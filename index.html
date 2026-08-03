@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMEAG · English Test Platform</title>
+<link rel="stylesheet" href="app/css/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">SMEAG<small>LEARN · TEST · REPEAT</small></div>
+    <nav class="nav" id="nav">
+      <a data-page="home" class="active"><span class="ic">🏠</span>홈 대시보드</a>
+      <a data-page="tests"><span class="ic">📝</span>모의고사</a>
+      <a data-page="practice"><span class="ic">🎯</span>연습 (Practice)</a>
+      <a data-page="scores"><span class="ic">📊</span>성적 / 기록</a>
+      <a data-page="tools"><span class="ic">🧰</span>학습 도구</a>
+      <a data-page="lectures"><span class="ic">🎬</span>해설 강의</a>
+    </nav>
+    <div class="help">❓ 도움말</div>
+  </aside>
+  <main class="main">
+    <!-- HOME -->
+    <section class="page active" id="home">
+      <div class="topbar"><div><h1 id="homeHello">다시 오신 걸 환영해요!</h1><p>오늘의 학습 현황입니다.</p></div>
+        <div class="userbox"><div class="avatar" id="userAvatar">SU</div><div><b id="userName">Sunny</b><br><small style="color:var(--muted)" id="userCode">s2025001</small></div></div></div>
+
+      <!-- 진행 중 시험 · 동기화 대기 배너 (JS 로 채움) -->
+      <div id="homeBanners"></div>
+
+      <!-- 최고 기록 카드 4개 (JS 로 채움) -->
+      <div class="grid cols-4" id="bestCards"></div>
+
+      <!-- 응시 CTA -->
+      <div class="section" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div>
+          <h2 style="margin-bottom:4px">🚀 NEW TOEFL SET 1</h2>
+          <p style="color:var(--muted);font-size:13px">Reading · Listening · Writing · Speaking 전 영역</p>
+        </div>
+        <a class="btn primary" style="display:inline-block" href="exam.html?set=1">지금 모의고사 응시하기</a>
+      </div>
+
+      <div class="section"><h2>📌 최근 공지</h2>
+        <ul style="padding-left:18px;color:#444;font-size:14px;line-height:2">
+          <li>새 학기가 시작되었습니다!</li><li>수강 신청이 오픈되었습니다.</li><li>프로필 정보를 업데이트해 주세요.</li></ul></div>
+    </section>
+
+    <!-- TESTS -->
+    <section class="page" id="tests">
+      <div class="topbar"><div><h1>English Test Courses</h1><p>응시할 시험을 선택하세요.</p></div></div>
+      <div class="section"><div class="tiles">
+        <div class="tile" style="cursor:default;opacity:.55"><div class="emoji">🔒</div><div class="name">ESL TEST</div><div style="font-size:11px;color:var(--muted);margin-top:4px">준비 중</div></div>
+        <div class="tile" style="cursor:default;opacity:.55"><div class="emoji">🔒</div><div class="name">TOEIC TEST</div><div style="font-size:11px;color:var(--muted);margin-top:4px">준비 중</div></div>
+        <a class="tile" href="exam.html?set=1" style="display:block;border-color:var(--brand)"><div class="emoji">📙</div><div class="name">TOEFL TEST</div><div style="font-size:11px;color:var(--brand);margin-top:4px;font-weight:700">SET 1 응시 가능</div></a>
+        <div class="tile" style="cursor:default;opacity:.55"><div class="emoji">🔒</div><div class="name">IELTS ACADEMIC</div><div style="font-size:11px;color:var(--muted);margin-top:4px">준비 중</div></div>
+        <div class="tile" style="cursor:default;opacity:.55"><div class="emoji">🔒</div><div class="name">IELTS GENERAL</div><div style="font-size:11px;color:var(--muted);margin-top:4px">준비 중</div></div>
+        <div class="tile" style="cursor:default;opacity:.55"><div class="emoji">🔒</div><div class="name">BUSINESS TEST</div><div style="font-size:11px;color:var(--muted);margin-top:4px">준비 중</div></div>
+        <div class="tile" style="cursor:default;opacity:.55"><div class="emoji">🔒</div><div class="name">SPEAKING MASTER</div><div style="font-size:11px;color:var(--muted);margin-top:4px">준비 중</div></div>
+      </div></div>
+    </section>
+
+    <!-- PRACTICE -->
+    <section class="page" id="practice">
+      <div class="topbar"><div><h1>Practice Zone</h1><p>영역별 문제 은행 · 자동 채점</p></div></div>
+      <div class="grid cols-4">
+        <div class="card clickable" onclick="goPage('pg-planner','tools')"><div class="label">📅 학습 플래너</div><div class="sub" style="margin-top:6px">일/주/월 학습 계획</div></div>
+        <div class="card clickable" onclick="goPage('pg-errorlog','tools')"><div class="label">📝 오답 노트</div><div class="sub" style="margin-top:6px">틀린 문제 &amp; 복습</div></div>
+        <div class="card clickable" onclick="goPage('pg-vocab','tools')"><div class="label">📖 단어장</div><div class="sub" style="margin-top:6px">저장한 단어 &amp; 노트</div></div>
+        <div class="card clickable" onclick="goPage('pg-history','tools')"><div class="label">🕘 연습 이력</div><div class="sub" style="margin-top:6px">완료한 시도 &amp; 채점 결과</div></div>
+      </div>
+      <div class="section">
+        <div class="tabs" data-group="skill">
+          <button class="tab active">Reading</button><button class="tab">Listening</button><button class="tab">Writing</button><button class="tab">Speaking</button></div>
+        <div class="filters">
+          <select><option>유형 선택</option><option>Academic Passage</option><option>Daily Life</option></select>
+          <select><option>난이도</option><option>Easy</option><option>Medium</option><option>Hard</option></select></div>
+        <div class="tiles">
+          <a class="tile" href="exam.html?set=1" style="display:block;border-color:var(--brand)"><div class="emoji">📙</div><div class="name">TOEFL SET 1</div><div style="font-size:11px;color:var(--brand);margin-top:4px;font-weight:700">전 영역 모의고사</div></a>
+          <div class="tile" style="cursor:default;opacity:.55"><div class="emoji">🔒</div><div class="name">Academic 02</div><div style="font-size:11px;color:var(--muted);margin-top:4px">준비 중</div></div>
+          <div class="tile" style="cursor:default;opacity:.55"><div class="emoji">🔒</div><div class="name">Academic 03</div><div style="font-size:11px;color:var(--muted);margin-top:4px">준비 중</div></div>
+          <div class="tile" style="cursor:default;opacity:.55"><div class="emoji">🔒</div><div class="name">Academic 04</div><div style="font-size:11px;color:var(--muted);margin-top:4px">준비 중</div></div>
+        </div></div>
+    </section>
+
+    <!-- SCORES -->
+    <section class="page" id="scores">
+      <div class="topbar"><div><h1>My Test Scores</h1><p>학습 진행과 성과를 추적하세요.</p></div></div>
+      <div class="grid cols-4" id="scoreStats"></div>
+      <div class="section">
+        <h2>📊 응시 기록</h2>
+        <div id="scoreTableWrap" style="overflow-x:auto"></div>
+      </div>
+    </section>
+
+    <!-- TOOLS -->
+    <section class="page" id="tools">
+      <div class="topbar"><div><h1>학습 도구 · Study Planner</h1><p>일정을 따라 연습하세요.</p></div></div>
+      <div class="section"><h2>📅 2026년 8월</h2><div class="planner-grid" id="plannerGrid"></div></div>
+    </section>
+
+    <!-- TOOL SUB-PAGES -->
+    <section class="page" id="pg-planner"><div class="topbar"><div><h1>📅 학습 플래너</h1><p>일/주/월 학습 계획을 관리하세요.</p></div></div>
+      <div class="section"><p style="color:#444;font-size:14px">오늘의 과제: Read in Daily Life · Mock Test</p></div></section>
+
+    <section class="page" id="pg-errorlog"><div class="topbar"><div><h1>📝 오답 노트</h1><p>가장 최근 회차의 오답 문항입니다.</p></div></div>
+      <div class="section" id="errorlogBox"></div></section>
+
+    <section class="page" id="pg-vocab"><div class="topbar"><div><h1>📖 단어장</h1><p>지문에서 저장한 단어를 확인하세요.</p></div></div>
+      <div class="section"><p style="color:#444;font-size:14px">저장 단어: 84개 · 오늘 복습: 10개</p></div></section>
+
+    <section class="page" id="pg-history"><div class="topbar"><div><h1>🕘 연습 이력</h1><p>완료한 시도와 채점 결과입니다.</p></div></div>
+      <div class="section" id="historyBox"></div></section>
+
+    <!-- LECTURES -->
+    <section class="page" id="lectures">
+      <div class="topbar"><div><h1>Click &amp; Learn · 해설 강의</h1><p>모의고사별 전문 강사 해설 (한/영)</p></div></div>
+      <div class="grid cols-3">
+        <div class="card clickable" onclick="alert('해설 강의 재생 (프로토타입)')"><div class="label">🎬 Reading 해설</div><div class="sub" style="margin-top:6px">Academic Passage 01</div></div>
+        <div class="card clickable" onclick="alert('해설 강의 재생 (프로토타입)')"><div class="label">🎬 Listening 해설</div><div class="sub" style="margin-top:6px">Conversation 03</div></div>
+        <div class="card clickable" onclick="alert('해설 강의 재생 (프로토타입)')"><div class="label">🎬 Writing 해설</div><div class="sub" style="margin-top:6px">AI 피드백 리뷰</div></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="app/js/config.js"></script>
+<script src="app/js/data/set1.js"></script>
+<script src="app/js/util.js"></script>
+<script src="app/js/store.js"></script>
+<script src="app/js/timer.js"></script>
+<script src="app/js/audio.js"></script>
+<script src="app/js/recorder.js"></script>
+<script src="app/js/grade.js"></script>
+<script src="app/js/sync.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- 안전 헬퍼 (util.js 가 없어도 죽지 않게) ---------- */
+  var U = window.SMEAG || {};
+  function esc(s) {
+    if (typeof U.esc === 'function') return U.esc(s);
+    return String(s === undefined || s === null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function fmtDate(iso) {
+    if (typeof U.fmtDate === 'function') return U.fmtDate(iso);
+    if (!iso) return '—';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  function byId(id) { return document.getElementById(id); }
+  var STORE = window.SMEAG_STORE || null;
+
+  /* ---------- 페이지 라우팅 (기존 구조 유지) ---------- */
+  window.goPage = function (pageId, navName) {
+    var pages = document.querySelectorAll('.page');
+    for (var i = 0; i < pages.length; i++) pages[i].classList.remove('active');
+    var target = byId(pageId);
+    if (target) target.classList.add('active');
+    var nav = byId('nav');
+    var links = nav.children;
+    for (var j = 0; j < links.length; j++) links[j].classList.remove('active');
+    var link = nav.querySelector('a[data-page="' + (navName || pageId) + '"]');
+    if (link) link.classList.add('active');
+    window.scrollTo(0, 0);
+  };
+
+  byId('nav').addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a') : null;
+    if (!a || !a.dataset || !a.dataset.page) return;
+    window.goPage(a.dataset.page);
+  });
+
+  /* 탭 전환 (목업 유지) */
+  var tabGroups = document.querySelectorAll('.tabs');
+  for (var t = 0; t < tabGroups.length; t++) {
+    (function (g) {
+      g.addEventListener('click', function (e) {
+        if (!e.target.classList.contains('tab')) return;
+        for (var k = 0; k < g.children.length; k++) g.children[k].classList.remove('active');
+        e.target.classList.add('active');
+      });
+    })(tabGroups[t]);
+  }
+
+  /* ---------- 학생 정보 ---------- */
+  (function renderStudent() {
+    var st = (window.SMEAG_CONFIG && window.SMEAG_CONFIG.student) || {};
+    var name = st.name || 'Student';
+    var code = st.code || '';
+    byId('userName').textContent = name;
+    byId('userCode').textContent = code;
+    byId('userAvatar').textContent = name.slice(0, 2).toUpperCase();
+    byId('homeHello').textContent = '다시 오신 걸 환영해요, ' + name + '!';
+  })();
+
+  /* ---------- 공통: 배너 만들기 ---------- */
+  function bannerHtml(opts) {
+    // opts: {bg, border, color, icon, text, action, id}
+    return '<div id="' + opts.id + '" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;' +
+      'background:' + opts.bg + ';border:1px solid ' + opts.border + ';border-radius:var(--radius);' +
+      'padding:14px 18px;margin-top:18px;font-size:14px;font-weight:600;color:' + opts.color + '">' +
+      '<span style="font-size:18px">' + opts.icon + '</span>' +
+      '<span style="flex:1;min-width:180px">' + opts.text + '</span>' +
+      opts.action + '</div>';
+  }
+
+  /* ---------- 1) 진행 중 시험 배너 · 2) 동기화 대기 배너 ---------- */
+  function renderBanners() {
+    var box = byId('homeBanners');
+    if (!box) return;
+    var html = '';
+
+    // 진행 중인 시험
+    var cur = null;
+    try { cur = STORE && STORE.current ? STORE.current() : null; } catch (e) { cur = null; }
+    if (cur) {
+      html += bannerHtml({
+        id: 'bannerResume',
+        bg: '#fff3d6', border: '#f0d79a', color: '#8a5a00', icon: '⏳',
+        text: '진행 중인 시험이 있습니다 · ' + esc(cur.setCode || 'SET1') +
+              ' · 시작 ' + esc(fmtDate(cur.startedAt)),
+        action: '<a class="btn accent" style="display:inline-block;text-decoration:none" ' +
+                'href="exam.html?set=1">이어서 응시하기</a>'
+      });
+    }
+
+    // 동기화 대기
+    var sync = window.SMEAG_SYNC;
+    var enabled = false, qsize = 0;
+    try {
+      enabled = !!(sync && typeof sync.enabled === 'function' && sync.enabled());
+      qsize = (sync && typeof sync.queueSize === 'function') ? (sync.queueSize() || 0) : 0;
+    } catch (e2) { enabled = false; qsize = 0; }
+
+    if (enabled && qsize > 0) {
+      html += bannerHtml({
+        id: 'bannerSync',
+        bg: '#eef0ff', border: '#c9ccff', color: '#3a3ccc', icon: '☁️',
+        text: '동기화 대기 ' + qsize + '건',
+        action: '<button class="btn primary" type="button" id="btnRetrySync">재시도</button>'
+      });
+    }
+
+    box.innerHTML = html;
+
+    var btn = byId('btnRetrySync');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        btn.disabled = true;
+        btn.textContent = '동기화 중…';
+        var p = null;
+        try { p = window.SMEAG_SYNC.retryQueue(); } catch (e3) { p = null; }
+        if (!p || typeof p.then !== 'function') { renderBanners(); return; }
+        p.then(function (r) {
+          r = r || {};
+          if (r.failed) alert('동기화 완료 ' + (r.done || 0) + '건 · 실패 ' + r.failed + '건');
+          else alert('동기화 완료 ' + (r.done || 0) + '건');
+        })['catch'](function () {
+          alert('동기화에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+        }).then(function () {
+          renderBanners();
+          renderAll();
+        });
+      });
+    }
+  }
+
+  /* ---------- 3) 홈 대시보드 최고 기록 카드 ---------- */
+  function pctText(v) { return (typeof v === 'number' && isFinite(v)) ? (v + '%') : '—'; }
+
+  function renderBests() {
+    var box = byId('bestCards');
+    if (!box) return;
+    var b = { reading: null, listening: null, writing: null, total: null, attempts: 0 };
+    try { if (STORE && STORE.bests) b = STORE.bests() || b; } catch (e) { }
+
+    var noData = !b.attempts;
+    var sub = noData ? '아직 응시 기록이 없습니다' : '최고 정답률';
+
+    function card(label, val) {
+      return '<div class="card clickable" data-goto="scores">' +
+        '<div class="label">' + esc(label) + '</div>' +
+        '<div class="big">' + esc(pctText(val)) + '</div>' +
+        '<div class="sub">' + esc(sub) + '</div></div>';
+    }
+
+    box.innerHTML =
+      card('Reading', b.reading) +
+      card('Listening', b.listening) +
+      card('Writing', b.writing) +
+      '<div class="card clickable" data-goto="scores">' +
+        '<div class="label">총 응시</div>' +
+        '<div class="big">' + (b.attempts ? b.attempts + '회' : '—') + '</div>' +
+        '<div class="sub">' + (noData ? '아직 응시 기록이 없습니다' : '제출 완료 기준') + '</div></div>';
+  }
+
+  /* ---------- 4) 성적 / 기록 탭 ---------- */
+  var STATUS_LABEL = {
+    in_progress: { text: '진행 중', bg: '#fff3d6', color: '#8a5a00', border: '#f0d79a' },
+    submitted: { text: '제출됨', bg: '#eef0ff', color: '#3a3ccc', border: '#c9ccff' },
+    synced: { text: '동기화됨', bg: '#eafbef', color: '#12a150', border: '#bfe9cd' }
+  };
+  function statusBadge(status) {
+    var s = STATUS_LABEL[status] || { text: String(status || '—'), bg: '#f2f2f7', color: '#8a8aa0', border: '#e5e5ee' };
+    return '<span style="display:inline-block;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:800;' +
+      'background:' + s.bg + ';color:' + s.color + ';border:1px solid ' + s.border + '">' + esc(s.text) + '</span>';
+  }
+
+  function attempts() {
+    try { return (STORE && STORE.list ? STORE.list() : []) || []; } catch (e) { return []; }
+  }
+
+  function secPct(a, key) {
+    var sc = a && a.score;
+    if (!sc || !sc.sections || !sc.sections[key]) return null;
+    var v = sc.sections[key].pct;
+    return (typeof v === 'number' && isFinite(v)) ? v : null;
+  }
+  function speakingText(a) {
+    var sc = a && a.score;
+    if (!sc || !sc.sections || !sc.sections.speaking) return '—';
+    var sp = sc.sections.speaking;
+    return (sp.submitted || 0) + '/' + (sp.total || 0);
+  }
+  function totalPct(a) {
+    var sc = a && a.score;
+    if (!sc || !sc.autoScore) return null;
+    var v = sc.autoScore.pct;
+    return (typeof v === 'number' && isFinite(v)) ? v : null;
+  }
+  function attemptHref(a) {
+    // 진행 중 회차는 결과가 없으므로 시험 화면으로, 그 외는 결과 화면으로 보낸다.
+    if (a.status === 'in_progress') return 'exam.html?set=1';
+    return 'results.html?attempt=' + encodeURIComponent(a.id);
+  }
+
+  function emptyBox(msg, withCta) {
+    return '<div style="text-align:center;padding:34px 12px;color:var(--muted);font-size:14px">' +
+      '<div style="font-size:34px;margin-bottom:8px">📭</div>' + esc(msg) +
+      (withCta ? '<div style="margin-top:16px"><a class="btn primary" style="display:inline-block;text-decoration:none" href="exam.html?set=1">지금 모의고사 응시하기</a></div>' : '') +
+      '</div>';
+  }
+
+  function renderScores() {
+    var list = attempts();
+    var done = list.filter(function (a) { return a.status === 'submitted' || a.status === 'synced'; });
+
+    /* 상단 통계 카드 */
+    var sum = 0, cnt = 0, best = null;
+    done.forEach(function (a) {
+      var p = totalPct(a);
+      if (p === null) return;
+      sum += p; cnt += 1;
+      best = (best === null) ? p : Math.max(best, p);
+    });
+    var avg = cnt ? Math.round((sum / cnt) * 10) / 10 : null;
+    var last = list.length ? (list[0].submittedAt || list[0].startedAt) : null;
+
+    byId('scoreStats').innerHTML =
+      '<div class="stat-tile"><div class="k">총 응시</div><div class="v">' + (list.length || '—') + '</div><div class="s">전체 회차</div></div>' +
+      '<div class="stat-tile"><div class="k">평균 정답률</div><div class="v">' + esc(pctText(avg)) + '</div><div class="s">제출 회차 기준</div></div>' +
+      '<div class="stat-tile ok"><div class="k">최고 정답률</div><div class="v">' + esc(pctText(best)) + '</div><div class="s">자동 채점 총점</div></div>' +
+      '<div class="stat-tile"><div class="k">최근 응시</div><div class="v" style="font-size:20px">' + esc(last ? fmtDate(last) : '—') + '</div><div class="s">최근 회차 날짜</div></div>';
+
+    /* 회차 표 */
+    var wrap = byId('scoreTableWrap');
+    if (!list.length) { wrap.innerHTML = emptyBox('아직 응시 기록이 없습니다.', true); return; }
+
+    var rows = list.map(function (a) {
+      return '<tr class="clickable" data-href="' + esc(attemptHref(a)) + '">' +
+        '<td>' + esc(fmtDate(a.submittedAt || a.startedAt)) + '</td>' +
+        '<td>' + esc(a.setCode || 'SET1') + '</td>' +
+        '<td>' + esc(pctText(secPct(a, 'reading'))) + '</td>' +
+        '<td>' + esc(pctText(secPct(a, 'listening'))) + '</td>' +
+        '<td>' + esc(pctText(secPct(a, 'writing'))) + '</td>' +
+        '<td>' + esc(speakingText(a)) + '</td>' +
+        '<td><b>' + esc(pctText(totalPct(a))) + '</b></td>' +
+        '<td>' + statusBadge(a.status) + '</td>' +
+        '</tr>';
+    }).join('');
+
+    wrap.innerHTML = '<table><thead><tr>' +
+      '<th>날짜</th><th>세트</th><th>Reading</th><th>Listening</th><th>Writing</th>' +
+      '<th>Speaking</th><th>총점</th><th>상태</th></tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  /* ---------- 5) 오답 노트 (최근 제출 회차) ---------- */
+  function latestGraded() {
+    var list = attempts();
+    for (var i = 0; i < list.length; i++) {
+      var a = list[i];
+      if ((a.status === 'submitted' || a.status === 'synced') && a.score && a.score.perQuestion) return a;
+    }
+    return null;
+  }
+
+  function answerText(q, v) {
+    if (v === undefined || v === null || v === '') return '(무응답)';
+    if (typeof v === 'number') {
+      if (q && q.choices && q.choices[v] !== undefined) return String.fromCharCode(65 + v) + '. ' + q.choices[v];
+      return String(v);
+    }
+    if (Array.isArray(v)) return v.join(' ');
+    if (typeof v === 'object') {
+      if (v.recorded) return '녹음 제출됨';
+      return '미제출';
+    }
+    return String(v);
+  }
+  function expectedText(q, e) {
+    if (e === undefined || e === null || e === '') return '—';
+    if (typeof e === 'number') {
+      if (q && q.choices && q.choices[e] !== undefined) return String.fromCharCode(65 + e) + '. ' + q.choices[e];
+      return String(e);
+    }
+    if (Array.isArray(e)) return e.join(' ');
+    return String(e);
+  }
+
+  function renderErrorLog() {
+    var box = byId('errorlogBox');
+    if (!box) return;
+    var a = latestGraded();
+    if (!a) { box.innerHTML = emptyBox('채점된 회차가 없습니다. 모의고사를 먼저 응시해 주세요.', true); return; }
+
+    var set = window.SMEAG_SET1;
+    var pq = a.score.perQuestion;
+    var items = [];
+    Object.keys(pq).forEach(function (qid) {
+      if (pq[qid].correct !== false) return;
+      var found = (set && set.findQuestion) ? set.findQuestion(qid) : null;
+      items.push({
+        qid: qid,
+        sectionKo: found && found.section ? (found.section.labelKo || found.section.label) : '',
+        no: found && found.q ? found.q.no : '',
+        q: found ? found.q : null,
+        mine: pq[qid].response,
+        expected: pq[qid].expected
+      });
+    });
+
+    var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">' +
+      '<b style="font-size:14px">' + esc(fmtDate(a.submittedAt || a.startedAt)) + ' · ' + esc(a.setCode || 'SET1') + '</b>' +
+      '<a class="btn" style="display:inline-block;text-decoration:none" href="results.html?attempt=' + esc(a.id) + '">전체 결과 보기</a></div>';
+
+    if (!items.length) {
+      box.innerHTML = head + '<div style="text-align:center;padding:26px;color:var(--ok);font-size:14px;font-weight:700">🎉 최근 회차에 오답이 없습니다!</div>';
+      return;
+    }
+
+    var rows = items.map(function (it) {
+      return '<div class="review-row bad">' +
+        '<div class="rhead"><span class="rno">' + esc(it.sectionKo) + ' · ' + esc(it.no) + '번</span>' +
+        '<span class="badge-bad">오답</span></div>' +
+        '<div class="ans">내 답: <span class="mine">' + esc(answerText(it.q, it.mine)) + '</span></div>' +
+        '<div class="ans">정답: <span class="right">' + esc(expectedText(it.q, it.expected)) + '</span></div>' +
+        '</div>';
+    }).join('');
+
+    box.innerHTML = head +
+      '<p style="color:var(--muted);font-size:13px;margin-bottom:12px">오답 ' + items.length + '문항</p>' + rows;
+  }
+
+  /* ---------- 6) 연습 이력 (회차별 요약) ---------- */
+  function renderHistory() {
+    var box = byId('historyBox');
+    if (!box) return;
+    var list = attempts();
+    if (!list.length) { box.innerHTML = emptyBox('아직 연습 이력이 없습니다.', true); return; }
+
+    box.innerHTML = list.map(function (a) {
+      var tot = totalPct(a);
+      return '<div class="clickable" data-href="' + esc(attemptHref(a)) + '" ' +
+        'style="border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;' +
+        'display:flex;align-items:center;gap:14px;flex-wrap:wrap">' +
+        '<b style="font-size:14px">' + esc(fmtDate(a.submittedAt || a.startedAt)) + '</b>' +
+        '<span style="color:var(--muted);font-size:13px">' + esc(a.setCode || 'SET1') + '</span>' +
+        '<span style="flex:1;min-width:120px;color:var(--muted);font-size:12px">' +
+          'R ' + esc(pctText(secPct(a, 'reading'))) + ' · L ' + esc(pctText(secPct(a, 'listening'))) +
+          ' · W ' + esc(pctText(secPct(a, 'writing'))) + ' · S ' + esc(speakingText(a)) + '</span>' +
+        '<div class="bar" title="총점"><span style="width:' + (tot === null ? 0 : tot) + '%"></span></div>' +
+        '<b style="min-width:52px;text-align:right;color:var(--brand)">' + esc(pctText(tot)) + '</b>' +
+        statusBadge(a.status) + '</div>';
+    }).join('');
+  }
+
+  /* ---------- 플래너 달력 (목업 유지) ---------- */
+  (function renderPlanner() {
+    var tasks = { 3: 'Read in Daily Life', 8: 'Mock Test', 15: 'Build a Sentence', 22: 'Listen & Repeat' };
+    var today = new Date().getDate();
+    var h = '';
+    for (var d = 1; d <= 31; d++) {
+      h += '<div class="day ' + (d === today ? 'today' : '') + '"><b>' + d + '</b>' +
+        (tasks[d] ? '<div class="badge">' + esc(tasks[d]) + '</div>' : '') + '</div>';
+    }
+    byId('plannerGrid').innerHTML = h;
+  })();
+
+  /* ---------- 위임 클릭: data-href / data-goto ---------- */
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var go = t.closest ? t.closest('[data-goto]') : null;
+    if (go) { window.goPage(go.getAttribute('data-goto')); return; }
+    var row = t.closest ? t.closest('[data-href]') : null;
+    if (row) { location.href = row.getAttribute('data-href'); }
+  });
+
+  /* ---------- 전체 렌더 ---------- */
+  function renderAll() {
+    renderBests();
+    renderScores();
+    renderErrorLog();
+    renderHistory();
+  }
+
+  renderBanners();
+  renderAll();
+})();
+</script>
+</body>
+</html>

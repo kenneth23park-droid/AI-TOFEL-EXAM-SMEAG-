@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(node --check \"/private/tmp/claude-501/-Users-kwangseobpark-smeag-TOFEL---/0eac2229-7980-48f7-adce-8372cd4bf037/scratchpad/idx.js\")",
+      "Bash(node sim.js)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

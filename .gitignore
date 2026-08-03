@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+._*
+
+# Word 임시 파일
+~$*.docx
+
+# extract_set1.py 가 만드는 중간 산출물 (재생성 가능)
+tools/_clean_set1.txt
+
+# 에디터
+.vscode/
+.idea/
+*.swp

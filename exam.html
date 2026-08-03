@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMEAG · TOEFL 모의고사</title>
+
+<!--
+  아래 <style> 은 app.css 가 아직 없거나 시험 셸 전용 요소(모달·안내화면)를
+  다루지 않을 때를 위한 최소 폴백이다. app.css 를 뒤에 로드해 항상 A 담당의
+  디자인이 이기도록 순서를 잡았다.
+-->
+<style id="exam-fallback">
+  :root{--brand:#5b5ef4;--brand-soft:#eef0ff;--accent:#ff5a36;--bg:#f5f5fb;--card:#fff;
+        --text:#1c1c28;--muted:#8a8aa0;--line:#ececf4;--radius:16px;
+        --ok:#12a150;--bad:#e5484d;--warn:#f5a524}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);
+       color:var(--text);line-height:1.55}
+  button{font:inherit;cursor:pointer}
+
+  .exam-shell{display:flex;flex-direction:column;min-height:100vh}
+  .exam-top{display:flex;align-items:center;gap:18px;padding:12px 20px;background:var(--card);
+            border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .exam-top .et-left{min-width:220px}
+  .exam-top .et-left b{display:block;font-size:15px}
+  .exam-top .et-left span{display:block;font-size:12px;color:var(--muted)}
+  .exam-top .et-mid{flex:1}
+  .exam-top .et-right{display:flex;align-items:center;gap:12px}
+  .ex-bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden}
+  .ex-bar i{display:block;height:100%;width:0;background:var(--brand);transition:width .2s}
+  .ex-progtext{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+  .ex-time{font-variant-numeric:tabular-nums;font-weight:800;font-size:18px;color:var(--brand)}
+  .ex-time.warn{color:var(--accent)}
+  .ex-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 16px;font-weight:700}
+  .ex-btn:hover{border-color:var(--brand)}
+  .ex-btn[disabled]{opacity:.4;cursor:not-allowed}
+  .ex-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .ex-btn.ghost{color:var(--muted)}
+
+  .qpalette{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 20px;
+            background:#fbfbff;border-bottom:1px solid var(--line)}
+  .qpalette em{font-style:normal;font-size:11px;color:var(--muted);margin-right:4px}
+  .qpalette b{display:grid;place-items:center;min-width:28px;height:28px;padding:0 6px;
+              border:1px solid var(--line);background:#fff;border-radius:8px;
+              font-size:12px;font-weight:700;color:#55556e;cursor:pointer}
+  .qpalette b.done{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+  .qpalette b.cur{outline:2px solid var(--accent);outline-offset:1px}
+  .qpalette b.lock{cursor:default;opacity:.75}
+
+  .exam-body{flex:1;padding:26px 20px 40px;max-width:960px;width:100%;margin:0 auto}
+  .exam-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;
+             padding:12px 20px;background:var(--card);border-top:1px solid var(--line);
+             position:sticky;bottom:0;z-index:20}
+  .exam-foot .foot-note{font-size:12px;color:var(--muted)}
+
+  .ex-overlay{position:fixed;inset:0;background:#1c1c2899;display:grid;place-items:center;
+              padding:20px;z-index:100;overflow:auto}
+  .ex-overlay[hidden]{display:none}
+  .ex-panel{background:var(--card);border-radius:var(--radius);padding:26px;max-width:640px;
+            width:100%;box-shadow:0 20px 50px #0003}
+  .ex-panel h2{font-size:20px;margin-bottom:8px}
+  .ex-panel p{font-size:14px;color:#4a4a63;margin-bottom:10px}
+  .ex-panel ul{margin:0 0 14px 18px;font-size:14px;color:#4a4a63}
+  .ex-panel li{margin-bottom:4px}
+  .ex-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+  .ex-note{background:var(--brand-soft);border-radius:12px;padding:12px 14px;font-size:13px;
+           color:#3b3b8f;margin-bottom:12px}
+  .ex-warn{background:#fff4e5;border:1px solid #ffd9a8;border-radius:12px;padding:12px 14px;
+           font-size:13px;color:#8a5a00;margin-bottom:12px}
+  .ex-missing{background:#fff;border:1px dashed var(--bad);border-radius:var(--radius);
+              padding:24px;text-align:center;color:var(--bad);font-weight:700}
+  @media(max-width:680px){
+    .exam-top{flex-wrap:wrap;gap:10px}
+    .exam-top .et-left{min-width:0;flex:1}
+    .exam-top .et-mid{order:3;flex-basis:100%}
+  }
+</style>
+
+<link rel="stylesheet" href="app/css/app.css">
+</head>
+<body>
+
+<div class="exam-shell" id="examShell" hidden>
+
+  <header class="exam-top">
+    <div class="et-left">
+      <b id="exSetTitle">NEW TOEFL SET 1</b>
+      <span id="exWhere">—</span>
+    </div>
+    <div class="et-mid">
+      <div class="ex-bar"><i id="exProgFill"></i></div>
+      <small class="ex-progtext" id="exProgText">0 / 0 문항</small>
+    </div>
+    <div class="et-right">
+      <span class="ex-time" id="exTime" hidden>--:--</span>
+      <button class="ex-btn ghost" id="exExit" type="button">나가기</button>
+    </div>
+  </header>
+
+  <nav class="qpalette" id="exPalette" aria-label="문항 팔레트"></nav>
+
+  <main class="exam-body" id="exBody"></main>
+
+  <footer class="exam-foot">
+    <button class="ex-btn" id="exPrev" type="button">이전</button>
+    <span class="foot-note" id="exFootNote"></span>
+    <button class="ex-btn primary" id="exNext" type="button">다음</button>
+  </footer>
+
+</div>
+
+<div class="ex-overlay" id="exOverlay" hidden></div>
+
+<!-- 로드 순서는 INTERFACES.md 그대로 -->
+<script src="app/js/config.js"></script>
+<script src="app/js/data/set1.js"></script>
+<script src="app/js/util.js"></script>
+<script src="app/js/store.js"></script>
+<script src="app/js/timer.js"></script>
+<script src="app/js/audio.js"></script>
+<script src="app/js/recorder.js"></script>
+<script src="app/js/grade.js"></script>
+<script src="app/js/sync.js"></script>
+<script src="app/js/sections/reading.js"></script>
+<script src="app/js/sections/listening.js"></script>
+<script src="app/js/sections/writing.js"></script>
+<script src="app/js/sections/speaking.js"></script>
+<script src="app/js/exam.js"></script>
+
+</body>
+</html>
