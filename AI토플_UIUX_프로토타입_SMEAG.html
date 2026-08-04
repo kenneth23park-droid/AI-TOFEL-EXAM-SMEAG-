@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html class="light" lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SMEAG AI TOEFL · StudyGround 프로토타입</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "inverse-surface": "#2a3234",
+          "sky-blue": "#23B2E8",
+          "surface-container": "#e8eff2",
+          "background": "#f4fafd",
+          "tertiary": "#003346",
+          "primary": "#002b6c",
+          "primary-fixed-dim": "#b0c6ff",
+          "tertiary-fixed": "#c2e8ff",
+          "on-background": "#161d1f",
+          "secondary": "#a63b00",
+          "vibrant-orange": "#F26522",
+          "tertiary-container": "#004b65",
+          "on-surface": "#161d1f",
+          "on-primary": "#ffffff",
+          "surface-container-highest": "#dde4e7",
+          "primary-fixed": "#d9e2ff",
+          "surface": "#f4fafd",
+          "surface-container-high": "#e2e9ec",
+          "error": "#ba1a1a",
+          "on-primary-fixed": "#001945",
+          "tertiary-fixed-dim": "#75d1ff",
+          "surface-container-low": "#eef5f8",
+          "primary-container": "#1f4287",
+          "surface-dim": "#d4dbde",
+          "surface-container-lowest": "#ffffff",
+          "slate-gray": "#636E72",
+          "on-secondary": "#ffffff",
+          "on-tertiary": "#ffffff",
+          "outline-variant": "#c4c6d2",
+          "deep-navy": "#1F4287",
+          "on-surface-variant": "#444651",
+          "on-primary-container": "#93b1fe",
+          "outline": "#747782",
+          "surface-variant": "#dde4e7",
+          "on-tertiary-fixed": "#001e2b",
+          "on-primary-fixed-variant": "#214489",
+          "secondary-fixed": "#ffdbce",
+          "secondary-container": "#fc6c29",
+          "on-secondary-container": "#5a1c00",
+          "on-tertiary-fixed-variant": "#004d67",
+          "paper-white": "#FFFFFF"
+        },
+        borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+        spacing: { "gutter": "24px", "margin-mobile": "16px", "unit": "8px", "margin-desktop": "64px" },
+        fontFamily: {
+          "display-lg": ["Montserrat"], "headline-lg": ["Montserrat"], "headline-md": ["Montserrat"],
+          "headline-lg-mobile": ["Montserrat"], "title-lg": ["Open Sans"],
+          "body-lg": ["Open Sans"], "body-md": ["Open Sans"], "label-md": ["Open Sans"], "label-sm": ["Open Sans"]
+        },
+        fontSize: {
+          "display-lg": ["48px", {"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"700"}],
+          "label-sm": ["12px", {"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"700"}],
+          "headline-lg-mobile": ["28px", {"lineHeight":"36px","fontWeight":"700"}],
+          "title-lg": ["20px", {"lineHeight":"28px","fontWeight":"600"}],
+          "headline-md": ["24px", {"lineHeight":"32px","fontWeight":"600"}],
+          "headline-lg": ["32px", {"lineHeight":"40px","fontWeight":"700"}],
+          "body-lg": ["18px", {"lineHeight":"28px","fontWeight":"400"}],
+          "label-md": ["14px", {"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],
+          "body-md": ["16px", {"lineHeight":"24px","fontWeight":"400"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family:'Open Sans',sans-serif; background-color:#f4fafd; color:#161d1f; -webkit-tap-highlight-color:transparent; }
+  h1,h2,h3,h4,h5,h6,.font-display { font-family:'Montserrat',sans-serif; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .custom-scroll::-webkit-scrollbar, .hide-scrollbar::-webkit-scrollbar { display:none; }
+  .glass-card { background:rgba(255,255,255,0.7); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+  .circle-bg { fill:none; stroke:#dde4e7; stroke-width:2.8; }
+  .circle { fill:none; stroke-width:2.8; stroke-linecap:round; animation:progress 1.2s ease-out forwards; }
+  @keyframes progress { 0% { stroke-dasharray:0 100; } }
+  .fade-in { animation:fadeIn .45s ease-out forwards; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px);} to { opacity:1; transform:translateY(0);} }
+  .pulse-soft { animation:pulse 2s infinite ease-in-out; }
+  @keyframes pulse { 0%{transform:scale(1);opacity:1;} 50%{transform:scale(1.05);opacity:.8;} 100%{transform:scale(1);opacity:1;} }
+  .screen { display:none; }
+  .screen.active { display:block; }
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-28">
+
+<!-- ============ SHARED TOP APP BAR ============ -->
+<header id="appbar" class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface/80 backdrop-blur-md border-b border-outline-variant/40">
+  <div class="flex items-center gap-2">
+    <button onclick="alert('메뉴 — 실제 앱에서는 사이드 메뉴가 열립니다.')" class="w-10 h-10 flex items-center justify-center rounded hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined text-primary">menu</span>
+    </button>
+    <span class="text-title-lg font-bold text-primary" style="font-family:'Montserrat';">StudyGround</span>
+  </div>
+  <div class="flex items-center gap-3">
+    <div class="hidden md:flex items-center gap-6 mr-2">
+      <a class="nav-top text-label-md text-primary font-bold cursor-pointer" data-go="home">Home</a>
+      <a class="nav-top text-label-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer" data-go="exams">Exams</a>
+      <a class="nav-top text-label-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer" data-go="results">Results</a>
+      <a class="nav-top text-label-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer" data-go="profile">Profile</a>
+    </div>
+    <div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-primary-fixed overflow-hidden flex items-center justify-center text-primary font-bold">SG</div>
+  </div>
+</header>
+
+<!-- ============ HOME / DASHBOARD ============ -->
+<section id="home" class="screen active">
+<main class="mt-20 px-margin-mobile md:px-margin-desktop max-w-[1100px] mx-auto space-y-8 fade-in">
+  <section class="space-y-2 py-4">
+    <h1 class="text-headline-lg-mobile md:text-headline-lg font-bold">Hello, Student <span class="text-vibrant-orange">👋</span></h1>
+    <p class="text-body-md text-on-surface-variant max-w-md">You're <span class="font-bold text-on-surface">3 mock tests</span> away from your goal of <span class="text-primary font-bold">110 TOEFL score</span>.</p>
+  </section>
+
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+    <!-- Latest Mock Test -->
+    <div class="md:col-span-8 group relative overflow-hidden bg-primary-fixed rounded-lg p-6 shadow-sm border border-outline-variant transition-all hover:shadow-md">
+      <div class="relative z-10 flex flex-col h-full justify-between gap-6">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-primary-container px-3 py-1 rounded-full text-on-primary mb-4">
+            <span class="material-symbols-outlined text-[16px]">new_releases</span><span class="text-label-sm">JUST DROPPED</span>
+          </div>
+          <h2 class="text-headline-md text-on-primary-fixed mb-2">Latest mock test NT-017 is here.</h2>
+          <ul class="space-y-2 mt-4">
+            <li class="flex items-center gap-2 text-on-primary-fixed-variant text-body-md"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Essential · Standard · Pro 플랜 전용</li>
+            <li class="flex items-center gap-2 text-on-primary-fixed-variant text-body-md"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>실제 시험 시간 제한 &amp; 더미 지문</li>
+            <li class="flex items-center gap-2 text-on-primary-fixed-variant text-body-md"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>실제 TOEFL iBT 난이도 반영</li>
+          </ul>
+        </div>
+        <button onclick="openWaiting()" class="w-fit bg-primary text-on-primary px-8 py-4 rounded-lg text-label-md font-bold flex items-center gap-2 transition-transform active:scale-95 hover:bg-primary-container">Take a test <span class="material-symbols-outlined">arrow_forward</span></button>
+      </div>
+      <div class="absolute -right-12 -bottom-12 w-64 h-80 opacity-20 md:opacity-100 rotate-12 transition-transform group-hover:rotate-6 pointer-events-none">
+        <div class="w-full h-full bg-white rounded-lg shadow-xl border border-outline-variant flex flex-col items-center justify-center p-6 text-center">
+          <div class="w-12 h-1 bg-primary mb-4 rounded-full"></div>
+          <span class="text-4xl font-bold text-primary mb-2">NT-017</span>
+          <div class="space-y-2 w-full"><div class="h-2 bg-surface-container-highest rounded-full w-full"></div><div class="h-2 bg-surface-container-highest rounded-full w-3/4"></div></div>
+        </div>
+      </div>
+      <div class="absolute right-4 bottom-4 flex items-center gap-2 text-on-primary-fixed-variant text-label-sm">
+        <span class="bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full">01 / 03</span>
+      </div>
+    </div>
+
+    <!-- AI Scoring -->
+    <div class="md:col-span-4 bg-surface-container-lowest rounded-lg p-6 shadow-sm border border-outline-variant flex flex-col gap-6">
+      <div class="flex justify-between items-start"><h3 class="text-headline-md">AI Scoring</h3><span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">psychology</span></div>
+      <div class="space-y-6 flex-1">
+        <div class="space-y-2">
+          <div class="flex justify-between items-end"><span class="text-label-md text-on-surface-variant">Listening Proficiency</span><span class="text-headline-md font-bold text-primary">28/30</span></div>
+          <div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden"><div class="anim-bar h-full bg-primary transition-all duration-1000" style="width:93%"></div></div>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between items-end"><span class="text-label-md text-on-surface-variant">Speaking AI Analysis</span><span class="text-headline-md font-bold text-on-surface">24/30</span></div>
+          <div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden"><div class="anim-bar h-full bg-sky-blue transition-all duration-1000" style="width:80%"></div></div>
+        </div>
+      </div>
+      <button onclick="go('results')" class="w-full py-3 rounded-lg border border-primary text-primary text-label-md font-bold hover:bg-primary-fixed transition-colors">View Full Analysis</button>
+    </div>
+
+    <!-- Event Banner -->
+    <div class="md:col-span-12 glass-card rounded-lg border border-outline-variant p-4 flex flex-col md:flex-row items-center justify-between gap-4 group">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-tertiary-fixed flex items-center justify-center text-primary shrink-0"><span class="material-symbols-outlined">emoji_events</span></div>
+        <div><p class="text-label-md font-bold text-on-surface">7월 무료 모의고사 리뷰 이벤트</p><p class="text-label-sm text-on-surface-variant">라이브 첨삭 세션이 2시간 뒤 시작됩니다.</p></div>
+      </div>
+      <a class="text-primary font-bold text-label-md flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer">JOIN NOW <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+    </div>
+
+    <!-- Community -->
+    <div class="md:col-span-12 glass-card rounded-lg border border-outline-variant p-4 flex flex-col md:flex-row items-center justify-between gap-4 group">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-primary-container overflow-hidden border-2 border-white shadow-sm shrink-0 flex items-center justify-center text-on-primary font-bold">D</div>
+        <div><p class="text-label-md font-bold text-on-surface">강사 Daniel과 바로 상담하기</p><p class="text-label-sm text-on-surface-variant">헤드 강사가 현재 라운지에서 활동 중입니다.</p></div>
+      </div>
+      <a class="text-primary font-bold text-label-md flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer">ENTER LOUNGE <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+    </div>
+
+    <!-- Section 01 -->
+    <div class="md:col-span-12 bg-surface-container-low rounded-lg p-6 shadow-sm border border-outline-variant">
+      <div class="border-b border-outline-variant pb-4 mb-6">
+        <div class="flex items-center gap-2 mb-2"><span class="text-primary font-bold text-headline-md">01</span><h3 class="text-headline-md">최신 출제 경향 기반 모의고사</h3></div>
+        <p class="text-vibrant-orange font-bold text-label-md">최신 시험 트렌드를 가장 먼저 반영합니다.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+        <div class="flex items-start gap-3"><span class="w-2 h-2 rounded-full bg-primary mt-2"></span><p class="text-body-md">실제 시험 구조 · UI · 타이머를 1:1로 재현</p></div>
+        <div class="flex items-start gap-3"><span class="w-2 h-2 rounded-full bg-primary mt-2"></span><p class="text-body-md">R&amp;D팀이 매월 실제 시험을 응시해 형식 변화 추적</p></div>
+        <div class="flex items-start gap-3"><span class="w-2 h-2 rounded-full bg-primary mt-2"></span><p class="text-body-md">ETS 출제 패턴을 학습한 AI 지문 생성</p></div>
+        <div class="flex items-start gap-3"><span class="w-2 h-2 rounded-full bg-primary mt-2"></span><p class="text-body-md">자체 난이도 알고리즘으로 점수 캘리브레이션</p></div>
+      </div>
+    </div>
+  </div>
+</main>
+</section>
+
+<!-- ============ EXAMS / MOCK EXAM LIST ============ -->
+<section id="exams" class="screen">
+<main class="pt-20 px-margin-mobile max-w-xl mx-auto fade-in">
+  <section class="mb-6">
+    <h2 class="text-headline-lg-mobile text-on-surface mb-1">TOEFL Mock Exams</h2>
+    <p class="text-body-md text-on-surface-variant">최신 출제 경향으로 연습하세요. AI 채점으로 즉시 피드백을 받습니다.</p>
+  </section>
+
+  <section class="mb-6 sticky top-16 z-40 bg-surface/80 py-2 backdrop-blur-sm -mx-margin-mobile px-margin-mobile">
+    <div class="relative mb-4">
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+      <input class="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-body-md focus:ring-2 focus:ring-primary outline-none transition-all" placeholder="시험 이름 검색..." type="text"/>
+    </div>
+    <div class="flex gap-2 overflow-x-auto pb-2 custom-scroll">
+      <button class="filter-btn px-5 py-2 rounded bg-primary text-on-primary text-label-md font-bold whitespace-nowrap">All Exams</button>
+      <button class="filter-btn px-5 py-2 rounded bg-surface-container-highest text-on-surface-variant text-label-md font-bold whitespace-nowrap hover:bg-outline-variant transition-colors">Reading</button>
+      <button class="filter-btn px-5 py-2 rounded bg-surface-container-highest text-on-surface-variant text-label-md font-bold whitespace-nowrap hover:bg-outline-variant transition-colors">Listening</button>
+      <button class="filter-btn px-5 py-2 rounded bg-surface-container-highest text-on-surface-variant text-label-md font-bold whitespace-nowrap hover:bg-outline-variant transition-colors">Speaking</button>
+      <button class="filter-btn px-5 py-2 rounded bg-surface-container-highest text-on-surface-variant text-label-md font-bold whitespace-nowrap hover:bg-outline-variant transition-colors">Writing</button>
+    </div>
+  </section>
+
+  <!-- Featured -->
+  <div class="mb-6 relative overflow-hidden bg-primary-container rounded shadow-sm border border-outline-variant p-6">
+    <div class="absolute top-0 right-0 p-3"><span class="bg-vibrant-orange text-white text-[10px] px-2 py-0.5 rounded font-bold">LATEST</span></div>
+    <div class="mb-4"><h3 class="text-headline-md text-on-primary mb-1">NT-017</h3><p class="text-label-sm text-tertiary-fixed-dim uppercase tracking-wider">Premium Mock Test</p></div>
+    <ul class="space-y-2 mb-6">
+      <li class="flex items-center gap-2 text-label-md text-primary-fixed"><span class="w-1.5 h-1.5 rounded-full bg-sky-blue"></span>실제 시험 시간 제한</li>
+      <li class="flex items-center gap-2 text-label-md text-primary-fixed"><span class="w-1.5 h-1.5 rounded-full bg-sky-blue"></span>업데이트된 AI 스피킹 피드백</li>
+    </ul>
+    <button onclick="openWaiting()" class="w-full py-4 bg-primary text-on-primary rounded font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">Take a test <span class="material-symbols-outlined text-[20px]">arrow_forward</span></button>
+  </div>
+
+  <!-- List -->
+  <div class="space-y-3">
+    <div class="bg-surface-container-lowest border border-outline-variant rounded p-4 flex items-center justify-between hover:border-primary transition-colors cursor-pointer" onclick="openWaiting()">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-surface-container rounded flex items-center justify-center"><span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">assignment</span></div>
+        <div><h4 class="text-label-md font-bold text-on-surface">NT-016</h4><div class="flex items-center gap-2"><span class="text-label-sm text-slate-gray">Hard</span><span class="w-1 h-1 rounded-full bg-outline"></span><span class="text-label-sm text-vibrant-orange font-bold">In Progress</span></div></div>
+      </div>
+      <button class="w-10 h-10 rounded bg-secondary-container/10 flex items-center justify-center text-vibrant-orange"><span class="material-symbols-outlined">play_arrow</span></button>
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded p-4 flex items-center justify-between hover:border-primary transition-colors cursor-pointer" onclick="openWaiting()">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-surface-container rounded flex items-center justify-center"><span class="material-symbols-outlined text-primary">assignment</span></div>
+        <div><h4 class="text-label-md font-bold text-on-surface">NT-015</h4><div class="flex items-center gap-2"><span class="text-label-sm text-slate-gray">Medium</span><span class="w-1 h-1 rounded-full bg-outline"></span><span class="text-label-sm text-on-surface-variant">Not Started</span></div></div>
+      </div>
+      <button class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined">lock_open</span></button>
+    </div>
+    <div class="bg-surface-container border border-outline-variant rounded p-4 flex items-center justify-between opacity-90 cursor-pointer" onclick="go('results')">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-surface-container-highest rounded flex items-center justify-center"><span class="material-symbols-outlined text-tertiary" style="font-variation-settings:'FILL' 1;">check_circle</span></div>
+        <div><h4 class="text-label-md font-bold text-on-surface">NT-014</h4><div class="flex items-center gap-2"><span class="text-label-sm text-slate-gray">Easy</span><span class="w-1 h-1 rounded-full bg-outline"></span><span class="text-label-sm text-tertiary">Completed</span></div></div>
+      </div>
+      <div class="text-right"><div class="text-primary font-bold text-label-md">102 / 120</div><div class="text-label-sm text-slate-gray">Score</div></div>
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded p-4 flex items-center justify-between hover:border-primary transition-colors cursor-pointer" onclick="openWaiting()">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-surface-container rounded flex items-center justify-center"><span class="material-symbols-outlined text-primary">assignment</span></div>
+        <div><h4 class="text-label-md font-bold text-on-surface">NT-013</h4><div class="flex items-center gap-2"><span class="text-label-sm text-slate-gray">Hard</span><span class="w-1 h-1 rounded-full bg-outline"></span><span class="text-label-sm text-on-surface-variant">Not Started</span></div></div>
+      </div>
+      <button class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined">lock_open</span></button>
+    </div>
+  </div>
+
+  <div class="mt-8 mb-4 p-6 rounded bg-on-background text-white relative overflow-hidden">
+    <div class="relative z-10">
+      <h5 class="text-label-md font-bold text-sky-blue mb-1">AI SCORING ENGINE</h5>
+      <p class="text-title-lg font-bold mb-4 leading-tight">스피킹·라이팅 결과를 60초 안에 받아보세요.</p>
+      <button class="px-6 py-2 bg-vibrant-orange text-white text-label-md font-bold rounded hover:bg-secondary transition-colors">Upgrade Now</button>
+    </div>
+    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/20 rounded-full blur-2xl"></div>
+  </div>
+</main>
+</section>
+
+<!-- ============ RESULTS / AI ANALYSIS REPORT ============ -->
+<section id="results" class="screen">
+<main class="pt-20 px-margin-mobile space-y-6 max-w-lg mx-auto md:max-w-4xl md:grid md:grid-cols-12 md:gap-gutter md:space-y-0 fade-in">
+  <div class="md:col-span-12 py-4">
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Analysis Report</h1>
+    <p class="text-on-surface-variant text-body-md opacity-80">Mock Test NT-017 • July 15, 2024</p>
+  </div>
+
+  <section class="md:col-span-5 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/30 flex flex-col items-center justify-center relative overflow-hidden">
+    <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary-fixed/20 rounded-full blur-3xl"></div>
+    <div class="relative w-48 h-48 md:w-56 md:h-56">
+      <svg class="block mx-auto max-h-[250px]" viewBox="0 0 36 36">
+        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+        <path class="circle" stroke="#002b6c" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="88, 100"></path>
+      </svg>
+      <div class="absolute inset-0 flex flex-col items-center justify-center">
+        <span class="text-[48px] font-bold text-primary" style="font-family:'Montserrat';">106</span>
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-widest">Total Score</span>
+      </div>
+    </div>
+    <div class="mt-4 text-center space-y-1">
+      <p class="text-headline-md text-on-surface">Advanced Level</p>
+      <p class="text-label-md text-on-tertiary-fixed-variant bg-tertiary-fixed px-4 py-1 rounded-full">Top 12% of SMEAG Students</p>
+    </div>
+  </section>
+
+  <section class="md:col-span-7 space-y-gutter">
+    <div class="grid grid-cols-2 gap-4">
+      <div class="bg-surface-container-low p-4 rounded-lg flex flex-col justify-between h-32 border-l-4 border-primary shadow-sm">
+        <div class="flex justify-between items-start"><span class="text-label-md text-on-surface-variant uppercase">Reading</span><span class="material-symbols-outlined text-primary-container">menu_book</span></div>
+        <div><span class="text-headline-md text-on-surface">28</span><span class="text-label-sm text-on-surface-variant">/ 30</span></div>
+      </div>
+      <div class="bg-surface-container-low p-4 rounded-lg flex flex-col justify-between h-32 border-l-4 border-primary shadow-sm">
+        <div class="flex justify-between items-start"><span class="text-label-md text-on-surface-variant uppercase">Listening</span><span class="material-symbols-outlined text-primary-container">headset</span></div>
+        <div><span class="text-headline-md text-on-surface">27</span><span class="text-label-sm text-on-surface-variant">/ 30</span></div>
+      </div>
+      <div class="bg-surface-container-low p-4 rounded-lg flex flex-col justify-between h-32 border-l-4 border-vibrant-orange shadow-sm">
+        <div class="flex justify-between items-start"><span class="text-label-md text-on-surface-variant uppercase">Speaking</span><span class="material-symbols-outlined text-vibrant-orange">record_voice_over</span></div>
+        <div><span class="text-headline-md text-on-surface">24</span><span class="text-label-sm text-on-surface-variant">/ 30</span></div>
+      </div>
+      <div class="bg-surface-container-low p-4 rounded-lg flex flex-col justify-between h-32 border-l-4 border-primary shadow-sm">
+        <div class="flex justify-between items-start"><span class="text-label-md text-on-surface-variant uppercase">Writing</span><span class="material-symbols-outlined text-primary-container">edit_note</span></div>
+        <div><span class="text-headline-md text-on-surface">27</span><span class="text-label-sm text-on-surface-variant">/ 30</span></div>
+      </div>
+    </div>
+    <div class="bg-primary-container/10 border border-primary-container/20 rounded-xl p-6 relative overflow-hidden mt-4">
+      <div class="flex items-center gap-2 mb-2"><span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">auto_awesome</span><h3 class="text-label-md font-bold text-primary uppercase tracking-wider">AI Insight</h3></div>
+      <p class="text-body-md text-on-surface italic leading-relaxed">"리딩 이해력은 매우 뛰어납니다. 스피킹 응답의 억양과 자연스러운 속도 개선에 집중하세요. AI가 통합형 과제에서 약간의 망설임을 감지했습니다. 연결 표현을 연습해 아이디어를 더 매끄럽게 이어보세요."</p>
+      <div class="mt-4 flex justify-end"><button class="bg-primary text-on-primary px-6 py-2 rounded-xl text-label-md font-bold transition-all active:scale-95 shadow-md">View Detailed Correction</button></div>
+    </div>
+  </section>
+
+  <section class="md:col-span-12 py-6">
+    <h2 class="text-headline-md mb-6">SMEAG Benchmark</h2>
+    <div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant shadow-sm space-y-6">
+      <div class="space-y-2"><div class="flex justify-between text-label-md"><span class="text-on-surface-variant">Your Score</span><span class="text-primary font-bold">106</span></div><div class="w-full bg-surface-container-highest rounded-full h-4 overflow-hidden"><div class="anim-bar bg-primary h-full rounded-full" style="width:88%"></div></div></div>
+      <div class="space-y-2 opacity-80"><div class="flex justify-between text-label-md"><span class="text-on-surface-variant">SMEAG Average</span><span class="text-on-surface font-bold">84</span></div><div class="w-full bg-surface-container-highest rounded-full h-4 overflow-hidden"><div class="anim-bar bg-deep-navy/40 h-full rounded-full" style="width:70%"></div></div></div>
+      <div class="space-y-2 opacity-80"><div class="flex justify-between text-label-md"><span class="text-on-surface-variant">SMEAG Top 5% Target</span><span class="text-on-surface font-bold">114</span></div><div class="w-full bg-surface-container-highest rounded-full h-4 overflow-hidden"><div class="anim-bar bg-sky-blue h-full rounded-full" style="width:95%"></div></div></div>
+    </div>
+  </section>
+
+  <section class="md:col-span-12 pb-8">
+    <h2 class="text-headline-md mb-6">Recommended for You</h2>
+    <div class="flex overflow-x-auto gap-6 hide-scrollbar -mx-margin-mobile px-margin-mobile pb-2">
+      <div class="min-w-[280px] bg-deep-navy text-on-primary p-6 rounded-xl border border-primary/10 shadow-lg flex flex-col justify-between h-48 shrink-0">
+        <div><span class="text-label-sm uppercase bg-white/10 px-2 py-1 rounded">Speaking Improvement</span><h4 class="text-headline-md mt-2 leading-tight">Mastering Integrated Tasks</h4></div>
+        <button class="text-sky-blue font-bold text-label-md flex items-center gap-1">Start Course <span class="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+      </div>
+      <div class="min-w-[280px] bg-surface-container-high p-6 rounded-xl border border-outline-variant/30 shadow-sm flex flex-col justify-between h-48 shrink-0">
+        <div><span class="text-label-sm text-on-surface-variant uppercase bg-on-surface/5 px-2 py-1 rounded">Daily Practice</span><h4 class="text-headline-md text-on-surface mt-2 leading-tight">15-min Speaking Drill: Pacing</h4></div>
+        <button class="text-primary font-bold text-label-md flex items-center gap-1">Launch Drill <span class="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+      </div>
+      <div class="min-w-[280px] bg-surface-container-high p-6 rounded-xl border border-outline-variant/30 shadow-sm flex flex-col justify-between h-48 shrink-0">
+        <div><span class="text-label-sm text-on-surface-variant uppercase bg-on-surface/5 px-2 py-1 rounded">Writing Strategy</span><h4 class="text-headline-md text-on-surface mt-2 leading-tight">Transition Mastery for Essay 2</h4></div>
+        <button class="text-primary font-bold text-label-md flex items-center gap-1">Read Article <span class="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+      </div>
+    </div>
+  </section>
+</main>
+</section>
+
+<!-- ============ PROFILE ============ -->
+<section id="profile" class="screen">
+<main class="pt-20 px-margin-mobile max-w-xl mx-auto space-y-6 fade-in">
+  <div class="py-4 flex items-center gap-4">
+    <div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary text-headline-md font-bold">SG</div>
+    <div><h1 class="text-headline-md text-on-surface">Student</h1><p class="text-label-md text-on-surface-variant">Standard Plan · 목표 점수 110</p></div>
+  </div>
+  <div class="grid grid-cols-3 gap-3">
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 text-center"><p class="text-headline-md text-primary font-bold">12</p><p class="text-label-sm text-on-surface-variant">응시 완료</p></div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 text-center"><p class="text-headline-md text-primary font-bold">106</p><p class="text-label-sm text-on-surface-variant">최고 점수</p></div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 text-center"><p class="text-headline-md text-vibrant-orange font-bold">Top 12%</p><p class="text-label-sm text-on-surface-variant">SMEAG 랭크</p></div>
+  </div>
+  <div class="bg-surface-container-lowest border border-outline-variant rounded-lg divide-y divide-outline-variant/60">
+    <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">workspace_premium</span><span class="text-label-md">구독 관리</span></div><span class="material-symbols-outlined text-on-surface-variant">chevron_right</span></div>
+    <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">history</span><span class="text-label-md">응시 기록</span></div><span class="material-symbols-outlined text-on-surface-variant">chevron_right</span></div>
+    <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">forum</span><span class="text-label-md">라운지 · 커뮤니티</span></div><span class="material-symbols-outlined text-on-surface-variant">chevron_right</span></div>
+    <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">settings</span><span class="text-label-md">설정</span></div><span class="material-symbols-outlined text-on-surface-variant">chevron_right</span></div>
+  </div>
+</main>
+</section>
+
+<!-- ============ WAITING ROOM (full-screen overlay) ============ -->
+<section id="waiting" class="screen fixed inset-0 z-[60] bg-background overflow-y-auto">
+  <header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface/80 backdrop-blur-md">
+    <div class="flex items-center gap-4">
+      <button onclick="closeWaiting()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors active:scale-95"><span class="material-symbols-outlined text-on-surface">close</span></button>
+      <h1 class="text-headline-md text-on-surface">StudyGround</h1>
+    </div>
+    <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-bold text-sm">SG</div>
+  </header>
+
+  <main class="mt-20 mb-32 px-margin-mobile max-w-xl mx-auto w-full fade-in">
+    <section class="mb-8">
+      <div class="inline-block px-3 py-1 bg-secondary-container text-on-secondary-container text-label-sm rounded-full mb-2">LATEST MOCK TEST</div>
+      <h2 class="text-display-lg text-on-surface mb-1">NT-017</h2>
+      <p class="text-body-lg text-on-surface-variant">TOEFL iBT Full Simulation</p>
+    </section>
+
+    <section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm mb-6 border border-outline-variant/30">
+      <h3 class="text-label-md text-vibrant-orange mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1;">settings_accessibility</span>EQUIPMENT CHECK</h3>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center"><span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">settings_voice</span></div>
+            <div><p class="text-label-md text-on-surface">Microphone</p><p class="text-label-sm text-on-surface-variant">감도 테스트 중...</p></div>
+          </div>
+          <div class="flex gap-1 items-end">
+            <div class="mic-bar w-1.5 h-6 bg-primary rounded-full pulse-soft"></div>
+            <div class="mic-bar w-1.5 h-8 bg-primary rounded-full pulse-soft"></div>
+            <div class="mic-bar w-1.5 h-5 bg-primary rounded-full pulse-soft"></div>
+            <div class="mic-bar w-1.5 h-7 bg-primary rounded-full pulse-soft"></div>
+          </div>
+        </div>
+        <hr class="border-outline-variant/30"/>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center"><span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings:'FILL' 1;">hearing</span></div>
+            <div><p class="text-label-md text-on-surface">Speaker / Headset</p><button class="text-primary text-label-sm mt-0.5 hover:underline decoration-2 underline-offset-4">Play Test Sound</button></div>
+          </div>
+          <span class="material-symbols-outlined text-green-600" style="font-variation-settings:'FILL' 1;">check_circle</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-2 gap-4 mb-8">
+      <div class="bg-tertiary-fixed/30 p-4 rounded-xl flex flex-col justify-between"><span class="material-symbols-outlined text-tertiary mb-2">schedule</span><div><p class="text-label-sm text-tertiary uppercase tracking-wider">Duration</p><p class="text-headline-md text-on-tertiary-container">~2 Hours</p></div></div>
+      <div class="bg-surface-container p-4 rounded-xl flex flex-col justify-between"><span class="material-symbols-outlined text-vibrant-orange mb-2">fact_check</span><div><p class="text-label-sm text-vibrant-orange uppercase tracking-wider">Questions</p><p class="text-headline-md text-on-surface">Full Set</p></div></div>
+    </section>
+
+    <section class="space-y-3 mb-8">
+      <h3 class="text-label-md text-on-surface mb-4">IMPORTANT RULES</h3>
+      <div class="flex gap-4 items-start"><div class="mt-1 flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 flex-shrink-0"><span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings:'FILL' 1;">done_all</span></div><p class="text-body-md text-on-surface-variant">앞으로 2시간 동안 방해받지 않는 조용한 환경을 확보하세요.</p></div>
+      <div class="flex gap-4 items-start"><div class="mt-1 flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 flex-shrink-0"><span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings:'FILL' 1;">done_all</span></div><p class="text-body-md text-on-surface-variant">시험 중 브라우저 창을 닫으면 점수가 무효 처리될 수 있습니다.</p></div>
+      <div class="flex gap-4 items-start"><div class="mt-1 flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 flex-shrink-0"><span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings:'FILL' 1;">done_all</span></div><p class="text-body-md text-on-surface-variant">AI 프록토링 시스템이 오디오를 모니터링해 시험 무결성을 보장합니다.</p></div>
+    </section>
+
+    <div class="bg-inverse-surface p-6 rounded-xl text-surface-container-lowest flex items-center justify-between relative overflow-hidden group">
+      <div class="relative z-10">
+        <div class="flex items-center gap-2 mb-2"><span class="material-symbols-outlined text-sky-blue" style="font-variation-settings:'FILL' 1;">auto_awesome</span><span class="text-label-sm uppercase tracking-widest text-surface-dim">AI Strategy Prep</span></div>
+        <p class="text-body-md max-w-[240px]">스피킹 속도에 집중하세요. 최근 기록상 향상 추세입니다.</p>
+      </div>
+      <div class="absolute -right-4 top-1/2 -translate-y-1/2 opacity-20 transform group-hover:scale-110 transition-transform duration-700"><span class="material-symbols-outlined text-[120px]">analytics</span></div>
+    </div>
+  </main>
+
+  <footer class="fixed bottom-0 left-0 w-full bg-surface/95 backdrop-blur-lg px-margin-mobile py-6 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-50">
+    <div class="max-w-xl mx-auto flex gap-4">
+      <button id="startExamBtn" class="flex-1 h-14 bg-deep-navy text-white text-label-md rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md hover:bg-primary">Start Exam <span class="material-symbols-outlined">rocket_launch</span></button>
+    </div>
+  </footer>
+</section>
+
+<!-- ============ SHARED BOTTOM NAV ============ -->
+<nav id="bottomnav" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface/95 backdrop-blur-lg border-t border-outline-variant shadow-lg">
+  <a class="nav-btn flex flex-col items-center justify-center text-primary bg-primary-fixed/30 rounded-full px-4 py-1 transition-all cursor-pointer" data-go="home">
+    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span><span class="text-label-sm font-bold">Home</span>
+  </a>
+  <a class="nav-btn flex flex-col items-center justify-center text-on-surface-variant transition-all cursor-pointer" data-go="exams">
+    <span class="material-symbols-outlined">assignment</span><span class="text-label-sm font-bold">Exams</span>
+  </a>
+  <a class="nav-btn flex flex-col items-center justify-center text-on-surface-variant transition-all cursor-pointer" data-go="results">
+    <span class="material-symbols-outlined">analytics</span><span class="text-label-sm font-bold">Results</span>
+  </a>
+  <a class="nav-btn flex flex-col items-center justify-center text-on-surface-variant transition-all cursor-pointer" data-go="profile">
+    <span class="material-symbols-outlined">person</span><span class="text-label-sm font-bold">Profile</span>
+  </a>
+</nav>
+
+<!-- Contextual FAB -->
+<button id="fab" onclick="go('exams')" class="fixed right-6 bottom-24 md:bottom-10 z-40 w-14 h-14 bg-vibrant-orange text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-transform">
+  <span class="material-symbols-outlined text-3xl">add</span>
+</button>
+
+<script>
+  const screens = ['home','exams','results','profile'];
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const el = document.getElementById(id); if(el) el.classList.add('active');
+    // bottom nav state
+    document.querySelectorAll('#bottomnav .nav-btn').forEach(b=>{
+      const on = b.dataset.go===id;
+      b.classList.toggle('text-primary', on);
+      b.classList.toggle('bg-primary-fixed/30', on);
+      b.classList.toggle('rounded-full', on);
+      b.classList.toggle('text-on-surface-variant', !on);
+      b.querySelector('.material-symbols-outlined').style.fontVariationSettings = on ? "'FILL' 1" : "'FILL' 0";
+    });
+    // top nav state
+    document.querySelectorAll('#appbar .nav-top').forEach(a=>{
+      const on = a.dataset.go===id;
+      a.classList.toggle('text-primary', on); a.classList.toggle('font-bold', on);
+      a.classList.toggle('text-on-surface-variant', !on);
+    });
+    document.getElementById('appbar').style.display='flex';
+    document.getElementById('bottomnav').style.display='flex';
+    document.getElementById('fab').style.display='flex';
+    window.scrollTo({top:0,behavior:'instant'});
+    animateBars();
+  }
+  function openWaiting(){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('waiting').classList.add('active');
+    document.getElementById('appbar').style.display='none';
+    document.getElementById('bottomnav').style.display='none';
+    document.getElementById('fab').style.display='none';
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+  function closeWaiting(){ go('exams'); }
+  function animateBars(){
+    document.querySelectorAll('.anim-bar').forEach(bar=>{
+      const w = bar.style.width; bar.style.width='0%';
+      setTimeout(()=>bar.style.width=w, 200);
+    });
+  }
+  document.querySelectorAll('[data-go]').forEach(el=> el.addEventListener('click', ()=>go(el.dataset.go)));
+  document.addEventListener('DOMContentLoaded', animateBars);
+</script>
+</body>
+</html>
