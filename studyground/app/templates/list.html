@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ t('list.title') }} · {{ t('app.name') }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ t('list.title') }}</h1>
+    <p class="sub">{{ t('list.subtitle', n=rows|length) }}</p>
+  </div>
+</div>
+
+<form class="filters" method="get" action="/">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <select name="student_id" onchange="this.form.submit()">
+    <option value="">{{ t('list.allStudents') }}</option>
+    {% for s in students %}
+      <option value="{{ s.id }}" {% if sel_student == s.id %}selected{% endif %}>
+        {{ s.name }} · {{ s.student_no }}
+      </option>
+    {% endfor %}
+  </select>
+  <select name="exam_id" onchange="this.form.submit()">
+    <option value="">{{ t('list.allExams') }}</option>
+    {% for e in exams %}
+      <option value="{{ e.id }}" {% if sel_exam == e.id %}selected{% endif %}>{{ e.code }}</option>
+    {% endfor %}
+  </select>
+  <noscript><button class="btn small" type="submit">OK</button></noscript>
+</form>
+
+{% if not rows %}
+  <p class="empty">{{ t('list.empty') }}</p>
+{% else %}
+<div class="table-wrap">
+  <table class="scores">
+    <thead>
+      <tr>
+        <th>{{ t('col.date') }}</th>
+        <th>{{ t('col.student') }}</th>
+        <th>{{ t('col.exam') }}</th>
+        {% for s in skills %}<th class="num">{{ t('skill.' ~ s) }}</th>{% endfor %}
+        <th class="num">{{ t('col.total') }}</th>
+        <th>{{ t('col.grade') }}</th>
+        <th>{{ t('col.status') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr class="row-link" data-href="/attempts/{{ r.id }}?lang={{ lang }}" tabindex="0">
+        <td class="mono">{{ fmt_date(r.taken_at) }}</td>
+        <td>
+          <b>{{ r.student.name }}</b>
+          <span class="dim">{{ r.student.student_no }} · {{ r.student.klass }}</span>
+        </td>
+        <td><span class="chip">{{ r.exam.code }}</span></td>
+        {% for s in skills %}
+          {% set v = r.sections.get(s, 0) %}
+          <td class="num">
+            <span class="cell-score">{{ v }}</span>
+            <span class="mini-bar"><i style="width: {{ (v / section_max * 100) | round(0, 'floor') }}%"></i></span>
+          </td>
+        {% endfor %}
+        <td class="num total">{{ r.total_score }}<span class="dim">/{{ r.total_max }}</span></td>
+        <td><span class="grade">{{ r.grade }}</span></td>
+        <td><span class="status {{ r.status }}">{{ t('status.' ~ r.status) }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

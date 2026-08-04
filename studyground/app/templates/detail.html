@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}{{ d.student.name }} · {{ d.exam.code }} · {{ t('app.name') }}{% endblock %}
+
+{% set pct = (d.total_score / d.total_max * 100) if d.total_max else 0 %}
+{% set circ = 339.292 %}
+
+{% block content %}
+<a class="back" href="/?lang={{ lang }}">{{ t('detail.back') }}</a>
+
+<div class="page-head">
+  <div>
+    <h1>{{ t('detail.title') }}</h1>
+    <p class="sub">
+      <b>{{ d.student.name }}</b> · {{ d.student.student_no }} · {{ d.student.klass }}
+      &nbsp;|&nbsp; {{ d.exam.code }} — {{ d.exam.title }}
+      &nbsp;|&nbsp; {{ t('detail.taken') }} {{ fmt_date(d.taken_at) }}
+    </p>
+  </div>
+  <span class="status {{ d.status }}">{{ t('status.' ~ d.status) }}</span>
+</div>
+
+<section class="card score-hero">
+  <div class="ring-wrap">
+    <svg class="ring" viewBox="0 0 128 128" role="img"
+         aria-label="{{ d.total_score }} / {{ d.total_max }}">
+      <circle class="ring-bg" cx="64" cy="64" r="54"></circle>
+      <circle class="ring-fg" cx="64" cy="64" r="54"
+              stroke-dasharray="{{ (circ * pct / 100) | round(1) }} {{ circ }}"></circle>
+    </svg>
+    <div class="ring-label">
+      <b>{{ d.total_score }}</b>
+      <small>/ {{ d.total_max }}</small>
+      <span class="grade big">{{ d.grade }}</span>
+    </div>
+  </div>
+
+  <div class="bars">
+    <h2 class="card-title">{{ t('detail.sections') }}</h2>
+    {% for s in d.section_scores %}
+    <div class="bar-row">
+      <span class="bar-k">{{ t('skill.' ~ s.skill) }}</span>
+      <span class="bar"><i class="{{ s.skill }}"
+        style="width: {{ (s.scaled / s.max_score * 100) | round(0, 'floor') }}%"></i></span>
+      <span class="bar-v">{{ s.scaled }}<span class="dim">/{{ s.max_score }}</span></span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card" id="feedback-card">
+  <div class="card-head">
+    <h2 class="card-title">{{ t('detail.feedback') }}</h2>
+    <div class="card-actions">
+      <span class="fb-mode" id="fb-mode">
+        {% set any_fb = feedback.get('overall') %}
+        {% if any_fb %}
+          {{ t('detail.modeOnline') if any_fb.mode == 'online' else t('detail.modeOffline') }}
+        {% endif %}
+      </span>
+      <button class="btn" id="rescore-btn"
+              data-attempt="{{ d.id }}" data-lang="{{ lang }}"
+              data-busy="{{ t('detail.rescoring') }}"
+              data-idle="{{ t('detail.rescore') }}"
+              data-done="{{ t('detail.rescored', mode='{mode}') }}"
+              data-failed="{{ t('detail.rescoreFailed') }}">
+        {{ t('detail.rescore') }}
+      </button>
+    </div>
+  </div>
+  <p class="flash" id="rescore-flash" hidden></p>
+
+  <div id="feedback-list">
+    {% if not d.feedback %}
+      <p class="empty">{{ t('detail.noFeedback') }}</p>
+    {% endif %}
+    {% for scope in ['overall', 'reading', 'listening', 'speaking', 'writing'] %}
+      {% set f = feedback.get(scope) %}
+      {% if f %}
+      <article class="fb {{ 'overall' if scope == 'overall' else '' }}">
+        <h3>{{ t('skill.' ~ scope) }}</h3>
+        <p class="fb-sum">{{ f.summary }}</p>
+        {% if f.strengths %}
+        <div class="fb-block good">
+          <h4>{{ t('detail.strengths') }}</h4>
+          <ul>{% for s in f.strengths %}<li>{{ s }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+        {% if f.improvements %}
+        <div class="fb-block warn">
+          <h4>{{ t('detail.improvements') }}</h4>
+          <ul>{% for s in f.improvements %}<li>{{ s }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+      </article>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2 class="card-title">{{ t('detail.review') }}</h2>
+  {% for skill in receptive %}
+    {% set rows = review.get(skill, []) %}
+    {% if rows %}
+    {% set ok = rows | selectattr('is_correct') | list | length %}
+    <details class="review" {% if loop.first %}open{% endif %}>
+      <summary>
+        {{ t('skill.' ~ skill) }}
+        <span class="dim">{{ t('detail.correctCount', correct=ok, total=rows|length) }}</span>
+      </summary>
+      <div class="table-wrap">
+        <table class="qtable">
+          <thead>
+            <tr>
+              <th class="w-no">{{ t('detail.qNo') }}</th>
+              <th>{{ t('detail.question') }}</th>
+              <th class="w-ans">{{ t('detail.yourAnswer') }}</th>
+              <th class="w-ans">{{ t('detail.correctAnswer') }}</th>
+              <th class="w-res">{{ t('detail.result') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for q in rows %}
+            <tr class="{{ 'is-wrong' if not q.is_correct else '' }}">
+              <td class="mono">{{ q.no }}</td>
+              <td>{{ q.prompt }}</td>
+              <td class="mono">{{ q.student_answer }}</td>
+              <td class="mono">{{ q.correct_answer }}</td>
+              <td>
+                <span class="mark {{ 'ok' if q.is_correct else 'no' }}">
+                  {{ t('detail.correct') if q.is_correct else t('detail.wrong') }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+    {% endif %}
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2 class="card-title">{{ t('detail.rubric') }}</h2>
+  <div class="rubric-grid">
+    {% for skill in productive %}
+      {% set rows = rubrics.get(skill, []) %}
+      {% if rows %}
+      <div class="rubric">
+        <h3>{{ t('skill.' ~ skill) }}</h3>
+        {% for r in rows %}
+        <div class="bar-row">
+          <span class="bar-k wide">{{ r.criterion }}</span>
+          <span class="bar"><i class="{{ skill }}"
+            style="width: {{ (r.score / r.max_score * 100) | round(0, 'floor') }}%"></i></span>
+          <span class="bar-v">{{ '%g' % r.score }}<span class="dim">/{{ '%g' % r.max_score }}</span></span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

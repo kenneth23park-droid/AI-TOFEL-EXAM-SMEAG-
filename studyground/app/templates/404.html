@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ t('error.404.title') }} · {{ t('app.name') }}{% endblock %}
+
+{% block content %}
+<section class="card notfound">
+  <div class="nf-code">404</div>
+  <h1>{{ t('error.404.title') }}</h1>
+  <p class="sub">{{ t('error.404.body') }}</p>
+  <a class="btn" href="/?lang={{ lang }}">{{ t('detail.back') }}</a>
+</section>
+{% endblock %}
