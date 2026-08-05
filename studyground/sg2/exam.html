@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SET 1 · Exam · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .exam-wrap { max-width: 860px; }
+  .seg { display:inline-flex; background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px; gap:4px; }
+  .seg a { padding:7px 14px; border-radius:999px; font-size:13px; font-weight:700; color:var(--muted); }
+  .seg a.on { background:var(--brand); color:#fff; }
+  .qcard { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .qcard .qh { font-size:12px; font-weight:800; color:var(--brand); letter-spacing:.04em; }
+  .qcard .prompt { font-size:15px; font-weight:650; margin:6px 0 12px; }
+  .opt { display:flex; gap:10px; align-items:flex-start; padding:9px 12px; border:1px solid var(--line); border-radius:10px; margin-bottom:8px; cursor:pointer; font-size:14px; }
+  .opt:hover { border-color:var(--brand); }
+  .opt input { margin-top:3px; accent-color:var(--brand); }
+  .opt.correct { background:var(--ok-soft); border-color:var(--ok); }
+  .opt.wrong { background:#fdeeee; border-color:var(--no,#dc2626); }
+  .passage { background:var(--cream-2); border-radius:12px; padding:14px 16px; font-size:14px; line-height:1.7; margin-bottom:14px; white-space:pre-wrap; }
+  .blank-in { border:none; border-bottom:2px solid var(--brand); background:transparent; font-size:14px; width:110px; font-family:inherit; padding:2px 4px; }
+  audio { width:100%; margin:8px 0; }
+  .qinstr { font-size:13px; color:var(--muted); margin:2px 0 6px; }
+  .qitem { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
+  .qitem:first-of-type { border-top:none; }
+  /* character page + countdown */
+  .audio-unit { margin:10px 0 12px; }
+  .au-stage { position:relative; background:linear-gradient(160deg,#fbe3d8,#f7d3c2); border:1px solid var(--peach-2);
+    border-radius:14px; padding:14px; display:flex; align-items:center; gap:16px; min-height:120px; }
+  .au-stage .speaker { width:120px; height:120px; object-fit:contain; border-radius:12px; background:#fff;
+    padding:6px; box-shadow:var(--shadow); flex:none; }
+  .au-timer { display:flex; flex-direction:column; }
+  .au-count { font-size:34px; font-weight:850; color:var(--brand-ink); font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+  .au-cap { font-size:12px; font-weight:700; color:var(--muted); }
+  .au-stage.playing { box-shadow:0 0 0 3px rgba(232,72,31,.25) inset; }
+  .au-stage.playing .au-count { color:var(--brand); animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
+  .au-audio { margin:8px 0 0; }
+  .result-bar { position:sticky; bottom:0; background:#fff; border-top:1px solid var(--line); padding:14px 0; margin-top:20px; }
+  .score-big { font-size:26px; font-weight:850; color:var(--brand); }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
+    <nav class="nav-center">
+      <a href="tests.html" class="on">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
+      <a href="npz.html">🎯 <span data-en>Practice</span><span data-ko>연습</span></a>
+      <a href="learning.html">🎬 <span data-en>Lectures</span><span data-ko>강의</span></a>
+      <a href="community.html">💬 <span data-en>Community</span><span data-ko>커뮤니티</span></a>
+      <a href="dashboard.html">📊 <span data-en>My StudyGround</span><span data-ko>내 성적</span></a>
+    </nav>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="tests.html"><span data-en>Exit</span><span data-ko>나가기</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap exam-wrap">
+  <div class="page-h" style="padding:24px 0 8px">
+    <h1 style="font-size:28px"><span data-en>NEW TOEFL SET 1</span><span data-ko>NEW TOEFL SET 1</span></h1>
+    <div class="mt-16 seg" id="seg">
+      <a href="?section=reading" data-sec="reading">📖 <span data-en>Reading</span><span data-ko>리딩</span></a>
+      <a href="?section=listening" data-sec="listening">🎧 <span data-en>Listening</span><span data-ko>리스닝</span></a>
+      <a href="?section=writing" data-sec="writing">✍️ <span data-en>Writing</span><span data-ko>라이팅</span></a>
+      <a href="?section=speaking" data-sec="speaking">🎙️ <span data-en>Speaking</span><span data-ko>스피킹</span></a>
+    </div>
+  </div>
+
+  <div id="exam"></div>
+
+  <div class="result-bar">
+    <div class="wrap exam-wrap" style="padding:0;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+      <div id="scoreOut" class="muted"><span data-en>Answer the questions, then grade.</span><span data-ko>문항에 답한 뒤 채점하세요.</span></div>
+      <button class="btn brand lg" id="gradeBtn"><span data-en>Grade section</span><span data-ko>채점</span></button>
+    </div>
+  </div>
+</main>
+
+<script src="assets/set1.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  var S = window.SMEAG_SET1;
+  var params = new URLSearchParams(location.search);
+  var secId = params.get('section') || 'reading';
+  document.querySelectorAll('#seg a').forEach(function(a){ a.classList.toggle('on', a.dataset.sec===secId); });
+  var section = S.sections.find(function(s){return s.id===secId;});
+  var host = document.getElementById('exam');
+  // assets bundled inside the site so it deploys self-contained
+  function audioSrc(p){
+    return encodeURI(p
+      .replace('TOEFL MOCK TEST  SET 1/SET 1 AUDIO/', 'media/audio/')
+      .replace('app/assets/speaking/', 'media/speaking/'));
+  }
+  function imgSrc(p){
+    if(!p) return '';
+    return encodeURI(p
+      .replace('TOEFL LISTENING & WRITING PICTURES/', 'media/pictures/')
+      .replace('app/assets/speaking/', 'media/speaking/'));
+  }
+  function fmt(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60), q=s%60; return m+':'+(q<10?'0':'')+q; }
+
+  // A "character page" + audio player + live countdown timer.
+  // Real-exam feel: one play, a speaker illustration, and a ticking clock.
+  function makeAudioUnit(src, image, caption){
+    var wrap=document.createElement('div'); wrap.className='audio-unit';
+    var img = image ? '<img class="speaker" src="'+imgSrc(image)+'" alt="speaker" loading="lazy">' : '';
+    wrap.innerHTML =
+      '<div class="au-stage">'+img+
+        '<div class="au-timer"><span class="au-count">0:00</span>'+
+        '<span class="au-cap">'+(caption||'Audio plays once')+'</span></div>'+
+      '</div>'+
+      '<audio class="au-audio" controls preload="metadata" src="'+audioSrc(src)+'"></audio>';
+    var audio=wrap.querySelector('audio');
+    var count=wrap.querySelector('.au-count');
+    var stage=wrap.querySelector('.au-stage');
+    audio.addEventListener('loadedmetadata', function(){ if(isFinite(audio.duration)) count.textContent=fmt(audio.duration); });
+    audio.addEventListener('play', function(){ stage.classList.add('playing'); });
+    audio.addEventListener('pause', function(){ stage.classList.remove('playing'); });
+    audio.addEventListener('timeupdate', function(){
+      var rem = (isFinite(audio.duration)? audio.duration : 0) - audio.currentTime;
+      count.textContent = fmt(rem);
+    });
+    audio.addEventListener('ended', function(){ stage.classList.remove('playing'); count.textContent='0:00'; });
+    return wrap;
+  }
+  var graders = []; // functions returning {correct, total}
+
+  function esc(t){ var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+
+  section.modules.forEach(function(mod){
+    var h=document.createElement('h2'); h.className='title'; h.style.margin='20px 0 10px'; h.textContent=mod.label; host.appendChild(h);
+    mod.blocks.forEach(function(blk){
+      var card=document.createElement('div'); card.className='qcard';
+      card.innerHTML='<div class="qh">'+esc(blk.heading||'')+'</div>'+
+        (blk.instruction?'<div class="qinstr">'+esc(blk.instruction)+'</div>':'');
+      // block-level audio (conversations, talks, announcements) + its speaker page
+      if(blk.audio){ card.appendChild(makeAudioUnit(blk.audio, blk.image, blk.heading||'Listen once')); }
+      if(blk.introAudio){ card.appendChild(makeAudioUnit(blk.introAudio, blk.image, 'Instructions')); }
+
+      // CLOZE
+      if(blk.kind==='cloze'){
+        var tmpl=blk.template||'';
+        var frag=tmpl.replace(/\{\{(\d+)\}\}/g, function(_,n){ return '<input class="blank-in" data-blank="'+n+'" placeholder="'+n+'">'; });
+        var p=document.createElement('div'); p.className='passage'; p.innerHTML=frag; card.appendChild(p);
+        var ans={}; blk.questions.forEach(function(q){ ans[q.no]=q.answer; });
+        graders.push(function(){
+          var c=0,t=0;
+          card.querySelectorAll('input[data-blank]').forEach(function(inp){
+            t++; var n=inp.dataset.blank; var ok=(inp.value.trim().toLowerCase()===String(ans[n]||'').toLowerCase());
+            inp.style.borderColor= ok? 'var(--ok)':'#dc2626'; if(ok)c++;
+          });
+          return {correct:c,total:t};
+        });
+      }
+      // MCQ / audio-set with choices
+      else if(blk.questions && blk.questions.some(function(q){return q.choices;})){
+        if(blk.passage){ var pp=document.createElement('div'); pp.className='passage'; pp.textContent=blk.passage; card.appendChild(pp); }
+        blk.questions.forEach(function(q){
+          if(!q.choices) return;
+          var qd=document.createElement('div'); qd.className='qitem';
+          qd.innerHTML='<div class="prompt">'+esc('Q'+(q.no||'')+(q.prompt?' · '+q.prompt:''))+'</div>';
+          // per-question audio (short-response 1–7 / 1–3) with its own speaker page + timer
+          if(blk.perQuestionAudio && q.audio){ qd.appendChild(makeAudioUnit(q.audio, q.image, 'Question '+(q.no||''))); }
+          q.choices.forEach(function(ch,idx){
+            qd.innerHTML+='<label class="opt" data-q="'+q.id+'" data-idx="'+idx+'"><input type="radio" name="'+q.id+'" value="'+idx+'"><span>'+esc(ch)+'</span></label>';
+          });
+          card.appendChild(qd);
+          graders.push(function(){
+            var sel=card.querySelector('input[name="'+q.id+'"]:checked');
+            var chosen= sel? parseInt(sel.value,10):-1;
+            card.querySelectorAll('label[data-q="'+q.id+'"]').forEach(function(l){
+              var i=parseInt(l.dataset.idx,10);
+              if(i===q.answer) l.classList.add('correct');
+              if(i===chosen && chosen!==q.answer) l.classList.add('wrong');
+            });
+            return {correct: chosen===q.answer?1:0, total:1};
+          });
+        });
+      }
+      // BUILD-A-SENTENCE (writing)
+      else if(blk.kind==='build-set'){
+        blk.questions.forEach(function(q){
+          var qd=document.createElement('div'); qd.style.marginTop='12px';
+          qd.innerHTML='<div class="prompt">'+esc(q.context||'')+'</div>'+
+            '<div class="muted" style="font-size:12px">'+esc((q.answerTokens||[]).join(' · '))+'</div>'+
+            '<div class="passage" style="margin-top:6px">'+esc(q.sentence||'')+'</div>';
+          card.appendChild(qd);
+        });
+      }
+      // FREE WRITE
+      else if(blk.kind==='free-write'){
+        blk.questions.forEach(function(q){
+          var qd=document.createElement('div'); qd.style.marginTop='10px';
+          var promptText = q.prompt || q.situation || '';
+          qd.innerHTML='<div class="prompt">'+esc(q.subject||q.professor||blk.heading)+'</div>'+
+            (promptText?'<div class="passage">'+esc(promptText)+'</div>':'')+
+            '<textarea class="passage" style="width:100%;min-height:120px" placeholder="Type your response ('+(q.minWords||80)+'+ words)…"></textarea>';
+          card.appendChild(qd);
+        });
+      }
+      // RECORD-SET (speaking)
+      else if(blk.kind==='record-set'){
+        blk.questions.forEach(function(q){
+          var qd=document.createElement('div'); qd.className='qitem';
+          qd.innerHTML='<div class="prompt">'+esc('Q'+q.no+' · '+(q.kind==='interview'?'Interview':'Listen & Repeat'))+'</div>';
+          if(q.audio){ qd.appendChild(makeAudioUnit(q.audio, q.image, 'Prep '+(q.prepSec||3)+'s · Respond '+(q.respondSec||20)+'s')); }
+          var btn=document.createElement('button'); btn.className='btn ghost sm'; btn.style.marginTop='6px'; btn.textContent='🎤 Record';
+          qd.appendChild(btn);
+          card.appendChild(qd);
+        });
+      }
+      host.appendChild(card);
+    });
+  });
+
+  document.getElementById('gradeBtn').addEventListener('click', function(){
+    if(!graders.length){
+      document.getElementById('scoreOut').innerHTML='<span class="muted">This section is submitted for AI review (no auto-score).</span>';
+      return;
+    }
+    var c=0,t=0; graders.forEach(function(g){ var r=g(); c+=r.correct; t+=r.total; });
+    var pct= t? Math.round(c/t*100):0;
+    document.getElementById('scoreOut').innerHTML='<span class="score-big">'+c+' / '+t+'</span> <span class="muted">('+pct+'%)</span>';
+  });
+})();
+</script>
+</body>
+</html>

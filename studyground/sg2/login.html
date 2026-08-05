@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
+    <div class="nav-right" style="margin-left:auto">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn brand sm" href="signup.html"><span data-en>Sign Up Free</span><span data-ko>무료 가입</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="auth">
+  <div class="auth-card">
+    <h1><span data-en>Welcome back</span><span data-ko>다시 오신 걸 환영해요</span></h1>
+    <p class="sub"><span data-en>Log in to continue your TOEFL prep.</span><span data-ko>TOEFL 학습을 이어가려면 로그인하세요.</span></p>
+    <form onsubmit="event.preventDefault();location.href='dashboard.html'">
+      <div class="field"><label data-en>Student ID or email</label><label data-ko>학번 또는 이메일</label>
+        <input type="text" placeholder="s2025001" required></div>
+      <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
+        <input type="password" placeholder="••••••••" required></div>
+      <button class="btn brand block lg" type="submit"><span data-en>Log in</span><span data-ko>로그인</span></button>
+    </form>
+    <div class="divider"><span data-en>or</span><span data-ko>또는</span></div>
+    <a class="btn ghost block" href="dashboard.html"><span data-en>Continue as guest</span><span data-ko>게스트로 계속</span></a>
+    <div class="auth-alt"><span data-en>New to StudyGround?</span><span data-ko>StudyGround가 처음이신가요?</span>
+      <a href="signup.html"><span data-en>Sign up free</span><span data-ko>무료 가입</span></a></div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

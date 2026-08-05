@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My StudyGround · Dashboard</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
+    <nav class="nav-center">
+      <a href="tests.html">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
+      <a href="npz.html">🎯 <span data-en>Practice</span><span data-ko>연습</span></a>
+      <a href="learning.html">🎬 <span data-en>Lectures</span><span data-ko>강의</span></a>
+      <a href="community.html">💬 <span data-en>Community</span><span data-ko>커뮤니티</span></a>
+      <a href="dashboard.html" class="on">📊 <span data-en>My StudyGround</span><span data-ko>내 성적</span></a>
+    </nav>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="purchase.html"><span data-en>Purchase</span><span data-ko>구매</span></a>
+      <a class="btn brand sm" href="signup.html"><span data-en>Sign Up Free</span><span data-ko>무료 가입</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-h"><h1 style="font-size:clamp(28px,4vw,44px)"><span data-en>My StudyGround</span><span data-ko>내 StudyGround</span></h1></div>
+
+  <!-- score summary -->
+  <div class="grid cols-4 mt-16">
+    <div class="card"><div class="muted" style="font-size:12px" data-en>Reading</div><div class="muted" style="font-size:12px" data-ko>리딩</div><div style="font-size:30px;font-weight:850;color:var(--brand)">6.0</div><div class="muted" style="font-size:12px" data-en>best band</div><div class="muted" style="font-size:12px" data-ko>최고 밴드</div></div>
+    <div class="card"><div class="muted" style="font-size:12px" data-en>Listening</div><div class="muted" style="font-size:12px" data-ko>리스닝</div><div style="font-size:30px;font-weight:850;color:var(--brand)">5.5</div><div class="muted" style="font-size:12px" data-en>best band</div><div class="muted" style="font-size:12px" data-ko>최고 밴드</div></div>
+    <div class="card"><div class="muted" style="font-size:12px" data-en>Writing</div><div class="muted" style="font-size:12px" data-ko>라이팅</div><div style="font-size:30px;font-weight:850;color:var(--brand)">6.0</div><div class="muted" style="font-size:12px" data-en>best band</div><div class="muted" style="font-size:12px" data-ko>최고 밴드</div></div>
+    <div class="card"><div class="muted" style="font-size:12px" data-en>Speaking</div><div class="muted" style="font-size:12px" data-ko>스피킹</div><div style="font-size:30px;font-weight:850;color:var(--brand)">5.5</div><div class="muted" style="font-size:12px" data-en>best band</div><div class="muted" style="font-size:12px" data-ko>최고 밴드</div></div>
+  </div>
+
+  <!-- CTA when empty -->
+  <div class="empty-hero mt-24">
+    <div class="pill" style="margin:0 auto"><span data-en>Get started</span><span data-ko>시작하기</span></div>
+    <h2 class="title mt-16"><span data-en>Start your TOEFL journey today</span><span data-ko>오늘 TOEFL 여정을 시작하세요</span></h2>
+    <p class="muted mt-8"><span data-en>SET 1 mock test and 91 practice questions are ready for you.</span><span data-ko>SET 1 모의고사와 연습 91문항이 준비돼 있습니다.</span></p>
+    <div class="mt-24" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <a class="btn brand lg" href="tests.html"><span data-en>Take the free mock test</span><span data-ko>무료 모의고사 응시</span></a>
+      <a class="btn ghost lg" href="npz.html"><span data-en>Go to Practice Zone</span><span data-ko>연습존으로</span></a>
+    </div>
+  </div>
+
+  <!-- recent scores table -->
+  <section class="section" style="padding:40px 0">
+    <h2 class="title mb-24"><span data-en>Recent scores</span><span data-ko>최근 성적</span></h2>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr>
+          <th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-en>Date</th><th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-ko>날짜</th>
+          <th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-en>Test</th><th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-ko>시험</th>
+          <th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-en>Section</th><th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-ko>영역</th>
+          <th style="text-align:right;padding:12px 14px;border-bottom:1px solid var(--line)" data-en>Score</th><th style="text-align:right;padding:12px 14px;border-bottom:1px solid var(--line)" data-ko>점수</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><div class="wrap foot-in">
+  <small class="muted">© SMEAG StudyGround · Dashboard</small>
+  <div class="foot-links"><a href="index.html" data-en>Home</a><a href="index.html" data-ko>홈</a><a href="tests.html" data-en>Mock Tests</a><a href="tests.html" data-ko>모의고사</a></div>
+</div></footer>
+
+<script src="assets/app.js"></script>
+<script>
+  var rows=[
+    ['2026-08-04','SET 1','Listening','24/33'],
+    ['2026-08-03','SET 1','Reading','28/35'],
+    ['2026-07-29','SET 1','Writing','10/12'],
+    ['2026-07-27','SET 1','Speaking','—'],
+    ['2026-07-23','SET 1','Reading','22/35']
+  ];
+  document.getElementById('rows').innerHTML=rows.map(function(r){
+    return '<tr>'+
+      '<td style="padding:11px 14px;border-bottom:1px solid var(--line)" class="mono">'+r[0]+'</td>'+
+      '<td style="padding:11px 14px;border-bottom:1px solid var(--line)"><span class="chip">'+r[1]+'</span></td>'+
+      '<td style="padding:11px 14px;border-bottom:1px solid var(--line)">'+r[2]+'</td>'+
+      '<td style="padding:11px 14px;border-bottom:1px solid var(--line);text-align:right;font-weight:750">'+r[3]+'</td>'+
+    '</tr>';
+  }).join('');
+</script>
+</body>
+</html>
