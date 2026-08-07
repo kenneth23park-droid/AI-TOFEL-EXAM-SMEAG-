@@ -15,7 +15,7 @@
 //     exam.css / exam-runtime.html / exam-render-{instruction,listening,reading,writing,
 //     speaking}.js 가 전부 바뀌었다. 이 파일들은 전부 SHELL_ASSETS(cache-first)라서
 //     VERSION 을 올리지 않으면 재방문 기기가 옛 UI(빨간 중앙 pill 등)를 계속 본다.
-const VERSION = 'sg-v6';   // v6: 실측 반영 UI 개편 — 타이머를 서브바 우측으로, 리스닝 화면 분할
+const VERSION = 'sg-v7';   // v7: exam-shell.js 와 /en/test-nt/ 라우트 페이지를 프리캐시에 추가
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -39,7 +39,15 @@ const SHELL_ASSETS = [
 
   // Timing profiles — exam-timing.js falls back to an inline default if these are
   // missing, but precaching them keeps offline timings identical to online ones.
-  'config/timing.toefl.json', 'config/timing.ielts.json'
+  'config/timing.toefl.json', 'config/timing.ielts.json',
+
+  // 시험 셸 스크립트 — exam-runtime.html 과 라우트 페이지가 공유한다.
+  'assets/exam-shell.js',
+
+  // /en/test-nt/{section} 라우트 페이지 (tools/build_routes.py 가 생성).
+  // 응시자가 이 주소로 진입할 수 있으므로 오프라인에서도 열려야 한다.
+  'en/test-nt/reading/index.html', 'en/test-nt/listening/index.html',
+  'en/test-nt/speaking/index.html', 'en/test-nt/writing/index.html'
 ];
 
 self.addEventListener('install', (e) => {
