@@ -98,6 +98,81 @@
     return { en: raw, ko: raw, remapped: false };
   }
 
+  /* ── 복수 선택 문항(mcq-multi) 순수 헬퍼 ────────────────────
+   * TOEFL Listening 의 "Choose 2 answers." 유형. 콘텐츠 계약:
+   *   { kind:'mcq-multi', choices:[...], answers:[1,3], selectCount:2 }
+   * selectCount 가 없으면 answers 길이로, 그것도 없으면 2로 본다.
+   * 블록 종류는 그대로 'audio-set' 이라 컴파일러는 손대지 않는다 — 화면 분기는
+   * 문항 kind 로만 일어난다(오디오 화면 분리·1회재생·진행표기 전부 그대로). */
+  function selectCountOf(q) {
+    if (!q) return 0;
+    if (typeof q.selectCount === 'number' && q.selectCount > 1) return q.selectCount;
+    if (q.answers && q.answers.length > 1) return q.answers.length;
+    return 2;
+  }
+
+  function isMultiQuestion(q) {
+    if (!q) return false;
+    if (q.kind === 'mcq-multi') return true;
+    return typeof q.selectCount === 'number' && q.selectCount > 1;
+  }
+
+  /* 상한 도달 후 새 항목을 클릭했을 때의 정책. 한 곳에서만 바꾼다.
+   *   'replace' — 가장 먼저 고른 답을 자동으로 해제하고 새 답을 넣는다(현재 설정)
+   *   'lock'    — 클릭을 무시하고 "먼저 하나 해제" 를 요구한다
+   * ETS 실제 클라이언트 동작을 이 환경에서 확인할 수 없어 기본값을 'replace' 로 둔다.
+   * 확인되면 이 상수 하나만 'lock' 으로 되돌리면 된다 — 테스트도 이 값을 읽는다. */
+  var CAP_POLICY = 'replace';
+
+  /**
+   * 선택 토글.
+   * prev 는 **고른 순서**를 그대로 담은 배열이다(오름차순 아님). 'replace' 정책에서
+   * "가장 먼저 고른 답" 을 알아야 하기 때문이다. 저장소로 나가는 값은 호출부에서
+   * sortedPicks() 로 오름차순 정렬해 넘긴다 — 저장 계약은 종전과 같다.
+   *
+   * @param {number[]} prev 선택 순서 배열
+   * @param {number}   idx  클릭한 선택지
+   * @param {number}   cap  선택 상한
+   * @param {string}   [policy] 미지정 시 CAP_POLICY
+   * @returns {number[]} 새 선택 순서 배열(원본 불변)
+   */
+  function toggleSelection(prev, idx, cap, policy) {
+    var mode = policy || CAP_POLICY;
+    var cur = [], i;
+    if (prev && prev.length) { for (i = 0; i < prev.length; i++) cur.push(prev[i]); }
+    var at = -1;
+    for (i = 0; i < cur.length; i++) { if (cur[i] === idx) { at = i; break; } }
+    if (at >= 0) { cur.splice(at, 1); return cur; }   // 이미 고른 항목 → 해제
+    if (cur.length >= cap) {
+      if (mode !== 'replace') return cur;             // 'lock' — 클릭 무시
+      cur.shift();                                    // 가장 먼저 고른 답을 밀어낸다
+    }
+    cur.push(idx);
+    return cur;
+  }
+
+  // 저장소로 나가는 값. 화면 상태(선택 순서)와 분리한다.
+  function sortedPicks(picked) {
+    var out = (picked && picked.length) ? picked.slice(0) : [];
+    out.sort(function (a, b) { return a - b; });
+    return out;
+  }
+
+  /* "Choose 2 answers.  1 of 2 selected"
+   * 상한을 채운 뒤에는 다음 클릭이 무슨 일을 하는지 미리 알려 준다 — 답이 소리 없이
+   * 밀려나는 것처럼 보이지 않게 하기 위해서다. */
+  function selectHintPair(picked, cap, policy) {
+    var mode = policy || CAP_POLICY;
+    var n = (typeof picked === 'number' && picked > 0) ? picked : 0;
+    var en = 'Choose ' + cap + ' answers.  ' + n + ' of ' + cap + ' selected';
+    var ko = cap + '개를 고르세요.  ' + n + ' / ' + cap + ' 선택';
+    if (n >= cap && mode === 'replace') {
+      en += '  ·  a new pick replaces your first';
+      ko += '  ·  새로 고르면 처음 고른 답이 바뀝니다';
+    }
+    return { en: en, ko: ko };
+  }
+
   // "Question n of N" — N 은 screen.progress.total(컴파일러가 콘텐츠에서 산출).
   function progressPair(screen) {
     var p = screen && screen.progress;
@@ -513,7 +588,100 @@
     return box;
   }
 
+  /**
+   * 복수 선택 목록(mcq-multi). 실측 900s 프레임의 A/B/C/D 배지 레이아웃을 그대로 쓰되
+   * 배지를 사각형으로 바꿔(.is-multi) 라디오와 시각적으로 구분한다.
+   *
+   * 답은 항상 오름차순 인덱스 배열 하나로 engine.answer() 에 넘긴다 — 저장소에는
+   * 문항당 레코드 1개만 남는다(단일선택과 동일한 계약).
+   *
+   * @returns {HTMLElement} div.lst-opts.is-multi — refresh() 를 노드에 달아 둔다(테스트용)
+   */
+  function multiChoiceList(q, screen, ctx, disabled) {
+    var box = el('div', 'lst-opts is-multi');
+    var choices = (q && q.choices) || [];
+    var cap = selectCountOf(q);
+    var prev = savedAnswer(q.id);
+    var picked = (prev && prev.length) ? prev.slice(0) : [];
+    var labels = [], inputs = [];
+
+    var hint = el('p', 'lst-selecthint');
+    box.appendChild(hint);
+
+    function has(i) {
+      for (var k = 0; k < picked.length; k++) { if (picked[k] === i) return true; }
+      return false;
+    }
+
+    /* 상태 → DOM 단방향 반영.
+     * 'replace' 정책에서는 상한에 닿아도 모든 항목이 계속 클릭 가능해야 하므로
+     * 비활성(.is-capped)을 걸지 않는다. 대신 다음에 밀려날 답(가장 먼저 고른 것)에
+     * .is-next-out 을 붙여, 무엇이 바뀔지 누르기 전에 보이게 한다. */
+    function refresh() {
+      var full = picked.length >= cap;
+      var replacing = full && CAP_POLICY === 'replace' && !disabled;
+      var oldest = replacing && picked.length ? picked[0] : -1;
+
+      while (hint.firstChild) hint.removeChild(hint.firstChild);
+      var pair = selectHintPair(picked.length, cap);
+      biInto(hint, pair.en, pair.ko);
+      hint.className = full ? 'lst-selecthint is-full' : 'lst-selecthint';
+
+      for (var i = 0; i < labels.length; i++) {
+        var on = has(i);
+        inputs[i].checked = on;
+        // 'lock' 정책에서만 미선택 항목을 잠근다.
+        inputs[i].disabled = !!disabled || (!on && full && CAP_POLICY !== 'replace');
+        var cls = 'opt';
+        if (on) { cls += ' is-selected'; if (i === oldest) cls += ' is-next-out'; }
+        else if (!disabled && full && CAP_POLICY !== 'replace') { cls += ' is-capped'; }
+        labels[i].className = cls;
+      }
+    }
+
+    for (var j = 0; j < choices.length; j++) {
+      (function (idx) {
+        var lab = el('label', 'opt');
+        var input = el('input');
+        input.type = 'checkbox';
+        input.name = q.id;
+        input.value = String(idx);
+        input.onchange = function () {
+          picked = toggleSelection(picked, idx, cap);
+          refresh();
+          if (ctx && ctx.engine && typeof ctx.engine.answer === 'function') {
+            // 저장 값은 항상 오름차순 — 화면의 선택 순서를 저장소로 흘리지 않는다.
+            try { ctx.engine.answer(q.id, sortedPicks(picked)); } catch (e) { warn('answer rejected', e); }
+          }
+        };
+        var kb = el('span', 'opt-key');
+        kb.setAttribute('aria-hidden', 'true');
+        kb.textContent = String.fromCharCode(65 + idx);
+        var sp = el('span', 'opt-text');
+        sp.textContent = choices[idx];
+        lab.appendChild(input);
+        lab.appendChild(kb);
+        lab.appendChild(sp);
+        box.appendChild(lab);
+        labels.push(lab); inputs.push(input);
+      })(j);
+    }
+
+    refresh();
+    box._refresh = function (nextDisabled) {
+      if (typeof nextDisabled === 'boolean') disabled = nextDisabled;
+      refresh();
+    };
+    return box;
+  }
+
   function setChoicesEnabled(box, on) {
+    if (typeof box._refresh === 'function') {
+      // mcq-multi — 상한 규칙이 있으므로 disabled 를 일괄로 덮어쓰지 않는다.
+      box._refresh(!on);
+      box.className = on ? 'lst-opts is-multi' : 'lst-opts is-multi is-locked';
+      return;
+    }
     var inputs = box.querySelectorAll('input[type="radio"]');
     for (var i = 0; i < inputs.length; i++) inputs[i].disabled = !on;
     box.className = on ? 'lst-opts' : 'lst-opts is-locked';
@@ -532,6 +700,7 @@
 
     var wrap = el('article', 'lst-screen');
     if (q && q.layout === 'short-response') wrap.className = 'lst-screen lst-short';
+    if (isMultiQuestion(q)) wrap.className += ' lst-multi';
 
     /* 진행 표시("Question 25 of 32")는 셸의 서브바가 그린다 — 여기서 중복 렌더하지 않는다.
      * 블록 제목/지시문도 답변 화면(900s 프레임)에는 없다. 오디오가 이 화면에 남아 있는
@@ -600,7 +769,9 @@
         qwrap.appendChild(pnode);
       }
       if (q.choices && q.choices.length) {
-        optsBox = choiceList(q, screen, ctx, hasLiveAudio);
+        optsBox = isMultiQuestion(q)
+          ? multiChoiceList(q, screen, ctx, hasLiveAudio)
+          : choiceList(q, screen, ctx, hasLiveAudio);
         qwrap.appendChild(optsBox);
       } else {
         var na = bi('p', 'This question type is not supported here.', '이 문항 유형은 여기서 지원되지 않습니다.');
@@ -689,7 +860,14 @@
     makeAudioUnit: makeAudioUnit,
     renderListeningQuestion: renderListeningQuestion,
     renderAudioPlay: renderAudioPlay,
+    multiChoiceList: multiChoiceList,
     // 순수 헬퍼 — node/셀프테스트에서 직접 검증한다
+    selectCountOf: selectCountOf,
+    isMultiQuestion: isMultiQuestion,
+    toggleSelection: toggleSelection,
+    sortedPicks: sortedPicks,
+    selectHintPair: selectHintPair,
+    capPolicy: function () { return CAP_POLICY; },
     fmtRemain: fmtRemain,
     spentKey: spentKey,
     promptPair: promptPair,

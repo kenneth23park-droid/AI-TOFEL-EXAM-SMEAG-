@@ -26,13 +26,19 @@
   var DEFAULT_ORDER = ['listening', 'speaking', 'reading', 'writing'];
 
   /* 합성 화면의 고정 id (config directions[].id → screen id). */
-  var FIXED_ID = { adjustVolume: 'intro.volume', hardwareCheck: 'speaking.hardware', submitConfirm: 'review.submit' };
+  var FIXED_ID = { adjustVolume: 'intro.volume', adjustMic: 'intro.microphone',
+                   hardwareCheck: 'speaking.hardware', submitConfirm: 'review.submit' };
 
   /* 안내 화면 문구. EN 기본 / KO 토글 (F5 — 한국어 하드코딩 금지가 아니라 EN·KO 동시 작성). */
   var DIR_COPY = {
     adjustVolume: {
       bodyEn: 'Use the volume control to set a comfortable listening level. You may adjust the volume at any time during the test.',
       bodyKo: '볼륨 조절 버튼으로 편안한 음량을 설정하세요. 시험 중에는 언제든지 볼륨을 조절할 수 있습니다.'
+    },
+    adjustMic: {
+      // 문구는 렌더러가 레퍼런스대로 그린다. 본문은 비워 두고 제목만 config 의 label 을 쓴다.
+      bodyEn: '',
+      bodyKo: ''
     },
     listeningDirections: {
       bodyEn: 'In this section you will listen to short responses, conversations, announcements and academic talks. Each audio plays once. Answer each question before the time for that question runs out.',

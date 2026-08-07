@@ -188,44 +188,107 @@
 
   /* ── instruction ────────────────────────────────────────── */
 
-  /* Adjusting the Volume (녹화 02:30 확정) — 슬라이더 + Play Test Audio. */
+  /* Adjusting the Volume (녹화 02:30 확정).
+   * 관찰값: 화면 안에 슬라이더가 없다 — 음량은 상단바 Volume 팝오버에서만 조절한다.
+   * 화면은 안내문 3단락 + 스피커 아이콘 행 + 가운데 Play Test Audio 버튼으로 구성된다. */
+
+  // 문장 중간의 "Volume" 만 굵게. bi() 는 통문장만 다루므로 여기서 조립한다.
+  function volumeCopy() {
+    var lines = [
+      { en: ['To adjust the volume, select the ', 'Volume', ' icon at the top of the screen. The volume control will appear. Move the volume indicator to the left or the right to change the volume.'],
+        ko: ['음량을 조절하려면 화면 상단의 ', 'Volume', ' 아이콘을 선택하세요. 음량 조절 막대가 나타납니다. 표시를 좌우로 움직여 음량을 바꿉니다.'] },
+      { en: ['To close the volume control, select the ', 'Volume', ' icon again.'],
+        ko: ['음량 조절을 닫으려면 ', 'Volume', ' 아이콘을 다시 선택하세요.'] },
+      { en: ['You will be able to change the volume during the test if you need to.'],
+        ko: ['시험 중에도 필요하면 언제든지 음량을 바꿀 수 있습니다.'] }
+    ];
+    var frag = doc.createDocumentFragment();
+    for (var i = 0; i < lines.length; i++) {
+      var p = el('p', 'instr-body instr-vol-para');
+      p.appendChild(langSpan('en', lines[i].en));
+      p.appendChild(langSpan('ko', lines[i].ko));
+      frag.appendChild(p);
+    }
+    return frag;
+  }
+
+  // parts 가 [평문, 강조, 평문, …] 순서로 번갈아 오는 한 언어분(分) 스팬.
+  function langSpan(lang, parts) {
+    var s = el('span');
+    s.setAttribute(lang === 'ko' ? 'data-ko' : 'data-en', '');
+    for (var i = 0; i < parts.length; i++) {
+      if (i % 2 === 1) {
+        var b = el('b');
+        b.textContent = parts[i];
+        s.appendChild(b);
+      } else {
+        s.appendChild(doc.createTextNode(parts[i]));
+      }
+    }
+    return s;
+  }
+
+  function speakerIcon(cls) {
+    var svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.8');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+    if (cls) svg.setAttribute('class', cls);
+    var d = ['M4 9v6h4l5 4V5L8 9H4z', 'M17 9a4 4 0 0 1 0 6', 'M19.5 6.5a8 8 0 0 1 0 11'];
+    for (var i = 0; i < d.length; i++) {
+      var p = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', d[i]);
+      svg.appendChild(p);
+    }
+    return svg;
+  }
+
+  function playIcon() {
+    var svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.8');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+    var p = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', 'M8 5.5v13l11-6.5-11-6.5z');
+    svg.appendChild(p);
+    return svg;
+  }
+
   function volumePanel() {
     var box = el('div', 'instr-volume');
     var vol = readVolume();
 
-    var lab = bi('label', 'Volume', '음량');
-    lab.className = 'instr-vol-label';
-    box.appendChild(lab);
-
-    var row = el('div', 'instr-vol-row');
-    var range = el('input', 'instr-vol-range');
-    range.type = 'range';
-    range.min = '0';
-    range.max = '100';
-    range.step = '1';
-    range.value = String(Math.round(vol * 100));
-    range.id = 'instr-volume-range';
-    range.setAttribute('aria-label', 'Volume');
-
-    var pct = el('span', 'instr-vol-pct');
-    pct.textContent = Math.round(vol * 100) + '%';
-
-    range.oninput = function () {
-      var v = (parseInt(range.value, 10) || 0) / 100;
-      pct.textContent = Math.round(v * 100) + '%';
-      applyVolume(v);
+    /* 아이콘 행 — 아이콘 자체가 상단바 Volume 팝오버를 여는 버튼이다
+     * (안내문의 "select the Volume icon" 을 화면 안에서도 그대로 실행할 수 있게). */
+    var row = el('div', 'instr-vol-note');
+    var iconBtn = el('button', 'instr-vol-icon');
+    iconBtn.type = 'button';
+    iconBtn.setAttribute('aria-label', 'Volume');
+    iconBtn.appendChild(speakerIcon());
+    iconBtn.onclick = function () {
+      var tb = doc.getElementById('btn-volume');
+      if (tb && !tb.hidden) tb.click();
     };
+    row.appendChild(iconBtn);
 
-    row.appendChild(range);
-    row.appendChild(pct);
+    var note = bi('p', 'You now have the option to adjust the volume.', '이제 음량을 조절할 수 있습니다.');
+    note.className = 'instr-vol-note-text';
+    row.appendChild(note);
     box.appendChild(row);
 
-    var play = button('exam-btn instr-testaudio', 'Play Test Audio', '테스트 음향 재생');
+    var actions = el('div', 'instr-vol-play-row');
+    var play = button('exam-btn primary instr-testaudio', 'Play Test Audio', '테스트 음향 재생');
+    play.insertBefore(playIcon(), play.firstChild);
     var status = el('p', 'instr-vol-status muted');
-    biInto(status, 'You can play the test sound as many times as you like.',
-      '테스트 음향은 원하는 만큼 반복해서 들을 수 있습니다.');
     play.onclick = function () {
-      var v = (parseInt(range.value, 10) || 0) / 100;
+      var v = readVolume();
       applyVolume(v);
       play.disabled = true;
       playTestTone(v, function (err) {
@@ -237,7 +300,8 @@
         }
       });
     };
-    box.appendChild(play);
+    actions.appendChild(play);
+    box.appendChild(actions);
     box.appendChild(status);
 
     applyVolume(vol);
@@ -335,6 +399,177 @@
     return wrap;
   }
 
+  /* ── Reading Section Directions ─────────────────────────
+   * 레퍼런스 화면 구성: 제목 "Reading Section" · 안내 문단 · 2열 표(유형/설명) ·
+   * 모듈별 제한 시간 문단. 표의 유형과 문항 수는 콘텐츠 팩에서, 시간은 timing config
+   * 에서 유도한다 — 상수로 박지 않는다(F11: 세트가 바뀌면 화면도 따라 바뀐다).
+   */
+  var READING_TASKS = [
+    { key: 'cloze', en: 'Complete the Words', ko: '단어 완성',
+      descEn: 'Fill in the missing letters in a paragraph.',
+      descKo: '지문에서 빠진 철자를 채웁니다.' },
+    { key: 'daily', en: 'Read in Daily Life', ko: '실생활 읽기',
+      descEn: 'Answer questions about everyday reading material.',
+      descKo: '일상에서 접하는 글에 대한 문항에 답합니다.' },
+    { key: 'academic', en: 'Read an Academic Passage', ko: '학술 지문 읽기',
+      descEn: 'Answer questions about academic passages.',
+      descKo: '학술 지문에 대한 문항에 답합니다.' }
+  ];
+
+  /* 블록 하나가 어느 유형에 속하는지. passage 는 지시문("Read a passage." vs
+   * "Read an email." 등)이 학술/실생활을 가른다 — 콘텐츠 팩에 유형 필드가 없다. */
+  function readingTaskKey(block) {
+    if (!block) return null;
+    var kind = String(block.kind || '');
+    if (kind === 'cloze') return 'cloze';
+    if (kind === 'chat') return 'daily';
+    if (kind !== 'passage') return null;
+    return /\bpassage\b/i.test(String(block.instruction || '')) ? 'academic' : 'daily';
+  }
+
+  /* 표에 넣을 유형 목록. 콘텐츠를 못 읽으면 3종 전부를 보여준다(레퍼런스 기본형). */
+  function readingRows() {
+    var set = root.SG_CONTENT_PACK || root.SMEAG_SET1;
+    var seen = {}, any = false, i, j, k;
+    if (set && set.sections) {
+      for (i = 0; i < set.sections.length; i++) {
+        if (set.sections[i].id !== 'reading') continue;
+        var mods = set.sections[i].modules || [];
+        for (j = 0; j < mods.length; j++) {
+          var blocks = mods[j].blocks || [];
+          for (k = 0; k < blocks.length; k++) {
+            var key = readingTaskKey(blocks[k]);
+            if (key) { seen[key] = true; any = true; }
+          }
+        }
+      }
+    }
+    var out = [];
+    for (i = 0; i < READING_TASKS.length; i++) {
+      if (!any || seen[READING_TASKS[i].key]) out.push(READING_TASKS[i]);
+    }
+    return out;
+  }
+
+  function readingQuestionCount() {
+    var counts = questionCountsByModule('reading'), total = 0;
+    for (var id in counts) { if (counts.hasOwnProperty(id)) total += counts[id]; }
+    return total;
+  }
+
+  function readingTimingConfig() {
+    var t = null;
+    if (root.SG_RUNTIME && typeof root.SG_RUNTIME.timing === 'function') t = root.SG_RUNTIME.timing();
+    if (!t && root.SG_TIMING && typeof root.SG_TIMING.config === 'function') t = root.SG_TIMING.config();
+    if (!t && root.SG_TIMING && root.SG_TIMING.FALLBACK) t = root.SG_TIMING.FALLBACK;
+    return (t && t.sections && t.sections.reading) || null;
+  }
+
+  var NUM_WORD_EN = ['zero', 'one', 'two', 'three', 'four', 'five', 'six'];
+  var NUM_WORD_KO = ['0', '한', '두', '세', '네', '다섯', '여섯'];
+
+  /* 초 → "20 minutes and 30 seconds" / "9 minutes" / "45 seconds". */
+  function durationWords(sec) {
+    var s = Math.max(0, Math.round(sec || 0));
+    var m = Math.floor(s / 60), r = s % 60;
+    var en = [], ko = [];
+    if (m) { en.push(m + (m === 1 ? ' minute' : ' minutes')); ko.push(m + '분'); }
+    if (r || !m) { en.push(r + (r === 1 ? ' second' : ' seconds')); ko.push(r + '초'); }
+    return { en: en.join(' and '), ko: ko.join(' ') };
+  }
+
+  /* 숫자를 한국어로 읽었을 때의 받침에 맞는 주제격 조사. 1(일)·3(삼)·6(육)·7(칠)·8(팔) → 은. */
+  function koTopicParticle(n) {
+    return ({ 1: '은', 3: '은', 6: '은', 7: '은', 8: '은' })[n] || '는';
+  }
+
+  /* 모듈별 제한 시간 문단. 모듈 수에 관계없이 문장을 조립한다. */
+  function readingTimeParagraph() {
+    var sec = readingTimingConfig();
+    var mods = (sec && sec.modules) || [];
+    var parts = [], i;
+    for (i = 0; i < mods.length; i++) {
+      var alloc = mods[i].allocatedSec;
+      if (typeof alloc !== 'number' || !(alloc > 0)) continue;
+      var d = durationWords(alloc);
+      parts.push({ en: d.en, ko: d.ko, no: parts.length + 1 });
+    }
+    if (!parts.length) return null;
+
+    /* [평문, 강조, 평문, …] 교대 배열 — langSpan 의 입력 형식이다.
+       EN: "You will have 20 minutes to complete Module 1 and 9 minutes to complete Module 2."
+       KO: "모듈 1은 20분, 모듈 2는 9분 동안 풉니다." (한국어는 어순이 달라 문형을 따로 짠다) */
+    var en = ['You will have '], ko = [];
+    for (i = 0; i < parts.length; i++) {
+      var last = (i === parts.length - 1);
+      var tail = last ? '. ' : (i === parts.length - 2 ? ' and ' : ', ');
+      en.push(parts[i].en);
+      en.push(' to complete Module ' + parts[i].no + tail);
+      ko.push((i ? ', ' : '') + '모듈 ' + parts[i].no + koTopicParticle(parts[i].no) + ' ');
+      ko.push(parts[i].ko);
+    }
+    ko.push(' 동안 풉니다. ');
+    /* 마지막 원소는 평문 자리다 — 'Select ' 를 새로 push 하면 강조 자리로 밀려
+       Begin 과 함께 굵어진다. 이어 붙여서 교대 순서를 지킨다. */
+    en[en.length - 1] += 'Select ';
+    en.push('Begin');
+    en.push(' when you are ready to start.');
+    ko[ko.length - 1] += '준비되면 ';
+    ko.push('Begin');
+    ko.push(' 을 선택하세요.');
+
+    var p = el('p', 'instr-body instr-dir-time');
+    p.appendChild(langSpan('en', en));
+    p.appendChild(langSpan('ko', ko));
+    return p;
+  }
+
+  /* 안내 문단 — 문항 수와 유형 수를 실제 콘텐츠에서 읽어 넣는다. */
+  function readingIntroParagraph(rows) {
+    var n = readingQuestionCount();
+    var kinds = rows.length;
+    var enCount = n > 0 ? ('answer ' + n + ' questions to demonstrate') : 'answer questions that show';
+    var koCount = n > 0 ? (n + '문항을 풀며') : '문항을 풀며';
+    var enKinds = NUM_WORD_EN[kinds] || String(kinds);
+    var koKinds = NUM_WORD_KO[kinds] || String(kinds);
+    var p = bi('p',
+      'In the reading section, you will ' + enCount +
+        ' how well you understand academic and non-academic texts in English. There are ' +
+        enKinds + ' types of tasks.',
+      '리딩 섹션에서는 ' + koCount +
+        ' 영어로 된 학술·비학술 지문을 얼마나 잘 이해하는지 보여 줍니다. 과제 유형은 ' +
+        koKinds + ' 가지입니다.');
+    p.className = 'instr-body';
+    return p;
+  }
+
+  function readingTable(rows) {
+    if (!rows || !rows.length) return null;
+    var wrap = el('div', 'instr-table-wrap');
+    var t = el('table', 'instr-table');
+    var thead = el('thead');
+    var tr = el('tr');
+    var heads = [['Type of Task', '과제 유형'], ['Description', '설명']];
+    for (var h = 0; h < heads.length; h++) {
+      var th = el('th');
+      biInto(th, heads[h][0], heads[h][1]);
+      tr.appendChild(th);
+    }
+    thead.appendChild(tr);
+    t.appendChild(thead);
+
+    var tbody = el('tbody');
+    for (var i = 0; i < rows.length; i++) {
+      var row = el('tr');
+      var c1 = el('td'); biInto(c1, rows[i].en, rows[i].ko); row.appendChild(c1);
+      var c2 = el('td'); biInto(c2, rows[i].descEn, rows[i].descKo); row.appendChild(c2);
+      tbody.appendChild(row);
+    }
+    t.appendChild(tbody);
+    wrap.appendChild(t);
+    return wrap;
+  }
+
   /* Directions 화면의 introAudio(FR16) — 1회 재생. 소진 관리는 listening 렌더러의
    * 공용 유닛(window.SG_LISTEN.makeAudioUnit)에 위임한다. 없으면 배지로 degrade. */
   function introAudioNode(screen, ctx) {
@@ -356,18 +591,45 @@
     return b;
   }
 
-  function renderInstruction(screen, ctx) {
-    var wrap = card();
-    wrap.appendChild(titleNode(screen));
+  function isDirections(screen) {
+    return String(screen && screen.id).indexOf('.directions') >= 0;
+  }
 
-    var body = bodyNode(screen);
-    if (body) wrap.appendChild(body);
+  function renderInstruction(screen, ctx) {
+    var isVolume = screen.id === fixedId('adjustVolume', 'intro.volume');
+    var isReadingDir = screen.section === 'reading' && isDirections(screen);
+    var wrap = card();
+    if (isVolume) wrap.className += ' instr-volume-screen';
+    if (isReadingDir) wrap.className += ' instr-directions';
+    /* 레퍼런스 리딩 안내 화면의 제목은 "Reading Section Directions" 가 아니라
+       "Reading Section" 이다. config 의 label 을 화면에서만 줄여 쓴다. */
+    if (isReadingDir) wrap.appendChild(titleNode(screen, 'Reading Section', '리딩 섹션'));
+    else wrap.appendChild(titleNode(screen));
+
+    // 볼륨 화면은 제목 아래 구분선 + 전용 3단락 안내문을 쓴다(녹화 02:30).
+    if (isVolume) {
+      wrap.appendChild(el('div', 'instr-rule'));
+      wrap.appendChild(volumeCopy());
+    } else if (isReadingDir) {
+      var readingRowList = readingRows();
+      wrap.appendChild(readingIntroParagraph(readingRowList));
+      var readingTbl = readingTable(readingRowList);
+      if (readingTbl) wrap.appendChild(readingTbl);
+      var timePara = readingTimeParagraph();
+      if (timePara) wrap.appendChild(timePara);
+    } else {
+      var body = bodyNode(screen);
+      if (body) wrap.appendChild(body);
+    }
 
     var audioNode = introAudioNode(screen, ctx);
     if (audioNode) wrap.appendChild(audioNode);
 
-    if (screen.id === fixedId('adjustVolume', 'intro.volume')) {
+    if (isVolume) {
       wrap.appendChild(volumePanel());
+      // 진행은 상단바 Continue 로만 한다(관찰값 — 화면 안에 버튼이 없다).
+      if (screen.timer) warn('instruction screen "' + screen.id + '" unexpectedly carries a timer');
+      return wrap;
     }
 
     if (screen.section === 'speaking' && String(screen.id).indexOf('.directions') >= 0) {
@@ -670,6 +932,361 @@
     return wrap;
   }
 
+  /* ── Adjusting the Microphone (레퍼런스 test-nt 화면) ───── */
+
+  /* 레퍼런스 화면(en_test-nt) 관찰:
+   *   가운데 정렬 굵은 제목 → 가로 구분선 → 흰 카드.
+   *   카드는 2열이다. 좌측에 원형 RECORD 버튼, 우측에 안내 2문단 + 낭독 지문(회색 박스).
+   *   그 아래 칸이 나뉜 입력 레벨 미터와 Too Quiet / Good / Too Loud 라벨.
+   *   우하단에 "Skip microphone check".
+   * ETS 원본과 동일하게 Record 를 누르면 카운트다운 후 정해진 시간 동안 녹음하고,
+   * 끝나면 피크 레벨로 판정한다. 판정 전에는 상단바 Continue 를 잠근다(AC4 와 동일 규칙).
+   */
+  var MIC_READY_SEC = 3;      // "A timer will count down until the system is ready to record."
+  var MIC_RECORD_SEC = 10;    // 낭독 지문 1회 분량
+  var MIC_SEGMENTS = 24;
+  var MIC_QUIET_PEAK = 0.10;  // 이하면 Too Quiet
+  var MIC_LOUD_PEAK = 0.80;   // 이상이면 Too Loud
+
+  var MIC_SAMPLE_EN = 'There are several reasons why I would prefer to live in a large city. ' +
+    'Some of the greatest advantages would include the number of job opportunities and career options, ' +
+    'public transportation, greater diversity, and a wealth of entertainment. Also, large cities typically ' +
+    'have a great deal to offer in terms of history, art and culture.';
+  var MIC_SAMPLE_KO = '제가 대도시에 살고 싶은 이유는 여러 가지입니다. 가장 큰 장점으로는 많은 일자리와 다양한 진로, ' +
+    '편리한 대중교통, 높은 다양성, 그리고 풍부한 볼거리를 들 수 있습니다. 또한 대도시는 역사와 예술, 문화 면에서도 ' +
+    '누릴 것이 아주 많습니다.';
+
+  /* 피크 레벨 → 판정. 순수 함수라 셀프테스트에서 직접 검증한다. */
+  function micVerdict(peak) {
+    if (!(peak > 0)) return 'silent';
+    if (peak < MIC_QUIET_PEAK) return 'quiet';
+    if (peak > MIC_LOUD_PEAK) return 'loud';
+    return 'good';
+  }
+
+  function micIcon() {
+    var NS = 'http://www.w3.org/2000/svg';
+    // 스텁 DOM(노드 테스트)에는 createElementNS 가 없다 — 아이콘은 장식이므로 조용히 뺀다.
+    if (!doc || typeof doc.createElementNS !== 'function') return el('span', 'instr-mic-icon');
+    var svg = doc.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('class', 'instr-mic-icon');
+    svg.setAttribute('aria-hidden', 'true');
+    var body = doc.createElementNS(NS, 'path');
+    body.setAttribute('d', 'M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z');
+    var arc = doc.createElementNS(NS, 'path');
+    arc.setAttribute('d', 'M5 11a7 7 0 0 0 14 0M12 18v3');
+    arc.setAttribute('fill', 'none');
+    arc.setAttribute('stroke', 'currentColor');
+    arc.setAttribute('stroke-width', '2');
+    arc.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(body);
+    svg.appendChild(arc);
+    return svg;
+  }
+
+  /* 칸이 나뉜 레벨 미터. setLevel(0..1) 로 채운 칸 수를 바꾼다. */
+  function segmentMeter() {
+    var box = el('div', 'instr-seg-wrap');
+    var strip = el('div', 'instr-seg');
+    var cells = [];
+    for (var i = 0; i < MIC_SEGMENTS; i++) {
+      var c = el('span', 'instr-seg-cell');
+      strip.appendChild(c);
+      cells.push(c);
+    }
+    box.appendChild(strip);
+
+    var labels = el('div', 'instr-seg-labels');
+    var l1 = bi('span', 'Too Quiet', '너무 작음');
+    var l2 = bi('span', 'Good', '적절함');
+    var l3 = bi('span', 'Too Loud', '너무 큼');
+    labels.appendChild(l1); labels.appendChild(l2); labels.appendChild(l3);
+    box.appendChild(labels);
+
+    box.setLevel = function (v) {
+      var lvl = typeof v === 'number' && v > 0 ? v : 0;
+      var on = Math.min(MIC_SEGMENTS, Math.round(lvl * MIC_SEGMENTS));
+      for (var k = 0; k < MIC_SEGMENTS; k++) {
+        var zone = k < MIC_SEGMENTS * MIC_QUIET_PEAK ? 'is-quiet'
+          : (k >= MIC_SEGMENTS * MIC_LOUD_PEAK ? 'is-loud' : 'is-good');
+        cells[k].className = 'instr-seg-cell' + (k < on ? ' is-on ' + zone : '');
+      }
+    };
+    box.setLevel(0);
+    return box;
+  }
+
+  function renderMicAdjust(screen, ctx) {
+    var c = copyOf(screen);
+    var wrap = card();
+    wrap.className = 'instr-card instr-micscreen';
+
+    var h1 = bi('h1', c.titleEn || 'Adjusting the Microphone', c.titleKo || '마이크 조절');
+    h1.className = 'instr-mic-h1';
+    wrap.appendChild(h1);
+    wrap.appendChild(el('div', 'instr-rule'));
+
+    var panel = el('div', 'instr-mic');
+
+    /* 좌측 — 원형 RECORD 버튼 */
+    var left = el('div', 'instr-mic-left');
+    var rec = el('button', 'instr-mic-record');
+    rec.type = 'button';
+    rec.appendChild(micIcon());
+    var recLabel = el('span', 'instr-mic-record-label');
+    biInto(recLabel, 'RECORD', '녹음');
+    rec.appendChild(recLabel);
+    left.appendChild(rec);
+    panel.appendChild(left);
+
+    /* 우측 — 안내 2문단 + 낭독 지문 */
+    var right = el('div', 'instr-mic-copy');
+    var p1 = bi('p', "Select the 'Record' button. A timer will count down until the system is ready to record.",
+      "'Record' 버튼을 선택하세요. 녹음이 준비될 때까지 타이머가 카운트다운됩니다.");
+    var p2 = bi('p', 'To check your microphone level, you will record the following paragraph using your normal tone and volume.',
+      '마이크 입력 수준을 확인하기 위해 아래 지문을 평소 말투와 목소리 크기로 읽어 녹음합니다.');
+    right.appendChild(p1);
+    right.appendChild(p2);
+    var sample = bi('p', MIC_SAMPLE_EN, MIC_SAMPLE_KO);
+    sample.className = 'instr-mic-sample';
+    right.appendChild(sample);
+    panel.appendChild(right);
+    wrap.appendChild(panel);
+
+    /* 레벨 미터 */
+    var meter = segmentMeter();
+    wrap.appendChild(meter);
+
+    var status = el('p', 'instr-hw-status instr-mic-status');
+    biInto(status, 'Select Record when you are ready.', '준비되면 Record 를 선택하세요.');
+    wrap.appendChild(status);
+
+    /* 액션 — 판정 전에는 Skip 만, 통과하면 Continue 가 붙는다 */
+    var actions = el('div', 'instr-actions instr-mic-actions');
+    var cont = ctaNode(screen, ctx);
+    cont.style.display = 'none';
+    var skip = button('exam-btn instr-mic-skip', 'Skip microphone check', '마이크 점검 건너뛰기');
+    skip.onclick = function () {
+      var st = store();
+      if (st && typeof st.pushEvent === 'function') st.pushEvent('mic_skipped', screen.id, {});
+      if (ctx && ctx.engine && typeof ctx.engine.next === 'function') ctx.engine.next('manual');
+    };
+    actions.appendChild(cont);
+    actions.appendChild(skip);
+    wrap.appendChild(actions);
+
+    lockAdvance(true);
+
+    var state = {
+      alive: true, stream: null, audioCtx: null, raf: null,
+      tick: null, phase: 'idle', peak: 0, adopted: false
+    };
+
+    function setStatus(en, ko, cls) {
+      while (status.firstChild) status.removeChild(status.firstChild);
+      status.className = 'instr-hw-status instr-mic-status' + (cls ? ' ' + cls : '');
+      biInto(status, en, ko);
+    }
+
+    function setRecLabel(en, ko) {
+      while (recLabel.firstChild) recLabel.removeChild(recLabel.firstChild);
+      biInto(recLabel, en, ko);
+    }
+
+    function clearTick() {
+      if (state.tick !== null) { try { root.clearInterval(state.tick); } catch (e) {} }
+      state.tick = null;
+    }
+
+    function cleanup() {
+      state.alive = false;
+      clearTick();
+      if (state.raf !== null && root.cancelAnimationFrame) {
+        try { root.cancelAnimationFrame(state.raf); } catch (e) {}
+      }
+      state.raf = null;
+      if (state.audioCtx) { try { state.audioCtx.close(); } catch (e2) {} state.audioCtx = null; }
+      // 스트림은 SG_RECORDER 가 물려받았으면 살려 둔다 — 스피킹에서 권한을 다시 묻지 않기 위해서다.
+      if (state.stream && !state.adopted) {
+        var tr = state.stream.getTracks ? state.stream.getTracks() : [];
+        for (var i = 0; i < tr.length; i++) { try { tr[i].stop(); } catch (e3) {} }
+      }
+      state.stream = null;
+      lockAdvance(false);
+    }
+    onLeave(ctx, cleanup);
+
+    function startMeter(stream) {
+      var Ctx = root.AudioContext || root.webkitAudioContext;
+      if (!Ctx) return;
+      try {
+        var ac = new Ctx();
+        state.audioCtx = ac;
+        var analyser = ac.createAnalyser();
+        analyser.fftSize = 1024;
+        ac.createMediaStreamSource(stream).connect(analyser);
+        var buf = new Uint8Array(analyser.fftSize);
+        var loop = function () {
+          if (!state.alive) return;
+          analyser.getByteTimeDomainData(buf);
+          var sum = 0, v;
+          for (var i = 0; i < buf.length; i++) { v = (buf[i] - 128) / 128; sum += v * v; }
+          var rms = Math.sqrt(sum / buf.length);
+          var lvl = Math.min(1, rms * 3.2);
+          if (state.phase === 'recording') {
+            if (lvl > state.peak) state.peak = lvl;
+            meter.setLevel(lvl);
+          } else {
+            meter.setLevel(0);
+          }
+          if (root.requestAnimationFrame) state.raf = root.requestAnimationFrame(loop);
+        };
+        loop();
+      } catch (e) { warn('level meter unavailable', e); }
+    }
+
+    function finish() {
+      state.phase = 'done';
+      clearTick();
+      meter.setLevel(state.peak);
+      rec.className = 'instr-mic-record';
+      setRecLabel('RE-RECORD', '다시 녹음');
+      rec.disabled = false;
+      var verdict = micVerdict(state.peak);
+      var st = store();
+      if (st && typeof st.pushEvent === 'function') {
+        st.pushEvent('mic_check_done', screen.id, { peak: Math.round(state.peak * 100) / 100, verdict: verdict });
+      }
+      if (verdict === 'good') {
+        setStatus('Your microphone level is good. Select Continue to go on.',
+          '마이크 입력 수준이 적절합니다. 계속하려면 Continue 를 선택하세요.', 'is-ok');
+      } else if (verdict === 'quiet') {
+        setStatus('Your voice was too quiet. Move closer to the microphone or raise your input level, then record again.',
+          '목소리가 너무 작습니다. 마이크에 더 가까이 가거나 입력 감도를 올린 뒤 다시 녹음하세요.', 'is-error');
+      } else if (verdict === 'loud') {
+        setStatus('Your voice was too loud. Move away from the microphone or lower your input level, then record again.',
+          '목소리가 너무 큽니다. 마이크에서 조금 떨어지거나 입력 감도를 낮춘 뒤 다시 녹음하세요.', 'is-error');
+      } else {
+        setStatus('No sound was detected. Check that the right microphone is selected, then record again.',
+          '소리가 감지되지 않았습니다. 올바른 마이크가 선택되어 있는지 확인한 뒤 다시 녹음하세요.', 'is-error');
+      }
+      // 판정과 무관하게 한 번 녹음했으면 진행은 열어 준다(FR14 — 시험을 멈추지 않는다).
+      cont.style.display = '';
+      cont.disabled = false;
+      lockAdvance(false);
+    }
+
+    function runRecording() {
+      state.phase = 'recording';
+      state.peak = 0;
+      rec.className = 'instr-mic-record is-recording';
+      rec.disabled = true;
+      var left2 = MIC_RECORD_SEC;
+      setRecLabel('RECORDING', '녹음 중');
+      setStatus('Read the paragraph aloud. ' + left2 + ' seconds remaining.',
+        '지문을 소리 내어 읽으세요. ' + left2 + '초 남았습니다.');
+      state.tick = root.setInterval(function () {
+        if (!state.alive) { clearTick(); return; }
+        left2 -= 1;
+        if (left2 <= 0) { finish(); return; }
+        setStatus('Read the paragraph aloud. ' + left2 + ' seconds remaining.',
+          '지문을 소리 내어 읽으세요. ' + left2 + '초 남았습니다.');
+      }, 1000);
+    }
+
+    function runCountdown() {
+      state.phase = 'countdown';
+      rec.disabled = true;
+      rec.className = 'instr-mic-record is-arming';
+      var n = MIC_READY_SEC;
+      setRecLabel(String(n), String(n));
+      setStatus('Get ready — recording starts in ' + n + '…', '준비하세요 — ' + n + '초 후 녹음이 시작됩니다…');
+      state.tick = root.setInterval(function () {
+        if (!state.alive) { clearTick(); return; }
+        n -= 1;
+        if (n <= 0) { clearTick(); runRecording(); return; }
+        setRecLabel(String(n), String(n));
+        setStatus('Get ready — recording starts in ' + n + '…', '준비하세요 — ' + n + '초 후 녹음이 시작됩니다…');
+      }, 1000);
+    }
+
+    function unavailable(en, ko) {
+      setStatus(en, ko, 'is-error');
+      rec.disabled = true;
+      setRecLabel('RECORD', '녹음');
+      rec.className = 'instr-mic-record is-disabled';
+      // 마이크가 없어도 시험은 계속된다 — Skip 만 남기고 상단바를 푼다.
+      lockAdvance(false);
+    }
+
+    function ensureStream(then) {
+      if (state.stream) { then(state.stream); return; }
+      // 이미 SG_RECORDER 가 스트림을 쥐고 있으면 권한을 두 번 묻지 않는다.
+      var R2 = root.SG_RECORDER;
+      var live = R2 && typeof R2.getStream === 'function' ? R2.getStream() : null;
+      if (live) {
+        state.stream = live;
+        state.adopted = true;
+        startMeter(live);
+        then(live);
+        return;
+      }
+      var nav = root.navigator;
+      if (!nav || !nav.mediaDevices || typeof nav.mediaDevices.getUserMedia !== 'function') {
+        unavailable('This browser cannot access a microphone. You can continue, but Speaking answers will not be recorded.',
+          '이 브라우저는 마이크에 접근할 수 없습니다. 계속 진행할 수 있으나 스피킹 답변은 녹음되지 않습니다.');
+        return;
+      }
+      setStatus('Requesting microphone access…', '마이크 권한을 요청하는 중…');
+      rec.disabled = true;
+      var p;
+      try { p = nav.mediaDevices.getUserMedia({ audio: true }); } catch (e) { p = null; }
+      if (!p || !p.then) {
+        unavailable('Microphone request failed.', '마이크 요청에 실패했습니다.');
+        return;
+      }
+      p.then(function (stream) {
+        if (!state.alive) {
+          var tr = stream.getTracks ? stream.getTracks() : [];
+          for (var i = 0; i < tr.length; i++) { try { tr[i].stop(); } catch (e) {} }
+          return;
+        }
+        state.stream = stream;
+        if (R2 && typeof R2.adoptStream === 'function') { state.adopted = !!R2.adoptStream(stream); }
+        var st = store();
+        if (st && typeof st.pushEvent === 'function') st.pushEvent('mic_granted', screen.id, {});
+        startMeter(stream);
+        rec.disabled = false;
+        then(stream);
+      })['catch'](function (err) {
+        var name = err && err.name ? err.name : 'Error';
+        var denied = name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError';
+        rec.disabled = false;
+        rec.className = 'instr-mic-record';
+        setRecLabel('RECORD', '녹음');
+        if (denied) {
+          setStatus('Microphone access was blocked. Allow the microphone in your browser settings, then select Record again.',
+            '마이크 접근이 차단되었습니다. 브라우저 설정에서 마이크를 허용한 뒤 Record 를 다시 선택하세요.', 'is-error');
+        } else {
+          setStatus('No microphone was found. Connect one and select Record again, or skip the check.',
+            '마이크를 찾지 못했습니다. 마이크를 연결한 뒤 Record 를 다시 선택하거나 점검을 건너뛰세요.', 'is-error');
+        }
+        lockAdvance(false);
+        var st2 = store();
+        if (st2 && typeof st2.pushEvent === 'function') st2.pushEvent('mic_denied', screen.id, { name: name });
+      });
+    }
+
+    rec.onclick = function () {
+      if (rec.disabled) return;
+      if (state.phase === 'countdown' || state.phase === 'recording') return;
+      ensureStream(function () { runCountdown(); });
+    };
+
+    return wrap;
+  }
+
   /* ── hardwareCheck ──────────────────────────────────────── */
 
   /* 상단바 Continue 를 잠근다(AC4: 권한 확보 전 Begin 비활성).
@@ -681,6 +1298,9 @@
   }
 
   function renderHardwareCheck(screen, ctx) {
+    // Adjusting the Microphone 은 같은 screenType 을 쓰지만 레퍼런스 레이아웃이 따로 있다.
+    if (screen && screen.id === fixedId('adjustMic', 'intro.microphone')) return renderMicAdjust(screen, ctx);
+
     var wrap = card();
     wrap.className = 'instr-card instr-hardware';
     wrap.appendChild(titleNode(screen, copyOf(screen).titleEn || 'Hardware Check', copyOf(screen).titleKo || '장치 점검'));
@@ -976,12 +1596,19 @@
     reviewSummary: reviewSummary,
     moduleEndCopy: moduleEndCopy,
     speakingRows: speakingRows,
+    readingTaskKey: readingTaskKey,
+    readingRows: readingRows,
+    readingQuestionCount: readingQuestionCount,
+    durationWords: durationWords,
     questionCountsByModule: questionCountsByModule,
     unitWords: unitWords,
+    micVerdict: micVerdict,
+    MIC_SAMPLE_EN: MIC_SAMPLE_EN,
     // 렌더 함수(셀프테스트에서 직접 호출)
     renderInstruction: renderInstruction,
     renderModuleEnd: renderModuleEnd,
     renderHardwareCheck: renderHardwareCheck,
+    renderMicAdjust: renderMicAdjust,
     renderReview: renderReview
   };
 })(typeof window !== 'undefined' ? window : this);

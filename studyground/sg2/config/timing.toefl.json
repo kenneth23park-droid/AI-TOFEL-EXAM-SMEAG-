@@ -240,6 +240,23 @@
       ]
     },
     {
+      "id": "adjustMic",
+      "label": "Adjusting the Microphone",
+      "labelKo": "마이크 조절",
+      "screenType": "hardwareCheck",
+      "insertAt": {
+        "position": "beforeSection",
+        "section": "listening",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "micTest",
+        "continue"
+      ]
+    },
+    {
       "id": "listeningDirections",
       "label": "Listening Section Directions",
       "screenType": "instruction",

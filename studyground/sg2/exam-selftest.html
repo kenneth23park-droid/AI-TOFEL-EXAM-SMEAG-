@@ -481,17 +481,22 @@ window.SG_SELFTEST = (function () {
     var timed = instr.filter(function (s) { return s.timer !== null; });
     T.eq('타이머 달린 instruction(=self-paced 위반)', timed.length, 0);
 
-    // Adjusting the Volume — 슬라이더 + Play Test Audio (녹화 02:30)
+    // Adjusting the Volume — 안내 3단락 + 아이콘 행 + Play Test Audio (녹화 02:30)
     var vol = byId('intro.volume');
     var volBox = T.caseBox('intro.volume · Adjusting the Volume');
     var volNode = T.renderInto(volBox, I.renderInstruction, vol, ctx);
     if (volNode) {
-      T.ok('볼륨 슬라이더 존재', !!volNode.querySelector('input[type="range"]'));
-      T.ok('Play Test Audio 버튼', textOf(volNode).indexOf('Play Test Audio') >= 0);
-      var range = volNode.querySelector('input[type="range"]');
-      range.value = '50';
-      range.dispatchEvent(new Event('input'));
-      T.eq('슬라이더 → localStorage(sg2_volume)', localStorage.getItem(I.VOLUME_KEY), '0.5');
+      var volText = textOf(volNode);
+      T.ok('화면 안 슬라이더 없음(조절은 상단바 팝오버)', !volNode.querySelector('input[type="range"]'));
+      T.ok('Play Test Audio 버튼', volText.indexOf('Play Test Audio') >= 0);
+      T.ok('Volume 아이콘 안내문', volText.indexOf('icon at the top of the screen') >= 0);
+      T.ok('아이콘 행 문구', volText.indexOf('You now have the option to adjust the volume.') >= 0);
+      T.ok('제목 아래 구분선', !!volNode.querySelector('.instr-rule'));
+      T.eq('안내 단락 3개', volNode.querySelectorAll('.instr-vol-para').length, 3);
+      T.ok('화면 안 Continue 없음(상단바만)', !volNode.querySelector('.instr-cta'));
+      // 저장된 음량이 렌더 시 그대로 적용된다.
+      I.applyVolume(0.5);
+      T.eq('applyVolume → localStorage(sg2_volume)', localStorage.getItem(I.VOLUME_KEY), '0.5');
       T.eq('readVolume() 재확인', I.readVolume(), 0.5);
       I.applyVolume(0.8);
     }
@@ -509,6 +514,34 @@ window.SG_SELFTEST = (function () {
       T.ok('응답시간(config taskTypes.responseSec)', st.indexOf('20 s') >= 0 && st.indexOf('45 s') >= 0);
       T.ok('표 행 수(유형 2 + 합계)', spkNode.querySelectorAll('.instr-table tbody tr').length === 3,
            String(spkNode.querySelectorAll('.instr-table tbody tr').length));
+    }
+
+    // Reading Directions — "Reading Section" + 유형 표(Type of Task / Description) + 모듈 시간
+    var rdg = byId('reading.directions');
+    var rdgBox = T.caseBox('reading.directions · 유형 표 + 모듈 시간');
+    var rdgNode = T.renderInto(rdgBox, I.renderInstruction, rdg, ctx);
+    if (rdgNode) {
+      var rt = textOf(rdgNode);
+      var rrows = I.readingRows();
+      T.ok('제목 "Reading Section"(Directions 아님)',
+           rt.indexOf('Reading Section') >= 0 && rt.indexOf('Reading Section Directions') < 0);
+      T.eq('유형 수(콘텐츠 산출)', rrows.length, 3);
+      T.ok('유형 라벨 3종',
+           rt.indexOf('Complete the Words') >= 0 && rt.indexOf('Read in Daily Life') >= 0 &&
+           rt.indexOf('Read an Academic Passage') >= 0);
+      T.ok('표 헤더', rt.indexOf('Type of Task') >= 0 && rt.indexOf('Description') >= 0);
+      T.eq('표 행 수(합계행 없음)', rdgNode.querySelectorAll('.instr-table tbody tr').length, rrows.length);
+      T.ok('문항 수(콘텐츠 산출)',
+           rt.indexOf('answer ' + I.readingQuestionCount() + ' questions') >= 0,
+           String(I.readingQuestionCount()));
+      T.ok('모듈 시간 문단(config allocatedSec)',
+           !!rdgNode.querySelector('.instr-dir-time') && rt.indexOf('to complete Module 1') >= 0);
+      T.eq('시간 표기 포맷', I.durationWords(1230).en, '20 minutes and 30 seconds');
+      T.eq('블록 → 유형 분류(passage/Read a passage.)',
+           I.readingTaskKey({ kind: 'passage', instruction: 'Read a passage.' }), 'academic');
+      T.eq('블록 → 유형 분류(passage/Read an email.)',
+           I.readingTaskKey({ kind: 'passage', instruction: 'Read an email.' }), 'daily');
+      T.eq('블록 → 유형 분류(cloze)', I.readingTaskKey({ kind: 'cloze' }), 'cloze');
     }
 
     // moduleEnd — End of Module {n} / Continue to Module {n+1}
@@ -548,6 +581,20 @@ window.SG_SELFTEST = (function () {
       radios[2].dispatchEvent(new Event('change'));
       var rec = window.SG_STORE.getAnswer(lq[0].questionIds[0]);
       T.ok('transfer 편집 → SG_STORE 저장', !!rec && rec.v === 2, rec ? String(rec.v) : 'none');
+    }
+
+    // Adjusting the Microphone (레퍼런스 test-nt 레이아웃)
+    var micBox = T.caseBox('intro.microphone · Adjusting the Microphone');
+    var micNode = T.renderInto(micBox, I.renderHardwareCheck, byId('intro.microphone'), ctx);
+    if (micNode) {
+      var mt = textOf(micNode);
+      T.ok('원형 RECORD 버튼', !!micNode.querySelector('.instr-mic-record'));
+      T.ok('낭독 지문', mt.indexOf('There are several reasons why I would prefer to live in a large city') >= 0);
+      T.eq('레벨 미터 칸 수', micNode.querySelectorAll('.instr-seg-cell').length, 24);
+      T.ok('Too Quiet / Good / Too Loud', mt.indexOf('Too Quiet') >= 0 && mt.indexOf('Too Loud') >= 0);
+      T.ok('Skip microphone check', mt.indexOf('Skip microphone check') >= 0);
+      T.ok('판정 함수', I.micVerdict(0.4) === 'good' && I.micVerdict(0.02) === 'quiet' &&
+        I.micVerdict(0.95) === 'loud' && I.micVerdict(0) === 'silent');
     }
 
     // hardwareCheck
@@ -657,6 +704,34 @@ window.SG_SELFTEST = (function () {
       var fAny = false;
       for (var n = 0; n < fi.length; n++) { if (fi[n].disabled) fAny = true; }
       T.ok('선택지 즉시 활성', !fAny);
+    }
+
+    /* 복수 선택(mcq-multi) — "Choose 2 answers."
+       콘텐츠 팩에 아직 이 유형이 없으므로 후속 문항 화면의 문항을 임시로 바꿔 그린다.
+       콘텐츠는 건드리지 않는다(렌더 직후 원상복구). */
+    var mHit = (window.SG_CONTENT_PACK || window.SMEAG_SET1).findQuestion(follow.questionIds[0]);
+    if (mHit && mHit.q && mHit.q.choices && mHit.q.choices.length >= 4) {
+      var mq = mHit.q, keep = { kind: mq.kind, selectCount: mq.selectCount, answers: mq.answers };
+      mq.kind = 'mcq-multi'; mq.selectCount = 2; mq.answers = [0, 3];
+      var mBox = T.caseBox(follow.id + ' · 복수 선택(Choose 2 answers)');
+      var mNode = T.renderInto(mBox, L.renderListeningQuestion, follow, ctx);
+      mq.kind = keep.kind; mq.selectCount = keep.selectCount; mq.answers = keep.answers;
+      if (mNode) {
+        var mi = mNode.querySelectorAll('input[type="checkbox"]');
+        T.eq('체크박스 4개', mi.length, 4);
+        T.ok('라디오 없음', mNode.querySelectorAll('input[type="radio"]').length === 0);
+        T.ok('선택 개수 힌트', /Choose 2 answers/.test(textOf(mNode.querySelector('.lst-selecthint'))));
+        mi[0].checked = true; mi[0].dispatchEvent(new Event('change'));
+        mi[3].checked = true; mi[3].dispatchEvent(new Event('change'));
+        var mrec = window.SG_STORE.getAnswer(follow.questionIds[0]);
+        T.ok('배열로 저장', !!mrec && String(mrec.v) === '0,3', mrec ? String(mrec.v) : 'none');
+        // CAP_POLICY 'replace' — 상한에서도 전부 클릭 가능하고, 먼저 고른 답이 밀려난다.
+        T.eq('상한 정책', L.capPolicy(), 'replace');
+        T.ok('상한에서도 잠기지 않음', !mi[1].disabled && !mi[2].disabled);
+        mi[1].checked = true; mi[1].dispatchEvent(new Event('change'));
+        var mrec2 = window.SG_STORE.getAnswer(follow.questionIds[0]);
+        T.ok('먼저 고른 답이 자동 교체', !!mrec2 && String(mrec2.v) === '1,3', mrec2 ? String(mrec2.v) : 'none');
+      }
     }
 
     // 문항 타이머는 question scope 20초, 만료 시 자동 전환

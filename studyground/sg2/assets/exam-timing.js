@@ -119,6 +119,7 @@
     },
     "directions": [
       {"id": "adjustVolume", "label": "Adjusting the Volume", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["playTestAudio", "volume", "continue"]},
+      {"id": "adjustMic", "label": "Adjusting the Microphone", "labelKo": "마이크 조절", "screenType": "hardwareCheck", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["micTest", "continue"]},
       {"id": "listeningDirections", "label": "Listening Section Directions", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["begin"]},
       {"id": "moduleEnd.listening", "label": "End of Module", "screenType": "moduleEnd", "insertAt": {"position": "betweenModules", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["continue"]},
       {"id": "hardwareCheck", "label": "Hardware Check", "screenType": "hardwareCheck", "insertAt": {"position": "beforeSection", "section": "speaking", "module": null}, "maxSec": null, "advance": "manual", "controls": ["micTest", "speakerTest", "continue"]},
@@ -236,6 +237,7 @@
     },
     "directions": [
       {"id": "adjustVolume", "label": "Adjusting the Volume", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["playTestAudio", "volume", "continue"]},
+      {"id": "adjustMic", "label": "Adjusting the Microphone", "labelKo": "마이크 조절", "screenType": "hardwareCheck", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["micTest", "continue"]},
       {"id": "listeningDirections", "label": "Listening Test Instructions", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["begin"]},
       {"id": "readingDirections", "label": "Reading Test Instructions", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "reading", "module": null}, "maxSec": null, "advance": "manual", "controls": ["begin"]},
       {"id": "writingDirections", "label": "Writing Test Instructions", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "writing", "module": null}, "maxSec": null, "advance": "manual", "controls": ["begin"]},

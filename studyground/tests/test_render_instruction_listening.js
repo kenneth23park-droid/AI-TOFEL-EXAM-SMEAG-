@@ -28,6 +28,11 @@ function makeNode(tag) {
     disabled: false,
     firstChild: null,
     appendChild: function (c) { c.parentNode = n; n.children.push(c); n.firstChild = n.children[0]; return c; },
+    insertBefore: function (c, ref) {
+      var at = n.children.indexOf(ref);
+      if (at < 0) at = n.children.length;
+      c.parentNode = n; n.children.splice(at, 0, c); n.firstChild = n.children[0]; return c;
+    },
     removeChild: function (c) {
       for (var i = 0; i < n.children.length; i++) {
         if (n.children[i] === c) { n.children.splice(i, 1); break; }
@@ -71,6 +76,10 @@ function collect(root, sel) {
 var docRoot = makeNode('body');
 global.document = {
   createElement: makeNode,
+  // 렌더러가 쓰는 만큼만 추가한 스텁 — 프래그먼트는 그냥 컨테이너 노드로 둔다.
+  createElementNS: function (ns, tag) { return makeNode(tag); },
+  createDocumentFragment: function () { return makeNode('#fragment'); },
+  createTextNode: function (t) { var n = makeNode('#text'); n.textContent = String(t); return n; },
   getElementById: function () { return null; },
   querySelectorAll: function (sel) { return collect(docRoot, sel); },
   addEventListener: function () {},
@@ -131,7 +140,7 @@ var audioSet = by(function (s) { return s.blockKind === 'audio-set'; });
 console.log('       instruction ids: ' + instr.map(function (s) { return s.id; }).join(', '));
 ok('instruction >= 5', instr.length >= 5, String(instr.length));
 ok('moduleEnd >= 1', mend.length >= 1, String(mend.length));
-check('hardwareCheck', hw.length, 1);
+check('hardwareCheck (intro.microphone + speaking.hardware)', hw.length, 2);
 check('review', rev.length, 1);
 check('audio-set 화면', audioSet.length, 33);
 
@@ -240,7 +249,12 @@ var volScreen = instr.filter(function (s) { return s.id === 'intro.volume'; })[0
 var volNode = window.SG_INSTRUCTION.renderInstruction(volScreen, ctx);
 var volText = textOf(volNode);
 ok('Adjusting the Volume 에 Play Test Audio', volText.indexOf('Play Test Audio') >= 0);
-ok('Adjusting the Volume 에 슬라이더', collectRange(volNode).length === 1, String(collectRange(volNode).length));
+/* 이 화면에는 슬라이더가 없다 — 녹화 실측(영상 165s, docs/reference/screens 참조).
+   실제 문구가 "select the Volume icon at the top of the screen. The volume control
+   will appear" 이므로 음량 조절은 상단바 Volume 팝오버가 담당한다. 화면 안에 슬라이더를
+   두던 초기 구현은 잘못된 명세를 따른 것이었다. */
+ok('Adjusting the Volume 에 인라인 슬라이더 없음', collectRange(volNode).length === 0, String(collectRange(volNode).length));
+ok('Adjusting the Volume 이 상단 Volume 아이콘을 안내', volText.indexOf('Volume') >= 0);
 function collectRange(n) {
   return walk(n, []).filter(function (x) { return x.tagName === 'INPUT' && x.type === 'range'; });
 }
@@ -301,8 +315,26 @@ function pickRow(sum, sec) {
   return { answered: -1, unanswered: -1 };
 }
 
+/* Adjusting the Microphone — 레퍼런스 화면(hardwareCheck 이지만 전용 레이아웃) */
+var micScreen = hw.filter(function (s) { return s.id === 'intro.microphone'; })[0];
+ok('intro.microphone 화면 존재', !!micScreen);
+var micNode = window.SG_INSTRUCTION.renderMicAdjust(micScreen, ctx);
+var micText = textOf(micNode);
+ok('제목 Adjusting the Microphone', micText.indexOf('Adjusting the Microphone') >= 0);
+ok('Record 안내 문구', micText.indexOf("Select the 'Record' button") >= 0);
+ok('낭독 지문', micText.indexOf('There are several reasons why I would prefer to live in a large city') >= 0);
+ok('레벨 미터 라벨', micText.indexOf('Too Quiet') >= 0 && micText.indexOf('Good') >= 0 && micText.indexOf('Too Loud') >= 0);
+ok('Skip microphone check', micText.indexOf('Skip microphone check') >= 0);
+check('미터 칸 수', walk(micNode, []).filter(function (x) {
+  return String(x.className).indexOf('instr-seg-cell') >= 0; }).length, 24);
+check('피크 판정 — 무음', window.SG_INSTRUCTION.micVerdict(0), 'silent');
+check('피크 판정 — 작음', window.SG_INSTRUCTION.micVerdict(0.05), 'quiet');
+check('피크 판정 — 적절', window.SG_INSTRUCTION.micVerdict(0.4), 'good');
+check('피크 판정 — 큼', window.SG_INSTRUCTION.micVerdict(0.95), 'loud');
+
 /* hardwareCheck 폴백 — navigator.mediaDevices 없음 */
-var hwNode = window.SG_INSTRUCTION.renderHardwareCheck(hw[0], ctx);
+var hwScreen = hw.filter(function (s) { return s.id === 'speaking.hardware'; })[0];
+var hwNode = window.SG_INSTRUCTION.renderHardwareCheck(hwScreen, ctx);
 var hwText = textOf(hwNode);
 ok('hardwareCheck 에 마이크 없음 안내', hwText.indexOf('cannot access a microphone') >= 0);
 ok('hardwareCheck 에 마이크 없이 계속', hwText.indexOf('Continue without microphone') >= 0);

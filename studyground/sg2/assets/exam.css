@@ -408,6 +408,30 @@ body.exam-body {
 }
 .lst-opts .opt.is-selected .opt-key { background: var(--brand); border-color: var(--brand); color: #fff; }
 
+/* ── 복수 선택(mcq-multi) — "Choose 2 answers." ────────────
+   단일선택과 같은 2열 레이아웃을 쓰되, 배지를 원형→사각으로 바꿔 "여러 개"임을
+   글자를 읽기 전에 알 수 있게 한다. 상한에 닿은 뒤의 미선택 항목은 흐려진다. */
+.lst-selecthint {
+  font-size: 12.5px; font-weight: 700; letter-spacing: .01em;
+  color: var(--ink-2); margin: -6px 0 12px;
+}
+.lst-selecthint.is-full { color: var(--brand); }
+.lst-opts.is-multi .opt input { opacity: 0; width: 0; height: 0; margin: 0; flex: none; }
+.lst-opts.is-multi .opt-key { border-radius: 8px; }
+.lst-opts.is-multi .opt.is-selected .opt-key::after {
+  content: ''; position: absolute; width: 14px; height: 14px;
+  background: no-repeat center / contain
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12.5l5.5 5.5L20 6'/></svg>");
+}
+.lst-opts.is-multi .opt.is-selected .opt-key { position: relative; color: transparent; }
+.lst-opts.is-multi .opt.is-capped { opacity: .55; cursor: not-allowed; }
+.lst-opts.is-multi .opt.is-capped:hover { border-color: var(--line); }
+
+/* 상한을 채운 상태에서 다음에 밀려날 답(가장 먼저 고른 것).
+   테두리를 점선으로 바꿔 "다음에 다른 걸 고르면 이게 빠진다" 를 미리 보여 준다. */
+.lst-opts.is-multi .opt.is-next-out { border-style: dashed; }
+.lst-opts.is-multi .opt.is-next-out .opt-key { opacity: .72; }
+
 /* short-response(문항 1개=화면 1개): 삽화 위 · 선택지 세로 */
 .lst-short .lst-au-stage { flex-direction: column; text-align: center; gap: 10px; }
 .lst-short .lst-au-speaker { width: 150px; height: 150px; }
@@ -781,19 +805,37 @@ body.exam-body {
 .instr-body { font-size: 15.5px; color: var(--ink-2); line-height: 1.65; margin-bottom: 20px; }
 .instr-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 .instr-cta { padding: 11px 26px; font-size: 15px; }
+/* 카드 안 버튼은 흰 배경 위에 놓인다 — 상단바용 흰 알약 스타일을 여기서 뒤집는다. */
+.instr-card .exam-btn { background: var(--exam-accent-soft); color: var(--ink); }
+.instr-card .exam-btn:hover { background: #e3e6fb; }
+.instr-card .exam-btn.primary { background: var(--exam-response); color: #fff; }
+.instr-card .exam-btn.primary:hover { filter: brightness(1.05); background: var(--exam-response); }
+.instr-card .exam-btn:disabled { opacity: .55; color: inherit; }
 
 /* ── Adjusting the Volume (녹화 02:30) ──────────────────── */
-.instr-volume {
-  border: 1px solid var(--line); border-radius: var(--radius);
-  background: var(--cream); padding: 18px 20px; margin-bottom: 6px;
+/* 화면 안에는 슬라이더가 없다 — 조절은 상단바 Volume 팝오버가 담당한다. */
+.instr-volume-screen h1 { text-align: center; font-size: 30px; margin-bottom: 0; }
+.instr-volume-screen .instr-rule { margin: 20px 0 26px; }
+.instr-vol-para { font-size: 16.5px; color: var(--ink); margin-bottom: 22px; }
+.instr-vol-para b { font-weight: 850; }
+
+.instr-volume { margin-top: 30px; }
+.instr-vol-note { display: flex; align-items: center; gap: 22px; }
+.instr-vol-icon {
+  flex: 0 0 auto; width: 58px; height: 58px; border-radius: 50%; border: 0;
+  background: var(--exam-response); color: #fff; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
 }
-.instr-vol-label { display: block; font-size: 12px; font-weight: 800; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-.instr-vol-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-.instr-vol-range { flex: 1 1 auto; accent-color: var(--brand); }
-.instr-vol-pct { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums;
-  color: var(--ink); min-width: 3.5em; text-align: right; }
-.instr-vol-status { font-size: 12.5px; margin-top: 8px; }
+.instr-vol-icon svg { width: 28px; height: 28px; }
+.instr-vol-icon:hover { filter: brightness(1.05); }
+.instr-vol-icon:focus-visible { outline: 2px solid var(--exam-accent); outline-offset: 3px; }
+.instr-vol-note-text { font-size: 16.5px; color: var(--ink); }
+
+.instr-vol-play-row { display: flex; justify-content: center; margin-top: 42px; }
+.instr-testaudio { padding: 12px 26px; font-size: 15.5px; gap: 10px; }
+.instr-testaudio svg { width: 18px; height: 18px; fill: currentColor; stroke: none; }
+.instr-vol-status { font-size: 12.5px; margin-top: 10px; text-align: center; }
+.instr-vol-status:empty { display: none; }   /* 오류가 없으면 자리를 차지하지 않는다 */
 
 /* ── 표 (Speaking directions · review 집계) ─────────────── */
 .instr-table-wrap { overflow-x: auto; margin: 6px 0 4px; }
@@ -810,6 +852,25 @@ body.exam-body {
 .instr-table-total td { font-weight: 850; border-bottom: none; background: var(--cream); }
 .instr-table td.is-unanswered { color: var(--brand-ink); font-weight: 800; }
 
+/* ── Section Directions (Reading) ───────────────────────── */
+/* 레퍼런스 화면: 제목 왼쪽 액센트 바 · 격자 테두리 표 · 굵은 시간 표기. */
+.instr-directions h1 {
+  border-left: 5px solid var(--exam-accent);
+  padding-left: 14px; margin-bottom: 18px;
+}
+.instr-directions .instr-table-wrap { margin: 18px 0 22px; }
+.instr-directions .instr-table th,
+.instr-directions .instr-table td {
+  border: 1px solid var(--line); white-space: normal; vertical-align: top;
+  padding: 12px 14px; font-size: 14.5px;
+}
+.instr-directions .instr-table th {
+  background: var(--exam-accent-soft); color: var(--ink-2);
+  font-size: 13px; font-weight: 800; letter-spacing: 0; text-transform: none;
+}
+.instr-directions .instr-table td:first-child { width: 38%; font-weight: 650; }
+.instr-dir-time b { font-weight: 850; color: var(--ink); }
+
 /* ── Hardware Check ─────────────────────────────────────── */
 .instr-hw-row { border-top: 1px solid var(--line); padding-top: 18px; margin-top: 18px; }
 .instr-hw-title { font-size: 13px; font-weight: 800; letter-spacing: .06em;
@@ -824,6 +885,67 @@ body.exam-body {
 }
 .instr-meter-bar { height: 100%; width: 0%; background: var(--line-2); transition: width .06s linear; }
 .instr-meter-bar.is-live { background: var(--ok); }
+
+/* ── Adjusting the Microphone (레퍼런스 en_test-nt) ─────── */
+/* 관찰: 가운데 정렬 제목 → 가로선 → 흰 카드(좌 원형 RECORD / 우 안내+낭독 지문)
+   → 칸 나뉜 레벨 미터 → Too Quiet · Good · Too Loud → 우하단 Skip. */
+.instr-micscreen { max-width: 900px; padding: 30px 34px 26px; }
+.instr-mic-h1 { text-align: center; font-size: 30px; margin-bottom: 18px; }
+.instr-micscreen .instr-rule { margin-bottom: 26px; }
+
+.instr-mic { display: grid; grid-template-columns: 190px 1fr; gap: 26px; align-items: start; }
+.instr-mic-left { display: flex; justify-content: center; padding-top: 6px; }
+
+.instr-mic-record {
+  width: 150px; height: 150px; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--peach); color: var(--brand-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  box-shadow: inset 0 0 0 1px var(--peach-2); transition: background .15s ease, transform .1s ease;
+}
+.instr-mic-record:hover:not(:disabled) { background: var(--peach-2); }
+.instr-mic-record:active:not(:disabled) { transform: scale(.97); }
+.instr-mic-record:disabled { cursor: default; }
+.instr-mic-record.is-disabled { background: var(--lock); color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
+.instr-mic-record.is-arming { background: var(--cream-2); color: var(--ink-2); }
+.instr-mic-record.is-arming .instr-mic-record-label { font-size: 34px; letter-spacing: 0; }
+.instr-mic-record.is-recording { background: var(--brand); color: #fff; box-shadow: inset 0 0 0 1px var(--brand-ink);
+  animation: micPulse 1.4s ease-in-out infinite; }
+.instr-mic-icon { width: 44px; height: 44px; fill: currentColor; }
+.instr-mic-record-label {
+  font-size: 13px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase;
+}
+@keyframes micPulse { 0%, 100% { box-shadow: inset 0 0 0 1px var(--brand-ink), 0 0 0 0 rgba(232,72,31,.35); }
+                      50% { box-shadow: inset 0 0 0 1px var(--brand-ink), 0 0 0 14px rgba(232,72,31,0); } }
+
+.instr-mic-copy p { font-size: 15.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 14px; }
+.instr-mic-sample {
+  background: var(--cream); border-radius: var(--radius); padding: 16px 18px;
+  color: var(--ink) !important; margin-bottom: 0 !important;
+}
+
+.instr-seg-wrap { margin: 26px 0 6px; }
+.instr-seg { display: flex; gap: 3px; }
+.instr-seg-cell {
+  flex: 1 1 0; height: 22px; border: 1px solid var(--line);
+  border-radius: 3px; background: var(--card);
+}
+.instr-seg-cell.is-on.is-quiet { background: var(--warn); border-color: var(--warn); }
+.instr-seg-cell.is-on.is-good { background: var(--ok); border-color: var(--ok); }
+.instr-seg-cell.is-on.is-loud { background: var(--brand); border-color: var(--brand); }
+.instr-seg-labels {
+  display: flex; justify-content: space-between; margin-top: 7px;
+  font-size: 12.5px; color: var(--muted); font-weight: 650;
+}
+
+.instr-mic-status { margin-top: 12px; min-height: 1.3em; }
+.instr-mic-actions { justify-content: flex-end; }
+
+@media (max-width: 720px) {
+  .instr-mic { grid-template-columns: 1fr; gap: 18px; }
+  .instr-mic-record { width: 124px; height: 124px; }
+  .instr-mic-h1 { font-size: 24px; }
+  .instr-seg-cell { height: 18px; }
+}
 
 /* ── moduleEnd · transfer time (§3.4) ───────────────────── */
 /* 관찰(reading-module-end-2910s.png): 카드 테두리·그림자·배경이 없다.

@@ -87,11 +87,12 @@ check('findQuestion("nope") null', set.findQuestion('nope'), null);
 console.log('\n[1] 화면 수 검산 (위 주석의 산술 유도)');
 var bySec = {};
 res.screens.forEach(function (s) { bySec[s.section] = (bySec[s.section] || 0) + 1; });
-check('listening (47 + intro.volume + directions + moduleEnd×2 + audio-play 27)', bySec.listening || 0, 78);
+// 2026-08-07: intro.microphone(Adjusting the Microphone) 추가 → 섹션·총계 +1.
+check('listening (47 + intro.volume + intro.microphone + directions + moduleEnd×2 + audio-play 27)', bySec.listening || 0, 79);
 check('speaking  (11 + hardware + directions + intro×2)',          bySec.speaking  || 0, 15);
 check('reading   (블록 9 + directions + moduleEnd×2)',              bySec.reading   || 0, 12);
 check('writing   (12 + directions + taskEnd×3 + review.submit)',   bySec.writing   || 0, 17);
-check('총 화면',                                                    res.screens.length, 122);
+check('총 화면',                                                    res.screens.length, 123);
 
 console.log('\n[1b] 오디오/답변 화면 분리 + 타이머 규칙 (SET 1 과 동일 계약)');
 var play = res.screens.filter(function (s) { return s.blockKind === 'audio-play'; });

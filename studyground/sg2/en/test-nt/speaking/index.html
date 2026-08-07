@@ -1,9 +1,15 @@
 <!DOCTYPE html>
+<!--
+  GENERATED FILE — 직접 고치지 마세요.
+  원본: exam-runtime.html · 생성: tools/build_routes.py
+  라우트: /en/test-nt/{section}?testId=..&sessionId=..&mode=full|section&section=..
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exam Runtime · SMEAG StudyGround</title>
+<base href="../../../">
+<title>Speaking · NT Mock Test · SMEAG StudyGround</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="stylesheet" href="assets/exam.css">
 <link rel="manifest" href="manifest.webmanifest">
@@ -175,6 +181,13 @@
 <script src="assets/exam-store.js"></script>
 <script src="assets/exam-render.js"></script>
 <script src="assets/exam-engine.js"></script>
+<script>
+window.SG_ROUTE = {
+  section: 'speaking',
+  base: '../../../',
+  path: location.pathname.replace(/\/+$/, '').replace(/[^\/]*$/, '')
+};
+</script>
 <script src="assets/exam-shell.js"></script>
 </body>
 </html>

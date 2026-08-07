@@ -43,11 +43,12 @@ console.log('\n[1] 화면 수 검산 (architecture.md §4.3)');
 // — audio-play 화면은 questionIds 를 갖지 않기 때문이다.
 var bySec = {};
 res.screens.forEach(function (s) { bySec[s.section] = (bySec[s.section] || 0) + 1; });
-check('listening (36 + intro.volume + audio-play 19)', bySec.listening || 0, 56);
+// 2026-08-07: 레퍼런스 test-nt 화면 'Adjusting the Microphone'(intro.microphone) 추가 → 섹션·총계 +1.
+check('listening (36 + intro.volume + intro.microphone + audio-play 19)', bySec.listening || 0, 57);
 check('speaking',                      bySec.speaking  || 0, 15);
 check('reading',                       bySec.reading   || 0, 9);
 check('writing (16 + review.submit)',  bySec.writing   || 0, 17);
-check('총 화면',                        res.screens.length, 97);
+check('총 화면',                        res.screens.length, 98);
 
 console.log('\n[1b] 오디오/답변 화면 분리 + 타이머 부여 규칙 (실측)');
 var play = res.screens.filter(function (s) { return s.blockKind === 'audio-play'; });
