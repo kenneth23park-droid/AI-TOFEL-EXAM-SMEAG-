@@ -327,11 +327,27 @@
     for (var i = 0; i < sec.modules.length; i++) {
       var m = sec.modules[i];
       var tt = (sec.taskTypes && m.taskType && sec.taskTypes[m.taskType]) || null;
+      /* 문항마다 답변 시간이 다른 유형(TOEFL Task 1: 8/10/12초)은 단일 숫자로 못 적는다.
+       * responseSecByIndex 가 있으면 실제 문항 수만큼 잘라 최소~최대를 범위로 보여준다. */
+      var byIndex = (tt && tt.responseSecByIndex && tt.responseSecByIndex.length) ? tt.responseSecByIndex : null;
+      var count = counts[m.id] || 0;
+      var range = null;
+      if (byIndex) {
+        var lo = null, hi = null;
+        for (var k = 0; k < (count || byIndex.length); k++) {
+          var v = typeof byIndex[k] === 'number' ? byIndex[k] : (tt && tt.responseSec);
+          if (typeof v !== 'number') continue;
+          if (lo === null || v < lo) lo = v;
+          if (hi === null || v > hi) hi = v;
+        }
+        if (lo !== null) range = { min: lo, max: hi };
+      }
       rows.push({
         moduleId: m.id,
         label: (tt && tt.label) || m.taskType || m.id,
-        count: counts[m.id] || 0,
-        responseSec: tt && typeof tt.responseSec === 'number' ? tt.responseSec : null,
+        count: count,
+        responseSec: range ? range.min : (tt && typeof tt.responseSec === 'number' ? tt.responseSec : null),
+        responseSecRange: range && range.min !== range.max ? range : null,
         prepSec: tt && typeof tt.prepSec === 'number' ? tt.prepSec : null
       });
     }
@@ -385,7 +401,10 @@
       var c1 = el('td'); c1.textContent = r.label; row.appendChild(c1);
       var c2 = el('td'); c2.textContent = String(r.count); row.appendChild(c2);
       var c3 = el('td'); c3.textContent = r.prepSec === null ? '—' : r.prepSec + ' s'; row.appendChild(c3);
-      var c4 = el('td'); c4.textContent = r.responseSec === null ? '—' : r.responseSec + ' s'; row.appendChild(c4);
+      var c4 = el('td');
+      c4.textContent = r.responseSec === null ? '—'
+        : (r.responseSecRange ? r.responseSecRange.min + '–' + r.responseSecRange.max + ' s' : r.responseSec + ' s');
+      row.appendChild(c4);
       tbody.appendChild(row);
     }
     var totalRow = el('tr', 'instr-table-total');

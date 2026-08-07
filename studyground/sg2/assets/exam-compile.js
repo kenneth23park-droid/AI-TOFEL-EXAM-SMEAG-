@@ -385,6 +385,16 @@
     }
     var onExpire = pick(tt.onExpire, ctx.secCfg.onExpire, 'stopRecord');
 
+    /* 문항별 답변 시간. TOEFL Speaking Task 1(listenAndRepeat)은 문장마다 시간이 다르다 —
+     * 1~2번 8초 / 3~5번 10초 / 6~7번 12초 (최종수정사항.docx). config 의
+     * taskTypes.<t>.responseSecByIndex[] 가 있으면 그 인덱스를 쓰고, 범위를 넘어가면
+     * responseSec 로 떨어진다. byIndex 가 없는 taskType(interview·IELTS)은 종전과 동일. */
+    var byIndex = (tt.responseSecByIndex && tt.responseSecByIndex.length) ? tt.responseSecByIndex : null;
+    function responseSecAt(index) {
+      if (byIndex && typeof byIndex[index] === 'number') return byIndex[index];
+      return pick(tt.responseSec, 0);
+    }
+
     if (block.introAudio) {
       out.push(window.SG_TYPES.makeScreen({
         id: ctx.sectionId + '.intro.' + ctx.moduleId,
@@ -422,10 +432,11 @@
       var prepPhase = { name: 'prep', seconds: pick(tt.prepSec, 0), onExpire: 'startRecord' };
       if (cue) prepPhase.cue = cue;
       phases.push(prepPhase);
-      phases.push({ name: 'record', seconds: pick(tt.responseSec, 0), onExpire: onExpire });
+      var respondSec = responseSecAt(i);
+      phases.push({ name: 'record', seconds: respondSec, onExpire: onExpire });
 
       var timer = {
-        mode: 'response', scope: 'screen', seconds: pick(tt.responseSec, 0),
+        mode: 'response', scope: 'screen', seconds: respondSec,
         format: fmt, onExpire: onExpire, visible: true
       };
       out.push(ctx.mk({

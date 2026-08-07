@@ -44,12 +44,13 @@
         "questionCountSource": "content",
         "sectionSec": null,
         "modules": [
-          {"id": "L1", "contentRef": "listening.modules[id=L1]", "taskType": null, "allocatedSec": 1080, "perQuestionSec": 30, "onExpire": "autoAdvance", "moduleEndScreen": "moduleEnd.listening", "introAudioSelfPaced": null},
-          {"id": "L2", "contentRef": "listening.modules[id=L2]", "taskType": null, "allocatedSec": 900, "perQuestionSec": 30, "onExpire": "autoAdvance", "moduleEndScreen": "moduleEnd.listening", "introAudioSelfPaced": null}
+          {"id": "L1", "contentRef": "listening.modules[id=L1]", "taskType": null, "allocatedSec": 1080, "perQuestionSec": 20, "onExpire": "autoAdvance", "moduleEndScreen": "moduleEnd.listening", "introAudioSelfPaced": null},
+          {"id": "L2", "contentRef": "listening.modules[id=L2]", "taskType": null, "allocatedSec": 900, "perQuestionSec": 20, "onExpire": "autoAdvance", "moduleEndScreen": "moduleEnd.listening", "introAudioSelfPaced": null}
         ],
         "tasks": null,
         "taskTypes": null,
-        "fallbackPerQuestionSec": 30,
+        "fallbackPerQuestionSec": 20,
+        "promptOnScreen": false,
         "phases": []
       },
       "speaking": {
@@ -69,8 +70,8 @@
         ],
         "tasks": null,
         "taskTypes": {
-          "listenAndRepeat": {"id": "listenAndRepeat", "label": "Listen and Repeat", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 3, "responseSec": 20, "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"},
-          "interview": {"id": "interview", "label": "Take an Interview", "mediaType": "video", "promptSelfPaced": true, "listenReplays": 1, "prepSec": 3, "responseSec": 45, "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"}
+          "listenAndRepeat": {"id": "listenAndRepeat", "label": "Listen and Repeat", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 3, "responseSec": 12, "responseSecByIndex": [8, 8, 10, 10, 10, 12, 12], "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"},
+          "interview": {"id": "interview", "label": "Take an Interview", "mediaType": "video", "promptSelfPaced": true, "listenReplays": 1, "prepSec": 3, "responseSec": 45, "responseSecByIndex": null, "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"}
         },
         "fallbackPerQuestionSec": null,
         "phases": []
@@ -85,10 +86,10 @@
         "onExpire": "autoAdvance",
         "audio": null,
         "questionCountSource": "content",
-        "sectionSec": 1740,
+        "sectionSec": 1800,
         "modules": [
           {"id": "R1", "contentRef": "reading.modules[id=R1]", "taskType": null, "allocatedSec": 1200, "perQuestionSec": null, "onExpire": "autoAdvance", "moduleEndScreen": "moduleEnd.reading", "introAudioSelfPaced": null},
-          {"id": "R2", "contentRef": "reading.modules[id=R2]", "taskType": null, "allocatedSec": 540, "perQuestionSec": null, "onExpire": "autoAdvance", "moduleEndScreen": "moduleEnd.reading", "introAudioSelfPaced": null}
+          {"id": "R2", "contentRef": "reading.modules[id=R2]", "taskType": null, "allocatedSec": 600, "perQuestionSec": null, "onExpire": "autoAdvance", "moduleEndScreen": "moduleEnd.reading", "introAudioSelfPaced": null}
         ],
         "tasks": null,
         "taskTypes": null,
@@ -108,8 +109,8 @@
         "sectionSec": null,
         "modules": [],
         "tasks": [
-          {"id": "W1", "contentRef": "writing.modules[id=W1]", "taskKind": "build-set", "perTaskSec": 600, "minWords": null, "onExpire": "autoAdvance", "moduleEndScreen": "taskEnd.writing"},
-          {"id": "W2", "contentRef": "writing.modules[id=W2]", "taskKind": "email", "perTaskSec": 600, "minWords": 80, "onExpire": "autoAdvance", "moduleEndScreen": "taskEnd.writing"},
+          {"id": "W1", "contentRef": "writing.modules[id=W1]", "taskKind": "build-set", "perTaskSec": 420, "minWords": null, "onExpire": "autoAdvance", "moduleEndScreen": "taskEnd.writing"},
+          {"id": "W2", "contentRef": "writing.modules[id=W2]", "taskKind": "email", "perTaskSec": 420, "minWords": 80, "onExpire": "autoAdvance", "moduleEndScreen": "taskEnd.writing"},
           {"id": "W3", "contentRef": "writing.modules[id=W3]", "taskKind": "academicDiscussion", "perTaskSec": 600, "minWords": 100, "onExpire": "autoAdvance", "moduleEndScreen": "taskEnd.writing"}
         ],
         "taskTypes": null,
@@ -130,7 +131,7 @@
       {"id": "taskEnd.writing", "label": "End of Task", "screenType": "moduleEnd", "insertAt": {"position": "betweenModules", "section": "writing", "module": null}, "maxSec": null, "advance": "manual", "controls": ["continue"]},
       {"id": "submitConfirm", "label": "Submit Test", "screenType": "review", "insertAt": {"position": "afterSection", "section": "writing", "module": null}, "maxSec": null, "advance": "manual", "controls": ["submit"]}
     ],
-    "provenance": {"levels": {"observed": "57분53초 화면녹화에서 직접 확인된 값/동작", "official": "시험 주관사가 공개한 공식 규격", "content": "studyground/sg2/assets/set1.js 콘텐츠 파일에서 그대로 가져온 값", "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요"}, "entries": []}
+    "provenance": {"levels": {"observed": "57분53초 화면녹화에서 직접 확인된 값/동작", "official": "시험 주관사가 공개한 공식 규격", "content": "studyground/sg2/assets/set1.js 콘텐츠 파일에서 그대로 가져온 값", "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요", "spec": "발주처 확정 규격서 — _compare/TOEFL Test set up-최종수정사항.docx. 실측(observed)과 충돌하면 이쪽이 이긴다"}, "entries": []}
   };
 
   /* 내장 폴백 (IELTS) — config/timing.ielts.json 과 동일한 수치의 사본. Story 6.1 AC4.
@@ -164,6 +165,7 @@
         "tasks": null,
         "taskTypes": null,
         "fallbackPerQuestionSec": null,
+        "promptOnScreen": true,
         "phases": [
           {"id": "transferTime", "label": "Transfer your answers to the answer sheet", "screenType": "instruction", "position": "afterSection", "seconds": 600, "onExpire": "autoAdvance", "advance": "manual", "appliesTo": "paperBased"}
         ]
@@ -227,9 +229,9 @@
         ],
         "tasks": null,
         "taskTypes": {
-          "part1": {"id": "part1", "label": "Introduction and Interview", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 0, "responseSec": 30, "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"},
-          "part2": {"id": "part2", "label": "Long Turn (Cue Card)", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 60, "responseSec": 120, "responseSecMin": 60, "responseSecMax": 120, "recording": true, "onExpire": "stopRecord"},
-          "part3": {"id": "part3", "label": "Discussion", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 0, "responseSec": 45, "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"}
+          "part1": {"id": "part1", "label": "Introduction and Interview", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 0, "responseSec": 30, "responseSecByIndex": null, "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"},
+          "part2": {"id": "part2", "label": "Long Turn (Cue Card)", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 60, "responseSec": 120, "responseSecByIndex": null, "responseSecMin": 60, "responseSecMax": 120, "recording": true, "onExpire": "stopRecord"},
+          "part3": {"id": "part3", "label": "Discussion", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 0, "responseSec": 45, "responseSecByIndex": null, "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"}
         },
         "fallbackPerQuestionSec": null,
         "phases": []
@@ -245,7 +247,7 @@
       {"id": "cueCardPrep", "label": "You have one minute to prepare", "screenType": "instruction", "insertAt": {"position": "betweenModules", "section": "speaking", "module": "SP1"}, "maxSec": 60, "advance": "auto", "controls": ["continue"]},
       {"id": "submitConfirm", "label": "Submit Test", "screenType": "review", "insertAt": {"position": "afterSection", "section": "speaking", "module": null}, "maxSec": null, "advance": "manual", "controls": ["submit"]}
     ],
-    "provenance": {"levels": {"observed": "57분53초 화면녹화에서 직접 확인된 값/동작 (IELTS 파일에는 해당 없음)", "official": "IELTS(British Council / IDP / Cambridge)가 공개한 공식 시험 규격", "content": "콘텐츠 파일에서 그대로 가져온 값", "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요"}, "entries": []}
+    "provenance": {"levels": {"observed": "57분53초 화면녹화에서 직접 확인된 값/동작 (IELTS 파일에는 해당 없음)", "official": "IELTS(British Council / IDP / Cambridge)가 공개한 공식 시험 규격", "content": "콘텐츠 파일에서 그대로 가져온 값", "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요", "spec": "발주처 확정 규격서. 실측(observed)과 충돌하면 이쪽이 이긴다 — IELTS 프로파일에는 현재 해당 항목 없음"}, "entries": []}
   };
 
   /* 프로파일 → 내장 폴백. 여기 없는 프로파일은 DEFAULT_PROFILE 로 degrade 한다(AC5). */

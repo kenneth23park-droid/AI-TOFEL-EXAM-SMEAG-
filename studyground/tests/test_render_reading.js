@@ -135,9 +135,11 @@ var alloc = timing.sections.reading.modules;
 /* 2026-08-07 실측으로 교체 (구값 R1 1080 / R2 1020 은 2100 을 반씩 나눈 가설이었다).
  * R1 = 1200s(20:00): recording 2730s→19:22, 2745s→19:08.
  * R2 =  540s(09:00): recording 2930s→08:43, 2960s→08:13, 3000s→07:33, 3030s→07:04.
- * 측정 절차는 docs/bmad/timing-spec.md §8. */
+ * 측정 절차는 docs/bmad/timing-spec.md §8.
+ * 2026-08-07 재수정: R2 는 최종수정사항.docx "MODULE 2: 10 mins. (Time limit)" 로 600s 확정 —
+ * 발주처 규격서(spec)가 녹화 실측(observed)을 대체한다. R1 20:00 은 양쪽이 일치. */
 check('R1 allocatedSec', alloc[0].allocatedSec, 1200);
-check('R2 allocatedSec', alloc[1].allocatedSec, 540);
+check('R2 allocatedSec', alloc[1].allocatedSec, 600);
 
 console.log('\n[5] 순수 헬퍼 단위 확인');
 var t = RD.clozeTokens('a {{1}} b {{2}}');

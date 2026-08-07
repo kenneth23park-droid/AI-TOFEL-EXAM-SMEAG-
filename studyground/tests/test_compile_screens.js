@@ -59,9 +59,12 @@ check('audio-play 에 타이머 없음', play.filter(function (s) { return s.tim
 check('audio-play 에 questionIds 없음', play.filter(function (s) { return s.questionIds; }).length, 0);
 check('audio-play 이 오디오를 갖는다', play.filter(function (s) { return s.audio && s.audio.src; }).length, 19);
 check('답변 화면에는 오디오 없음', ans.filter(function (s) { return s.audio; }).length, 0);
-// 답변 화면 타이머 = {countdown, question, 30} — 녹화 Q29 884s→00:29 … 904s→00:09 실측
+/* 답변 화면 타이머 = {countdown, question, 20}.
+ * 녹화 실측은 30초였으나(Q29 884s→00:29), 발주처 확정 규격서
+ * (_compare/TOEFL Test set up-최종수정사항.docx — "given the 20 secs time limit")가
+ * 이를 20초로 덮어쓴다. provenance level 'spec' 이 'observed' 를 이긴다. */
 var badQ = ans.filter(function (s) {
-  return !s.timer || s.timer.mode !== 'countdown' || s.timer.scope !== 'question' || s.timer.seconds !== 30;
+  return !s.timer || s.timer.mode !== 'countdown' || s.timer.scope !== 'question' || s.timer.seconds !== 20;
 });
 check('답변 화면 타이머 규격 위반', badQ.length, 0);
 

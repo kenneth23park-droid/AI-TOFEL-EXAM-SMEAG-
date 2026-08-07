@@ -631,6 +631,15 @@ body.exam-body {
 }
 .wr-bar { display: flex; gap: 8px; align-items: center; }
 
+/* 과제(좌) / 작성창(우) 2단. 좁은 화면은 1단으로 접고 과제가 위로 간다. */
+.wr-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.wr-pane { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.wr-pane-answer { position: sticky; top: 0; }
+@media (max-width: 900px) {
+  .wr-cols { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .wr-pane-answer { position: static; }
+}
+
 .wr-mail-head {
   display: flex; flex-direction: column; gap: 6px;
   border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
@@ -665,6 +674,7 @@ body.exam-body {
   border: 1px solid var(--line-2); border-radius: var(--radius); padding: 14px;
   font: inherit; font-size: 15px; line-height: 1.65; color: var(--ink); background: #fff;
 }
+.wr-pane-answer .wr-textarea { min-height: 360px; }
 .wr-textarea:focus { outline: 2px solid var(--brand); outline-offset: -1px; }
 .wr-textarea[readonly] { background: var(--cream-2); color: var(--ink-2); }
 

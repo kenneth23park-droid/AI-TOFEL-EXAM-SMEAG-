@@ -102,8 +102,9 @@ check('audio-set(답변) 화면', ansS.length, 47);
 check('audio-play 에 타이머 없음', play.filter(function (s) { return s.timer !== null; }).length, 0);
 check('audio-play 에 questionIds 없음', play.filter(function (s) { return s.questionIds; }).length, 0);
 check('audio-play 이 오디오를 갖는다', play.filter(function (s) { return s.audio && s.audio.src; }).length, 27);
-check('답변 화면 타이머 {countdown,question,30} 위반', ansS.filter(function (s) {
-  return !s.timer || s.timer.mode !== 'countdown' || s.timer.scope !== 'question' || s.timer.seconds !== 30;
+// 30 → 20: 최종수정사항.docx "given the 20 secs time limit" 이 녹화 실측 30초를 대체한다.
+check('답변 화면 타이머 {countdown,question,20} 위반', ansS.filter(function (s) {
+  return !s.timer || s.timer.mode !== 'countdown' || s.timer.scope !== 'question' || s.timer.seconds !== 20;
 }).length, 0);
 check('타이머 달린 moduleEnd', res.screens.filter(function (s) {
   return s.screenType === 'moduleEnd' && s.timer !== null;

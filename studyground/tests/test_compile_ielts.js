@@ -154,7 +154,8 @@ t.screens.forEach(function (s) {
   if (!s1 && s.screenType === 'speaking' && s.moduleId === 'S1') s1 = s;
   if (s.transfer) trCount += 1;
 });
-check('TOEFL S1 phase', s1.phases.map(function (p) { return p.name + ':' + p.seconds; }), ['listen:0', 'prep:3', 'record:20']);
+// record:20 → 8 — Task 1 첫 문장은 8초(최종수정사항.docx responseSecByIndex[0]).
+check('TOEFL S1 phase', s1.phases.map(function (p) { return p.name + ':' + p.seconds; }), ['listen:0', 'prep:3', 'record:8']);
 check('TOEFL transfer 화면 수', trCount, 0);
 var tRead = null;
 t.screens.forEach(function (s) { if (!tRead && s.section === 'reading' && s.screenType === 'question') tRead = s; });

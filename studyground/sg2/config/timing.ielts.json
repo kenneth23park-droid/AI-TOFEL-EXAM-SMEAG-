@@ -90,6 +90,7 @@
       "tasks": null,
       "taskTypes": null,
       "fallbackPerQuestionSec": null,
+      "promptOnScreen": true,
       "phases": [
         {
           "id": "transferTime",
@@ -240,6 +241,7 @@
           "listenReplays": 1,
           "prepSec": 0,
           "responseSec": 30,
+          "responseSecByIndex": null,
           "responseSecMin": null,
           "responseSecMax": null,
           "recording": true,
@@ -253,6 +255,7 @@
           "listenReplays": 1,
           "prepSec": 60,
           "responseSec": 120,
+          "responseSecByIndex": null,
           "responseSecMin": 60,
           "responseSecMax": 120,
           "recording": true,
@@ -266,6 +269,7 @@
           "listenReplays": 1,
           "prepSec": 0,
           "responseSec": 45,
+          "responseSecByIndex": null,
           "responseSecMin": null,
           "responseSecMax": null,
           "recording": true,
@@ -409,7 +413,8 @@
       "observed": "57분53초 화면녹화에서 직접 확인된 값/동작 (IELTS 파일에는 해당 없음)",
       "official": "IELTS(British Council / IDP / Cambridge)가 공개한 공식 시험 규격",
       "content": "콘텐츠 파일에서 그대로 가져온 값",
-      "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요"
+      "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요",
+      "spec": "발주처 확정 규격서. 실측(observed)과 충돌하면 이쪽이 이긴다 — IELTS 프로파일에는 현재 해당 항목 없음"
     },
     "entries": [
       {

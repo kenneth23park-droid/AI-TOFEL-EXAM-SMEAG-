@@ -272,5 +272,28 @@ check('라디오 4개', collect(sroot, 'input[type="radio"]').length, 4);
 check('체크박스 0개', collect(sroot, 'input[type="checkbox"]').length, 0);
 ok('lst-multi 없음', !/lst-multi/.test(sroot.className), sroot.className);
 
+/* ── [7] 문항 문구 표시 규칙 (최종수정사항.docx) ─────────────
+ * Task 1(자체 음성 + 그림, block.perQuestionAudio:true) → 문구를 화면에 그리지 않는다.
+ * Task 2(대화·강의형, prompt 가 곧 질문) → 그대로 그린다. 둘을 한 번에 확인한다. */
+console.log('\n[7] 문항 문구 표시 규칙 — 음성이 질문을 대신하는 문항만 숨긴다');
+function screenFor(qid) {
+  return res.screens.filter(function (s) {
+    return s.blockKind === 'audio-set' && s.questionIds && s.questionIds[0] === qid;
+  })[0];
+}
+// L1-1: "Questions 1-12" 블록 = perQuestionAudio:true (Task 1)
+var t1blk = listening.modules[0].blocks.filter(function (b) { return b.perQuestionAudio; })[0];
+ok('Task 1 블록(perQuestionAudio) 존재', !!t1blk, t1blk && t1blk.heading);
+var t1q = t1blk.questions[0];
+var t1root = L.renderListeningQuestion(screenFor(t1q.id), ctx);
+ok('Task 1 문항 문구는 화면에 없다',
+  flatten(t1root).indexOf(t1q.prompt) < 0, JSON.stringify(flatten(t1root).slice(0, 80)));
+check('Task 1 선택지는 그대로 4개', collect(t1root, 'input[type="radio"]').length, 4);
+
+// L1-13: 블록 오디오형 (Task 2) — prompt 가 질문 그 자체다
+var t2q = block.questions[0];
+ok('Task 2 문항 문구는 화면에 남는다',
+  flatten(sroot).indexOf(t2q.prompt) >= 0, JSON.stringify(t2q.prompt));
+
 console.log('\n' + (fails.length ? 'FAILED: ' + fails.join(', ') : 'ALL PASS'));
 process.exit(fails.length ? 1 : 0);

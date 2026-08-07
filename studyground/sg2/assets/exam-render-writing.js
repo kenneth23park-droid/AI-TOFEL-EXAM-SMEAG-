@@ -621,18 +621,28 @@
           ? bi('h2', 'Write an Email', '이메일 작성하기', 'wr-heading')
           : bi('h2', 'Write for an Academic Discussion', '학술 토론 작성하기', 'wr-heading'));
 
+        /* 2단 배치 — 과제는 왼쪽, 작성창은 오른쪽(최종수정사항.docx Writing Task 2·3:
+         * "task should be on the left side and writing response should be on the right side").
+         * 좁은 화면에서는 CSS 가 1단으로 접는다. */
+        var cols = el('div', 'wr-cols');
+        var pane = el('div', 'wr-pane wr-pane-task');
+        var answer = el('div', 'wr-pane wr-pane-answer');
+        cols.appendChild(pane);
+        cols.appendChild(answer);
+        card.appendChild(cols);
+
         var bar = el('div', 'wr-bar');
         var tts = readAloudButton(q);
         if (tts) bar.appendChild(tts);
-        if (bar.firstChild) card.appendChild(bar);
+        if (bar.firstChild) pane.appendChild(bar);
 
         if (isEmail) {
-          card.appendChild(emailHeader(q));
-          card.appendChild(situationBox(q));
+          pane.appendChild(emailHeader(q));
+          pane.appendChild(situationBox(q));
           var bl = bulletsBox(q);
-          if (bl) card.appendChild(bl);
+          if (bl) pane.appendChild(bl);
         } else {
-          card.appendChild(discussionBox(q));
+          pane.appendChild(discussionBox(q));
         }
 
         var minWords = typeof q.minWords === 'number' ? q.minWords : 0;
@@ -643,14 +653,14 @@
         ta.placeholder = 'Type your response here (' + minWords + '+ words)';
         var prev = savedAnswer(q.id);
         ta.value = (prev && typeof prev.v === 'string') ? prev.v : '';
-        card.appendChild(ta);
+        answer.appendChild(ta);
 
         var foot = el('div', 'wr-foot');
         var count = el('span', 'wr-count');
         var min = el('span', 'wr-min');
         min.appendChild(bi('span', 'minimum ' + minWords + ' words', '최소 ' + minWords + '단어', null));
         foot.appendChild(count); foot.appendChild(min);
-        card.appendChild(foot);
+        answer.appendChild(foot);
 
         var timer = null;
 

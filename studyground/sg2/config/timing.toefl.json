@@ -51,7 +51,7 @@
           "contentRef": "listening.modules[id=L1]",
           "taskType": null,
           "allocatedSec": 1080,
-          "perQuestionSec": 30,
+          "perQuestionSec": 20,
           "onExpire": "autoAdvance",
           "moduleEndScreen": "moduleEnd.listening",
           "introAudioSelfPaced": null
@@ -61,7 +61,7 @@
           "contentRef": "listening.modules[id=L2]",
           "taskType": null,
           "allocatedSec": 900,
-          "perQuestionSec": 30,
+          "perQuestionSec": 20,
           "onExpire": "autoAdvance",
           "moduleEndScreen": "moduleEnd.listening",
           "introAudioSelfPaced": null
@@ -69,7 +69,8 @@
       ],
       "tasks": null,
       "taskTypes": null,
-      "fallbackPerQuestionSec": 30,
+      "fallbackPerQuestionSec": 20,
+      "promptOnScreen": false,
       "phases": []
     },
     "speaking": {
@@ -114,7 +115,8 @@
           "promptSelfPaced": false,
           "listenReplays": 1,
           "prepSec": 3,
-          "responseSec": 20,
+          "responseSec": 12,
+          "responseSecByIndex": [8, 8, 10, 10, 10, 12, 12],
           "responseSecMin": null,
           "responseSecMax": null,
           "recording": true,
@@ -128,6 +130,7 @@
           "listenReplays": 1,
           "prepSec": 3,
           "responseSec": 45,
+          "responseSecByIndex": null,
           "responseSecMin": null,
           "responseSecMax": null,
           "recording": true,
@@ -147,7 +150,7 @@
       "onExpire": "autoAdvance",
       "audio": null,
       "questionCountSource": "content",
-      "sectionSec": 1740,
+      "sectionSec": 1800,
       "modules": [
         {
           "id": "R1",
@@ -163,7 +166,7 @@
           "id": "R2",
           "contentRef": "reading.modules[id=R2]",
           "taskType": null,
-          "allocatedSec": 540,
+          "allocatedSec": 600,
           "perQuestionSec": null,
           "onExpire": "autoAdvance",
           "moduleEndScreen": "moduleEnd.reading",
@@ -192,7 +195,7 @@
           "id": "W1",
           "contentRef": "writing.modules[id=W1]",
           "taskKind": "build-set",
-          "perTaskSec": 600,
+          "perTaskSec": 420,
           "minWords": null,
           "onExpire": "autoAdvance",
           "moduleEndScreen": "taskEnd.writing"
@@ -201,7 +204,7 @@
           "id": "W2",
           "contentRef": "writing.modules[id=W2]",
           "taskKind": "email",
-          "perTaskSec": 600,
+          "perTaskSec": 420,
           "minWords": 80,
           "onExpire": "autoAdvance",
           "moduleEndScreen": "taskEnd.writing"
@@ -399,9 +402,40 @@
       "observed": "57분53초 화면녹화에서 직접 확인된 값/동작",
       "official": "시험 주관사가 공개한 공식 규격",
       "content": "studyground/sg2/assets/set1.js 콘텐츠 파일에서 그대로 가져온 값",
-      "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요"
+      "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요",
+      "spec": "발주처 확정 규격서 — _compare/TOEFL Test set up-최종수정사항.docx. 실측(observed)과 충돌하면 이쪽이 이긴다"
     },
     "entries": [
+      {
+        "path": "sections.listening.modules[*].perQuestionSec · fallbackPerQuestionSec",
+        "level": "spec",
+        "source": "최종수정사항.docx Listening Task 1·2 — \"the option to choose will appear on the right side given the 20 secs time limit\" / \"each question will appear after the conversation given 20 SECS. Limit TO ANSWER\". 종전 30초(assumed)를 대체",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.listening.promptOnScreen",
+        "level": "spec",
+        "source": "최종수정사항.docx Listening Task 1 — \"The speaker will say the question and it will not be shown in screen but only picture instead\". 단, 같은 문서 Task 2 는 \"each question will appear after the conversation\" 이므로 전면 숨김이 아니다. 자체 음성을 갖는 문항(block.perQuestionAudio:true = Task 1)에 한해 문구를 숨기고, 대화·강의형(prompt 가 곧 질문)은 그대로 표시한다",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.reading.modules[id=R2].allocatedSec · sections.reading.sectionSec",
+        "level": "spec",
+        "source": "최종수정사항.docx \"MODULE 2: 10 mins. (Time limit)\" — Reading Module 2 를 600초로 확정. 종전 540초(assumed)를 대체하며 sectionSec 은 1200+600=1800",
+        "verify": "MODULE 2 헤더가 Reading Module 2 를 가리키는 게 맞는지 발주처 1회 확인 권장 — 문서상 Reading 3개 태스크 뒤·Listening 앞에 위치"
+      },
+      {
+        "path": "sections.writing.tasks[id=W1].perTaskSec · tasks[id=W2].perTaskSec",
+        "level": "spec",
+        "source": "최종수정사항.docx Writing Task 1 \"time limit of 7 MINS. For 10 questions\", Task 2 \"with the time limit of 7 MINS\" → 420초. Task 3 는 \"10 MINS\" 로 종전 600초 유지",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.speaking.taskTypes.listenAndRepeat.responseSecByIndex",
+        "level": "spec",
+        "source": "최종수정사항.docx Speaking Task 1 — \"8 secs to repeat for the first 2 numbers, And 10 secs for the 3rd-5th statements and 12 secs to the 6th-7th statements\". 종전 전 문항 20초(assumed)를 대체. responseSec:12 는 8번째 이후 문항용 폴백",
+        "verify": "없음(확정)"
+      },
       {
         "path": "sectionOrder",
         "level": "observed",

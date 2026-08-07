@@ -265,7 +265,8 @@ var spkText = textOf(spkNode);
 var rows = window.SG_INSTRUCTION.speakingRows();
 check('speaking 유형 수', rows.length, 2);
 check('speaking 문항 합계', rows[0].count + rows[1].count, 11);
-ok('directions 표에 응답시간(20s/45s)', spkText.indexOf('20 s') >= 0 && spkText.indexOf('45 s') >= 0);
+// Task 1 은 문항별 8/10/12초라 단일 숫자가 아니라 범위로 적는다(최종수정사항.docx).
+ok('directions 표에 응답시간(8–12s/45s)', spkText.indexOf('8\u201312 s') >= 0 && spkText.indexOf('45 s') >= 0);
 ok('directions 표에 유형 라벨', spkText.indexOf('Listen and Repeat') >= 0 && spkText.indexOf('Take an Interview') >= 0);
 
 var me = mend.filter(function (s) { return s.section === 'listening' && s.module === 1; })[0];

@@ -15,7 +15,7 @@
 //     exam.css / exam-runtime.html / exam-render-{instruction,listening,reading,writing,
 //     speaking}.js 가 전부 바뀌었다. 이 파일들은 전부 SHELL_ASSETS(cache-first)라서
 //     VERSION 을 올리지 않으면 재방문 기기가 옛 UI(빨간 중앙 pill 등)를 계속 본다.
-const VERSION = 'sg-v7';   // v7: exam-shell.js 와 /en/test-nt/ 라우트 페이지를 프리캐시에 추가
+const VERSION = 'sg-v8';   // v8: 최종수정사항.docx 반영 — 리스닝 20초·Task1 문구 숨김, 라이팅 7/7/10분 2단, 스피킹 8/10/12초
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 

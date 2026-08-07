@@ -127,13 +127,18 @@ free.forEach(function (s) {
   check('ttsIdFor(' + q.id + ') = ' + id, !!ttsIndex[id]);
 });
 
-console.log('\n[7] 타이머 — writing 은 task scope sharedDeadline 600초');
+/* 타이머 — writing 은 task scope sharedDeadline.
+ * 최종수정사항.docx: Task 1 "7 MINS. For 10 questions", Task 2 "7 MINS", Task 3 "10 MINS"
+ * → W1/W2 420초, W3 600초. 종전에는 셋 다 600초였다. */
+console.log('\n[7] 타이머 — writing 은 task scope sharedDeadline (W1·W2 420s / W3 600s)');
+var EXPECT_TASK_SEC = { W1: 420, W2: 420, W3: 600 };
 var KF = window.SG_EXAM.clockKeyFor;
 mine.forEach(function (s) {
   var ts = (s.timers || []).concat(s.timer && (!s.timers || s.timers.indexOf(s.timer) < 0) ? [s.timer] : []);
   var task = null;
   ts.forEach(function (t) { if (t && t.scope === 'task') task = t; });
-  check(s.id + ' task 타이머', !!task && task.seconds === 600 && task.sharedDeadline === true,
+  var want = EXPECT_TASK_SEC[s.id.split('.')[2]];
+  check(s.id + ' task 타이머 (' + want + 's)', !!task && task.seconds === want && task.sharedDeadline === true,
     task ? task.seconds + 's key=' + KF(s, task) : 'none');
 });
 // 같은 태스크의 화면들은 같은 clock key 를 공유해야 만료가 한 번에 온다

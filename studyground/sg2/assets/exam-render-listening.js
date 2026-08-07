@@ -52,6 +52,37 @@
   function warn(msg, e) { if (root.console && root.console.warn) root.console.warn('[SG_LISTEN] ' + msg, e || ''); }
   function store() { return root.SG_STORE || null; }
 
+  /* 문항 문구를 화면에 그릴지.
+   *
+   * 최종수정사항.docx Listening Task 1: "The speaker will say the question and it will not be
+   * shown in screen but only picture instead" — 질문을 음성으로만 읽고 화면에는 그림과 선택지만 둔다.
+   * 같은 문서 Task 2: "each question will appear after the conversation" — 대화·강의형은
+   * 문항이 화면에 **나타난다**.
+   *
+   * 두 규칙을 가르는 건 콘텐츠다. Task 1 문항만 자체 음성(q.audio)을 갖고
+   * (block.perQuestionAudio:true · layout:'short-response'), prompt 는 "Listen to the question
+   * and select the best response." 라는 안내문일 뿐이다. Task 2 문항은 자체 음성이 없고
+   * prompt 가 곧 질문이다 — 이걸 가리면 답을 할 수 없다.
+   *
+   * 따라서 config 의 sections.listening.promptOnScreen:false 는 "음성이 질문을 대신하는 문항에
+   * 한해 문구를 숨긴다"로 해석한다. 키가 없는 프로필(IELTS)은 종전대로 항상 그린다. */
+  /* 조회 순서는 exam-render-instruction.js 의 speakingTaskConfig() 와 같다 —
+   * 런타임 주입 → 로드된 config → 내장 폴백. */
+  function listeningCfg() {
+    var t = null;
+    if (root.SG_RUNTIME && typeof root.SG_RUNTIME.timing === 'function') t = root.SG_RUNTIME.timing();
+    if (!t && root.SG_TIMING && typeof root.SG_TIMING.config === 'function') t = root.SG_TIMING.config();
+    if (!t && root.SG_TIMING && root.SG_TIMING.FALLBACK) t = root.SG_TIMING.FALLBACK;
+    return (t && t.sections && t.sections.listening) || null;
+  }
+
+  function spokenQuestionOnly(block, q) {
+    var sec = listeningCfg();
+    if (!sec || sec.promptOnScreen !== false) return false;
+    if (block && block.perQuestionAudio) return true;
+    return !!(q && q.layout === 'short-response' && q.audio);
+  }
+
   function el(tag, cls) {
     var n = doc.createElement(tag);
     if (cls) n.className = cls;
@@ -760,7 +791,7 @@
     var qwrap = el('div', hasLiveAudio ? 'lst-q is-waiting' : 'lst-q');
 
     if (q) {
-      var pair = promptPair(q);
+      var pair = spokenQuestionOnly(block, q) ? null : promptPair(q);
       if (pair) {
         /* 문항 번호 접두("Q29 · ")는 붙이지 않는다 — 서브바가 'Question 29 of 32' 를
          * 이미 표시하고, 실측 900s 프레임의 문항 문구에도 번호가 없다. */
