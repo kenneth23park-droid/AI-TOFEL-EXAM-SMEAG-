@@ -7,7 +7,8 @@ field here and every stream sees it.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -23,6 +24,7 @@ class StudentOut(ORMModel):
     student_no: str
     name: str
     klass: str = ""
+    campus: str = ""
 
 
 class ExamOut(ORMModel):
@@ -37,6 +39,7 @@ class SectionScoreOut(ORMModel):
     raw_total: float
     scaled: int
     max_score: int = SECTION_MAX
+    module: str = ""
 
 
 class QuestionResponseOut(ORMModel):
@@ -46,6 +49,14 @@ class QuestionResponseOut(ORMModel):
     student_answer: str
     correct_answer: str
     is_correct: bool
+    # architecture.md 7.3 — additive only, so existing consumers keep working.
+    question_key: str = ""
+    qtype: str = "MCQ"
+    module: str = ""
+    feedback: str = ""
+    auto_score: float | None = None
+    max_score: float = 1
+    audio_ref: str = ""
 
 
 class RubricScoreOut(ORMModel):
@@ -54,6 +65,7 @@ class RubricScoreOut(ORMModel):
     score: float
     max_score: float
     comment: str = ""
+    band: float | None = None       # IELTS only, 0.5 steps
 
 
 class FeedbackOut(ORMModel):
@@ -75,8 +87,19 @@ class AttemptSummary(ORMModel):
     total_score: int
     total_max: int = TOTAL_MAX
     grade: str
-    status: str
+    status: str                     # in_progress | scoring | completed
     sections: dict[str, int] = Field(default_factory=dict)   # skill → scaled /30
+
+    # architecture.md 7.3 — admin list columns, all optional for back-compat.
+    session: str | None = None
+    campus: str = ""
+    exam_date: date | None = None
+    submitted_count: int = 0
+    total_questions: int = 0
+    feedback_progress: int = 0      # 0..100
+    profile: str = "toefl"
+    scale: str = "toefl120"
+    band_score: float | None = None  # IELTS overall band; None on the TOEFL scale
 
 
 class AttemptDetail(AttemptSummary):
@@ -115,6 +138,126 @@ class RescoreResponse(BaseModel):
     fell_back: bool = False
     note: str = ""
     feedback: list[FeedbackOut] = Field(default_factory=list)
+
+
+# ── runtime API (architecture.md §7.1 — Stories 3.2 / 3.3 / 3.5) ──────────
+# Additive only: nothing above this line changes shape.
+
+
+class AttemptCreateIn(BaseModel):
+    student_no: str
+    exam_code: str
+    name: str = ""                      # used only when the 학번 is new
+    klass: str = ""
+    profile: str = "toefl"              # toefl | ielts
+    campus: str = ""
+    content_hash: str = ""
+    timing_hash: str = ""
+    session: str = ""                   # client-minted offline id, if it has one
+
+
+class AttemptCreateOut(BaseModel):
+    attempt_id: int
+    session: str
+    server_time: datetime               # client derives serverNowOffset (§5.5)
+    resume: bool = False
+    status: str = "in_progress"
+    total_questions: int = 0
+
+
+class CursorIn(BaseModel):
+    screen_id: str = ""
+    screen_index: int = 0
+    phase_index: int = 0
+
+
+class AttemptStateIn(BaseModel):
+    cursor: CursorIn | None = None
+    clocks: dict[str, int] = Field(default_factory=dict)   # clock key → epoch ms
+
+
+class AttemptStateOut(BaseModel):
+    session: str | None = None
+    status: str
+    cursor: dict | None = None
+    clocks: dict = Field(default_factory=dict)
+    answered_count: int = 0
+    server_time: datetime
+
+
+class AnswerItemIn(BaseModel):
+    question_key: str
+    skill: str = ""
+    module: str = ""
+    qtype: str = ""
+    no: int | None = None
+    answer: Any = None                  # int index | str | list[str] | None
+    elapsed_ms: int = 0
+    prompt: str = ""
+
+
+class AnswersIn(BaseModel):
+    items: list[AnswerItemIn] = Field(default_factory=list)
+    client_seq: int | None = None
+
+
+class RejectedAnswer(BaseModel):
+    question_key: str
+    reason: str
+
+
+class AnswersOut(BaseModel):
+    accepted: int = 0
+    rejected: list[RejectedAnswer] = Field(default_factory=list)
+    submitted_count: int = 0
+
+
+class MediaUploadIn(BaseModel):
+    question_key: str
+    mime: str = "audio/webm"
+    duration_ms: int = 0
+    data_b64: str = ""
+
+
+class MediaUploadOut(BaseModel):
+    audio_ref: str
+    bytes: int
+    sha256: str
+    storage: str = "file"
+    asset_id: int | None = None
+
+
+class EventIn(BaseModel):
+    ts: int | None = None               # client epoch ms, informational
+    type: str
+    screen_id: str = ""
+    detail: Any = ""
+
+
+class EventsIn(BaseModel):
+    events: list[EventIn] = Field(default_factory=list)
+
+
+class AttemptSubmitIn(BaseModel):
+    client_finished_at: datetime | None = None
+    answered_count: int = 0
+
+
+class AttemptSubmitOut(BaseModel):
+    attempt_id: int
+    status: str = "scoring"
+    submitted_count: int = 0
+    total_questions: int = 0
+    feedback_progress: int = 0
+    already_submitted: bool = False
+
+
+class AttemptResultPending(BaseModel):
+    """Returned while auto-scoring has not finished (architecture.md §7.1)."""
+
+    attempt_id: int
+    status: str = "scoring"
+    ready: bool = False
 
 
 class HealthOut(BaseModel):

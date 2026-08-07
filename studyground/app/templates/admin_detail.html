@@ -1,0 +1,103 @@
+{% extends "admin_base.html" %}
+
+{% block subtitle %}
+<p class="sub attempt-head">
+  <span class="mono">{{ a.session or '—' }}</span>
+  <span class="dot">·</span>{{ at('detail.year') }} {{ a.exam_date.year if a.exam_date else a.taken_at.year }}
+  <span class="dot">·</span>{{ at('detail.campus') }} {{ a.campus or a.student.campus or '—' }}
+  <span class="dot">·</span>{{ at('col.examDate') }} {{ a.exam_date.isoformat() if a.exam_date else '—' }}
+  <span class="dot">·</span><b>{{ a.student.name }}</b> <span class="dim">{{ a.student.student_no }}</span>
+  <span class="dot">·</span><span class="chip">{{ a.exam.code }}</span>
+</p>
+{% endblock %}
+
+{% block headright %}
+<div class="head-right">
+  <span class="mode-tag {{ 'edit' if editable else 'read' }}">
+    {{ at('detail.editing') if editable else at('detail.readonly') }}
+  </span>
+  <div class="progress full-w {{ 'zero' if progress == 0 else ('full' if progress >= 100 else 'part') }}"
+       id="attempt-progress">
+    <span class="progress-bar"><i style="width: {{ progress }}%"></i></span>
+    <span class="progress-v">{{ progress }}%</span>
+  </div>
+  <a class="btn small ghost" href="/admin/answers?lang={{ lang }}">{{ at('answers.title') }}</a>
+</div>
+{% endblock %}
+
+{% block content %}
+{% if request.query_params.get('saved') == '1' %}
+  <p class="flash">{{ at('detail.saved') }}</p>
+{% elif request.query_params.get('saved') == '0' %}
+  <p class="flash err">{{ at('detail.saveFailed') }}</p>
+{% endif %}
+
+<div class="tabs" role="tablist" data-tabs>
+  {% for tab in tabs %}
+  <a class="tab {{ 'on' if loop.first else '' }}" role="tab" href="#{{ tab }}" data-tab="{{ tab }}">
+    {{ t('skill.' ~ tab) | upper }}
+    <span class="tab-n">{{ rows_by_tab.get(tab, []) | length }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+{% for tab in tabs %}
+{% set rows = rows_by_tab.get(tab, []) %}
+<section class="tab-panel {{ 'on' if loop.first else '' }}" id="{{ tab }}" data-panel="{{ tab }}">
+  {% if not rows %}
+    <p class="empty">{{ at('detail.noRows', skill=t('skill.' ~ tab)) }}</p>
+  {% else %}
+    {% for r in rows %}
+    <article class="card qcard" data-response="{{ r.id }}">
+      <header class="qcard-head">
+        <span class="qtag">{{ qtype_label.get(r.qtype, r.qtype) }}</span>
+        <span class="qno">{{ t('detail.qNo') }} {{ r.no }}</span>
+        {% if r.module %}<span class="qmod mono">{{ r.module }}</span>{% endif %}
+        {% if r.auto_score is none %}
+          <span class="mark manual">{{ at('detail.manual') }}</span>
+        {% elif r.is_correct %}
+          <span class="mark ok">{{ t('detail.correct') }}</span>
+        {% else %}
+          <span class="mark no">{{ t('detail.wrong') }}</span>
+        {% endif %}
+      </header>
+
+      <p class="qprompt">{{ r.prompt }}</p>
+
+      <div class="answer-grid">
+        <div class="answer-box">
+          <h4>{{ at('detail.studentAnswer') }}</h4>
+          {% if r.student_answer %}
+            <p>{{ r.student_answer }}</p>
+          {% else %}
+            <p class="not-submitted">{{ at('detail.notSubmitted') }}</p>
+          {% endif %}
+        </div>
+        <div class="answer-box">
+          <h4>{{ at('detail.correctAnswerFull') }}</h4>
+          <p>{{ r.correct_answer or '—' }}</p>
+        </div>
+      </div>
+
+      <form class="fb-form" method="post" action="/admin/answers/{{ a.id }}/feedback"
+            data-response="{{ r.id }}">
+        <input type="hidden" name="response_id" value="{{ r.id }}">
+        <input type="hidden" name="tab" value="{{ tab }}">
+        <input type="hidden" name="mode" value="{{ 'write' if editable else 'view' }}">
+        <label class="fb-label" for="fb-{{ r.id }}">{{ at('detail.feedbackLabel') }}</label>
+        <textarea id="fb-{{ r.id }}" name="feedback" rows="3"
+                  placeholder="{{ at('detail.feedbackPlaceholder') }}"
+                  {% if not editable %}readonly{% endif %}>{{ r.feedback }}</textarea>
+        {% if editable %}
+        <div class="fb-actions">
+          <button class="btn small" type="submit">{{ at('detail.save') }}</button>
+          <span class="fb-status" aria-live="polite"></span>
+        </div>
+        {% endif %}
+      </form>
+    </article>
+    {% endfor %}
+  {% endif %}
+</section>
+{% endfor %}
+{% endblock %}

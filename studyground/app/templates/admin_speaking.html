@@ -1,0 +1,130 @@
+{% extends "admin_base.html" %}
+
+{% block subtitle %}<p class="sub">{{ at('speaking.intro') }}</p>{% endblock %}
+
+{% block headright %}
+{% if a %}
+<div class="head-right">
+  <span class="mode-tag edit">{{ at('speaking.reviewed', done=reviewed, total=cards|length) }}</span>
+  <div class="speed-toggle" data-speed-toggle>
+    <span class="sub">{{ at('speaking.speed') }}</span>
+    <button type="button" class="btn small ghost" data-speed="0.75">0.75x</button>
+    <button type="button" class="btn small ghost on" data-speed="1">1.0x</button>
+    <button type="button" class="btn small ghost" data-speed="1.25">1.25x</button>
+  </div>
+  <a class="btn small ghost" href="/admin/speaking?lang={{ lang }}">{{ at('speaking.title') }}</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if not a %}
+  {% if not rows %}
+    <p class="empty">{{ at('speaking.empty') }}</p>
+  {% else %}
+  <div class="table-wrap">
+    <table class="scores admin-table">
+      <thead>
+        <tr>
+          <th>{{ at('col.session') }}</th>
+          <th>{{ at('col.examName') }}</th>
+          <th>{{ t('col.student') }}</th>
+          <th>{{ at('col.campus') }}</th>
+          <th>{{ at('col.examDate') }}</th>
+          <th class="w-progress">{{ at('col.progress') }}</th>
+          <th>{{ at('col.manage') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        {% set p = r.feedback_progress %}
+        <tr>
+          <td class="mono">{{ r.session or '—' }}</td>
+          <td><span class="chip">{{ r.exam.code }}</span></td>
+          <td><b>{{ r.student.name }}</b> <span class="dim">{{ r.student.student_no }}</span></td>
+          <td>{{ r.campus or r.student.campus or '—' }}</td>
+          <td class="mono">{{ r.exam_date.isoformat() if r.exam_date else '—' }}</td>
+          <td>
+            <div class="progress {{ 'zero' if p == 0 else ('full' if p >= 100 else 'part') }}">
+              <span class="progress-bar"><i style="width: {{ p }}%"></i></span>
+              <span class="progress-v">{{ p }}%</span>
+            </div>
+          </td>
+          <td class="manage">
+            <a class="strong" href="/admin/speaking/{{ r.id }}?lang={{ lang }}">{{ at('action.write') }}</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+{% else %}
+  <p class="sub attempt-head">
+    <span class="mono">{{ a.session or '—' }}</span>
+    <span class="dot">·</span><b>{{ a.student.name }}</b>
+    <span class="dim">{{ a.student.student_no }}</span>
+    <span class="dot">·</span><span class="chip">{{ a.exam.code }}</span>
+    <span class="dot">·</span>{{ a.exam_date.isoformat() if a.exam_date else '—' }}
+  </p>
+
+  {% if not cards %}
+    <p class="empty">{{ at('speaking.empty') }}</p>
+  {% endif %}
+
+  {% for c in cards %}
+  {% set r = c.r %}
+  <article class="card qcard" data-response="{{ r.id }}">
+    <header class="qcard-head">
+      <span class="qtag">{{ c.kind | upper }}</span>
+      <span class="qno">{{ t('detail.qNo') }} {{ r.no }}</span>
+      {% if r.module %}<span class="qmod mono">{{ r.module }}</span>{% endif %}
+      {% if r.feedback %}<span class="mark ok">{{ at('detail.saved') }}</span>{% endif %}
+    </header>
+
+    <p class="qprompt">{{ r.prompt or at('speaking.prompt') ~ ' ' ~ r.question_key }}</p>
+
+    <div class="answer-grid">
+      <div class="answer-box">
+        <h4>{{ at('speaking.recording') }}</h4>
+        {% if c.asset_id %}
+          <audio controls preload="none" data-audio src="/api/admin/media/{{ c.asset_id }}"></audio>
+          <p class="sub">{{ at('speaking.duration') }}: {{ c.duration_s }}s</p>
+        {% else %}
+          <p class="not-submitted">{{ at('speaking.noRecording') }}</p>
+        {% endif %}
+      </div>
+      <div class="answer-box">
+        <h4>{{ at('detail.correctAnswerFull') }}</h4>
+        <p>{{ r.correct_answer or '—' }}</p>
+      </div>
+    </div>
+
+    <form class="fb-form" method="post" action="/admin/answers/{{ a.id }}/feedback"
+          data-response="{{ r.id }}">
+      <input type="hidden" name="response_id" value="{{ r.id }}">
+      <input type="hidden" name="tab" value="speaking">
+      <input type="hidden" name="mode" value="write">
+      <label class="fb-label" for="sc-{{ r.id }}">
+        {{ at('speaking.score') }} <span class="dim">/ {{ '%g' % r.max_score }}</span>
+      </label>
+      <input class="score-input" id="sc-{{ r.id }}" type="number" name="score" step="0.5"
+             min="0" max="{{ r.max_score }}"
+             value="{{ '' if r.auto_score is none else '%g' % r.auto_score }}"
+             {% if not editable %}readonly{% endif %}>
+      <label class="fb-label" for="fb-{{ r.id }}">{{ at('detail.feedbackLabel') }}</label>
+      <textarea id="fb-{{ r.id }}" name="feedback" rows="3"
+                placeholder="{{ at('detail.feedbackPlaceholder') }}"
+                {% if not editable %}readonly{% endif %}>{{ r.feedback }}</textarea>
+      {% if editable %}
+      <div class="fb-actions">
+        <button class="btn small" type="submit">{{ at('detail.save') }}</button>
+        <span class="fb-status" aria-live="polite"></span>
+      </div>
+      {% endif %}
+    </form>
+  </article>
+  {% endfor %}
+{% endif %}
+{% endblock %}

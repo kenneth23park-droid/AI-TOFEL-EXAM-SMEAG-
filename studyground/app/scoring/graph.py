@@ -1,10 +1,17 @@
-"""LangGraph scoring pipeline — only the feedback node differs between modes.
+"""LangGraph scoring pipeline — the shape lives in `graph_spec`, not in here.
 
-    ingest → analyze → route ─┬→ offline_feedback ─┐
-                              └→ online_feedback  ─┴→ compose → END
+    ingest → autoscore → analyze ─┬→ rubric_online  ─┐
+                                  ├→ rubric_offline ─┼→ scale → route ─┬→ offline_feedback ─┐
+                                  └────────────────→ ┘                 └→ online_feedback  ─┴→ compose → END
 
-If langgraph is not installed the very same node functions are executed in
-sequence by `_SequentialGraph`, so LOCAL mode never has a hard dependency on it.
+Both runners walk the same declaration (architecture.md 8.4), so adding a node
+means editing `graph_spec.py` alone. If langgraph is not installed the very same
+node functions are executed by `_SequentialGraph`, so LOCAL mode never has a hard
+dependency on it — and, by construction, it produces the identical result.
+
+`_SequentialGraph` deliberately has **no** try/except: node exceptions propagate
+to the caller exactly as they did before this refactor. Exception isolation lives
+inside the nodes (`online_feedback`, `rubric_online`, `autoscore`, `scale`).
 """
 
 from __future__ import annotations
@@ -12,7 +19,7 @@ from __future__ import annotations
 import logging
 
 from app.schemas import AttemptDetail, FeedbackBundle
-from app.scoring import nodes
+from app.scoring import graph_spec, nodes
 from app.scoring.nodes import ScoringState
 
 log = logging.getLogger("studyground.scoring")
@@ -26,17 +33,43 @@ class _SequentialGraph:
 
     def invoke(self, state: ScoringState) -> ScoringState:
         merged: ScoringState = dict(state)  # type: ignore[assignment]
-        merged.update(nodes.ingest(merged))
-        merged.update(nodes.analyze(merged))
-        branch = nodes.route(merged)
-        merged.update(getattr(nodes, branch)(merged))
-        merged.update(nodes.compose(merged))
-        return merged
+        node = graph_spec.ENTRY
+
+        for _ in range(graph_spec.MAX_STEPS):
+            if node == graph_spec.END:
+                return merged
+            fn = graph_spec.NODES.get(node)
+            if fn is None:
+                raise KeyError(f"unknown scoring node {node!r}")
+
+            merged.update(fn(merged) or {})
+
+            branch = graph_spec.CONDITIONAL.get(node)
+            if branch is not None:
+                decide, mapping = branch
+                key = decide(merged)
+                if key not in mapping:
+                    raise KeyError(f"{node!r} branched to unknown key {key!r}")
+                node = mapping[key]
+            else:
+                if node not in graph_spec.NEXT:
+                    raise KeyError(f"{node!r} has no outgoing edge")
+                node = graph_spec.NEXT[node]
+
+        raise RuntimeError(
+            f"scoring graph did not reach END within {graph_spec.MAX_STEPS} steps"
+        )
 
 
 def _build():
     """Compile the real StateGraph; fall back to sequential execution if unavailable."""
     global _backend
+
+    problems = graph_spec.validate()
+    if problems:
+        # A malformed declaration would break both runners — say so loudly, once.
+        log.error("graph_spec is inconsistent: %s", "; ".join(problems))
+
     try:
         from langgraph.graph import END, START, StateGraph
     except ImportError:
@@ -46,22 +79,18 @@ def _build():
 
     try:
         builder = StateGraph(ScoringState)
-        builder.add_node("ingest", nodes.ingest)
-        builder.add_node("analyze", nodes.analyze)
-        builder.add_node("offline_feedback", nodes.offline_feedback)
-        builder.add_node("online_feedback", nodes.online_feedback)
-        builder.add_node("compose", nodes.compose)
+        for name, fn in graph_spec.NODES.items():
+            builder.add_node(name, fn)
 
-        builder.add_edge(START, "ingest")
-        builder.add_edge("ingest", "analyze")
-        builder.add_conditional_edges(
-            "analyze",
-            nodes.route,
-            {"offline_feedback": "offline_feedback", "online_feedback": "online_feedback"},
-        )
-        builder.add_edge("offline_feedback", "compose")
-        builder.add_edge("online_feedback", "compose")
-        builder.add_edge("compose", END)
+        builder.add_edge(START, graph_spec.ENTRY)
+        for src, dst in graph_spec.EDGES:
+            builder.add_edge(src, END if dst == graph_spec.END else dst)
+        for src, (decide, mapping) in graph_spec.CONDITIONAL.items():
+            builder.add_conditional_edges(
+                src,
+                decide,
+                {k: (END if v == graph_spec.END else v) for k, v in mapping.items()},
+            )
 
         graph = builder.compile()
         _backend = "langgraph"
@@ -77,6 +106,13 @@ def get_graph():
     if _compiled is None:
         _compiled = _build()
     return _compiled
+
+
+def reset() -> None:
+    """Drop the cached graph — used by tests that toggle langgraph availability."""
+    global _compiled, _backend
+    _compiled = None
+    _backend = "sequential"
 
 
 def backend() -> str:

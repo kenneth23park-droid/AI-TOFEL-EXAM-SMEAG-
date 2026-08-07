@@ -45,6 +45,9 @@ class Settings:
     default_lang: str             # UI 기본은 영어
     seed_on_start: bool
     sqlite_path: Path
+    media_root: Path              # FileMediaStore root (architecture.md 6.4 strategy A)
+    max_media_bytes: int          # per-upload ceiling for a Speaking recording
+    default_profile: str          # 'toefl' | 'ielts' — seeds attempts.profile/scale
 
     @property
     def is_local(self) -> bool:
@@ -78,6 +81,20 @@ def get_settings() -> Settings:
     )
     sqlite_path = Path(_env("SQLITE_PATH") or default_sqlite)
 
+    # Recordings sit next to the SQLite file so a local install is one folder to back up.
+    default_media = Path("/tmp/sg-media") if _env("VERCEL") else PROJECT_DIR / "data" / "media"
+    media_root = Path(_env("MEDIA_ROOT") or default_media)
+
+    profile = _env("DEFAULT_PROFILE", "toefl").lower()
+    if profile not in ("toefl", "ielts"):
+        profile = "toefl"
+
+    try:
+        # 8 MB covers a ~20 s opus clip many times over; a bad client can't fill the disk.
+        max_media_bytes = int(_env("MAX_MEDIA_BYTES", "8388608"))
+    except ValueError:
+        max_media_bytes = 8388608
+
     database_url = _env("DATABASE_URL")
     if mode == "local" or not database_url:
         database_url = f"sqlite:///{sqlite_path}"
@@ -93,4 +110,7 @@ def get_settings() -> Settings:
         default_lang=_env("DEFAULT_LANG", "en"),
         seed_on_start=_env("SEED_ON_START", "1") not in ("0", "false", "no"),
         sqlite_path=sqlite_path,
+        media_root=media_root,
+        max_media_bytes=max_media_bytes,
+        default_profile=profile,
     )

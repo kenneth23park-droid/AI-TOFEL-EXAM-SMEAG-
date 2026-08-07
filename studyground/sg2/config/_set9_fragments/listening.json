@@ -1,0 +1,775 @@
+{
+  "id": "listening",
+  "label": "Listening",
+  "labelKo": "리스닝",
+  "timeLimitSec": null,
+  "modules": [
+    {
+      "id": "L1",
+      "label": "Listening Module 1",
+      "timeLimitSec": null,
+      "blocks": [
+        {
+          "kind": "audio-set",
+          "heading": "Questions 1-12",
+          "instruction": "Listen to the question and select the best response from the choices.",
+          "questions": [
+            {
+              "id": "L1-1",
+              "kind": "mcq",
+              "no": 1,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "I usually study in the library.",
+                "It’s on the second floor, near the elevators.",
+                "The building was innovated last year.",
+                "It’s open until midnight during finals."
+              ],
+              "answer": 1,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q01.mp3"
+            },
+            {
+              "id": "L1-2",
+              "kind": "mcq",
+              "no": 2,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "At ten o’clock, I believe.",
+                "The topic is really interesting.",
+                "I think it’s in Hall B this week.",
+                "The professor is new this semester."
+              ],
+              "answer": 0,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q02.mp3"
+            },
+            {
+              "id": "L1-3",
+              "kind": "mcq",
+              "no": 3,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "I joined the team last month.",
+                "We’re meeting in the usual room, right?",
+                "Well, we can always start with whoever shows up.",
+                "Sarah said she might bring snacks."
+              ],
+              "answer": 2,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q03.mp3"
+            },
+            {
+              "id": "L1-4",
+              "kind": "mcq",
+              "no": 4,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "I saw him at the cafeteria earlier.",
+                "He’s always forgetting things.",
+                "The office supply store closes at six.",
+                "There’s a supply closest down the hall."
+              ],
+              "answer": 3,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q04.mp3"
+            },
+            {
+              "id": "L1-5",
+              "kind": "mcq",
+              "no": 5,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "The classroom is on the third floor.",
+                "The bulb might need replacing.",
+                "I prefer natural lighting.",
+                "The switch is right by the door."
+              ],
+              "answer": 1,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q05.mp3"
+            },
+            {
+              "id": "L1-6",
+              "kind": "mcq",
+              "no": 6,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "There’s a kiosk by the main entrance.",
+                "The train departs at six.",
+                "I usually drive to work.",
+                "A round trip is about forty dollars."
+              ],
+              "answer": 0,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q06.mp3"
+            },
+            {
+              "id": "L1-7",
+              "kind": "mcq",
+              "no": 7,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "My phone battery is almost dead too.",
+                "Did you check the circuit breaker?",
+                "That would explain why the streetlights are off too.",
+                "I was in the middle of watching something."
+              ],
+              "answer": 2,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q07.mp3"
+            },
+            {
+              "id": "L1-8",
+              "kind": "mcq",
+              "no": 8,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "The class is in room 201.",
+                "I enjoy the lectures.",
+                "Did I miss anything important?",
+                "I overslept."
+              ],
+              "answer": 3,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q08.mp3"
+            },
+            {
+              "id": "L1-9",
+              "kind": "mcq",
+              "no": 9,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "The presentation went really well.",
+                "I think Group B is scheduled first.",
+                "The schedule should be posted online.",
+                "The conference room is upstairs."
+              ],
+              "answer": 1,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q09.mp3"
+            },
+            {
+              "id": "L1-10",
+              "kind": "mcq",
+              "no": 10,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "I’m still working on the conclusion.",
+                "the seminar was very informative.",
+                "It’s supposed to be at least ten pages.",
+                "The topic is on climate change."
+              ],
+              "answer": 0,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q10.mp3"
+            },
+            {
+              "id": "L1-11",
+              "kind": "mcq",
+              "no": 11,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "I think the game is almost over.",
+                "The show starts at eight.",
+                "Sure, no problem.",
+                "What channel is this on?"
+              ],
+              "answer": 2,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q11.mp3"
+            },
+            {
+              "id": "L1-12",
+              "kind": "mcq",
+              "no": 12,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "The group project is due Friday.",
+                "Everyone’s been so busy with midterms.",
+                "The library closes at nine.",
+                "How about next Tuesday instead?"
+              ],
+              "answer": 3,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L1-q12.mp3"
+            }
+          ],
+          "perQuestionAudio": true
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 13-14",
+          "instruction": "Listen to a conversation.",
+          "questions": [
+            {
+              "id": "L1-13",
+              "kind": "mcq",
+              "no": 13,
+              "prompt": "What are the speakers mainly discussing?",
+              "choices": [
+                "The woman’s academic project progress",
+                "A request for a deadline extension",
+                "A professor’s grading policies",
+                "Research methodology problems"
+              ],
+              "answer": 0
+            },
+            {
+              "id": "L1-14",
+              "kind": "mcq",
+              "no": 14,
+              "prompt": "When will the man be available to help the woman?",
+              "choices": [
+                "This weekend",
+                "In three weeks",
+                "After the final presentation",
+                "Next week"
+              ],
+              "answer": 3
+            }
+          ],
+          "audio": "media/audio/set9/set9-L1-13-14.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 15-16",
+          "instruction": "Listen to a conversation.",
+          "questions": [
+            {
+              "id": "L1-15",
+              "kind": "mcq",
+              "no": 15,
+              "prompt": "What problem does the man have?",
+              "choices": [
+                "He forgot to make a reservation.",
+                "His equipment reservation was not recorded.",
+                "The microscope he needs is broken.",
+                "He missed his biology lab session."
+              ],
+              "answer": 1
+            },
+            {
+              "id": "L1-16",
+              "kind": "mcq",
+              "no": 16,
+              "prompt": "What will the woman probably do next?",
+              "choices": [
+                "Contact the biology department",
+                "Reserve a different microscope",
+                "Postpone the man's experiment",
+                "Look up the man's booking information"
+              ],
+              "answer": 3
+            }
+          ],
+          "audio": "media/audio/set9/set9-L1-15-16.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 17-18",
+          "instruction": "Listen to a conversation.",
+          "questions": [
+            {
+              "id": "L1-17",
+              "kind": "mcq",
+              "no": 17,
+              "prompt": "Why does the man want to participate in the garage sale?",
+              "choices": [
+                "He wants to help the woman move.",
+                "He needs money for new furniture.",
+                "He has items he wants to sell.",
+                "He enjoys meeting new people."
+              ],
+              "answer": 2
+            },
+            {
+              "id": "L1-18",
+              "kind": "mcq",
+              "no": 18,
+              "prompt": "What can be inferred about the woman?",
+              "choices": [
+                "She has never held a garage sale before.",
+                "She has experience selling items this way.",
+                "She prefers to donate rather than sell.",
+                "She is planning to move soon."
+              ],
+              "answer": 1
+            }
+          ],
+          "audio": "media/audio/set9/set9-L1-17-18.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 19-20",
+          "instruction": "Listen to an announcement.",
+          "questions": [
+            {
+              "id": "L1-19",
+              "kind": "mcq",
+              "no": 19,
+              "prompt": "What is the main topic of the announcement?",
+              "choices": [
+                "A membership recruitment drive for a campus club",
+                "A game design workshop for interested students",
+                "A social gathering hosted by a club",
+                "A competition between organizations"
+              ],
+              "answer": 2
+            },
+            {
+              "id": "L1-20",
+              "kind": "mcq",
+              "no": 20,
+              "prompt": "What are attendees asked to bring?",
+              "choices": [
+                "Board games from home",
+                "Snacks to share",
+                "A registration fee",
+                "Their student IDs"
+              ],
+              "answer": 1
+            }
+          ],
+          "audio": "media/audio/set9/set9-L1-19-20.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 21-22",
+          "instruction": "Listen to an announcement.",
+          "questions": [
+            {
+              "id": "L1-21",
+              "kind": "mcq",
+              "no": 21,
+              "prompt": "What is the main purpose of the announcement?",
+              "choices": [
+                "To introduce visiting lecturers to students",
+                "To announce a new peer review assignment",
+                "To remind students of upcoming project deadlines",
+                "To inform students about a room change"
+              ],
+              "answer": 3
+            },
+            {
+              "id": "L1-22",
+              "kind": "mcq",
+              "no": 22,
+              "prompt": "What can be inferred about students in this class?",
+              "choices": [
+                "They will need to go to a different building",
+                "They should register for the lecture series soon",
+                "They can skip class on Monday if needed",
+                "They will receive extra credit for attending"
+              ],
+              "answer": 0
+            }
+          ],
+          "audio": "media/audio/set9/set9-L1-21-22.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 23-24",
+          "instruction": "Listen to an announcement.",
+          "questions": [
+            {
+              "id": "L1-23",
+              "kind": "mcq",
+              "no": 23,
+              "prompt": "Which of the following is true about the Health Sciences Shadowing Program?",
+              "choices": [
+                "It is available to students from any major",
+                "Participants will observe professionals weekly",
+                "The program runs during summer break",
+                "Students will assist with medical procedures"
+              ],
+              "answer": 1
+            },
+            {
+              "id": "L1-24",
+              "kind": "mcq",
+              "no": 24,
+              "prompt": "What should students include in their application?",
+              "choices": [
+                "Two faculty recommendation letters",
+                "A health screening report",
+                "Prior volunteer experience documentation",
+                "Immunization records and a personal statement"
+              ],
+              "answer": 3
+            }
+          ],
+          "audio": "media/audio/set9/set9-L1-23-24.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 25-28",
+          "instruction": "Listen to a talk.",
+          "questions": [
+            {
+              "id": "L1-25",
+              "kind": "mcq",
+              "no": 25,
+              "prompt": "What is the main topic of the talk?",
+              "choices": [
+                "The historical development of Newton's laws of motion",
+                "How moving objects overcome air resistance during turns",
+                "Different techniques cyclists use to increase their speed",
+                "How leaning helps maintain balance in turns"
+              ],
+              "answer": 3
+            },
+            {
+              "id": "L1-26",
+              "kind": "mcq",
+              "no": 26,
+              "prompt": "According to the speaker, what does the law of inertia state?",
+              "choices": [
+                "Objects in motion tend to continue straight",
+                "Heavier objects require more force to stop completely",
+                "Objects naturally slow down over time without applied force",
+                "All motion eventually comes to rest"
+              ],
+              "answer": 0
+            },
+            {
+              "id": "L1-27",
+              "kind": "mcq",
+              "no": 27,
+              "prompt": "What determines how much a cyclist must lean during a turn?",
+              "choices": [
+                "The weight of the bicycle and rider",
+                "The surface material of the road",
+                "Speed and curve sharpness",
+                "The direction of the wind"
+              ],
+              "answer": 2
+            },
+            {
+              "id": "L1-28",
+              "kind": "mcq",
+              "no": 28,
+              "prompt": "What will the speaker discuss next?",
+              "choices": [
+                "How Newton discovered the laws of motion",
+                "Road and track design applications",
+                "Safety equipment commonly used by cyclists",
+                "The key difference between bicycles and motorcycles"
+              ],
+              "answer": 1
+            }
+          ],
+          "audio": "media/audio/set9/set9-L1-25-28.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 29-32",
+          "instruction": "Listen to a talk.",
+          "questions": [
+            {
+              "id": "L1-29",
+              "kind": "mcq",
+              "no": 29,
+              "prompt": "What is the talk mainly about?",
+              "choices": [
+                "The history of dice games in educational settings",
+                "A tool for sparking ideas and interaction",
+                "How to become a professional fiction writer",
+                "Traditional methods of overcoming writer's block"
+              ],
+              "answer": 1
+            },
+            {
+              "id": "L1-30",
+              "kind": "mcq",
+              "no": 30,
+              "prompt": "What does the speaker say is central to creative thinking?",
+              "choices": [
+                "Making unexpected connections",
+                "Following established story structures",
+                "Working independently without prompts",
+                "Planning narratives carefully in advance"
+              ],
+              "answer": 0
+            },
+            {
+              "id": "L1-31",
+              "kind": "mcq",
+              "no": 31,
+              "prompt": "Why does the speaker mention social gatherings?",
+              "choices": [
+                "To explain where picture dice were invented",
+                "To argue that writing is better done in groups",
+                "To compare professional and casual storytelling",
+                "To show another use of the dice"
+              ],
+              "answer": 3
+            },
+            {
+              "id": "L1-32",
+              "kind": "mcq",
+              "no": 32,
+              "prompt": "What will the speaker discuss next?",
+              "choices": [
+                "How to manufacture picture dice at home",
+                "Other icebreaker activities for social events",
+                "The psychology behind visual learning styles",
+                "A former student's work using this method"
+              ],
+              "answer": 3
+            }
+          ],
+          "audio": "media/audio/set9/set9-L1-29-32.mp3"
+        }
+      ]
+    },
+    {
+      "id": "L2",
+      "label": "Listening Module 2",
+      "timeLimitSec": null,
+      "blocks": [
+        {
+          "kind": "audio-set",
+          "heading": "Questions 1-3",
+          "instruction": "Listen to the question and select the best response from the choices.",
+          "questions": [
+            {
+              "id": "L2-1",
+              "kind": "mcq",
+              "no": 1,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "I think it starts at three.",
+                "The tutoring center is in the library.",
+                "Yes, I registered online yesterday.",
+                "I heard spots fill up fast."
+              ],
+              "answer": 2,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L2-q01.mp3"
+            },
+            {
+              "id": "L2-2",
+              "kind": "mcq",
+              "no": 2,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "It's in the administration building.",
+                "I applied for a scholarship last semester.",
+                "The deadline was extended.",
+                "You can also apply online now"
+              ],
+              "answer": 0,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L2-q02.mp3"
+            },
+            {
+              "id": "L2-3",
+              "kind": "mcq",
+              "no": 3,
+              "prompt": "Listen to the question and select the best response.",
+              "choices": [
+                "I'm leaning toward biology.",
+                "The deadline to declare is next month.",
+                "My advisor suggested I take a semester off.",
+                "Engineering requires the most credits."
+              ],
+              "answer": 0,
+              "layout": "short-response",
+              "audio": "media/audio/set9/set9-L2-q03.mp3"
+            }
+          ],
+          "perQuestionAudio": true
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 4-5",
+          "instruction": "Listen to a conversation.",
+          "questions": [
+            {
+              "id": "L2-4",
+              "kind": "mcq",
+              "no": 4,
+              "prompt": "What happened to the woman recently?",
+              "choices": [
+                "She dropped a linguistics course.",
+                "She received a spot in a seminar.",
+                "She changed her major to linguistics.",
+                "She met with Professor Hammond."
+              ],
+              "answer": 1
+            },
+            {
+              "id": "L2-5",
+              "kind": "mcq",
+              "no": 5,
+              "prompt": "What does the woman suggest the man do?",
+              "choices": [
+                "Email the professor directly",
+                "Attend the first class anyway",
+                "Wait until next semester",
+                "Prepare an alternative course option"
+              ],
+              "answer": 3
+            }
+          ],
+          "audio": "media/audio/set9/set9-L2-04-05.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 6-7",
+          "instruction": "Listen to a conversation.",
+          "questions": [
+            {
+              "id": "L2-6",
+              "kind": "mcq",
+              "no": 6,
+              "prompt": "What is the man’s main concern?",
+              "choices": [
+                "His rent is increasing significantly.",
+                "His apartment is too far from work.",
+                "His lease is about to expire.",
+                "His landlord is difficult to contact."
+              ],
+              "answer": 0
+            },
+            {
+              "id": "L2-7",
+              "kind": "mcq",
+              "no": 7,
+              "prompt": "What can be inferred about the man?",
+              "choices": [
+                "He plans to move to a new city soon.",
+                "He recently started a new job.",
+                "He has a history of paying rent on time.",
+                "He prefers to live with roommates."
+              ],
+              "answer": 2
+            }
+          ],
+          "audio": "media/audio/set9/set9-L2-06-07.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 8-11",
+          "instruction": "Listen to a talk.",
+          "questions": [
+            {
+              "id": "L2-8",
+              "kind": "mcq",
+              "no": 8,
+              "prompt": "What aspect of bird behavior does the speaker mainly discuss in this talk?",
+              "choices": [
+                "The physiology adaptations that allows birds to fly long distances",
+                "The seasonal patterns of food availability in different regions",
+                "The navigation methods birds use and challenges to migration",
+                "The evolutionary origins of migratory behavior in birds species"
+              ],
+              "answer": 2
+            },
+            {
+              "id": "L2-9",
+              "kind": "mcq",
+              "no": 9,
+              "prompt": "According to the speaker, which navigation method do migrating birds use during nighttime travel?",
+              "choices": [
+                "Detecting changes in air temperature",
+                "Following the Sun’s magnetic field patterns",
+                "Recognizing landscape features below",
+                "Observing positions of stars"
+              ],
+              "answer": 3
+            },
+            {
+              "id": "L2-10",
+              "kind": "mcq",
+              "no": 10,
+              "prompt": "Why does the speaker discuss glass buildings in relation to bird migration?",
+              "choices": [
+                "To give an example of how human development harms migrating birds",
+                "To explain why birds prefer to rest on artificial structures",
+                "To suggest that urban areas provide shelter for migratory species",
+                "To describe how birds have adapted to modem environments"
+              ],
+              "answer": 0
+            },
+            {
+              "id": "L2-11",
+              "kind": "mcq",
+              "no": 11,
+              "prompt": "Based on the talk, what can be inferred about the effects of climate change on bird migration?",
+              "choices": [
+                "Birds developing new navigation systems to cope with changes",
+                "Misaligned timing between arrival and food sources threatens birds",
+                "Warmer temperatures have made migration unnecessary for most species",
+                "Climate shifts affect birds in tropical breeding grounds"
+              ],
+              "answer": 1
+            }
+          ],
+          "audio": "media/audio/set9/set9-L2-08-11.mp3"
+        },
+        {
+          "kind": "audio-set",
+          "heading": "Questions 12-15",
+          "instruction": "Listen to a talk.",
+          "questions": [
+            {
+              "id": "L2-12",
+              "kind": "mcq",
+              "no": 12,
+              "prompt": "What is the speaker primarily explaining in this talk about jazz music?",
+              "choices": [
+                "The technical skills required to master jazz instruments",
+                "How jazz developed differently from classical music traditions",
+                "The way jazz musicians collaborate with their audiences",
+                "The nature and function of improvisation in jazz performance"
+              ],
+              "answer": 3
+            },
+            {
+              "id": "L2-13",
+              "kind": "mcq",
+              "no": 13,
+              "prompt": "According to the speaker, what makes jazz improvisation particularly demanding for musicians?",
+              "choices": [
+                "They must memorize numerous melodic variations before performing",
+                "Chord progressions in jazz are more complex than in other genres",
+                "Written scores require different interpretations at each concert",
+                "They must listen and respond to other players instantaneously"
+              ],
+              "answer": 3
+            },
+            {
+              "id": "L2-14",
+              "kind": "mcq",
+              "no": 14,
+              "prompt": "What is the speaker’s purpose in complaining jazz improvisation to having a conversation?",
+              "choices": [
+                "To illustrate how improvisation combines freedom with underlying structure",
+                "To emphasize that each musician develops a distinctive personal voice",
+                "To suggest that performers exchange musical ideas with one another",
+                "To explain why jazz feels more natural and accessible than others genres"
+              ],
+              "answer": 0
+            },
+            {
+              "id": "L2-15",
+              "kind": "mcq",
+              "no": 15,
+              "prompt": "What can be inferred from the discussion about how jazz influenced other musical genres?",
+              "choices": [
+                "Rock and blues musicians formally studied jazz theory before changing their approach",
+                "Classical composers were initially reluctant",
+                "Other genres previously placed greater emphasis on performing fixed compositions",
+                "Audiences in rock and blues gradually lost interest in predictable performances"
+              ],
+              "answer": 2
+            }
+          ],
+          "audio": "media/audio/set9/set9-L2-12-15.mp3"
+        }
+      ]
+    }
+  ]
+}

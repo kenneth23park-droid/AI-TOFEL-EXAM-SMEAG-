@@ -1,0 +1,4 @@
+# Runtime deps are deliberately minimal — the campus boxes are air-gapped and
+# every package is one more thing to patch by hand.
+numpy>=1.24        # qa/metrics.py, roi/roi_model.py
+# scoring/client.py, qa/stt_loopback.py, qa/calibrate.py use the stdlib only.

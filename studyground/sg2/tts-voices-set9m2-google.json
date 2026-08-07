@@ -1,0 +1,202 @@
+{
+  "provider": "google",
+  "audioEncoding": "MP3",
+  "items": [
+    {
+      "id": "set9-M2-sr-01",
+      "title": "M2 Q1 short response",
+      "kind": "short",
+      "segments": [
+        {
+          "speaker": "Speaker 1",
+          "voice": "en-US-Neural2-C",
+          "lang": "en-US",
+          "voice_name": "US-Ava",
+          "text": "Did you sign up for the tutoring sessions?"
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-sr-02",
+      "title": "M2 Q2 short response",
+      "kind": "short",
+      "segments": [
+        {
+          "speaker": "Speaker 2",
+          "voice": "en-US-Neural2-E",
+          "lang": "en-US",
+          "voice_name": "US-Emma",
+          "text": "Where’s the financial aid office?"
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-sr-03",
+      "title": "M2 Q3 short response",
+      "kind": "short",
+      "segments": [
+        {
+          "speaker": "Speaker 3",
+          "voice": "en-GB-Neural2-C",
+          "lang": "en-GB",
+          "voice_name": "GB-Ivy",
+          "text": "Have you decided on your major yet?"
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-repeat-01",
+      "title": "Listen & Repeat 1",
+      "kind": "repeat",
+      "segments": [
+        {
+          "speaker": "Trainer",
+          "voice": "en-US-Neural2-E",
+          "lang": "en-US",
+          "voice_name": "US-Emma",
+          "text": "Is this your first time in our cafeteria?"
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-repeat-02",
+      "title": "Listen & Repeat 2",
+      "kind": "repeat",
+      "segments": [
+        {
+          "speaker": "Trainer",
+          "voice": "en-US-Neural2-E",
+          "lang": "en-US",
+          "voice_name": "US-Emma",
+          "text": "You can find today’s menu on the board?"
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-repeat-03",
+      "title": "Listen & Repeat 3",
+      "kind": "repeat",
+      "segments": [
+        {
+          "speaker": "Trainer",
+          "voice": "en-US-Neural2-E",
+          "lang": "en-US",
+          "voice_name": "US-Emma",
+          "text": "The hot food station is on the left side."
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-repeat-04",
+      "title": "Listen & Repeat 4",
+      "kind": "repeat",
+      "segments": [
+        {
+          "speaker": "Trainer",
+          "voice": "en-US-Neural2-E",
+          "lang": "en-US",
+          "voice_name": "US-Emma",
+          "text": "We offer a variety of meals, snacks, and drinks every day."
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-repeat-05",
+      "title": "Listen & Repeat 5",
+      "kind": "repeat",
+      "segments": [
+        {
+          "speaker": "Trainer",
+          "voice": "en-US-Neural2-E",
+          "lang": "en-US",
+          "voice_name": "US-Emma",
+          "text": "You can pay with cash or your student ID card."
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-repeat-06",
+      "title": "Listen & Repeat 6",
+      "kind": "repeat",
+      "segments": [
+        {
+          "speaker": "Trainer",
+          "voice": "en-US-Neural2-E",
+          "lang": "en-US",
+          "voice_name": "US-Emma",
+          "text": "Please remember to return your tray to the collection area when finished."
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-repeat-07",
+      "title": "Listen & Repeat 7",
+      "kind": "repeat",
+      "segments": [
+        {
+          "speaker": "Trainer",
+          "voice": "en-US-Neural2-E",
+          "lang": "en-US",
+          "voice_name": "US-Emma",
+          "text": "If you have any food allergies, please let the staff know before ordering."
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-interview-01",
+      "title": "Interview Q1",
+      "kind": "interview",
+      "segments": [
+        {
+          "speaker": "Researcher",
+          "voice": "en-GB-Neural2-B",
+          "lang": "en-GB",
+          "voice_name": "GB-Oliver",
+          "text": "What kind of exercise do you or someone you know typically do, such as running, swimming, or going to a gym? Why?"
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-interview-02",
+      "title": "Interview Q2",
+      "kind": "interview",
+      "segments": [
+        {
+          "speaker": "Researcher",
+          "voice": "en-GB-Neural2-B",
+          "lang": "en-GB",
+          "voice_name": "GB-Oliver",
+          "text": "If you wanted to encourage a friend who doesn’t exercise to become more active, would you prefer to invite them to exercise together with you, or would you prefer to share information about the benefits and let them decide on their own? Why?"
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-interview-03",
+      "title": "Interview Q3",
+      "kind": "interview",
+      "segments": [
+        {
+          "speaker": "Researcher",
+          "voice": "en-GB-Neural2-B",
+          "lang": "en-GB",
+          "voice_name": "GB-Oliver",
+          "text": "What are some things that might make it difficult for someone to start and maintain a regular exercise routine?"
+        }
+      ]
+    },
+    {
+      "id": "set9-M2-interview-04",
+      "title": "Interview Q4",
+      "kind": "interview",
+      "segments": [
+        {
+          "speaker": "Researcher",
+          "voice": "en-GB-Neural2-B",
+          "lang": "en-GB",
+          "voice_name": "GB-Oliver",
+          "text": "Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?"
+        }
+      ]
+    }
+  ]
+}

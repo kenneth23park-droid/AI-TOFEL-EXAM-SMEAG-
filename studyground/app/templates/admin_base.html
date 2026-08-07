@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }} · {{ at('admin.title') }} · {{ t('app.name') }}</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <link rel="stylesheet" href="/assets/admin.css">
+</head>
+<body class="admin">
+  <header class="topbar">
+    <a class="brand" href="/admin?lang={{ lang }}">
+      <span class="brand-mark">S</span>
+      <span class="brand-text">
+        <b>{{ t('app.name') }} · {{ at('admin.title') }}</b>
+        <small>{{ at('admin.tagline') }}</small>
+      </span>
+    </a>
+    <div class="topbar-right">
+      <a class="lang-toggle ghost" href="/?lang={{ lang }}">{{ at('admin.toStudent') }}</a>
+      <a class="lang-toggle" href="{{ request.url.include_query_params(lang=other_lang) }}">
+        {{ t('lang.toggle') }}
+      </a>
+    </div>
+  </header>
+
+  <div class="admin-shell">
+    <nav class="admin-nav" aria-label="{{ at('admin.title') }}">
+      <ul>
+        {% for item in nav %}
+        <li>
+          <a href="{{ item.href }}?lang={{ lang }}" class="{{ 'on' if item.active else '' }}"
+             {% if item.active %}aria-current="page"{% endif %}>{{ item.label }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <main class="admin-main">
+      <div class="page-head">
+        <div>
+          <h1>{{ page_title }}</h1>
+          {% block subtitle %}{% endblock %}
+        </div>
+        {% block headright %}{% endblock %}
+      </div>
+
+      {% block content %}
+        {# Default body = the Coming soon placeholder (Story 4.1 AC2). The dashboard
+           passes `tiles`, so the same template also serves as the landing screen. #}
+        {% if tiles %}
+        <section class="tile-row">
+          {% for key, value in tiles %}
+          <div class="card tile">
+            <span class="tile-k">{{ at(key) }}</span>
+            <b class="tile-v">{{ value }}</b>
+          </div>
+          {% endfor %}
+        </section>
+        <section class="card">
+          <h2 class="card-title">{{ at('answers.title') }}</h2>
+          <p class="sub">{{ at('answers.intro') }}</p>
+          <p style="margin-top:12px">
+            <a class="btn" href="/admin/answers?lang={{ lang }}">{{ at('answers.title') }}</a>
+          </p>
+        </section>
+        {% else %}
+        <section class="card coming-soon">
+          <span class="chip">{{ at('admin.comingSoon') }}</span>
+          <p class="sub">{{ at('admin.comingSoonBody') }}</p>
+        </section>
+        {% endif %}
+      {% endblock %}
+    </main>
+  </div>
+
+  <footer class="foot">
+    StudyGround · APP_MODE={{ settings.app_mode }} · scoring={{ settings.scoring_mode }}
+  </footer>
+
+  <script src="/assets/admin-tabs.js"></script>
+</body>
+</html>

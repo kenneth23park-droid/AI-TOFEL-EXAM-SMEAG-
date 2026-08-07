@@ -1,0 +1,85 @@
+{
+  "blockId": "L2-B3",
+  "audioId": "set9-L2-06-07",
+  "kind": "conversation",
+  "origin": "authored",
+  "originNote": "원본 SET 9 SCRIPT.docx 에 본문 전사가 없어 정답키 제약에 맞춰 새로 집필함. 원본 확보 시 교체 대상.",
+  "revisionNote": "rev3. blind 응시자 2명이 rev2 를 '소거법으로 풀린다'고 지적하여 오답 배제 방식을 '화자의 부정' 에서 '사실관계 충돌' 로 전면 교체했다. 항목별 변경: (1) 신호어 제거 — 'So the whole problem is the number.' / 'The whole problem is the number.' 2회 반복 왕복을 통째로 삭제했다. 인상 폭이 걱정거리라는 사실은 이제 남자의 행동과 수치로만 드러난다(봉투를 아홉 번 읽음, 새벽 두 시까지 부엌에서 계산, 사백 달러가 식비+버스 정기권+나머지 전부, 현재 임대료의 약 3분의 1). (2) 오답[2](계약 만료) 직접 부정 제거 — 'My renewal paperwork comes up at the end of the term anyway, so the date isn't what's bothering me.' 를 삭제하고, 갱신은 감정 없는 사실로만 흘렸다: 봉투 안에 9월분 갱신서가 이미 들어 있고 남자는 '오늘 밤에라도 서명할' 상태다. 즉 계약은 만료 위기가 아니라 갱신이 제시된 상태이며, 이 충돌은 응시자가 추론해야 한다. (3) 오답[3](집주인 연락난) 직접 부정 제거 — 'She answered on the second ring... She's reachable.' 를 삭제하고 장면으로 대체했다. 여자가 아무 설명 없이 'Call her tonight. She's downstairs at the desk till eight, same as always.' 라고 전제한다. 접근성에 대한 평가문은 한 줄도 없다. (4) 오답[1](직장이 멀다) 도 부정 없이, 도보 10분이라는 사실 한 줄로만 충돌시킨다. (5) L2-7 은 두 응시자 모두 세트 최고 문항으로 평가했으므로 간접 단서 구조('counting days at the end of the month' / 'yellow notices')를 그대로 보존했다. 다만 이사(강 건너 매물)와 룸메이트(친구 Dana) 소재는 각각 '10분 보다가 탭을 닫았다', 'Dana 가 그랬다' 수준으로 더 눈에 띄지 않게 다듬어 근거 없음 상태를 유지했다. (6) 부정문·신호어 제거로 253→250 단어(대화 상한 250 이내).",
+  "segments": [
+    {
+      "speaker": "M",
+      "text": "My landlord slid an envelope under my door yesterday. I've read it about nine times since."
+    },
+    {
+      "speaker": "W",
+      "text": "Nine times. What was in it?"
+    },
+    {
+      "speaker": "M",
+      "text": "Two things. The renewal form for September, which I'd sign tonight if you handed me a pen. And a new figure. Four hundred dollars more a month."
+    },
+    {
+      "speaker": "W",
+      "text": "Four hundred? On what the lab pays you?"
+    },
+    {
+      "speaker": "M",
+      "text": "It's about a third on top of what I pay now. Four hundred is my groceries, my bus pass, and whatever's left over at the end, all of it. I stood in the kitchen running the arithmetic until two in the morning and it never came out."
+    },
+    {
+      "speaker": "W",
+      "text": "And you like that apartment."
+    },
+    {
+      "speaker": "M",
+      "text": "Ten minutes on foot to the lab. I've been in that lab since sophomore year and I've never once had to think about how I'd get there."
+    },
+    {
+      "speaker": "W",
+      "text": "Then go talk to her before you sign anything. Four years in that unit, and in four years I've never seen you counting days at the end of the month, or peeling one of those yellow notices off your door. That goes in a file somewhere. Two empty months would cost her more than four hundred."
+    },
+    {
+      "speaker": "M",
+      "text": "Huh. I'd been picturing it as begging."
+    },
+    {
+      "speaker": "W",
+      "text": "It's the opposite. Call her tonight. She's downstairs at the desk until eight, same as always."
+    },
+    {
+      "speaker": "M",
+      "text": "I did scroll listings across the river for ten minutes last night, out of spite, and closed the tab. Dana took in two roommates when hers went up."
+    },
+    {
+      "speaker": "W",
+      "text": "Sign nothing until you've talked to her."
+    }
+  ],
+  "plainText": "M: My landlord slid an envelope under my door yesterday. I've read it about nine times since.\nW: Nine times. What was in it?\nM: Two things. The renewal form for September, which I'd sign tonight if you handed me a pen. And a new figure. Four hundred dollars more a month.\nW: Four hundred? On what the lab pays you?\nM: It's about a third on top of what I pay now. Four hundred is my groceries, my bus pass, and whatever's left over at the end, all of it. I stood in the kitchen running the arithmetic until two in the morning and it never came out.\nW: And you like that apartment.\nM: Ten minutes on foot to the lab. I've been in that lab since sophomore year and I've never once had to think about how I'd get there.\nW: Then go talk to her before you sign anything. Four years in that unit, and in four years I've never seen you counting days at the end of the month, or peeling one of those yellow notices off your door. That goes in a file somewhere. Two empty months would cost her more than four hundred.\nM: Huh. I'd been picturing it as begging.\nW: It's the opposite. Call her tonight. She's downstairs at the desk until eight, same as always.\nM: I did scroll listings across the river for ten minutes last night, out of spite, and closed the tab. Dana took in two roommates when hers went up.\nW: Sign nothing until you've talked to her.",
+  "wordCount": 250,
+  "evidence": [
+    {
+      "questionId": "L2-6",
+      "keyedAnswerIndex": 0,
+      "keyedAnswerText": "His rent is increasing significantly.",
+      "supportingLine": "And a new figure. Four hundred dollars more a month. ... It's about a third on top of what I pay now. Four hundred is my groceries, my bus pass, and whatever's left over at the end, all of it. I stood in the kitchen running the arithmetic until two in the morning and it never came out.",
+      "whyOthersFail": {
+        "1": "지문의 거리 서술과 충돌한다. 연구실까지 도보 10분이고, 그는 학부 2학년 이래 '어떻게 갈지 생각해 본 적조차 없다'고 말한다. 이동에 드는 비용이 문제였다면 그 집을 오늘 밤이라도 갱신하겠다는 태도가 성립하지 않는다. (화자가 '멀지 않다'고 말해 주는 문장은 없다 — 응시자가 도보 10분이라는 사실에서 추론해야 한다.)",
+        "2": "계약이 만료 위기라는 전제와 충돌한다. 봉투 안에는 9월분 '갱신서(renewal form)'가 이미 들어 있고, 남자는 '펜만 주면 오늘 밤 서명하겠다'고 한다. 즉 계약 연장은 이미 제안된 상태이며 그를 붙잡는 것은 서류가 아니라 금액이다. 마지막 줄에서 여자가 '얘기하기 전엔 서명하지 마라'라고 만류하는 것도, 서명 자체는 언제든 가능하다는 사실을 다시 확인시킨다. 갱신 시점은 감정적 무게 없이 사실로만 등장한다.",
+        "3": "집주인의 접근성에 대한 평가문은 지문에 없고, 대신 장면이 그것을 무너뜨린다. 여자가 아무런 설명이나 조건 없이 '오늘 밤 전화해라, 그 사람 늘 그렇듯 여덟 시까지 아래층 데스크에 있다'고 전제하며, 남자도 이의 없이 넘어간다. 매일 같은 자리에 앉아 있는 사람을 '연락하기 어렵다'고 볼 수 없다."
+      }
+    },
+    {
+      "questionId": "L2-7",
+      "keyedAnswerIndex": 2,
+      "keyedAnswerText": "He has a history of paying rent on time.",
+      "supportingLine": "Four years in that unit, and in four years I've never seen you counting days at the end of the month, or peeling one of those yellow notices off your door. That goes in a file somewhere. Two empty months would cost her more than four hundred.",
+      "whyOthersFail": {
+        "0": "지문 속 그의 행동과 충돌한다. 그가 본 매물은 '강 건너', 즉 같은 도시 안이고, 10분 보다가 홧김에 탭을 닫았다. 그리고 그가 실제로 하려는 일은 갱신서에 서명하는 것이다('펜만 주면 오늘 밤 서명하겠다'). 다른 도시로 옮긴다는 계획은 지문 어디에도 근거가 없다.",
+        "1": "재직 기간 서술과 충돌한다. 'I've been in that lab since sophomore year' 는 최소 2년 이상 같은 자리라는 뜻이며, 같은 유닛에 4년째 살고 있다는 여자의 말과도 맞물린다. 최근에 새 일을 시작했다면 성립하지 않는 시간선이다.",
+        "3": "룸메이트를 들인 주체가 그가 아니다. 임대료가 올랐을 때 두 명을 들인 사람은 친구 Dana 이고, 남자는 그것을 자기 계획으로 제시하지 않으며 여자도 그 문장을 받지 않고 곧장 '얘기하기 전엔 서명하지 마라'로 넘어간다. 그가 4년간 혼자 그 유닛에 살아온 사실과도 어긋난다.",
+        "_designNote": "정답은 여전히 직접 진술되지 않는다. '월말에 날짜를 세는 모습을 본 적이 없다', '문에 노란 통지서를 뗀 적이 없다', '집주인 쪽에 그런 기록이 남는다' 라는 세 개의 간접 단서를 종합해야만 '연체 이력이 없다 → 제때 냈다'가 나온다. rev2 대비 이 구조는 손대지 않았고(두 blind 응시자 모두 세트 최고 문항으로 평가), 이사·룸메이트 소재만 눈에 덜 띄게 다듬었다."
+      }
+    }
+  ]
+}

@@ -1,0 +1,635 @@
+{
+  "id": "reading",
+  "label": "Reading",
+  "labelKo": "리딩",
+  "timeLimitSec": 2100,
+  "modules": [
+    {
+      "id": "R1",
+      "label": "Reading Module 1",
+      "blocks": [
+        {
+          "kind": "cloze",
+          "heading": "Questions 1-10",
+          "instruction": "Fill in the blank.",
+          "template": "Immigration has reshaped communities around the world throughout modern history. Immigrant {{1}} have {{2}} {{3}} {{4}} {{5}} {{6}} challenges {{7}} require balancing new {{8}} realities {{9}} preserving cultural {{10}}. These adjustments often span multiple generations before full integration occurs. Researchers continue studying how such processes unfold across different regions.",
+          "questions": [
+            {
+              "id": "R1-1",
+              "kind": "blank",
+              "no": 1,
+              "hint": "popul",
+              "answer": "populations"
+            },
+            {
+              "id": "R1-2",
+              "kind": "blank",
+              "no": 2,
+              "hint": "exper",
+              "answer": "experienced"
+            },
+            {
+              "id": "R1-3",
+              "kind": "blank",
+              "no": 3,
+              "hint": "com",
+              "answer": "complex"
+            },
+            {
+              "id": "R1-4",
+              "kind": "blank",
+              "no": 4,
+              "hint": "soc",
+              "answer": "social"
+            },
+            {
+              "id": "R1-5",
+              "kind": "blank",
+              "no": 5,
+              "hint": "a",
+              "answer": "and"
+            },
+            {
+              "id": "R1-6",
+              "kind": "blank",
+              "no": 6,
+              "hint": "econ",
+              "answer": "economic"
+            },
+            {
+              "id": "R1-7",
+              "kind": "blank",
+              "no": 7,
+              "hint": "th",
+              "answer": "that",
+              "answerKeyRaw": "correct"
+            },
+            {
+              "id": "R1-8",
+              "kind": "blank",
+              "no": 8,
+              "hint": "poli",
+              "answer": "political"
+            },
+            {
+              "id": "R1-9",
+              "kind": "blank",
+              "no": 9,
+              "hint": "wi",
+              "answer": "with"
+            },
+            {
+              "id": "R1-10",
+              "kind": "blank",
+              "no": 10,
+              "hint": "tradi",
+              "answer": "traditions"
+            }
+          ]
+        },
+        {
+          "kind": "cloze",
+          "heading": "Questions 11-20",
+          "instruction": "Fill in the blank.",
+          "template": "Lions are social animals that live in groups called prides on African grasslands. A {{11}} lion typically {{12}} a {{13}} {{14}} {{15}} many miles {{16}} {{17}} patrols its boundaries. {{18}} dominant cat must {{19}} for intruders across hundreds of {{20}} kilometers to protect his pride. These patrols help ensure that rival males do not challenge his position or threaten the cubs. Successful territorial defense is essential for a male lion’s reproductive success.",
+          "questions": [
+            {
+              "id": "R1-11",
+              "kind": "blank",
+              "no": 11,
+              "hint": "ma",
+              "answer": "male"
+            },
+            {
+              "id": "R1-12",
+              "kind": "blank",
+              "no": 12,
+              "hint": "estab",
+              "answer": "establishes"
+            },
+            {
+              "id": "R1-13",
+              "kind": "blank",
+              "no": 13,
+              "hint": "la",
+              "answer": "large"
+            },
+            {
+              "id": "R1-14",
+              "kind": "blank",
+              "no": 14,
+              "hint": "terr",
+              "answer": "territory"
+            },
+            {
+              "id": "R1-15",
+              "kind": "blank",
+              "no": 15,
+              "hint": "span",
+              "answer": "spanning"
+            },
+            {
+              "id": "R1-16",
+              "kind": "blank",
+              "no": 16,
+              "hint": "a",
+              "answer": "and"
+            },
+            {
+              "id": "R1-17",
+              "kind": "blank",
+              "no": 17,
+              "hint": "regu",
+              "answer": "regularly"
+            },
+            {
+              "id": "R1-18",
+              "kind": "blank",
+              "no": 18,
+              "hint": "T",
+              "answer": "The"
+            },
+            {
+              "id": "R1-19",
+              "kind": "blank",
+              "no": 19,
+              "hint": "lo",
+              "answer": "look"
+            },
+            {
+              "id": "R1-20",
+              "kind": "blank",
+              "no": 20,
+              "hint": "squ",
+              "answer": "square"
+            }
+          ]
+        },
+        {
+          "kind": "passage",
+          "heading": "Questions 21-22",
+          "instruction": "Read a webpage.",
+          "title": "Westbrook University Morrison Library – Hours & Services",
+          "paragraphs": [
+            "www.westbrook.edu/library/hours",
+            "The Morrison Library is the main research facility on campus, housing over 2 million print volumes and providing access to 300+ online databases.",
+            "House of Operation:",
+            "Monday-Thursday: 7 A.M. – 11 P.M.",
+            "Friday: 7 A.M. – 6 P.M.",
+            "Saturday-Sunday: 10 A.M. – 5 P.M.",
+            "Extended Hours During Finals: The library remains open 24 hours from the last week of classes through the final examination period. All students must present a valid university ID to enter after 9 P.M. Visitors may use reading rooms during regular daytime hours but cannot borrow materials."
+          ],
+          "questions": [
+            {
+              "id": "R1-21",
+              "kind": "mcq",
+              "no": 21,
+              "prompt": "When does the library close on Fridays?",
+              "choices": [
+                "At 7 A.M.",
+                "At 6 P.M.",
+                "At 9 P.M.",
+                "At 11 P.M."
+              ],
+              "answer": 1
+            },
+            {
+              "id": "R1-22",
+              "kind": "mcq",
+              "no": 22,
+              "prompt": "What are visitors allowed to do at the library?",
+              "choices": [
+                "Borrow books for up to one week",
+                "Access online databases remotely",
+                "Use reading rooms during the day",
+                "Enter the building after 9 P.M."
+              ],
+              "answer": 2
+            }
+          ]
+        },
+        {
+          "kind": "passage",
+          "heading": "Questions 23-24",
+          "instruction": "Read an email.",
+          "title": "Subject: Resume Review Request – Career Fair Candidates",
+          "paragraphs": [
+            "To: Team",
+            "From: Daniel Reyes, Team Leader",
+            "Dear Team,",
+            "I attended the Greenfield University career fair on Monday and collected 12 resumes from promising candidates. Please review the attached files and submit your feedback through the evaluation portal by Friday at 5:00 P.M. Your assessments will help us select applicants for first-round interviews next Wednesday.",
+            "Best regards,",
+            "Daniel Reyes",
+            "Team Leader"
+          ],
+          "questions": [
+            {
+              "id": "R1-23",
+              "kind": "mcq",
+              "no": 23,
+              "prompt": "What does Mr. Reyes require his team members to do?",
+              "choices": [
+                "Attend a university career fair",
+                "Schedule interviews with applicants",
+                "Evaluate candidate materials",
+                "Update the hiring portal"
+              ],
+              "answer": 2
+            },
+            {
+              "id": "R1-24",
+              "kind": "mcq",
+              "no": 24,
+              "prompt": "When will the first-round interviews be held?",
+              "choices": [
+                "On Monday",
+                "On Wednesday",
+                "On Friday",
+                "On Saturday"
+              ],
+              "answer": 1
+            }
+          ]
+        },
+        {
+          "kind": "passage",
+          "heading": "Questions 25-27",
+          "instruction": "Read a notice.",
+          "title": "Data Science Program – Fall Course Guide",
+          "paragraphs": [
+            "The Center for Data Analytics is pleased to offer a range of courses for the upcoming fall semester. Please review the following information to determine which class best suits your background and goals.",
+            "Beginner Level",
+            "Prerequisites: None",
+            "This course provides an introduction to core data science concepts, including data collection, basic analysis, and interpretation. Classes A, B, and C cover identical content but are offered at different times and formats to accommodate various schedules.",
+            "Class | Schedule | Time | Format",
+            "Class A | Mon/Wed | 10:00 A.M. | In-person only",
+            "Class B | Tue/Thu | 2:00 P.M. | Online only",
+            "Class C | Wed/Fri | 4:00 P.M. | In-person only",
+            "Intermediate Level",
+            "Prerequisites: Basic statistics or prior data science coursework",
+            "This course covers machine learning fundamentals, predictive modeling, and algorithm design. Students will gain hands-on experience with industry-standard tools and techniques.",
+            "Class | Schedule | Time",
+            "Class D | Mon/Wed | 1:00 P.M.",
+            "Class E | Tue/Thu | 10:00 A.M.",
+            "Advanced Level",
+            "Prerequisites: Completion of Class D or E",
+            "This research seminar is designed for students conducting independent projects. It is required for all thesis candidates in the data science program.",
+            "Class F: Friday, 9:00 A.M.",
+            "Special Course",
+            "Prerequisites: None",
+            "This course focuses on creating compelling infographics and presenting data findings to diverse audiences. Students will learn effective techniques for communicating complex information visually.",
+            "Class G: Thursday, 6:00 P.M.",
+            "Registration opens September 1st. For questions, contact datascience@westfield.edu."
+          ],
+          "questions": [
+            {
+              "id": "R1-25",
+              "kind": "mcq",
+              "no": 25,
+              "prompt": "Michael has no data science background, is unavailable on Mondays and Thursdays, and does not have reliable internet access at home. Which class would be most appropriate for him?",
+              "choices": [
+                "Class A",
+                "Class B",
+                "Class C",
+                "Class D"
+              ],
+              "answer": 2
+            },
+            {
+              "id": "R1-26",
+              "kind": "mcq",
+              "no": 26,
+              "prompt": "Alex has completed an introductory statistics course along with some intermediate data science courses. He intends to write a thesis. Which class should Alex take?",
+              "choices": [
+                "Class C",
+                "Class D",
+                "Class F",
+                "Class G"
+              ],
+              "answer": 2
+            },
+            {
+              "id": "R1-27",
+              "kind": "mcq",
+              "no": 27,
+              "prompt": "Who is most likely to be interested in class G?",
+              "choices": [
+                "A marketing manager who presents reports to clients",
+                "A software developer interested in machine learning",
+                "A doctoral candidate preparing a research project",
+                "A high school teacher new to data science"
+              ],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "kind": "passage",
+          "heading": "Questions 28-30",
+          "instruction": "Read a notice.",
+          "title": "Greenwood University Literature Club – Fall Semester Recruitment",
+          "paragraphs": [
+            "The Greenwood University Literature Club is now accepting applications for new members for the fall semester. We welcome students from all majors who share a passion for reading and discussing literary works.",
+            "About the Club",
+            "The Literature Club was founded in 2015 and currently has over 60 active members.",
+            "We meet every Tuesday evening from 6:00 P.M. to 8:00 P.M. in Humanities Hall, Room 204.",
+            "Each month, members vote on a book to read and discuss together.",
+            "Past selections have included classic novels, contemporary fiction, and poetry collections.",
+            "Membership Benefits",
+            "Members receive priority registration for guest author lectures and literary workshops hosted by the English Department.",
+            "Additionally, members are eligible to submit their own creative writing to the club's annual publication, The Greenwood Review.",
+            "How to Join",
+            "Interested students should complete an application form available at the Student Activities Office or online at greenwood.edu/litclub.",
+            "Applications must be submitted by Friday, September 15th.",
+            "There is no membership fee for the fall semester.",
+            "For questions, contact the club president, Rachel Kim, at litclub@greenwood.edu."
+          ],
+          "questions": [
+            {
+              "id": "R1-28",
+              "kind": "mcq",
+              "no": 28,
+              "prompt": "What is the main topic of the notice?",
+              "choices": [
+                "An announcement of upcoming guest author lectures",
+                "A call for submissions to a literary publication",
+                "An invitation to join a student organization",
+                "A schedule change for club meetings"
+              ],
+              "answer": 2
+            },
+            {
+              "id": "R1-29",
+              "kind": "mcq",
+              "no": 29,
+              "prompt": "According to the notice, what is one benefit of joining the club?",
+              "choices": [
+                "Free access to all English Department courses",
+                "Early registration for certain campus events",
+                "A discount on books selected for discussion",
+                "Automatic publication of creative writing submissions"
+              ],
+              "answer": 1
+            },
+            {
+              "id": "R1-30",
+              "kind": "mcq",
+              "no": 30,
+              "prompt": "What is indicated about the membership fee?",
+              "choices": [
+                "It varies depending on the student’s major.",
+                "It will increase starting next semester.",
+                "It is waived for first-time applicants.",
+                "It is not required for the current term."
+              ],
+              "answer": 3
+            }
+          ]
+        },
+        {
+          "kind": "passage",
+          "heading": "Questions 31-35",
+          "instruction": "Read a passage.",
+          "title": "Augmented Reality in Employee Training",
+          "paragraphs": [
+            "Augmented reality technology is revolutionizing how companies train employees for complex and potentially hazardous tasks. By overlaying digital information onto the physical environment, AR systems enable workers to practice dangerous procedures without real-world risks. This approach proves especially valuable in industries where mistakes can result in serious injury or equipment damage.",
+            "AR training environments allow learners to repeat difficult tasks as many times as needed while receiving immediate feedback on their performance. Studies have shown that this iterative practice significantly improves both learning speed and long-term retention. Medical students who practiced surgical techniques through AR simulations, for instance, demonstrated proficiency scores thirty percent higher than peers trained with traditional methods. At automotive plants, workers reduced assembly errors by nearly half after completing AR-guided modules, suggesting that virtual practice translates effectively to actual job performance.",
+            "However, widespread adoption of AR training faces significant obstacles. The initial investment for hardware, specialized software, and system maintenance remains prohibitively expensive for many small and medium-sized businesses. Organizations also struggle to find personnel qualified to design effective AR curricula. Despite these challenges, costs continue to decline as the technology matures, and growing demand is expanding the pool of skilled developers."
+          ],
+          "questions": [
+            {
+              "id": "R1-31",
+              "kind": "mcq",
+              "no": 31,
+              "prompt": "The word “revolutionizing” in paragraph 1 is closest in meaning to",
+              "choices": [
+                "challenging",
+                "opposing",
+                "analyzing",
+                "transforming"
+              ],
+              "answer": 3
+            },
+            {
+              "id": "R1-32",
+              "kind": "mcq",
+              "no": 32,
+              "prompt": "The passage states that medical students who used AR simulations",
+              "choices": [
+                "completed their training in half the time required by traditional programs",
+                "achieved significantly higher scores on proficiency assessments",
+                "expressed a strong preference for virtual learning environments",
+                "were permitted to perform procedures without direct supervisions"
+              ],
+              "answer": 1
+            },
+            {
+              "id": "R1-33",
+              "kind": "mcq",
+              "no": 33,
+              "prompt": "What can be inferred from the passage about the relationship between AR training and workplace tasks?",
+              "choices": [
+                "Competencies acquired through virtual practice can apply to real work situations",
+                "AR training benefits only those in medical professions",
+                "Conventional instructional approaches have become obsolete",
+                "Factory employees need more extensive AR instruction than healthcare workers"
+              ],
+              "answer": 0
+            },
+            {
+              "id": "R1-34",
+              "kind": "mcq",
+              "no": 34,
+              "prompt": "Why does the author mention studies about AR training?",
+              "choices": [
+                "To explain the technical mechanisms underlying AR systems",
+                "To contrast various AR platforms used across industries",
+                "To provide evidence that AR training yields measurable improvements",
+                "To trace the historical evolution of AR in educational contexts"
+              ],
+              "answer": 2
+            },
+            {
+              "id": "R1-35",
+              "kind": "mcq",
+              "no": 35,
+              "prompt": "According to paragraph 3, what represents a barrier to the broad implementation of AR-based employee training?",
+              "choices": [
+                "The technological complexity exceeds the capabilities of most workers",
+                "Virtual environments cannot adequately replicate hazardous workplace conditions",
+                "Empirical research has demonstrated superior outcomes with conventional instructional approaches",
+                "The financial resources required for acquisition and upkeep exceed what numerous enterprises can afford"
+              ],
+              "answer": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "label": "Reading Module 2",
+      "blocks": [
+        {
+          "kind": "cloze",
+          "heading": "Questions 1-10",
+          "instruction": "Fill in the blank.",
+          "template": "Cosmology is the scientific study of the universe's origin, structure, and ultimate fate. This field {{1}} distant {{2}} and {{3}} through mathematical {{4}} {{5}} help explain cosmic {{6}}. It {{7}} {{8}} that are {{9}} accepted based on careful {{10}} of celestial phenomena. Advanced telescopes and space probes have revolutionized our understanding of deep space. These technological advances continue to shape modern astrophysical research in profound ways.",
+          "questions": [
+            {
+              "id": "R2-1",
+              "kind": "blank",
+              "no": 1,
+              "hint": "exam",
+              "answer": "examines"
+            },
+            {
+              "id": "R2-2",
+              "kind": "blank",
+              "no": 2,
+              "hint": "gala",
+              "answer": "galaxies"
+            },
+            {
+              "id": "R2-3",
+              "kind": "blank",
+              "no": 3,
+              "hint": "pla",
+              "answer": "planets"
+            },
+            {
+              "id": "R2-4",
+              "kind": "blank",
+              "no": 4,
+              "hint": "mod",
+              "answer": "models"
+            },
+            {
+              "id": "R2-5",
+              "kind": "blank",
+              "no": 5,
+              "hint": "wh",
+              "answer": "which"
+            },
+            {
+              "id": "R2-6",
+              "kind": "blank",
+              "no": 6,
+              "hint": "eve",
+              "answer": "events"
+            },
+            {
+              "id": "R2-7",
+              "kind": "blank",
+              "no": 7,
+              "hint": "desc",
+              "answer": "describes"
+            },
+            {
+              "id": "R2-8",
+              "kind": "blank",
+              "no": 8,
+              "hint": "id",
+              "answer": "ideas"
+            },
+            {
+              "id": "R2-9",
+              "kind": "blank",
+              "no": 9,
+              "hint": "wid",
+              "answer": "widely"
+            },
+            {
+              "id": "R2-10",
+              "kind": "blank",
+              "no": 10,
+              "hint": "observ",
+              "answer": "observations"
+            }
+          ]
+        },
+        {
+          "kind": "passage",
+          "heading": "Questions 11-15",
+          "instruction": "Read a passage.",
+          "title": "Benefits of Green Roofs",
+          "paragraphs": [
+            "Green roofs, which feature layers of vegetation planted on building rooftops, have gained increasing popularity in urban planning as a strategy for addressing environmental challenges. These living systems offer multiple benefits that extend well beyond simple aesthetics.",
+            "One significant advantage is increased energy efficiency. The layer of soil and plants provides natural insulation, substantially reducing heat transfer through the roof structure. During summer months, green roofs can lower indoor temperatures by several degrees, diminishing the need for air conditioning and reducing energy consumption.",
+            "Green roofs also help combat the urban heat island effect, a phenomenon where cities become significantly warmer than surrounding rural areas due to heat- absorbing surfaces like asphalt and concrete. By replacing these dark surfaces with vegetation, green roofs reflect more sunlight and release moisture through evapotranspiration, effectively cooling the surrounding air.",
+            "Additionally, rooftop gardens enhance ecological diversity by providing habitat for insects, birds, and other wildlife in otherwise barren urban environments. Some cities have also begun using green roofs for urban food production, growing vegetables and herbs that supply local restaurants and community markets.",
+            "However, green roofs require substantial initial investment and ongoing maintenance costs. The added weight of soil and vegetation also demands reinforced structural support, which can limit installation options for older buildings."
+          ],
+          "questions": [
+            {
+              "id": "R2-11",
+              "kind": "mcq",
+              "no": 11,
+              "prompt": "The word “diminishing” in paragraph 2 is closest in meaning to",
+              "choices": [
+                "eliminating",
+                "addressing",
+                "lessening",
+                "stabilizing"
+              ],
+              "answer": 2
+            },
+            {
+              "id": "R2-12",
+              "kind": "mcq",
+              "no": 12,
+              "prompt": "According to the passage, how does the vegetation layer on green roofs contribute to energy efficiency?",
+              "choices": [
+                "It completely prevents heat from entering buildings during all seasons",
+                "It functions as insulation that decreases the transfer of heat",
+                "It generates electricity through photosynthetic processes in plants",
+                "It absorbs excess moisture that would otherwise damage roof materials"
+              ],
+              "answer": 1
+            },
+            {
+              "id": "R2-13",
+              "kind": "mcq",
+              "no": 13,
+              "prompt": "What can be inferred from the passage about conventional urban surfaces such as asphalt and concrete?",
+              "choices": [
+                "They retain less thermal energy than vegetated surfaces during daylight hours",
+                "They contribute to elevated temperatures in metropolitan areas",
+                "They have been largely replaced by green infrastructure in most cities",
+                "They are more cost-effective than green roofs for urban development"
+              ],
+              "answer": 1
+            },
+            {
+              "id": "R2-14",
+              "kind": "mcq",
+              "no": 14,
+              "prompt": "Why does the author mention \"vegetation\" in the discussion of the urban heat island effect?",
+              "choices": [
+                "To contrast plant biology with the physical properties of synthetic materials",
+                "To explain the mechanism by which green roofs counteract urban warming",
+                "To argue that all urban areas should mandate vegetated roof installations",
+                "To describe the aesthetic improvements green roofs provide to cityscapes"
+              ],
+              "answer": 1
+            },
+            {
+              "id": "R2-15",
+              "kind": "insert",
+              "no": 15,
+              "prompt": "Look at the four letters (A, B, C, and D) in the passage that indicate where the following sentence could be added. Where would the sentence best fit?",
+              "choices": [
+                "Position A",
+                "Position B",
+                "Position C",
+                "Position D"
+              ],
+              "answer": 3,
+              "sentence": "These factors must be carefully weighed against the environmental and economic benefits described above."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

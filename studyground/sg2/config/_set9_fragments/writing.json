@@ -1,0 +1,684 @@
+{
+  "id": "writing",
+  "label": "Writing",
+  "labelKo": "라이팅",
+  "timeLimitSec": null,
+  "modules": [
+    {
+      "id": "W1",
+      "label": "Build a Sentence",
+      "timeLimitSec": 600,
+      "blocks": [
+        {
+          "kind": "build-set",
+          "heading": "Questions 1-10",
+          "instruction": "Make an appropriate sentence.",
+          "questions": [
+            {
+              "id": "set9-W1-q01",
+              "kind": "build",
+              "no": 1,
+              "context": "What did the professor ask?",
+              "slots": [
+                {
+                  "t": "b",
+                  "a": "she"
+                },
+                {
+                  "t": "b",
+                  "a": "wanted to know"
+                },
+                {
+                  "t": "f",
+                  "text": "which books"
+                },
+                {
+                  "t": "b",
+                  "a": "I"
+                },
+                {
+                  "t": "b",
+                  "a": "needed"
+                },
+                {
+                  "t": "b",
+                  "a": "for"
+                },
+                {
+                  "t": "b",
+                  "a": "the final project"
+                },
+                {
+                  "t": "f",
+                  "text": "."
+                }
+              ],
+              "tiles": [
+                "wanted to know",
+                "the final project",
+                "I",
+                "needed",
+                "she",
+                "for"
+              ],
+              "trapTiles": [],
+              "sentence": "She wanted to know which books I needed for the final project.",
+              "answerTokens": [
+                "she",
+                "wanted to know",
+                "I",
+                "needed",
+                "for",
+                "the final project"
+              ]
+            },
+            {
+              "id": "set9-W1-q02",
+              "kind": "build",
+              "no": 2,
+              "context": "How did your homemade pizza turn out?",
+              "slots": [
+                {
+                  "t": "b",
+                  "a": "it"
+                },
+                {
+                  "t": "b",
+                  "a": "turns"
+                },
+                {
+                  "t": "b",
+                  "a": "out"
+                },
+                {
+                  "t": "b",
+                  "a": "I"
+                },
+                {
+                  "t": "b",
+                  "a": "added"
+                },
+                {
+                  "t": "b",
+                  "a": "too much"
+                },
+                {
+                  "t": "b",
+                  "a": "salt"
+                },
+                {
+                  "t": "f",
+                  "text": "."
+                }
+              ],
+              "tiles": [
+                "out",
+                "I",
+                "salt",
+                "turns",
+                "too much",
+                "it",
+                "added"
+              ],
+              "trapTiles": [],
+              "sentence": "It turns out I added too much salt.",
+              "answerTokens": [
+                "it",
+                "turns",
+                "out",
+                "I",
+                "added",
+                "too much",
+                "salt"
+              ]
+            },
+            {
+              "id": "set9-W1-q03",
+              "kind": "build",
+              "no": 3,
+              "context": "Have you decided on you class schedule yet?",
+              "slots": [
+                {
+                  "t": "f",
+                  "text": "I wonder"
+                },
+                {
+                  "t": "b",
+                  "a": "if"
+                },
+                {
+                  "t": "b",
+                  "a": "I"
+                },
+                {
+                  "t": "b",
+                  "a": "can"
+                },
+                {
+                  "t": "b",
+                  "a": "still"
+                },
+                {
+                  "t": "b",
+                  "a": "switch"
+                },
+                {
+                  "t": "b",
+                  "a": "to"
+                },
+                {
+                  "t": "b",
+                  "a": "the morning section"
+                },
+                {
+                  "t": "f",
+                  "text": "."
+                }
+              ],
+              "tiles": [
+                "to",
+                "can",
+                "the morning section",
+                "if",
+                "still",
+                "I",
+                "switch"
+              ],
+              "trapTiles": [],
+              "sentence": "I wonder if I can still switch to the morning section",
+              "answerTokens": [
+                "if",
+                "I",
+                "can",
+                "still",
+                "switch",
+                "to",
+                "the morning section"
+              ]
+            },
+            {
+              "id": "set9-W1-q04",
+              "kind": "build",
+              "no": 4,
+              "context": "Did you find the jacket you were looking for?",
+              "slots": [
+                {
+                  "t": "b",
+                  "a": "no"
+                },
+                {
+                  "t": "f",
+                  "text": ","
+                },
+                {
+                  "t": "b",
+                  "a": "it"
+                },
+                {
+                  "t": "b",
+                  "a": "was"
+                },
+                {
+                  "t": "f",
+                  "text": "out of stock"
+                },
+                {
+                  "t": "b",
+                  "a": "in"
+                },
+                {
+                  "t": "b",
+                  "a": "my size"
+                },
+                {
+                  "t": "f",
+                  "text": "."
+                }
+              ],
+              "tiles": [
+                "was",
+                "my size",
+                "is",
+                "it",
+                "in",
+                "no"
+              ],
+              "trapTiles": [
+                "is"
+              ],
+              "sentence": "No, it was out of stock in my size.",
+              "answerTokens": [
+                "no",
+                "it",
+                "was",
+                "in",
+                "my size"
+              ]
+            },
+            {
+              "id": "set9-W1-q05",
+              "kind": "build",
+              "no": 5,
+              "context": "What did your study partner say about the final?",
+              "slots": [
+                {
+                  "t": "b",
+                  "a": "he"
+                },
+                {
+                  "t": "b",
+                  "a": "asked"
+                },
+                {
+                  "t": "b",
+                  "a": "if"
+                },
+                {
+                  "t": "b",
+                  "a": "I"
+                },
+                {
+                  "t": "b",
+                  "a": "had"
+                },
+                {
+                  "t": "b",
+                  "a": "finished"
+                },
+                {
+                  "t": "b",
+                  "a": "reviewing"
+                },
+                {
+                  "t": "f",
+                  "text": "the last chapter"
+                },
+                {
+                  "t": "b",
+                  "a": "yet"
+                },
+                {
+                  "t": "f",
+                  "text": "."
+                }
+              ],
+              "tiles": [
+                "if",
+                "reviewing",
+                "he",
+                "had",
+                "asked",
+                "yet",
+                "I",
+                "finished"
+              ],
+              "trapTiles": [],
+              "sentence": "He asked if I had finished reviewing the last chapter yet.",
+              "answerTokens": [
+                "he",
+                "asked",
+                "if",
+                "I",
+                "had",
+                "finished",
+                "reviewing",
+                "yet"
+              ]
+            },
+            {
+              "id": "set9-W1-q06",
+              "kind": "build",
+              "no": 6,
+              "context": "What time does that café open on weekends?",
+              "slots": [
+                {
+                  "t": "b",
+                  "a": "it"
+                },
+                {
+                  "t": "b",
+                  "a": "opens"
+                },
+                {
+                  "t": "f",
+                  "text": "at nine"
+                },
+                {
+                  "t": "b",
+                  "a": "on"
+                },
+                {
+                  "t": "b",
+                  "a": "Saturdays"
+                },
+                {
+                  "t": "f",
+                  "text": "."
+                }
+              ],
+              "tiles": [
+                "on",
+                "opening",
+                "Saturdays",
+                "it",
+                "opens"
+              ],
+              "trapTiles": [
+                "opening"
+              ],
+              "sentence": "It opens at nine on Saturdays.",
+              "answerTokens": [
+                "it",
+                "opens",
+                "on",
+                "Saturdays"
+              ]
+            },
+            {
+              "id": "set9-W1-q07",
+              "kind": "build",
+              "no": 7,
+              "context": "The professor changed the research topic.",
+              "slots": [
+                {
+                  "t": "f",
+                  "text": "Did she"
+                },
+                {
+                  "t": "b",
+                  "a": "explain"
+                },
+                {
+                  "t": "b",
+                  "a": "where to find"
+                },
+                {
+                  "t": "b",
+                  "a": "the new guidelines"
+                },
+                {
+                  "t": "f",
+                  "text": "?"
+                }
+              ],
+              "tiles": [
+                "the new guidelines",
+                "explain",
+                "where to find"
+              ],
+              "trapTiles": [],
+              "sentence": "Did she explain where to find the new guidelines?",
+              "answerTokens": [
+                "explain",
+                "where to find",
+                "the new guidelines"
+              ]
+            },
+            {
+              "id": "set9-W1-q08",
+              "kind": "build",
+              "no": 8,
+              "context": "Are you joining any clubs this semester?",
+              "slots": [
+                {
+                  "t": "b",
+                  "a": "I"
+                },
+                {
+                  "t": "b",
+                  "a": "met"
+                },
+                {
+                  "t": "b",
+                  "a": "a student"
+                },
+                {
+                  "t": "f",
+                  "text": "who runs"
+                },
+                {
+                  "t": "b",
+                  "a": "the photography club"
+                },
+                {
+                  "t": "b",
+                  "a": "and"
+                },
+                {
+                  "t": "b",
+                  "a": "it"
+                },
+                {
+                  "t": "b",
+                  "a": "seems"
+                },
+                {
+                  "t": "b",
+                  "a": "interesting"
+                },
+                {
+                  "t": "f",
+                  "text": "."
+                }
+              ],
+              "tiles": [
+                "and",
+                "the photography club",
+                "met",
+                "interesting",
+                "ran",
+                "I",
+                "a student",
+                "it",
+                "seems"
+              ],
+              "trapTiles": [
+                "ran"
+              ],
+              "sentence": "I met a student who runs the photography club and it seems interesting.",
+              "answerTokens": [
+                "I",
+                "met",
+                "a student",
+                "the photography club",
+                "and",
+                "it",
+                "seems",
+                "interesting"
+              ]
+            },
+            {
+              "id": "set9-W1-q09",
+              "kind": "build",
+              "no": 9,
+              "context": "Did your roommate leave a message?",
+              "slots": [
+                {
+                  "t": "b",
+                  "a": "yes"
+                },
+                {
+                  "t": "f",
+                  "text": ","
+                },
+                {
+                  "t": "b",
+                  "a": "she"
+                },
+                {
+                  "t": "b",
+                  "a": "asked"
+                },
+                {
+                  "t": "b",
+                  "a": "what time"
+                },
+                {
+                  "t": "b",
+                  "a": "I"
+                },
+                {
+                  "t": "b",
+                  "a": "would"
+                },
+                {
+                  "t": "b",
+                  "a": "be"
+                },
+                {
+                  "t": "b",
+                  "a": "home"
+                },
+                {
+                  "t": "f",
+                  "text": "."
+                }
+              ],
+              "tiles": [
+                "would",
+                "she",
+                "home",
+                "what time",
+                "be",
+                "asked",
+                "I",
+                "yes"
+              ],
+              "trapTiles": [],
+              "sentence": "Yes, she asked what time I would be home.",
+              "answerTokens": [
+                "yes",
+                "she",
+                "asked",
+                "what time",
+                "I",
+                "would",
+                "be",
+                "home"
+              ]
+            },
+            {
+              "id": "set9-W1-q10",
+              "kind": "build",
+              "no": 10,
+              "context": "Which brand of cereal do you usually buy?",
+              "slots": [
+                {
+                  "t": "b",
+                  "a": "I"
+                },
+                {
+                  "t": "b",
+                  "a": "always"
+                },
+                {
+                  "t": "b",
+                  "a": "get"
+                },
+                {
+                  "t": "b",
+                  "a": "the one"
+                },
+                {
+                  "t": "b",
+                  "a": "the store"
+                },
+                {
+                  "t": "b",
+                  "a": "has"
+                },
+                {
+                  "t": "f",
+                  "text": "on sale."
+                }
+              ],
+              "tiles": [
+                "has",
+                "the one",
+                "got",
+                "I",
+                "the store",
+                "get",
+                "always"
+              ],
+              "trapTiles": [
+                "got"
+              ],
+              "sentence": "I always get the one the store has on sale.",
+              "answerTokens": [
+                "I",
+                "always",
+                "get",
+                "the one",
+                "the store",
+                "has"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "W2",
+      "label": "Write an Email",
+      "timeLimitSec": 600,
+      "blocks": [
+        {
+          "kind": "free-write",
+          "heading": "WRITE AN EMAIL",
+          "questions": [
+            {
+              "id": "set9-W2-email",
+              "kind": "email",
+              "no": 11,
+              "to": "Christina",
+              "subject": "Idea for the Fundraising Event",
+              "situationLabel": "SITUATION",
+              "situation": "You and your friend Christina are organizing a fundraising event for a local children’s hospital. While planning the event, you thought of an idea that could help improve the event and encourage more people from the community to participate. You want to share your idea with Christina and discuss next steps.",
+              "bulletsLabel": "YOUR EMAIL SHOULD",
+              "bullets": [
+                "Describe your idea for improving the event and explain why you think it would be effective.",
+                "Discuss how Christina can help with or contribute to your idea.",
+                "Suggest a date and time for your next planning meeting and explain why that timing works well."
+              ],
+              "prompt": "You and your friend Christina are organizing a fundraising event for a local children’s hospital. While planning the event, you thought of an idea that could help improve the event and encourage more people from the community to participate. You want to share your idea with Christina and discuss next steps. Describe your idea for improving the event and explain why you think it would be effective. Discuss how Christina can help with or contribute to your idea. Suggest a date and time for your next planning meeting and explain why that timing works well.",
+              "minWords": 80
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "W3",
+      "label": "Write for an Academic Discussion",
+      "timeLimitSec": 600,
+      "blocks": [
+        {
+          "kind": "free-write",
+          "heading": "WRITE for an ACADEMIC DISCUSSION",
+          "questions": [
+            {
+              "id": "set9-W3-disc",
+              "kind": "discussion",
+              "no": 12,
+              "professor": "Doctor Alvarez – Business Ethics",
+              "prompt": "In today’ session, we will examine company transparency and its growing importance in modern business practices. Transparency refers to how openly companies share information about their operations, finances, and decision-making with stakeholders. While openness can build trust, it may also create risks. Companies should be transparent to everyone, including the public. Do you agree or disagree with this statement? Why?",
+              "posts": [
+                {
+                  "name": "Claire",
+                  "text": "I agree that companies should be transparent to everyone. Transparency helps build trust with customers, employees, and investors, which is important for long-term success. When companies share information openly, they are more accountable for ethical behavior and social responsibility. This openness can improve reputation and encourage customer loyalty. Overall, transparency strengthens the relationship between businesses and society."
+                },
+                {
+                  "name": "Mark",
+                  "text": "I disagree that companies should be transparent to everyone. Although some transparency is necessary, complete openness can damage a company’s competitiveness. Businesses often depend on confidential strategies and financial information to succeed. If all details were public, competitors could misuse them. For this reason, companies should balance transparency with protecting sensitive information."
+                }
+              ],
+              "minWords": 100
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_warnings": []
+}

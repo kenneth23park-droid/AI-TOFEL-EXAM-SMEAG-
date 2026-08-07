@@ -12,3 +12,22 @@ tools/_clean_set1.txt
 .vscode/
 .idea/
 *.swp
+
+# ── 대용량 원본 자산 ───────────────────────────────────────────────
+# GitHub 은 100MB 초과 파일을 거부한다. 원본은 로컬/별도 스토리지에 둔다.
+TOEFL MOCK TEST SCREEN RECORDING.mp4
+studyground/desktop/release/
+
+# ── 파이썬 가상환경 · 캐시 ────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+
+# ── 로컬 DB (seed 로 재생성) ──────────────────────────────────────
+studyground/data/*.db
+
+# ── TTS 중간 산출물 (tools/tts_google.py 가 재생성) ───────────────
+studyground/sg2/media/tts/_segments_google/
+
+# ── 의존성 (package.json 으로 재설치) ─────────────────────────────
+node_modules/

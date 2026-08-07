@@ -11,7 +11,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import BASE_DIR, get_settings
 from app.db import create_all
-from app.routers import pages, scores
+from app.migrations import run_migrations
+from app.routers import admin, attempts, pages, scores
 from app.templating import render, resolve_lang
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -22,6 +23,7 @@ log = logging.getLogger("studyground")
 async def lifespan(_: FastAPI):
     settings = get_settings()
     create_all()
+    run_migrations()   # architecture.md 6.3 — brings an existing DB up to the new shape
     if settings.seed_on_start:
         from app.seed import seed
 
@@ -47,7 +49,9 @@ def create_app() -> FastAPI:
     app.mount("/assets", StaticFiles(directory=str(BASE_DIR / "static")), name="assets")
 
     app.include_router(scores.router)
+    app.include_router(attempts.router)   # architecture.md §7.1 test-taker runtime API
     app.include_router(pages.router)
+    app.include_router(admin.router)      # architecture.md §7.2 admin grading back office
 
     @app.exception_handler(404)
     async def not_found(request: Request, exc):  # noqa: ANN001, ARG001

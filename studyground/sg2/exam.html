@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SET 1 · Exam · SMEAG StudyGround</title>
 <link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudyGround">
 <style>
   .exam-wrap { max-width: 860px; }
   .seg { display:inline-flex; background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px; gap:4px; }
@@ -132,6 +137,33 @@
   var graders = []; // functions returning {correct, total}
 
   function esc(t){ var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+  function slug(s){ return (s||'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase(); }
+
+  // Reading passage text from whichever field the block uses.
+  function passageText(blk){
+    if(blk.passage) return blk.passage;
+    if(blk.paragraphs) return blk.paragraphs.join('\n\n');
+    if(blk.messages) return blk.messages.map(function(m){ return (m.from||m.sender||'')+': '+(m.text||m); }).join('\n');
+    return '';
+  }
+  // Passage block + a Read-aloud button (bundled ElevenLabs mp3 → browser voice fallback).
+  function makePassage(mod, blk){
+    var text=passageText(blk); if(!text) return null;
+    var wrap=document.createElement('div');
+    var ttsId='read-'+mod.id+'-'+slug(blk.title||blk.heading);
+    var bar=document.createElement('div'); bar.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:6px';
+    var btn=document.createElement('button'); btn.className='btn ghost sm'; btn.type='button';
+    btn.innerHTML='🔊 <span data-en>Read aloud</span><span data-ko>읽어주기</span>';
+    btn.addEventListener('click', function(){
+      if(btn.dataset.state==='playing'){ window.SG_TTS.stop(); btn.dataset.state=''; return; }
+      window.SG_TTS && window.SG_TTS.speak(ttsId, text, btn);
+    });
+    if(blk.title){ var ti=document.createElement('b'); ti.textContent=blk.title; ti.style.cssText='font-size:15px'; bar.appendChild(ti); }
+    bar.appendChild(btn);
+    var p=document.createElement('div'); p.className='passage'; p.textContent=text;
+    wrap.appendChild(bar); wrap.appendChild(p);
+    return wrap;
+  }
 
   section.modules.forEach(function(mod){
     var h=document.createElement('h2'); h.className='title'; h.style.margin='20px 0 10px'; h.textContent=mod.label; host.appendChild(h);
@@ -160,7 +192,7 @@
       }
       // MCQ / audio-set with choices
       else if(blk.questions && blk.questions.some(function(q){return q.choices;})){
-        if(blk.passage){ var pp=document.createElement('div'); pp.className='passage'; pp.textContent=blk.passage; card.appendChild(pp); }
+        var pass=makePassage(mod, blk); if(pass) card.appendChild(pass);
         blk.questions.forEach(function(q){
           if(!q.choices) return;
           var qd=document.createElement('div'); qd.className='qitem';
@@ -198,9 +230,22 @@
         blk.questions.forEach(function(q){
           var qd=document.createElement('div'); qd.style.marginTop='10px';
           var promptText = q.prompt || q.situation || '';
-          qd.innerHTML='<div class="prompt">'+esc(q.subject||q.professor||blk.heading)+'</div>'+
-            (promptText?'<div class="passage">'+esc(promptText)+'</div>':'')+
-            '<textarea class="passage" style="width:100%;min-height:120px" placeholder="Type your response ('+(q.minWords||80)+'+ words)…"></textarea>';
+          var ttsId='write-'+slug(q.id||(''+q.no));
+          qd.innerHTML='<div class="prompt">'+esc(q.subject||q.professor||blk.heading)+'</div>';
+          if(promptText){
+            var pbar=document.createElement('div'); pbar.style.cssText='display:flex;gap:8px;margin-bottom:6px';
+            var pbtn=document.createElement('button'); pbtn.className='btn ghost sm'; pbtn.type='button';
+            pbtn.innerHTML='🔊 <span data-en>Read aloud</span><span data-ko>읽어주기</span>';
+            pbtn.addEventListener('click', function(){
+              if(pbtn.dataset.state==='playing'){ window.SG_TTS.stop(); pbtn.dataset.state=''; return; }
+              window.SG_TTS && window.SG_TTS.speak(ttsId, promptText, pbtn);
+            });
+            pbar.appendChild(pbtn); qd.appendChild(pbar);
+            var pp=document.createElement('div'); pp.className='passage'; pp.textContent=promptText; qd.appendChild(pp);
+          }
+          var ta=document.createElement('textarea'); ta.className='passage'; ta.style.cssText='width:100%;min-height:120px';
+          ta.placeholder='Type your response ('+(q.minWords||80)+'+ words)…';
+          qd.appendChild(ta);
           card.appendChild(qd);
         });
       }
@@ -230,5 +275,6 @@
   });
 })();
 </script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
 </html>

@@ -1,0 +1,73 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<form class="card search-form" method="get" action="/admin/rankings">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label>
+    <span>{{ at('col.examName') }}</span>
+    <select name="exam_id">
+      <option value="">{{ at('stats.allExams') }}</option>
+      {% for e in exams %}
+        <option value="{{ e.id }}" {% if q.exam_id == e.id %}selected{% endif %}>{{ e.code }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>
+    <span>{{ at('stats.campus') }}</span>
+    <input type="text" name="campus" value="{{ q.campus }}" autocomplete="off">
+  </label>
+  <label>
+    <span>{{ t('col.grade') }}</span>
+    <select name="grade">
+      <option value="">{{ at('rank.allGrades') }}</option>
+      {% for b in bands %}
+        <option value="{{ b }}" {% if q.grade == b %}selected{% endif %}>{{ b }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div class="search-actions">
+    <button class="btn" type="submit">{{ at('stats.apply') }}</button>
+    <a class="btn ghost" href="/admin/rankings.csv?exam_id={{ q.exam_id }}&campus={{ q.campus }}&grade={{ q.grade }}">
+      {{ at('rank.export') }}
+    </a>
+  </div>
+</form>
+
+{% if not rows %}
+  <p class="empty">{{ at('rank.empty') }}</p>
+{% else %}
+<div class="table-wrap">
+  <table class="scores admin-table">
+    <thead>
+      <tr>
+        <th class="num">{{ at('col.rank') }}</th>
+        <th>{{ t('col.student') }}</th>
+        <th>{{ at('col.studentNo') }}</th>
+        <th>{{ at('col.campus') }}</th>
+        <th class="num">{{ t('col.total') }} /{{ total_max }}</th>
+        <th>{{ t('col.grade') }}</th>
+        {% for skill in skills_order %}<th class="num">{{ t('skill.' ~ skill)[0] }}</th>{% endfor %}
+        <th>{{ at('col.examDate') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      {% set a = row.attempt %}
+      <tr class="{{ 'podium p' ~ row.rank if row.rank <= 3 else '' }}">
+        <td class="num rank">{{ row.rank }}</td>
+        <td><b>{{ a.student.name }}</b></td>
+        <td class="mono">{{ a.student.student_no }}</td>
+        <td>{{ a.campus or a.student.campus or '—' }}</td>
+        <td class="num total">{{ a.total_score }}</td>
+        <td><span class="grade">{{ a.grade }}</span></td>
+        {% for skill in skills_order %}
+        <td class="num mono">{{ row.sections.get(skill, 0) }}</td>
+        {% endfor %}
+        <td class="mono">{{ a.exam_date.isoformat() if a.exam_date else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

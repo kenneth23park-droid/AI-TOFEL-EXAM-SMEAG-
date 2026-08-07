@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exam Renderer Self-test · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/exam.css">
+<style>
+  /* 셀프테스트 전용(배포 CSS 오염 금지 — exam.css 에는 넣지 않는다) */
+  .st-bar { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; gap: 8px;
+            align-items: center; padding: 10px 14px; background: #fff; border-bottom: 1px solid var(--line); }
+  .st-log { font-size: 12.5px; font-family: ui-monospace, Menlo, Consolas, monospace; padding: 10px 14px; }
+  .st-log .pass { color: var(--ok); }
+  .st-log .fail { color: var(--brand-ink); font-weight: 800; }
+  .st-case { border-top: 1px dashed var(--line-2); padding: 16px 14px; }
+  .st-case > h2 { font-size: 14px; font-weight: 800; color: var(--muted); margin-bottom: 10px; }
+</style>
+</head>
+<!--
+  exam-selftest.html — 섹션 렌더러 스모크 하네스.
+  브라우저로 직접 열어(로컬 서버 권장) 각 렌더러가 실제 DOM 에서 어떻게 보이는지 확인한다.
+  · 시험 셸(exam-runtime.html)과 달리 엔진 상태머신은 쓰지 않는다. 화면 하나씩 렌더만 한다.
+  · 답안은 메모리 백엔드(SG_STORE.setBackend(memoryBackend()))로 격리 — 실제 응시 세션을 건드리지 않는다.
+  · 후속 담당자는 이 파일을 **append** 한다. 아래 "=== <section> selftest ===" 주석 블록만 추가하고
+    기존 블록은 수정하지 않는다.
+-->
+<body>
+
+<div class="st-bar">
+  <b>Renderer self-test</b>
+  <span class="exam-badge" id="st-summary">running…</span>
+  <span class="lang">
+    <button type="button" data-lang="en">EN</button>
+    <button type="button" data-lang="ko">KO</button>
+  </span>
+</div>
+
+<div class="st-log" id="st-log"></div>
+<div id="st-cases"></div>
+
+<script src="assets/app.js"></script>
+<script src="assets/exam-types.js"></script>
+<script src="assets/exam-media.js"></script>
+<script src="assets/exam-timing.js"></script>
+<script src="assets/exam-compile.js"></script>
+<script src="assets/set1.js"></script>
+<script src="assets/exam-clock.js"></script>
+<script src="assets/exam-store.js"></script>
+<script src="assets/exam-render.js"></script>
+<script src="assets/exam-engine.js"></script>
+<script>
+/* 공용 하네스. 섹션별 블록은 이 아래에 각자 <script> 로 append 한다. */
+window.SG_SELFTEST = (function () {
+  'use strict';
+  var pass = 0, fail = 0;
+
+  function log(okFlag, msg) {
+    var d = document.createElement('div');
+    d.className = okFlag ? 'pass' : 'fail';
+    d.textContent = (okFlag ? '  ok   ' : '  FAIL ') + msg;
+    document.getElementById('st-log').appendChild(d);
+    if (okFlag) pass += 1; else fail += 1;
+    var s = document.getElementById('st-summary');
+    s.textContent = pass + ' pass · ' + fail + ' fail';
+    s.className = 'exam-badge ' + (fail ? 'expired' : 'practice');
+  }
+
+  function ok(name, cond, info) { log(!!cond, name + (info ? ' — ' + info : '')); }
+  function eq(name, actual, expected) { log(actual === expected, name + ': ' + actual + (actual === expected ? '' : ' (expected ' + expected + ')')); }
+
+  /* 격리된 스토어 세션. 실제 응시 데이터(localStorage)를 건드리지 않는다. */
+  function isolate() {
+    window.SG_STORE.setBackend(window.SG_STORE.memoryBackend());
+    window.SG_STORE.open('selftest-' + Date.now(), false);
+  }
+
+  var compiled = null;
+  function screens() {
+    if (compiled) return compiled;
+    var t = (window.SG_TIMING && window.SG_TIMING.FALLBACK) || null;
+    var out = window.SG_COMPILE.compileScreens(window.SMEAG_SET1, t, { profile: 'toefl' });
+    compiled = out.screens;
+    return compiled;
+  }
+
+  // config/timing.toefl.json 이 있으면 그것으로 다시 컴파일한다(폴백보다 정확).
+  function withTiming(cb) {
+    if (!window.fetch) { cb(screens()); return; }
+    window.fetch('config/timing.toefl.json').then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (j) { compiled = window.SG_COMPILE.compileScreens(window.SMEAG_SET1, j, { profile: 'toefl' }).screens; }
+        cb(screens());
+      }).catch(function () { cb(screens()); });
+  }
+
+  function caseBox(title) {
+    var box = document.createElement('div');
+    box.className = 'st-case';
+    var h = document.createElement('h2');
+    h.textContent = title;
+    box.appendChild(h);
+    document.getElementById('st-cases').appendChild(box);
+    return box;
+  }
+
+  /* 렌더러를 직접 호출한다(엔진 없이). ctx.engine 이 없으면 렌더러는 SG_STORE 로 답안을 쓴다. */
+  function renderInto(box, fn, screen, ctx) {
+    var node = null;
+    try { node = fn(screen, ctx || {}); }
+    catch (e) { ok('render ' + screen.id + ' 예외 없음', false, e.message); return null; }
+    ok('render ' + screen.id + ' 예외 없음', true);
+    if (node) box.appendChild(node);
+    return node;
+  }
+
+  isolate();
+  return { ok: ok, eq: eq, log: log, screens: screens, withTiming: withTiming, caseBox: caseBox, renderInto: renderInto };
+})();
+</script>
+
+<!-- === reading selftest (Story 2.3) ================================= -->
+<script src="assets/exam-render-reading.js"></script>
+<script>
+(function () {
+  'use strict';
+  var T = window.SG_SELFTEST, RD = window.SG_RENDER_READING;
+
+  T.withTiming(function (all) {
+    var mine = all.filter(function (s) { return RD.isReadingScreen(s); });
+    T.eq('reading question 화면 수', mine.length, 6);
+
+    mine.forEach(function (s) {
+      var blk = RD.blockOf(s);
+      var box = T.caseBox(s.id + ' · ' + s.blockKind + ' · ' + (blk ? blk.heading : 'no block'));
+      var node = T.renderInto(box, RD.render, s, {});
+      if (!node || !blk) return;
+      var qs = RD.questionsOf(blk, s.questionIds);
+
+      if (s.blockKind === 'cloze') {
+        T.eq(s.id + ' blank 입력칸', node.querySelectorAll('input.blank-in').length, 10);
+        var inp = node.querySelectorAll('input.blank-in')[0];
+        inp.value = 'brain';
+        inp.dispatchEvent(new Event('input'));
+        var rec = window.SG_STORE.getAnswer(qs[0].id);
+        T.ok(s.id + ' 입력 → 답안 저장', !!rec && rec.v === 'brain', rec ? String(rec.v) : 'none');
+      } else {
+        T.eq(s.id + ' 선택지 라벨', node.querySelectorAll('label.opt').length,
+             qs.reduce(function (a, q) { return a + (q.choices || []).length; }, 0));
+        T.ok(s.id + ' 그리드 네비게이션', !!node.querySelector('.grid-nav'));
+        T.ok(s.id + ' 지문 스크롤 영역', !!node.querySelector('.rd-scroll'));
+        if (s.blockKind === 'chat') {
+          T.eq(s.id + ' 말풍선', node.querySelectorAll('.rd-chat-bubble').length, blk.messages.length);
+        }
+        var iq = RD.insertQuestionOf(blk, qs);
+        if (iq) {
+          var markers = node.querySelectorAll('.rd-marker');
+          T.eq(s.id + ' insert 마커', markers.length, 4);
+          markers[1].click();                                  // 마커 B
+          var r1 = window.SG_STORE.getAnswer(iq.id);
+          T.ok(iq.id + ' 마커 클릭 → 답안 1', !!r1 && r1.v === 1, r1 ? String(r1.v) : 'none');
+          var radios = node.querySelectorAll('input[name="' + iq.id + '"]');
+          T.ok(iq.id + ' 마커 → 라디오 동기화', radios[1].checked === true);
+          radios[3].checked = true;
+          radios[3].dispatchEvent(new Event('change'));        // 라디오 D
+          var r2 = window.SG_STORE.getAnswer(iq.id);
+          T.ok(iq.id + ' 라디오 → 답안 3', !!r2 && r2.v === 3, r2 ? String(r2.v) : 'none');
+          T.ok(iq.id + ' 라디오 → 마커 동기화', markers[3].className.indexOf('is-chosen') >= 0);
+        }
+      }
+    });
+
+    // module sharedDeadline: 같은 모듈의 화면들은 하나의 clock key 를 쓴다.
+    var keys = {};
+    mine.forEach(function (s) { keys[window.SG_EXAM.clockKeyFor(s, s.timer)] = 1; });
+    T.eq('reading clock key 종류(모듈 2개)', Object.keys(keys).length, 2);
+    T.ok('clock key 는 module:{moduleId}', !!keys['module:R1'] && !!keys['module:R2'], Object.keys(keys).join(','));
+  });
+})();
+</script>
+<!-- === end reading selftest ========================================= -->
+
+<!-- === writing selftest (Story 2.4) ================================= -->
+<script src="assets/exam-render-writing.js"></script>
+<script>
+(function () {
+  'use strict';
+  var T = window.SG_SELFTEST, W = window.SG_WRITING;
+
+  T.ok('SG_WRITING 로드', !!W);
+  T.ok('SG_RENDER.render 후킹 설치', window.SG_RENDER.__sgWritingHook === true);
+
+  T.withTiming(function (all) {
+    var mine = all.filter(function (s) { return W.handles(s); });
+    var build = mine.filter(function (s) { return s.blockKind === 'build-set'; });
+    var free = mine.filter(function (s) { return s.blockKind === 'free-write'; });
+    T.eq('writing 담당 화면 수', mine.length, 12);
+    T.eq('build-set 화면 수', build.length, 10);
+    T.eq('free-write 화면 수', free.length, 2);
+
+    /* ── build-set: 클릭-투-플레이스 전 경로 ───────────────────────── */
+    var s1 = build[1];   // W-2 (빈칸 6개)
+    var box1 = T.caseBox(s1.id + ' · build-set · click-to-place');
+    var n1 = T.renderInto(box1, W.renderScreen, s1, {});
+    if (n1) {
+      var api = n1.__sg;
+      var blanks = W.blankIndexes(api.slots).length;
+      T.eq(s1.id + ' 드롭존 수', n1.querySelectorAll('.wr-slot').length, blanks);
+      T.eq(s1.id + ' 타일 수', n1.querySelectorAll('.wr-tile').length, api.tiles.length);
+      T.ok(s1.id + ' 타일 draggable', n1.querySelector('.wr-tile').getAttribute('draggable') === 'true');
+      T.ok(s1.id + ' 문항 그리드는 engine 없이는 미표시', !n1.querySelector('.wr-grid'));
+
+      // 정답 순서대로 타일을 "클릭"만으로 배치한다(터치/접근성 경로).
+      // 타일 텍스트는 문장 첫 단어가 소문자라 대소문자 무시로 찾는다.
+      var want = api.question.answerTokens;
+      for (var wi = 0; wi < want.length; wi++) {
+        var tiles = n1.querySelectorAll('.wr-tile'), hit = null;
+        for (var ti = 0; ti < tiles.length; ti++) {
+          if (tiles[ti].textContent.toLowerCase() === String(want[wi]).toLowerCase()) { hit = tiles[ti]; break; }
+        }
+        if (hit) hit.click();
+      }
+      T.ok(s1.id + ' 클릭만으로 전부 배치', W.isComplete(api.placed()), api.sentence());
+      T.ok(s1.id + ' 완성 문장 == set1.js sentence', api.sentence() === api.question.sentence, api.sentence());
+      T.ok(s1.id + ' 완성 미리보기 노출', n1.querySelector('.wr-preview').className.indexOf('is-complete') >= 0);
+
+      var rec = window.SG_STORE.getAnswer(s1.questionIds[0]);
+      T.ok(s1.id + ' 답안 = 토큰 배열', !!rec && rec.v instanceof Array && rec.v.length === blanks,
+           rec ? JSON.stringify(rec.v) : 'none');
+      T.ok(s1.id + ' extra.complete=true', !!rec && rec.complete === true);
+      T.ok(s1.id + ' extra.text = 완성 문장', !!rec && rec.text === api.question.sentence);
+
+      // 배치된 타일을 다시 클릭하면 팔레트로 돌아온다(AC2)
+      n1.querySelectorAll('.wr-slot')[0].click();
+      T.eq(s1.id + ' 배치 타일 클릭 → 팔레트 복귀', n1.querySelectorAll('.wr-tile').length, 1);
+      T.ok(s1.id + ' 복귀 후 complete=false', window.SG_STORE.getAnswer(s1.questionIds[0]).complete === false);
+    }
+
+    /* ── build-set: 재렌더(새로고침) 복원 ─────────────────────────── */
+    var box2 = T.caseBox(s1.id + ' · build-set · restore after re-render');
+    var n2 = T.renderInto(box2, W.renderScreen, s1, {});
+    if (n2) {
+      var savedRec = window.SG_STORE.getAnswer(s1.questionIds[0]);
+      T.ok(s1.id + ' 배치 상태 복원', n2.__sg.tokens().join('|') === (savedRec.v || []).join('|'),
+           n2.__sg.tokens().join('|'));
+    }
+
+    /* ── free-write: email ────────────────────────────────────────── */
+    var se = free[0];
+    var box3 = T.caseBox(se.id + ' · free-write · email (W-EMAIL)');
+    var n3 = T.renderInto(box3, W.renderScreen, se, {});
+    if (n3) {
+      T.ok(se.id + ' To/Subject 헤더', !!n3.querySelector('.wr-mail-head'));
+      T.ok(se.id + ' SITUATION 박스', !!n3.querySelector('.wr-situation'));
+      T.eq(se.id + ' YOUR EMAIL SHOULD 불릿', n3.querySelectorAll('.wr-bullets-list li').length, 3);
+      T.ok(se.id + ' Read-aloud 버튼', !!n3.querySelector('.wr-tts'));
+      var ta = n3.querySelector('.wr-textarea');
+      ta.value = 'one two three';
+      ta.dispatchEvent(new Event('input'));
+      var cnt = n3.querySelector('.wr-count');
+      T.ok(se.id + ' 단어수 실시간 갱신', cnt.textContent.indexOf('3 words') === 0, cnt.textContent);
+      T.ok(se.id + ' minWords 미달 경고', cnt.className.indexOf('wr-count--warn') >= 0);
+      T.ok(se.id + ' 키스트로크 직후 미저장(디바운스)',
+           !window.SG_STORE.getAnswer('W-EMAIL') || window.SG_STORE.getAnswer('W-EMAIL').v !== 'one two three');
+
+      window.setTimeout(function () {
+        var later = window.SG_STORE.getAnswer('W-EMAIL');
+        T.ok(se.id + ' 디바운스(' + W.TEXT_DEBOUNCE_MS + 'ms) 후 저장', !!later && later.v === 'one two three');
+        T.eq(se.id + ' extra.words', later ? later.words : -1, 3);
+        runDiscussion();
+      }, W.TEXT_DEBOUNCE_MS + 300);
+    } else { runDiscussion(); }
+
+    /* ── free-write: discussion + 만료 잠금 ───────────────────────── */
+    function runDiscussion() {
+      var sd = free[1];
+      var box4 = T.caseBox(sd.id + ' · free-write · discussion (W-DISC) + expiry lock');
+      var n4 = T.renderInto(box4, W.renderScreen, sd, {});
+      if (!n4) return;
+      T.ok(sd.id + ' professor 프롬프트', !!n4.querySelector('.wr-disc-prompt'));
+      T.eq(sd.id + ' posts 카드', n4.querySelectorAll('.wr-post').length, 2);
+      T.ok(sd.id + ' 빈 입력 카운터 0', n4.querySelector('.wr-count').textContent.indexOf('0 words') === 0);
+
+      var t = null, ts = sd.timers || [];
+      for (var i = 0; i < ts.length; i++) { if (ts[i].scope === 'task') t = ts[i]; }
+      T.ok(sd.id + ' task 타이머 600초 sharedDeadline', !!t && t.seconds === 600 && t.sharedDeadline === true);
+      if (!t) return;
+
+      var key = window.SG_EXAM.clockKeyFor(sd, t);
+      T.eq(sd.id + ' clock key', key, 'task:W3');
+
+      var ta4 = n4.querySelector('.wr-textarea');
+      ta4.value = 'kept as it is';
+      window.SG_CLOCK.armClock(key, 5, { mode: 'countdown', scope: 'task', format: 'MM:SS' });
+      window.SG_CLOCK.expireNow(key);          // → tickOnce() → 구독자에게 통지
+      T.ok(sd.id + ' 만료 → 입력 잠금', ta4.readOnly === true);
+      T.ok(sd.id + ' 만료 → 내용 유지', ta4.value === 'kept as it is');
+      T.ok(sd.id + ' 만료 안내 노출', n4.querySelector('.wr-locked-note').style.display === '');
+      window.SG_CLOCK.clearClock(key);
+
+      // build-set 도 같은 규칙으로 잠긴다
+      var sb = build[0];
+      var box5 = T.caseBox(sb.id + ' · build-set · expiry lock');
+      var n5 = T.renderInto(box5, W.renderScreen, sb, {});
+      if (n5) {
+        var bt = null, bts = sb.timers || [];
+        for (var j = 0; j < bts.length; j++) { if (bts[j].scope === 'task') bt = bts[j]; }
+        var bkey = window.SG_EXAM.clockKeyFor(sb, bt);
+        window.SG_CLOCK.armClock(bkey, 5, { mode: 'countdown', scope: 'task', format: 'MM:SS' });
+        window.SG_CLOCK.expireNow(bkey);
+        T.ok(sb.id + ' 만료 → 타일 비활성', n5.__sg.locked() === true &&
+             (!n5.querySelector('.wr-tile') || n5.querySelector('.wr-tile').disabled === true));
+        window.SG_CLOCK.clearClock(bkey);
+      }
+      /* ── 문항 그리드 네비게이션 (실제 엔진 + SG_RENDER 디스패치 경로) ── */
+      var box6 = T.caseBox('W1 · grid navigation (engine + SG_RENDER.render hook)');
+      var prevMount = window.SG_RENDER.mount();
+      window.SG_RENDER.setMount(box6);
+      var eng = window.SG_EXAM.create(all, { mode: 'exam' });
+      var startIdx = all.indexOf(build[0]);
+      eng.restoreTo(startIdx, 0);
+      eng.start(startIdx);
+
+      T.ok('엔진 경로에서 build-set 렌더', !!box6.querySelector('.wr-build'));
+      var cells = box6.querySelectorAll('.wr-grid .grid-nav button');
+      T.eq('그리드 셀 수 (W1 10문항)', cells.length, 10);
+      T.ok('현재 문항 셀 = current', cells[0].className === 'current' && cells[0].disabled === true);
+      T.ok('앞 문항 셀은 활성', cells[3].disabled === false);
+
+      cells[3].click();                       // 4번 문항으로 전진
+      T.eq('그리드 클릭 → 전진', eng.current().id, build[3].id);
+      var cells2 = box6.querySelectorAll('.wr-grid .grid-nav button');
+      T.ok('전진 후 current 이동', cells2[3].className === 'current');
+      T.ok('지난 문항은 비활성(엔진에 역방향 API 없음)', cells2[0].disabled === true);
+      T.ok('아직 안 푼 앞 문항은 활성', cells2[9].disabled === false);
+
+      eng.destroy();
+      window.SG_CLOCK.stop();
+      window.SG_CLOCK.clearClock('task:W1');
+      window.SG_RENDER.setMount(prevMount);
+
+      T.log(true, '드래그앤드롭 경로는 네이티브 DnD 라 스크립트로 재현하지 않는다 — 위 스테이지에서 직접 끌어 확인할 것.');
+    }
+  });
+})();
+</script>
+<!-- === end writing selftest ========================================= -->
+
+<!-- === speaking selftest (Story 2.5) =============================== -->
+<script src="assets/exam-recorder.js"></script>
+<script src="assets/exam-render-speaking.js"></script>
+<script>
+(function () {
+  'use strict';
+  var T = window.SG_SELFTEST, SP = window.SG_SPEAKING;
+
+  /* 실제 MediaRecorder 를 부르면 이 페이지가 마이크 권한을 요구하고 헤드리스에서 막힌다.
+     녹음기는 스텁으로 바꿔 "훅이 불렸는가"만 본다. 진짜 녹음은 exam-runtime.html 에서
+     Story 2.5 Verification 1·2·4(육안 + IndexedDB)로 확인한다. */
+  var realRec = window.SG_RECORDER;
+  var calls = [];
+  var stub = {
+    NOT_SUBMIT: 'NOT SUBMIT',
+    isSupported: function () { return true; },
+    isRecording: function () { return calls.length % 2 === 1; },
+    level: function () { return 0.4; },
+    start: function (qid, cb) { calls.push('start:' + qid); if (cb) cb(null, { questionId: qid }); return null; },
+    stop: function (cb) { calls.push('stop'); if (cb) cb(null, { questionId: '', blob: null, mime: 'audio/webm', durationMs: 1234, saved: true }); return null; },
+    abort: function () { return true; },
+    state: function () { return 'idle'; },
+    markNotSubmit: function () { return true; }
+  };
+
+  function fakeEngine(screen) {
+    return {
+      current: function () { return screen; },
+      currentIndex: function () { return 0; },
+      onTransition: function () { return function () {}; },
+      next: function () { calls.push('next'); return true; },
+      answer: function (qid, v) { window.SG_STORE.upsertAnswer(qid, v); return true; }
+    };
+  }
+
+  T.withTiming(function (all) {
+    var mine = all.filter(function (s) { return s.screenType === 'speaking'; });
+    T.eq('speaking 화면 수 (S1 7 + S2 4)', mine.length, 11);
+    T.ok('SG_RENDER 에 speaking 등록됨', window.SG_RENDER.has('speaking'));
+    T.ok('SG_RECORDER 존재', !!realRec);
+    T.ok('브라우저 MediaRecorder 지원 (미지원이어도 시험은 진행)', realRec ? realRec.isSupported() : false,
+         realRec ? realRec.pickMime() || '(default mime)' : 'no recorder');
+
+    /* 순수부 — node 테스트(test_speaking_phases.js)와 같은 기대값을 브라우저에서도 확인 */
+    T.eq('endCondition selfPaced', SP.endCondition({ seconds: 0, selfPaced: true }), 'button');
+    T.eq('endCondition media+0s', SP.endCondition({ seconds: 0, media: { kind: 'audio', src: 'a.mp3' } }), 'media');
+    T.eq('endCondition seconds>0', SP.endCondition({ seconds: 20 }), 'deadline');
+    T.eq('endCondition 0-length', SP.endCondition({ seconds: 0 }), 'immediate');
+
+    window.SG_RECORDER = stub;
+
+    var cases = [mine[0], mine[7]];   // S1-1 (listen/prep/record) · S2-1 (read/listen/prep/record)
+    cases.forEach(function (s) {
+      calls = [];
+      var box = T.caseBox(s.id + ' · ' + s.moduleId + ' · phases=' +
+        s.phases.map(function (p) { return p.name + '(' + p.seconds + 's)'; }).join(' → '));
+      var node = T.renderInto(box, SP.render, s, { engine: fakeEngine(s), phaseIndex: 0 });
+      if (!node) return;
+
+      T.ok(s.id + ' 캐릭터 일러스트', !!node.querySelector('img.speaking-portrait'));
+      var rb = node.querySelector('.response-box');
+      T.ok(s.id + ' RESPONSE TIME 박스 존재', !!rb);
+      T.ok(s.id + ' 🎤 아이콘', !!rb && rb.textContent.indexOf('🎤') >= 0);
+      T.ok(s.id + ' HH:MM:SS 포맷', !!rb && /^\d\d:\d\d:\d\d$/.test(rb.querySelector('.response-time').textContent),
+           rb ? rb.querySelector('.response-time').textContent : '-');
+      T.ok(s.id + ' 레벨미터', !!node.querySelector('.speaking-meter-fill'));
+      T.ok(s.id + ' EN/KO 이중 표기', !!node.querySelector('[data-en]') && !!node.querySelector('[data-ko]'));
+
+      // renderSpeaking 은 마운트 후 다음 틱에 첫 phase 를 시작한다.
+      setTimeout(function () {
+        var inst = SP.active();
+        var first = s.phases[0];
+        if (first.selfPaced) {
+          var b = node.querySelector('.speaking-btn');
+          T.ok(s.id + ' selfPaced read → 버튼 노출', !!b && !b.hidden);
+        } else {
+          T.ok(s.id + ' listen phase 로 안착', inst && inst.phaseIndex() === 0, inst ? String(inst.phaseIndex()) : '-');
+        }
+        T.ok(s.id + ' 렌더 시점엔 아직 녹음 시작 안 함', calls.length === 0, calls.join('|'));
+      }, 60);
+    });
+
+    setTimeout(function () {
+      window.SG_RECORDER = realRec;
+      T.ok('스텁 원복', window.SG_RECORDER === realRec);
+    }, 400);
+  });
+})();
+</script>
+<!-- === end speaking selftest ======================================= -->
+
+<!-- === instruction / listening selftest (Story 2.1 · 2.2) =========== -->
+<script src="assets/exam-render-instruction.js"></script>
+<script src="assets/exam-render-listening.js"></script>
+<script>
+(function () {
+  'use strict';
+  var T = window.SG_SELFTEST;
+  var I = window.SG_INSTRUCTION, L = window.SG_LISTEN;
+
+  T.ok('SG_INSTRUCTION 로드', !!I);
+  T.ok('SG_LISTEN 로드', !!L);
+  T.ok('SG_QRENDER(blockKind 디스패처) 설치', !!window.SG_QRENDER);
+  T.ok('audio-set 디스패처 등록', !!window.SG_QRENDER && window.SG_QRENDER.has('audio-set'));
+  T.ok('SG_RENDER 에 instruction 등록', window.SG_RENDER.has('instruction'));
+  T.ok('SG_RENDER 에 moduleEnd 등록', window.SG_RENDER.has('moduleEnd'));
+  T.ok('SG_RENDER 에 hardwareCheck 등록', window.SG_RENDER.has('hardwareCheck'));
+  T.ok('SG_RENDER 에 review 등록', window.SG_RENDER.has('review'));
+
+  /* 엔진 스텁. 실제 상태머신을 돌리면 clock 이 시작되고 마운트가 필요해지므로,
+     렌더러가 실제로 쓰는 3개 메서드만 흉내낸다. */
+  function fakeEngine(all) {
+    return {
+      next: function () { return true; },
+      answer: function (qid, v) { window.SG_STORE.upsertAnswer(qid, v); return true; },
+      screens: function () { return all; },
+      onTransition: function () { return function () {}; }
+    };
+  }
+
+  function textOf(n) { return n ? (n.textContent || '') : ''; }
+
+  T.withTiming(function (all) {
+    var eng = fakeEngine(all);
+    var ctx = { engine: eng, mode: 'practice', phaseIndex: 0 };
+    function byId(id) { for (var i = 0; i < all.length; i++) { if (all[i].id === id) return all[i]; } return null; }
+    function by(fn) { return all.filter(fn); }
+
+    /* ── Story 2.1 ─────────────────────────────────────────── */
+
+    var instr = by(function (s) { return s.screenType === 'instruction'; });
+    T.ok('instruction 화면 5종 이상', instr.length >= 5, instr.length + '개');
+    var timed = instr.filter(function (s) { return s.timer !== null; });
+    T.eq('타이머 달린 instruction(=self-paced 위반)', timed.length, 0);
+
+    // Adjusting the Volume — 슬라이더 + Play Test Audio (녹화 02:30)
+    var vol = byId('intro.volume');
+    var volBox = T.caseBox('intro.volume · Adjusting the Volume');
+    var volNode = T.renderInto(volBox, I.renderInstruction, vol, ctx);
+    if (volNode) {
+      T.ok('볼륨 슬라이더 존재', !!volNode.querySelector('input[type="range"]'));
+      T.ok('Play Test Audio 버튼', textOf(volNode).indexOf('Play Test Audio') >= 0);
+      var range = volNode.querySelector('input[type="range"]');
+      range.value = '50';
+      range.dispatchEvent(new Event('input'));
+      T.eq('슬라이더 → localStorage(sg2_volume)', localStorage.getItem(I.VOLUME_KEY), '0.5');
+      T.eq('readVolume() 재확인', I.readVolume(), 0.5);
+      I.applyVolume(0.8);
+    }
+
+    // Speaking Directions — 11문항·2유형 표 (녹화 22:00)
+    var spk = byId('speaking.directions');
+    var spkBox = T.caseBox('speaking.directions · 11문항 2유형 표');
+    var spkNode = T.renderInto(spkBox, I.renderInstruction, spk, ctx);
+    if (spkNode) {
+      var rows = I.speakingRows();
+      T.eq('유형 수', rows.length, 2);
+      T.eq('문항 합계(콘텐츠 산출)', rows[0].count + rows[1].count, 11);
+      var st = textOf(spkNode);
+      T.ok('유형 라벨', st.indexOf('Listen and Repeat') >= 0 && st.indexOf('Take an Interview') >= 0);
+      T.ok('응답시간(config taskTypes.responseSec)', st.indexOf('20 s') >= 0 && st.indexOf('45 s') >= 0);
+      T.ok('표 행 수(유형 2 + 합계)', spkNode.querySelectorAll('.instr-table tbody tr').length === 3,
+           String(spkNode.querySelectorAll('.instr-table tbody tr').length));
+    }
+
+    // moduleEnd — End of Module {n} / Continue to Module {n+1}
+    var me1 = by(function (s) { return s.screenType === 'moduleEnd' && s.section === 'listening' && s.module === 1; })[0];
+    var meBox = T.caseBox(me1.id + ' · End of Module');
+    var meNode = T.renderInto(meBox, I.renderModuleEnd, me1, ctx);
+    if (meNode) {
+      var mt = textOf(meNode);
+      T.ok('제목 "End of Module 1"', mt.indexOf('End of Module 1') >= 0);
+      T.ok('본문 "… Continue to Module 2."',
+           mt.indexOf('Your time for Module 1 has ended. Continue to Module 2.') >= 0);
+      T.ok('transfer 없으면 편집 패널 없음', !meNode.querySelector('.instr-transfer'));
+      if (me1.timer) {
+        T.eq('상한 타이머 비표시', me1.timer.visible, false);
+        T.eq('상한 타이머 scope', me1.timer.scope, 'screen');
+      }
+    }
+
+    // moduleEnd — transfer.editable (IELTS transfer time 겸용, architecture §3.4)
+    var lq = by(function (s) { return s.screenType === 'question' && s.section === 'listening'; });
+    var trScreen = {
+      id: 'listening.moduleEnd.transfer', screenType: 'moduleEnd', section: 'listening', module: 2,
+      advance: 'auto', timer: null,
+      transfer: { enabled: true, editable: true, targetScreenIds: [lq[0].id, lq[1].id] },
+      copy: { titleEn: 'Transfer your answers', titleKo: '답안 옮겨 적기',
+              bodyEn: 'You now have 10 minutes to transfer your answers.', bodyKo: '10분 동안 답안을 옮겨 적으세요.',
+              ctaEn: 'Finish transfer', ctaKo: '완료' }
+    };
+    var trBox = T.caseBox('listening.moduleEnd.transfer · transfer.editable 분기');
+    var trNode = T.renderInto(trBox, I.renderModuleEnd, trScreen, ctx);
+    if (trNode) {
+      T.ok('편집 패널 렌더', !!trNode.querySelector('.instr-transfer'));
+      T.eq('편집 대상 문항 수', trNode.querySelectorAll('.instr-transfer-item').length, 2);
+      var radios = trNode.querySelectorAll('.instr-transfer-opts input[type="radio"]');
+      T.ok('편집 선택지 렌더', radios.length === 8, radios.length + '개');
+      radios[2].checked = true;
+      radios[2].dispatchEvent(new Event('change'));
+      var rec = window.SG_STORE.getAnswer(lq[0].questionIds[0]);
+      T.ok('transfer 편집 → SG_STORE 저장', !!rec && rec.v === 2, rec ? String(rec.v) : 'none');
+    }
+
+    // hardwareCheck
+    var hwBox = T.caseBox('speaking.hardware · Hardware Check');
+    var hwNode = T.renderInto(hwBox, I.renderHardwareCheck, byId('speaking.hardware'), ctx);
+    if (hwNode) {
+      var ht = textOf(hwNode);
+      T.ok('스피커 테스트 버튼', ht.indexOf('Play Test Sound') >= 0);
+      T.ok('입력 레벨 미터', !!hwNode.querySelector('.instr-meter-bar'));
+      T.ok('Begin 은 권한 확보 전 비활성', hwNode.querySelector('.instr-cta').disabled === true);
+      T.ok('EN/KO 이중 표기', !!hwNode.querySelector('[data-en]') && !!hwNode.querySelector('[data-ko]'));
+    }
+
+    // review
+    var rvBox = T.caseBox('review.submit · 섹션별 응답/미응답 집계');
+    var rvNode = T.renderInto(rvBox, I.renderReview, byId('review.submit'), ctx);
+    if (rvNode) {
+      var sum = I.reviewSummary(all, window.SG_STORE.answers());
+      T.eq('총 문항', sum.total.total, 91);
+      T.eq('섹션 행 수', sum.rows.length, 4);
+      T.ok('Submit 버튼', textOf(rvNode).indexOf('Submit') >= 0);
+      T.ok('집계 표 렌더', !!rvNode.querySelector('.instr-table'));
+    }
+
+    /* ── Story 2.2 ─────────────────────────────────────────── */
+
+    var aset = by(function (s) { return s.blockKind === 'audio-set'; });
+    T.eq('audio-set 화면 수', aset.length, 33);
+
+    // 재생 잔여시간 표기 — 상단 pill(MM:SS)과 구분되는 M:SS
+    T.eq('fmtRemain(83)', L.fmtRemain(83), '1:23');
+    T.eq('fmtRemain(0)', L.fmtRemain(0), '0:00');
+    T.eq('fmtRemain(-4) clamp', L.fmtRemain(-4), '0:00');
+
+    // FR29 — 한국어 하드코딩 prompt 를 EN 우선으로
+    var pair = L.promptPair({ prompt: '오디오를 듣고 가장 알맞은 응답을 고르세요.', layout: 'short-response' });
+    T.eq('FR29 EN 문구', pair.en, 'Choose the best response.');
+    T.eq('FR29 KO 원문 보존', pair.ko, '오디오를 듣고 가장 알맞은 응답을 고르세요.');
+    T.eq('set1.js 원본 미수정', window.SMEAG_SET1.findQuestion('L1-1').q.prompt,
+         '오디오를 듣고 가장 알맞은 응답을 고르세요.');
+
+    // perQuestionAudio 방식 (short-response)
+    var shortS = null;
+    for (var i = 0; i < aset.length; i++) {
+      var hit = window.SMEAG_SET1.findQuestion(aset[i].questionIds[0]);
+      if (hit && hit.q && hit.q.layout === 'short-response' && aset[i].audio) { shortS = aset[i]; break; }
+    }
+    var sBox = T.caseBox(shortS.id + ' · perQuestionAudio(short-response)');
+    var sNode = T.renderInto(sBox, L.renderListeningQuestion, shortS, ctx);
+    if (sNode) {
+      T.ok('lst-short 레이아웃', String(sNode.className).indexOf('lst-short') >= 0, sNode.className);
+      T.ok('Question n of N 표시', textOf(sNode).indexOf('Question 1 of ' + shortS.progress.total) >= 0);
+      T.eq('progress.total(콘텐츠 산출)', shortS.progress.total, 33);
+      T.ok('화자 일러스트', !!sNode.querySelector('img.lst-au-speaker'));
+      T.ok('재생 잔여시간 카운터', !!sNode.querySelector('.lst-au-count'));
+      var au = sNode.querySelector('audio');
+      T.ok('audio 엘리먼트 존재(미소진)', !!au);
+      T.ok('<audio controls> 미사용(FR8)', !!au && !au.hasAttribute('controls'));
+      var ins = sNode.querySelectorAll('input[type="radio"]');
+      T.eq('선택지 수', ins.length, 4);
+      var allDisabled = true;
+      for (var k = 0; k < ins.length; k++) { if (!ins[k].disabled) allDisabled = false; }
+      T.ok('재생 완료 전 선택지 잠금', allDisabled);
+      T.ok('EN/KO 이중 표기', !!sNode.querySelector('[data-en]') && !!sNode.querySelector('[data-ko]'));
+    }
+
+    // FR8 — 소진 플래그가 남으면 오디오 엘리먼트를 만들지 않는다(재진입·새로고침)
+    var blockS = null;
+    for (var b = 0; b < aset.length; b++) {
+      var h2 = window.SMEAG_SET1.findQuestion(aset[b].questionIds[0]);
+      if (aset[b].audio && h2 && h2.q && h2.q.layout !== 'short-response') { blockS = aset[b]; break; }
+    }
+    var key = L.spentKey(blockS.id, blockS.audio.src);
+    T.eq('소진 전', L.isAudioSpent(key), false);
+    L.markAudioSpent(key);
+    T.eq('마킹 후', L.isAudioSpent(key), true);
+    // 새로고침 시뮬레이션: 직렬화 → 새 백엔드로 복원 → 같은 세션 id 로 재오픈.
+    var sid = window.SG_STORE.current();
+    var snap = window.SG_STORE.serialize();
+    window.SG_STORE.restore(snap);
+    window.SG_STORE.open(sid, false);
+    T.eq('새로고침(직렬화·복원) 후에도 소진 유지', L.isAudioSpent(key), true);
+
+    var spentBox = T.caseBox(blockS.id + ' · 재생 소진 후 재진입');
+    var spentNode = T.renderInto(spentBox, L.renderListeningQuestion, blockS, ctx);
+    if (spentNode) {
+      T.ok('audio 엘리먼트 없음', !spentNode.querySelector('audio'));
+      T.ok('재생 불가 안내', textOf(spentNode).indexOf('Audio already played') >= 0);
+      var si = spentNode.querySelectorAll('input[type="radio"]');
+      var anyDisabled = false;
+      for (var m = 0; m < si.length; m++) { if (si[m].disabled) anyDisabled = true; }
+      T.ok('선택지 활성화', !anyDisabled);
+      si[1].checked = true;
+      si[1].dispatchEvent(new Event('change'));
+      var arec = window.SG_STORE.getAnswer(blockS.questionIds[0]);
+      T.ok('선택 → engine.answer 경유 저장', !!arec && arec.v === 1, arec ? String(arec.v) : 'none');
+    }
+
+    // 블록 audio 방식의 후속 문항 — 오디오 없음, 삽화 유지
+    var follow = by(function (s) { return s.blockKind === 'audio-set' && !s.audio && s.image; })[0];
+    var fBox = T.caseBox(follow.id + ' · 블록 오디오 후속 문항');
+    var fNode = T.renderInto(fBox, L.renderListeningQuestion, follow, ctx);
+    if (fNode) {
+      T.ok('오디오 없음', !fNode.querySelector('audio'));
+      T.ok('화자 삽화 유지(AC3)', !!fNode.querySelector('img.lst-au-speaker'));
+      var fi = fNode.querySelectorAll('input[type="radio"]');
+      var fAny = false;
+      for (var n = 0; n < fi.length; n++) { if (fi[n].disabled) fAny = true; }
+      T.ok('선택지 즉시 활성', !fAny);
+    }
+
+    // 문항 타이머는 question scope 20초, 만료 시 자동 전환
+    T.eq('listening timer.scope', aset[0].timer.scope, 'question');
+    T.eq('listening timer.format', aset[0].timer.format, 'MM:SS');
+    T.eq('listening advance', aset[0].advance, 'auto');
+    T.eq('listening onExpire', aset[0].timer.onExpire, 'autoAdvance');
+  });
+})();
+</script>
+<!-- === end instruction / listening selftest ========================= -->
+
+</body>
+</html>

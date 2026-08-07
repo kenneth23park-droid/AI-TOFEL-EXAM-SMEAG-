@@ -1,0 +1,91 @@
+# Campus GPU node — private network, no egress.
+#
+# Bring up:  docker compose --env-file serving/campus.env up -d
+# Verify:    curl http://localhost:8000/v1/models
+#
+# The scoring client talks to vllm; whisper and kokoro are separate so a
+# failure in the voice stack cannot take band scoring down with it.
+
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.9.2
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HF_TOKEN:-}
+      # Models are pre-staged on disk. An air-gapped campus must never depend
+      # on a hub fetch at boot — a cold start after a power cut would hang.
+      HF_HUB_OFFLINE: "1"
+    volumes:
+      - ${MODEL_DIR:-/srv/models}:/models:ro
+      - vllm-cache:/root/.cache
+    command: >
+      --model /models/gemma-4-26b-a4b-it
+      --served-model-name google/gemma-4-26b-a4b-it
+      --quantization ${QUANT:-awq}
+      --max-model-len 16384
+      --gpu-memory-utilization 0.88
+      --max-num-seqs 32
+      --guided-decoding-backend xgrammar
+      --enable-prefix-caching
+      --disable-log-requests
+    # --enable-prefix-caching matters more than it looks: the rubric system
+    # prompt is ~1.5k tokens and identical on every request, so prefix reuse
+    # removes most of the prefill cost at 3-sample self-consistency.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 300s   # model load on a cold cache is slow; do not shorten
+    shm_size: "8gb"
+    ulimits:
+      memlock: -1
+      stack: 67108864
+
+  whisper:
+    image: fedirz/faster-whisper-server:latest-cuda
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      WHISPER__MODEL: Systran/faster-whisper-large-v3
+      WHISPER__COMPUTE_TYPE: float16
+      WHISPER__INFERENCE_DEVICE: cuda
+      ENABLE_UI: "false"
+    volumes:
+      - ${MODEL_DIR:-/srv/models}/whisper:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  kokoro:
+    # Coaching-reply TTS only. Exam audio is pre-rendered and shipped as a
+    # bundle — never synthesised live, because a TTS glitch mid-exam is
+    # unrecoverable and every student must hear byte-identical audio.
+    image: ghcr.io/remsky/kokoro-fastapi-gpu:latest
+    restart: unless-stopped
+    ports:
+      - "8002:8880"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+volumes:
+  vllm-cache:

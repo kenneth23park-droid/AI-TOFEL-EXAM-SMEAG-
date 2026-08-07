@@ -13,7 +13,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import crud
+from app.config import get_settings
 from app.db import create_all, session_scope
+from app.migrations import run_migrations
 from app.models import (
     PRODUCTIVE,
     RECEPTIVE,
@@ -32,13 +34,19 @@ SEED = 20260804
 QUESTIONS_PER_RECEPTIVE = 20
 
 STUDENTS = [
-    ("S2026-001", "Kim Min-su", "Intensive A"),
-    ("S2026-002", "Lee Ji-woo", "Intensive A"),
-    ("S2026-003", "Park Seo-yeon", "Intensive B"),
-    ("S2026-004", "Nguyen Thi Mai", "ESL Core"),
-    ("S2026-005", "Tanaka Haruto", "ESL Core"),
-    ("S2026-006", "Chen Yu-wei", "Intensive B"),
+    ("S2026-001", "Kim Min-su", "Intensive A", "Capital"),
+    ("S2026-002", "Lee Ji-woo", "Intensive A", "Capital"),
+    ("S2026-003", "Park Seo-yeon", "Intensive B", "Sparta"),
+    ("S2026-004", "Nguyen Thi Mai", "ESL Core", "Classic"),
+    ("S2026-005", "Tanaka Haruto", "ESL Core", "Classic"),
+    ("S2026-006", "Chen Yu-wei", "Intensive B", "Sparta"),
 ]
+
+# Seeded receptive questions belong to the first module of their skill.
+SEED_MODULE = {"reading": "R1", "listening": "L1"}
+
+# attempts.profile → attempts.scale (architecture.md 6.2.2).
+_SCALE_FOR = {"toefl": "toefl120", "ielts": "ielts9"}
 
 EXAMS = [
     ("SET 9", "SMEAG Mock Test — SET 9"),
@@ -86,10 +94,29 @@ def _build_attempt(
     db: Session, rng: random.Random, student: Student, exam: Exam, profile: dict, taken_at: datetime,
     status: str,
 ) -> Attempt:
-    attempt = Attempt(student_id=student.id, exam_id=exam.id, taken_at=taken_at, status=status)
+    # `profile` above is the student's ability profile; this is the *exam* profile
+    # (config.default_profile, Story 3.1) that picks the score scale.
+    _profile = get_settings().default_profile
+    attempt = Attempt(
+        student_id=student.id,
+        exam_id=exam.id,
+        taken_at=taken_at,
+        status=status,
+        # Story 3.1 — the admin list columns are populated at seed time so the
+        # backfill migration never has to guess for freshly created databases.
+        session="seed-" + student.student_no + "-" + exam.code.replace(" ", ""),
+        campus=student.campus,
+        exam_date=taken_at.date(),
+        profile=_profile,
+        scale=_SCALE_FOR.get(_profile, "toefl120"),
+        feedback_progress=100 if status == "completed" else 0,
+        started_at=taken_at,
+        submitted_at=taken_at,
+    )
     db.add(attempt)
     db.flush()
 
+    questions = 0
     for skill in RECEPTIVE:
         # Per-sitting variance around the student's baseline.
         accuracy = min(0.99, max(0.15, rng.gauss(profile[skill], 0.06)))
@@ -103,6 +130,7 @@ def _build_attempt(
                 answer = key
             else:
                 answer = rng.choice([c for c in CHOICES if c != key])
+            module = SEED_MODULE[skill]
             db.add(
                 QuestionResponse(
                     attempt_id=attempt.id,
@@ -112,8 +140,14 @@ def _build_attempt(
                     student_answer=answer,
                     correct_answer=key,
                     is_correct=hit,
+                    question_key=module + "-" + str(no),
+                    qtype="MCQ",
+                    module=module,
+                    auto_score=1.0 if hit else 0.0,
+                    max_score=1.0,
                 )
             )
+            questions += 1
         db.add(
             SectionScore(
                 attempt_id=attempt.id, skill=skill,
@@ -148,6 +182,8 @@ def _build_attempt(
     db.refresh(attempt)
     attempt.total_score = sum(s.scaled for s in attempt.section_scores)
     attempt.grade = cefr_for(attempt.total_score)
+    attempt.total_questions = questions
+    attempt.submitted_count = questions
     db.add(attempt)
     db.flush()
     return attempt
@@ -156,6 +192,7 @@ def _build_attempt(
 def seed(force: bool = False) -> dict:
     """Create the schema and populate it. Returns a small summary."""
     create_all()
+    run_migrations()   # `python -m app.seed` on an older DB must not hit missing columns
 
     with session_scope() as db:
         if db.scalar(select(Student).limit(1)) is not None and not force:
@@ -165,7 +202,8 @@ def seed(force: bool = False) -> dict:
         rng = random.Random(SEED)
 
         students = [
-            Student(student_no=no, name=name, klass=klass) for no, name, klass in STUDENTS
+            Student(student_no=no, name=name, klass=klass, campus=campus)
+            for no, name, klass, campus in STUDENTS
         ]
         exams = [Exam(code=code, title=title) for code, title in EXAMS]
         db.add_all(students + exams)
@@ -173,9 +211,11 @@ def seed(force: bool = False) -> dict:
 
         # 12 attempts = 6 students × 2 sittings (most recent set first).
         base = datetime(2026, 7, 28, 9, 0, tzinfo=timezone.utc).replace(tzinfo=None)
+        # Unified status set (architecture.md 6.2.2): everything is 'completed'
+        # except two sittings left mid-pipeline so the admin views have work to show.
         statuses = {
-            (2, 1): "pending",     # one attempt still awaiting teacher review
-            (4, 1): "reviewing",
+            (2, 1): "scoring",
+            (4, 1): "scoring",
         }
         created: list[Attempt] = []
         for si, student in enumerate(students):
@@ -185,7 +225,7 @@ def seed(force: bool = False) -> dict:
                 created.append(
                     _build_attempt(
                         db, rng, student, exam, PROFILES[si], taken_at,
-                        statuses.get((si, ai), "scored"),
+                        statuses.get((si, ai), "completed"),
                     )
                 )
 

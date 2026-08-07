@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SET 9 Listening · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .modwrap { margin-top: 22px; }
+  .modwrap h2 { font-size: 20px; font-weight: 820; margin: 18px 0 10px; }
+  .aud { background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
+  .aud-h { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .aud-h b { font-size:14px; }
+  .kind { font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:999px; background:var(--cream-2); color:var(--ink-2); text-transform:uppercase; letter-spacing:.04em; }
+  .kind.conversation,.kind.interview { background:var(--peach); color:var(--brand-ink); }
+  .vchips { display:flex; gap:5px; flex-wrap:wrap; margin-left:auto; }
+  .vchip { font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:#eef; color:#3838a0; }
+  .au-stage { position:relative; background:linear-gradient(160deg,#fbe3d8,#f7d3c2); border:1px solid var(--peach-2);
+    border-radius:12px; padding:12px; display:flex; align-items:center; gap:14px; min-height:96px; }
+  .au-badge { width:88px; height:72px; border-radius:10px; background:#fff; display:grid; place-items:center;
+    font-size:30px; box-shadow:var(--shadow); flex:none; }
+  .au-count { font-size:30px; font-weight:850; color:var(--brand-ink); font-variant-numeric:tabular-nums; }
+  .au-cap { font-size:12px; font-weight:700; color:var(--muted); }
+  .au-stage.playing .au-count { color:var(--brand); animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
+  audio { width:100%; margin-top:8px; }
+  .tr { margin-top:8px; }
+  .tr summary { cursor:pointer; font-size:12px; font-weight:700; color:var(--brand-ink); }
+  .tr p { white-space:pre-wrap; font-size:12.5px; color:var(--ink-2); line-height:1.6; margin-top:6px;
+    background:var(--cream-2); border-radius:10px; padding:10px 12px; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
+    <nav class="nav-center">
+      <a href="tests.html" class="on">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
+      <a href="npz.html">🎯 <span data-en>Practice</span><span data-ko>연습</span></a>
+      <a href="learning.html">🎬 <span data-en>Lectures</span><span data-ko>강의</span></a>
+      <a href="community.html">💬 <span data-en>Community</span><span data-ko>커뮤니티</span></a>
+      <a href="dashboard.html">📊 <span data-en>My StudyGround</span><span data-ko>내 성적</span></a>
+    </nav>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="tests.html"><span data-en>All tests</span><span data-ko>전체 시험</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-h">
+    <span class="pill" style="margin-bottom:8px">SET 9 · Google TTS</span>
+    <h1 style="font-size:clamp(28px,4vw,44px)"><span data-en>SET 9 — Listening audio</span><span data-ko>SET 9 — 리스닝 오디오</span></h1>
+    <p class="sub"><span data-en>Generated from SET 9 SCRIPT with diverse character voices (US · GB · AU). Each clip has a speaker page, a countdown timer, and a transcript.</span>
+      <span data-ko>SET 9 SCRIPT에서 다양한 캐릭터 보이스(US·GB·AU)로 생성. 화자 페이지·카운트다운·스크립트 포함.</span></p>
+  </div>
+  <div id="host"></div>
+</main>
+
+<footer class="foot"><div class="wrap foot-in">
+  <small class="muted">© SMEAG StudyGround · SET 9 Listening · Google Cloud TTS</small>
+  <div class="foot-links"><a href="tests.html" data-en>Mock Tests</a><a href="tests.html" data-ko>모의고사</a></div>
+</div></footer>
+
+<script src="assets/set9-audio.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  var D = window.SMEAG_SET9_AUDIO; if(!D) return;
+  var ICON = { short:'💬', conversation:'👥', announcement:'📣', repeat:'🔁', interview:'🎤' };
+  function fmt(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60),q=s%60; return m+':'+(q<10?'0':'')+q; }
+  function esc(t){ var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+  var host = document.getElementById('host');
+
+  D.modules.forEach(function(mod){
+    var w = document.createElement('div'); w.className='modwrap';
+    w.innerHTML = '<h2>'+esc(mod.label)+' · '+mod.items.length+' clips</h2>';
+    mod.items.forEach(function(it){
+      var card = document.createElement('div'); card.className='aud';
+      var chips = (it.voices||[]).map(function(v){return '<span class="vchip">'+esc(v)+'</span>';}).join('');
+      card.innerHTML =
+        '<div class="aud-h"><b>'+esc(it.title)+'</b>'+
+          '<span class="kind '+it.kind+'">'+esc(it.kind)+'</span>'+
+          '<span class="vchips">'+chips+'</span></div>'+
+        '<div class="au-stage"><div class="au-badge">'+(ICON[it.kind]||'🔊')+'</div>'+
+          '<div><div class="au-count">0:00</div><div class="au-cap">'+esc(it.kind==='repeat'?'Listen & repeat':'Plays once')+'</div></div></div>'+
+        '<audio controls preload="metadata" src="'+it.audio+'"></audio>'+
+        '<details class="tr"><summary>Transcript</summary><p>'+esc(it.transcript)+'</p></details>';
+      var audio=card.querySelector('audio'), count=card.querySelector('.au-count'), stage=card.querySelector('.au-stage');
+      audio.addEventListener('loadedmetadata',function(){ if(isFinite(audio.duration)) count.textContent=fmt(audio.duration); });
+      audio.addEventListener('play',function(){ stage.classList.add('playing'); });
+      audio.addEventListener('pause',function(){ stage.classList.remove('playing'); });
+      audio.addEventListener('timeupdate',function(){ count.textContent=fmt((isFinite(audio.duration)?audio.duration:0)-audio.currentTime); });
+      audio.addEventListener('ended',function(){ stage.classList.remove('playing'); count.textContent='0:00'; });
+      w.appendChild(card);
+    });
+    host.appendChild(w);
+  });
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

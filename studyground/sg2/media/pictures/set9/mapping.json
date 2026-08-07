@@ -1,0 +1,246 @@
+{
+  "source": "NEW TOEFL MOCK TEST SET  9.docx",
+  "note": "Reading 섹션은 이미지를 하나도 사용하지 않는다 — 문항문서의 r:embed 앵커 20개는 전부 LISTENING SECTION 이후 문단에 있다(아래 anchors 의 paraIndex 참조; Reading 구간은 paraIndex < LISTENING SECTION 앵커). 파일명은 앵커 문단의 앞뒤 문맥으로 추정한 사용처이며, Listening/Speaking 담당이 확정해야 한다.",
+  "images": {
+    "image1.png": {
+      "file": "l1-q1-12-speaker-a.png",
+      "bytes": 42493,
+      "anchors": [
+        {
+          "paraIndex": 194,
+          "nearText": "Listen to the question and select the best response from the choices."
+        }
+      ]
+    },
+    "image10.png": {
+      "file": "w-discussion-01.png",
+      "bytes": 69253,
+      "anchors": [
+        {
+          "paraIndex": 497,
+          "nearText": ""
+        }
+      ]
+    },
+    "image11.png": {
+      "file": "w-discussion-02.png",
+      "bytes": 54548,
+      "anchors": [
+        {
+          "paraIndex": 498,
+          "nearText": ""
+        }
+      ]
+    },
+    "image12.png": {
+      "file": "w-discussion-03.png",
+      "bytes": 59118,
+      "anchors": [
+        {
+          "paraIndex": 499,
+          "nearText": ""
+        }
+      ]
+    },
+    "image13.png": {
+      "file": "s-task1-repeat-1.png",
+      "bytes": 443515,
+      "anchors": [
+        {
+          "paraIndex": 503,
+          "nearText": ""
+        }
+      ]
+    },
+    "image14.png": {
+      "file": "s-task1-repeat-2.png",
+      "bytes": 453630,
+      "anchors": [
+        {
+          "paraIndex": 504,
+          "nearText": ""
+        }
+      ]
+    },
+    "image15.png": {
+      "file": "s-task1-repeat-3.png",
+      "bytes": 456121,
+      "anchors": [
+        {
+          "paraIndex": 505,
+          "nearText": ""
+        }
+      ]
+    },
+    "image16.png": {
+      "file": "s-task1-repeat-4.png",
+      "bytes": 423254,
+      "anchors": [
+        {
+          "paraIndex": 506,
+          "nearText": ""
+        }
+      ]
+    },
+    "image17.png": {
+      "file": "s-task1-repeat-5.png",
+      "bytes": 441568,
+      "anchors": [
+        {
+          "paraIndex": 507,
+          "nearText": ""
+        }
+      ]
+    },
+    "image18.png": {
+      "file": "s-task1-repeat-6.png",
+      "bytes": 458631,
+      "anchors": [
+        {
+          "paraIndex": 508,
+          "nearText": ""
+        }
+      ]
+    },
+    "image19.png": {
+      "file": "s-task1-repeat-7.png",
+      "bytes": 477331,
+      "anchors": [
+        {
+          "paraIndex": 509,
+          "nearText": ""
+        }
+      ]
+    },
+    "image2.png": {
+      "file": "l1-q1-12-speaker-b.png",
+      "bytes": 40695,
+      "anchors": [
+        {
+          "paraIndex": 198,
+          "nearText": "D. It’s open until midnight during finals."
+        },
+        {
+          "paraIndex": 214,
+          "nearText": "D. The switch is right by the door."
+        },
+        {
+          "paraIndex": 235,
+          "nearText": "D. The topic is on climate change."
+        },
+        {
+          "paraIndex": 373,
+          "nearText": "D. You can also apply online now"
+        }
+      ]
+    },
+    "image20.png": {
+      "file": "s-task2-interview.png",
+      "bytes": 280318,
+      "anchors": [
+        {
+          "paraIndex": 512,
+          "nearText": ""
+        }
+      ]
+    },
+    "image3.png": {
+      "file": "l1-q1-12-speaker-c.png",
+      "bytes": 39179,
+      "anchors": [
+        {
+          "paraIndex": 202,
+          "nearText": "D. The professor is new this semester."
+        },
+        {
+          "paraIndex": 222,
+          "nearText": "D. I was in the middle of watching something."
+        },
+        {
+          "paraIndex": 238,
+          "nearText": "C. Sure, no problem."
+        },
+        {
+          "paraIndex": 368,
+          "nearText": ""
+        }
+      ]
+    },
+    "image4.png": {
+      "file": "l1-q1-12-speaker-d.png",
+      "bytes": 49161,
+      "anchors": [
+        {
+          "paraIndex": 206,
+          "nearText": "D. Sarah said she might bring snacks."
+        },
+        {
+          "paraIndex": 218,
+          "nearText": "D. A round trip is about forty dollars."
+        },
+        {
+          "paraIndex": 227,
+          "nearText": ""
+        }
+      ]
+    },
+    "image5.png": {
+      "file": "l1-q1-12-speaker-e.png",
+      "bytes": 41725,
+      "anchors": [
+        {
+          "paraIndex": 210,
+          "nearText": "D. There’s a supply closest down the hall."
+        },
+        {
+          "paraIndex": 231,
+          "nearText": "D. The conference room is upstairs."
+        },
+        {
+          "paraIndex": 364,
+          "nearText": "A. I think it starts at three."
+        }
+      ]
+    },
+    "image6.png": {
+      "file": "l2-q4-5-conversation.png",
+      "bytes": 299774,
+      "anchors": [
+        {
+          "paraIndex": 381,
+          "nearText": "4. What happened to the woman recently?"
+        }
+      ]
+    },
+    "image7.png": {
+      "file": "l2-q6-7-conversation.png",
+      "bytes": 276388,
+      "anchors": [
+        {
+          "paraIndex": 391,
+          "nearText": "Questions 6-7"
+        }
+      ]
+    },
+    "image8.png": {
+      "file": "l2-q8-11-talk.png",
+      "bytes": 199095,
+      "anchors": [
+        {
+          "paraIndex": 399,
+          "nearText": "A. He plans to move to a new city soon."
+        }
+      ]
+    },
+    "image9.png": {
+      "file": "l2-q12-15-talk.png",
+      "bytes": 285653,
+      "anchors": [
+        {
+          "paraIndex": 424,
+          "nearText": "D. Climate shifts affect birds in tropical breeding grounds"
+        }
+      ]
+    }
+  }
+}

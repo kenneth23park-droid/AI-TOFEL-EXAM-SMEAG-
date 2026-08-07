@@ -40,3 +40,46 @@
     });
   });
 })();
+
+/* ── Read-aloud (TTS) ──────────────────────────────────────────────
+ * Priority: bundled ElevenLabs mp3 (media/tts/<id>.mp3, generated offline
+ * via tools/tts_generate.py) → else the browser's built-in speechSynthesis
+ * (works offline, no API key). Exposed as window.SG_TTS. */
+window.SG_TTS = (function () {
+  'use strict';
+  var index = null, loaded = false;
+  function loadIndex() {
+    if (loaded) return Promise.resolve(index);
+    loaded = true;
+    return fetch('media/tts/index.json').then(function (r) {
+      return r.ok ? r.json() : {};
+    }).then(function (j) { index = j || {}; return index; }).catch(function () { index = {}; return index; });
+  }
+  var current = null;
+  function stop() {
+    if (current && current.pause) { try { current.pause(); } catch (e) {} current = null; }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+  // Speak by id (checks bundled mp3) with text fallback to browser voice.
+  function speak(id, text, btn) {
+    stop();
+    return loadIndex().then(function (idx) {
+      var entry = id && idx[id];
+      if (entry && entry.file) {
+        var a = new Audio(entry.file);
+        current = a;
+        if (btn) { btn.dataset.state = 'playing'; a.onended = function () { btn.dataset.state = ''; }; }
+        return a.play().catch(function () { return browserSpeak(text, btn); });
+      }
+      return browserSpeak(text, btn);
+    });
+  }
+  function browserSpeak(text, btn) {
+    if (!('speechSynthesis' in window) || !text) return;
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.98;
+    if (btn) { btn.dataset.state = 'playing'; u.onend = function () { btn.dataset.state = ''; }; }
+    window.speechSynthesis.speak(u);
+  }
+  return { speak: speak, stop: stop };
+})();

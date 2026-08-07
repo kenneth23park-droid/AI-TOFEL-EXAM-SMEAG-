@@ -1,0 +1,540 @@
+{
+  "schemaVersion": "1.0.0",
+  "exam": {
+    "id": "toefl-nt",
+    "label": "New TOEFL",
+    "labelKo": "뉴토플",
+    "scoreScale": "toefl120",
+    "scale": {
+      "sectionMax": 30,
+      "totalMax": 120,
+      "step": 1,
+      "bandLabel": "CEFR"
+    },
+    "contentRef": "window.SMEAG_SET1"
+  },
+  "sectionOrder": [
+    "listening",
+    "speaking",
+    "reading",
+    "writing"
+  ],
+  "defaults": {
+    "timerScope": "module",
+    "timerFormat": "MM:SS",
+    "onExpire": "autoAdvance",
+    "advance": "manual",
+    "audioMaxPlays": 1,
+    "instructionMaxSec": null,
+    "graceSec": 0,
+    "warnAtSec": 60
+  },
+  "sections": {
+    "listening": {
+      "id": "listening",
+      "label": "Listening",
+      "labelKo": "리스닝",
+      "screenType": "question",
+      "timerScope": "question",
+      "timerFormat": "MM:SS",
+      "onExpire": "autoAdvance",
+      "audio": {
+        "maxPlays": 1,
+        "autoPlay": true,
+        "replayAllowed": false
+      },
+      "questionCountSource": "content",
+      "sectionSec": null,
+      "modules": [
+        {
+          "id": "L1",
+          "contentRef": "listening.modules[id=L1]",
+          "taskType": null,
+          "allocatedSec": 1080,
+          "perQuestionSec": 30,
+          "onExpire": "autoAdvance",
+          "moduleEndScreen": "moduleEnd.listening",
+          "introAudioSelfPaced": null
+        },
+        {
+          "id": "L2",
+          "contentRef": "listening.modules[id=L2]",
+          "taskType": null,
+          "allocatedSec": 900,
+          "perQuestionSec": 30,
+          "onExpire": "autoAdvance",
+          "moduleEndScreen": "moduleEnd.listening",
+          "introAudioSelfPaced": null
+        }
+      ],
+      "tasks": null,
+      "taskTypes": null,
+      "fallbackPerQuestionSec": 30,
+      "phases": []
+    },
+    "speaking": {
+      "id": "speaking",
+      "label": "Speaking",
+      "labelKo": "스피킹",
+      "screenType": "speaking",
+      "timerScope": "screen",
+      "timerFormat": "HH:MM:SS",
+      "onExpire": "stopRecord",
+      "audio": null,
+      "questionCountSource": "content",
+      "sectionSec": null,
+      "modules": [
+        {
+          "id": "S1",
+          "contentRef": "speaking.modules[id=S1]",
+          "taskType": "listenAndRepeat",
+          "allocatedSec": null,
+          "perQuestionSec": null,
+          "onExpire": null,
+          "moduleEndScreen": null,
+          "introAudioSelfPaced": true
+        },
+        {
+          "id": "S2",
+          "contentRef": "speaking.modules[id=S2]",
+          "taskType": "interview",
+          "allocatedSec": null,
+          "perQuestionSec": null,
+          "onExpire": null,
+          "moduleEndScreen": null,
+          "introAudioSelfPaced": true
+        }
+      ],
+      "tasks": null,
+      "taskTypes": {
+        "listenAndRepeat": {
+          "id": "listenAndRepeat",
+          "label": "Listen and Repeat",
+          "mediaType": "audio",
+          "promptSelfPaced": false,
+          "listenReplays": 1,
+          "prepSec": 3,
+          "responseSec": 20,
+          "responseSecMin": null,
+          "responseSecMax": null,
+          "recording": true,
+          "onExpire": "stopRecord"
+        },
+        "interview": {
+          "id": "interview",
+          "label": "Take an Interview",
+          "mediaType": "video",
+          "promptSelfPaced": true,
+          "listenReplays": 1,
+          "prepSec": 3,
+          "responseSec": 45,
+          "responseSecMin": null,
+          "responseSecMax": null,
+          "recording": true,
+          "onExpire": "stopRecord"
+        }
+      },
+      "fallbackPerQuestionSec": null,
+      "phases": []
+    },
+    "reading": {
+      "id": "reading",
+      "label": "Reading",
+      "labelKo": "리딩",
+      "screenType": "question",
+      "timerScope": "module",
+      "timerFormat": "MM:SS",
+      "onExpire": "autoAdvance",
+      "audio": null,
+      "questionCountSource": "content",
+      "sectionSec": 1740,
+      "modules": [
+        {
+          "id": "R1",
+          "contentRef": "reading.modules[id=R1]",
+          "taskType": null,
+          "allocatedSec": 1200,
+          "perQuestionSec": null,
+          "onExpire": "autoAdvance",
+          "moduleEndScreen": "moduleEnd.reading",
+          "introAudioSelfPaced": null
+        },
+        {
+          "id": "R2",
+          "contentRef": "reading.modules[id=R2]",
+          "taskType": null,
+          "allocatedSec": 540,
+          "perQuestionSec": null,
+          "onExpire": "autoAdvance",
+          "moduleEndScreen": "moduleEnd.reading",
+          "introAudioSelfPaced": null
+        }
+      ],
+      "tasks": null,
+      "taskTypes": null,
+      "fallbackPerQuestionSec": null,
+      "phases": []
+    },
+    "writing": {
+      "id": "writing",
+      "label": "Writing",
+      "labelKo": "라이팅",
+      "screenType": "question",
+      "timerScope": "task",
+      "timerFormat": "MM:SS",
+      "onExpire": "autoAdvance",
+      "audio": null,
+      "questionCountSource": "content",
+      "sectionSec": null,
+      "modules": [],
+      "tasks": [
+        {
+          "id": "W1",
+          "contentRef": "writing.modules[id=W1]",
+          "taskKind": "build-set",
+          "perTaskSec": 600,
+          "minWords": null,
+          "onExpire": "autoAdvance",
+          "moduleEndScreen": "taskEnd.writing"
+        },
+        {
+          "id": "W2",
+          "contentRef": "writing.modules[id=W2]",
+          "taskKind": "email",
+          "perTaskSec": 600,
+          "minWords": 80,
+          "onExpire": "autoAdvance",
+          "moduleEndScreen": "taskEnd.writing"
+        },
+        {
+          "id": "W3",
+          "contentRef": "writing.modules[id=W3]",
+          "taskKind": "academicDiscussion",
+          "perTaskSec": 600,
+          "minWords": 100,
+          "onExpire": "autoAdvance",
+          "moduleEndScreen": "taskEnd.writing"
+        }
+      ],
+      "taskTypes": null,
+      "fallbackPerQuestionSec": null,
+      "phases": []
+    }
+  },
+  "directions": [
+    {
+      "id": "adjustVolume",
+      "label": "Adjusting the Volume",
+      "screenType": "instruction",
+      "insertAt": {
+        "position": "beforeSection",
+        "section": "listening",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "playTestAudio",
+        "volume",
+        "continue"
+      ]
+    },
+    {
+      "id": "listeningDirections",
+      "label": "Listening Section Directions",
+      "screenType": "instruction",
+      "insertAt": {
+        "position": "beforeSection",
+        "section": "listening",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "begin"
+      ]
+    },
+    {
+      "id": "moduleEnd.listening",
+      "label": "End of Module",
+      "screenType": "moduleEnd",
+      "insertAt": {
+        "position": "betweenModules",
+        "section": "listening",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "continue"
+      ]
+    },
+    {
+      "id": "hardwareCheck",
+      "label": "Hardware Check",
+      "screenType": "hardwareCheck",
+      "insertAt": {
+        "position": "beforeSection",
+        "section": "speaking",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "micTest",
+        "speakerTest",
+        "continue"
+      ]
+    },
+    {
+      "id": "speakingDirections",
+      "label": "Speaking Section Directions",
+      "screenType": "instruction",
+      "insertAt": {
+        "position": "beforeSection",
+        "section": "speaking",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "begin"
+      ]
+    },
+    {
+      "id": "readingDirections",
+      "label": "Reading Section Directions",
+      "screenType": "instruction",
+      "insertAt": {
+        "position": "beforeSection",
+        "section": "reading",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "begin"
+      ]
+    },
+    {
+      "id": "moduleEnd.reading",
+      "label": "End of Module 1",
+      "screenType": "moduleEnd",
+      "insertAt": {
+        "position": "betweenModules",
+        "section": "reading",
+        "module": "R1"
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "continue"
+      ]
+    },
+    {
+      "id": "writingDirections",
+      "label": "Writing Section Directions",
+      "screenType": "instruction",
+      "insertAt": {
+        "position": "beforeSection",
+        "section": "writing",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "begin"
+      ]
+    },
+    {
+      "id": "taskEnd.writing",
+      "label": "End of Task",
+      "screenType": "moduleEnd",
+      "insertAt": {
+        "position": "betweenModules",
+        "section": "writing",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "continue"
+      ]
+    },
+    {
+      "id": "submitConfirm",
+      "label": "Submit Test",
+      "screenType": "review",
+      "insertAt": {
+        "position": "afterSection",
+        "section": "writing",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "submit"
+      ]
+    }
+  ],
+  "provenance": {
+    "levels": {
+      "observed": "57분53초 화면녹화에서 직접 확인된 값/동작",
+      "official": "시험 주관사가 공개한 공식 규격",
+      "content": "studyground/sg2/assets/set1.js 콘텐츠 파일에서 그대로 가져온 값",
+      "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요"
+    },
+    "entries": [
+      {
+        "path": "sectionOrder",
+        "level": "observed",
+        "source": "녹화 03:00 Listening → 22:00 Speaking → 45:30 Reading, Writing은 51:00 문항으로 추정 위치",
+        "verify": "Writing이 Reading 뒤에 오는지 SMEAG 시험 운영 규격서로 확인"
+      },
+      {
+        "path": "defaults.audioMaxPlays",
+        "level": "observed",
+        "source": "녹화 03:00~21:00 Listening 오디오 1회 재생, 재생 버튼 비활성",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "defaults.timerFormat",
+        "level": "observed",
+        "source": "문제화면 상단 빨간 pill = MM:SS, RESPONSE TIME 박스 = HH:MM:SS",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.listening.audio.maxPlays",
+        "level": "observed",
+        "source": "녹화 Listening 구간 — 오디오 1회",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.listening.timerScope",
+        "level": "observed",
+        "source": "실측 — 오디오 재생 화면(700s, Q25 \"Listen to an academic talk.\")에는 서브바 우측 타이머가 아예 없고, 답변 화면(900s, Q29)에만 00:13 이 뜬다. 즉 타이머는 문항 단위로 답변 화면에만 걸린다. modules[*].allocatedSec 은 비표시 모듈 상한(2차 deadline)으로만 남는다",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.listening.modules[*].allocatedSec",
+        "level": "assumed",
+        "source": "문항수 기반 추정(L1 18 / L2 15). timerScope=question이므로 모듈 상한 deadline으로만 사용",
+        "verify": "SMEAG 시험 규격문서에서 Listening 모듈별 배정시간 조회"
+      },
+      {
+        "path": "sections.listening.fallbackPerQuestionSec",
+        "level": "observed",
+        "source": "perQuestionSec 과 동일 근거 — 실측 30초 (Q29 884s→00:29 … 904s→00:09)",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.speaking.taskTypes.listenAndRepeat.listenReplays",
+        "level": "observed",
+        "source": "녹화 22:30~29:30 'Listen and repeat only once' — 일러스트/오디오 1회 재생",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.speaking.taskTypes.listenAndRepeat.prepSec",
+        "level": "content",
+        "source": "set1.js repeatQ() prepSec: 3",
+        "verify": "명세 2-4는 prep 0으로 기술 — 녹화 22:30 구간에서 청취 종료와 RESPONSE TIME 등장 사이 간격 측정"
+      },
+      {
+        "path": "sections.speaking.taskTypes.listenAndRepeat.responseSec",
+        "level": "content",
+        "source": "set1.js repeatQ() respondSec: 20",
+        "verify": "명세 2-4는 15초로 기술 — 녹화 RESPONSE TIME 박스 시작값 확인"
+      },
+      {
+        "path": "sections.speaking.taskTypes.interview.promptSelfPaced",
+        "level": "observed",
+        "source": "녹화 30:00 'Please answer the interviewer's questions' 프롬프트에 카운트다운 없음",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.speaking.taskTypes.interview.mediaType",
+        "level": "observed",
+        "source": "녹화 30:30~33:30 인터뷰어 영상 재생",
+        "verify": "sg2 콘텐츠는 현재 audio(mp3)만 보유 — 영상 자산 존재 여부 확인 필요"
+      },
+      {
+        "path": "sections.speaking.taskTypes.interview.responseSec",
+        "level": "content",
+        "source": "set1.js interviewQ() respondSec: 45 (명세 2-4의 interview.responseSec 45와 일치)",
+        "verify": "녹화 30:30~33:30 RESPONSE TIME 시작값 확인"
+      },
+      {
+        "path": "sections.reading.modules[*].allocatedSec",
+        "level": "observed",
+        "source": "실측(2026-08-07). R1=1200s: recording 2730s→19:22, 2745s→19:08 (15초 경과에 14초 감소 = 1배속 카운트다운, 시작값 20:00). R2=540s: 2930s→08:43, 2960s→08:13, 3000s→07:33, 3030s→07:04 (시작값 09:00). TOEFL MOCK TEST SCREEN RECORDING.mp4 (1906x1130, 30fps, 3472s), ffmpeg 프레임 추출 실측 — 절차는 docs/bmad/timing-spec.md §8",
+        "verify": "없음(확정). 이전 가설값 R1 1080 / R2 1020 을 대체한다"
+      },
+      {
+        "path": "sections.reading.sectionSec",
+        "level": "observed",
+        "source": "모듈 실측 합계 1200+540=1740. set1.js reading.timeLimitSec(2100)은 콘텐츠 파일의 구값이며 런타임은 읽지 않는다(F11). 섹션 시계는 module 시계가 있어 visible:false 인 2차 deadline 이다",
+        "verify": "없음(확정). 이전 content 값 2100 을 실측 모듈 합계로 대체"
+      },
+      {
+        "path": "sections.reading.modules[id=R1].moduleEndScreen",
+        "level": "observed",
+        "source": "녹화 48:30 'End of Module 1 · Continue to Module 2' 자동 전환",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.writing.tasks[*].perTaskSec",
+        "level": "content",
+        "source": "set1.js W1/W2/W3 module.timeLimitSec = 600",
+        "verify": "명세 2-4는 writing.perTaskSec = null(미확정) — SMEAG 규격문서 조회"
+      },
+      {
+        "path": "sections.writing.tasks[*].minWords",
+        "level": "content",
+        "source": "set1.js W-EMAIL minWords 80, W-DISC minWords 100",
+        "verify": "없음(콘텐츠 확정)"
+      },
+      {
+        "path": "directions[*].maxSec",
+        "level": "observed",
+        "source": "실측 — 안내화면(02:30/21:30/22:00)과 End of Module 화면(recording 2910s) 모두 서브바 우측이 비어 있다(타이머·Hide Time 둘 다 없음) → 전부 self-paced(null)",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "directions[id=moduleEnd.reading].maxSec",
+        "level": "observed",
+        "source": "실측 — recording 2910s \"End of Module 1\" 프레임에 타이머 미표시. 가설이던 30초 비표시 상한을 제거하고 null(무제한, Continue 버튼으로만 진행)로 확정",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.listening.modules[*].perQuestionSec",
+        "level": "observed",
+        "source": "실측(2026-08-07) Q29 답변 구간 카운트다운: recording 884s→00:29, 888s→00:25, 892s→00:21, 896s→00:17, 900s→00:13, 904s→00:09 → 4초 간격 4초 감소, 시작값 00:30. TOEFL MOCK TEST SCREEN RECORDING.mp4 (1906x1130, 30fps, 3472s), ffmpeg 프레임 추출 실측 — 절차는 docs/bmad/timing-spec.md §8",
+        "verify": "없음(확정). 이전 가설값 20 을 대체한다"
+      },
+      {
+        "path": "directions[id=listeningDirections]",
+        "level": "observed",
+        "source": "architecture.md 4.2 — 각 섹션 시작 전 {section}.directions 화면. 녹화 22:00 Speaking Directions와 동형",
+        "verify": "녹화 03:00 직전 Listening 안내화면 문구 캡처"
+      },
+      {
+        "path": "directions[id=taskEnd.writing]",
+        "level": "assumed",
+        "source": "architecture.md 4.3 — writing은 task별 taskEnd 화면 3개(W1/W2/W3 각 600초 만료 시). maxSec 은 reading/listening moduleEnd 실측(타이머 없음)과 동형으로 null 로 맞췄다",
+        "verify": "녹화에 Writing 구간 미포함 — 실제 시험 Writing 전환 화면 확보 필요"
+      },
+      {
+        "path": "sections.listening — 오디오 화면 / 답변 화면 분리",
+        "level": "observed",
+        "source": "실측 두 프레임 비교: 700s(docs/reference/screens/listening-audio-700s.png)는 'Listening | Question 25 of 32' + 화자 사진 + 제목 'Listen to an academic talk.' 만 있고 선택지도 타이머도 없다. 900s(listening-question-900s.png)는 같은 서브바에 선택지 4개 + 타이머 00:13. → 오디오 재생과 답변은 별개 화면이다. exam-compile.js 의 audioSetBlock 이 blockKind 'audio-play'(타이머 없음) 화면을 답변 화면 앞에 넣는다",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "progress (컴파일러 산출 필드)",
+        "level": "observed",
+        "source": "서브바 좌측 실측 — Listening/Speaking 은 'Question 25 of 32' 단일 번호, Reading 은 'Questions 1-10 of 35' 범위. 분모는 섹션 전체 문항 수. → progress:{first,last,total,style:'single'|'range'}",
+        "verify": "없음(확정)"
+      }
+    ]
+  }
+}

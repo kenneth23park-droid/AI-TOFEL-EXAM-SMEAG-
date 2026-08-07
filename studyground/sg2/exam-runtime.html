@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exam Runtime · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/exam.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudyGround">
+</head>
+<!--
+  exam-runtime.html — 전체화면 시험 셸 (Story 1.7 / 1.8)
+
+  URL 계약:
+    exam-runtime.html?testId=SET1&sessionId=<id>&mode=exam|practice&exam=toefl|ielts#screen=<screenId>
+    · `profile=` 은 `exam=` 의 별칭으로 함께 받는다.
+    · `set=set1|set9` 로 콘텐츠 팩을 고른다(기본 set1). assets/{set}.js 를 로드해
+      window.SMEAG_SET1 / window.SMEAG_SET9 를 컴파일러에 넘긴다.
+    · 관찰된 레퍼런스 URL `/en/test-nt/{section}?testId=..&sessionId=..&mode=..&section=..` 을
+      정적 사이트에서 표현 가능한 형태로 매핑한 것이다. 경로의 {section} 은 화면 id 에 녹아
+      있으므로 `#screen=` 프래그먼트가 그 역할을 대신한다.
+    · sessionId 미지정 시 오프라인 임시 세션(offline-uuid)을 발급한다. 서버 발급 세션으로의
+      치환은 exam-sync.js(Epic 3) 가 meta.serverSession 에 매핑을 남기며 수행한다.
+    · mode 는 meta.mode 에 저장되며 세션 도중 URL 로 바꿔도 저장값이 이긴다.
+
+  기존 exam.html(연습지 모드)은 삭제하지 않는다 — 별개 용도로 계속 유지된다.
+  외부 도메인 요청 0건: 모든 스크립트/스타일/설정은 로컬 파일이다.
+-->
+<body class="exam-body">
+
+<div class="exam-shell">
+
+  <!-- 상단바 1행 — 좌: 브랜드 / 우: 섹션별 버튼.
+       DOM 순서는 Exit · Volume · Help · Review · Back · Next 로 고정이며
+       관찰된 네 화면(listening / reading / speaking / moduleEnd)의 좌→우 순서를 모두 만족한다.
+       섹션별 노출은 syncActions() 가 [hidden] 으로 제어한다. -->
+  <header class="exam-topbar">
+    <div class="exam-brand">
+      <b id="exam-title">StudyGround NT-016</b>
+      <small id="exam-subtitle"></small>
+    </div>
+
+    <div class="exam-actions">
+      <button type="button" class="exam-btn danger" id="btn-exit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+        <span data-en>Exit Test</span><span data-ko>시험 나가기</span>
+      </button>
+      <button type="button" class="exam-btn" id="btn-volume" aria-expanded="false">
+        <span data-en>Volume</span><span data-ko>음량</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9a4 4 0 0 1 0 6"/><path d="M19.5 6.5a8 8 0 0 1 0 11"/></svg>
+      </button>
+      <button type="button" class="exam-btn" id="btn-help">
+        <span data-en>Help</span><span data-ko>도움말</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.8-.9 1.4v.4"/><path d="M12 17h.01"/></svg>
+      </button>
+      <!-- Review 는 현재 문항의 플래그 토글이다(눌린 상태가 보인다). -->
+      <button type="button" class="exam-btn" id="btn-review" aria-pressed="false" hidden>
+        <span data-en>Review</span><span data-ko>표시</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4h9l-1 3h6v9h-7l-1-3H5"/></svg>
+      </button>
+      <button type="button" class="exam-btn" id="btn-back" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        <span data-en>Back</span><span data-ko>이전</span>
+      </button>
+      <button type="button" class="exam-btn primary" id="btn-advance">
+        <span data-en id="advance-en">Continue</span><span data-ko id="advance-ko">계속</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 상단바 2행 · 서브바 — 좌: "Listening | Question 25 of 32", 우: MM:SS + Hide Time.
+       타이머가 없는 화면에서는 우측(#exam-time)이 통째로 비고,
+       moduleEnd 처럼 서브바 자체가 없는 화면에서는 이 행이 [hidden] 이다. -->
+  <div class="exam-subbar" id="exam-subbar" hidden>
+    <div class="exam-crumb">
+      <b id="subbar-section"></b>
+      <span class="exam-crumb-sep" id="subbar-sep">|</span>
+      <span id="subbar-progress"></span>
+    </div>
+    <div class="exam-time" id="exam-time" hidden>
+      <span class="exam-time-value" id="timer-value"></span>
+      <button type="button" class="exam-hidetime" id="btn-hide-time">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/><path d="M3 21L21 3"/></svg>
+        <span data-en id="hidetime-en">Hide Time</span><span data-ko id="hidetime-ko">시간 숨기기</span>
+      </button>
+    </div>
+  </div>
+
+  <main class="exam-main">
+    <div class="exam-screen" id="screen-mount"></div>
+  </main>
+
+  <!-- 음량 팝오버 — 모달이 아니라 상단바 아래 우측 패널(관찰값). -->
+  <div class="exam-popover" id="pop-volume" hidden>
+    <button type="button" class="exam-pop-close" id="btn-volume-close" aria-label="Close">&#215;</button>
+    <div class="exam-meter" id="volume-meter"></div>
+    <input type="range" id="volume-range" class="exam-vol-range" min="0" max="100" value="80">
+  </div>
+
+  <footer class="exam-footer">
+    <span class="exam-status" id="exam-status"></span>
+    <div class="exam-footctl">
+      <span class="lang">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="ko">KO</button>
+      </span>
+      <button type="button" class="exam-fs" id="btn-fullscreen" aria-label="Fullscreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg>
+      </button>
+    </div>
+  </footer>
+</div>
+
+<!-- Exit Test 확인 -->
+<div class="exam-modal" id="modal-exit" hidden>
+  <div class="exam-modal-card">
+    <h2><span data-en>Exit this test?</span><span data-ko>시험을 나가시겠습니까?</span></h2>
+    <p>
+      <span data-en>Your answers and remaining time are saved. You can resume this session later.</span>
+      <span data-ko>답안과 남은 시간이 저장됩니다. 나중에 이 세션을 이어서 응시할 수 있습니다.</span>
+    </p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn" data-close="modal-exit">
+        <span data-en>Stay</span><span data-ko>계속 응시</span>
+      </button>
+      <button type="button" class="exam-btn primary" id="btn-exit-confirm">
+        <span data-en>Exit Test</span><span data-ko>나가기</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Help -->
+<div class="exam-modal" id="modal-help" hidden>
+  <div class="exam-modal-card">
+    <h2><span data-en>Help</span><span data-ko>도움말</span></h2>
+    <p>
+      <span data-en>The timer at the right of the bar above shows the time left for the current question or module. Select Hide Time to hide it — the clock keeps running. Audio plays once. Use Continue / Next to move forward.</span>
+      <span data-ko>위 막대 오른쪽 타이머는 현재 문항 또는 모듈의 남은 시간입니다. Hide Time 을 누르면 숫자만 감춰지고 시간은 계속 흐릅니다. 오디오는 1회만 재생됩니다. Continue / Next 로 진행합니다.</span>
+    </p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn primary" data-close="modal-help">
+        <span data-en>Close</span><span data-ko>닫기</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 재개 확인 -->
+<div class="exam-modal" id="modal-resume" hidden>
+  <div class="exam-modal-card">
+    <h2><span data-en>Resume your test?</span><span data-ko>시험을 이어서 볼까요?</span></h2>
+    <p id="resume-note">
+      <span data-en>An unfinished session was found on this device. Time spent while you were away has already been counted.</span>
+      <span data-ko>이 기기에 완료되지 않은 세션이 있습니다. 자리를 비운 동안의 시간도 이미 소모된 것으로 계산됩니다.</span>
+    </p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn" id="btn-restart">
+        <span data-en>Start new</span><span data-ko>새로 시작</span>
+      </button>
+      <button type="button" class="exam-btn primary" id="btn-resume">
+        <span data-en>Resume</span><span data-ko>이어서 응시</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script src="assets/exam-clock.js"></script>
+<script src="assets/exam-store.js"></script>
+<script src="assets/exam-render.js"></script>
+<script src="assets/exam-engine.js"></script>
+<script>
+/* SMEAG · StudyGround — exam-runtime 셸 바인딩.
+ * 담당: URL 계약 해석, 세션 열기, 컴파일러/타이밍 로드(없으면 인라인 폴백),
+ *       재개 흐름, 상단바·서브바(타이머/Hide Time)·모달·음량 팝오버 바인딩.
+ * 화면 DOM 생성은 하지 않는다 — 그것은 SG_RENDER 에 등록된 렌더러의 몫이다.
+ */
+window.SG_RUNTIME = (function () {
+  'use strict';
+
+  var CLOCK = window.SG_CLOCK, STORE = window.SG_STORE, EXAM = window.SG_EXAM;
+  var machine = null, timing = null, screens = [], volume = 0.8;
+
+  /* 컴파일러(exam-compile.js)·타이밍 로더(exam-timing.js)가 아직 없어도 셸이 동작하도록
+     선택적으로 로드한다. 404 여도 진행한다(F12: 시험을 멈추지 않는다). */
+  /* 어떤 콘텐츠 팩을 실을지 — `?set=set1|set9`. 기본은 set1(회귀 방지).
+     알 수 없는 값은 조용히 set1 로 떨어뜨린다(F12: 시험을 멈추지 않는다).
+     exam-engine.js 의 parseUrl 은 이 파라미터를 모르므로 여기서 직접 읽는다. */
+  var SET_IDS = { set1: 'SMEAG_SET1', set9: 'SMEAG_SET9' };
+
+  function currentSetId() {
+    var m = /[?&]set=([^&]*)/.exec(String(window.location.search || ''));
+    var id = m ? decodeURIComponent(m[1]).toLowerCase() : 'set1';
+    return SET_IDS[id] ? id : 'set1';
+  }
+
+  var SET_ID = currentSetId();
+
+  /* 선택된 팩의 전역. 로드 실패 시 set1 로 폴백한다. */
+  function contentPack() {
+    var p = window[SET_IDS[SET_ID]] || window.SMEAG_SET1 || null;
+    /* 렌더러들은 문항 본문을 콘텐츠 팩에서 되찾는다. 어떤 팩이 활성인지 알려주는
+       유일한 채널이 이 전역이다. 설정하지 않으면 렌더러가 SMEAG_SET1 로 폴백하므로
+       set9 에서 listening/writing 화면이 placeholder 로 떨어진다. */
+    window.SG_CONTENT_PACK = p;
+    return p;
+  }
+
+  var OPTIONAL = ['assets/exam-types.js', 'assets/exam-timing.js', 'assets/exam-media.js',
+                  'assets/exam-compile.js', 'assets/' + SET_ID + '.js',
+                  /* 섹션 렌더러 — 각자 SG_RENDER.register() 로 자기를 등록한다.
+                     아직 없는 파일은 onerror 로 건너뛰므로 순서·존재 여부에 의존하지 않는다. */
+                  'assets/exam-recorder.js',
+                  'assets/exam-render-instruction.js',
+                  'assets/exam-render-listening.js',
+                  'assets/exam-render-reading.js',
+                  'assets/exam-render-writing.js',
+                  'assets/exam-render-speaking.js'];
+
+  function loadOptional(list, done) {
+    var i = 0;
+    function step() {
+      if (i >= list.length) { done(); return; }
+      var s = document.createElement('script');
+      s.src = list[i++];
+      s.onload = step;
+      s.onerror = function () { step(); };
+      document.head.appendChild(s);
+    }
+    step();
+  }
+
+  /* 오프라인 인라인 폴백 타이밍. config/timing.toefl.json 을 못 읽을 때만 쓴다. */
+  var TIMING_FALLBACK = {
+    schemaVersion: '0.0.0-inline',
+    exam: { id: 'toefl-nt', label: 'New TOEFL' },
+    sectionOrder: ['listening', 'speaking', 'reading', 'writing'],
+    defaults: { timerFormat: 'MM:SS', onExpire: 'autoAdvance', advance: 'manual', warnAtSec: 60 },
+    sections: {}
+  };
+
+  function loadTiming(profile, cb) {
+    var file = 'config/timing.' + (profile === 'ielts' ? 'ielts' : 'toefl') + '.json';
+    if (!window.fetch) { cb(TIMING_FALLBACK); return; }
+    window.fetch(file).then(function (r) {
+      return r.ok ? r.json() : TIMING_FALLBACK;
+    }).then(function (j) { cb(j || TIMING_FALLBACK); })
+      .catch(function () { cb(TIMING_FALLBACK); });
+  }
+
+  /* 컴파일러 미로드 시의 최소 화면열. 셸 자체(상단바/타이머/전이)를 검증할 수 있는 뼈대다. */
+  function fallbackScreens(t) {
+    var per = 20;
+    try { per = t.sections.listening.fallbackPerQuestionSec || per; } catch (e) {}
+    return [
+      { id: 'intro.volume', screenType: 'instruction', section: 'listening', advance: 'manual', timer: null,
+        copy: { titleEn: 'Adjusting the Volume', titleKo: '음량 조절',
+                bodyEn: 'Use the Volume button in the toolbar to set a comfortable level.',
+                bodyKo: '상단 Volume 버튼으로 편안한 음량을 설정하세요.', ctaEn: 'Continue', ctaKo: '계속' } },
+      { id: 'listening.directions', screenType: 'instruction', section: 'listening', advance: 'manual', timer: null,
+        copy: { titleEn: 'Listening Directions', titleKo: '리스닝 안내',
+                bodyEn: 'You will hear each recording one time only.',
+                bodyKo: '각 음원은 한 번만 재생됩니다.', ctaEn: 'Begin', ctaKo: '시작' } },
+      { id: 'listening.q.L1.01', screenType: 'question', section: 'listening', module: 1, moduleId: 'L1',
+        questionIds: ['L1-1'], advance: 'auto', progress: { index: 1, total: 1 },
+        timer: { mode: 'countdown', scope: 'question', seconds: per, format: 'MM:SS', onExpire: 'autoAdvance', visible: true } },
+      { id: 'listening.moduleEnd.L1', screenType: 'moduleEnd', section: 'listening', module: 1, moduleId: 'L1',
+        advance: 'manual', timer: null,
+        copy: { titleEn: 'End of Module 1', titleKo: '모듈 1 종료',
+                bodyEn: 'Your time for Module 1 has ended.', bodyKo: '모듈 1 시간이 종료되었습니다.',
+                ctaEn: 'Continue', ctaKo: '계속' } },
+      { id: 'review.submit', screenType: 'review', section: 'writing', advance: 'manual', timer: null,
+        copy: { titleEn: 'Review and submit', titleKo: '확인 후 제출',
+                bodyEn: 'Submit your test when you are ready.', bodyKo: '준비되면 제출하세요.',
+                ctaEn: 'Submit Test', ctaKo: '제출' } }
+    ];
+  }
+
+  function buildScreens(t) {
+    var pack = contentPack();
+    if (window.SG_COMPILE && typeof window.SG_COMPILE.compileScreens === 'function' && pack) {
+      try {
+        // profile 은 'toefl' | 'ielts' 두 값만 — exam.id 는 'toefl-nt' 같은 식별자라 그대로 넘기면 안 된다.
+        var scale = (t.exam && t.exam.scoreScale) || 'toefl120';
+        var out = window.SG_COMPILE.compileScreens(pack, t,
+                    { profile: scale === 'ielts9' ? 'ielts' : 'toefl' });
+        if (out && out.screens && out.screens.length) {
+          if (out.warnings && out.warnings.length && window.console) window.console.warn('[compile]', out.warnings);
+          return out.screens;
+        }
+      } catch (e) { if (window.console) window.console.warn('[compile] failed; using fallback screens', e); }
+    }
+    return fallbackScreens(t);
+  }
+
+  /* ── 상단바 ─────────────────────────────────────────────── */
+
+  function setText(id, en, ko) {
+    var elEn = document.getElementById(id + '-en'), elKo = document.getElementById(id + '-ko');
+    if (elEn) elEn.textContent = en;
+    if (elKo) elKo.textContent = ko;
+  }
+
+  function ctaFor(screen) {
+    if (!screen) return { en: 'Continue', ko: '계속' };
+    var c = screen.copy || {};
+    if (c.ctaEn) return { en: c.ctaEn, ko: c.ctaKo || c.ctaEn };
+    if (screen.screenType === 'question' || screen.screenType === 'speaking') return { en: 'Next', ko: '다음' };
+    if (screen.screenType === 'review') return { en: 'Submit Test', ko: '제출' };
+    if (String(screen.id).indexOf('.directions') >= 0) return { en: 'Begin', ko: '시작' };
+    return { en: 'Continue', ko: '계속' };
+  }
+
+  /* ── 서브바(2행) ───────────────────────────────────────────
+     관찰값(docs/reference/screens/*):
+       · 좌: "Listening | Question 25 of 32" / "Reading | Questions 1-10 of 35"
+       · 우: 등폭 MM:SS + "Hide Time". 타이머 없는 화면(오디오 재생 중)은 우측이 빈다.
+       · moduleEnd 화면에는 서브바 자체가 없다.
+     빨간 중앙 pill 은 SMEAG 관리자 미리보기(test_listening.php)의 UI 라 제거했다. */
+
+  function sectionLabel(section) {
+    var s = String(section || '');
+    if (!s) return '';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  /* 서브바를 띄우는 화면 종류. moduleEnd/review/hardwareCheck 는 진행표시가 없다. */
+  function hasSubbar(screen) {
+    if (!screen) return false;
+    return screen.screenType === 'question' || screen.screenType === 'speaking' ||
+           screen.screenType === 'instruction';
+  }
+
+  function syncSubbar(screen) {
+    var bar = document.getElementById('exam-subbar');
+    if (!bar) return;
+    var show = hasSubbar(screen);
+    bar.hidden = !show;
+    if (!show) {
+      // 서브바가 없는 화면(moduleEnd 등)에서는 타이머 상태도 같이 내린다.
+      var box = document.getElementById('exam-time');
+      if (box) box.hidden = true;
+      return;
+    }
+
+    var sec = document.getElementById('subbar-section');
+    var sep = document.getElementById('subbar-sep');
+    var prog = document.getElementById('subbar-progress');
+    if (sec) sec.textContent = sectionLabel(screen.section);
+
+    /* progress 는 담당 A 의 컴파일러가 만든다: {first,last,total,style}.
+       레거시 {index,total} 도 SG_TYPES.formatProgress 가 흡수한다. */
+    var text = '';
+    if (screen.progress) {
+      if (window.SG_TYPES && window.SG_TYPES.formatProgress) {
+        text = (document.documentElement.lang === 'ko' && window.SG_TYPES.formatProgressKo)
+          ? window.SG_TYPES.formatProgressKo(screen.progress)
+          : window.SG_TYPES.formatProgress(screen.progress);
+      } else if (typeof screen.progress.index === 'number') {
+        text = 'Question ' + screen.progress.index + ' of ' + screen.progress.total;
+      }
+    }
+    if (prog) prog.textContent = text;
+    if (sep) sep.hidden = !text;
+    paintTimer(CLOCK.display());
+  }
+
+  /* 타이머는 서브바 우측의 평문 등폭 MM:SS 다. 표시할 clock 이 없으면 우측을 통째로 비운다. */
+  function paintTimer(d) {
+    var wrap = document.getElementById('exam-time');
+    var val = document.getElementById('timer-value');
+    if (!wrap || !val) return;
+    var bar = document.getElementById('exam-subbar');
+    /* response 모드(speaking 녹음/준비 시간)는 중앙 RESPONSE TIME 카드가 표시를 소유한다.
+       관찰된 speaking 프레임의 서브바 우측은 비어 있으므로 여기서 중복 표시하지 않는다. */
+    if (!d || d.mode === 'response' || (bar && bar.hidden)) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    val.textContent = d.text;
+    /* 색은 바꾸지 않는다 — 관찰된 프레임은 00:13 · 00:09 까지도 검정 등폭이다.
+       경고 상태는 display().warning 으로 여전히 노출되므로 다른 소비자는 쓸 수 있다. */
+    val.className = 'exam-time-value';
+    wrap.className = 'exam-time' + (d.hidden ? ' is-hidden' : '');
+    setText('hidetime',
+      d.hidden ? 'Show Time' : 'Hide Time',
+      d.hidden ? '시간 보기' : '시간 숨기기');
+  }
+
+  /* ── 상단바 버튼 노출(섹션별, 관찰값) ─────────────────────
+       Listening : Exit · Volume · Help · Next        (Back 없음)
+       Reading   : Exit · Help · Review · Back · Next (Volume 없음)
+       Speaking  : Exit · Volume                      (녹음 중)
+       moduleEnd : Exit · Continue                                        */
+  function syncActions(screen) {
+    var t = screen ? screen.screenType : '';
+    var sec = screen ? screen.section : '';
+    var speakingLive = (t === 'speaking');
+    var terminal = (t === 'moduleEnd' || t === 'review');
+
+    var showVolume = !terminal && (sec === 'listening' || sec === 'speaking');
+    var showHelp = !terminal && !speakingLive;
+    var showReview = (sec === 'reading') && (t === 'question');
+    var showBack = (sec === 'reading') && (t === 'question');
+    var showAdvance = !speakingLive;
+
+    function set(id, on) { var b = document.getElementById(id); if (b) b.hidden = !on; }
+    set('btn-volume', showVolume);
+    set('btn-help', showHelp);
+    set('btn-review', showReview);
+    set('btn-back', showBack);
+    set('btn-advance', showAdvance);
+
+    /* Back — 상태머신(SG_EXAM)에 역방향 이동 API 가 없어 지금은 항상 비활성이다.
+       참조 프레임(reading-cloze-2760s.png)도 비활성 상태로 찍혀 있다.
+       엔진에 back() 이 생기면 screen.allowBack 으로 열어주면 된다. */
+    var back = document.getElementById('btn-back');
+    if (back) back.disabled = true;
+
+    /* Review 는 화면 단위 플래그다 — 화면이 바뀌면 눌린 상태를 다시 읽어 온다. */
+    var rev = document.getElementById('btn-review');
+    if (rev) {
+      var on = !!(screen && reviewFlags[screen.id]);
+      rev.classList.toggle('is-on', on);
+      rev.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+
+  function syncHeader(screen, cfg) {
+    var cta = ctaFor(screen);
+    setText('advance', cta.en, cta.ko);
+    syncActions(screen);
+    var st = document.getElementById('exam-status');
+    if (st) {
+      st.textContent = (cfg.mode === 'practice' ? 'PRACTICE · ' : '') +
+        (screen ? screen.id : '-') + ' · ' + cfg.sessionId;
+    }
+  }
+
+  /* ── 모달 ───────────────────────────────────────────────── */
+
+  function openModal(id) { var m = document.getElementById(id); if (m) m.hidden = false; }
+  function closeModal(id) { var m = document.getElementById(id); if (m) m.hidden = true; }
+
+  /* ── 음량 팝오버 ────────────────────────────────────────── */
+  /* 관찰값: Volume 은 모달이 아니라 우측 팝오버다 — 막대 레벨미터 + 가로 슬라이더 + 닫기 ×.
+     레벨미터는 현재 재생 중인 오디오가 있으면 WebAudio 실측 레벨을, 없으면 볼륨에 비례한
+     정적 막대를 그린다. WebAudio 가 없거나 막히면 조용히 정적 막대로 떨어진다(F12). */
+  var METER_BARS = 26;
+  var meterRaf = null, audioCtx = null, analyser = null, analysed = null, freqData = null;
+
+  function buildMeter() {
+    var m = document.getElementById('volume-meter');
+    if (!m || m.firstChild) return;
+    for (var i = 0; i < METER_BARS; i++) m.appendChild(document.createElement('i'));
+  }
+
+  /* 실측 레벨이 없을 때의 기본 모양: 좌→우로 높아지는 막대. 볼륨만큼만 진하게 켠다. */
+  function paintMeter(levels) {
+    var m = document.getElementById('volume-meter');
+    if (!m) return;
+    var bars = m.getElementsByTagName('i');
+    for (var i = 0; i < bars.length; i++) {
+      var ramp = (i + 1) / bars.length;                 // 0..1
+      var h = levels ? levels[i] : ramp;
+      if (h < 0.04) h = 0.04;
+      bars[i].style.height = Math.round(h * 100) + '%';
+      bars[i].className = (ramp <= volume + 0.001) ? 'on' : '';
+    }
+  }
+
+  function attachAnalyser() {
+    if (!window.AudioContext && !window.webkitAudioContext) return null;
+    var els = document.querySelectorAll('audio, video');
+    var live = null, i;
+    for (i = 0; i < els.length; i++) { if (!els[i].paused) { live = els[i]; break; } }
+    if (!live || live === analysed) return analyser;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var src = audioCtx.createMediaElementSource(live);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      src.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+      analysed = live;
+    } catch (e) { analyser = null; }   /* 이미 라우팅된 엘리먼트면 여기로 온다 */
+    return analyser;
+  }
+
+  function meterLoop() {
+    var pop = document.getElementById('pop-volume');
+    if (!pop || pop.hidden) { meterRaf = null; return; }
+    var a = attachAnalyser();
+    if (a && freqData) {
+      a.getByteFrequencyData(freqData);
+      var levels = [], step = freqData.length / METER_BARS, i;
+      for (i = 0; i < METER_BARS; i++) levels.push(freqData[Math.floor(i * step)] / 255);
+      paintMeter(levels);
+    } else {
+      paintMeter(null);
+    }
+    meterRaf = window.requestAnimationFrame ? window.requestAnimationFrame(meterLoop)
+                                            : window.setTimeout(meterLoop, 80);
+  }
+
+  function openVolume() {
+    var pop = document.getElementById('pop-volume');
+    var btn = document.getElementById('btn-volume');
+    if (!pop) return;
+    buildMeter();
+    pop.hidden = false;
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+    paintMeter(null);
+    if (meterRaf === null) meterLoop();
+  }
+
+  function closeVolume() {
+    var pop = document.getElementById('pop-volume');
+    var btn = document.getElementById('btn-volume');
+    if (pop) pop.hidden = true;
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+
+  function bindModals() {
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      while (t && t !== document.body) {
+        if (t.getAttribute && t.getAttribute('data-close')) { closeModal(t.getAttribute('data-close')); return; }
+        t = t.parentNode;
+      }
+    });
+    document.getElementById('btn-help').onclick = function () { openModal('modal-help'); };
+    document.getElementById('btn-volume').onclick = function () {
+      var pop = document.getElementById('pop-volume');
+      if (pop && pop.hidden) openVolume(); else closeVolume();
+    };
+    document.getElementById('btn-volume-close').onclick = closeVolume;
+    var vr = document.getElementById('volume-range');
+    vr.oninput = function () {
+      volume = (parseInt(vr.value, 10) || 0) / 100;
+      var els = document.querySelectorAll('audio, video');
+      for (var i = 0; i < els.length; i++) els[i].volume = volume;
+      paintMeter(null);
+    };
+    volume = (parseInt(vr.value, 10) || 0) / 100;
+
+    /* 전체화면 — 관찰값은 우하단의 EN 옆 아이콘이다. */
+    var fs = document.getElementById('btn-fullscreen');
+    if (fs) {
+      fs.onclick = function () {
+        var d = document, el = d.documentElement;
+        try {
+          if (d.fullscreenElement || d.webkitFullscreenElement) {
+            (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+          } else {
+            (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+          }
+        } catch (e) { /* F12 */ }
+      };
+    }
+  }
+
+  /* ── Hide Time · Review 플래그 ─────────────────────────── */
+
+  var reviewFlags = {};
+  var FLAG_KEY = 'sg2_review_flags';
+
+  function loadFlags(session) {
+    try {
+      var raw = window.localStorage.getItem(FLAG_KEY + '.' + session);
+      reviewFlags = raw ? (JSON.parse(raw) || {}) : {};
+    } catch (e) { reviewFlags = {}; }
+  }
+
+  function saveFlags(session) {
+    try { window.localStorage.setItem(FLAG_KEY + '.' + session, JSON.stringify(reviewFlags)); } catch (e) {}
+  }
+
+  function bindSubbar(session) {
+    var hide = document.getElementById('btn-hide-time');
+    if (hide) {
+      hide.onclick = function () { CLOCK.toggleTimeHidden(); paintTimer(CLOCK.display()); };
+    }
+    var rev = document.getElementById('btn-review');
+    if (rev) {
+      rev.onclick = function () {
+        var sc = machine && machine.current();
+        if (!sc) return;
+        if (reviewFlags[sc.id]) delete reviewFlags[sc.id]; else reviewFlags[sc.id] = 1;
+        saveFlags(session);
+        syncActions(sc);
+        try { STORE.pushEvent('review_flag', sc.id, { on: !!reviewFlags[sc.id] }); } catch (e) {}
+      };
+    }
+  }
+
+  /* Exit Test → 확인 후 상태를 저장하고 시험 목록으로 돌아간다. 진행은 재개 가능하게 남는다. */
+  function bindExit() {
+    document.getElementById('btn-exit').onclick = function () { openModal('modal-exit'); };
+    document.getElementById('btn-exit-confirm').onclick = function () {
+      try {
+        STORE.flushAnswers();
+        STORE.pushEvent('exit_test', machine && machine.current() ? machine.current().id : '', {});
+      } catch (e) {}
+      window.location.href = 'tests.html';
+    };
+  }
+
+  function bindLifecycle() {
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') {
+        try { STORE.flushAnswers(); } catch (e) {}
+        if (machine && machine.current()) { try { STORE.saveCursor(machine.current().id, machine.currentIndex(), machine.phaseIndex()); } catch (e) {} }
+      }
+    });
+    window.addEventListener('beforeunload', function () { try { STORE.flushAnswers(); } catch (e) {} });
+    // §5.3 — 10초 주기 자동저장
+    window.setInterval(function () {
+      if (!machine || !machine.current()) return;
+      try {
+        STORE.flushAnswers();
+        STORE.saveCursor(machine.current().id, machine.currentIndex(), machine.phaseIndex());
+      } catch (e) {}
+    }, 10000);
+  }
+
+  /* ── 부팅 ───────────────────────────────────────────────── */
+
+  function boot() {
+    var url = EXAM.parseUrl(window.location.search, window.location.hash);
+
+    loadOptional(OPTIONAL, function () {
+      loadTiming(url.profile, function (t) {
+        timing = t;
+        screens = buildScreens(t);
+
+        /* SET_ID 를 해시에 섞는다 — 팩의 최상위 key 집합은 set1/set9 가 거의 같아서
+           이게 없으면 SET 1 세션을 SET 9 으로 "이어서 응시" 할 수 있게 된다. */
+        var pack0 = contentPack();
+        var contentHash = STORE.hashString(pack0
+          ? SET_ID + ':' + (pack0.code || '') + ':' + JSON.stringify(Object.keys(pack0))
+          : 'no-content');
+        var timingHash = STORE.hashString(JSON.stringify(t));
+
+        var active = STORE.activeSession();
+        var session = url.sessionId || active || STORE.offlineSessionId();
+        STORE.open(session);
+        CLOCK.attachStore(STORE);
+
+        var resumable = (session === active) && STORE.canResume(contentHash, timingHash).ok && !!STORE.cursor();
+        var titleEl = document.getElementById('exam-title');
+        var code = (pack0 && pack0.code) || url.testId;
+        if (titleEl) titleEl.textContent = 'StudyGround ' + (code === 'SET1' ? 'NT-016' : code);
+
+        if (resumable) {
+          openModal('modal-resume');
+          document.getElementById('btn-resume').onclick = function () { closeModal('modal-resume'); startRun(url, session, contentHash, timingHash, true); };
+          document.getElementById('btn-restart').onclick = function () {
+            closeModal('modal-resume');
+            STORE.dropSession(session);
+            var fresh = STORE.offlineSessionId();
+            STORE.open(fresh);
+            startRun(url, fresh, contentHash, timingHash, false);
+          };
+        } else {
+          startRun(url, session, contentHash, timingHash, false);
+        }
+      });
+    });
+  }
+
+  function startRun(url, session, contentHash, timingHash, resume) {
+    var meta = STORE.meta();
+    if (!meta || !meta.session) {
+      STORE.saveMeta({
+        session: session, examCode: url.testId, studentNo: '', startedAt: Date.now(),
+        profile: url.profile, mode: url.mode, contentHash: contentHash, timingHash: timingHash,
+        screenCount: screens.length, submittedAt: null, serverSession: null
+      });
+      meta = STORE.meta();
+    }
+    // mode 는 저장값이 이긴다(Story 1.8 AC5).
+    var mode = meta.mode || url.mode;
+    STORE.patchMeta({ screenCount: screens.length, mode: mode });
+
+    machine = EXAM.create(screens, { mode: mode });
+    SG_RENDER.setMount(document.getElementById('screen-mount'));
+
+    var startIndex = 0;
+    if (resume) {
+      var plan = STORE.planResume(screens, STORE.cursor(), STORE.clocks(), CLOCK.now());
+      startIndex = plan.screenIndex;
+      machine.restoreTo(plan.screenIndex, plan.phaseIndex);
+      STORE.pushEvent('reload', plan.screenId, { expired: plan.expiredKeys, notes: plan.notes });
+    } else if (url.screenId) {
+      var i = STORE.findScreenIndex(screens, url.screenId);
+      if (i > 0) { startIndex = i; machine.restoreTo(i, 0); }
+    }
+
+    loadFlags(session);
+
+    machine.onTransition(function (tr) {
+      var sc = machine.current();
+      syncSubbar(sc);
+      syncHeader(sc, { mode: mode, sessionId: session });
+      closeVolume();
+      machine.syncHash();
+      if (!sc && machine.status() === 'submitting') {
+        // 제출 단계는 Epic 3(exam-sync.js) 이 담당한다. 셸은 상태만 남긴다.
+        STORE.enqueue('submit', { session: session, at: Date.now() });
+      }
+    });
+
+    CLOCK.subscribe(function (d) { paintTimer(d); });
+
+    document.getElementById('btn-advance').onclick = function () {
+      if (machine.status() === 'submitting' || machine.status() === 'submitted') return;
+      machine.next('manual');
+    };
+
+    bindModals();
+    bindSubbar(session);
+    bindExit();
+    bindLifecycle();
+    machine.installHistoryGuard();
+    machine.start(startIndex);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+
+  return {
+    machine: function () { return machine; },
+    screens: function () { return screens; },
+    timing: function () { return timing; },
+    volume: function () { return volume; }
+  };
+})();
+</script>
+</body>
+</html>

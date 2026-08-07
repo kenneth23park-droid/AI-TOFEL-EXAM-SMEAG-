@@ -2,18 +2,22 @@
 
 from __future__ import annotations
 
-from sqlalchemy import func, select
+from datetime import date
+
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
     AiFeedback,
     Attempt,
     Exam,
+    MediaAsset,
     QuestionResponse,
     RubricScore,
     SectionScore,
     Student,
     cefr_for,
+    utcnow,
 )
 from app.schemas import AttemptDetail, AttemptSummary, FeedbackBundle
 
@@ -76,6 +80,15 @@ def to_summary(attempt: Attempt) -> AttemptSummary:
         grade=attempt.grade,
         status=attempt.status,
         sections={s.skill: s.scaled for s in attempt.section_scores},
+        session=attempt.session,
+        campus=attempt.campus,
+        exam_date=attempt.exam_date,
+        submitted_count=attempt.submitted_count,
+        total_questions=attempt.total_questions,
+        feedback_progress=attempt.feedback_progress,
+        profile=attempt.profile,
+        scale=attempt.scale,
+        band_score=attempt.band_score,
     )
 
 
@@ -130,21 +143,327 @@ def save_feedback(db: Session, attempt: Attempt, bundle: FeedbackBundle) -> list
     return rows
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Admin grading back office — Epic 4 (architecture.md 7.2).
+# Read-only helpers plus the two feedback writes; every aggregate is a SQL
+# GROUP BY so a class-sized result set never lands in Python (Story 4.6 AC7).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# architecture.md 7.2 — the feedback_progress denominator is exactly the set of
+# responses a teacher must comment on, i.e. the productive question kinds.
+FEEDBACK_QTYPES = ("WRITING", "SPEAKING")
+
+# Story 4.6 AC5 — must match models._CEFR_BANDS, highest band first.
+CEFR_BANDS = ("C1", "B2+", "B2", "B1+", "B1", "A2", "A1")
+
+ADMIN_PAGE_SIZE = 50
+
+
+def _like(value: str) -> str:
+    """Case-insensitive contains — lower() on both sides works on SQLite and PG."""
+    return "%" + value.strip().lower() + "%"
+
+
+def _attempt_filters(
+    *,
+    session: str | None = None,
+    student: str | None = None,
+    campus: str | None = None,
+    exam_id: int | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    statuses: tuple[str, ...] | None = None,
+    grade: str | None = None,
+) -> list:
+    """AND-combined admin search predicates; blank inputs are dropped (4.2 AC5)."""
+    conds: list = []
+    if session and session.strip():
+        conds.append(func.lower(Attempt.session).like(_like(session)))
+    if student and student.strip():
+        # Story 4.2 AC6 — name OR student_no, both partial and case-insensitive.
+        conds.append(
+            func.lower(Student.name).like(_like(student))
+            | func.lower(Student.student_no).like(_like(student))
+        )
+    if campus and campus.strip():
+        conds.append(func.lower(Attempt.campus).like(_like(campus)))
+    if exam_id:
+        conds.append(Attempt.exam_id == exam_id)
+    if date_from:
+        conds.append(Attempt.exam_date >= date_from)
+    if date_to:
+        conds.append(Attempt.exam_date <= date_to)
+    if statuses:
+        conds.append(Attempt.status.in_(statuses))
+    if grade and grade.strip():
+        conds.append(Attempt.grade == grade.strip())
+    return conds
+
+
+def search_attempts(
+    db: Session,
+    *,
+    session: str | None = None,
+    student: str | None = None,
+    campus: str | None = None,
+    exam_id: int | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    statuses: tuple[str, ...] | None = None,
+    offset: int = 0,
+    limit: int = ADMIN_PAGE_SIZE,
+) -> tuple[int, list[Attempt]]:
+    """(total, page) for the 3-Subject Answer Management list — newest exam_date first."""
+    conds = _attempt_filters(
+        session=session, student=student, campus=campus, exam_id=exam_id,
+        date_from=date_from, date_to=date_to, statuses=statuses,
+    )
+    total = db.scalar(
+        select(func.count()).select_from(Attempt).join(Student, Attempt.student_id == Student.id).where(*conds)
+    ) or 0
+    stmt = (
+        select(Attempt)
+        .join(Student, Attempt.student_id == Student.id)
+        .options(selectinload(Attempt.student), selectinload(Attempt.exam))
+        .where(*conds)
+        .order_by(Attempt.exam_date.desc(), Attempt.taken_at.desc(), Attempt.id.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    return total, list(db.scalars(stmt))
+
+
+def attempt_responses(db: Session, attempt_id: int, *, skills: tuple[str, ...] | None = None) -> list[QuestionResponse]:
+    """Per-question rows for one sitting, ordered the way the tabs render them."""
+    stmt = select(QuestionResponse).where(QuestionResponse.attempt_id == attempt_id)
+    if skills:
+        stmt = stmt.where(QuestionResponse.skill.in_(skills))
+    rows = list(db.scalars(stmt))
+    rows.sort(key=lambda q: (_SKILL_ORDER.get(q.skill, 9), q.no))
+    return rows
+
+
+def media_by_question_key(db: Session, attempt_id: int) -> dict[str, MediaAsset]:
+    """question_key → recording, so a Speaking card can find its audio in O(1)."""
+    rows = db.scalars(select(MediaAsset).where(MediaAsset.attempt_id == attempt_id))
+    return {row.question_key: row for row in rows}
+
+
+def get_media_asset(db: Session, asset_id: int) -> MediaAsset | None:
+    return db.scalar(select(MediaAsset).where(MediaAsset.id == asset_id))
+
+
+def speaking_attempts(db: Session, *, limit: int = ADMIN_PAGE_SIZE) -> list[Attempt]:
+    """Sittings that actually carry Speaking responses — the SPEAKING ANSWERS index."""
+    keys = select(QuestionResponse.attempt_id).where(QuestionResponse.skill == "speaking")
+    stmt = (
+        select(Attempt)
+        .options(selectinload(Attempt.student), selectinload(Attempt.exam))
+        .where(Attempt.id.in_(keys))
+        .order_by(Attempt.exam_date.desc(), Attempt.id.desc())
+        .limit(limit)
+    )
+    return list(db.scalars(stmt))
+
+
+def feedback_progress_for(db: Session, attempt_id: int) -> int:
+    """architecture.md 7.2 — productive responses commented / productive responses."""
+    total = db.scalar(
+        select(func.count()).select_from(QuestionResponse).where(
+            QuestionResponse.attempt_id == attempt_id,
+            QuestionResponse.qtype.in_(FEEDBACK_QTYPES),
+        )
+    ) or 0
+    if not total:
+        return 100                      # nothing needs a human — the sitting is done
+    done = db.scalar(
+        select(func.count()).select_from(QuestionResponse).where(
+            QuestionResponse.attempt_id == attempt_id,
+            QuestionResponse.qtype.in_(FEEDBACK_QTYPES),
+            QuestionResponse.feedback != "",
+        )
+    ) or 0
+    return round(done / total * 100)
+
+
+def save_question_feedback(
+    db: Session,
+    response_id: int,
+    *,
+    feedback: str,
+    score: float | None = None,
+    graded_by: str = "teacher",
+) -> tuple[QuestionResponse, Attempt] | None:
+    """Store one card's feedback and re-derive the attempt's progress (Story 4.5).
+
+    An empty string is a deletion, which is why the progress recalculation runs on
+    every save and not only when text was added (AC7). A teacher-supplied `score`
+    lands in `auto_score` — it is the only per-response score column, and `graded_by`
+    is what tells the two apart afterwards.
+    """
+    row = db.get(QuestionResponse, response_id)
+    if row is None:
+        return None
+    if score is not None:
+        if score < 0 or score > row.max_score:
+            raise ValueError("Score must be between 0 and " + str(row.max_score) + ".")
+        row.auto_score = score
+    row.feedback = feedback
+    row.graded_by = graded_by
+    row.graded_at = utcnow()
+    db.add(row)
+    db.flush()
+
+    attempt = db.get(Attempt, row.attempt_id)
+    if attempt is not None:
+        attempt.feedback_progress = feedback_progress_for(db, attempt.id)
+        db.add(attempt)
+    db.commit()
+    db.refresh(row)
+    return row, attempt
+
+
+def exam_statistics(db: Session, **filters) -> dict:
+    """Summary card values + per-skill averages + CEFR distribution, all GROUP BY."""
+    conds = _attempt_filters(**filters)
+    joined = select(Attempt).join(Student, Attempt.student_id == Student.id).where(*conds).subquery()
+
+    row = db.execute(
+        select(
+            func.count(joined.c.id),
+            func.avg(joined.c.total_score),
+            func.max(joined.c.total_score),
+            func.min(joined.c.total_score),
+        )
+    ).first()
+    count = int(row[0] or 0)
+
+    skills = {
+        skill: round(float(avg or 0), 1)
+        for skill, avg in db.execute(
+            select(SectionScore.skill, func.avg(SectionScore.scaled))
+            .where(SectionScore.attempt_id.in_(select(joined.c.id)))
+            .group_by(SectionScore.skill)
+        )
+    }
+    counted = {
+        grade: n
+        for grade, n in db.execute(
+            select(joined.c.grade, func.count()).group_by(joined.c.grade)
+        )
+    }
+    return {
+        "count": count,
+        "avg_total": round(float(row[1] or 0), 1),
+        "max_total": int(row[2] or 0),
+        "min_total": int(row[3] or 0),
+        "avg_by_skill": skills,
+        "distribution": [
+            {"band": band, "n": counted.get(band, 0),
+             "pct": round(counted.get(band, 0) / count * 100) if count else 0}
+            for band in CEFR_BANDS
+        ],
+    }
+
+
+def question_accuracy(db: Session, *, limit: int = 200, **filters) -> list[dict]:
+    """Per-question correct rate over the filtered sittings, hardest question first."""
+    conds = _attempt_filters(**filters)
+    ids = (
+        select(Attempt.id)
+        .join(Student, Attempt.student_id == Student.id)
+        .where(*conds)
+        .scalar_subquery()
+    )
+    correct = func.sum(case((QuestionResponse.is_correct.is_(True), 1), else_=0))
+    stmt = (
+        select(
+            QuestionResponse.skill,
+            QuestionResponse.no,
+            QuestionResponse.qtype,
+            func.count().label("n"),
+            correct.label("ok"),
+        )
+        .where(
+            QuestionResponse.attempt_id.in_(ids),
+            QuestionResponse.qtype.not_in(FEEDBACK_QTYPES),
+        )
+        .group_by(QuestionResponse.skill, QuestionResponse.no, QuestionResponse.qtype)
+        .order_by((correct * 1.0 / func.count()).asc(), QuestionResponse.skill, QuestionResponse.no)
+        .limit(limit)
+    )
+    return [
+        {
+            "skill": r.skill,
+            "no": r.no,
+            "qtype": r.qtype,
+            "responses": int(r.n or 0),
+            "rate": round(float(r.ok or 0) / r.n * 100) if r.n else 0,
+        }
+        for r in db.execute(stmt)
+    ]
+
+
+def rankings(db: Session, *, grade: str | None = None, limit: int = 500, **filters) -> list[dict]:
+    """Competition ranking (1,1,3). The `grade` filter narrows the rows shown but
+    never the ranking base, so a B2 student keeps their whole-cohort position."""
+    conds = _attempt_filters(**filters)
+    stmt = (
+        select(Attempt)
+        .join(Student, Attempt.student_id == Student.id)
+        .options(selectinload(Attempt.student), selectinload(Attempt.exam),
+                 selectinload(Attempt.section_scores))
+        .where(*conds)
+        .order_by(Attempt.total_score.desc(), Attempt.id.asc())
+        .limit(limit)
+    )
+    rows: list[dict] = []
+    rank = 0
+    previous: int | None = None
+    for index, attempt in enumerate(db.scalars(stmt), start=1):
+        if attempt.total_score != previous:
+            rank = index                       # ties share a rank, the next one skips
+            previous = attempt.total_score
+        sections = {s.skill: s.scaled for s in attempt.section_scores}
+        rows.append({
+            "rank": rank,
+            "attempt": attempt,
+            "sections": sections,
+        })
+    if grade and grade.strip():
+        rows = [r for r in rows if r["attempt"].grade == grade.strip()]
+    return rows
+
+
 __all__ = [
+    "ADMIN_PAGE_SIZE",
     "AiFeedback",
     "Attempt",
+    "CEFR_BANDS",
     "Exam",
+    "FEEDBACK_QTYPES",
+    "MediaAsset",
     "QuestionResponse",
     "RubricScore",
     "SectionScore",
     "Student",
+    "attempt_responses",
     "count_rows",
+    "exam_statistics",
+    "feedback_progress_for",
     "get_attempt",
+    "get_media_asset",
     "list_attempts",
     "list_exams",
     "list_students",
+    "media_by_question_key",
+    "question_accuracy",
+    "rankings",
     "recalc_totals",
     "save_feedback",
+    "save_question_feedback",
+    "search_attempts",
+    "speaking_attempts",
     "to_detail",
     "to_summary",
 ]

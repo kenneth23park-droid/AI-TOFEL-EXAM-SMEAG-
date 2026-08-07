@@ -26,8 +26,17 @@
     talk: PICS + 'TOEFL Listening Image (Academic, Single female).png'
   };
 
-  /* 단문응답(Q1-7 / Q1-3) 화자 삽화 로테이션 */
-  var SPEAKER_CYCLE = [IMG.q_female, IMG.q_male, IMG.q_female2, IMG.q_male2, IMG.q_female, IMG.q_male3, IMG.q_male];
+  /* 단문응답(Q1-7 / Q1-3) 화자 삽화.
+   * 로테이션이 아니라 실제 오디오 음성에 맞춘 고정 매핑이다.
+   * 각 mp3 의 기본주파수(F0) + MFCC 화자 유사도로 3명의 화자를 분류:
+   *   여성A(고음, F0 ~230-290Hz) → q_female
+   *   여성B(중음, F0 ~175-185Hz) → q_female2
+   *   남성A(F0 ~110-140Hz)       → q_male
+   * 오디오를 교체하면 이 표도 함께 갱신할 것. */
+  var SPEAKER_BY_ITEM = {
+    1: [IMG.q_female, IMG.q_male, IMG.q_female2, IMG.q_female, IMG.q_male, IMG.q_female, IMG.q_male],
+    2: [IMG.q_male, IMG.q_female, IMG.q_female2]
+  };
 
   function shortResponse(mod, no, choices, answer) {
     return {
@@ -35,7 +44,7 @@
       kind: 'mcq',
       layout: 'short-response',
       prompt: '오디오를 듣고 가장 알맞은 응답을 고르세요.',
-      image: SPEAKER_CYCLE[(no - 1) % SPEAKER_CYCLE.length],
+      image: SPEAKER_BY_ITEM[mod][no - 1],
       audio: AUDIO + 'LISTENING/MODULE ' + mod + '/' + no + '.mp3',
       choices: choices,
       answer: answer
@@ -465,7 +474,7 @@
             heading: 'Questions 15-18',
             instruction: 'Listen to a talk.',
             audio: AUDIO + 'LISTENING/MODULE 1/15 -18 Academic talk.mp3',
-            image: IMG.talk,
+            image: IMG.q_male3, // 남성 화자 오디오 (F0 ~143Hz)
             questions: [
               {
                 id: 'L1-15', kind: 'mcq', no: 15,
@@ -650,7 +659,7 @@
             heading: 'Questions 12-15',
             instruction: 'Listen to a talk.',
             audio: AUDIO + 'LISTENING/MODULE 2/12 -15 Academic Talk 2.mp3',
-            image: IMG.q_male3,
+            image: IMG.q_male2, // 13-14 Announcement 과 동일 남성 화자
             questions: [
               {
                 id: 'L2-12', kind: 'mcq', no: 12,

@@ -1,0 +1,72 @@
+{
+  "_comment": "All costs in USD. Edit these before quoting anything to management — every number here is an assumption, not a measurement. Fields marked SOURCE:QUOTE must be replaced with a real vendor quote.",
+
+  "campuses": [
+    {"name": "Capital",        "students": 260, "start_month": 1},
+    {"name": "Encanto/Mactan", "students": 180, "start_month": 7},
+    {"name": "Tarlac",         "students": 120, "start_month": 13}
+  ],
+
+  "usage": {
+    "study_days_per_month": 22,
+    "writing_tasks_per_student_per_day": 1.0,
+    "speaking_answers_per_student_per_day": 2.0,
+    "coaching_turns_per_student_per_day": 6.0,
+    "active_student_ratio": 0.75,
+    "_note": "active_student_ratio: not every enrolled student uses the AI every day. 0.75 is a planning guess — instrument the pilot and replace it."
+  },
+
+  "tokens": {
+    "writing_in": 1400,
+    "writing_out": 900,
+    "writing_samples": 3,
+    "speaking_in": 900,
+    "speaking_out": 700,
+    "speaking_samples": 3,
+    "coaching_in": 700,
+    "coaching_out": 250,
+    "coaching_samples": 1,
+    "_note": "writing_samples=3 is the self-consistency setting in scoring/client.py. Input is re-sent per sample, so cloud cost scales linearly with it unless prompt caching is used."
+  },
+
+  "cloud": {
+    "input_per_mtok": 0.30,
+    "output_per_mtok": 1.20,
+    "cached_input_per_mtok": 0.03,
+    "cache_hit_ratio": 0.80,
+    "asr_per_audio_hour": 0.36,
+    "tts_per_million_chars": 165.0,
+    "_note": "SOURCE:QUOTE — placeholder rates for a MID-TIER hosted model plus hosted ASR/TTS. Replace with your actual contracted rates. This single field decides the whole purchase: at these rates hosted inference costs ~$104/month at peak load and on-prem never pays back. Run `--voice isolate_llm` and read the price-boundary section: GPUs only win above ~17x these rates, i.e. frontier-model pricing. If band scoring genuinely needs a frontier model, re-quote here first. cache_hit_ratio applies to the shared rubric system prompt, which is large and identical across every request."
+  },
+
+  "local": {
+    "gpu_server_capex": 7500,
+    "ups_network_capex": 1800,
+    "cooling_capex": 1200,
+    "install_capex": 800,
+    "hardware_life_months": 36,
+    "gpu_watts_avg": 420,
+    "server_idle_watts": 180,
+    "pue": 1.5,
+    "electricity_per_kwh": 0.19,
+    "hours_powered_per_day": 14,
+    "maintenance_per_month": 120,
+    "_note": "electricity_per_kwh 0.19 reflects Philippine commercial rates, which are high — this is why PUE and powered-hours matter more here than they would in Korea. gpu_watts_avg is the average draw under mixed load, not TDP.",
+
+    "throughput": {
+      "tokens_per_second_output": 900,
+      "utilisation_ceiling": 0.60,
+      "_note": "tokens_per_second_output: aggregate output throughput for Gemma 4 26B A4B (MoE, ~4B active) on one RTX 5090 at Q4 under continuous batching. SOURCE:QUOTE — measure before purchase. NOTE: at the modelled volume this assumption does NOT bind. One box serves ~599M output tokens/month against ~78M of demand, so fleet size is set entirely by the one-box-per-campus redundancy floor. Halving or doubling throughput changes nothing (verified in the sensitivity sweep). It only starts to matter above roughly 8x the current student load. utilisation_ceiling accounts for peak-hour bunching: everyone submits at the end of class, not uniformly across the day."
+    }
+  },
+
+  "staff": {
+    "ml_engineer_monthly": 0,
+    "setup_one_off": 4000,
+    "human_review_rate": 0.12,
+    "examiner_cost_per_review": 1.10,
+    "_note": "human_review_rate: fraction of AI scores routed to a human by the self-consistency spread gate plus random audit. This cost exists in BOTH scenarios — it is not a differentiator — but it is modelled so the total cost of running the service is visible."
+  },
+
+  "horizon_months": 36
+}

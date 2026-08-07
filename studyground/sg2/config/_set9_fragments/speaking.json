@@ -1,0 +1,128 @@
+{
+  "id": "speaking",
+  "label": "Speaking",
+  "labelKo": "스피킹",
+  "timeLimitSec": null,
+  "modules": [
+    {
+      "id": "S1",
+      "label": "Task 1 · Listen and Repeat",
+      "timeLimitSec": 600,
+      "blocks": [
+        {
+          "kind": "record-set",
+          "heading": "Task 1",
+          "instruction": "Listen and Repeat",
+          "introAudio": "media/audio/set9/set9-S1-intro.mp3",
+          "perQuestionAudio": true,
+          "questions": [
+            {
+              "id": "set9-S1-q01",
+              "kind": "repeat",
+              "no": 1,
+              "audio": "media/audio/set9/set9-S1-q01.mp3",
+              "prepSec": 3,
+              "respondSec": 20
+            },
+            {
+              "id": "set9-S1-q02",
+              "kind": "repeat",
+              "no": 2,
+              "audio": "media/audio/set9/set9-S1-q02.mp3",
+              "prepSec": 3,
+              "respondSec": 20
+            },
+            {
+              "id": "set9-S1-q03",
+              "kind": "repeat",
+              "no": 3,
+              "audio": "media/audio/set9/set9-S1-q03.mp3",
+              "prepSec": 3,
+              "respondSec": 20
+            },
+            {
+              "id": "set9-S1-q04",
+              "kind": "repeat",
+              "no": 4,
+              "audio": "media/audio/set9/set9-S1-q04.mp3",
+              "prepSec": 3,
+              "respondSec": 20
+            },
+            {
+              "id": "set9-S1-q05",
+              "kind": "repeat",
+              "no": 5,
+              "audio": "media/audio/set9/set9-S1-q05.mp3",
+              "prepSec": 3,
+              "respondSec": 20
+            },
+            {
+              "id": "set9-S1-q06",
+              "kind": "repeat",
+              "no": 6,
+              "audio": "media/audio/set9/set9-S1-q06.mp3",
+              "prepSec": 3,
+              "respondSec": 20
+            },
+            {
+              "id": "set9-S1-q07",
+              "kind": "repeat",
+              "no": 7,
+              "audio": "media/audio/set9/set9-S1-q07.mp3",
+              "prepSec": 3,
+              "respondSec": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "label": "Task 2 · Interview",
+      "timeLimitSec": 600,
+      "blocks": [
+        {
+          "kind": "record-set",
+          "heading": "Task 2",
+          "instruction": "Answer the interviewer’s questions.",
+          "introAudio": "media/audio/set9/set9-S2-intro.mp3",
+          "perQuestionAudio": true,
+          "questions": [
+            {
+              "id": "set9-S2-q01",
+              "kind": "interview",
+              "no": 8,
+              "audio": "media/audio/set9/set9-S2-q01.mp3",
+              "prepSec": 3,
+              "respondSec": 45
+            },
+            {
+              "id": "set9-S2-q02",
+              "kind": "interview",
+              "no": 9,
+              "audio": "media/audio/set9/set9-S2-q02.mp3",
+              "prepSec": 3,
+              "respondSec": 45
+            },
+            {
+              "id": "set9-S2-q03",
+              "kind": "interview",
+              "no": 10,
+              "audio": "media/audio/set9/set9-S2-q03.mp3",
+              "prepSec": 3,
+              "respondSec": 45
+            },
+            {
+              "id": "set9-S2-q04",
+              "kind": "interview",
+              "no": 11,
+              "audio": "media/audio/set9/set9-S2-q04.mp3",
+              "prepSec": 3,
+              "respondSec": 45
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

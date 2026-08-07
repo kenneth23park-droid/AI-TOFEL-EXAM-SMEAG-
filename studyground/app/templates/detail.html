@@ -1,8 +1,46 @@
 {% extends "base.html" %}
 {% block title %}{{ d.student.name }} · {{ d.exam.code }} · {{ t('app.name') }}{% endblock %}
 
-{% set pct = (d.total_score / d.total_max * 100) if d.total_max else 0 %}
+{#
+  Story 5.3 / 6.4 AC6 extend this page; the original structure (score ring, .bars,
+  #feedback-card, review <details>, .rubric-grid) and every existing i18n key are
+  kept exactly as they were.
+
+  New strings live here rather than in i18n.py because that file belongs to another
+  stream. English is the default, Korean is the toggle — same rule as i18n.py.
+#}
+{% set L = 'ko' if lang == 'ko' else 'en' %}
+{% set TX = {
+  'scoringBanner': {
+    'en': 'Scoring in progress — your report will appear here.',
+    'ko': '채점이 진행 중입니다 — 결과는 완료되면 이곳에 표시됩니다.'},
+  'scoringHint': {
+    'en': 'Scores, rubrics and AI feedback stay hidden until grading is complete.',
+    'ko': '채점이 끝나기 전까지 점수·루브릭·AI 피드백은 표시되지 않습니다.'},
+  'type': {'en': 'Type', 'ko': '유형'},
+  'teacherFeedback': {'en': 'Teacher feedback', 'ko': '교사 피드백'},
+  'speakingAnswers': {'en': 'Speaking answers', 'ko': '스피킹 답안'},
+  'writingAnswers': {'en': 'Writing answers', 'ko': '라이팅 답안'},
+  'transcript': {'en': 'Transcript', 'ko': '전사'},
+  'yourResponse': {'en': 'Your response', 'ko': '내 답안'},
+  'noRecording': {'en': 'No recording was submitted.', 'ko': '제출된 녹음이 없습니다.'},
+  'noAnswer': {'en': 'No answer was submitted.', 'ko': '제출된 답안이 없습니다.'},
+  'noSpeaking': {'en': 'No speaking answers on this attempt.', 'ko': '이 응시에는 스피킹 답안이 없습니다.'},
+  'audioUnsupported': {'en': 'Your browser cannot play this recording.',
+                       'ko': '이 브라우저는 해당 녹음을 재생할 수 없습니다.'},
+  'band': {'en': 'Band', 'ko': '밴드'},
+  'awaitingTeacher': {'en': 'Awaiting teacher review', 'ko': '교사 검수 대기'}
+} %}
+{% macro tx(key) %}{{ TX[key][L] }}{% endmacro %}
+
+{# Story 6.4 AC6 — the ring reads the attempt's own scale, never a hard-coded /120. #}
+{% set is_band = (d.scale == 'ielts9' or d.profile == 'ielts') and d.band_score is not none %}
+{% set pct = ((d.band_score / 9 * 100) if is_band else (d.total_score / d.total_max * 100)) if (d.total_max or is_band) else 0 %}
 {% set circ = 339.292 %}
+{% set is_pending = d.status in ('in_progress', 'scoring') %}
+
+{% set speaking_rows = d.question_responses | selectattr('skill', 'equalto', 'speaking') | list %}
+{% set writing_rows = d.question_responses | selectattr('skill', 'equalto', 'writing') | list %}
 
 {% block content %}
 <a class="back" href="/?lang={{ lang }}">{{ t('detail.back') }}</a>
@@ -19,18 +57,37 @@
   <span class="status {{ d.status }}">{{ t('status.' ~ d.status) }}</span>
 </div>
 
+{% if is_pending %}
+{# Story 5.3 AC4 — no score, no rubric, no AI feedback until grading finishes. #}
+<section class="card scoring-banner" id="scoring-banner" role="status">
+  <h2 class="card-title">{{ tx('scoringBanner') }}</h2>
+  <p class="empty">{{ tx('scoringHint') }}</p>
+  {% if d.total_questions %}
+  <p class="dim">
+    {{ d.submitted_count }} / {{ d.total_questions }} ·
+    {{ t('detail.feedback') }} {{ d.feedback_progress }}%
+  </p>
+  {% endif %}
+</section>
+{% else %}
 <section class="card score-hero">
   <div class="ring-wrap">
     <svg class="ring" viewBox="0 0 128 128" role="img"
-         aria-label="{{ d.total_score }} / {{ d.total_max }}">
+         aria-label="{% if is_band %}Band {{ '%.1f' % d.band_score }}{% else %}{{ d.total_score }} / {{ d.total_max }}{% endif %}">
       <circle class="ring-bg" cx="64" cy="64" r="54"></circle>
       <circle class="ring-fg" cx="64" cy="64" r="54"
               stroke-dasharray="{{ (circ * pct / 100) | round(1) }} {{ circ }}"></circle>
     </svg>
     <div class="ring-label">
-      <b>{{ d.total_score }}</b>
-      <small>/ {{ d.total_max }}</small>
-      <span class="grade big">{{ d.grade }}</span>
+      {% if is_band %}
+        <b>{{ '%.1f' % d.band_score }}</b>
+        <small>{{ tx('band') }}</small>
+        <span class="grade big">{{ d.grade }}</span>
+      {% else %}
+        <b>{{ d.total_score }}</b>
+        <small>/ {{ d.total_max }}</small>
+        <span class="grade big">{{ d.grade }}</span>
+      {% endif %}
     </div>
   </div>
 
@@ -41,12 +98,16 @@
       <span class="bar-k">{{ t('skill.' ~ s.skill) }}</span>
       <span class="bar"><i class="{{ s.skill }}"
         style="width: {{ (s.scaled / s.max_score * 100) | round(0, 'floor') }}%"></i></span>
-      <span class="bar-v">{{ s.scaled }}<span class="dim">/{{ s.max_score }}</span></span>
+      <span class="bar-v">
+        {% if is_band %}{{ '%.1f' % (s.scaled / 10) }}{% else %}{{ s.scaled }}<span class="dim">/{{ s.max_score }}</span>{% endif %}
+      </span>
     </div>
     {% endfor %}
   </div>
 </section>
+{% endif %}
 
+{% if not is_pending %}
 <section class="card" id="feedback-card">
   <div class="card-head">
     <h2 class="card-title">{{ t('detail.feedback') }}</h2>
@@ -96,6 +157,7 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
 
 <section class="card">
   <h2 class="card-title">{{ t('detail.review') }}</h2>
@@ -113,16 +175,19 @@
           <thead>
             <tr>
               <th class="w-no">{{ t('detail.qNo') }}</th>
+              <th class="w-type">{{ tx('type') }}</th>
               <th>{{ t('detail.question') }}</th>
               <th class="w-ans">{{ t('detail.yourAnswer') }}</th>
               <th class="w-ans">{{ t('detail.correctAnswer') }}</th>
               <th class="w-res">{{ t('detail.result') }}</th>
+              <th class="w-fb">{{ tx('teacherFeedback') }}</th>
             </tr>
           </thead>
           <tbody>
             {% for q in rows %}
             <tr class="{{ 'is-wrong' if not q.is_correct else '' }}">
               <td class="mono">{{ q.no }}</td>
+              <td><span class="qtype-tag">{{ q.qtype }}</span></td>
               <td>{{ q.prompt }}</td>
               <td class="mono">{{ q.student_answer }}</td>
               <td class="mono">{{ q.correct_answer }}</td>
@@ -131,6 +196,8 @@
                   {{ t('detail.correct') if q.is_correct else t('detail.wrong') }}
                 </span>
               </td>
+              {# Story 5.3 AC2 — an em dash, never a blank cell. #}
+              <td class="q-feedback">{{ q.feedback if q.feedback else '—' }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -141,6 +208,76 @@
   {% endfor %}
 </section>
 
+{# Story 5.3 AC3 — Speaking has no answer key, so it gets its own card. #}
+<section class="card" id="speaking-answers">
+  <h2 class="card-title">{{ tx('speakingAnswers') }}</h2>
+  {% if not speaking_rows %}
+    <p class="empty">{{ tx('noSpeaking') }}</p>
+  {% endif %}
+  <div class="answer-list">
+    {% for q in speaking_rows %}
+    <article class="answer-card">
+      <header class="answer-head">
+        <span class="mono">{{ t('detail.qNo') }} {{ q.no }}</span>
+        <span class="qtype-tag">{{ q.qtype }}</span>
+        {% if q.module %}<span class="dim mono">{{ q.module }}</span>{% endif %}
+      </header>
+      {% if q.prompt %}<p class="answer-prompt">{{ q.prompt }}</p>{% endif %}
+
+      {% if q.audio_ref %}
+        {% set src = q.audio_ref if (q.audio_ref.startswith('http') or q.audio_ref.startswith('/'))
+                     else '/api/admin/media/by-uri/' ~ q.audio_ref %}
+        <audio class="answer-audio" controls preload="none" src="{{ src }}">
+          {{ tx('audioUnsupported') }}
+        </audio>
+      {% else %}
+        <p class="empty">{{ tx('noRecording') }}</p>
+      {% endif %}
+
+      {% if q.student_answer %}
+      <details class="answer-transcript">
+        <summary>{{ tx('transcript') }}</summary>
+        <p>{{ q.student_answer }}</p>
+      </details>
+      {% endif %}
+
+      <p class="q-feedback">
+        <b>{{ tx('teacherFeedback') }}:</b>
+        {{ q.feedback if q.feedback else '—' }}
+      </p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+{% if writing_rows %}
+<section class="card" id="writing-answers">
+  <h2 class="card-title">{{ tx('writingAnswers') }}</h2>
+  <div class="answer-list">
+    {% for q in writing_rows %}
+    <article class="answer-card">
+      <header class="answer-head">
+        <span class="mono">{{ t('detail.qNo') }} {{ q.no }}</span>
+        <span class="qtype-tag">{{ q.qtype }}</span>
+        {% if q.module %}<span class="dim mono">{{ q.module }}</span>{% endif %}
+      </header>
+      {% if q.prompt %}<p class="answer-prompt">{{ q.prompt }}</p>{% endif %}
+      {% if q.student_answer %}
+        <p class="answer-body">{{ q.student_answer }}</p>
+      {% else %}
+        <p class="empty">{{ tx('noAnswer') }}</p>
+      {% endif %}
+      <p class="q-feedback">
+        <b>{{ tx('teacherFeedback') }}:</b>
+        {{ q.feedback if q.feedback else '—' }}
+      </p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if not is_pending %}
 <section class="card">
   <h2 class="card-title">{{ t('detail.rubric') }}</h2>
   <div class="rubric-grid">
@@ -154,12 +291,18 @@
           <span class="bar-k wide">{{ r.criterion }}</span>
           <span class="bar"><i class="{{ skill }}"
             style="width: {{ (r.score / r.max_score * 100) | round(0, 'floor') }}%"></i></span>
-          <span class="bar-v">{{ '%g' % r.score }}<span class="dim">/{{ '%g' % r.max_score }}</span></span>
+          <span class="bar-v">
+            {% if r.band is not none %}{{ '%.1f' % r.band }}<span class="dim">/9.0</span>
+            {% else %}{{ '%g' % r.score }}<span class="dim">/{{ '%g' % r.max_score }}</span>{% endif %}
+          </span>
         </div>
+        {# Story 5.3 AC6 — the rationale behind the number, small and under it. #}
+        {% if r.comment %}<p class="rubric-comment">{{ r.comment }}</p>{% endif %}
         {% endfor %}
       </div>
       {% endif %}
     {% endfor %}
   </div>
 </section>
+{% endif %}
 {% endblock %}

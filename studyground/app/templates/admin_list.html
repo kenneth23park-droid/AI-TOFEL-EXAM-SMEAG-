@@ -1,0 +1,82 @@
+{% extends "admin_base.html" %}
+
+{% block subtitle %}<p class="sub">{{ at('answers.intro') }}</p>{% endblock %}
+
+{% block content %}
+<form class="card search-form" method="get" action="/admin/answers">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label>
+    <span>{{ at('answers.session') }}</span>
+    <input type="text" name="session" value="{{ q.session }}" autocomplete="off">
+  </label>
+  <label>
+    <span>{{ at('answers.studentQuery') }}</span>
+    <input type="text" name="student" value="{{ q.student }}" autocomplete="off">
+  </label>
+  <label>
+    <span>{{ at('answers.dateFrom') }}</span>
+    <input type="date" name="date_from" value="{{ q.date_from }}">
+  </label>
+  <label>
+    <span>{{ at('answers.dateTo') }}</span>
+    <input type="date" name="date_to" value="{{ q.date_to }}">
+  </label>
+  <div class="search-actions">
+    <button class="btn" type="submit">{{ at('answers.search') }}</button>
+    <a class="btn ghost" href="/admin/answers?lang={{ lang }}">{{ at('answers.reset') }}</a>
+  </div>
+</form>
+
+{% if not rows %}
+  <p class="empty">{{ at('answers.empty') }}</p>
+{% else %}
+<div class="table-wrap">
+  <table class="scores admin-table">
+    <thead>
+      <tr>
+        <th>{{ at('col.session') }}</th>
+        <th>{{ at('col.examName') }}</th>
+        <th>{{ t('col.student') }}</th>
+        <th>{{ at('col.campus') }}</th>
+        <th>{{ at('col.examDate') }}</th>
+        <th>{{ at('col.submitted') }}</th>
+        <th class="w-progress">{{ at('col.progress') }}</th>
+        <th>{{ at('col.manage') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      {% set p = r.feedback_progress %}
+      <tr>
+        <td class="mono">{{ r.session or '—' }}</td>
+        <td><span class="chip">{{ r.exam.code }}</span> <span class="dim">{{ r.exam.title }}</span></td>
+        <td>
+          <b>{{ r.student.name }}</b>
+          <span class="dim">{{ r.student.student_no }}</span>
+        </td>
+        <td>{{ r.campus or r.student.campus or '—' }}</td>
+        <td class="mono">{{ r.exam_date.isoformat() if r.exam_date else '—' }}</td>
+        <td class="mono">{{ at('answers.items', n=r.submitted_count) }}</td>
+        <td>
+          <div class="progress {{ 'zero' if p == 0 else ('full' if p >= 100 else 'part') }}">
+            <span class="progress-bar"><i style="width: {{ p }}%"></i></span>
+            <span class="progress-v">{{ p }}%</span>
+          </div>
+        </td>
+        <td class="manage">
+          <a href="/admin/answers/{{ r.id }}?mode=view&lang={{ lang }}">{{ at('action.view') }}</a>
+          <a class="strong" href="/admin/answers/{{ r.id }}?mode=write&lang={{ lang }}">{{ at('action.write') }}</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="pager">
+  {% if prev_url %}<a class="btn small ghost" href="{{ prev_url }}">{{ at('page.prev') }}</a>{% endif %}
+  <span class="sub">{{ at('page.of', page=page, pages=pages, total=total) }}</span>
+  {% if next_url %}<a class="btn small ghost" href="{{ next_url }}">{{ at('page.next') }}</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

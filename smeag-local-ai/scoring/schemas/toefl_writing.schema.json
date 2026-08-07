@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TOEFL Writing — structured rubric report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["criteria", "overall", "word_count", "off_topic", "summary_ko", "summary_en"],
+  "properties": {
+    "criteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["TF", "OD", "LU", "VO"],
+      "properties": {
+        "TF": { "$ref": "#/$defs/criterion" },
+        "OD": { "$ref": "#/$defs/criterion" },
+        "LU": { "$ref": "#/$defs/criterion" },
+        "VO": { "$ref": "#/$defs/criterion" }
+      }
+    },
+    "overall": {
+      "type": "number",
+      "description": "Mean of the four criterion scores, rounded to the nearest 0.5 (.25 and .75 round up).",
+      "minimum": 0,
+      "maximum": 5,
+      "multipleOf": 0.5
+    },
+    "word_count": { "type": "integer", "minimum": 0 },
+    "off_topic": {
+      "type": "boolean",
+      "description": "true if the response does not address the prompt. Forces TF <= 2."
+    },
+    "corrections": {
+      "type": "array",
+      "description": "Sentence-level corrections. Max 12, highest-impact first.",
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["original", "corrected", "error_type"],
+        "properties": {
+          "original": { "type": "string" },
+          "corrected": { "type": "string" },
+          "error_type": {
+            "type": "string",
+            "enum": ["article", "tense", "agreement", "preposition", "word_choice",
+                     "collocation", "spelling", "punctuation", "fragment",
+                     "run_on", "word_form", "register", "cohesion"]
+          },
+          "note_ko": { "type": "string" }
+        }
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "maxItems": 3,
+      "items": { "type": "string" },
+      "description": "Actionable study advice, most impactful first."
+    },
+    "summary_en": { "type": "string" },
+    "summary_ko": { "type": "string" }
+  },
+  "$defs": {
+    "criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "evidence", "rationale"],
+      "properties": {
+        "score": { "type": "number", "minimum": 0, "maximum": 5, "multipleOf": 0.5 },
+        "evidence": {
+          "type": "array",
+          "description": "VERBATIM quotes from the student's response. Must appear character-for-character in the submission. Empty array is NOT acceptable unless the response is blank.",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "type": "string" }
+        },
+        "rationale": {
+          "type": "string",
+          "description": "1-3 sentences tying the quoted evidence to the anchor for this score."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "blockId": "L2-B2",
+  "audioId": "set9-L2-04-05",
+  "kind": "conversation",
+  "origin": "authored",
+  "originNote": "원본 SET 9 SCRIPT.docx 에 본문 전사가 없어 정답키 제약에 맞춰 새로 집필함. 원본 확보 시 교체 대상.",
+  "revisionNote": "rev3. blind 검증에서 이 블록이 소거법으로 풀린다는 지적을 받아 전면 재집필함. (1) L2-4 오답[3](교수 면담)을 지우던 직접 부정 'I never made it to his door, and we've never exchanged a word. The list did this, not him.' 을 통째로 삭제하고, 대신 자리 배정이 registrar 의 자동 대기열로만 처리되며 Hammond 는 개강 전 월요일에 명단을 '받는' 쪽이라는 사실을 대화 흐름에 심었다 — 교수와의 접촉은 지문 어디에도 근거가 없어 탈락한다. (2) L2-4 오답[2](전공 변경)를 지우던 마지막 턴 'Hardly. I'm still in cognitive science...' 을 삭제하고, 전공 화제 자체를 대화에서 제거했다 — 근거 없음으로 탈락. 여자가 '전공 바꿨냐'는 질문을 부인하는 구조가 사라졌다. (3) L2-4 오답[0](수강 철회)은 'Two students in the class dropped over the weekend' 로 명확히 3인칭 타인의 행위로만 등장하며, 여자 본인은 등록하는 쪽이다. 이전 rev2 의 'I'm not moving a single thing on my schedule' 같은 자기 부정 문장은 제거했다. (4) L2-5 는 남자가 이메일·첫수업 출석·다음 학기 대기 3안을 내고 여자가 셋 다 기각하던 구조를 해체했다. 남자의 제안은 0개이고 open question('What are my odds?')만 던진다. 여자는 대안 과목 등록을 금요일 add-drop 마감·남은 두 과목의 잔여석 소진이라는 적극적 시간 압박 근거와 함께 권한다. 'Here's what actually works' 류의 정답 직전 신호어도 삭제했다. (5) 각 오답이 지문의 서로 다른 사실과 충돌하도록 근거를 분산했다: 이메일 → 자동 대기열/registrar 소관, 첫수업 출석 → 세미나 첫 모임이 3주차이고 명단은 그 전 금요일에 잠김, 대기 → 이번 주 안에 움직이지 않으면 대체 과목 잔여석이 사라짐.",
+  "segments": [
+    {
+      "speaker": "W",
+      "text": "You will not believe my morning. Six a.m., and the registrar's system sends me a seat confirmation. Sociolinguistics. The Thursday seminar. I read it four times."
+    },
+    {
+      "speaker": "M",
+      "text": "You're in? That thing filled up before I finished typing my ID number. I'm fourteenth in the queue."
+    },
+    {
+      "speaker": "W",
+      "text": "I'd stopped watching it, honestly. Two students in the class dropped over the weekend, the queue ran overnight, and it took the next two names off the top. Mine was one of them."
+    },
+    {
+      "speaker": "M",
+      "text": "Overnight. So it's just the software moving people around."
+    },
+    {
+      "speaker": "W",
+      "text": "Start to finish. Hammond gets the roster from the registrar the Monday before classes open, and whoever's on it is who he teaches that term."
+    },
+    {
+      "speaker": "M",
+      "text": "Fourteenth. What are my odds here, realistically?"
+    },
+    {
+      "speaker": "W",
+      "text": "Low enough that you want a second plan moving this week. Look at what else clears the same methods requirement and get yourself registered for one of those before Friday, because Friday is when add-drop shuts. There are two courses that count for it and both were down to single seats yesterday afternoon. If those fill, you're carrying that requirement into next year."
+    },
+    {
+      "speaker": "M",
+      "text": "And if my number does come up after I've signed for something?"
+    },
+    {
+      "speaker": "W",
+      "text": "Then you release the other one and walk into the seminar. It doesn't meet until week three anyway, and the roster locks the Friday before that, so it's all settled before anyone's in a classroom."
+    },
+    {
+      "speaker": "M",
+      "text": "Two courses, one week. Right. There's a methods section Tuesday mornings. I'll register for it this afternoon."
+    }
+  ],
+  "plainText": "W: You will not believe my morning. Six a.m., and the registrar's system sends me a seat confirmation. Sociolinguistics. The Thursday seminar. I read it four times.\nM: You're in? That thing filled up before I finished typing my ID number. I'm fourteenth in the queue.\nW: I'd stopped watching it, honestly. Two students in the class dropped over the weekend, the queue ran overnight, and it took the next two names off the top. Mine was one of them.\nM: Overnight. So it's just the software moving people around.\nW: Start to finish. Hammond gets the roster from the registrar the Monday before classes open, and whoever's on it is who he teaches that term.\nM: Fourteenth. What are my odds here, realistically?\nW: Low enough that you want a second plan moving this week. Look at what else clears the same methods requirement and get yourself registered for one of those before Friday, because Friday is when add-drop shuts. There are two courses that count for it and both were down to single seats yesterday afternoon. If those fill, you're carrying that requirement into next year.\nM: And if my number does come up after I've signed for something?\nW: Then you release the other one and walk into the seminar. It doesn't meet until week three anyway, and the roster locks the Friday before that, so it's all settled before anyone's in a classroom.\nM: Two courses, one week. Right. There's a methods section Tuesday mornings. I'll register for it this afternoon.",
+  "wordCount": 245,
+  "evidence": [
+    {
+      "questionId": "L2-4",
+      "keyedAnswerIndex": 1,
+      "keyedAnswerText": "She received a spot in a seminar.",
+      "supportingLine": "Six a.m., and the registrar's system sends me a seat confirmation. Sociolinguistics. The Thursday seminar. ... the queue ran overnight, and it took the next two names off the top. Mine was one of them.",
+      "whyOthersFail": {
+        "0": "철회한 사람은 이미 수강 중이던 다른 두 학생이며('Two students in the class dropped over the weekend'), 그 결과가 여자의 자리 확보다. 여자는 대기열에서 위로 올라와 등록이 확정된 쪽이므로, 그녀가 무언가를 철회했다는 것은 자리를 얻었다는 지문의 사실관계와 방향이 반대다. 지문에 여자 본인의 철회 행위는 존재하지 않는다.",
+        "2": "전공 변경은 지문의 어떤 사실과도 연결되지 않는다. 대화 전체가 특정 세미나의 좌석 배정과 금요일 add-drop 마감이라는 등록 절차에 국한되어 있고, 학과·전공·학위 요건 변경을 시사하는 사건이 한 건도 서술되지 않는다.",
+        "3": "지문이 그리는 자리 배정 경로는 사람이 아니라 절차다: 새벽에 시스템이 좌석 확정 메일을 보냈고, 대기열이 밤사이 돌아 상위 두 명을 자동으로 올렸으며, Hammond 는 개강 전 월요일에 registrar 로부터 명단을 '받는' 쪽이다. 즉 교수는 여자가 자리를 얻은 시점 이후에야 명단을 보게 되므로, 그와의 면담이 이 사건을 만들어냈다는 선택지는 시간·권한 양면에서 지문과 양립하지 않는다."
+      }
+    },
+    {
+      "questionId": "L2-5",
+      "keyedAnswerIndex": 3,
+      "keyedAnswerText": "Prepare an alternative course option",
+      "supportingLine": "Look at what else clears the same methods requirement and get yourself registered for one of those before Friday... Then you release the other one and walk into the seminar.",
+      "whyOthersFail": {
+        "0": "여자가 설명한 배정 구조에서 좌석은 registrar 의 대기열이 야간에 자동 처리하고 교수는 확정된 명단을 나중에 전달받을 뿐이다. 교수에게 보내는 문의는 명단을 만드는 주체에게 닿지 않으므로, 이 선택지는 여자가 제시한 절차 서술과 충돌한다. 또한 여자의 권고는 '금요일 전에 등록하라'는 행위 지시이지 연락 지시가 아니다.",
+        "1": "세미나의 첫 모임은 3주차이고 명단은 그 전 금요일에 이미 잠긴다. 교실에 사람이 모이는 시점에는 등록이 끝나 있으므로 첫 수업에 나타나는 행동은 남자의 문제(금요일까지 요건을 확보하는 것)를 시간상 해결할 수 없다.",
+        "2": "여자의 근거 전체가 기다림과 반대 방향이다. 같은 요건을 채우는 대체 과목은 두 개뿐이고 전날 이미 잔여석이 한 자리 수준이며, 금요일에 add-drop 이 닫힌다. 이번 주에 움직이지 않으면 요건을 다음 해로 넘기게 된다는 서술과, 다음 학기까지 대기한다는 선택지는 양립할 수 없다."
+      }
+    }
+  ]
+}

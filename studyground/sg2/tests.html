@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mock Tests · SMEAG StudyGround</title>
 <link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudyGround">
 </head>
 <body>
 
@@ -38,7 +43,12 @@
       <h3 class="mt-8"><span data-en>NEW TOEFL SET 1 — Full Mock Test</span><span data-ko>NEW TOEFL SET 1 — 전체 모의고사</span></h3>
       <p><span data-en>Reading 35 · Listening 33 · Writing 12 · Speaking 11 — 91 questions, real audio.</span><span data-ko>리딩 35 · 리스닝 33 · 라이팅 12 · 스피킹 11 — 91문항, 실제 오디오.</span></p>
     </div>
-    <a class="btn brand lg" href="exam.html"><span data-en>Start test →</span><span data-ko>응시 시작 →</span></a>
+    <!-- Two entry points: the timed runtime (real exam conditions) and the old
+         scrollable practice sheet, which stays available for review. -->
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:stretch">
+      <a class="btn brand lg" href="exam-runtime.html?mode=exam&amp;profile=toefl"><span data-en>Start test →</span><span data-ko>응시 시작 →</span></a>
+      <a class="btn ghost" href="exam.html"><span data-en>Practice sheet (untimed)</span><span data-ko>연습지 (시간 제한 없음)</span></a>
+    </div>
   </div>
 
   <!-- section breakdown -->
@@ -56,7 +66,8 @@
   <section class="section" style="padding:10px 0 40px">
     <h2 class="title mb-24"><span data-en>Mock test library</span><span data-ko>모의고사 라이브러리</span></h2>
     <div class="grid" style="gap:12px">
-      <div class="testcard"><div class="code">01</div><div class="body"><h4>NEW TOEFL SET 1</h4><p data-en>Full 4-section mock · real SET 1 audio</p><p data-ko>4영역 전체 모의고사 · SET 1 실제 오디오</p></div><a class="btn brand" href="exam.html"><span data-en>Start</span><span data-ko>응시</span></a></div>
+      <div class="testcard"><div class="code">01</div><div class="body"><h4>NEW TOEFL SET 1</h4><p data-en>Full 4-section mock · real SET 1 audio</p><p data-ko>4영역 전체 모의고사 · SET 1 실제 오디오</p></div><a class="btn brand" href="exam-runtime.html?mode=exam&amp;profile=toefl"><span data-en>Start</span><span data-ko>응시</span></a></div>
+      <div class="testcard"><div class="code">09</div><div class="body"><h4>NEW TOEFL SET 9</h4><p data-en>Full 4-section mock · 120 questions (R 50 · L 47 · W 12 · S 11)</p><p data-ko>4영역 전체 모의고사 · 120문항 (리딩 50 · 리스닝 47 · 라이팅 12 · 스피킹 11)</p><div class="chips"><span class="chip">🔊 34 audio clips</span><span class="chip">12 voices · US/GB/AU</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" href="set9.html"><span data-en>🔊 Listening audio</span><span data-ko>🔊 리스닝 오디오</span></a><a class="btn brand" href="exam-runtime.html?mode=exam&amp;profile=toefl&amp;set=set9"><span data-en>Start</span><span data-ko>응시</span></a></div></div>
       <div class="testcard"><div class="code">02</div><div class="body"><h4>NEW TOEFL SET 2</h4><p data-en>Releasing soon</p><p data-ko>곧 공개</p></div><button class="btn ghost" disabled>Locked</button></div>
       <div class="testcard"><div class="code">03</div><div class="body"><h4>NEW TOEFL SET 3</h4><p data-en>Releasing soon</p><p data-ko>곧 공개</p></div><button class="btn ghost" disabled>Locked</button></div>
     </div>
@@ -69,5 +80,6 @@
 </div></footer>
 
 <script src="assets/app.js"></script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
 </html>

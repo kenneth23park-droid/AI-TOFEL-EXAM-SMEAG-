@@ -1,0 +1,117 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<form class="card search-form" method="get" action="/admin/statistics">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label>
+    <span>{{ at('col.examName') }}</span>
+    <select name="exam_id">
+      <option value="">{{ at('stats.allExams') }}</option>
+      {% for e in exams %}
+        <option value="{{ e.id }}" {% if q.exam_id == e.id %}selected{% endif %}>{{ e.code }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>
+    <span>{{ at('stats.campus') }}</span>
+    <input type="text" name="campus" value="{{ q.campus }}" autocomplete="off">
+  </label>
+  <label>
+    <span>{{ at('answers.dateFrom') }}</span>
+    <input type="date" name="date_from" value="{{ q.date_from }}">
+  </label>
+  <label>
+    <span>{{ at('answers.dateTo') }}</span>
+    <input type="date" name="date_to" value="{{ q.date_to }}">
+  </label>
+  <label class="check">
+    <input type="checkbox" name="include_scoring" value="1"
+           {% if q.include_scoring %}checked{% endif %}>
+    <span>{{ at('stats.includeScoring') }}</span>
+  </label>
+  <div class="search-actions">
+    <button class="btn" type="submit">{{ at('stats.apply') }}</button>
+  </div>
+</form>
+
+{% if s.count == 0 %}
+  <p class="empty">{{ at('stats.noData') }}</p>
+{% else %}
+
+<section class="tile-row">
+  <div class="card tile"><span class="tile-k">{{ at('stats.candidates') }}</span><b class="tile-v">{{ s.count }}</b></div>
+  <div class="card tile"><span class="tile-k">{{ at('stats.avgTotal') }}</span><b class="tile-v">{{ s.avg_total }}<small>/{{ total_max }}</small></b></div>
+  <div class="card tile"><span class="tile-k">{{ at('stats.highest') }}</span><b class="tile-v">{{ s.max_total }}</b></div>
+  <div class="card tile"><span class="tile-k">{{ at('stats.lowest') }}</span><b class="tile-v">{{ s.min_total }}</b></div>
+</section>
+
+<section class="card">
+  <h2 class="card-title">{{ at('stats.bySkill') }}</h2>
+  {% for skill in skills_order %}
+  {% set v = s.avg_by_skill.get(skill, 0) %}
+  <div class="bar-row">
+    <span class="bar-k">{{ t('skill.' ~ skill) }}</span>
+    <span class="bar"><i class="{{ skill }}"
+      style="width: {{ (v / section_max * 100) | round(0, 'floor') }}%"></i></span>
+    <span class="bar-v">{{ v }}<span class="dim">/{{ section_max }}</span></span>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2 class="card-title">{{ at('stats.distribution') }}</h2>
+  {# Inline SVG column chart — no chart library, no CDN (P1/P2). #}
+  {% set peak = (s.distribution | map(attribute='n') | max) or 1 %}
+  <div class="chart-wrap">
+    <svg class="chart" viewBox="0 0 700 210" role="img"
+         aria-label="{{ at('stats.distribution') }}" preserveAspectRatio="xMidYMid meet">
+      <line x1="34" y1="160" x2="690" y2="160" class="axis"></line>
+      {% for d in s.distribution %}
+        {% set slot = 93 %}
+        {% set x = 40 + loop.index0 * slot %}
+        {% set h = (d.n / peak * 120) | round(1) %}
+        <rect class="col" x="{{ x }}" y="{{ 160 - h }}" width="{{ slot - 26 }}" height="{{ h }}"
+              rx="4"></rect>
+        <text class="col-v" x="{{ x + (slot - 26) / 2 }}" y="{{ 152 - h }}"
+              text-anchor="middle">{{ d.n }}</text>
+        <text class="col-k" x="{{ x + (slot - 26) / 2 }}" y="178" text-anchor="middle">{{ d.band }}</text>
+        <text class="col-p" x="{{ x + (slot - 26) / 2 }}" y="196" text-anchor="middle">{{ d.pct }}%</text>
+      {% endfor %}
+    </svg>
+  </div>
+</section>
+
+<section class="card">
+  <h2 class="card-title">{{ at('stats.accuracy') }}</h2>
+  {% if not accuracy %}
+    <p class="empty">{{ at('stats.noData') }}</p>
+  {% else %}
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>{{ t('detail.qNo') }}</th>
+          <th>{{ t('col.exam') }}</th>
+          <th class="num">{{ at('stats.rate') }}</th>
+          <th class="num">{{ at('stats.responses') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in accuracy %}
+        <tr class="{{ 'is-hard' if row.rate < hard_rate else '' }}">
+          <td class="mono">{{ t('skill.' ~ row.skill) }} · {{ row.no }}</td>
+          <td><span class="chip">{{ row.qtype }}</span></td>
+          <td class="num">
+            <span class="cell-score">{{ row.rate }}%</span>
+            <span class="mini-bar"><i style="width: {{ row.rate }}%"></i></span>
+          </td>
+          <td class="num mono">{{ row.responses }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

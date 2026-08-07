@@ -1,0 +1,71 @@
+{
+  "blockId": "L2-B5",
+  "audioId": "set9-L2-12-15",
+  "kind": "talk",
+  "origin": "authored",
+  "originNote": "원본 SET 9 SCRIPT.docx 에 본문 전사가 없어 정답키 제약에 맞춰 새로 집필함. 원본 확보 시 교체 대상.",
+  "revisionNote": "rev3. blind 검증에서 '오답 선택지를 먼저 만들고 그 부정문을 지문에 심은 흔적'이 지적되어, 오답을 부정문으로 지우던 설계를 전부 걷어내고 '충돌 또는 근거 없음'으로만 탈락하도록 다시 씀. 항목별: (1) L2-12 — 도입부의 논지 선언('By the time you leave I want two things settled: what a player is actually doing... and why a band is built around that moment')을 삭제. 또한 오답 두 개를 한 문장 묶음으로 지우던 'I am not going to tell you where the music came from, and I am not going to tell you what your hands should be doing on a horn or a keyboard' 를 통째로 삭제했다. 이제 강의는 주제를 선언하지 않고, 솔로 순간의 실제 작동·그것을 감싸는 규칙 틀·그 방식의 확산을 차례로 '실연'하며, 응시자가 전체를 종합해야 주제에 도달한다. 연주 기술(오답0)과 역사 비교(오답1)는 지문에 아예 다뤄지지 않아 탈락한다. (2) L2-13 — 'the blank page is not the difficulty, and neither is the harmony', 'It is not a feat of memory either', 'Here is the difficulty' 를 전부 삭제. 대신 장면으로 대체했다: 연주자가 오후에 집에서 다섯째 마디용 프레이즈를 짜 두었는데, 실연에서 베이스가 박자를 뒤로 놓고 드러머가 앞서 나가며 피아니스트가 다섯째 마디에 다른 코드를 대입해, 준비해 둔 프레이즈가 걸릴 마디 자체가 사라진다. 암기(오답0)는 '아니라고 선언'되는 대신 장면과 양립 불가능해진다. 화성 복잡도(오답1)와 악보 해석(오답2)은 이제 지문에서 아예 언급되지 않는다 — 특히 오답2를 지우던 'There is no written part for a solo, nothing on the page saying which note comes next' 문장을 삭제했고, 3문단의 'students hear that nothing is written down' 도 'students hear the word improvisation' 으로 바꿔 표기법 화제를 지문에서 완전히 제거했다. (3) L2-14 — 오답2를 직접 부정하던 'I am not making a point about two people trading turns; I am making a point about the rules neither of you is allowed to drop' 와 목적 선언 'That arrangement is the only reason I bring the comparison up' 을 삭제. 대신 비유 자체를 한 사람의 발화로 다시 썼다(룸메이트에게 주말 얘기를 '내가' 한다). 주고받기 요소가 비유에서 사라졌으므로 오답2는 부정 없이 근거를 잃는다. 비유의 내용은 '단어는 즉석에서 고르지만 문법과 문장의 완결은 유지된다'로, 자유+틀이라는 취지가 서술만으로 드러난다. 개성(오답1)은 종전대로 다음 문단의 별개 논점으로 유지. (4) L2-15 — 결론을 넘겨주던 서술과 두 개의 직접 부정, 즉 'the crowds turned up for it exactly as they always had'(오답3)와 'These were not people sitting in theory classes... They picked it up by ear, off the records'(오답0)를 삭제. 1935년 댄스밴드 장면을 담백한 서술로만 남겨 오답0·3이 근거 없음으로 탈락하게 했다. (5) 부정문 제거로 분량이 543 → 446단어로 줄어 규격(300~450) 안에 들어왔다.",
+  "segments": [
+    {
+      "text": "Every book on jazz gets to the same word by about page three. Improvisation. It gets used loosely, so let's look at where it actually happens: the bandstand."
+    },
+    {
+      "text": "So picture the second set. The tune comes around and it is your turn to step out. That afternoon, in your apartment, you worked something out that you liked, a climbing figure you were saving for the fifth bar. You get eight bars in and the bass player starts placing the beat later than you expected. The drummer leans ahead of him. The pianist arrives at the fifth bar and substitutes a chord from somewhere else entirely, and your climbing figure now belongs to a bar that has stopped existing. Whatever comes out of your horn next has to come out in the same second all of that reaches you; you are still holding a note while you decide. That is the job up there. You are taking in four other people continuously and bending the line you are already in the middle of so that it fits what they just did to it."
+    },
+    {
+      "text": "Now, students hear the word improvisation and take it to mean anything goes. So consider breakfast. You sit down and start telling your roommate about your weekend. Nobody handed you those sentences in advance. You pick the words as you go, and starting a sentence you have no clear idea how you will land it. And yet the grammar holds all the way through, and you finish the thought you opened, or your roommate stops following you. The freedom lives inside a set of things you keep. On the bandstand those things are the key, the chord changes, the form, and how many bars before the whole thing comes around again. All of it is settled before anyone plays. What goes inside it is yours. Made up as you go, yes. Made up out of thin air, no."
+    },
+    {
+      "text": "And because what goes inside is yours, a strong improviser is recognizable in about four notes. The phrasing is as particular as handwriting. This way of working also spread outward. Picture a dance band in 1935, before recordings circulated widely. You played the arrangement. The arrangement was the point. Tuesday's version and Saturday's version were the same version, and what a listener weighed was how cleanly a settled piece had been executed. The concert hall ran on that same principle and largely still does. Then the records got around, and by the sixties you had rock and blues bands leaving whole stretches of a song open, a chorus where the notes had been fixed by nobody in advance and the thing came out different every night."
+    }
+  ],
+  "plainText": "Every book on jazz gets to the same word by about page three. Improvisation. It gets used loosely, so let's look at where it actually happens: the bandstand.\n\nSo picture the second set. The tune comes around and it is your turn to step out. That afternoon, in your apartment, you worked something out that you liked, a climbing figure you were saving for the fifth bar. You get eight bars in and the bass player starts placing the beat later than you expected. The drummer leans ahead of him. The pianist arrives at the fifth bar and substitutes a chord from somewhere else entirely, and your climbing figure now belongs to a bar that has stopped existing. Whatever comes out of your horn next has to come out in the same second all of that reaches you; you are still holding a note while you decide. That is the job up there. You are taking in four other people continuously and bending the line you are already in the middle of so that it fits what they just did to it.\n\nNow, students hear the word improvisation and take it to mean anything goes. So consider breakfast. You sit down and start telling your roommate about your weekend. Nobody handed you those sentences in advance. You pick the words as you go, and starting a sentence you have no clear idea how you will land it. And yet the grammar holds all the way through, and you finish the thought you opened, or your roommate stops following you. The freedom lives inside a set of things you keep. On the bandstand those things are the key, the chord changes, the form, and how many bars before the whole thing comes around again. All of it is settled before anyone plays. What goes inside it is yours. Made up as you go, yes. Made up out of thin air, no.\n\nAnd because what goes inside is yours, a strong improviser is recognizable in about four notes. The phrasing is as particular as handwriting. This way of working also spread outward. Picture a dance band in 1935, before recordings circulated widely. You played the arrangement. The arrangement was the point. Tuesday's version and Saturday's version were the same version, and what a listener weighed was how cleanly a settled piece had been executed. The concert hall ran on that same principle and largely still does. Then the records got around, and by the sixties you had rock and blues bands leaving whole stretches of a song open, a chorus where the notes had been fixed by nobody in advance and the thing came out different every night.",
+  "wordCount": 446,
+  "evidence": [
+    {
+      "questionId": "L2-12",
+      "keyedAnswerIndex": 3,
+      "keyedAnswerText": "The nature and function of improvisation in jazz performance",
+      "supportingLine": "Every book on jazz gets to the same word by about page three. Improvisation. It gets used loosely, so let's look at where it actually happens: the bandstand.",
+      "whyOthersFail": {
+        "0": "연주 기술 향상 방법과 충돌한다. 지문은 손·주법·연습법을 한 번도 다루지 않고, 유일하게 나오는 개인 연습 장면('That afternoon, in your apartment, you worked something out')조차 그 준비물이 실연에서 무력해지는 사례로 쓰인다. 기술 습득을 가르치는 강의라면 그 준비를 살려 써야 하므로 양립하지 않는다.",
+        "1": "재즈와 클래식의 발전사 비교와 충돌한다. concert hall 은 1935년 댄스밴드와 나란히 '고정된 악곡을 연주하던 관행'의 예로 한 문장 등장할 뿐이고, 그 문장에도 재즈의 역사적 기원·시대 구분·양자 대조 서술이 없다. 발전사 비교 강의라면 필수인 연대기 자체가 지문에 존재하지 않는다.",
+        "2": "연주자와 청중의 협업과 충돌한다. 지문에서 상호작용이 일어나는 상대는 시종 밴드 내부의 네 명(베이스·드럼·피아노)이고, 청중이 나오는 단 한 대목('what a listener weighed')에서 청중은 완성된 연주를 사후에 평가하는 쪽이지 연주에 참여하는 쪽이 아니다."
+      }
+    },
+    {
+      "questionId": "L2-13",
+      "keyedAnswerIndex": 3,
+      "keyedAnswerText": "They must listen and respond to other players instantaneously",
+      "supportingLine": "Whatever comes out of your horn next has to come out in the same second all of that reaches you; you are still holding a note while you decide. ... You are taking in four other people continuously and bending the line you are already in the middle of so that it fits what they just did to it.",
+      "whyOthersFail": {
+        "0": "장면과 정면으로 충돌한다. 연주자는 실제로 프레이즈를 미리 준비했지만, 베이스가 박자를 뒤로 밀고 피아니스트가 다섯째 마디에 다른 코드를 대입하는 순간 '그 프레이즈가 걸릴 마디 자체가 사라진다'. 즉 지문은 암기해 둔 자료가 실연에서 쓸모없어지는 과정을 보여주므로, 암기가 요구되는 능력이라는 해석은 성립할 수 없다.",
+        "1": "근거가 없다. 지문은 화성을 '미리 합의되어 고정된 것(the key, the chord changes ... settled before anyone plays)'으로만 취급하고, 진행의 난이도나 복잡성은 어디에서도 화제가 되지 않는다. 어려움의 소재는 화성이 아니라 그것이 실시간으로 어긋나는 순간이다.",
+        "2": "근거가 없다. 지문 전체에 악보·기보·페이지에 대한 언급이 한 마디도 없다. 솔로에 관해 서술되는 행위는 듣기와 즉각적인 응답뿐이다."
+      }
+    },
+    {
+      "questionId": "L2-14",
+      "keyedAnswerIndex": 0,
+      "keyedAnswerText": "To illustrate how improvisation combines freedom with underlying structure",
+      "supportingLine": "You pick the words as you go, and starting a sentence you have no clear idea how you will land it. And yet the grammar holds all the way through, and you finish the thought you opened, or your roommate stops following you. The freedom lives inside a set of things you keep.",
+      "whyOthersFail": {
+        "1": "비유의 내용과 충돌한다. 비유가 드는 두 항목(문법, 문장의 완결)은 화자마다 달라지는 특징이 아니라 누구에게나 동일하게 적용되는 공통 제약이다. 개인 고유성 논점은 비유가 끝난 뒤 다음 문단에서 별개 소재('recognizable in about four notes ... as particular as handwriting')로 따로 제시된다.",
+        "2": "비유의 구성과 충돌한다. 이 비유에서 말하는 사람은 처음부터 끝까지 한 명이다. 룸메이트는 발화를 주고받는 상대가 아니라 이해가 끊기는지를 가늠하는 청자로만 등장하므로, 두 연주자가 아이디어를 교환한다는 취지를 이 장면에서 끌어낼 근거가 없다.",
+        "3": "비유의 귀결과 충돌한다. 대화 비유가 도달하는 지점은 '자유가 유지되는 항목들 안에 놓여 있다'이고, 곧이어 재즈 쪽에도 동일하게 사전 고정 항목(key, changes, form, 마디 수)이 열거된다. 즉 비유는 재즈가 더 자연스럽거나 쉽다는 쪽이 아니라 제약이 동등하게 존재한다는 쪽으로 닫힌다."
+      }
+    },
+    {
+      "questionId": "L2-15",
+      "keyedAnswerIndex": 2,
+      "keyedAnswerText": "Other genres previously placed greater emphasis on performing fixed compositions",
+      "supportingLine": "Picture a dance band in 1935, before recordings circulated widely. You played the arrangement. The arrangement was the point. Tuesday's version and Saturday's version were the same version, and what a listener weighed was how cleanly a settled piece had been executed. The concert hall ran on that same principle and largely still does.",
+      "whyOthersFail": {
+        "0": "근거가 없다. 지문은 다른 장르 연주자들이 무엇을 어떻게 배웠는지, 이론 교육을 받았는지 여부를 한 번도 다루지 않는다. 1935년 장면에서 서술되는 것은 학습 경로가 아니라 무엇이 평가 대상이었는가(연주의 정확성)뿐이다.",
+        "1": "지문의 서술과 충돌한다. concert hall 은 즉흥을 놓고 망설이는 주체로 나오지 않고, 고정된 악곡 연주라는 원칙을 '지금도 대체로 유지하는' 사례로 제시된다. 즉 지문이 concert hall 에 대해 진술하는 것은 태도나 판단이 아니라 관행의 지속이다.",
+        "3": "근거가 없다. 즉흥이 도입된 뒤의 청중 반응은 지문에 전혀 서술되지 않는다. 청중이 언급되는 유일한 대목은 1935년 이전 상황의 평가 기준이며, 60년대 대목에서 서술되는 것은 밴드가 무엇을 했는가(곡 안에 미정 구간을 남겼다)와 그 결과 연주가 매일 달라졌다는 사실뿐이다.",
+        "_designNote": "정답을 요약 문장으로 진술하지 않고 1935년 댄스밴드라는 구체 장면으로만 제시해, 일반화를 거쳐야 선택지에 도달하도록 했다."
+      }
+    }
+  ]
+}

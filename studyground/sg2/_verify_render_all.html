@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>verify render all</title>
+<link rel="stylesheet" href="assets/exam.css">
+</head>
+<body>
+<div class="exam-screen" id="screen-mount"></div>
+<pre id="out">RUNNING</pre>
+
+<script>
+window.__ERRORS = [];
+window.onerror = function (m, s, l, c) { window.__ERRORS.push('onerror: ' + m + ' @' + s + ':' + l); };
+window.addEventListener('unhandledrejection', function (e) { window.__ERRORS.push('unhandledrejection: ' + e.reason); });
+(function () {
+  var w = console.warn, er = console.error;
+  console.warn = function () { window.__ERRORS.push('warn: ' + Array.prototype.join.call(arguments, ' ')); w.apply(console, arguments); };
+  console.error = function () { window.__ERRORS.push('error: ' + Array.prototype.join.call(arguments, ' ')); er.apply(console, arguments); };
+})();
+</script>
+
+<script src="assets/app.js"></script>
+<script src="assets/exam-clock.js"></script>
+<script src="assets/exam-store.js"></script>
+<script src="assets/exam-render.js"></script>
+<script src="assets/exam-engine.js"></script>
+<script>
+var SET_PARAM = (/[?&]set=([^&]*)/.exec(window.location.search) || [0, 'set1'])[1];
+var GLOBAL_NAME = SET_PARAM === 'set9' ? 'SMEAG_SET9' : 'SMEAG_SET1';
+
+var LIST = ['assets/exam-types.js', 'assets/exam-timing.js', 'assets/exam-media.js',
+            'assets/exam-compile.js', 'assets/' + SET_PARAM + '.js',
+            'assets/exam-recorder.js',
+            'assets/exam-render-instruction.js',
+            'assets/exam-render-listening.js',
+            'assets/exam-render-reading.js',
+            'assets/exam-render-writing.js',
+            'assets/exam-render-speaking.js'];
+
+function loadAll(list, done) {
+  var i = 0;
+  function step() {
+    if (i >= list.length) { done(); return; }
+    var s = document.createElement('script');
+    s.src = list[i++];
+    s.onload = step;
+    s.onerror = function () { window.__ERRORS.push('script 404: ' + s.src); step(); };
+    document.head.appendChild(s);
+  }
+  step();
+}
+
+function textOf(el) { return (el.textContent || '').replace(/\s+/g, ' '); }
+
+loadAll(LIST, function () {
+  var report = { set: SET_PARAM, screens: 0, placeholders: [], nullRoots: [], suspicious: [], emptyScreens: [], errors: [] };
+  try {
+    var pack = window[GLOBAL_NAME];
+    if (!pack) throw new Error('content pack ' + GLOBAL_NAME + ' missing');
+    window.SG_CONTENT_PACK = pack;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'config/timing.toefl.json', false);
+    xhr.send(null);
+    var timing = JSON.parse(xhr.responseText);
+    var res = window.SG_COMPILE.compileScreens(pack, timing, { profile: 'toefl', lang: 'en' });
+    var screens = res.screens || res;
+    report.screens = screens.length;
+    report.compileWarnings = (res.warnings || []).slice(0);
+
+    var mount = document.getElementById('screen-mount');
+    window.SG_RENDER.setMount(mount);
+    var machine = window.SG_EXAM.create(screens, { mode: 'exam' });
+
+    for (var i = 0; i < screens.length; i++) {
+      var sc = screens[i];
+      var node = null, threw = null;
+      // 엔진 커서를 렌더 대상 화면에 맞춘다. 맞추지 않으면 writing textarea 의 input
+      // 핸들러가 engine 의 화면(index 0 = intro.volume)에 대고 answer() 를 불러
+      // "does not belong to screen" 경고가 뜬다 — 하네스가 만든 가짜 경고였다.
+      if (typeof machine.restoreTo === 'function') machine.restoreTo(i, 0);
+      try {
+        node = window.SG_RENDER.render(sc, { engine: machine, mode: 'exam', phaseIndex: 0 });
+      } catch (e) { threw = String(e && e.stack || e); }
+      if (threw) { report.errors.push(sc.id + ' :: THROW ' + threw); continue; }
+      if (!node) { report.nullRoots.push(sc.id); continue; }
+      if (mount.querySelector('.screen-placeholder')) {
+        report.placeholders.push(sc.id + ' (' + sc.screenType + ')');
+        continue;
+      }
+      var t = textOf(mount);
+      if (!t.trim()) report.emptyScreens.push(sc.id + ' (' + sc.screenType + ')');
+      var hit = /\bundefined\b|\[object Object\]|\bnull\b|TODO|PLACEHOLDER|Lorem ipsum/i.exec(t) ||
+                /\bNaN\b/.exec(t);
+      if (hit) {
+        report.suspicious.push(sc.id + ' (' + sc.screenType + ') :: MATCH "' + hit[0] +
+          '" ctx=' + JSON.stringify(t.slice(Math.max(0, hit.index - 60), hit.index + 60)));
+      }
+      // broken media refs
+      var mediaEls = mount.querySelectorAll('img,audio,source,video');
+      for (var k = 0; k < mediaEls.length; k++) {
+        var src = mediaEls[k].getAttribute('src') || '';
+        if (!src || /undefined|null/.test(src)) report.suspicious.push(sc.id + ' :: bad media src "' + src + '"');
+      }
+    }
+  } catch (e) {
+    report.errors.push('FATAL ' + String(e && e.stack || e));
+  }
+  report.runtimeErrors = window.__ERRORS.slice(0);
+  document.getElementById('out').textContent = 'RESULT_JSON ' + JSON.stringify(report, null, 1);
+  document.title = 'DONE';
+});
+</script>
+</body>
+</html>

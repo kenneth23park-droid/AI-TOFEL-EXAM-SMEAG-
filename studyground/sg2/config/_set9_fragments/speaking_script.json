@@ -1,0 +1,59 @@
+{
+  "code": "SET9",
+  "section": "speaking",
+  "audioDir": "media/audio/set9/",
+  "lines": [
+    {
+      "id": "set9-S1-intro",
+      "text": "Instructions: You are being trained to help student at the university cafeteria, listen to your trainer, and repeat what she says. Repeat only once."
+    },
+    {
+      "id": "set9-S1-q01",
+      "text": "Is this your first time in our cafeteria?"
+    },
+    {
+      "id": "set9-S1-q02",
+      "text": "You can find today’s menu on the board?"
+    },
+    {
+      "id": "set9-S1-q03",
+      "text": "The hot food station is on the left side."
+    },
+    {
+      "id": "set9-S1-q04",
+      "text": "We offer a variety of meals, snacks, and drinks every day."
+    },
+    {
+      "id": "set9-S1-q05",
+      "text": "You can pay with cash or your student ID card."
+    },
+    {
+      "id": "set9-S1-q06",
+      "text": "Please remember to return your tray to the collection area when finished."
+    },
+    {
+      "id": "set9-S1-q07",
+      "text": "If you have any food allergies, please let the staff know before ordering."
+    },
+    {
+      "id": "set9-S2-intro",
+      "text": "Instructions: You have volunteered for a research study on Exercise and Physical activity. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+    },
+    {
+      "id": "set9-S2-q01",
+      "text": "Thank you for speaking with me today. I’d like to ask you some questions about exercise. What kind of exercise do you or someone you know typically do, such as running, swimming, or going to a gym? Why?"
+    },
+    {
+      "id": "set9-S2-q02",
+      "text": "I see. If you wanted to encourage a friend who doesn’t exercise to become more active, would you prefer to invite them to exercise together with you, or would you prefer to share information about the benefits and let them decide on their own? Why?"
+    },
+    {
+      "id": "set9-S2-q03",
+      "text": "Interesting. What are some things that might make it difficult for someone to start and maintain a regular exercise routine?"
+    },
+    {
+      "id": "set9-S2-q04",
+      "text": "Good points. Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?"
+    }
+  ]
+}

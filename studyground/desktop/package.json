@@ -1,0 +1,23 @@
+{
+  "name": "smeag-studyground",
+  "productName": "SMEAG StudyGround",
+  "version": "1.0.0",
+  "description": "SMEAG New TOEFL preparation — offline desktop app.",
+  "main": "main.js",
+  "author": "SMEAG",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac --dir",
+    "dmg": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "ai.smeag.studyground",
+    "productName": "SMEAG StudyGround",
+    "directories": { "output": "release" },
+    "files": ["main.js", "preload.js", "site/**/*"],
+    "mac": { "target": ["dir", "dmg"], "category": "public.app-category.education" },
+    "win": { "target": ["nsis"] }
+  },
+  "devDependencies": { "electron": "^31.0.0", "electron-builder": "^24.13.3" }
+}
