@@ -19,17 +19,27 @@
 //     바뀌었고, 오프라인에서도 게이트를 통과해야 하므로 두 파일을 프리캐시에 넣는다.
 // v10: 관리자 오디오 설정(admin-audio.html · assets/audio-config.js) 추가.
 //      오프라인에서도 출제자가 문항별 오디오를 지정/미리듣기 할 수 있어야 하므로 프리캐시.
-const VERSION = 'sg-v10';
+// v11: SET 별 관리자 계층 추가 — 관리자 로그인(assets/admin-session.js), 오디오
+//      정지/일시정지 트랜스포트와 플로팅 바(assets/admin-bar.js), 문항 교체
+//      스토어(assets/question-config.js), 오디오 목록(assets/audio-index.js),
+//      그리고 두 관리자 화면(admin-audio-files.html · admin-questions.html).
+//      set9.html / exam-runtime.html / tests.html / admin-audio.html 의 <script>
+//      목록이 바뀌었으므로 VERSION 을 올려 셸 캐시를 새로 채운다.
+const VERSION = 'sg-v11';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
 const SHELL_ASSETS = [
   'index.html', 'npz.html', 'tests.html', 'dashboard.html', 'learning.html',
   'community.html', 'tools.html', 'purchase.html', 'login.html', 'signup.html', 'exam.html',
-  'set9.html', 'admin-audio.html',
+  'set9.html', 'admin-audio.html', 'admin-audio-files.html', 'admin-questions.html',
 
   // 내부용 접근 게이트 — 오프라인 진입도 이 화면을 먼저 지난다.
   'gate.html', 'assets/gate.js', 'assets/audio-config.js',
+
+  // SET 별 관리자 계층 — 오프라인 수업 중에도 정지/일시정지·교체가 되어야 한다.
+  'assets/admin-session.js', 'assets/admin-bar.js',
+  'assets/question-config.js', 'assets/audio-index.js',
 
   'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',

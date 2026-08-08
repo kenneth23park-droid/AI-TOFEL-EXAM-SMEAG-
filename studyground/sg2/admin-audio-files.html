@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<!--
+  admin-audio-files.html — 오디오 파일 점검 전용 관리자 화면.
+
+  admin-audio.html 이 "무엇으로 바꿀까"(교체)라면 이 화면은 "지금 파일이 멀쩡한가"만 본다.
+  문항 내용·선택지·정답은 일부러 보여주지 않는다 — 파일 존재·용량·길이·형식·교체 상태만.
+
+  SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Audio files (admin) · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:16px 0 10px; }
+  .bar input[type=search] { flex:1; min-width:190px; font:inherit; font-size:12.5px; padding:9px 12px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .seg { display:inline-flex; border:1px solid var(--line-2); border-radius:9px; overflow:hidden; }
+  .seg button { font:inherit; font-size:12px; font-weight:750; padding:8px 12px; border:0; cursor:pointer;
+    background:var(--paper,#fff); color:var(--ink-2); }
+  .seg button + button { border-left:1px solid var(--line-2); }
+  .seg button.on { background:var(--brand); color:#fff; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin:6px 0 14px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 14px; min-width:104px; }
+  .stat b { display:block; font-size:21px; font-weight:850; line-height:1.15; }
+  .stat span { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .stat.ok b { color:#1f7a44; } .stat.bad b { color:#c62828; } .stat.ovr b { color:#2f6f9f; }
+
+  table.files { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.files th { text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--muted); padding:8px 9px; border-bottom:1px solid var(--line-2); white-space:nowrap; }
+  table.files td { padding:9px; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.files tr:hover td { background:var(--cream-2); }
+  .fpath { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; color:var(--muted); word-break:break-all; }
+  .ftitle { font-weight:750; }
+  .fmeta { font-size:11px; color:var(--dim); }
+  .num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .tagx { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
+  .tagx.ok { background:#e6f5ec; color:#1f7a44; }
+  .tagx.bad { background:#fdeeee; color:#c62828; }
+  .tagx.idle { background:var(--cream-2); color:var(--muted); }
+  .tagx.url { background:#e2eef6; color:#2f6f9f; }
+  .tagx.file { background:#efe7fb; color:#6b3fbe; }
+  .playbtn { font:inherit; font-size:12px; font-weight:750; padding:6px 11px; border-radius:8px; cursor:pointer;
+    border:1px solid var(--line-2); background:var(--paper,#fff); color:var(--ink); }
+  .playbtn.on { background:var(--brand); border-color:var(--brand); color:#fff; }
+
+  .player { position:sticky; bottom:0; background:var(--card); border-top:1px solid var(--line-2);
+    padding:10px 0; margin-top:18px; }
+  .player .fpath { margin-bottom:6px; }
+  .player audio { width:100%; }
+  .prog { font-size:12px; font-weight:700; color:var(--muted); }
+  .gate { max-width:520px; margin:60px auto; text-align:center; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Admin · Audio files</small></span></a>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="admin-audio.html"><span data-en>Replace audio</span><span data-ko>오디오 교체</span></a>
+      <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main" hidden>
+  <div class="page-h" style="padding-top:26px">
+    <span class="pill" style="margin-bottom:8px">Admin · Audio file check</span>
+    <h1 style="font-size:clamp(26px,4vw,40px)"><span data-en>Audio files</span><span data-ko>오디오 파일 점검</span></h1>
+    <p class="sub"><span data-en>Every audio slot in the loaded sets — path, file size, duration and whether it is currently replaced. Read-only: nothing here changes a question.</span>
+      <span data-ko>불러온 SET 의 모든 오디오 슬롯 — 경로 · 용량 · 재생 길이 · 교체 여부만 봅니다. 이 화면에서는 문항이 바뀌지 않습니다.</span></p>
+  </div>
+
+  <div class="bar">
+    <span class="seg" id="setseg"></span>
+    <span class="seg" id="statseg">
+      <button data-stat="all" class="on"><span data-en>All</span><span data-ko>전체</span></button>
+      <button data-stat="bad"><span data-en>Problems</span><span data-ko>문제</span></button>
+      <button data-stat="ovr"><span data-en>Replaced</span><span data-ko>교체됨</span></button>
+    </span>
+    <input type="search" id="q" placeholder="Filter by title or path…">
+    <button class="btn brand sm" id="checkBtn"><span data-en>Check all files</span><span data-ko>전체 파일 검사</span></button>
+    <button class="btn ghost sm" id="csvBtn"><span data-en>Export CSV</span><span data-ko>CSV 내보내기</span></button>
+    <span class="prog" id="prog"></span>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <table class="files">
+    <thead><tr>
+      <th><span data-en>Item</span><span data-ko>항목</span></th>
+      <th><span data-en>File</span><span data-ko>파일</span></th>
+      <th class="num"><span data-en>Size</span><span data-ko>용량</span></th>
+      <th class="num"><span data-en>Length</span><span data-ko>길이</span></th>
+      <th><span data-en>Status</span><span data-ko>상태</span></th>
+      <th></th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <div class="player">
+    <div class="fpath" id="nowpath"><span data-en>No clip selected.</span><span data-ko>선택된 클립이 없습니다.</span></div>
+    <audio id="player" controls preload="none"></audio>
+  </div>
+</main>
+
+<div class="wrap gate" id="gate">
+  <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
+  <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+</div>
+
+<script src="assets/question-config.js"></script>
+<script src="assets/set1.js"></script>
+<script src="assets/set9.js"></script>
+<script src="assets/set9-audio.js"></script>
+<script src="assets/exam-media.js"></script>
+<script src="assets/audio-index.js"></script>
+<script src="assets/audio-config.js"></script>
+<script src="assets/admin-session.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var A = window.SG_ADMIN;
+  var qs = new URLSearchParams(location.search);
+  var wantSet = (qs.get('set') || '').toLowerCase();
+
+  function esc(t){ var d=document.createElement('div'); d.textContent=t==null?'':t; return d.innerHTML; }
+  function kb(n){ if (n==null) return '—'; return n>=1048576 ? (n/1048576).toFixed(1)+' MB' : Math.round(n/1024)+' KB'; }
+  function mmss(s){ if (s==null || !isFinite(s)) return '—'; s=Math.round(s); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+
+  var ROWS = [], filterSet = wantSet || 'all', filterStat = 'all', filterQ = '';
+
+  /* ── 파일 프로브 ────────────────────────────────────────────
+     HEAD → (막히면) 1바이트 Range GET 순으로 존재·용량을 확인하고,
+     길이는 <audio> 메타데이터로 잰다. file:// 는 fetch 가 막히므로
+     메타데이터 로드 성공 여부만으로 판정한다. */
+  function headSize(url) {
+    if (!window.fetch) return Promise.resolve({ net: false });
+    return fetch(url, { method: 'HEAD' }).then(function (r) {
+      if (!r.ok) return { net: true, ok: false, status: r.status };
+      var len = r.headers.get('content-length');
+      return { net: true, ok: true, status: r.status, size: len ? +len : null, type: r.headers.get('content-type') };
+    }).catch(function () {
+      return fetch(url, { headers: { Range: 'bytes=0-0' } }).then(function (r) {
+        if (!r.ok && r.status !== 206) return { net: true, ok: false, status: r.status };
+        var cr = r.headers.get('content-range');
+        var size = cr && cr.indexOf('/') >= 0 ? +cr.split('/')[1] : null;
+        return { net: true, ok: true, status: r.status, size: isFinite(size) ? size : null,
+                 type: r.headers.get('content-type') };
+      }).catch(function () { return { net: false }; });
+    });
+  }
+  function duration(url) {
+    return new Promise(function (res) {
+      var a = new Audio();
+      var done = false;
+      var end = function (v) { if (done) return; done = true; a.src = ''; res(v); };
+      a.preload = 'metadata';
+      a.addEventListener('loadedmetadata', function () { end({ ok: true, dur: a.duration }); });
+      a.addEventListener('error', function () { end({ ok: false }); });
+      setTimeout(function () { end({ ok: null }); }, 12000);
+      a.src = url;
+    });
+  }
+  function probe(row) {
+    var url = SG_AUDIO.resolve(row.item.path);
+    row.state = 'checking'; paint();
+    return Promise.all([headSize(url), duration(url)]).then(function (r) {
+      var h = r[0], d = r[1];
+      row.size = h.size != null ? h.size : null;
+      row.type = h.type || '';
+      row.dur = d.ok ? d.dur : null;
+      row.httpStatus = h.status || null;
+      if (h.net && h.ok === false) { row.state = 'bad'; row.note = 'HTTP ' + h.status; }
+      else if (d.ok === false) { row.state = 'bad'; row.note = h.net ? 'File found but not decodable' : 'Not found / not playable'; }
+      else if (d.ok === null) { row.state = 'idle'; row.note = 'Timed out'; }
+      else { row.state = 'ok'; row.note = h.net ? '' : 'size unavailable (file://)'; }
+      paint();
+    });
+  }
+
+  function pool(list, n, run) {
+    var i = 0, active = 0;
+    return new Promise(function (done) {
+      function next() {
+        if (i >= list.length && active === 0) return done();
+        while (active < n && i < list.length) {
+          active++;
+          run(list[i++]).catch(function () {}).then(function () { active--; next(); });
+        }
+      }
+      next();
+    });
+  }
+
+  /* ── 목록 만들기 ───────────────────────────────────────── */
+  function build() {
+    ROWS = [];
+    SG_AUDIO_INDEX.groups().forEach(function (g) {
+      g.items.forEach(function (it) {
+        ROWS.push({ item: it, group: g.label, state: 'idle', note: '', size: null, dur: null });
+      });
+    });
+    var sets = ['all'].concat(SG_AUDIO_INDEX.groups().map(function (g) { return g.set; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    document.getElementById('setseg').innerHTML = sets.map(function (s) {
+      return '<button data-set="' + s + '"' + (s === filterSet ? ' class="on"' : '') + '>' +
+        (s === 'all' ? '<span data-en>All sets</span><span data-ko>전체 SET</span>' : s.toUpperCase()) + '</button>';
+    }).join('');
+  }
+
+  function visible() {
+    return ROWS.filter(function (r) {
+      if (filterSet !== 'all' && r.item.set !== filterSet) return false;
+      var ov = SG_AUDIO.info(r.item.path).mode !== 'default';
+      if (filterStat === 'bad' && r.state !== 'bad') return false;
+      if (filterStat === 'ovr' && !ov) return false;
+      if (filterQ && (r.item.title + ' ' + r.item.path + ' ' + r.group).toLowerCase().indexOf(filterQ) < 0) return false;
+      return true;
+    });
+  }
+
+  function statusTag(r) {
+    if (r.state === 'ok') return '<span class="tagx ok">OK</span>';
+    if (r.state === 'bad') return '<span class="tagx bad">Missing</span>';
+    if (r.state === 'checking') return '<span class="tagx idle">…</span>';
+    return '<span class="tagx idle">Not checked</span>';
+  }
+  function overrideTag(r) {
+    var i = SG_AUDIO.info(r.item.path);
+    if (i.mode === 'url') return ' <span class="tagx url">URL</span>';
+    if (i.mode === 'file') return ' <span class="tagx file">' + (i.missing ? 'File lost' : 'Uploaded') + '</span>';
+    return '';
+  }
+
+  function paint() {
+    var list = visible();
+    document.getElementById('rows').innerHTML = list.map(function (r, i) {
+      var idx = ROWS.indexOf(r);
+      return '<tr data-i="' + idx + '">' +
+        '<td><div class="ftitle">' + esc(r.item.title) + '</div>' +
+          '<div class="fmeta">' + esc(r.item.set.toUpperCase() + ' · ' + (r.item.sectionLabel || '') +
+            (r.item.block ? ' · ' + r.item.block : '')) + '</div></td>' +
+        '<td><div class="fpath">' + esc(decodeURI(r.item.path)) + '</div>' +
+          (r.note ? '<div class="fmeta">' + esc(r.note) + '</div>' : '') + '</td>' +
+        '<td class="num">' + kb(r.size) + '</td>' +
+        '<td class="num">' + mmss(r.dur) + '</td>' +
+        '<td>' + statusTag(r) + overrideTag(r) + '</td>' +
+        '<td class="num"><button class="playbtn" data-act="play">▶</button> ' +
+          '<button class="playbtn" data-act="check">⟳</button></td>' +
+      '</tr>';
+    }).join('') || '<tr><td colspan="6" class="fmeta" style="padding:18px 9px">No files match this filter.</td></tr>';
+
+    var scope = ROWS.filter(function (r) { return filterSet === 'all' || r.item.set === filterSet; });
+    var ok = scope.filter(function (r) { return r.state === 'ok'; }).length;
+    var bad = scope.filter(function (r) { return r.state === 'bad'; }).length;
+    var ovr = scope.filter(function (r) { return SG_AUDIO.info(r.item.path).mode !== 'default'; }).length;
+    var bytes = scope.reduce(function (n, r) { return n + (r.size || 0); }, 0);
+    document.getElementById('stats').innerHTML =
+      '<div class="stat"><b>' + scope.length + '</b><span data-en>clips</span><span data-ko>클립</span></div>' +
+      '<div class="stat ok"><b>' + ok + '</b><span data-en>playable</span><span data-ko>정상</span></div>' +
+      '<div class="stat bad"><b>' + bad + '</b><span data-en>problems</span><span data-ko>문제</span></div>' +
+      '<div class="stat ovr"><b>' + ovr + '</b><span data-en>replaced</span><span data-ko>교체됨</span></div>' +
+      '<div class="stat"><b>' + (bytes ? kb(bytes) : '—') + '</b><span data-en>total size</span><span data-ko>총 용량</span></div>';
+  }
+
+  /* ── 이벤트 ────────────────────────────────────────────── */
+  document.getElementById('rows').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var r = ROWS[+e.target.closest('tr').getAttribute('data-i')];
+    if (b.getAttribute('data-act') === 'check') { probe(r); return; }
+    var p = document.getElementById('player');
+    p.src = SG_AUDIO.resolve(r.item.path);
+    document.getElementById('nowpath').textContent = decodeURI(r.item.path);
+    p.play().catch(function () {});
+    document.querySelectorAll('.playbtn.on').forEach(function (x) { x.classList.remove('on'); });
+    b.classList.add('on');
+  });
+  document.getElementById('setseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-set]'); if (!b) return;
+    filterSet = b.getAttribute('data-set');
+    this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    paint();
+  });
+  document.getElementById('statseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-stat]'); if (!b) return;
+    filterStat = b.getAttribute('data-stat');
+    this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    paint();
+  });
+  document.getElementById('q').addEventListener('input', function () {
+    filterQ = this.value.trim().toLowerCase(); paint();
+  });
+  document.getElementById('checkBtn').addEventListener('click', function () {
+    var list = visible(), n = 0;
+    var prog = document.getElementById('prog');
+    this.disabled = true;
+    pool(list, 4, function (r) { return probe(r).then(function () { prog.textContent = (++n) + ' / ' + list.length; }); })
+      .then(function () { prog.textContent = 'Checked ' + list.length; document.getElementById('checkBtn').disabled = false; });
+  });
+  document.getElementById('csvBtn').addEventListener('click', function () {
+    var head = ['set', 'section', 'module', 'title', 'path', 'override', 'status', 'bytes', 'seconds', 'note'];
+    var lines = [head.join(',')].concat(visible().map(function (r) {
+      var i = SG_AUDIO.info(r.item.path);
+      return [r.item.set, r.item.section, r.item.module, r.item.title, decodeURI(r.item.path),
+              i.mode, r.state, r.size == null ? '' : r.size, r.dur == null ? '' : Math.round(r.dur), r.note]
+        .map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(',');
+    }));
+    var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'sg-audio-files.csv'; a.click();
+  });
+
+  /* ── 진입 가드 ─────────────────────────────────────────── */
+  function open() {
+    document.getElementById('gate').hidden = true;
+    document.getElementById('main').hidden = false;
+    SG_AUDIO.ready().then(function () { build(); paint(); });
+  }
+  document.getElementById('signin').addEventListener('click', function () { A.openLogin(wantSet, open); });
+  if (A.can(wantSet)) open(); else A.openLogin(wantSet, open);
+  SG_AUDIO.onChange(function () { if (!document.getElementById('main').hidden) paint(); });
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

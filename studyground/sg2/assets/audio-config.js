@@ -78,11 +78,20 @@
     ready: function () {
       if (readyPromise) return readyPromise;
       loadMeta();
-      readyPromise = dbGetAll().then(function (blobs) {
-        Object.keys(blobs).forEach(function (k) {
-          if (meta[k] && meta[k].mode === 'file') blobUrls[k] = URL.createObjectURL(blobs[k]);
-        });
-      }).catch(function () {}).then(function () { return API; });
+      /* IndexedDB 가 응답하지 않는 브라우저/모드가 있다(프라이빗 창, 일부 헤드리스).
+         그런 곳에서 화면이 영영 비어 있으면 안 되므로 2.5초면 그냥 진행한다 —
+         URL 오버라이드는 localStorage 라 이미 살아 있고, 업로드 blob 만 늦게 붙는다. */
+      readyPromise = new Promise(function (resolve) {
+        var settled = false;
+        function finish() { if (!settled) { settled = true; resolve(API); } }
+        setTimeout(finish, 2500);
+        dbGetAll().then(function (blobs) {
+          Object.keys(blobs).forEach(function (k) {
+            if (meta[k] && meta[k].mode === 'file') blobUrls[k] = URL.createObjectURL(blobs[k]);
+          });
+          if (settled) emit();          // 늦게 도착했으면 화면을 한 번 더 갱신
+        }).catch(function () {}).then(finish);
+      });
       return readyPromise;
     },
     /** Effective src for an original clip path (falls back to the original). */
@@ -160,6 +169,27 @@
           if (media && media.load) { try { media.load(); } catch (e) {} }
         }
       }
+    },
+
+    /** 나중에 만들어지는 <audio> 까지 덮어쓴다.
+     *  시험 런타임(exam-render-listening.js)은 화면마다 <audio> 를 스크립트로
+     *  만들어 붙이므로, 한 번 훑는 apply() 만으로는 교체가 걸리지 않는다. */
+    observe: function () {
+      if (API._obs || typeof MutationObserver === 'undefined') return;
+      API._obs = new MutationObserver(function (recs) {
+        for (var i = 0; i < recs.length; i++) {
+          var added = recs[i].addedNodes;
+          for (var j = 0; j < added.length; j++) {
+            var n = added[j];
+            if (n.nodeType !== 1) continue;
+            if (n.tagName === 'AUDIO' || n.tagName === 'SOURCE') API.apply(n.parentNode || document);
+            else if (n.querySelector && n.querySelector('audio')) API.apply(n);
+          }
+        }
+      });
+      var start = function () { API._obs.observe(document.documentElement, { childList: true, subtree: true }); };
+      if (document.documentElement) start();
+      else document.addEventListener('DOMContentLoaded', start);
     }
   };
 
@@ -167,7 +197,7 @@
 
   // Auto-apply on load and whenever overrides change, so including this one
   // script is enough to make a page honor admin audio settings.
-  function autoApply() { API.ready().then(function () { API.apply(document); }); }
+  function autoApply() { API.ready().then(function () { API.apply(document); API.observe(); }); }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', autoApply);
   } else {

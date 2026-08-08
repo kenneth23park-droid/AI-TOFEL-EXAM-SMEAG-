@@ -31,7 +31,7 @@
   기존 exam.html(연습지 모드)은 삭제하지 않는다 — 별개 용도로 계속 유지된다.
   외부 도메인 요청 0건: 모든 스크립트/스타일/설정은 로컬 파일이다.
 -->
-<body class="exam-body">
+<body class="exam-body" data-sg-admin-bar>
 
 <div class="exam-shell">
 
@@ -172,6 +172,12 @@
 </div>
 
 <script src="assets/app.js"></script>
+<!-- 관리자 계층 — 학생 화면에는 아무 것도 그리지 않는다(Ctrl+Alt+A 또는 좌하단 ⚙ 로 로그인).
+     question-config.js 는 exam-shell.js 가 콘텐츠 팩을 붙이기 전에 실려야 교체분이 반영된다. -->
+<script src="assets/question-config.js"></script>
+<script src="assets/audio-config.js"></script>
+<script src="assets/admin-session.js"></script>
+<script src="assets/admin-bar.js"></script>
 <script src="assets/exam-clock.js"></script>
 <script src="assets/exam-store.js"></script>
 <script src="assets/exam-render.js"></script>

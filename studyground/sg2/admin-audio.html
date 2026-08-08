@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
 <title>Audio settings (admin) · SMEAG StudyGround</title>
+<meta name="robots" content="noindex,nofollow">
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#e8481f">
@@ -46,12 +48,19 @@
     <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Admin · Audio settings</small></span></a>
     <div class="nav-right">
       <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="admin-audio-files.html"><span data-en>Audio files</span><span data-ko>오디오 점검</span></a>
+      <a class="btn ghost sm" href="admin-questions.html"><span data-en>Questions</span><span data-ko>문항 교체</span></a>
       <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
     </div>
   </div>
 </header>
 
-<main class="wrap">
+<div class="wrap" id="gate" style="max-width:520px;margin:60px auto;text-align:center">
+  <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
+  <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+</div>
+
+<main class="wrap" id="main" hidden>
   <div class="page-h" style="padding-top:26px">
     <span class="pill" style="margin-bottom:8px">Admin · Listening audio</span>
     <h1 style="font-size:clamp(26px,4vw,40px)"><span data-en>Listening audio settings</span><span data-ko>듣기평가 오디오 설정</span></h1>
@@ -77,10 +86,12 @@
 
 <div class="flash" id="flash"></div>
 
+<script src="assets/question-config.js"></script>
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
 <script src="assets/set9-audio.js"></script>
 <script src="assets/audio-config.js"></script>
+<script src="assets/admin-session.js"></script>
 <script src="assets/app.js"></script>
 <script>
 (function () {
@@ -222,7 +233,17 @@
     SG_AUDIO.resetAll().then(function(){ toast('All reset'); render(); });
   });
 
-  SG_AUDIO.ready().then(render);
+  // 관리자 로그인(SET 별)을 통과해야 목록이 열린다.
+  var A = window.SG_ADMIN;
+  var wantSet = (new URLSearchParams(location.search).get('set') || '').toLowerCase();
+  function open() {
+    document.getElementById('gate').hidden = true;
+    document.getElementById('main').hidden = false;
+    if (wantSet) groups = groups.filter(function (g) { return g.set.toLowerCase().indexOf(wantSet.replace('set', 'set ')) >= 0; });
+    SG_AUDIO.ready().then(render);
+  }
+  document.getElementById('signin').addEventListener('click', function () { A.openLogin(wantSet, open); });
+  if (A.can(wantSet)) open(); else A.openLogin(wantSet, open);
 })();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
