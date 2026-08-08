@@ -61,6 +61,21 @@
     pointer-events:none; z-index:60; }
   .flash.on { opacity:1; }
   .gate { max-width:520px; margin:60px auto; text-align:center; }
+
+  /* 스크립트 → 음성 생성 패널 */
+  .gen { border:1px dashed var(--line-2); border-radius:11px; padding:11px 12px; background:var(--cream-2); }
+  .gen textarea { font-size:12.5px; line-height:1.6; }
+  .voices { display:flex; flex-wrap:wrap; gap:8px; margin:9px 0 4px; }
+  .voices .vrow { display:flex; align-items:center; gap:6px; background:var(--paper,#fff);
+    border:1px solid var(--line-2); border-radius:9px; padding:5px 9px; font-size:12px; }
+  .voices .vrow b { font-weight:750; }
+  .voices select { font:inherit; font-size:12px; border:0; background:transparent; color:var(--ink); }
+  .mini { font-size:11.5px; font-weight:750; color:var(--muted); display:inline-flex; align-items:center; gap:5px; }
+  .mini input { width:66px; font:inherit; font-size:12px; padding:5px 7px; border:1px solid var(--line-2);
+    border-radius:7px; background:var(--paper,#fff); color:var(--ink); }
+  .genmsg { font-size:11.5px; font-weight:700; color:var(--muted); }
+  .genmsg.bad { color:#c62828; }
+  .genout:not(:empty) { margin-top:9px; }
   .file-btn { position:relative; overflow:hidden; }
   .file-btn input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
 </style>
@@ -117,6 +132,7 @@
 <script src="assets/audio-index.js"></script>
 <script src="assets/audio-config.js"></script>
 <script src="assets/admin-session.js"></script>
+<script src="assets/tts-client.js"></script>
 <script src="assets/app.js"></script>
 <script>
 (function () {
@@ -182,6 +198,24 @@
           '<div class="qacts"><label class="btn ghost sm file-btn"><span data-en>Upload replacement clip</span><span data-ko>대체 음원 업로드</span>' +
             '<input type="file" accept="audio/*" data-f="audiofile"></label>' +
             '<button class="btn ghost sm" data-act="audioreset" type="button"><span data-en>Clear clip override</span><span data-ko>음원 덮어쓰기 해제</span></button></div>' +
+        '</div>' +
+        /* 스크립트 → 음성. 키는 서버에만 있고 여기서는 /api/tts 를 부른다. */
+        '<div class="fld gen">' +
+          '<label>🎙 <span data-en>Generate the audio from a script</span><span data-ko>스크립트로 음성 생성</span></label>' +
+          '<p class="muted" style="font-size:11.5px;line-height:1.55;margin:0 0 7px">' +
+            '<span data-en>One line per turn — write <b>Speaker 1: …</b> to split speakers; each gets its own voice. Runs on the deployed site only (the API key lives on the server).</span>' +
+            '<span data-ko>한 줄에 한 대사 — <b>Speaker 1: …</b> 형식으로 쓰면 화자별로 다른 목소리가 배정됩니다. API 키가 서버에 있으므로 배포된 사이트에서만 동작합니다.</span></p>' +
+          '<textarea rows="4" data-f="script" placeholder="Speaker 1: Where is the student lounge?&#10;Speaker 2: It&#39;s on the second floor, near the elevators."></textarea>' +
+          '<div class="voices" data-role="voices"></div>' +
+          '<div class="qacts">' +
+            '<label class="mini"><span data-en>gap ms</span><span data-ko>간격 ms</span>' +
+              '<input type="number" data-f="gap" value="400" min="0" max="2000" step="50"></label>' +
+            '<label class="mini"><span data-en>rate</span><span data-ko>속도</span>' +
+              '<input type="number" data-f="rate" value="1" min="0.5" max="1.5" step="0.05"></label>' +
+            '<button class="btn brand sm" data-act="gen" type="button">🎙 <span data-en>Generate</span><span data-ko>생성</span></button>' +
+            '<span class="genmsg"></span>' +
+          '</div>' +
+          '<div class="genout"></div>' +
         '</div>' +
         '<div class="fld"><label><span data-en>Image path</span><span data-ko>이미지 경로</span></label>' +
           '<input type="text" data-f="image" value="' + esc(q.image || '') + '"></div>' +
@@ -249,9 +283,82 @@
     return patch;
   }
 
+  /* ── 스크립트 → 음성 (/api/tts) ─────────────────────────
+     대본을 "화자: 대사" 로 적으면 화자마다 다른 목소리로 합성해 한 mp3 로 돌려준다.
+     API 키는 서버(Vercel 환경변수)에만 있고, 여기서는 공용 토큰만 들고 부른다. */
+  var VOICES = SG_TTS_GEN.FALLBACK_VOICES, voicesLoaded = false;
+  function loadVoices() {
+    if (voicesLoaded) return;
+    voicesLoaded = true;
+    SG_TTS_GEN.listVoices().then(function (v) { VOICES = v; host.querySelectorAll('.qrow.open').forEach(paintVoices); });
+  }
+  function ensureToken() {
+    if (SG_TTS_GEN.hasToken()) return true;
+    var t = prompt('Enter the shared TTS token (SG_TTS_TOKEN set on the server):');
+    if (!t) return false;
+    SG_TTS_GEN.setToken(t);
+    return true;
+  }
+  function paintVoices(row) {
+    var box = row.querySelector('[data-role=voices]');
+    var ta = row.querySelector('[data-f=script]');
+    if (!box || !ta) return;
+    var segs = SG_TTS_GEN.parseScript(ta.value);
+    var speakers = SG_TTS_GEN.speakersOf(segs);
+    var prev = {};
+    box.querySelectorAll('select').forEach(function (s) { prev[s.getAttribute('data-sp')] = s.value; });
+    box.innerHTML = speakers.map(function (sp, i) {
+      var chosen = prev[sp] || VOICES[i % VOICES.length].name;
+      return '<span class="vrow"><b>' + esc(sp) + '</b><select data-sp="' + esc(sp) + '">' +
+        VOICES.map(function (v) {
+          return '<option value="' + esc(v.name) + '"' + (v.name === chosen ? ' selected' : '') + '>' + esc(v.label || v.name) + '</option>';
+        }).join('') + '</select></span>';
+    }).join('');
+  }
+  function genMsg(row, text, bad) {
+    var m = row.querySelector('.genmsg');
+    m.textContent = text || '';
+    m.classList.toggle('bad', !!bad);
+  }
+  function generate(row, q) {
+    var ta = row.querySelector('[data-f=script]');
+    var segs = SG_TTS_GEN.parseScript(ta.value);
+    if (!segs.length) { genMsg(row, 'Write the script first.', true); return; }
+    if (!ensureToken()) return;
+    var pick = {};
+    row.querySelectorAll('[data-role=voices] select').forEach(function (s) { pick[s.getAttribute('data-sp')] = s.value; });
+    var payload = segs.map(function (s, i) {
+      var v = pick[s.speaker] || VOICES[i % VOICES.length].name;
+      return { text: s.text, voice: v };
+    });
+    genMsg(row, 'Generating…');
+    SG_TTS_GEN.generate({
+      segments: payload,
+      gapMs: +row.querySelector('[data-f=gap]').value,
+      rate: +row.querySelector('[data-f=rate]').value,
+      filename: q.id || 'clip'
+    }).then(function (out) {
+      row._genFile = out.file;
+      genMsg(row, out.segments + ' segments · ' + out.chars + ' chars · ' + Math.round(out.bytes / 1024) + ' KB');
+      row.querySelector('.genout').innerHTML =
+        '<audio controls src="' + URL.createObjectURL(out.blob) + '"></audio>' +
+        '<div class="qacts">' +
+          '<button class="btn brand sm" data-act="genapply" type="button"><span data-en>Use for this question</span><span data-ko>이 문항에 적용</span></button>' +
+          '<button class="btn ghost sm" data-act="gendl" type="button"><span data-en>Download mp3</span><span data-ko>mp3 내려받기</span></button>' +
+        '</div>';
+    }).catch(function (err) {
+      genMsg(row, err.message, true);
+      row.querySelector('.genout').innerHTML = '';
+    });
+  }
+
   host.addEventListener('click', function (e) {
     var head = e.target.closest('.qhead');
-    if (head) { head.parentNode.classList.toggle('open'); return; }
+    if (head) {
+      head.parentNode.classList.toggle('open');
+      if (head.parentNode.classList.contains('open')) { loadVoices(); paintVoices(head.parentNode); }
+      return;
+    }
     var act = e.target.closest('[data-act]'); if (!act) return;
     var row = act.closest('.qrow'), it = LIST[+row.getAttribute('data-i')], q = it.q;
     var a = act.getAttribute('data-act');
@@ -266,7 +373,28 @@
       render();
     } else if (a === 'audioreset') {
       SG_AUDIO.reset(audioPath(q.audio)).then(function () { toast('Clip override cleared'); render(); });
+    } else if (a === 'gen') {
+      generate(row, q);
+    } else if (a === 'genapply') {
+      if (!q.audio) { genMsg(row, 'Set an audio path first — that path is the override key.', true); return; }
+      if (!row._genFile) return;
+      SG_AUDIO.setFile(audioPath(q.audio), row._genFile)
+        .then(function () { toast('Generated clip applied · ' + q.id); render(); });
+    } else if (a === 'gendl') {
+      if (!row._genFile) return;
+      var url = URL.createObjectURL(row._genFile);
+      var dl = document.createElement('a');
+      dl.href = url; dl.download = row._genFile.name; dl.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
     }
+  });
+  // 대본을 고치면 화자 목록(=목소리 선택 줄)을 다시 그린다.
+  var scriptT;
+  host.addEventListener('input', function (e) {
+    if (e.target.getAttribute('data-f') !== 'script') return;
+    var row = e.target.closest('.qrow');
+    clearTimeout(scriptT);
+    scriptT = setTimeout(function () { paintVoices(row); }, 250);
   });
   host.addEventListener('change', function (e) {
     if (e.target.getAttribute('data-f') !== 'audiofile') return;

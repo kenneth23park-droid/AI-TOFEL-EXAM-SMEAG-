@@ -25,7 +25,9 @@
 //      그리고 두 관리자 화면(admin-audio-files.html · admin-questions.html).
 //      set9.html / exam-runtime.html / tests.html / admin-audio.html 의 <script>
 //      목록이 바뀌었으므로 VERSION 을 올려 셸 캐시를 새로 채운다.
-const VERSION = 'sg-v11';
+// v12: 문항 스크립트 → 음성 생성. 서버리스 함수 api/tts.js (키는 Vercel 환경변수)와
+//      클라이언트 assets/tts-client.js 추가. /api/* 는 프리캐시·런타임 캐시 모두 제외한다.
+const VERSION = 'sg-v12';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -38,7 +40,7 @@ const SHELL_ASSETS = [
   'gate.html', 'assets/gate.js', 'assets/audio-config.js',
 
   // SET 별 관리자 계층 — 오프라인 수업 중에도 정지/일시정지·교체가 되어야 한다.
-  'assets/admin-session.js', 'assets/admin-bar.js',
+  'assets/admin-session.js', 'assets/admin-bar.js', 'assets/tts-client.js',
   'assets/question-config.js', 'assets/audio-index.js',
 
   'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js',
@@ -90,6 +92,9 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+
+  // 서버리스 함수(/api/*)는 캐시 대상이 아니다 — TTS 생성 결과가 굳어버리면 안 된다.
+  if (url.pathname.startsWith('/api/') || url.pathname.endsWith('/api/tts')) return;
 
   // Media: cache-first, then network, then store for next time (supports range requests).
   if (isMedia(url)) {
