@@ -53,277 +53,413 @@
   },
   "set9-M1-sr-01": {
     "file": "media/tts/set9-M1-sr-01.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Ava"
     ],
+    "kokoroVoices": [
+      "af_heart"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-02": {
     "file": "media/tts/set9-M1-sr-02.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Liam"
     ],
+    "kokoroVoices": [
+      "am_michael"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-03": {
     "file": "media/tts/set9-M1-sr-03.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Mia"
     ],
+    "kokoroVoices": [
+      "af_bella"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-04": {
     "file": "media/tts/set9-M1-sr-04.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Mason"
     ],
+    "kokoroVoices": [
+      "am_fenrir"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-05": {
     "file": "media/tts/set9-M1-sr-05.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Alice"
     ],
+    "kokoroVoices": [
+      "bf_alice"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-06": {
     "file": "media/tts/set9-M1-sr-06.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Henry"
     ],
+    "kokoroVoices": [
+      "bm_george"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-07": {
     "file": "media/tts/set9-M1-sr-07.mp3",
-    "provider": "google",
+    "provider": "google (preserved)",
     "voices": [
       "AU-Lily"
     ],
+    "preservedReason": "AU accent — Kokoro ships no Australian voice, so the Google original is kept to preserve SET 9's US/GB/AU accent spread",
     "segments": 1
   },
   "set9-M1-sr-08": {
     "file": "media/tts/set9-M1-sr-08.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Noah"
     ],
+    "kokoroVoices": [
+      "am_puck"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-09": {
     "file": "media/tts/set9-M1-sr-09.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "af_nicole"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-10": {
     "file": "media/tts/set9-M1-sr-10.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Ethan"
     ],
+    "kokoroVoices": [
+      "am_eric"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-11": {
     "file": "media/tts/set9-M1-sr-11.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Zoe"
     ],
+    "kokoroVoices": [
+      "af_aoede"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-sr-12": {
     "file": "media/tts/set9-M1-sr-12.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Oliver"
     ],
+    "kokoroVoices": [
+      "bm_lewis"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M1-ann-19-20": {
     "file": "media/tts/set9-M1-ann-19-20.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Liam"
     ],
+    "kokoroVoices": [
+      "am_michael"
+    ],
+    "speed": 1.0,
     "segments": 1
   },
   "set9-M1-ann-21-22": {
     "file": "media/tts/set9-M1-ann-21-22.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Ethan"
     ],
+    "kokoroVoices": [
+      "am_eric"
+    ],
+    "speed": 1.0,
     "segments": 1
   },
   "set9-M1-ann-23-24": {
     "file": "media/tts/set9-M1-ann-23-24.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Mason"
     ],
+    "kokoroVoices": [
+      "am_fenrir"
+    ],
+    "speed": 1.0,
     "segments": 1
   },
   "set9-M1-ann-25-28": {
     "file": "media/tts/set9-M1-ann-25-28.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Oliver"
     ],
+    "kokoroVoices": [
+      "bm_lewis"
+    ],
+    "speed": 1.0,
     "segments": 1
   },
   "set9-M1-ann-29-32": {
     "file": "media/tts/set9-M1-ann-29-32.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Henry"
     ],
+    "kokoroVoices": [
+      "bm_george"
+    ],
+    "speed": 1.0,
     "segments": 1
   },
   "set9-M1-conv-13-14": {
     "file": "media/tts/set9-M1-conv-13-14.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Liam",
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "am_michael",
+      "af_nicole"
+    ],
+    "speed": 1.1,
     "segments": 5
   },
   "set9-M1-conv-15-16": {
     "file": "media/tts/set9-M1-conv-15-16.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Ethan",
       "US-Mia"
     ],
+    "kokoroVoices": [
+      "am_eric",
+      "af_bella"
+    ],
+    "speed": 1.1,
     "segments": 5
   },
   "set9-M1-conv-17-18": {
     "file": "media/tts/set9-M1-conv-17-18.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Zoe",
       "US-Mason"
     ],
+    "kokoroVoices": [
+      "af_aoede",
+      "am_fenrir"
+    ],
+    "speed": 1.1,
     "segments": 5
   },
   "set9-M2-sr-01": {
     "file": "media/tts/set9-M2-sr-01.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Ava"
     ],
+    "kokoroVoices": [
+      "af_heart"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M2-sr-02": {
     "file": "media/tts/set9-M2-sr-02.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "af_nicole"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M2-sr-03": {
     "file": "media/tts/set9-M2-sr-03.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Ivy"
     ],
+    "kokoroVoices": [
+      "bf_isabella"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M2-repeat-01": {
     "file": "media/tts/set9-M2-repeat-01.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
     "segments": 1
   },
   "set9-M2-repeat-02": {
     "file": "media/tts/set9-M2-repeat-02.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
     "segments": 1
   },
   "set9-M2-repeat-03": {
     "file": "media/tts/set9-M2-repeat-03.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
     "segments": 1
   },
   "set9-M2-repeat-04": {
     "file": "media/tts/set9-M2-repeat-04.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
     "segments": 1
   },
   "set9-M2-repeat-05": {
     "file": "media/tts/set9-M2-repeat-05.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
     "segments": 1
   },
   "set9-M2-repeat-06": {
     "file": "media/tts/set9-M2-repeat-06.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
     "segments": 1
   },
   "set9-M2-repeat-07": {
     "file": "media/tts/set9-M2-repeat-07.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "US-Emma"
     ],
+    "kokoroVoices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
     "segments": 1
   },
   "set9-M2-interview-01": {
     "file": "media/tts/set9-M2-interview-01.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Oliver"
     ],
+    "kokoroVoices": [
+      "bm_lewis"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M2-interview-02": {
     "file": "media/tts/set9-M2-interview-02.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Oliver"
     ],
+    "kokoroVoices": [
+      "bm_lewis"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M2-interview-03": {
     "file": "media/tts/set9-M2-interview-03.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Oliver"
     ],
+    "kokoroVoices": [
+      "bm_lewis"
+    ],
+    "speed": 1.12,
     "segments": 1
   },
   "set9-M2-interview-04": {
     "file": "media/tts/set9-M2-interview-04.mp3",
-    "provider": "google",
+    "provider": "kokoro-82M",
     "voices": [
       "GB-Oliver"
     ],
+    "kokoroVoices": [
+      "bm_lewis"
+    ],
+    "speed": 1.12,
     "segments": 1
   }
 }

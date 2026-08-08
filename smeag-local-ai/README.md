@@ -72,11 +72,48 @@ python3 roi/roi_model.py --voice isolate_llm    # 전체 비용 리포트
 강세, 억양을 볼 수 없으므로 8·9를 줄 근거가 없습니다. 발음을 제대로 채점하려면
 별도 모델(GOP 또는 Wav2Vec2)이 필요하고, 그건 이 스캐폴드 밖입니다.
 
-## 3. 음원 QA (qa/stt_loopback.py)
+## 3. 음원 QA (qa/)
 
-렌더된 MP3를 다시 전사해 원본과 비교합니다. WER은 `text_display`가 아니라
-**`text_tts`(정규화된 입력 문자열)** 기준입니다 — 화면 표기 기준으로 비교하면
-"3:15 pm"을 올바로 읽은 것까지 전부 오류로 잡힙니다.
+3단계 파이프라인입니다. 각 단계가 별도 스크립트인 건 의존성 때문입니다 —
+게이트는 GPU도 torch도 없는 머신에서 돌아야 합니다.
+
+```bash
+# 1) 렌더 매니페스트 생성 (표준 라이브러리만)
+python3 qa/render_manifest.py \
+    --tts-manifest ../studyground/sg2/tts-manifest.set9.json \
+    --media-root   ../studyground/sg2 \
+    --out          data/render_manifest.set9.json
+
+# 2) 전사 — CrisperWhisper 가 asr_text 를 채웁니다
+python3 qa/transcribe.py --manifest data/render_manifest.set9.json
+python3 qa/transcribe.py --manifest data/render_manifest.set9.json \
+    --backend http --url http://127.0.0.1:8001/v1     # GPU 노드 위임
+
+# 3) 채점
+python3 qa/stt_loopback.py --manifest data/render_manifest.set9.json
+```
+
+### 왜 large-v3 가 아니라 CrisperWhisper 인가 (qa/transcribe.py)
+
+이 게이트가 잡으려는 건 **잘린 음원과 빠진 단어**입니다. 그런데 표준 Whisper는
+*유창한* 전사를 내도록 학습돼 있어서, 음원이 절 중간에 끊기거나 엔진이 단어를
+삼켜도 "들렸어야 할" 문장을 복원해 출력하는 경향이 있습니다. 그러면 결함
+클립이 WER 0%로 통과합니다. CrisperWhisper는 verbatim 전사 — 반복·더듬음·잘림이
+전사에 그대로 남으므로 결함이 편집거리로 보입니다. 누락 탐지가 존재 이유인
+게이트에서는 이게 동작하느냐 마느냐의 차이입니다.
+
+**한계를 분명히 해둡니다: 화자 신원은 검증하지 않습니다.** 잘못된 목소리로
+렌더된 클립도 내용만 맞으면 WER 0%로 통과합니다. 이 게이트가 초록불이라고
+음원이 옳다고 읽으면 안 됩니다.
+
+**라이선스:** CrisperWhisper 가중치는 CC BY-NC 4.0(비상업)입니다. 렌더된 음원을
+내부 QA 하는 이 용도는 문제없지만, 학생에게 서빙하거나 상업 채점 경로에 넣는
+근거는 아닙니다. 그 경우 `--backend http` 로 적절히 라이선스된 모델을 쓰십시오.
+
+### WER 게이트 (qa/stt_loopback.py)
+
+WER은 `text_display`가 아니라 **`text_tts`(정규화된 입력 문자열)** 기준입니다 —
+화면 표기 기준으로 비교하면 "3:15 pm"을 올바로 읽은 것까지 전부 오류로 잡힙니다.
 
 편집거리를 치환/삭제/삽입으로 분해해서 진단을 분리합니다: **삭제 우세 = 음원 잘림**,
 **치환 우세 = 발음 오류**. 고치는 방법이 다르므로 WER 숫자 하나로는 부족합니다.

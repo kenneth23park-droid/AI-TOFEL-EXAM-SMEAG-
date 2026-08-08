@@ -1,4 +1,8 @@
-/* SET 9 listening — audio + transcripts (Google TTS, diverse voices). Auto-generated. */
+/* SET 9 listening — audio + transcripts (Kokoro-82M local TTS, diverse voices). Auto-generated.
+ * The `voices` names below are casting labels; tools/tts_kokoro.py maps each to a Kokoro
+ * preset. Regenerate with:
+ *   ../.venv-tts/bin/python tools/tts_kokoro.py --manifest tts-voices-set9-google.json --force
+ *   ../.venv-tts/bin/python tools/tts_kokoro.py --manifest tts-voices-set9m2-google.json --force */
 window.SMEAG_SET9_AUDIO={
  "code": "SET9",
  "title": "NEW TOEFL SET 9 — Listening",

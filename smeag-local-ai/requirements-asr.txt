@@ -1,0 +1,14 @@
+# Optional — only needed for `qa/transcribe.py --backend hf` (local CrisperWhisper).
+#
+# Kept out of requirements.txt on purpose: this is ~2.5 GB of wheels plus a
+# ~3 GB model pull, and the machines that run the WER gate, the calibration
+# script and the ROI model need none of it. A campus box without a GPU should
+# use `--backend http` against the serving node instead.
+#
+#   pip install -r requirements-asr.txt
+#
+# Also required, outside pip: ffmpeg on PATH.
+torch>=2.2
+transformers>=4.40
+accelerate>=0.30
+numpy>=1.24

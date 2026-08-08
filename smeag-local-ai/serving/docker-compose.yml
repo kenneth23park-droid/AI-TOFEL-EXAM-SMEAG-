@@ -52,6 +52,10 @@ services:
       stack: 67108864
 
   whisper:
+    # Student-facing ASR (speaking transcription for scoring). Stays on
+    # large-v3: it is permissively licensed and its fluency bias is harmless
+    # here, because a student's speech has no "correct" reference to drift from.
+    # For exam-audio QA the bias is fatal — see the whisper-qa service below.
     image: fedirz/faster-whisper-server:latest-cuda
     restart: unless-stopped
     ports:
@@ -63,6 +67,44 @@ services:
       ENABLE_UI: "false"
     volumes:
       - ${MODEL_DIR:-/srv/models}/whisper:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  whisper-qa:
+    # CrisperWhisper — INTERNAL EXAM-AUDIO QA ONLY, drives qa/transcribe.py.
+    #
+    # Behind a profile for two independent reasons, and neither is optional:
+    #
+    #  1. Licence. CrisperWhisper's weights are CC BY-NC 4.0. Verifying our own
+    #     rendered audio is internal use; transcribing student speech for a paid
+    #     scoring product is not. It must never end up on port 8001.
+    #  2. GPU contention. QA is a batch job over a whole set. Left running it
+    #     would compete with vllm for the card during an exam window.
+    #
+    # Bring up only when running the gate, then take it back down:
+    #   docker compose --profile qa up -d whisper-qa
+    #   docker compose --profile qa down
+    #
+    # Pre-stage the CTranslate2 conversion at ${MODEL_DIR}/whisper-qa/crisperwhisper
+    # (ct2-transformers-converter --model nyrahealth/CrisperWhisper). An
+    # air-gapped node cannot fetch it at boot.
+    profiles: ["qa"]
+    image: fedirz/faster-whisper-server:latest-cuda
+    restart: "no"
+    ports:
+      - "8003:8000"
+    environment:
+      WHISPER__MODEL: /models/crisperwhisper
+      WHISPER__COMPUTE_TYPE: float16
+      WHISPER__INFERENCE_DEVICE: cuda
+      ENABLE_UI: "false"
+    volumes:
+      - ${MODEL_DIR:-/srv/models}/whisper-qa:/models:ro
     deploy:
       resources:
         reservations:

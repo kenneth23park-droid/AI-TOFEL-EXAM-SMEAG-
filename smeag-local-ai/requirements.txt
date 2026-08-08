@@ -1,4 +1,15 @@
 # Runtime deps are deliberately minimal — the campus boxes are air-gapped and
 # every package is one more thing to patch by hand.
-numpy>=1.24        # qa/metrics.py, roi/roi_model.py
-# scoring/client.py, qa/stt_loopback.py, qa/calibrate.py use the stdlib only.
+numpy>=1.24        # qa/metrics.py, roi/roi_model.py, qa/transcribe.py (audio decode)
+# scoring/client.py, qa/stt_loopback.py, qa/calibrate.py, qa/render_manifest.py
+# use the stdlib only. qa/transcribe.py --backend http is stdlib + numpy, so an
+# air-gapped box can drive the GPU node without any of the below.
+
+# --- ASR, only for `qa/transcribe.py --backend hf` -------------------------
+# Install separately (`pip install -r requirements-asr.txt`) — this pulls in
+# ~2.5 GB of wheels plus a ~3 GB model download, which has no business on a
+# machine that only runs the WER gate or the ROI model.
+#   torch>=2.2
+#   transformers>=4.40
+#   accelerate>=0.30
+# External: ffmpeg on PATH (audio decode, both backends).
