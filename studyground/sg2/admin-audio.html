@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio settings (admin) · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .admin-note { background:var(--sky-soft,#e2eef6); border:1px solid var(--sky,#2f6f9f); color:var(--sky-ink,#215074);
+    border-radius:12px; padding:12px 15px; font-size:12.5px; line-height:1.6; margin:14px 0 4px; }
+  .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:14px 0; }
+  .toolbar .grow { flex:1; }
+  .setblock { margin-top:26px; }
+  .setblock > h2 { font-size:19px; font-weight:850; margin:0 0 4px; }
+  .setblock > p.cnt { font-size:12.5px; color:var(--muted); margin:0 0 12px; }
+  .arow { background:var(--card); border:1px solid var(--line); border-radius:13px; padding:13px 15px; margin-bottom:10px; }
+  .arow-h { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .arow-h b { font-size:13.5px; }
+  .badge { font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
+  .badge.default { background:var(--cream-2); color:var(--muted); }
+  .badge.url { background:var(--sky-soft,#e2eef6); color:var(--sky,#2f6f9f); }
+  .badge.file { background:var(--lime-soft,#e6f5ec); color:var(--lime,#1f9d55); }
+  .badge.missing { background:#fdeeee; color:#c62828; }
+  .path { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; color:var(--muted); word-break:break-all; margin:6px 0; }
+  .ctrls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+  .ctrls input[type=url] { flex:1; min-width:180px; font-family:inherit; font-size:12.5px; padding:8px 11px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .ctrls input[type=url]:focus { outline:none; border-color:var(--brand); }
+  .file-btn { position:relative; overflow:hidden; }
+  .file-btn input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  audio { width:100%; margin-top:9px; }
+  .flash { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:var(--paper);
+    padding:10px 18px; border-radius:999px; font-size:13px; font-weight:700; box-shadow:var(--shadow); opacity:0;
+    transition:opacity .2s; pointer-events:none; z-index:60; }
+  .flash.on { opacity:1; }
+  .warn { background:#fff6e8; border:1px solid #d97706; color:#8a5a06; border-radius:10px; padding:9px 12px; font-size:12px; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Admin · Audio settings</small></span></a>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-h" style="padding-top:26px">
+    <span class="pill" style="margin-bottom:8px">Admin · Listening audio</span>
+    <h1 style="font-size:clamp(26px,4vw,40px)"><span data-en>Listening audio settings</span><span data-ko>듣기평가 오디오 설정</span></h1>
+    <p class="sub"><span data-en>Assign, replace or upload the audio file for each listening item. Changes apply to the practice/preview players and are saved on this device.</span>
+      <span data-ko>리스닝 문항마다 오디오 파일을 지정·교체·업로드합니다. 연습/미리보기 재생에 즉시 반영되며 이 기기에 저장됩니다.</span></p>
+  </div>
+
+  <div class="admin-note">
+    <span data-en><b>Note</b> — In the real TOEFL, students cannot pick audio; it auto-plays once (volume only). This screen is the <b>authoring side</b> — the student exam stays faithful. URL overrides persist across reload; uploaded files are stored in this browser.</span>
+    <span data-ko><b>참고</b> — 실제 TOEFL에서 학생은 오디오를 고를 수 없고 자동 1회 재생(볼륨만)입니다. 이 화면은 <b>출제자용</b>이며 학생 시험은 실제 규격을 유지합니다. URL은 새로고침해도 유지되고, 업로드 파일은 이 브라우저에 저장됩니다.</span>
+  </div>
+
+  <div class="toolbar">
+    <input type="url" id="bulkurl" class="grow" placeholder="Filter items… (type to search title/path)" style="font-family:inherit;font-size:12.5px;padding:9px 12px;border:1px solid var(--line-2);border-radius:9px">
+    <button class="btn ghost sm" id="exportBtn"><span data-en>Export URLs (JSON)</span><span data-ko>URL 내보내기</span></button>
+    <label class="btn ghost sm file-btn"><span data-en>Import JSON</span><span data-ko>JSON 가져오기</span><input type="file" id="importFile" accept="application/json"></label>
+    <button class="btn ghost sm" id="resetAll"><span data-en>Reset all</span><span data-ko>전체 초기화</span></button>
+  </div>
+  <div id="warn"></div>
+
+  <div id="host"></div>
+</main>
+
+<div class="flash" id="flash"></div>
+
+<script src="assets/set1.js"></script>
+<script src="assets/set9.js"></script>
+<script src="assets/set9-audio.js"></script>
+<script src="assets/audio-config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  function esc(t){ var d=document.createElement('div'); d.textContent=t==null?'':t; return d.innerHTML; }
+  function set1AudioSrc(p){ return encodeURI(String(p)
+      .replace('TOEFL MOCK TEST  SET 1/SET 1 AUDIO/', 'media/audio/')
+      .replace('app/assets/speaking/', 'media/speaking/')); }
+
+  // ── Enumerate every listening audio slot, resolved to its playable path ──
+  var groups = [];
+
+  // SET 1 (from set1.js)
+  (function () {
+    var S = window.SMEAG_SET1; if (!S) return;
+    var sec = (S.sections||[]).filter(function(x){return x.id==='listening';})[0]; if (!sec) return;
+    var items = [];
+    (sec.modules||[]).forEach(function (m) {
+      (m.blocks||[]).forEach(function (b) {
+        if (b.audio) items.push({ title: (m.label||m.id)+' · '+(b.heading||'Audio'), path: set1AudioSrc(b.audio) });
+        if (b.introAudio) items.push({ title: (m.label||m.id)+' · Instructions', path: set1AudioSrc(b.introAudio) });
+        (b.questions||[]).forEach(function (q) {
+          if (q.audio) items.push({ title: (m.label||m.id)+' · Q'+(q.no||''), path: set1AudioSrc(q.audio) });
+        });
+      });
+    });
+    if (items.length) groups.push({ set: 'SET 1 · Listening', items: items });
+  })();
+
+  // SET 9 preview (from set9-audio.js — my diverse-voice clips)
+  (function () {
+    var D = window.SMEAG_SET9_AUDIO; if (!D) return;
+    var items = [];
+    (D.modules||[]).forEach(function (mod) {
+      (mod.items||[]).forEach(function (it) {
+        items.push({ title: (mod.label||mod.id)+' · '+it.title+' ['+(it.voices||[]).join(', ')+']', path: it.audio });
+      });
+    });
+    if (items.length) groups.push({ set: 'SET 9 · Listening (preview clips)', items: items });
+  })();
+
+  // SET 9 exam (from set9.js — full exam listening audio, media/audio/set9/*)
+  (function () {
+    var S = window.SMEAG_SET9; if (!S) return;
+    var sec = (S.sections||[]).filter(function(x){return x.id==='listening';})[0]; if (!sec) return;
+    var seen = {}, items = [];
+    (sec.modules||[]).forEach(function (m) {
+      (m.blocks||[]).forEach(function (b) {
+        function add(p, t){ if (p && !seen[p]) { seen[p]=1; items.push({ title:t, path:p }); } }
+        if (b.audio) add(b.audio, (m.label||m.id)+' · '+(b.heading||'Audio'));
+        if (b.introAudio) add(b.introAudio, (m.label||m.id)+' · Instructions');
+        (b.questions||[]).forEach(function (q){ if (q.audio) add(q.audio, (m.label||m.id)+' · Q'+(q.no||'')); });
+      });
+    });
+    if (items.length) groups.push({ set: 'SET 9 · Listening (full exam)', items: items });
+  })();
+
+  var host = document.getElementById('host');
+  var flash = document.getElementById('flash'); var flashT;
+  function toast(msg){ flash.textContent=msg; flash.classList.add('on'); clearTimeout(flashT); flashT=setTimeout(function(){flash.classList.remove('on');},1800); }
+
+  function badge(info){
+    if (info.mode==='url') return '<span class="badge url">URL</span>';
+    if (info.mode==='file') return info.missing ? '<span class="badge missing">FILE (lost)</span>' : '<span class="badge file">UPLOADED</span>';
+    return '<span class="badge default">Default</span>';
+  }
+
+  function rowHtml(it){
+    var info = SG_AUDIO.info(it.path);
+    var eff = SG_AUDIO.resolve(it.path);
+    var cur = info.mode==='url' ? info.url : info.mode==='file' ? ('Uploaded: '+esc(info.name)) : it.path;
+    return '<div class="arow" data-key="'+esc(it.path)+'" data-search="'+esc((it.title+' '+it.path).toLowerCase())+'">'+
+      '<div class="arow-h"><b>'+esc(it.title)+'</b> '+badge(info)+'</div>'+
+      '<div class="path">'+esc(cur)+'</div>'+
+      '<div class="ctrls">'+
+        '<input type="url" placeholder="Paste an audio URL (https://… or media/…)" value="'+(info.mode==='url'?esc(info.url):'')+'">'+
+        '<button class="btn sm set" type="button">Set URL</button>'+
+        '<label class="btn ghost sm file-btn">Upload<input type="file" accept="audio/*"></label>'+
+        '<button class="btn ghost sm reset" type="button">Reset</button>'+
+      '</div>'+
+      '<audio controls preload="none" src="'+esc(eff)+'"></audio>'+
+    '</div>';
+  }
+
+  function render(){
+    host.innerHTML = groups.map(function(g){
+      return '<div class="setblock"><h2>'+esc(g.set)+'</h2><p class="cnt">'+g.items.length+' clips</p>'+
+        g.items.map(rowHtml).join('')+'</div>';
+    }).join('');
+    var w = SG_AUDIO.storageWarning();
+    document.getElementById('warn').innerHTML = w ? '<div class="warn">⚠ '+esc(w)+'</div>' : '';
+  }
+
+  function refreshRow(row){
+    var key = row.getAttribute('data-key');
+    var it = { title: row.querySelector('b').textContent, path: key };
+    row.outerHTML = rowHtml(it);
+  }
+
+  host.addEventListener('click', function(e){
+    var row = e.target.closest('.arow'); if (!row) return;
+    var key = row.getAttribute('data-key');
+    if (e.target.classList.contains('set')) {
+      var url = row.querySelector('input[type=url]').value;
+      SG_AUDIO.setUrl(key, url).then(function(){ toast(url.trim()?'URL set':'Reset to default'); render(); });
+    } else if (e.target.classList.contains('reset')) {
+      SG_AUDIO.reset(key).then(function(){ toast('Reset to default'); render(); });
+    }
+  });
+  host.addEventListener('change', function(e){
+    if (e.target.type==='file') {
+      var row = e.target.closest('.arow'); var key = row.getAttribute('data-key');
+      var f = e.target.files[0]; if (!f) return;
+      SG_AUDIO.setFile(key, f).then(function(){ toast('Uploaded · '+f.name); render(); });
+    }
+  });
+
+  // filter
+  document.getElementById('bulkurl').addEventListener('input', function(){
+    var q = this.value.trim().toLowerCase();
+    host.querySelectorAll('.arow').forEach(function(r){
+      r.style.display = (!q || r.getAttribute('data-search').indexOf(q)>=0) ? '' : 'none';
+    });
+  });
+  // export / import / reset all
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    var blob = new Blob([SG_AUDIO.exportJson()], {type:'application/json'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'sg-audio-overrides.json'; a.click();
+    toast('Exported URL overrides');
+  });
+  document.getElementById('importFile').addEventListener('change', function(){
+    var f = this.files[0]; if (!f) return;
+    f.text().then(function(t){ return SG_AUDIO.importJson(t); })
+      .then(function(n){ toast('Imported '+n+' URL overrides'); render(); })
+      .catch(function(err){ toast('Import failed: '+err.message); });
+  });
+  document.getElementById('resetAll').addEventListener('click', function(){
+    if (!confirm('Reset ALL audio overrides to default?')) return;
+    SG_AUDIO.resetAll().then(function(){ toast('All reset'); render(); });
+  });
+
+  SG_AUDIO.ready().then(render);
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

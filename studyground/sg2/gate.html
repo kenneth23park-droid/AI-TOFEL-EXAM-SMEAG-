@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--
+  gate.html — 내부용 접근 화면. 랜딩(index.html) 을 포함한 모든 페이지 앞에 선다.
+
+  통과하면 localStorage['sg2_gate'] 에 시각을 남기고 원래 가려던 주소(?next=)로 돌려보낸다.
+  검사는 assets/gate.js 가 각 페이지 <head> 에서 한다.
+
+  이건 인증이 아니라 가림막이다 — 정적 배포라 아래 자격증명이 파일에 그대로 있다.
+  외부 공개 시 서버/프록시 인증으로 교체할 것.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Internal Access · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudyGround">
+<style>
+  .gate-tag { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--brand); background:var(--cream-2);
+    border:1px solid var(--line); border-radius:999px; padding:5px 11px; margin-bottom:14px; }
+  .gate-err { display:none; font-size:13px; font-weight:700; color:#b3261e; background:#fdeceb;
+    border:1px solid #f5c6c2; border-radius:11px; padding:10px 13px; margin-bottom:14px; }
+  .gate-err.on { display:block; }
+  .gate-note { text-align:center; font-size:12px; color:var(--dim); margin-top:18px; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <span class="brand"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></span>
+    <div class="nav-right" style="margin-left:auto">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+    </div>
+  </div>
+</header>
+
+<div class="auth">
+  <div class="auth-card">
+    <span class="gate-tag"><span data-en>Internal use only</span><span data-ko>내부용</span></span>
+    <h1><span data-en>Sign in to continue</span><span data-ko>계속하려면 로그인하세요</span></h1>
+    <p class="sub"><span data-en>This site is for SMEAG staff and enrolled classes. Enter the shared access credentials.</span><span data-ko>SMEAG 내부 및 수강 반 전용입니다. 공용 접속 정보를 입력하세요.</span></p>
+
+    <div class="gate-err" id="err"><span data-en>Wrong ID or password.</span><span data-ko>아이디 또는 비밀번호가 올바르지 않습니다.</span></div>
+
+    <form id="f" autocomplete="off">
+      <div class="field"><label data-en>ID</label><label data-ko>아이디</label>
+        <input id="u" type="text" name="gate-id" autocapitalize="none" autocorrect="off" spellcheck="false" required></div>
+      <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
+        <input id="p" type="password" name="gate-pw" required></div>
+      <button class="btn brand block lg" type="submit"><span data-en>Enter</span><span data-ko>입장</span></button>
+    </form>
+
+    <div class="gate-note"><span data-en>Stays signed in on this device for 12 hours.</span><span data-ko>이 기기에서 12시간 동안 로그인 상태가 유지됩니다.</span></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'sg2_gate';
+  var TTL_MS = 12 * 60 * 60 * 1000;
+  var ID = 'smeag', PW = '2222';
+
+  var qs = new URLSearchParams(location.search);
+
+  // ?next= 는 이 사이트 안의 상대 경로만 받는다 — '//host' 나 'https://…' 는 버린다.
+  function safeNext() {
+    var n = qs.get('next') || '';
+    if (!n || n.charAt(0) !== '/' || n.charAt(1) === '/' || /^[a-z][a-z0-9+.-]*:/i.test(n)) return 'index.html';
+    if (/\/gate\.html/.test(n)) return 'index.html';   // 게이트로 되돌아가는 고리 차단
+    return n;
+  }
+
+  if (qs.has('logout')) {
+    try { localStorage.removeItem(KEY); } catch (e) {}
+  } else {
+    var t = 0;
+    try { t = parseInt(localStorage.getItem(KEY) || '', 10) || 0; } catch (e) {}
+    if (t && Date.now() - t < TTL_MS) location.replace(safeNext());
+  }
+
+  document.getElementById('f').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var u = document.getElementById('u').value.trim().toLowerCase();
+    var p = document.getElementById('p').value;
+    if (u !== ID || p !== PW) {
+      document.getElementById('err').classList.add('on');
+      document.getElementById('p').value = '';
+      document.getElementById('p').focus();
+      return;
+    }
+    try { localStorage.setItem(KEY, String(Date.now())); } catch (err) {}
+    location.replace(safeNext());
+  });
+
+  document.getElementById('u').focus();
+})();
+</script>
+<script src="assets/app.js"></script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

@@ -15,14 +15,22 @@
 //     exam.css / exam-runtime.html / exam-render-{instruction,listening,reading,writing,
 //     speaking}.js 가 전부 바뀌었다. 이 파일들은 전부 SHELL_ASSETS(cache-first)라서
 //     VERSION 을 올리지 않으면 재방문 기기가 옛 UI(빨간 중앙 pill 등)를 계속 본다.
-const VERSION = 'sg-v8';   // v8: 최종수정사항.docx 반영 — 리스닝 20초·Task1 문구 숨김, 라이팅 7/7/10분 2단, 스피킹 8/10/12초
+// v9: 내부용 접근 게이트(gate.html · assets/gate.js) 추가. 모든 셸 HTML 의 <head> 가
+//     바뀌었고, 오프라인에서도 게이트를 통과해야 하므로 두 파일을 프리캐시에 넣는다.
+// v10: 관리자 오디오 설정(admin-audio.html · assets/audio-config.js) 추가.
+//      오프라인에서도 출제자가 문항별 오디오를 지정/미리듣기 할 수 있어야 하므로 프리캐시.
+const VERSION = 'sg-v10';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
 const SHELL_ASSETS = [
   'index.html', 'npz.html', 'tests.html', 'dashboard.html', 'learning.html',
   'community.html', 'tools.html', 'purchase.html', 'login.html', 'signup.html', 'exam.html',
-  'set9.html',
+  'set9.html', 'admin-audio.html',
+
+  // 내부용 접근 게이트 — 오프라인 진입도 이 화면을 먼저 지난다.
+  'gate.html', 'assets/gate.js', 'assets/audio-config.js',
+
   'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',
   'manifest.webmanifest',

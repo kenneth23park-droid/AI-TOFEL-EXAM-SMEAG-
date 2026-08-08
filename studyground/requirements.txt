@@ -11,3 +11,6 @@ anthropic>=0.40           # online_feedback node
 
 # Scoring pipeline — optional: the same nodes run sequentially when absent.
 langgraph>=0.2
+
+# 테스트 전용 — tests/test_speaker_images.py 의 F0 측정(ffmpeg 도 필요). 런타임에는 안 쓴다.
+numpy>=1.26
