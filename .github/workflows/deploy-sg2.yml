@@ -1,0 +1,40 @@
+# main 에 studyground/sg2/ 변경이 푸시되면 프로덕션으로 자동 배포.
+# Vercel↔GitHub 앱 연동 대신 토큰으로 배포하므로 저장소 소유자 승인이 필요 없다.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'studyground/sg2/**'
+      - '.github/workflows/deploy-sg2.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-sg2
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: team_2dm8OcEEEVPKcelKEMlZTzAR
+      VERCEL_PROJECT_ID: prj_KZVPBfpDQ7dLpvaSsPI2rA10WF3V
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@54
+
+      # 정적 사이트라 빌드 단계가 없다. 소스를 그대로 올리면 Vercel 이 그대로 서빙한다.
+      # 업로드 대상에서 _screens/, REPORT.md 를 빼는 건 sg2/.vercelignore 가 처리.
+      - name: Deploy to production
+        working-directory: studyground/sg2
+        run: |
+          url=$(vercel deploy --prod --yes --token="$VERCEL_TOKEN")
+          echo "Deployed: $url"
+          echo "### Deployed :rocket: $url" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
