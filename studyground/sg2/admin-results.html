@@ -9,6 +9,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#e8481f">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  /* 점수 칸은 데스크톱 표에서만 오른쪽 정렬 — 카드에서는 이름표 옆에 붙는다. */
+  .rv-table td.score { font-weight:800; }
+  @media (min-width:721px) { .rv-table td.score { text-align:right; } }
+</style>
 </head>
 <body>
 
@@ -30,7 +35,8 @@
   <div class="page-h mt-24" style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
     <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Student results</span><span data-ko>학생 응시 결과</span></h1>
     <span class="chip" id="who" style="margin-bottom:8px"></span>
-    <button class="btn ghost sm" id="csv" style="margin-left:auto"><span data-en>Download CSV</span><span data-ko>CSV 내려받기</span></button>
+    <a class="btn ghost sm" href="scoring-guide.html" style="margin-left:auto"><span data-en>How we score</span><span data-ko>채점 근거</span></a>
+    <button class="btn ghost sm" id="csv"><span data-en>Download CSV</span><span data-ko>CSV 내려받기</span></button>
   </div>
 
   <div class="card mt-16 hide" id="notice"></div>
@@ -42,7 +48,7 @@
   </div>
 
   <div class="card mt-16 hide" id="table-card" style="padding:0;overflow:hidden">
-    <div class="table-wrap" style="overflow-x:auto"><table class="rv-table">
+    <div class="table-wrap" style="overflow-x:auto"><table class="rv-table cardify">
       <thead><tr>
         <th><span data-en>Date</span><span data-ko>날짜</span></th>
         <th><span data-en>Student</span><span data-ko>학생</span></th>
@@ -115,13 +121,13 @@
     $('count').textContent = list.length + ' / ' + ALL.length;
     $('rows').innerHTML = list.length ? list.map(function (r) {
       return '<tr>' +
-        '<td>' + when(r.submitted_at) + '</td>' +
-        '<td><b>' + esc(nameOf(r)) + '</b>' +
+        '<td ' + SG_LABEL('Date', '날짜') + '>' + when(r.submitted_at) + '</td>' +
+        '<td class="card-title"><b>' + esc(nameOf(r)) + '</b>' +
           (idOf(r) ? '<div class="muted" style="font-size:12px">' + esc(idOf(r)) + '</div>' : '') + '</td>' +
-        '<td><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
-        '<td><span class="chips" style="margin:0">' + chips(r) + '</span></td>' +
-        '<td style="text-align:right;font-weight:800">' + r.score + ' / ' + r.total + '</td>' +
-        '<td><a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) +
+        '<td ' + SG_LABEL('Test', '시험') + '><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
+        '<td ' + SG_LABEL('Sections', '영역') + '><span class="chips" style="margin:0">' + chips(r) + '</span></td>' +
+        '<td class="score" ' + SG_LABEL('Score', '점수') + '>' + r.score + ' / ' + r.total + '</td>' +
+        '<td class="card-actions"><a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) +
           '&owner=' + encodeURIComponent(r.owner) + '">' + bi('Review', '리뷰') + '</a></td>' +
       '</tr>';
     }).join('') : '<tr><td colspan="6" class="muted" style="padding:24px;text-align:center">' +

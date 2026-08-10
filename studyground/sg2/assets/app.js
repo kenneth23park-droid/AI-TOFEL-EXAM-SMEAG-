@@ -41,6 +41,17 @@
   });
 })();
 
+/* ── 표 → 카드 이름표 ──────────────────────────────────────────────
+ * 좁은 화면에서 table.cardify 는 한 줄을 카드로 그리고(app.css), 각 칸은
+ * 자기 이름표를 data-label 로 달고 다닌다. 표 머리글은 화면에서 사라지므로
+ * 이름표도 KO/EN 을 따라가야 한다 — 두 언어를 모두 심어 두고 고르는 건
+ * CSS(html[lang="ko"])가 한다. 행을 만드는 쪽에서 이렇게 쓴다:
+ *   '<td ' + SG_LABEL('Size', '용량') + '>' + kb(r.size) + '</td>'  */
+window.SG_LABEL = function (en, ko) {
+  function a(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+  return 'data-label="' + a(en) + '" data-label-ko="' + a(ko) + '"';
+};
+
 /* ── Read-aloud (TTS) ──────────────────────────────────────────────
  * Priority: bundled ElevenLabs mp3 (media/tts/<id>.mp3, generated offline
  * via tools/tts_generate.py) → else the browser's built-in speechSynthesis

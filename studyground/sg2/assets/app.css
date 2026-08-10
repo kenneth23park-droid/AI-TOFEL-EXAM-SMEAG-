@@ -374,3 +374,60 @@ html[lang="ko"] [data-ko] { display: revert; }
    세로로 쪼개지던 문제. */
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .table-scroll > table { min-width: 620px; }
+
+/* ── 표 → 카드 (좁은 화면) ────────────────────────────────
+   폰에서는 가로 스크롤조차 성가시다. table.cardify 는 720px 아래에서
+   한 줄을 카드 하나로 다시 그린다. 머리글은 감추고, 각 칸이 자기 이름표를
+   data-label 로 달고 다닌다 — 그래서 표 구조(정렬·CSV·인쇄)는 그대로다.
+
+   칸에 붙이는 표시:
+     data-label="용량"  → 이름표 + 값 한 줄
+     class="card-title"   → 카드 제목(이름표 없음, 굵게)
+     class="card-actions" → 버튼 줄(이름표 없음, 오른쪽 정렬)
+     이름표가 없는 칸은 값만 한 줄 차지한다. */
+@media (max-width: 720px) {
+  .table-scroll > table.cardify { min-width: 0; }
+  table.cardify, table.cardify tbody, table.cardify td { display: block; }
+  table.cardify thead { display: none; }
+  /* tr 을 세로 flex 로 두면 제목·버튼을 표 순서와 무관하게 제자리로 보낼 수 있다. */
+  table.cardify tr {
+    display: flex; flex-direction: column;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 13px 15px; margin-bottom: 10px;
+  }
+  body table.cardify tr:hover td { background: transparent; }
+  /* 칸은 [이름표 | 값] 2열 격자다. 값이 여러 덩어리(본문 + 부연 div)인 칸도
+     둘째 열에 세로로 쌓이므로, 이름표 아래로 가지런히 정렬된다.
+     각 페이지의 style 블록이 이 파일보다 뒤에 오므로 body 를 붙여 이긴다. */
+  body table.cardify td {
+    border: 0; padding: 3px 0;
+    display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 10px;
+    align-items: baseline;
+    text-align: left;            /* .num 의 오른쪽 정렬을 카드에서는 푼다 */
+  }
+  table.cardify td::before {
+    content: attr(data-label);
+    grid-column: 1; grid-row: 1;
+    font-size: 10.5px; font-weight: 800; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  /* justify-self:start 가 없으면 상태 칩이 줄 끝까지 늘어나 배경이 띠처럼 깔린다.
+     긴 문장은 열 너비까지 차고 그 안에서 줄바꿈되므로 손해가 없다. */
+  table.cardify td > * { grid-column: 2; justify-self: start; }
+  /* 이름표가 없으면 값이 칸 전체를 쓴다. */
+  body table.cardify td:not([data-label]) { grid-template-columns: minmax(0, 1fr); }
+  table.cardify td:not([data-label])::before { content: none; }
+  table.cardify td:not([data-label]) > * { grid-column: 1; }
+  html[lang="ko"] table.cardify td[data-label-ko]::before { content: attr(data-label-ko); }
+  body table.cardify td.card-title {
+    order: -1; display: block; padding: 0 0 9px;
+    font-size: 14.5px; font-weight: 800; line-height: 1.4;
+  }
+  table.cardify td.card-title::before { content: none; }
+  body table.cardify td.card-actions {
+    order: 99; display: flex; justify-content: flex-end; gap: 8px; padding-top: 10px;
+  }
+  table.cardify td.card-actions::before { content: none; }
+  /* 값이 없는 칸은 카드에서 자리를 차지하지 않게 한다. */
+  body table.cardify td:empty { display: none; }
+}

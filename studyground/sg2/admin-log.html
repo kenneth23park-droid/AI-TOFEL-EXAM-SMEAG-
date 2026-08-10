@@ -56,6 +56,8 @@
   .val ins { background:#dcf3e4; color:#12522f; text-decoration:none; padding:0 3px; border-radius:3px; }
   .val .arrow { color:var(--dim); margin:0 5px; }
   .gate { max-width:520px; margin:60px auto; text-align:center; }
+  /* 카드에서는 대상 id·값을 글자 단위로 끊지 않는다. */
+  @media (max-width:720px) { .cardify .tgt, .cardify .val { word-break:normal; overflow-wrap:anywhere; } }
 </style>
 </head>
 <body>
@@ -67,6 +69,7 @@
       <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
       <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
       <a class="btn ghost sm" href="admin-questions.html"><span data-en>Questions</span><span data-ko>문항 교체</span></a>
+      <a class="btn ghost sm" href="admin-dup.html"><span data-en>Overlap check</span><span data-ko>겹침 검사</span></a>
       <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
     </div>
   </div>
@@ -92,7 +95,7 @@
   <div class="stats" id="stats"></div>
 
   <div class="table-scroll">
-  <table class="log">
+  <table class="log cardify">
     <thead><tr>
       <th><span data-en>When</span><span data-ko>시각</span></th>
       <th><span data-en>Who</span><span data-ko>계정</span></th>
@@ -148,11 +151,13 @@
     var list = rowsNow();
     document.getElementById('rows').innerHTML = list.map(function (r) {
       return '<tr>' +
-        '<td class="when">' + esc(when(r.iso)) + '</td>' +
-        '<td class="who">' + esc(r.who) + (r.set ? '<div class="fld">' + esc(r.set) + '</div>' : '') + '</td>' +
-        '<td><span class="act ' + esc(r.action) + '">' + esc(r.action) + '</span></td>' +
-        '<td class="tgt">' + esc(r.target) + (r.page ? '<div class="fld">' + esc(r.page) + '</div>' : '') + '</td>' +
-        '<td class="val">' + change(r) + '</td>' +
+        '<td class="when" ' + SG_LABEL('When', '시각') + '>' + esc(when(r.iso)) + '</td>' +
+        '<td class="who" ' + SG_LABEL('Who', '계정') + '>' + esc(r.who) +
+          (r.set ? '<div class="fld">' + esc(r.set) + '</div>' : '') + '</td>' +
+        '<td ' + SG_LABEL('Action', '동작') + '><span class="act ' + esc(r.action) + '">' + esc(r.action) + '</span></td>' +
+        '<td class="tgt" ' + SG_LABEL('Target', '대상') + '>' + esc(r.target) +
+          (r.page ? '<div class="fld">' + esc(r.page) + '</div>' : '') + '</td>' +
+        '<td class="val" ' + SG_LABEL('Change', '변경') + '>' + change(r) + '</td>' +
       '</tr>';
     }).join('') || '<tr><td colspan="5" class="muted" style="padding:18px 9px">' +
       '<span data-en>No changes recorded yet.</span><span data-ko>아직 기록된 변경이 없습니다.</span></td></tr>';

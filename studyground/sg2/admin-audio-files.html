@@ -43,6 +43,7 @@
   .ftitle { font-weight:750; }
   .fmeta { font-size:11px; color:var(--dim); }
   .num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .tagrow { display:inline-flex; flex-wrap:wrap; gap:5px; align-items:center; }
   .tagx { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
   .tagx.ok { background:#e6f5ec; color:#1f7a44; }
   .tagx.bad { background:#fdeeee; color:#c62828; }
@@ -59,6 +60,8 @@
   .player audio { width:100%; }
   .prog { font-size:12px; font-weight:700; color:var(--muted); }
   .gate { max-width:520px; margin:60px auto; text-align:center; }
+  /* 카드에서는 경로를 글자 단위로 끊지 않는다 — "1/1.m p3" 처럼 쪼개지던 것. */
+  @media (max-width:720px) { .cardify .fpath { word-break:normal; overflow-wrap:anywhere; } }
 </style>
 </head>
 <body>
@@ -73,6 +76,7 @@
       <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
       <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
       <a class="btn ghost sm" href="admin-log.html"><span data-en>Change log</span><span data-ko>변경 기록</span></a>
+      <a class="btn ghost sm" href="admin-dup.html"><span data-en>Overlap check</span><span data-ko>겹침 검사</span></a>
       <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
     </div>
   </div>
@@ -102,7 +106,7 @@
   <div class="stats" id="stats"></div>
 
   <div class="table-scroll">
-  <table class="files">
+  <table class="files cardify">
     <thead><tr>
       <th><span data-en>Item</span><span data-ko>항목</span></th>
       <th><span data-en>File</span><span data-ko>파일</span></th>
@@ -257,15 +261,15 @@
     document.getElementById('rows').innerHTML = list.map(function (r, i) {
       var idx = ROWS.indexOf(r);
       return '<tr data-i="' + idx + '">' +
-        '<td><div class="ftitle">' + esc(r.item.title) + '</div>' +
+        '<td class="card-title"><div class="ftitle">' + esc(r.item.title) + '</div>' +
           '<div class="fmeta">' + esc(r.item.set.toUpperCase() + ' · ' + (r.item.sectionLabel || '') +
             (r.item.block ? ' · ' + r.item.block : '')) + '</div></td>' +
-        '<td><div class="fpath">' + esc(decodeURI(r.item.path)) + '</div>' +
+        '<td ' + SG_LABEL('File', '파일') + '><div class="fpath">' + esc(decodeURI(r.item.path)) + '</div>' +
           (r.note ? '<div class="fmeta">' + esc(r.note) + '</div>' : '') + '</td>' +
-        '<td class="num">' + kb(r.size) + '</td>' +
-        '<td class="num">' + mmss(r.dur) + '</td>' +
-        '<td>' + statusTag(r) + overrideTag(r) + '</td>' +
-        '<td class="num"><button class="playbtn" data-act="play">▶</button> ' +
+        '<td class="num" ' + SG_LABEL('Size', '용량') + '>' + kb(r.size) + '</td>' +
+        '<td class="num" ' + SG_LABEL('Length', '길이') + '>' + mmss(r.dur) + '</td>' +
+        '<td ' + SG_LABEL('Status', '상태') + '><span class="tagrow">' + statusTag(r) + overrideTag(r) + '</span></td>' +
+        '<td class="num card-actions"><button class="playbtn" data-act="play">▶</button> ' +
           '<button class="playbtn" data-act="check">⟳</button></td>' +
       '</tr>';
     }).join('') || '<tr><td colspan="6" class="fmeta" style="padding:18px 9px">No files match this filter.</td></tr>';
