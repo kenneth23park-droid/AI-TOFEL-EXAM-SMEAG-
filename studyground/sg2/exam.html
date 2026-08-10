@@ -88,8 +88,10 @@
 </main>
 
 <script src="assets/set1.js"></script>
+<script src="assets/exam-timing.js"></script>
 <script src="assets/audio-config.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
 <script>
 (function(){
   var S = window.SMEAG_SET1;
@@ -136,6 +138,40 @@
     audio.addEventListener('ended', function(){ stage.classList.remove('playing'); count.textContent='0:00'; });
     return wrap;
   }
+  // --- Speaking 응답 시간 -------------------------------------------------
+  // SG_TIMING(config/timing.<exam>.json)이 정본. 로드는 비동기라 렌더는 먼저 끝내고
+  // 초가 도착하면 캡션·타이머를 채운다(오프라인이면 내장 폴백이 즉시 settle 된다).
+  function onSpeakingTiming(modId, index, cb){
+    if(!window.SG_TIMING) return;
+    window.SG_TIMING.load(function(){
+      var sec = window.SG_TIMING.get('sections.speaking');
+      if(!sec) return;
+      var m = (sec.modules||[]).filter(function(x){ return x.id===modId; })[0];
+      var tt = m && sec.taskTypes && sec.taskTypes[m.taskType];
+      if(!tt) return;
+      var by = tt.responseSecByIndex;
+      var respond = (by && index < by.length) ? by[index] : tt.responseSec;
+      cb({ prep: tt.prepSec||0, respond: respond||0 });
+    });
+  }
+
+  // 워크시트 모드의 응답 카운트다운 — 실제 녹음은 시험 런타임(set9.html)이 담당한다.
+  function bindRespondTimer(btn, respondSec){
+    var base='🎤 Record ('+respondSec+'s)';
+    btn.textContent=base;
+    var tid=null;
+    btn.addEventListener('click', function(){
+      if(tid){ clearInterval(tid); tid=null; btn.textContent=base; return; }
+      var left=respondSec;
+      btn.textContent='■ Stop · '+left;
+      tid=setInterval(function(){
+        left--;
+        if(left<=0){ clearInterval(tid); tid=null; btn.textContent=base; return; }
+        btn.textContent='■ Stop · '+left;
+      }, 1000);
+    });
+  }
+
   var graders = []; // functions returning {correct, total}
 
   function esc(t){ var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
@@ -253,12 +289,23 @@
       }
       // RECORD-SET (speaking)
       else if(blk.kind==='record-set'){
-        blk.questions.forEach(function(q){
+        blk.questions.forEach(function(q, qi){
           var qd=document.createElement('div'); qd.className='qitem';
           qd.innerHTML='<div class="prompt">'+esc('Q'+q.no+' · '+(q.kind==='interview'?'Interview':'Listen & Repeat'))+'</div>';
-          if(q.audio){ qd.appendChild(makeAudioUnit(q.audio, q.image, 'Prep '+(q.prepSec||3)+'s · Respond '+(q.respondSec||20)+'s')); }
+          var cap=null;
+          if(q.audio){
+            var unit=makeAudioUnit(q.audio, q.image, '…');
+            cap=unit.querySelector('.au-cap');
+            qd.appendChild(unit);
+          }
           var btn=document.createElement('button'); btn.className='btn ghost sm'; btn.style.marginTop='6px'; btn.textContent='🎤 Record';
           qd.appendChild(btn);
+          // 실제 초는 config/timing.<exam>.json 이 정본이다 — set1.js 의 prepSec/respondSec 은 읽지 않는다.
+          // Task 1 은 문항 순서별로 다르다(8·8·10·10·10·12·12), Task 2 는 45초.
+          onSpeakingTiming(mod.id, qi, function(t){
+            if(cap) cap.textContent='Prep '+t.prep+'s · Respond '+t.respond+'s';
+            bindRespondTimer(btn, t.respond);
+          });
           card.appendChild(qd);
         });
       }
