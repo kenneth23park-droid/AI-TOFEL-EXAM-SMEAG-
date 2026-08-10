@@ -53,7 +53,8 @@ const PROVIDERS = {
         .map((m) => m.id)
         // 글을 쓰는 모델만 남긴다 — 임베딩·이미지·음성은 코멘트를 못 쓴다.
         .filter((id) => /^(gpt-|o[0-9])/.test(id) && !/(audio|realtime|transcribe|tts|image|search|embed)/.test(id))
-        .sort();
+        .sort()
+        .reverse();   // 새 모델이 위로 — 고르는 사람이 먼저 보는 게 최신이어야 한다.
     },
     async chat(key, model, system, user) {
       const r = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -153,6 +154,27 @@ async function staffOf(req) {
   return { id: user.id, name: (p && p.name) || '', role };
 }
 
+/* 환경변수로 모델을 못 박지 않았을 때의 기본값. 목록에서 "이름에 군더더기가 없는"
+ * 최신 세대를 고른다 — gpt-5.5 는 되고 gpt-5.5-pro·-codex·-2026-04-23 은 안 된다.
+ * 날짜·용도가 붙은 이름은 선생님이 직접 고를 때만 쓴다. */
+function pickDefault(id, models) {
+  if (id === 'openai') {
+    var best = null, bestV = -1;
+    models.forEach(function (m) {
+      var hit = /^gpt-(\d+(?:\.\d+)?)$/.exec(m);
+      if (!hit) return;
+      var v = parseFloat(hit[1]);
+      if (v > bestV) { bestV = v; best = m; }
+    });
+    return best;
+  }
+  if (id === 'anthropic') {
+    var pref = models.filter(function (m) { return /sonnet/.test(m); });
+    return pref[0] || null;
+  }
+  return null;
+}
+
 async function listProviders() {
   const out = [];
   for (const id of Object.keys(PROVIDERS)) {
@@ -165,7 +187,7 @@ async function listProviders() {
     let models = [];
     try { models = await P.models(key); } catch (e) { models = []; }
     if (!models.length) models = FALLBACK[id] || [];
-    const def = P.def();
+    const def = env(id.toUpperCase() + '_MODEL') || pickDefault(id, models) || P.def();
     if (def && models.indexOf(def) < 0) models.unshift(def);
     out.push({ id, label: P.label, ready: true, why: '', models, default: def || models[0] || '' });
   }
