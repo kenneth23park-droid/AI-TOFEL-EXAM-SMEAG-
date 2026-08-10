@@ -2,7 +2,7 @@
  *
  * gate.js/gate.html 이 "이 사이트에 들어올 수 있는가"를 가른다면, 이 파일은
  * "이 SET 을 손댈 수 있는가"를 가른다. 관리자로 로그인해야만
- *   · 재생 중인 오디오 정지/일시정지(assets/admin-bar.js)
+ *   · 시험 셸의 화면 이동·문항 편집 패널(assets/exam-admin-nav.js)
  *   · 오디오 교체(assets/audio-config.js · admin-audio.html)
  *   · 문항 교체(assets/question-config.js · admin-questions.html)
  * 가 열린다. 학생 화면은 로그인 전과 완전히 동일하다.

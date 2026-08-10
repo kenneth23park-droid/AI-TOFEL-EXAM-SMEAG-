@@ -20,7 +20,7 @@
 // v10: 관리자 오디오 설정(admin-audio.html · assets/audio-config.js) 추가.
 //      오프라인에서도 출제자가 문항별 오디오를 지정/미리듣기 할 수 있어야 하므로 프리캐시.
 // v11: SET 별 관리자 계층 추가 — 관리자 로그인(assets/admin-session.js), 오디오
-//      정지/일시정지 트랜스포트와 플로팅 바(assets/admin-bar.js), 문항 교체
+//      정지/일시정지 트랜스포트와 플로팅 바(assets/admin-bar.js — v18 에서 삭제), 문항 교체
 //      스토어(assets/question-config.js), 오디오 목록(assets/audio-index.js),
 //      그리고 두 관리자 화면(admin-audio-files.html · admin-questions.html).
 //      set9.html / exam-runtime.html / tests.html / admin-audio.html 의 <script>
@@ -38,7 +38,10 @@
 //      가 함께 바뀌므로 캐시된 옛 CSS 와 새 렌더러가 섞이지 않도록 VERSION 을 올린다.
 // v17: cloze 빈칸 밑줄을 다시 한 줄로 잇고 어간에 붙인다('popul______').
 //      exam.css 만 바뀌지만 캐시된 옛 CSS 가 남으면 화면이 그대로라 VERSION 을 올린다.
-const VERSION = 'sg-v17';
+// v18: 관리자 플로팅 바(assets/admin-bar.js) 삭제 — 오디오 트랜스포트·클립 즉시 교체를
+//      걷어내고, 로그인 진입점(⚙ · Ctrl+Alt+A)만 assets/admin-entry.js 로 남긴다.
+//      시험 셸 HTML 의 <script> 목록이 바뀌었으므로 VERSION 을 올려 캐시를 새로 채운다.
+const VERSION = 'sg-v18';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -51,8 +54,8 @@ const SHELL_ASSETS = [
   // 내부용 접근 게이트 — 오프라인 진입도 이 화면을 먼저 지난다.
   'gate.html', 'assets/gate.js', 'assets/audio-config.js',
 
-  // SET 별 관리자 계층 — 오프라인 수업 중에도 정지/일시정지·교체가 되어야 한다.
-  'assets/admin-session.js', 'assets/admin-bar.js', 'assets/tts-client.js',
+  // SET 별 관리자 계층 — 오프라인 수업 중에도 로그인·문항 교체가 되어야 한다.
+  'assets/admin-session.js', 'assets/admin-entry.js', 'assets/tts-client.js',
   'assets/question-config.js', 'assets/audio-index.js',
 
   // 회원 세션 — 온라인에서 로그인해 둔 상태를 오프라인에서도 헤더가 그려야 한다.

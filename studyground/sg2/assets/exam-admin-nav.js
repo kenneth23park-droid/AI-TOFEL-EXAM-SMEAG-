@@ -8,7 +8,7 @@
  * 완전히 같은 저장소다. 되돌리기를 누르면 원문이 그대로 복원된다.
  *
  * 학생 화면에는 아무 것도 그리지 않는다 — SG_ADMIN.can(set) 이 참일 때만 패널이 뜬다
- * (로그인은 좌하단 ⚙ 또는 Ctrl+Alt+A, assets/admin-bar.js).
+ * (로그인은 좌하단 ⚙ 또는 Ctrl+Alt+A, assets/admin-entry.js).
  *
  * 의존: SG_ADMIN(필수) · SG_QUESTIONS(필수) · SG_RUNTIME(셸이 mount 시 넘겨준다)
  * 노출 전역: window.SG_EXAM_ADMIN
