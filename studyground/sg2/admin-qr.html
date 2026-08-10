@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>QR Cards · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  .bar { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+  .bar .field { margin:0; }
+  .note { font-size:12.5px; color:var(--dim); }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px; margin-top:18px; }
+  .card-qr { border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center; background:#fff;
+             break-inside:avoid; }
+  .card-qr .nm { font-weight:800; font-size:15px; }
+  .card-qr .id { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:19px; font-weight:850; margin-top:2px; }
+  .card-qr .meta { font-size:11px; color:var(--dim); margin-top:2px; }
+  .card-qr svg { margin-top:8px; }
+  .bad { color:#b3261e; font-weight:700; }
+  @media print {
+    .nav, .foot, .no-print, .page-h { display:none !important; }
+    body { background:#fff; }
+    .cards { grid-template-columns:repeat(3,1fr); gap:8px; }
+    .card-qr { border:1px dashed #bbb; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
+    <div class="nav-right" style="margin-left:auto">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="admin.html"><span data-en>Admin home</span><span data-ko>관리자 홈</span></a>
+      <a class="btn ghost sm" href="login.html"><span data-en>Login</span><span data-ko>로그인</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-h">
+    <h1 style="font-size:clamp(24px,3vw,34px)"><span data-en>QR login cards</span><span data-ko>QR 로그인 카드</span></h1>
+    <p class="muted mt-8" style="font-size:13.5px">
+      <span data-en>Print one card per student for a test date. Scanning it at the login screen signs them in; the ID and password are printed too, so a failed scan is never a blocker.</span>
+      <span data-ko>시험일별로 학생 한 명당 카드 한 장을 인쇄합니다. 로그인 화면에서 스캔하면 바로 들어가고, 아이디·비밀번호도 같이 찍혀 있어 스캔이 안 돼도 막히지 않습니다.</span></p>
+  </div>
+
+  <div class="card no-print">
+    <div class="bar">
+      <div class="field" style="min-width:190px"><label data-en>Test date</label><label data-ko>시험일자</label>
+        <input id="date" type="date"></div>
+      <button class="btn brand" id="load"><span data-en>Load</span><span data-ko>불러오기</span></button>
+      <button class="btn ghost" id="print"><span data-en>Print</span><span data-ko>인쇄</span></button>
+      <div style="margin-left:auto" class="note" id="status"></div>
+    </div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+</main>
+
+<footer class="foot no-print"><div class="wrap foot-in">
+  <small class="muted">© SMEAG StudyGround · Admin</small>
+</div></footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script src="assets/sg-qr.js"></script>
+<script>
+/* 관리자 전용 화면. 명단은 sg_exam_accounts 에서 오고, RLS 가 관리자만 읽게 막는다 —
+ * 이 화면의 로그인 검사는 안내일 뿐 방어선이 아니다. */
+(function () {
+  'use strict';
+  var status = document.getElementById('status'), cards = document.getElementById('cards');
+  var dateEl = document.getElementById('date');
+
+  function two(n) { return (n < 10 ? '0' : '') + n; }
+  function todayStr() { var d = new Date(); return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()); }
+  dateEl.value = todayStr();
+
+  function say(en, ko, bad) {
+    status.innerHTML = '<span data-en></span><span data-ko></span>';
+    status.querySelector('[data-en]').textContent = en;
+    status.querySelector('[data-ko]').textContent = ko || en;
+    status.className = 'note' + (bad ? ' bad' : '');
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  function load() {
+    var date = dateEl.value;
+    if (!date) return;
+    cards.innerHTML = '';
+    say('Loading…', '불러오는 중…');
+
+    SG_AUTH.token().then(function (tok) {
+      if (!tok) {
+        say('Log in as an admin first.', '관리자로 먼저 로그인하세요.', true);
+        return null;
+      }
+      return fetch(SG_AUTH.url + '/rest/v1/sg_exam_accounts?exam_date=eq.' + date +
+                   '&select=student_id,name,exam_date&order=student_id.asc', {
+        headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok }
+      }).then(function (r) { return r.ok ? r.json() : null; });
+    }).then(function (rows) {
+      if (!rows) { if (status.className.indexOf('bad') < 0) say('Could not load the list.', '명단을 불러오지 못했습니다.', true); return; }
+      if (!rows.length) {
+        say('No students registered for ' + date + '.', date + ' 에 등록된 학생이 없습니다.');
+        return;
+      }
+      cards.innerHTML = rows.map(function (r) {
+        var payload = 'SG2|' + r.student_id + '|' + r.exam_date;
+        return '<div class="card-qr">' +
+          '<div class="nm">' + esc(r.name) + '</div>' +
+          '<div class="id">' + esc(r.student_id) + '</div>' +
+          '<div class="meta">' + esc(r.exam_date) + ' · PW 2222</div>' +
+          (window.SG_QR ? SG_QR.svg(payload, { size: 132 }) : '') +
+          '</div>';
+      }).join('');
+      say(rows.length + ' cards ready.', rows.length + '장 준비됨.');
+      verify(rows);
+    }).catch(function () {
+      say('Network error.', '네트워크 오류.', true);
+    });
+  }
+
+  /* 인쇄 전에 첫 카드를 브라우저 디코더로 실제로 읽어 본다. 지원하지 않는
+   * 브라우저면 조용히 넘어간다 — 카드에 아이디가 찍혀 있어 치명적이지 않다. */
+  function verify(rows) {
+    if (!window.SG_QR || !SG_QR.canScan()) return;
+    var r = rows[0], payload = 'SG2|' + r.student_id + '|' + r.exam_date;
+    var img = new Image();
+    img.onload = function () {
+      var cv = document.createElement('canvas');
+      cv.width = cv.height = 360;
+      var cx = cv.getContext('2d');
+      cx.fillStyle = '#fff'; cx.fillRect(0, 0, 360, 360);
+      cx.imageSmoothingEnabled = false;
+      cx.drawImage(img, 0, 0, 360, 360);
+      new window.BarcodeDetector({ formats: ['qr_code'] }).detect(cv).then(function (codes) {
+        if (codes.length && codes[0].rawValue === payload) {
+          say(rows.length + ' cards ready · QR verified.', rows.length + '장 준비됨 · QR 확인 완료.');
+        } else {
+          say('QR did not decode — hand out the printed IDs.', 'QR 이 읽히지 않습니다 — 인쇄된 아이디를 쓰게 하세요.', true);
+        }
+      }).catch(function () {});
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(SG_QR.svg(payload, { size: 132 }))));
+  }
+
+  document.getElementById('load').addEventListener('click', load);
+  document.getElementById('print').addEventListener('click', function () { window.print(); });
+  dateEl.addEventListener('change', load);
+  load();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

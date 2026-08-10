@@ -15,6 +15,11 @@
   .auth-err { display:none; font-size:13px; font-weight:700; color:#b3261e; background:#fdeceb;
               border:1px solid #f5c6c2; border-radius:10px; padding:10px 12px; margin-bottom:14px; }
   .auth-err.on { display:block; }
+  /* QR 스캐너 — 버튼을 누르기 전엔 카메라를 켜지 않는다. */
+  .scan { display:none; margin-bottom:14px; }
+  .scan.on { display:block; }
+  .scan video { width:100%; border-radius:12px; background:#111; aspect-ratio:4/3; object-fit:cover; }
+  .scan-msg { font-size:12px; color:var(--dim); margin-top:6px; text-align:center; }
 </style>
 </head>
 <body>
@@ -34,11 +39,24 @@
     <h1><span data-en>Welcome back</span><span data-ko>다시 오신 걸 환영해요</span></h1>
     <p class="sub"><span data-en>Log in to continue your TOEFL prep.</span><span data-ko>TOEFL 학습을 이어가려면 로그인하세요.</span></p>
     <div class="auth-err" id="err"><span data-en></span><span data-ko></span></div>
+
+    <!-- QR 배부 카드로 들어오는 길. 카메라가 없으면 버튼 자체가 숨는다. -->
+    <button class="btn ghost block lg" type="button" id="scan-btn" hidden>
+      <span data-en>📷 Scan my QR card</span><span data-ko>📷 QR 카드 스캔</span></button>
+    <div class="scan" id="scan">
+      <video id="cam" muted playsinline></video>
+      <div class="scan-msg"><span data-en>Hold the QR card in front of the camera.</span><span data-ko>QR 카드를 카메라에 비추세요.</span></div>
+      <button class="btn ghost block sm mt-8" type="button" id="scan-stop"><span data-en>Cancel</span><span data-ko>취소</span></button>
+    </div>
+
+    <div class="divider" id="or-scan" hidden><span data-en>or type it</span><span data-ko>또는 직접 입력</span></div>
+
     <form id="f">
-      <div class="field"><label data-en>Student ID or email</label><label data-ko>학번 또는 이메일</label>
-        <input id="login" type="text" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="s2025001" required></div>
+      <div class="field"><label data-en>ID</label><label data-ko>아이디</label>
+        <input id="login" type="text" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="smeag007" required>
+        <div class="scan-msg" style="text-align:left"><span data-en>Students: smeag000–smeag999. Staff: your admin ID.</span><span data-ko>수험생은 smeag000~smeag999, 관리자는 관리자 아이디.</span></div></div>
       <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
-        <input id="pw" type="password" name="password" autocomplete="current-password" placeholder="••••••••" required></div>
+        <input id="pw" type="password" name="password" autocomplete="current-password" value="2222" required></div>
       <button class="btn brand block lg" id="go" type="submit"><span data-en>Log in</span><span data-ko>로그인</span></button>
     </form>
     <div class="divider"><span data-en>or</span><span data-ko>또는</span></div>
@@ -50,6 +68,7 @@
 
 <script src="assets/app.js"></script>
 <script src="assets/sg-auth.js"></script>
+<script src="assets/sg-qr.js"></script>
 <script>
 /* 이메일 또는 학번 + 비밀번호 → Supabase 세션. ?next= 가 있으면 그 페이지로 돌아간다. */
 (function () {
@@ -70,18 +89,74 @@
   if (window.SG_AUTH && SG_AUTH.user()) location.replace(next);
   document.getElementById('guest').setAttribute('href', next);
 
-  f.addEventListener('submit', function (e) {
-    e.preventDefault();
+  function enter(id, pw, examDate) {
     err.classList.remove('on');
     go.disabled = true;
-
-    SG_AUTH.signIn(document.getElementById('login').value.trim(), document.getElementById('pw').value)
+    return SG_AUTH.signIn(id, pw, examDate)
       .then(function () { location.replace(next); })
       .catch(function (e2) {
         go.disabled = false;
-        document.getElementById('pw').value = '';
+        document.getElementById('pw').value = '2222';
         show(e2.message, e2.messageKo);
       });
+  }
+
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    enter(document.getElementById('login').value.trim(), document.getElementById('pw').value);
+  });
+
+  /* ── QR 카드 ────────────────────────────────────────────────
+   * 배부 카드의 내용은 "SG2|smeag007|2026-08-10". 비밀번호는 담지 않는다 —
+   * 어차피 전부 2222 라 QR 에 넣어봐야 보호되는 게 없고, 카드만 주우면
+   * 다 되는 상태를 만들 이유도 없다. 카드는 "아이디 타이핑 대행"이다. */
+  function fromCode(raw) {
+    var m = /^SG2\|(smeag\d{3})\|(\d{4}-\d{2}-\d{2})/.exec(String(raw || '').trim());
+    if (!m) return null;
+    return { id: m[1], date: m[2] };
+  }
+
+  function useCode(raw) {
+    var c = fromCode(raw);
+    if (!c) {
+      show('That QR is not a StudyGround card.', 'StudyGround 카드가 아닌 QR 입니다.');
+      return;
+    }
+    document.getElementById('login').value = c.id;
+    enter(c.id, '2222', c.date);   // 카드가 자기 시험일을 들고 온다
+  }
+
+  // 카드를 폰 카메라로 찍어 열었을 때: login.html#SG2|smeag007|2026-08-10
+  var hash = decodeURIComponent((location.hash || '').replace(/^#/, ''));
+  if (hash.indexOf('SG2|') === 0) useCode(hash);
+
+  var scanBtn = document.getElementById('scan-btn');
+  var scanBox = document.getElementById('scan');
+  var stop = null;
+
+  if (window.SG_QR && SG_QR.canScan()) {
+    scanBtn.hidden = false;
+    document.getElementById('or-scan').hidden = false;
+  }
+
+  scanBtn.addEventListener('click', function () {
+    scanBox.classList.add('on');
+    scanBtn.hidden = true;
+    stop = SG_QR.scan(document.getElementById('cam'), function (text) {
+      scanBox.classList.remove('on');
+      scanBtn.hidden = false;
+      useCode(text);
+    }, function () {
+      scanBox.classList.remove('on');
+      scanBtn.hidden = false;
+      show('Cannot open the camera. Type your ID instead.', '카메라를 열 수 없습니다. 아이디를 직접 입력하세요.');
+    });
+  });
+
+  document.getElementById('scan-stop').addEventListener('click', function () {
+    if (stop) stop();
+    scanBox.classList.remove('on');
+    scanBtn.hidden = false;
   });
 })();
 </script>
