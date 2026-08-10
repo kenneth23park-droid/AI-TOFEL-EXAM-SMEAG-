@@ -45,6 +45,7 @@
 
   .qbody { display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:12px; }
   .qrow.open .qbody { display:block; }
+
   .fld { margin-bottom:11px; }
   .fld > label { display:block; font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
     color:var(--muted); margin-bottom:5px; }
@@ -83,6 +84,26 @@
   .engines select:disabled { color:var(--dim); background:var(--cream-2); }
   .engnote { font-size:11px; color:var(--muted); }
   .engnote b { color:#a8331a; }
+  /* 키 행 — 엔진마다 "서버에 설정됨 / 이 기기 키 / 키 없음" 셋 중 하나를 보여준다. */
+  .keyrow { display:flex; flex-wrap:wrap; gap:7px; align-items:center; margin:2px 0 4px;
+    font-size:11.5px; color:var(--muted); }
+  .keyrow .kstate { display:inline-flex; align-items:center; gap:5px; padding:3px 8px;
+    border-radius:6px; font-size:11px; font-weight:650; }
+  .keyrow .kstate.srv { background:#e6f2ea; color:#1c6b45; }
+  .keyrow .kstate.loc { background:#fdf1dc; color:#8a5a12; }
+  .keyrow .kstate.none { background:#fbe6e2; color:#a8331a; }
+  .keyrow code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px;
+    background:var(--paper,#fff); border:1px solid var(--line-2); border-radius:5px; padding:2px 6px; }
+  .keyrow button { font:inherit; font-size:11px; padding:3px 9px; border:1px solid var(--line-2);
+    border-radius:6px; background:var(--paper,#fff); color:var(--ink); cursor:pointer; }
+  .keyrow button:hover { background:var(--cream-2); }
+  .keyrow input { font:inherit; font-size:11.5px; padding:4px 8px; border:1px solid var(--line-2);
+    border-radius:6px; background:var(--paper,#fff); color:var(--ink); min-width:210px; }
+  @media (prefers-color-scheme: dark) {
+    .keyrow .kstate.srv { background:#12301f; color:#7fd6a6; }
+    .keyrow .kstate.loc { background:#33260c; color:#f0c274; }
+    .keyrow .kstate.none { background:#331815; color:#f0a094; }
+  }
   .voices { display:flex; flex-wrap:wrap; gap:8px; margin:9px 0 4px; }
   .voices .vrow { display:flex; align-items:center; gap:6px; background:var(--paper,#fff);
     border:1px solid var(--line-2); border-radius:9px; padding:5px 9px; font-size:12px; }
@@ -96,6 +117,69 @@
   .genout:not(:empty) { margin-top:9px; }
   .file-btn { position:relative; overflow:hidden; }
   .file-btn input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+  /* ── 화면은 화이트블루, 편집 칸은 어두운 편집기 ────────────
+     VS Code 처럼 "읽는 면"과 "고치는 면"을 색으로 가른다. 페이지 바탕은 아주 옅은
+     푸른 흰색이고, 실제로 글자를 고치는 칸만 짙은 청회색 판에 흰 글씨다.
+     이 블록은 스타일시트 맨 끝에 둔다 — 위의 .fld 규칙과 특정도가 같아서,
+     순서가 앞서면 흰 바탕이 이겨 절반만 칠해진다(실제로 그랬다). */
+  body { background: #eef3fa; }                     /* 화이트블루 바탕 */
+  .qrow { background: #ffffff; border-color: #d8e2ee; }
+  .qrow.is-ovr { border-color: var(--brand); }
+
+  .qbody {
+    --edit-bg:   #20262e;   /* 편집 판 — 칠판이자 VS Code 어두운 편집기 */
+    --edit-bg-2: #1a2027;   /* 한 겹 더 어두운 패널 */
+    --edit-line: #3a4552;
+    --edit-ink:  #f5f8fa;   /* 흰 글씨 */
+    --edit-dim:  #9fb1c4;   /* 흐린 글씨(플레이스홀더·보조) */
+  }
+  .qbody textarea,
+  .qbody input[type=text],
+  .qbody input[type=number],
+  .qbody input[type=url],
+  .qbody select,
+  .qbody .fld textarea,
+  .qbody .fld input[type=text],
+  .qbody .fld input[type=number],
+  .qbody .choicerow input[type=text],
+  .qbody .mini input,
+  .qbody .keyrow input,
+  .qbody .engines select {
+    background: var(--edit-bg);
+    color: var(--edit-ink);
+    border-color: var(--edit-line);
+    caret-color: #ffffff;
+  }
+  /* 경로·대본처럼 "코드에 가까운" 칸은 고정폭으로 — 편집기다운 결. */
+  .qbody .fld input[data-f=audio],
+  .qbody .fld input[data-f=image],
+  .qbody .gen textarea {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+  }
+  .qbody textarea::placeholder,
+  .qbody input::placeholder { color: var(--edit-dim); }
+  .qbody textarea:focus,
+  .qbody input:focus,
+  .qbody select:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 2px rgba(232, 72, 31, .3);
+  }
+  .qbody ::selection { background: #35506b; color: #fff; }
+
+  /* 생성 패널은 편집 판 위에 한 겹 더 어두운 면으로 앉힌다. */
+  .qbody .gen { background: var(--edit-bg-2); border-color: var(--edit-line); }
+  .qbody .gen > label, .qbody .gen .muted, .qbody .gen .mini, .qbody .engnote,
+  .qbody .keyrow { color: var(--edit-dim); }
+  .qbody .gen .muted b, .qbody .gen b { color: var(--edit-ink); }
+  .qbody .voices .vrow { background: var(--edit-bg); border-color: var(--edit-line); color: var(--edit-ink); }
+  .qbody .voices select { color: var(--edit-ink); }
+  .qbody .keyrow code { background: var(--edit-bg); border-color: var(--edit-line); color: var(--edit-ink); }
+  .qbody .choicerow .key { color: var(--edit-dim); }
+  /* 지문 미리보기(.ctx)와 원문(.orig)은 읽는 면이므로 밝게 둔다. */
+  .qbody .ctx, .qbody .orig { background: #e8eef7; color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -157,6 +241,7 @@
 <script src="assets/audio-index.js"></script>
 <script src="assets/audio-config.js"></script>
 <script src="assets/admin-session.js"></script>
+<script src="assets/sg-auth.js"></script>
 <script src="assets/admin-log.js"></script>
 <script src="assets/tts-client.js"></script>
 <script src="assets/app.js"></script>
@@ -388,6 +473,7 @@
               '<select data-f="model"></select></label>' +
             '<span class="engnote"></span>' +
           '</div>' +
+          '<div class="keyrow" data-role="keyrow"></div>' +
           '<div class="voices" data-role="voices"></div>' +
           '<div class="qacts">' +
             '<label class="mini"><span data-en>gap ms</span><span data-ko>간격 ms</span>' +
@@ -484,13 +570,23 @@
      대본을 "화자: 대사" 로 적으면 화자마다 다른 목소리로 합성해 한 mp3 로 돌려준다.
      API 키는 서버(Vercel 환경변수)에만 있고, 여기서는 공용 토큰만 들고 부른다. */
   var CAT = null, catLoading = false;
+  /* 항상 Promise 를 돌려준다. 키를 바꾼 뒤 "다시 받고 → 다시 그리기" 를 이어 붙여야 하는데,
+     아무것도 반환하지 않으면 호출부가 그 순서를 보장할 수 없다. */
+  var catPromise = null;
   function loadCatalog() {
-    if (CAT || catLoading) return;
+    if (CAT) return Promise.resolve(CAT);
+    if (catPromise) return catPromise;
     catLoading = true;
-    SG_TTS_GEN.catalog().then(function (c) {
-      CAT = c;
-      host.querySelectorAll('.qrow.open').forEach(function (r) { paintEngines(r); paintVoices(r); });
+    catPromise = SG_TTS_GEN.catalog().then(function (c) {
+      CAT = c; catLoading = false; catPromise = null;
+      host.querySelectorAll('.qrow.open').forEach(function (r) {
+        // 엔진 목록은 ready 표시가 달라졌을 수 있으므로 비우고 다시 만든다.
+        var ps = r.querySelector('[data-f=provider]'); if (ps) ps.innerHTML = '';
+        paintEngines(r); paintKeyRow(r); paintVoices(r);
+      });
+      return c;
     });
+    return catPromise;
   }
   function providerOf(row) {
     var s = row.querySelector('[data-f=provider]');
@@ -508,9 +604,12 @@
     if (!ps) return;
     if (!ps.options.length) {
       ps.innerHTML = CAT.providers.map(function (p) {
-        return '<option value="' + esc(p.id) + '"' + (p.ready ? '' : ' disabled') +
-          (p.ready && !ps.value ? ' selected' : '') + '>' + esc(p.label) +
-          (p.ready ? '' : ' — ' + (p.local ? 'local only' : 'no key')) + '</option>';
+        // 키가 없어도 고를 수 있어야 한다 — 골라야 키를 넣을 자리가 열린다.
+        // 정말 못 쓰는 건 로컬 전용(kokoro)뿐이다.
+        var locked = !!p.local;
+        var tail = p.local ? ' — 로컬 전용' : (p.ready ? (p.byLocalKey ? ' — 이 기기 키' : '') : ' — 키 필요');
+        return '<option value="' + esc(p.id) + '"' + (locked ? ' disabled' : '') + '>' +
+          esc(p.label) + tail + '</option>';
       }).join('');
       var first = CAT.providers.filter(function (p) { return p.ready; })[0];
       if (first) ps.value = first.id;
@@ -536,6 +635,52 @@
     note.innerHTML = esc('mp3 ' + P.mp3 + (P.free ? ' · ' + P.free : '') +
       (P.gap ? '' : ' · gap not supported')) + (P.ready ? '' : ' · <b>' + esc(P.note || '') + '</b>');
   }
+  /** 엔진의 키 상태를 한 줄로. 값은 절대 원문으로 그리지 않는다 — 마스킹만 보여준다. */
+  function paintKeyRow(row) {
+    var box = row.querySelector('[data-role=keyrow]');
+    var P = providerOf(row);
+    if (!box) return;
+    if (!P || P.local) { box.innerHTML = ''; return; }
+    if (!P.acceptsKey) { box.innerHTML = ''; return; }
+
+    if (box.dataset.editing === P.id) return;      // 입력 중이면 다시 그리지 않는다
+
+    var envName = P.envVar ? ' (' + esc(P.envVar) + ')' : '';
+    if (P.envReady) {
+      box.innerHTML = '<span class="kstate srv">🔒 서버에 설정됨</span>' +
+        '<span>이 엔진의 키는 서버 환경변수에 있습니다' + envName + '. 브라우저에 저장하지 않습니다.</span>';
+      return;
+    }
+    if (SG_TTS_GEN.hasKey(P.id)) {
+      box.innerHTML = '<span class="kstate loc">🔑 이 기기의 키</span>' +
+        '<code>' + esc(SG_TTS_GEN.keyMask(P.id)) + '</code>' +
+        '<button type="button" data-key="edit">변경</button>' +
+        '<button type="button" data-key="clear">삭제</button>';
+      return;
+    }
+    box.innerHTML = '<span class="kstate none">키 없음</span>' +
+      '<span>' + esc(P.label) + ' 키를 넣으면 이 기기에서 바로 생성할 수 있습니다.</span>' +
+      '<button type="button" data-key="edit">키 입력</button>';
+  }
+
+  /** 입력 폼. type=password 로 그려 어깨너머로 읽히지 않게 한다. */
+  function paintKeyForm(row) {
+    var box = row.querySelector('[data-role=keyrow]');
+    var P = providerOf(row);
+    if (!box || !P) return;
+    box.dataset.editing = P.id;
+    box.innerHTML =
+      '<input type="password" data-key="input" autocomplete="off" spellcheck="false" ' +
+        'placeholder="' + esc(P.label) + ' API key 붙여넣기">' +
+      (P.needsRegion ? '<input type="text" data-key="region" placeholder="region (예: eastus)" ' +
+        'value="' + esc(SG_TTS_GEN.regionOf(P.id) || '') + '" style="min-width:120px">' : '') +
+      '<button type="button" data-key="save">저장</button>' +
+      '<button type="button" data-key="cancel">취소</button>' +
+      '<span>이 브라우저에만 저장됩니다. 공용 PC 라면 넣지 마세요.</span>';
+    var inp = box.querySelector('[data-key=input]');
+    if (inp) inp.focus();
+  }
+
   function ensureToken() {
     if (SG_TTS_GEN.hasToken()) return true;
     var t = prompt('Enter the shared TTS token (SG_TTS_TOKEN set on the server):');
@@ -621,7 +766,39 @@
     if (head) {
       head.parentNode.classList.toggle('open');
       if (head.parentNode.classList.contains('open')) {
-        loadCatalog(); paintEngines(head.parentNode); paintVoices(head.parentNode);
+        loadCatalog(); paintEngines(head.parentNode); paintKeyRow(head.parentNode); paintVoices(head.parentNode);
+      }
+      return;
+    }
+    // 키 행 버튼. 여기서 끝내고 아래 data-act 분기로 넘기지 않는다.
+    var kb = e.target.closest('[data-key]');
+    if (kb) {
+      var krow = kb.closest('.qrow'), kbox = kb.closest('[data-role=keyrow]');
+      var KP = providerOf(krow);
+      var kact = kb.getAttribute('data-key');
+      if (!KP) return;
+      if (kact === 'edit') { paintKeyForm(krow); return; }
+      if (kact === 'cancel') { delete kbox.dataset.editing; paintKeyRow(krow); return; }
+      if (kact === 'clear') {
+        if (!confirm(KP.label + ' 키를 이 브라우저에서 지웁니다. 계속할까요?')) return;
+        SG_TTS_GEN.clearKey(KP.id);
+        delete kbox.dataset.editing;
+        CAT = null; loadCatalog().then(function () { paintEngines(krow); paintKeyRow(krow); });
+        return;
+      }
+      if (kact === 'save') {
+        var v = (kbox.querySelector('[data-key=input]') || {}).value || '';
+        var rg = (kbox.querySelector('[data-key=region]') || {}).value || '';
+        if (!v.trim()) { alert('키를 붙여넣어 주세요.'); return; }
+        SG_TTS_GEN.setKey(KP.id, v, rg);
+        delete kbox.dataset.editing;
+        CAT = null;
+        loadCatalog().then(function () {
+          paintEngines(krow); paintKeyRow(krow);
+          // 새 키로 목소리 목록을 받아 온다 — 서버는 이 키를 모르므로 카탈로그가 비어 있다.
+          return SG_TTS_GEN.loadVoicesWithKey(CAT, KP.id, ['en-US', 'en-GB', 'en-AU']);
+        }).then(function () { paintVoices(krow); });
+        return;
       }
       return;
     }
@@ -659,7 +836,7 @@
     var f = e.target.getAttribute('data-f');
     if (f !== 'provider' && f !== 'lang' && f !== 'model') return;
     var row = e.target.closest('.qrow');
-    if (f === 'provider') paintEngines(row);
+    if (f === 'provider') { paintEngines(row); paintKeyRow(row); }
     paintVoices(row);
   });
   // 대본을 고치면 화자 목록(=목소리 선택 줄)을 다시 그린다.

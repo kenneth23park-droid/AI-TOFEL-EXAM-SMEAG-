@@ -4,8 +4,9 @@
 
   누가 · 언제 · 무엇을 · 어떻게 바꿨는지 한 줄씩 본다. 문항 신규/수정/삭제(되돌리기),
   오디오 URL·업로드 교체, 문항별 제한시간 변경이 모두 여기로 들어온다.
-  기록은 assets/admin-log.js 가 localStorage 에 남긴다 — 정적 사이트라 서버 로그가
-  없으므로, 개발자에게 넘길 때는 JSON/CSV 로 내보낸다.
+  기록은 두 겹이다. assets/admin-log.js 가 이 기기 localStorage 에 먼저 쓰고(오프라인
+  대비), 선생님·관리자로 로그인돼 있으면 Supabase public.sg_admin_log 로 올려 합본을
+  만든다. "이 기기 / 서버 합본" 을 토글해서 볼 수 있고, 어느 쪽이든 JSON/CSV 로 뽑는다.
 
   SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
 -->
@@ -92,6 +93,16 @@
     <button class="btn ghost sm" id="clearBtn"><span data-en>Clear log</span><span data-ko>기록 비우기</span></button>
   </div>
 
+  <!-- 이 기기 버퍼 ↔ Supabase 합본 -->
+  <div class="bar" style="margin-top:0">
+    <span class="seg" id="srcseg">
+      <button data-src="local" class="on"><span data-en>This device</span><span data-ko>이 기기</span></button>
+      <button data-src="remote"><span data-en>Server (all devices)</span><span data-ko>서버 합본</span></button>
+    </span>
+    <button class="btn ghost sm" id="syncBtn"><span data-en>Sync now</span><span data-ko>지금 동기화</span></button>
+    <span class="muted" id="syncmsg" style="font-size:12px;font-weight:700"></span>
+  </div>
+
   <div class="stats" id="stats"></div>
 
   <div class="table-scroll">
@@ -107,8 +118,8 @@
   </table>
   </div>
   <p class="muted" style="font-size:11.5px;margin-top:14px">
-    <span data-en>The log lives in this browser (most recent 800 entries). It is not sent anywhere — export it to share.</span>
-    <span data-ko>기록은 이 브라우저에 최근 800건까지 남습니다. 어디로도 전송되지 않으므로, 공유하려면 내보내기를 쓰세요.</span>
+    <span data-en>This device keeps the most recent 800 entries; the server holds the combined trail from every device. Uploads need a teacher/admin sign-in, and the server copy is append-only — it cannot be edited or cleared from here.</span>
+    <span data-ko>이 기기에는 최근 800건, 서버에는 모든 기기의 합본이 남습니다. 업로드는 선생님·관리자 로그인이 필요하고, 서버 기록은 추가 전용이라 이 화면에서 수정·삭제할 수 없습니다.</span>
   </p>
 </main>
 
@@ -118,6 +129,7 @@
 </div>
 
 <script src="assets/admin-session.js"></script>
+<script src="assets/sg-auth.js"></script>
 <script src="assets/admin-log.js"></script>
 <script src="assets/app.js"></script>
 <script>
@@ -145,7 +157,45 @@
            (r.note ? ' <span class="muted">· ' + esc(r.note) + '</span>' : '');
   }
 
-  function rowsNow() { return L.list({ q: fQ, action: fAct === 'all' ? '' : fAct, set: fSet === 'all' ? '' : fSet }); }
+  var source = 'local', REMOTE = null, remoteErr = '';
+
+  function rowsNow() {
+    var f = { q: fQ, action: fAct === 'all' ? '' : fAct, set: fSet === 'all' ? '' : fSet };
+    if (source === 'local') return L.list(f);
+    // 서버 합본은 이미 받아 둔 목록을 같은 규칙으로 거른다.
+    return (REMOTE || []).filter(function (r) {
+      if (f.set && r.set !== f.set) return false;
+      if (f.action && r.action !== f.action) return false;
+      if (f.q) {
+        var hay = (r.who + ' ' + r.set + ' ' + r.action + ' ' + r.target + ' ' + r.field + ' ' +
+                   (r.before || '') + ' ' + (r.after || '') + ' ' + r.note).toLowerCase();
+        if (hay.indexOf(f.q.toLowerCase()) < 0) return false;
+      }
+      return true;
+    });
+  }
+
+  /* 동기화 상태 한 줄. 왜 안 올라가는지도 그대로 적는다 — 조용히 실패하면 안 된다. */
+  function syncLine(extra) {
+    var st = L.syncStatus(), n = L.pending();
+    var msg;
+    if (st.ok) msg = n ? (n + ' waiting to upload') : 'all synced';
+    else if (st.reason === 'signed-out') msg = 'signed out — sign in as a teacher/admin to sync (' + n + ' waiting)';
+    else if (st.reason === 'no-auth-script') msg = 'sync unavailable on this page';
+    else msg = st.reason + ' (' + n + ' waiting)';
+    document.getElementById('syncmsg').textContent = (extra ? extra + ' · ' : '') + msg + ' · ' + L.device();
+  }
+
+  function loadRemote() {
+    remoteErr = '';
+    document.getElementById('syncmsg').textContent = 'loading server log…';
+    return L.remote({ limit: 500 }).then(function (list) {
+      REMOTE = list; render(); syncLine('server: ' + list.length + ' rows');
+    }).catch(function (e) {
+      REMOTE = []; remoteErr = String(e.message || e); render();
+      document.getElementById('syncmsg').textContent = 'server log unavailable — ' + remoteErr;
+    });
+  }
 
   function render() {
     var list = rowsNow();
@@ -162,7 +212,7 @@
     }).join('') || '<tr><td colspan="5" class="muted" style="padding:18px 9px">' +
       '<span data-en>No changes recorded yet.</span><span data-ko>아직 기록된 변경이 없습니다.</span></td></tr>';
 
-    var all = L.list({});
+    var all = source === 'local' ? L.list({}) : (REMOTE || []);
     var by = {};
     all.forEach(function (r) { by[r.action] = (by[r.action] || 0) + 1; });
     document.getElementById('stats').innerHTML =
@@ -193,6 +243,20 @@
     fSet = b.getAttribute('data-set'); paintSegs(); render();
   });
   document.getElementById('q').addEventListener('input', function () { fQ = this.value.trim(); render(); });
+  document.getElementById('srcseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-src]'); if (!b) return;
+    source = b.getAttribute('data-src');
+    this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    document.getElementById('clearBtn').disabled = source === 'remote';   // 서버 기록은 여기서 못 지운다
+    if (source === 'remote' && !REMOTE) loadRemote(); else { render(); syncLine(); }
+  });
+  document.getElementById('syncBtn').addEventListener('click', function () {
+    syncLine('syncing…');
+    L.sync().then(function (res) {
+      syncLine(res.sent ? ('uploaded ' + res.sent) : (res.skipped ? 'skipped: ' + res.skipped : 'nothing to upload'));
+      if (source === 'remote') loadRemote();
+    });
+  });
 
   function download(text, name, type) {
     var a = document.createElement('a');
@@ -214,7 +278,9 @@
     document.getElementById('gate').hidden = true;
     document.getElementById('main').hidden = false;
     paintSegs(); render();
-    L.onChange(render);
+    L.onChange(function () { render(); syncLine(); });
+    syncLine();
+    L.sync().then(function (res) { if (res.sent) syncLine('uploaded ' + res.sent); });
   }
   document.getElementById('signin').addEventListener('click', function () { A.openLogin('', open); });
   if (A.can()) open(); else A.openLogin('', open);

@@ -54,12 +54,18 @@
 // v23: 답안지 코멘트(선생님 · AI) — assets/sg-comments.js 추가, review.html 이 코멘트를
 //      읽고(학생) 쓰고(선생님·관리자) AI 생성을 부른다. api/feedback.js 는 서버리스라
 //      프리캐시 대상이 아니다(/api/* 는 fetch 핸들러에서 이미 제외).
-// (v24 는 QR 로그인 작업이 차지한다 — 별도 커밋.)
+// v24: QR 로그인 카드 — assets/sg-qr.js(자체 QR 인코더) 와 admin-qr.html(시험일별
+//      카드 인쇄) 추가. login.html 은 스캔 버튼·#SG2 딥링크를, signup.html 은 발급된
+//      아이디와 QR 을 그린다. 세 파일 모두 셸이라 VERSION 을 올려야 재방문 기기가
+//      옛 화면(이메일·비밀번호 가입 폼)을 계속 보지 않는다.
 // v25: 오프라인 사전 다운로드(assets/offline-prep.js · config/offline.set9.json). 미디어는
 //      여전히 lazy cache-first 지만, 페이지가 열리면 그 SET 의 오디오 91개(25 MB)를 미리
 //      끌어와 캐시에 넣는다. 셸 HTML 의 <script> 목록이 바뀌었고, 캐시 이름을 묻는
 //      'sg-cache-names' 메시지 핸들러가 새로 생겼다.
-const VERSION = 'sg-v25';
+// v26: 관리자 변경 로그를 Supabase(public.sg_admin_log)로 올린다 — assets/admin-log.js 가
+//      기기 버퍼와 서버 합본 두 겹을 관리하고, admin-log.html 에 "이 기기 / 서버 합본"
+//      토글이 생겼다. 문항 편집 화면은 화이트블루 바탕 + 어두운 편집 칸으로 바뀌었다.
+const VERSION = 'sg-v26';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -81,6 +87,9 @@ const SHELL_ASSETS = [
 
   // 회원 세션 — 온라인에서 로그인해 둔 상태를 오프라인에서도 헤더가 그려야 한다.
   'assets/sg-auth.js',
+
+  // QR 로그인 카드 — 인코더는 순수 계산이라 오프라인에서도 카드가 그려진다.
+  'assets/sg-qr.js', 'admin-qr.html',
 
   // 오프라인 사전 다운로드 — 목록 자체가 캐시에 있어야, 두 번째 방문이 오프라인이어도
   // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.
