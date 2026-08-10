@@ -96,14 +96,24 @@ def resolve_audio(ref, where):
 #   503..509                                          → Speaking Task1 Q1-7
 #   512                                               → Speaking Task2
 # 아래 표는 그 순서를 그대로 옮긴 것이다.
-
+#
+# ── 확장자 .webp (2026-08-10) ───────────────────────────────────────────────
+# docx 에서 뽑은 png 는 문서에 박혀 있던 축소본이라 화자 사진이 116×184 밖에 안 된다.
+# 같은 인물·같은 포즈의 800×1200 원본이 media/pictures/ 루트에
+# "TOEFL Listening Image (…).webp" 로 이미 들어와 있어 그걸 set9/ 로 옮겨 쓴다.
+# png 원본은 mapping.json 의 근거로 남겨 두되 화면에서는 쓰지 않는다.
+# speaker-e 는 docx 에서 speaker-a 와 같은 인물이었다 — Q1-12 화자가 4명뿐이 되므로
+# 남는 인물(데님셔츠·안경)로 돌려 5명을 채웠다. 그 인물은 L2 12-15 강의 화자와 겹치는데,
+# 고해상도 원본이 8장뿐이라 9자리 중 한 번의 재사용은 피할 수 없다. 같은 블록 안이 아니라
+# 모듈이 다른 두 자리로 밀어 둔 것이다.
 L1_Q1_12_IMAGES = ['a', 'b', 'c', 'd', 'e', 'b', 'd', 'c', 'd', 'e', 'b', 'c']
 L2_Q1_3_IMAGES = ['e', 'c', 'b']
+PIC_EXT = '.webp'
 L2_BLOCK_IMAGES = {
-    'Questions 4-5': 'l2-q4-5-conversation.png',
-    'Questions 6-7': 'l2-q6-7-conversation.png',
-    'Questions 8-11': 'l2-q8-11-talk.png',
-    'Questions 12-15': 'l2-q12-15-talk.png',
+    'Questions 4-5': 'l2-q4-5-conversation' + PIC_EXT,
+    'Questions 6-7': 'l2-q6-7-conversation' + PIC_EXT,
+    'Questions 8-11': 'l2-q8-11-talk' + PIC_EXT,
+    'Questions 12-15': 'l2-q12-15-talk' + PIC_EXT,
 }
 
 
@@ -474,13 +484,13 @@ def wire_listening(sec):
             if mod['id'] == 'L1' and blk.get('perQuestionAudio'):
                 for i, q in enumerate(qs):
                     if i < len(L1_Q1_12_IMAGES):
-                        p = pic('l1-q1-12-speaker-' + L1_Q1_12_IMAGES[i] + '.png', where0 + '/' + q['id'])
+                        p = pic('l1-q1-12-speaker-' + L1_Q1_12_IMAGES[i] + PIC_EXT, where0 + '/' + q['id'])
                         if p:
                             q['image'] = p
             elif mod['id'] == 'L2' and blk.get('perQuestionAudio'):
                 for i, q in enumerate(qs):
                     if i < len(L2_Q1_3_IMAGES):
-                        p = pic('l1-q1-12-speaker-' + L2_Q1_3_IMAGES[i] + '.png', where0 + '/' + q['id'])
+                        p = pic('l1-q1-12-speaker-' + L2_Q1_3_IMAGES[i] + PIC_EXT, where0 + '/' + q['id'])
                         if p:
                             q['image'] = p
             elif mod['id'] == 'L2':
