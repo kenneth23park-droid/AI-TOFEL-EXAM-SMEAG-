@@ -42,6 +42,9 @@ class Settings:
     database_url: str
     anthropic_api_key: str
     anthropic_model: str
+    openai_api_key: str
+    openai_model: str
+    llm_provider: str             # 'both' | 'anthropic' | 'openai' — 병행 시 앞에서부터 시도
     default_lang: str             # UI 기본은 영어
     seed_on_start: bool
     sqlite_path: Path
@@ -58,9 +61,23 @@ class Settings:
         return self.app_mode == "cloud"
 
     @property
+    def llm_providers(self) -> tuple[str, ...]:
+        """실제로 호출 가능한 프로바이더를 시도 순서대로. 키 없는 쪽은 아예 빠진다.
+
+        llm_provider='both' 는 병행 운용 — 앞의 프로바이더가 죽거나 한도에 걸리면
+        뒤가 같은 프롬프트를 이어받는다. 둘 다 실패해야 규칙 기반 초안으로 내려간다.
+        """
+        order = {
+            "anthropic": ("anthropic",),
+            "openai": ("openai",),
+        }.get(self.llm_provider, ("anthropic", "openai"))
+        have = {"anthropic": bool(self.anthropic_api_key), "openai": bool(self.openai_api_key)}
+        return tuple(p for p in order if have[p])
+
+    @property
     def llm_enabled(self) -> bool:
         """Online (LLM) feedback is only attempted in cloud mode with a key."""
-        return self.is_cloud and bool(self.anthropic_api_key)
+        return self.is_cloud and bool(self.llm_providers)
 
     @property
     def scoring_mode(self) -> str:
@@ -85,6 +102,10 @@ def get_settings() -> Settings:
     default_media = Path("/tmp/sg-media") if _env("VERCEL") else PROJECT_DIR / "data" / "media"
     media_root = Path(_env("MEDIA_ROOT") or default_media)
 
+    provider = _env("LLM_PROVIDER", "both").lower()
+    if provider not in ("both", "anthropic", "openai"):
+        provider = "both"
+
     profile = _env("DEFAULT_PROFILE", "toefl").lower()
     if profile not in ("toefl", "ielts"):
         profile = "toefl"
@@ -107,6 +128,9 @@ def get_settings() -> Settings:
         database_url=database_url,
         anthropic_api_key=_env("ANTHROPIC_API_KEY"),
         anthropic_model=_env("ANTHROPIC_MODEL", "claude-sonnet-5"),
+        openai_api_key=_env("OPENAI_API_KEY"),
+        openai_model=_env("OPENAI_MODEL", "gpt-4o"),
+        llm_provider=provider,
         default_lang=_env("DEFAULT_LANG", "en"),
         seed_on_start=_env("SEED_ON_START", "1") not in ("0", "false", "no"),
         sqlite_path=sqlite_path,

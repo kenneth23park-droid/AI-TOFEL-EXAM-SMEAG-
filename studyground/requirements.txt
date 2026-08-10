@@ -7,7 +7,8 @@ pydantic>=2.6
 
 # CLOUD mode
 psycopg[binary]>=3.1      # Supabase / Postgres
-anthropic>=0.40           # online_feedback node
+anthropic>=0.40           # online_feedback / rubric node — LLM_PROVIDER 에 anthropic 이 포함될 때
+openai>=1.40              # 같은 노드의 병행 프로바이더 — 한쪽만 설치돼 있어도 동작한다
 
 # Scoring pipeline — optional: the same nodes run sequentially when absent.
 langgraph>=0.2

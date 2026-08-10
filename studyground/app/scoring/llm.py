@@ -1,18 +1,23 @@
-"""Online feedback node — Claude via the Anthropic SDK.
+"""Online feedback node — Claude(Anthropic) 와 GPT(OpenAI) 병행.
 
-Only reachable in CLOUD mode with ANTHROPIC_API_KEY set. Every failure path
-(missing SDK, missing key, API error, malformed JSON) raises, and the graph
-routes to the offline node instead — the report never comes back empty.
+CLOUD 모드에서 키가 있는 프로바이더만 호출한다. LLM_PROVIDER=both(기본)면
+settings.llm_providers 순서대로 시도해 앞이 죽으면 뒤가 같은 프롬프트를 이어받고,
+전부 실패해야 예외가 올라가 그래프가 규칙 기반 노드로 내려간다 — 보고서가 비는 일은 없다.
+
+프롬프트·스키마는 프로바이더와 무관하게 한 벌만 쓴다(smeag-local-ai/scoring/).
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import os
 from pathlib import Path
 
 from app.config import PROJECT_DIR, get_settings
 from app.schemas import FeedbackItem
+
+log = logging.getLogger(__name__)
 
 _SYSTEM = (
     "You are an ESL assessment specialist writing score-report feedback for a "
@@ -33,31 +38,75 @@ Every scope must appear exactly once. 1-2 sentences per summary,
 1-2 bullet strings each for strengths and improvements."""
 
 
-def generate(analysis: dict, lang: str = "en") -> list[FeedbackItem]:
-    """Raise on any problem — the caller falls back to the rule-based node."""
-    settings = get_settings()
-    if not settings.anthropic_api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY is not set")
+# ── provider layer ────────────────────────────────────────────────────────────
+# 두 SDK 의 차이는 여기서만 흡수한다. 위쪽 로직은 (system, prompt) → text 만 안다.
+# import 는 함수 안에서 한다 — 한쪽 SDK 가 설치돼 있지 않아도 다른 쪽은 그대로 돈다.
 
+def _call_anthropic(system: str, prompt: str, max_tokens: int) -> str:
+    settings = get_settings()
     try:
         from anthropic import Anthropic
     except ImportError as exc:  # SDK not installed in this environment
         raise RuntimeError("anthropic SDK is not installed") from exc
+    message = Anthropic(api_key=settings.anthropic_api_key).messages.create(
+        model=settings.anthropic_model,
+        max_tokens=max_tokens,
+        system=system,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return "".join(b.text for b in message.content if getattr(b, "type", "") == "text")
 
-    client = Anthropic(api_key=settings.anthropic_api_key)
+
+def _call_openai(system: str, prompt: str, max_tokens: int) -> str:
+    settings = get_settings()
+    try:
+        from openai import OpenAI
+    except ImportError as exc:
+        raise RuntimeError("openai SDK is not installed") from exc
+    completion = OpenAI(api_key=settings.openai_api_key).chat.completions.create(
+        model=settings.openai_model,
+        max_tokens=max_tokens,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ],
+    )
+    return completion.choices[0].message.content or ""
+
+
+_CALLERS = {"anthropic": _call_anthropic, "openai": _call_openai}
+
+
+def complete(system: str, prompt: str, *, max_tokens: int) -> tuple[str, str]:
+    """(응답 텍스트, 실제로 답한 프로바이더). 전부 실패하면 마지막 예외를 올린다.
+
+    빈 응답은 실패로 친다 — 다음 프로바이더에게 기회를 준다.
+    """
+    providers = get_settings().llm_providers
+    if not providers:
+        raise RuntimeError("no LLM provider configured (ANTHROPIC_API_KEY / OPENAI_API_KEY)")
+
+    last: Exception | None = None
+    for name in providers:
+        try:
+            text = _CALLERS[name](system, prompt, max_tokens)
+            if not (text or "").strip():
+                raise ValueError(f"{name} returned an empty response")
+            return text, name
+        except Exception as exc:  # noqa: BLE001 — 다음 프로바이더로 넘긴다
+            log.warning("LLM provider %s failed: %s", name, exc)
+            last = exc
+    raise RuntimeError(f"all LLM providers failed ({', '.join(providers)}): {last}") from last
+
+
+def generate(analysis: dict, lang: str = "en") -> list[FeedbackItem]:
+    """Raise on any problem — the caller falls back to the rule-based node."""
     prompt = (
         f"{_INSTRUCTION.get(lang, _INSTRUCTION['en'])}\n\n"
         f"Scored attempt:\n{json.dumps(analysis, ensure_ascii=False, indent=2)}\n\n"
         f"{_SCHEMA_HINT}"
     )
-
-    message = client.messages.create(
-        model=settings.anthropic_model,
-        max_tokens=1600,
-        system=_SYSTEM,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    text = "".join(block.text for block in message.content if getattr(block, "type", "") == "text")
+    text, _provider = complete(_SYSTEM, prompt, max_tokens=1600)
     return _parse(text)
 
 
@@ -107,6 +156,20 @@ RUBRIC_FILES = {
     ("ielts9", "speaking"): "ielts_speaking",
 }
 
+# 스키마(smeag-local-ai/scoring/schemas/*.json)는 criteria 키를 약어로 쓰는데
+# rubric.CRITERIA 는 교사가 화면에서 보는 풀네임이다. 둘을 여기서 이어준다 —
+# 이 매핑이 없으면 TOEFL 루브릭은 allowed 필터에 전부 걸려 "no usable criteria" 로
+# 죽고 온라인 채점이 통째로 규칙 기반 초안으로 떨어진다.
+# IELTS(TR/CC/LR/GRA · FC/LR/GRA/PRO)는 약어가 곧 표시 이름이라 매핑이 필요 없다.
+_CRITERION_ALIASES = {
+    "TF": "Task Fulfilment",
+    "OD": "Organization & Development",
+    "LU": "Language Use",
+    "VO": "Vocabulary",
+    "DEL": "Delivery",
+    "TD": "Topic Development",
+}
+
 _RUBRIC_LANG = {
     "en": "Write every rationale, comment and summary in English.",
     "ko": "rationale·comment·summary 는 한국어로 작성하세요.",
@@ -143,15 +206,6 @@ def generate_rubric(
     Raises on **every** problem (no key, no SDK, no rubric file, API error, bad
     JSON) — `nodes.rubric_online` catches and falls back to `rubric.draft()`.
     """
-    settings = get_settings()
-    if not settings.anthropic_api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY is not set")
-
-    try:
-        from anthropic import Anthropic
-    except ImportError as exc:
-        raise RuntimeError("anthropic SDK is not installed") from exc
-
     system, schema = rubric_assets(scale_key, skill)
     is_band = scale_key == "ielts9"
 
@@ -173,16 +227,10 @@ def generate_rubric(
         f"Return ONLY a JSON object valid against this schema:\n{schema}"
     )
 
-    client = Anthropic(api_key=settings.anthropic_api_key)
-    message = client.messages.create(
-        model=settings.anthropic_model,
-        max_tokens=2400,
-        system=system,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    raw = "".join(b.text for b in message.content if getattr(b, "type", "") == "text")
+    raw, provider = complete(system, prompt, max_tokens=2400)
     return _parse_rubric(
-        raw, skill=skill, is_band=is_band, max_score=max_score, allowed=criteria
+        raw, skill=skill, is_band=is_band, max_score=max_score, allowed=criteria,
+        provider=provider,
     )
 
 
@@ -207,6 +255,7 @@ def _parse_rubric(
     is_band: bool,
     max_score: float,
     allowed: tuple[str, ...] | None = None,
+    provider: str = "",
 ) -> list[dict]:
     payload = _json_object(text)
     criteria = payload.get("criteria")
@@ -215,9 +264,13 @@ def _parse_rubric(
 
     summary = str(payload.get("summary_en") or payload.get("summary_ko") or "").strip()
     rows: list[dict] = []
-    for name, entry in criteria.items():
+    for raw_name, entry in criteria.items():
         if not isinstance(entry, dict):
             continue
+        # 모델이 약어로 답해도(스키마가 그렇게 요구한다) 표시 이름으로 되돌린다.
+        name = raw_name if (allowed and raw_name in allowed) else _CRITERION_ALIASES.get(
+            raw_name, raw_name
+        )
         if allowed and name not in allowed:
             continue
         value = entry.get("band") if is_band else entry.get("score")
@@ -242,6 +295,8 @@ def _parse_rubric(
                 "comment": comment,
                 "source": "ai_draft",
                 "origin": "online",
+                # 어느 모델이 매긴 초안인지 — 교사 화면에서 판단 근거로 쓰라고 남긴다.
+                "provider": provider,
             }
         )
     if not rows:
