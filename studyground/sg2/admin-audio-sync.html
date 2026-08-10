@@ -220,7 +220,9 @@
   }
   function compare(item) {
     var st = tokenize(item.text || ''), sa = tokenize(item.asr || '');
-    if (!item.asr || !sa.length) return { ratio: null, scriptHtml: esc(item.text || ''), asrHtml: '' };
+    if (!item.asr || !sa.length) {
+      return { ratio: null, toks: st, miss: {}, scriptHtml: esc(item.text || ''), asrHtml: '' };
+    }
     var r = lcsPairs(st, sa);
     var okS = {}, okA = {};
     r.pairs.forEach(function (p) { okS[p[0]] = 1; okA[p[1]] = 1; });
@@ -231,6 +233,7 @@
       ratio: (2 * r.same) / (st.length + sa.length),
       missing: Object.keys(missS).length,
       extra: Object.keys(extraA).length,
+      toks: st, miss: missS,
       scriptHtml: paint(item.text, st, missS, 'miss'),
       asrHtml: paint(item.asr, sa, extraA, 'extra')
     };
@@ -239,18 +242,27 @@
   /* ── 문장 나누기 + 재생 위치 추정 ─────────────────────────
      문장별 정확한 타임코드는 없다. 글자 수 비례로 나눈 "추정" 구간이며,
      화면에도 추정이라고 적는다. 클릭 이동도 같은 추정을 쓴다. */
+  /* 문장은 원문 안의 [start,end) 구간으로 들고 다닌다 — 형광을 원문 좌표로 칠하려면
+     잘라낸 문자열이 아니라 위치가 필요하다. */
   function sentences(text) {
-    var out = [];
-    String(text || '').split(/\n+/).forEach(function (line) {
-      var t = line.trim(); if (!t) return;
-      var sp = '', m = /^([A-Za-z][A-Za-z0-9 ._'-]{0,20}):\s*(.*)$/.exec(t);
-      if (m) { sp = m[1]; t = m[2]; }
-      (t.match(/[^.!?]+[.!?]*/g) || [t]).forEach(function (s) {
-        s = s.trim(); if (!s) return;
-        out.push({ speaker: sp, text: s });
+    var out = [], src = String(text || '');
+    var lineRe = /[^\n]+/g, lm;
+    while ((lm = lineRe.exec(src))) {
+      var line = lm[0], base = lm.index;
+      var sp = '', off = 0;
+      var pm = /^(\s*)([A-Za-z][A-Za-z0-9 ._'-]{0,20}):\s*/.exec(line);
+      if (pm) { sp = pm[2]; off = pm[0].length; }
+      var rest = line.slice(off);
+      var sRe = /[^.!?]+[.!?]*/g, sm;
+      while ((sm = sRe.exec(rest))) {
+        if (!sm[0].trim()) continue;
+        var lead = sm[0].length - sm[0].replace(/^\s+/, '').length;
+        var start = base + off + sm.index + lead;
+        var end = base + off + sm.index + sm[0].replace(/\s+$/, '').length;
+        out.push({ speaker: sp, text: src.slice(start, end), start: start, end: end });
         sp = '';                       // 화자 표시는 그 줄의 첫 문장에만
-      });
-    });
+      }
+    }
     return out;
   }
   function windows(sents, duration) {
@@ -392,12 +404,9 @@
     SENTS = sentences(cur.text);
     var sc = document.getElementById('sents');
     sc.innerHTML = SENTS.map(function (s, i) {
-      var html;
-      if (c.ratio == null) html = esc(s.text);
-      else {
-        var one = compare({ text: s.text, asr: cur.asr });   // 문장 vs 전체 받아쓰기
-        html = one.scriptHtml;
-      }
+      // 전체 대조 결과(c.miss)를 그대로 잘라 쓴다 — 헤더의 숫자와 형광이 항상 같은 근거다.
+      var html = c.ratio == null ? esc(s.text)
+               : paint(cur.text, c.toks, c.miss, 'miss', s.start, s.end);
       return '<div class="sent" data-i="' + i + '">' +
         (s.speaker ? '<span class="spk">' + esc(s.speaker) + '</span>' : '') + html + '</div>';
     }).join('');
