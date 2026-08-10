@@ -54,6 +54,45 @@
 
   session = load();
 
+  /* ── 학생 계정이 로그인해 있으면 관리자 권한을 덮어 끈다 ──────────
+   *
+   * SG_ADMIN(비밀번호 가림막)과 SG_AUTH(회원 계정)는 서로 다른 세션이라, 선생님이
+   * 쓰던 기기에 관리자 세션(12시간)이 남은 채로 학생이 자기 계정으로 들어오면
+   * 시험 화면에 관리자 패널이 그대로 보였다. 수험생 계정으로 로그인해 있는 동안은
+   * 관리자 세션이 남아 있어도 없는 것으로 친다 — 로그아웃하면 그대로 되살아난다.
+   *
+   * role 이 아직 안 채워진 옛 계정은 일단 학생으로 보고(막는 쪽이 안전),
+   * 서버 프로필을 한 번 받아 온 뒤 다시 판정한다. */
+  var AUTH_KEY = 'sg2_auth_v1';       // sg-auth.js 와 같은 열쇠.
+  function authUser() {
+    var Auth = window.SG_AUTH;
+    if (Auth && typeof Auth.user === 'function') return Auth.user();
+    // sg-auth.js 가 아직 안 떴어도 저장소는 읽을 수 있다 — 패널이 한 번 깜빡이지 않게.
+    try { var s = JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); return (s && s.user) || null; }
+    catch (e) { return null; }
+  }
+
+  function studentSignedIn() {
+    var u = authUser();
+    if (!u) return false;
+    var r = u.role || (u.is_admin ? 'admin' : 'student');
+    return r !== 'teacher' && r !== 'admin';
+  }
+
+  /* sg-auth.js 는 이 파일보다 늦게 로드될 수 있다(시험 셸의 선택 스크립트).
+     떴을 때 한 번 붙잡아 로그인/로그아웃마다 패널이 다시 판정되게 한다. */
+  (function hookAuth(tries) {
+    var Auth = window.SG_AUTH;
+    if (!Auth) {
+      if (tries < 40) setTimeout(function () { hookAuth(tries + 1); }, 250);
+      return;
+    }
+    if (Auth.onChange) Auth.onChange(emit);
+    var u = authUser();
+    if (u && !u.role && Auth.profile) Auth.profile().then(emit, function () {});
+    emit();
+  })(0);
+
   /* 이 페이지가 어떤 SET 을 다루는지: <body data-sg-set> → ?set= → ?testId= → set1 */
   function pageSet() {
     var b = document.body && document.body.getAttribute('data-sg-set');
@@ -77,6 +116,7 @@
     },
     /** setId 에 대한 관리 권한이 있는가. 인자를 비우면 "아무 SET 이라도" 로 본다. */
     can: function (setId) {
+      if (studentSignedIn()) return false;
       var s = API.current();
       if (!s) return false;
       if (s.sets.indexOf('*') >= 0) return true;
@@ -91,6 +131,8 @@
       return s.sets.slice();
     },
     pageSet: pageSet,
+    /** 수험생 계정으로 로그인해 있는가 — 그 동안은 관리자 UI 를 아예 그리지 않는다. */
+    blockedByStudent: studentSignedIn,
 
     login: function (id, pw) {
       var u = String(id || '').trim().toLowerCase(), p = String(pw || '');
@@ -165,10 +207,10 @@
       var pw = modal.querySelector('[name=sga-pw]').value;
       var want = modal.dataset.set || '';
       var signedIn = API.login(id, pw);
-      if (!signedIn || (want && !API.can(want))) {
+      if (!signedIn || studentSignedIn() || (want && !API.can(want))) {
         // 로그인 자체는 됐지만 이 SET 권한이 없는 계정이면 세션을 남기지 않는다.
         // 실패한 입력 때문에 이미 유효한 세션까지 끊기지는 않게 한다.
-        if (signedIn && want && !API.can(want)) API.logout();
+        if (signedIn && (studentSignedIn() || (want && !API.can(want)))) API.logout();
         modal.querySelector('.sga-err').classList.add('on');
         modal.querySelector('[name=sga-pw]').value = '';
         return;

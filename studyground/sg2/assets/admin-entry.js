@@ -52,14 +52,21 @@
       document.addEventListener('keydown', function (e) {
         if (e.ctrlKey && e.altKey && (e.key === 'a' || e.key === 'A')) {
           e.preventDefault();
+          if (blocked()) return;                 // 수험생 계정으로 로그인해 있으면 단축키도 죽는다.
           if (!A.can(setId)) A.openLogin(setId);
         }
       });
     },
     setId: function () { return setId; }
   };
+  function blocked() { return !!(A.blockedByStudent && A.blockedByStudent()); }
+
   // 로그인해 있으면 점은 숨긴다 — 관리자 UI 는 exam-admin-nav.js 가 그린다.
-  function sync() { A.can(setId) ? (dot && (dot.hidden = true)) : showDot(); }
+  // 수험생 계정으로 로그인해 있는 동안은 점 자체를 내놓지 않는다.
+  function sync() {
+    if (blocked() || A.can(setId)) { if (dot) dot.hidden = true; return; }
+    showDot();
+  }
 
   window.SG_ADMIN_ENTRY = ENTRY;
 
