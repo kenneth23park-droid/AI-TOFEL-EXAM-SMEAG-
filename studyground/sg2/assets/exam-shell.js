@@ -173,9 +173,16 @@ window.SG_RUNTIME = (function () {
 
   function scopeScreens(list, section, scope) {
     if (!section || scope !== 'section') return list;
-    var only = [], i;
-    for (i = 0; i < list.length; i++) if (list[i].section === section) only.push(list[i]);
-    return only.length ? only : list;
+    var only = [], i, submit = null;
+    for (i = 0; i < list.length; i++) {
+      if (list[i].section === section) only.push(list[i]);
+      else if (list[i].screenType === 'review') submit = list[i];
+    }
+    if (!only.length) return list;
+    /* 제출 화면은 마지막 섹션(writing) 뒤에만 붙어 있다. 한 영역만 응시할 때도
+       "확인 후 제출" 로 끝나야 하므로, 잘라낸 화면열에 없으면 뒤에 이어 붙인다. */
+    if (submit && only[only.length - 1].screenType !== 'review') only.push(submit);
+    return only;
   }
 
   /* 문항 id → 그 문항이 실린 화면의 인덱스. 없으면 -1. */
@@ -556,8 +563,11 @@ window.SG_RUNTIME = (function () {
            섹션 범위도 같은 이유로 섞는다: 같은 세션 id 로 full/section 을 오갈 때
            화면열 길이가 달라 cursor 가 엉뚱한 화면을 가리키게 된다. */
         var pack0 = contentPack();
+        /* 관리자 교체분(문항 내용·문항별 제한시간)도 해시에 섞는다 — 바뀐 뒤에는
+           옛 세션을 "이어서 응시" 하지 않고 새로 시작해야 바뀐 값이 반영된다. */
+        var ovr = window.SG_QUESTIONS ? SG_QUESTIONS.signature(SET_ID) : '';
         var contentHash = STORE.hashString(pack0
-          ? SET_ID + ':' + (pack0.code || '') + ':' + JSON.stringify(Object.keys(pack0))
+          ? SET_ID + ':' + (pack0.code || '') + ':' + JSON.stringify(Object.keys(pack0)) + ':' + ovr
           : 'no-content');
         var timingHash = STORE.hashString(JSON.stringify(t) + '|' + scope + ':' + (section || 'all'));
 
@@ -567,8 +577,17 @@ window.SG_RUNTIME = (function () {
         CLOCK.attachStore(STORE);
 
         /* `?goq=` 는 "이 문항 화면을 지금 열어라"는 관리자 진입이다 — 이어보기보다 우선한다. */
-        var resumable = (session === active) && !query('goq') &&
-                        STORE.canResume(contentHash, timingHash).ok && !!STORE.cursor();
+        var can = STORE.canResume(contentHash, timingHash);
+        var resumable = (session === active) && !query('goq') && can.ok && !!STORE.cursor();
+
+        /* 이어볼 수 없는 활성 세션은 재사용하지 않고 새 세션을 연다.
+           세트·응시 범위가 달라진 경우(전체 → 리딩만 등) 화면 id 는 그대로라서,
+           같은 세션을 다시 쓰면 옛 시계(남은 시간)와 답안이 새 응시에 섞인다.
+           URL 로 세션을 지정했거나 한 번도 시작한 적 없는 세션은 건드리지 않는다. */
+        if (!can.ok && can.reason !== 'no_meta' && !url.sessionId && session === active) {
+          session = STORE.offlineSessionId();
+          STORE.open(session);
+        }
         var titleEl = document.getElementById('exam-title');
         var code = (pack0 && pack0.code) || url.testId;
         if (titleEl) titleEl.textContent = 'StudyGround ' + (code === 'SET1' ? 'NT-016' : code);

@@ -252,6 +252,11 @@ h2.title { font-size: clamp(24px, 3vw, 34px); font-weight: 820; letter-spacing: 
 .testcard .body { flex: 1; }
 .testcard h4 { font-size: 16px; font-weight: 780; }
 .testcard p { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+/* 응시 범위 선택 — 전체 과정 옆에 놓이는 영역별 진입 줄. */
+.scope { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+.scope-lab { font-size: 11px; font-weight: 750; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .04em; margin-right: 2px; }
+
 .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .chip { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
   background: var(--cream-2); color: var(--ink-2); }
