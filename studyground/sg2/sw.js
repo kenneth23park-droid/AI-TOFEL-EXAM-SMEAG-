@@ -54,7 +54,12 @@
 // v23: 답안지 코멘트(선생님 · AI) — assets/sg-comments.js 추가, review.html 이 코멘트를
 //      읽고(학생) 쓰고(선생님·관리자) AI 생성을 부른다. api/feedback.js 는 서버리스라
 //      프리캐시 대상이 아니다(/api/* 는 fetch 핸들러에서 이미 제외).
-const VERSION = 'sg-v23';
+// (v24 는 QR 로그인 작업이 차지한다 — 별도 커밋.)
+// v25: 오프라인 사전 다운로드(assets/offline-prep.js · config/offline.set9.json). 미디어는
+//      여전히 lazy cache-first 지만, 페이지가 열리면 그 SET 의 오디오 91개(25 MB)를 미리
+//      끌어와 캐시에 넣는다. 셸 HTML 의 <script> 목록이 바뀌었고, 캐시 이름을 묻는
+//      'sg-cache-names' 메시지 핸들러가 새로 생겼다.
+const VERSION = 'sg-v25';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -76,6 +81,10 @@ const SHELL_ASSETS = [
 
   // 회원 세션 — 온라인에서 로그인해 둔 상태를 오프라인에서도 헤더가 그려야 한다.
   'assets/sg-auth.js',
+
+  // 오프라인 사전 다운로드 — 목록 자체가 캐시에 있어야, 두 번째 방문이 오프라인이어도
+  // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.
+  'assets/offline-prep.js', 'config/offline.set9.json',
 
   'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',
@@ -116,6 +125,15 @@ self.addEventListener('activate', (e) => {
       Promise.all(keys.filter((k) => k !== SHELL && k !== MEDIA).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
+});
+
+// 사전 다운로드(assets/offline-prep.js)는 미디어 캐시에 직접 파일을 넣는다. 캐시 이름은
+// VERSION 에 묶여 있고 판올림 때마다 옛 것이 지워지므로, 페이지가 이름을 짐작하게 두면
+// 판올림 직후 이미 버려진 캐시를 채우게 된다. 그래서 여기서 알려준다.
+self.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'sg-cache-names') return;
+  const reply = { shell: SHELL, media: MEDIA, version: VERSION };
+  if (e.ports && e.ports[0]) e.ports[0].postMessage(reply);
 });
 
 function isMedia(url) {

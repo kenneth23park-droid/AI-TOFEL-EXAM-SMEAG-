@@ -431,3 +431,52 @@ html[lang="ko"] [data-ko] { display: revert; }
   /* 값이 없는 칸은 카드에서 자리를 차지하지 않게 한다. */
   body table.cardify td:empty { display: none; }
 }
+
+/* ── 오프라인 사전 다운로드 알림 (assets/offline-prep.js) ──────────
+   받는 동안만 구석에 떠 있다가 끝나면 스스로 사라진다. 학생이 눌러야 하는
+   버튼은 없으므로, 평소에는 존재를 드러내지 않는 크기와 무게로 둔다. */
+.sg-prep {
+  position: fixed; right: 18px; bottom: 18px; z-index: 900;
+  width: min(340px, calc(100vw - 36px));
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; box-shadow: var(--shadow-lg);
+  padding: 14px 16px 15px;
+  opacity: 0; transform: translateY(10px); pointer-events: none;
+  transition: opacity .22s ease, transform .22s ease;
+}
+.sg-prep.on { opacity: 1; transform: none; pointer-events: auto; }
+.sg-prep-row { display: flex; align-items: center; gap: 9px; }
+.sg-prep-title { font-size: 14px; font-weight: 800; flex: 1; letter-spacing: -.01em; }
+.sg-prep-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex: none;
+  background: var(--brand); animation: sg-prep-pulse 1.4s ease-in-out infinite;
+}
+.sg-prep.ok .sg-prep-dot { background: var(--ok); animation: none; }
+@keyframes sg-prep-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+.sg-prep-x {
+  border: 0; background: none; color: var(--dim); font-size: 18px;
+  line-height: 1; padding: 2px 4px; border-radius: 6px;
+}
+.sg-prep-x:hover { color: var(--ink); background: var(--cream-2); }
+.sg-prep-track {
+  height: 5px; border-radius: 100px; background: var(--cream-2);
+  overflow: hidden; margin: 11px 0 9px;
+}
+.sg-prep-track i {
+  display: block; height: 100%; width: 0; border-radius: 100px;
+  background: var(--brand); transition: width .3s ease;
+}
+.sg-prep.ok .sg-prep-track i { background: var(--ok); }
+.sg-prep-sub { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.sg-prep-go {
+  margin-top: 11px; width: 100%; border: 1px solid var(--brand);
+  background: var(--brand); color: #fff; font-size: 13px; font-weight: 700;
+  padding: 8px 12px; border-radius: 9px;
+}
+.sg-prep-go:hover { background: var(--brand-ink); border-color: var(--brand-ink); }
+.sg-prep :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .sg-prep { transition: none; }
+  .sg-prep-dot { animation: none; }
+  .sg-prep-track i { transition: none; }
+}

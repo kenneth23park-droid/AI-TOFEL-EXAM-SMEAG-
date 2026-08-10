@@ -183,5 +183,7 @@
 <script src="assets/exam-render.js"></script>
 <script src="assets/exam-engine.js"></script>
 <script src="assets/exam-shell.js"></script>
+<script src="assets/offline-prep.js" data-mode="check"></script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
 </html>
