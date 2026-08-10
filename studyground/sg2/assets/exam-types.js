@@ -274,7 +274,7 @@
 
   var FIELDS = ['id', 'screenType', 'section', 'module', 'moduleId', 'blockKind', 'progress',
     'questionIds', 'timer', 'timers', 'advance', 'audio', 'image', 'phases',
-    'allowBack', 'transfer', 'controls', 'copy'];
+    'allowBack', 'transfer', 'controls', 'copy', 'timerStartsOnAudioEnd'];
 
   /**
    * TestScreen 팩토리. 계약 위반 시 dev 모드면 throw, 운영 모드면 warn + 안전 기본값으로 degrade.

@@ -162,14 +162,22 @@
     }
 
     /* 화면 진입 시 clock 을 arm 한다. armClock 은 같은 key 가 있으면 덮어쓰지 않으므로
-       재개해도 시간이 늘어나지 않는다(§5.3). */
-    function armScreenClocks(screen) {
+       재개해도 시간이 늘어나지 않는다(§5.3).
+
+       screen.timerStartsOnAudioEnd 가 true 면(오디오와 문항이 한 화면인 TOEFL Listening)
+       그 화면의 question/screen scope 시계는 진입 시점에 걸지 않는다 — 오디오가 도는 동안
+       답변 시간이 깎이면 안 되기 때문이다. 렌더러가 재생 종료 시 startDeferredClocks() 를
+       부르면 그때 arm 된다. 더 넓은 scope(module/section)는 시험 전체 시계라 즉시 건다. */
+    function armScreenClocks(screen, opts) {
       var c = clock();
       if (!c || !screen) return;
+      var deferring = !!(screen.timerStartsOnAudioEnd && !(opts && opts.audioEnded));
       var ts = timersOf(screen);
       for (var i = 0; i < ts.length; i++) {
         var t = ts[i];
         if (!t || t.mode === 'none') continue;
+        var scope = t.scope || 'screen';
+        if (deferring && (scope === 'question' || scope === 'screen')) continue;
         var key = clockKeyFor(screen, t);
         if (!key) continue;
         var action = t.onExpire || 'autoAdvance';
@@ -282,6 +290,18 @@
     }
 
     // 오디오/영상 ended 트리거. maxPlays 1 소진 → 다음 단계로(§2).
+    /* 오디오와 문항이 한 화면인 구성에서, 재생이 끝난 뒤 답변 시계를 건다.
+       렌더러(exam-render-listening.js)가 ended/error 시 부른다. 여러 번 불려도
+       armClock 이 같은 key 를 덮어쓰지 않으므로 시간이 늘어나지 않는다. */
+    function startDeferredClocks() {
+      if (destroyed || state !== 'in_progress') return false;
+      var sc = current();
+      if (!sc || !sc.timerStartsOnAudioEnd) return false;
+      armScreenClocks(sc, { audioEnded: true });
+      log('timer_start_after_audio', { screen: sc.id });
+      return true;
+    }
+
     function audioEnded(srcId) {
       if (destroyed || state !== 'in_progress') return false;
       var sc = current();
@@ -410,6 +430,7 @@
       current: current, currentIndex: currentIndex, screens: function () { return list; },
       status: status, mode: function () { return mode; },
       start: start, next: next, answer: answer, audioEnded: audioEnded, phaseNext: phaseNext,
+      startDeferredClocks: startDeferredClocks,
       phaseIndex: function () { return phaseIndex; },
       markSubmitted: markSubmitted, snapshot: snapshot, restoreTo: restoreTo,
       adminJumpTo: adminJumpTo,

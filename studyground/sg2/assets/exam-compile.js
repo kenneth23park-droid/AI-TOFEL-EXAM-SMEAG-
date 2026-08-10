@@ -316,15 +316,23 @@
    * byQuestionId 가 중복되어 'duplicate question id across screens' 경고가 난다.
    * 대신 progress 만 다음 문항 번호로 채워 서브바 표기를 유지한다(실측 프레임과 동일).
    *
-   * 분리 조건은 secCfg.timerScope === 'question' 이다(새 config 키를 만들지 않는다).
-   * 문항마다 답변 시계가 따로 도는 시험(= TOEFL Listening)에서만 "듣기 → 답하기" 가
-   * 물리적으로 분리되기 때문이다. IELTS Listening 은 timerScope 가 'section' 이고
-   * 30분 단일 시계 아래 **들으면서 답하는** 구조라 분리하면 안 된다 → 출력 무변경. */
+   * 분리 조건은 secCfg.timerScope === 'question' 이다. 문항마다 답변 시계가 따로 도는
+   * 시험에서만 "듣기 → 답하기" 가 물리적으로 분리되기 때문이다. IELTS Listening 은
+   * timerScope 가 'section' 이고 30분 단일 시계 아래 **들으면서 답하는** 구조라 분리하지
+   * 않는다 → 출력 무변경.
+   *
+   * ── 분리 해제 (2026-08-10 spec) ────────────────────────────────────────────
+   * secCfg.audioOnQuestionScreen 이 true 면 위 분리를 끈다(TOEFL). 사진과 선택지가
+   * 함께 있는 한 화면에서 오디오가 재생되어야 한다는 발주처 요구다 — 근거는
+   * config/timing.toefl.json provenance "sections.listening.audioOnQuestionScreen".
+   * 이때 답변 시계는 화면 진입이 아니라 **오디오가 끝난 뒤** 시작해야 하므로
+   * 화면에 timerStartsOnAudioEnd:true 를 달아 엔진에 알린다(exam-engine.js armScreenClocks). */
   function audioSetBlock(ctx, block) {
     var out = [], qs = block.questions || [], i;
     var maxPlays = pick(ctx.secCfg.audio && ctx.secCfg.audio.maxPlays, ctx.cfg.defaults && ctx.cfg.defaults.audioMaxPlays, 1);
     var autoPlay = !!(ctx.secCfg.audio && ctx.secCfg.audio.autoPlay);
-    var splitAudio = pick(ctx.secCfg.timerScope, ctx.cfg.defaults && ctx.cfg.defaults.timerScope) === 'question';
+    var splitAudio = pick(ctx.secCfg.timerScope, ctx.cfg.defaults && ctx.cfg.defaults.timerScope) === 'question'
+      && !ctx.secCfg.audioOnQuestionScreen;
     for (i = 0; i < qs.length; i++) {
       var q = qs[i];
       var where = ctx.sectionId + '/' + ctx.moduleId + '/' + q.id;
@@ -358,7 +366,8 @@
         advance: 'auto',
         allowBack: false,
         audio: splitAudio ? undefined : audio,
-        image: image
+        image: image,
+        timerStartsOnAudioEnd: (audio && !splitAudio && ctx.secCfg.audioOnQuestionScreen) ? true : undefined
       }));
     }
     return out;
@@ -550,7 +559,8 @@
             audio: spec.audio,
             image: spec.image,
             phases: spec.phases,
-            copy: spec.copy
+            copy: spec.copy,
+            timerStartsOnAudioEnd: spec.timerStartsOnAudioEnd
           };
           if (spec.timer !== undefined) { s.timer = spec.timer; s.timers = spec.timers; }
           else { s.timer = clocks.length ? clocks[0] : null; if (clocks.length) s.timers = clocks; }

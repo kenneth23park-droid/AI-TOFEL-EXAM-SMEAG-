@@ -251,12 +251,14 @@
   function makeAudioUnit(o) {
     var opts = o || {};
     var media = opts.media || null;
-    var wrap = el('div', 'lst-au');
+    var split = opts.variant === 'split';
+    var wrap = el('div', split ? 'lst-au lst-au-col' : 'lst-au');
+    var baseCls = wrap.className;
     var key = spentKey(opts.screenId, media && media.src);
 
     var stage = el('div', 'lst-au-stage');
     if (opts.image && opts.image.src) {
-      var img = el('img', 'lst-au-speaker');
+      var img = el('img', split ? 'lst-au-speaker lst-illus-img' : 'lst-au-speaker');
       img.src = opts.image.src;
       img.alt = 'speaker';
       img.setAttribute('loading', 'lazy');
@@ -286,7 +288,7 @@
     }
     if (isAudioSpent(key)) {
       wrap.setAttribute('data-audio-state', 'spent');
-      wrap.className = 'lst-au is-spent';
+      wrap.className = baseCls + ' is-spent';
       caption('Audio already played. It cannot be played again.', '오디오가 이미 재생되었습니다. 다시 재생할 수 없습니다.');
       counter.textContent = '0:00';
       return wrap;
@@ -314,7 +316,7 @@
       if (finished) return;
       finished = true;
       wrap.setAttribute('data-audio-state', 'done');
-      wrap.className = 'lst-au is-done';
+      wrap.className = baseCls + ' is-done';
       counter.textContent = '0:00';
       caption(reason === 'error' ? 'Audio unavailable. Continue with the question.' : 'Audio finished.',
               reason === 'error' ? '오디오를 재생할 수 없습니다. 문항을 이어서 진행하세요.' : '오디오 재생이 끝났습니다.');
@@ -333,7 +335,7 @@
     audio.addEventListener('play', function () {
       started = true;
       wrap.setAttribute('data-audio-state', 'playing');
-      wrap.className = 'lst-au is-playing';
+      wrap.className = baseCls + ' is-playing';
       playBtn.style.display = 'none';
     });
     audio.addEventListener('timeupdate', function () {
@@ -753,8 +755,11 @@
     }
 
     /* 실측 900s 프레임에는 바깥 카드 테두리가 없다 — 사진(좌) / 문항·선택지(우) 2열이다.
-     * 오디오가 화면 안에 남는 프로필에서만 종전 qcard 를 유지한다. */
-    var card = el('section', onScreenAudio ? 'qcard lst-card' : 'lst-card lst-split');
+     * 오디오가 이 화면에서 재생되는 TOEFL 구성(timerStartsOnAudioEnd)도 같은 2열을 쓴다:
+     * 왼쪽 사진 아래에 재생 카운터가 붙고, 오른쪽에 문항·선택지가 그대로 보인다.
+     * 들으면서 답하는 프로필(IELTS)만 종전 qcard(오디오 스테이지 위 · 문항 아래)를 유지한다. */
+    var splitLayout = !onScreenAudio || !!screen.timerStartsOnAudioEnd;
+    var card = el('section', splitLayout ? 'lst-card lst-split' : 'qcard lst-card');
 
     /* 오디오. 이 화면에 audio 가 없으면(블록 2번째 이후 문항) 삽화만 유지한다. */
     var hasLiveAudio = false;
@@ -767,12 +772,19 @@
         media: screen.audio,
         image: screen.image || null,
         screenId: screen.id,
+        variant: splitLayout ? 'split' : null,
         captionEn: 'Audio plays once',
         captionKo: '오디오는 1회만 재생됩니다',
         engine: ctx && ctx.engine,
         onEnded: function () {
           if (optsBox) setChoicesEnabled(optsBox, true);
           if (qwrap) qwrap.className = 'lst-q';
+          /* 답변 시계는 화면 진입이 아니라 여기서 시작한다(compile: timerStartsOnAudioEnd).
+             엔진이 없거나 옛 버전이면 조용히 지나간다 — 그 경우 시계는 이미 진입 때 걸렸다. */
+          var eng = ctx && ctx.engine;
+          if (eng && typeof eng.startDeferredClocks === 'function') {
+            try { eng.startDeferredClocks(); } catch (e) { warn('startDeferredClocks threw', e); }
+          }
         }
       });
       card.appendChild(unit);
@@ -826,6 +838,15 @@
 
     card.appendChild(qwrap);
     wrap.appendChild(card);
+
+    /* 새로고침·재진입으로 오디오가 이미 소진된 화면은 ended 가 다시 오지 않는다.
+       그대로 두면 미뤄 둔 답변 시계가 영영 걸리지 않으므로 지금 건다. */
+    if (screen.timerStartsOnAudioEnd && !hasLiveAudio) {
+      var eng0 = ctx && ctx.engine;
+      if (eng0 && typeof eng0.startDeferredClocks === 'function') {
+        try { eng0.startDeferredClocks(); } catch (e0) { warn('startDeferredClocks threw', e0); }
+      }
+    }
     return wrap;
   }
 

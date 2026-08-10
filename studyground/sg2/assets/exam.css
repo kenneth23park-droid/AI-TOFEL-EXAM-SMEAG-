@@ -388,6 +388,17 @@ body.exam-body {
   border-radius: 10px; border: 1px solid var(--line); background: var(--cream-2);
 }
 .lst-split .lst-q { padding-top: 4px; }
+
+/* 오디오가 이 화면에서 도는 구성(TOEFL: 사진 좌 · 문항 우 · mp3 재생).
+   왼쪽 칸은 사진 위 · 남은 재생시간 아래로 세로 배치한다. */
+.lst-split .lst-au-col { margin: 0; }
+.lst-split .lst-au-col .lst-au-stage {
+  flex-direction: column; align-items: stretch; gap: 12px; padding: 14px;
+}
+.lst-split .lst-au-col .lst-au-meta { flex-direction: row; align-items: baseline; gap: 10px; }
+.lst-split .lst-au-col .lst-au-count { font-size: 26px; }
+.lst-split .lst-au-col .lst-au-cap { line-height: 1.4; }
+.lst-split .lst-au-col .lst-au-play { width: 100%; }
 .lst-card .prompt { font-size: 20px; font-weight: 700; line-height: 1.35; margin: 0 0 20px; }
 
 /* ── 문항 영역 ──────────────────────────────────────────── */
@@ -435,6 +446,8 @@ body.exam-body {
 /* short-response(문항 1개=화면 1개): 삽화 위 · 선택지 세로 */
 .lst-short .lst-au-stage { flex-direction: column; text-align: center; gap: 10px; }
 .lst-short .lst-au-speaker { width: 150px; height: 150px; }
+/* 2열(사진 좌·문항 우) 안에서는 short-response 도 왼쪽 칸을 꽉 채운다. */
+.lst-short .lst-au-col .lst-au-speaker { width: 100%; height: auto; }
 
 @media (max-width: 900px) {
   .lst-split { grid-template-columns: minmax(0, 1fr); gap: 20px; }
