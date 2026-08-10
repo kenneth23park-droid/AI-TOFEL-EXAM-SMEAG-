@@ -65,7 +65,11 @@
 // v26: 관리자 변경 로그를 Supabase(public.sg_admin_log)로 올린다 — assets/admin-log.js 가
 //      기기 버퍼와 서버 합본 두 겹을 관리하고, admin-log.html 에 "이 기기 / 서버 합본"
 //      토글이 생겼다. 문항 편집 화면은 화이트블루 바탕 + 어두운 편집 칸으로 바뀌었다.
-const VERSION = 'sg-v26';
+// v27: 시험장 좌석 관리 — admin-seats.html(컴퓨터 1~30 의 연결 모드·코스·세트·문항·
+//      오디오 배속·화면 언어 지정)과 저장소 assets/sg-seats.js, 그리고 흩어져 있던
+//      관리자 화면을 한데 모은 admin.html 허브가 생겼다. 시험 당일 인터넷이 끊겨도
+//      좌석 보드를 열 수 있어야 하므로 셋 다 셸에 넣는다.
+const VERSION = 'sg-v27';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -90,6 +94,9 @@ const SHELL_ASSETS = [
 
   // QR 로그인 카드 — 인코더는 순수 계산이라 오프라인에서도 카드가 그려진다.
   'assets/sg-qr.js', 'admin-qr.html',
+
+  // 관리자 홈과 좌석 관리 — 시험장에서 회선이 없어도 좌석을 다시 짤 수 있어야 한다.
+  'admin.html', 'admin-seats.html', 'assets/sg-seats.js',
 
   // 오프라인 사전 다운로드 — 목록 자체가 캐시에 있어야, 두 번째 방문이 오프라인이어도
   // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.

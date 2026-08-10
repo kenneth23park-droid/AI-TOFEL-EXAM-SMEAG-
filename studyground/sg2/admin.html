@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<!--
+  admin.html — 관리자 홈.
+
+  관리자 화면들이 흩어져 있어 주소를 외워야 들어가던 것을 한 곳에 모은다.
+  시험 당일 가장 먼저 여는 「좌석 관리」가 맨 위, 그 다음이 콘텐츠·오디오·기록이다.
+  각 카드는 그저 링크다 — 기능은 각 화면에 있고 여기엔 아무 상태도 두지 않는다.
+
+  관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Admin · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .grp { margin-top:34px; }
+  .grp > h2 { font-size:15px; font-weight:850; letter-spacing:-.01em; margin:0 0 4px; }
+  .grp > p { margin:0 0 14px; font-size:12.5px; color:var(--muted); }
+  .cards { display:grid; gap:12px; grid-template-columns:1fr; }
+  @media (min-width:640px) { .cards { grid-template-columns:1fr 1fr; } }
+  @media (min-width:1000px) { .cards { grid-template-columns:repeat(3,1fr); } }
+
+  a.mcard { display:block; text-decoration:none; color:inherit; background:var(--card);
+    border:1px solid var(--line); border-radius:14px; padding:16px 16px 14px; transition:transform .12s, border-color .12s; }
+  a.mcard:hover { transform:translateY(-2px); border-color:var(--ink); }
+  a.mcard .ic { font-size:19px; line-height:1; }
+  a.mcard h3 { margin:9px 0 4px; font-size:15px; font-weight:800; letter-spacing:-.01em; }
+  a.mcard p { margin:0; font-size:12.5px; line-height:1.55; color:var(--ink-2); }
+  a.mcard .f { display:block; margin-top:10px; font:600 11px/1.4 ui-monospace,Menlo,Consolas,monospace; color:var(--muted); }
+  a.mcard.hero { border-color:var(--brand); background:var(--brand-soft); }
+  a.mcard .tag { float:right; font-size:9.5px; font-weight:850; letter-spacing:.08em; text-transform:uppercase;
+    background:var(--brand); color:#fff; border-radius:999px; padding:3px 8px; }
+  .ro { margin-left:6px; font-size:10px; font-weight:800; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--muted); border:1px solid var(--line-2); border-radius:4px; padding:2px 5px; }
+  .who { font-size:12px; font-weight:750; color:var(--muted); }
+  .gate { max-width:520px; margin:60px auto; text-align:center; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Admin</small></span></a>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <span class="who" id="who"></span>
+      <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
+      <button class="btn ghost sm" id="out"><span data-en>Sign out</span><span data-ko>로그아웃</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main" hidden>
+  <div class="page-h" style="padding-top:24px">
+    <span class="pill" style="margin-bottom:8px">Admin</span>
+    <h1 style="font-size:clamp(26px,4vw,40px)"><span data-en>Everything you can run from here</span><span data-ko>관리자 화면 모음</span></h1>
+    <p class="sub">
+      <span data-en>Exam-day controls first, then the content you prepare beforehand.</span>
+      <span data-ko>시험 당일에 쓰는 것부터, 그 다음이 미리 준비하는 콘텐츠입니다.</span>
+    </p>
+  </div>
+
+  <section class="grp">
+    <h2><span data-en>Exam day</span><span data-ko>시험장 운영</span></h2>
+    <p><span data-en>The room, the machines, the results.</span><span data-ko>강의실과 컴퓨터, 그리고 결과.</span></p>
+    <div class="cards">
+      <a class="mcard hero" href="admin-seats.html">
+        <span class="tag">New</span><span class="ic">🖥️</span>
+        <h3><span data-en>Seats — computers 1–30</span><span data-ko>좌석 관리 — 컴퓨터 1~30</span></h3>
+        <p><span data-en>Set each machine's connection (local or internet), course, test set, questions, audio speed and screen language. The student picks nothing.</span>
+           <span data-ko>컴퓨터마다 연결 모드(로컬·인터넷), 코스, 배정 세트, 출제 문항, 오디오 배속, 화면 언어를 지정합니다. 학생은 아무것도 고르지 않습니다.</span></p>
+        <span class="f">admin-seats.html</span>
+      </a>
+      <a class="mcard" href="admin-results.html">
+        <span class="ic">📊</span>
+        <h3><span data-en>Student results</span><span data-ko>학생 응시 결과</span></h3>
+        <p><span data-en>Who sat which test, what they scored, and the recordings behind it.</span>
+           <span data-ko>누가 어느 시험을 봤고 몇 점인지, 그 뒤의 녹음까지.</span></p>
+        <span class="f">admin-results.html</span>
+      </a>
+      <a class="mcard" href="admin-qr.html">
+        <span class="ic">🔳</span>
+        <h3><span data-en>QR login cards</span><span data-ko>QR 로그인 카드</span></h3>
+        <p><span data-en>Print a card per student so nobody types an ID at the desk.</span>
+           <span data-ko>학생마다 카드 한 장 — 자리에서 학번을 칠 필요가 없습니다.</span></p>
+        <span class="f">admin-qr.html</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="grp">
+    <h2><span data-en>Test content</span><span data-ko>시험 콘텐츠</span></h2>
+    <p><span data-en>Build a set, read it whole, fix a question.</span><span data-ko>세트를 만들고, 통째로 읽고, 문항을 고칩니다.</span></p>
+    <div class="cards">
+      <a class="mcard" href="admin-set-import.html">
+        <span class="ic">📥</span>
+        <h3><span data-en>Build a set from documents</span><span data-ko>문서로 세트 만들기</span></h3>
+        <p><span data-en>Drop in three docx files and get a four-section set. Anything that fails the checks locks the save button.</span>
+           <span data-ko>docx 3개를 올리면 4섹션 세트가 됩니다. 검산에 걸리면 저장이 잠깁니다.</span></p>
+        <span class="f">admin-set-import.html</span>
+      </a>
+      <a class="mcard" href="admin-set-view.html">
+        <span class="ic">📖</span>
+        <h3><span data-en>Set overview</span><span data-ko>SET 전체 보기</span><span class="ro" data-en>read only</span><span class="ro" data-ko>읽기 전용</span></h3>
+        <p><span data-en>Structure, listening scripts and the answer key on one page.</span>
+           <span data-ko>구조·듣기 대본·정답표를 한 화면에.</span></p>
+        <span class="f">admin-set-view.html</span>
+      </a>
+      <a class="mcard" href="admin-questions.html">
+        <span class="ic">✏️</span>
+        <h3><span data-en>Question editor</span><span data-ko>문항 교체</span></h3>
+        <p><span data-en>Rewrite a prompt, swap the choices, move the answer key — revertible item by item.</span>
+           <span data-ko>지문·선택지·정답을 고칩니다. 문항별로 되돌릴 수 있습니다.</span></p>
+        <span class="f">admin-questions.html</span>
+      </a>
+      <a class="mcard" href="admin-dup.html">
+        <span class="ic">🔍</span>
+        <h3><span data-en>Overlap check</span><span data-ko>겹침 검사</span></h3>
+        <p><span data-en>Every item and passage compared against every other, across all sets.</span>
+           <span data-ko>모든 세트의 문항·지문을 서로 대조합니다.</span></p>
+        <span class="f">admin-dup.html</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="grp">
+    <h2><span data-en>Audio</span><span data-ko>오디오</span></h2>
+    <p><span data-en>Assign it, check the files exist, check they say the right thing.</span><span data-ko>지정하고, 파일이 있는지 보고, 대본대로 읽혔는지 봅니다.</span></p>
+    <div class="cards">
+      <a class="mcard" href="admin-audio.html">
+        <span class="ic">🎧</span>
+        <h3><span data-en>Listening audio settings</span><span data-ko>듣기평가 오디오 설정</span></h3>
+        <p><span data-en>Assign, replace or upload the audio for each listening item.</span>
+           <span data-ko>문항별 오디오를 지정·교체·업로드합니다.</span></p>
+        <span class="f">admin-audio.html</span>
+      </a>
+      <a class="mcard" href="admin-audio-files.html">
+        <span class="ic">🗂️</span>
+        <h3><span data-en>Audio files</span><span data-ko>오디오 파일 점검</span><span class="ro" data-en>read only</span><span class="ro" data-ko>읽기 전용</span></h3>
+        <p><span data-en>Path, size, duration and replacement state for every audio slot.</span>
+           <span data-ko>모든 오디오 자리의 경로·용량·길이·교체 상태.</span></p>
+        <span class="f">admin-audio-files.html</span>
+      </a>
+      <a class="mcard" href="admin-audio-sync.html">
+        <span class="ic">📝</span>
+        <h3><span data-en>Script ↔ audio check</span><span data-ko>대본 ↔ 오디오 대조</span></h3>
+        <p><span data-en>Not "does the file exist" but "was it read as written".</span>
+           <span data-ko>파일이 있느냐가 아니라, 대본대로 읽혔느냐.</span></p>
+        <span class="f">admin-audio-sync.html</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="grp">
+    <h2><span data-en>Trail</span><span data-ko>기록</span></h2>
+    <p><span data-en>What changed, who changed it, and when.</span><span data-ko>무엇이, 누구에 의해, 언제 바뀌었는지.</span></p>
+    <div class="cards">
+      <a class="mcard" href="admin-log.html">
+        <span class="ic">🧾</span>
+        <h3><span data-en>Change log</span><span data-ko>관리자 변경 기록</span></h3>
+        <p><span data-en>Questions, audio, time limits and seat settings — old value → new value, exportable as JSON or CSV.</span>
+           <span data-ko>문항·오디오·제한시간·좌석 설정이 이전값 → 새값으로. JSON·CSV 로 내보냅니다.</span></p>
+        <span class="f">admin-log.html</span>
+      </a>
+    </div>
+  </section>
+
+  <p class="muted" style="font-size:11.5px;margin:34px 0 44px">
+    <span data-en>Signed in as a teacher or admin. The sign-in lasts a few hours on this device and only unlocks the sets your account owns.</span>
+    <span data-ko>선생님·관리자로 로그인한 상태입니다. 로그인은 이 기기에서 몇 시간 유지되며, 계정이 가진 SET 만 열립니다.</span>
+  </p>
+</main>
+
+<div class="wrap gate" id="gate">
+  <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
+  <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+</div>
+
+<script src="assets/admin-session.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var A = window.SG_ADMIN;
+
+  function open() {
+    document.getElementById('gate').hidden = true;
+    document.getElementById('main').hidden = false;
+    var s = A.current();
+    if (s) {
+      var w = document.getElementById('who');
+      w.textContent = (document.documentElement.lang === 'ko' ? s.labelKo : s.label) || s.id;
+    }
+  }
+  document.getElementById('signin').addEventListener('click', function () { A.openLogin('', open); });
+  document.getElementById('out').addEventListener('click', function () {
+    A.logout();
+    location.reload();
+  });
+  if (A.can()) open(); else A.openLogin('', open);
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

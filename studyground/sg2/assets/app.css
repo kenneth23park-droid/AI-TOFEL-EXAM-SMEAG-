@@ -78,7 +78,9 @@ button { font-family: inherit; cursor: pointer; }
 .nav-right { display: flex; align-items: center; gap: 8px; }
 /* 메뉴 축소: 모의고사 · 내 성적 · 로그인만 노출 (되돌리려면 이 블록만 삭제) */
 .nav-center a:not([href="tests.html"]):not([href="dashboard.html"]),
-.nav-right a:not([href="tests.html"]):not([href="login.html"]) { display: none; }
+/* 관리자 화면끼리 오가는 링크(admin*.html)는 예외 — 학생 메뉴만 줄이려던 규칙이라,
+   관리자 헤더까지 지우면 화면 사이에 길이 없어진다. */
+.nav-right a:not([href="tests.html"]):not([href="login.html"]):not([href^="admin"]) { display: none; }
 .lang {
   display: inline-flex; border: 1px solid var(--line-2); border-radius: 999px; overflow: hidden;
   font-size: 12px; font-weight: 700;
