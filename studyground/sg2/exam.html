@@ -47,6 +47,18 @@
   .mod-time { display:inline-block; margin-left:10px; padding:3px 10px; border-radius:999px;
     background:var(--peach, #fbe3d8); color:var(--brand-ink, #b8391a);
     font-size:12px; font-weight:800; letter-spacing:.02em; vertical-align:middle; }
+  /* 시간 조정 — 값이 보이는 자리에서 바로 고친다. 조정된 값은 점선 밑줄로 표시한다. */
+  .t-edit { cursor:pointer; }
+  .t-edit:hover { box-shadow:0 0 0 2px rgba(232,72,31,.2); border-radius:6px; }
+  .t-edit.edited { text-decoration:underline dotted; text-underline-offset:3px; }
+  .t-box { display:inline-flex; align-items:center; gap:4px; vertical-align:middle; }
+  .t-box input { width:64px; font:inherit; font-size:12px; padding:2px 5px; text-align:right;
+    border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink,#222); }
+  .t-box button { border:1px solid var(--line); background:#fff; border-radius:6px; cursor:pointer;
+    font-size:12px; line-height:1; padding:3px 6px; color:var(--muted); }
+  .t-box button:hover { border-color:var(--brand); color:var(--brand); }
+  .t-reset { display:inline-block; margin-left:8px; font-size:12px; font-weight:700;
+    color:var(--muted); cursor:pointer; text-decoration:underline; }
   /* character page + countdown */
   .audio-unit { margin:10px 0 12px; }
   .au-stage { position:relative; background:linear-gradient(160deg,#fbe3d8,#f7d3c2); border:1px solid var(--peach-2);
@@ -92,6 +104,7 @@
       <a href="?section=writing" data-sec="writing">✍️ <span data-en>Writing</span><span data-ko>라이팅</span></a>
       <a href="?section=speaking" data-sec="speaking">🎙️ <span data-en>Speaking</span><span data-ko>스피킹</span></a>
     </div>
+    <span id="tReset" class="t-reset" hidden><span data-en>Reset all adjusted times</span><span data-ko>조정한 시간 전부 원래대로</span></span>
   </div>
 
   <div id="exam"></div>
@@ -157,6 +170,104 @@
     audio.addEventListener('ended', function(){ stage.classList.remove('playing'); count.textContent='0:00'; });
     return wrap;
   }
+  // --- 시간 조정 -----------------------------------------------------------
+  // config/timing.<exam>.json 은 그대로 두고, 화면에서 바꾼 초는 SG_TIMING 의
+  // localStorage 패치로만 남는다. 같은 브라우저의 시험 런타임도 같은 패치를 읽는다.
+  var PAINTERS = {};   // path → 다시 그릴 함수들. 한 경로가 여러 문항에 걸리는 경우(taskType 공용) 때문에 필요하다.
+  var SPEC = {};       // path → 원래 규격값. 되돌리기 기준.
+
+  // 조정값이 하나라도 남아 있으면 전체 되돌리기 링크를 띄운다. 다른 섹션·다른 화면의
+  // 조정까지 한 번에 지우므로 세션 config 를 다시 만들도록 새로고침한다.
+  var resetLink = document.getElementById('tReset');
+  function syncResetLink(){
+    if(!resetLink || !window.SG_TIMING || !window.SG_TIMING.getPatch) return;
+    var p=window.SG_TIMING.getPatch(), n=0;
+    for(var k in p){ if(Object.prototype.hasOwnProperty.call(p,k)) n++; }
+    resetLink.hidden = !n;
+  }
+  if(resetLink && window.SG_TIMING){
+    resetLink.addEventListener('click', function(){
+      window.SG_TIMING.clearPatch();
+      location.reload();
+    });
+    window.SG_TIMING.load(syncResetLink);
+  }
+
+  function repaint(path){ (PAINTERS[path]||[]).forEach(function(f){ f(); }); }
+
+  /* 세션 config 에는 이미 조정값이 얹혀 있으므로, '원래 규격'은 내장 폴백(=config JSON 사본)에서 읽는다.
+   * 되돌리기 기준이자 '조정됨' 표시의 기준이다. */
+  function specOf(path, fallback){
+    try{
+      var T=window.SG_TIMING;
+      var base=T.BUILTINS[T.profile()||T.DEFAULT_PROFILE];
+      var v=T.get(base, path);
+      return (typeof v==='number' && v>0) ? v : fallback;
+    }catch(e){ return fallback; }
+  }
+
+  /* el 을 클릭하면 숫자 입력으로 바뀌는 편집기.
+   * opts: {path, spec, unit:'min'|'sec', label(sec)→string, onChange(sec)} */
+  function bindTimeEdit(el, opts){
+    var path=opts.path, unit=opts.unit||'sec', per=(unit==='min'?60:1);
+    if(SPEC[path]===undefined) SPEC[path]=specOf(path, opts.spec);
+    function cur(){
+      var v=window.SG_TIMING ? window.SG_TIMING.get(path) : null;
+      return (typeof v==='number' && v>0) ? v : opts.spec;
+    }
+    function paint(){
+      if(el.dataset.editing) return;
+      var s=cur();
+      el.textContent=opts.label(s);
+      el.classList.toggle('edited', s!==SPEC[path]);
+      el.title=(unit==='min'?'클릭해 제한 시간(분) 조정':'클릭해 응답 시간(초) 조정');
+      if(opts.onChange) opts.onChange(s);
+    }
+    (PAINTERS[path]=PAINTERS[path]||[]).push(paint);
+
+    el.classList.add('t-edit');
+    el.addEventListener('click', function(){
+      if(el.dataset.editing) return;
+      el.dataset.editing='1';
+      var shown=Math.max(1, Math.round(cur()/per));
+      el.textContent='';
+      var box=document.createElement('span'); box.className='t-box';
+      var inp=document.createElement('input'); inp.type='number'; inp.min='1'; inp.step='1'; inp.value=shown;
+      var u=document.createElement('span'); u.textContent=(unit==='min'?'분':'초');
+      var ok=document.createElement('button'); ok.type='button'; ok.textContent='✓'; ok.title='적용';
+      var rs=document.createElement('button'); rs.type='button'; rs.textContent='↺'; rs.title='원래 규격으로';
+      var no=document.createElement('button'); no.type='button'; no.textContent='✕'; no.title='취소';
+      box.appendChild(inp); box.appendChild(u); box.appendChild(ok); box.appendChild(rs); box.appendChild(no);
+      el.appendChild(box);
+      inp.focus(); inp.select();
+
+      function done(){ delete el.dataset.editing; repaint(path); syncResetLink(); }
+      function apply(){
+        var n=parseInt(inp.value,10);
+        if(!(n>0)){ done(); return; }
+        window.SG_TIMING && window.SG_TIMING.setPatchValue(path, n*per);
+        done();
+      }
+      ok.addEventListener('click', function(e){ e.stopPropagation(); apply(); });
+      no.addEventListener('click', function(e){ e.stopPropagation(); done(); });
+      rs.addEventListener('click', function(e){
+        e.stopPropagation();
+        // 규격값을 한 번 써서 세션 config 를 되돌린 뒤(새로고침 없이 반영), 저장된 조정 기록을 지운다.
+        if(window.SG_TIMING){
+          window.SG_TIMING.setPatchValue(path, SPEC[path]);
+          window.SG_TIMING.setPatchValue(path, null);
+        }
+        done();
+      });
+      inp.addEventListener('keydown', function(e){
+        if(e.key==='Enter'){ e.preventDefault(); apply(); }
+        if(e.key==='Escape'){ e.preventDefault(); done(); }
+      });
+      inp.addEventListener('click', function(e){ e.stopPropagation(); });
+    });
+    paint();
+  }
+
   // --- Speaking 응답 시간 -------------------------------------------------
   // SG_TIMING(config/timing.<exam>.json)이 정본. 로드는 비동기라 렌더는 먼저 끝내고
   // 초가 도착하면 캡션·타이머를 채운다(오프라인이면 내장 폴백이 즉시 settle 된다).
@@ -169,26 +280,35 @@
       var tt = m && sec.taskTypes && sec.taskTypes[m.taskType];
       if(!tt) return;
       var by = tt.responseSecByIndex;
-      var respond = (by && index < by.length) ? by[index] : tt.responseSec;
-      cb({ prep: tt.prepSec||0, respond: respond||0 });
+      var hasIdx = !!(by && index < by.length);
+      var base = 'sections.speaking.taskTypes.' + m.taskType;
+      cb({
+        prep: tt.prepSec||0,
+        respond: (hasIdx ? by[index] : tt.responseSec) || 0,
+        // Listen & Repeat 은 문항별(8·8·10·10·10·12·12), Interview 는 taskType 하나가 4문항 공용이다.
+        path: base + (hasIdx ? '.responseSecByIndex['+index+']' : '.responseSec')
+      });
     });
   }
 
   // 워크시트 모드의 응답 카운트다운 — 실제 녹음은 시험 런타임(set9.html)이 담당한다.
+  // 응답 시간이 조정되면 setSec() 으로 갈아끼운다(진행 중인 카운트다운은 멈춘다).
   function bindRespondTimer(btn, respondSec){
-    var base='🎤 Record ('+respondSec+'s)';
-    btn.textContent=base;
-    var tid=null;
+    var sec=respondSec, tid=null;
+    function base(){ return '🎤 Record ('+sec+'s)'; }
+    function stop(){ if(tid){ clearInterval(tid); tid=null; } btn.textContent=base(); }
+    btn.textContent=base();
     btn.addEventListener('click', function(){
-      if(tid){ clearInterval(tid); tid=null; btn.textContent=base; return; }
-      var left=respondSec;
+      if(tid){ stop(); return; }
+      var left=sec;
       btn.textContent='■ Stop · '+left;
       tid=setInterval(function(){
         left--;
-        if(left<=0){ clearInterval(tid); tid=null; btn.textContent=base; return; }
+        if(left<=0){ stop(); return; }
         btn.textContent='■ Stop · '+left;
       }, 1000);
     });
+    return function setSec(n){ sec=n; stop(); };
   }
 
   var graders = []; // functions returning {correct, total}
@@ -229,13 +349,20 @@
     window.SG_TIMING.load(function(){
       var sec = window.SG_TIMING.get('sections.'+secId);
       if(!sec) return;
-      var units = (sec.modules||[]).concat(sec.tasks||[]);
-      var u = units.filter(function(x){ return x.id===modId; })[0];
-      var s = u && (u.allocatedSec || u.perTaskSec);
-      if(!s) return;
-      var mins = Math.round(s/60);
-      badge.textContent = mins + ' mins. (Time limit)';
+      // 같은 id 를 modules 와 tasks 어느 쪽에서 찾았는지, 초가 어느 필드에 있는지가 곧 조정 경로다.
+      var coll = (sec.modules||[]).filter(function(x){ return x.id===modId; }).length ? 'modules' : 'tasks';
+      var u = ((sec[coll]||[]).filter(function(x){ return x.id===modId; }))[0];
+      if(!u) return;
+      var field = (typeof u.allocatedSec === 'number') ? 'allocatedSec'
+                : (typeof u.perTaskSec === 'number') ? 'perTaskSec' : null;
+      if(!field || !u[field]) return;
       badge.hidden = false;
+      bindTimeEdit(badge, {
+        path: 'sections.'+secId+'.'+coll+'[id='+modId+'].'+field,
+        spec: u[field],
+        unit: 'min',
+        label: function(s){ return Math.round(s/60) + ' mins. (Time limit)'; }
+      });
     });
   }
 
@@ -352,8 +479,15 @@
           // 실제 초는 config/timing.<exam>.json 이 정본이다 — set1.js 의 prepSec/respondSec 은 읽지 않는다.
           // Task 1 은 문항 순서별로 다르다(8·8·10·10·10·12·12), Task 2 는 45초.
           onSpeakingTiming(mod.id, qi, function(t){
-            if(cap) cap.textContent='Prep '+t.prep+'s · Respond '+t.respond+'s';
-            bindRespondTimer(btn, t.respond);
+            var setSec=bindRespondTimer(btn, t.respond);
+            if(!cap){ return; }
+            // 캡션의 응답 초를 클릭해 조정한다. Interview 는 4문항이 한 경로를 공유하므로
+            // 한 곳을 고치면 PAINTERS 가 나머지 캡션·버튼까지 같이 갱신한다.
+            bindTimeEdit(cap, {
+              path: t.path, spec: t.respond, unit: 'sec',
+              label: function(s){ return 'Prep '+t.prep+'s · Respond '+s+'s'; },
+              onChange: setSec
+            });
           });
           card.appendChild(qd);
         });

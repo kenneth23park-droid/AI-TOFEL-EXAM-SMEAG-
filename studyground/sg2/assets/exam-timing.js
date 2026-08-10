@@ -259,10 +259,12 @@
     profile: null,
     warnings: [],
     loading: false,
-    queue: []
+    queue: [],
+    patched: 0     // 이번 로드에 적용된 사용자 조정값 개수
   };
 
   var warnedPaths = {}; // get() 경고는 경로당 1회만 (AC4)
+  var PATCH_KEY = 'sg2_timing_patch'; // { "<profile>": { "<path>": <숫자 초> } }
 
   function warn(msg) {
     if (typeof console !== 'undefined' && console.warn) console.warn('[SG_TIMING] ' + msg);
@@ -335,6 +337,105 @@
     return cur;
   }
 
+  /* --- 사용자 조정값(패치) ------------------------------------------------
+   * config JSON 은 정본으로 두고, 강사가 화면에서 바꾼 초는 localStorage 패치로만 얹는다.
+   * 로드 우선순위의 맨 마지막 단계 — override/fetch/builtin 중 무엇이 실렸든 그 위에 적용된다.
+   * 형태: { "<profile>": { "sections.reading.modules[id=R1].allocatedSec": 1200 } }
+   * 경로는 get() 과 같은 문법이고, 없는 경로는 무시하고 경고만 남긴다(F12). */
+
+  function readPatch(profile) {
+    try {
+      var raw = window.localStorage && window.localStorage.getItem(PATCH_KEY);
+      if (!raw) return {};
+      var all = JSON.parse(raw);
+      return isObj(all) && isObj(all[profile]) ? all[profile] : {};
+    } catch (e) { return {}; }
+  }
+
+  function writePatch(profile, map) {
+    try {
+      if (!window.localStorage) return false;
+      var all = {};
+      var raw = window.localStorage.getItem(PATCH_KEY);
+      if (raw) { try { all = JSON.parse(raw) || {}; } catch (e) { all = {}; } }
+      if (map && countKeys(map)) all[profile] = map; else delete all[profile];
+      window.localStorage.setItem(PATCH_KEY, JSON.stringify(all));
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function countKeys(o) {
+    var n = 0;
+    for (var k in o) { if (Object.prototype.hasOwnProperty.call(o, k)) n++; }
+    return n;
+  }
+
+  /* 경로가 가리키는 자리에 값을 쓴다. 마지막 토큰의 부모까지 get() 과 같은 방식으로 걸어간다.
+   * 부모나 키가 없으면 아무것도 만들지 않고 false — 오타 난 경로가 config 를 오염시키지 않는다. */
+  function setAt(cfg, path, value) {
+    var toks = tokenize(path);
+    if (!toks.length) return false;
+    var last = toks[toks.length - 1];
+    // 대상은 객체의 키(.k) 또는 배열의 원소([i]) 뿐이다. [k=v] 로 끝나는 경로는 값 자리가 아니다.
+    if (last.k === undefined && last.i === undefined) return false;
+    var cur = cfg;
+    for (var i = 0; i < toks.length - 1; i++) {
+      var t = toks[i];
+      if (cur === null || cur === undefined) return false;
+      if (t.k !== undefined) { cur = isObj(cur) ? cur[t.k] : undefined; }
+      else if (t.i !== undefined) { cur = (cur instanceof Array) ? cur[t.i] : undefined; }
+      else {
+        var found;
+        if (cur instanceof Array) {
+          for (var j = 0; j < cur.length; j++) {
+            if (cur[j] && String(cur[j][t.pk]) === t.pv) { found = cur[j]; break; }
+          }
+        } else if (isObj(cur)) { found = cur[t.pv]; }
+        cur = found;
+      }
+    }
+    if (last.i !== undefined) {
+      if (!(cur instanceof Array) || last.i < 0 || last.i >= cur.length) return false;
+      cur[last.i] = value;
+      return true;
+    }
+    if (!isObj(cur) || !Object.prototype.hasOwnProperty.call(cur, last.k)) return false;
+    cur[last.k] = value;
+    return true;
+  }
+
+  function applyPatch(cfg, profile) {
+    var map = readPatch(profile);
+    var paths = [];
+    for (var k in map) { if (Object.prototype.hasOwnProperty.call(map, k)) paths.push(k); }
+    if (!paths.length) return { cfg: cfg, applied: 0, warnings: [] };
+    var w = [], n = 0;
+    for (var i = 0; i < paths.length; i++) {
+      if (setAt(cfg, paths[i], map[paths[i]])) n++;
+      else w.push('timing patch path "' + paths[i] + '" not found in config; ignored');
+    }
+    if (n) w.push(n + ' timing value(s) overridden by local adjustments');
+    return { cfg: cfg, applied: n, warnings: w };
+  }
+
+  /* 한 값을 조정한다. localStorage 에 남기고 이미 로드된 세션 config 에도 즉시 반영해
+   * 호출한 화면이 새로고침 없이 다시 그릴 수 있게 한다.
+   * value 가 null 이면 그 경로의 조정을 지우지만, 되돌린 값은 다음 로드부터 보인다. */
+  function setPatchValue(path, value, profile) {
+    var prof = profile || state.profile || profileFromLocation();
+    var map = readPatch(prof);
+    if (value === null || value === undefined) delete map[path];
+    else map[path] = value;
+    var ok = writePatch(prof, map);
+    if (value !== null && value !== undefined && state.cfg) setAt(state.cfg, path, value);
+    return ok;
+  }
+
+  function getPatch(profile) { return readPatch(profile || state.profile || profileFromLocation()); }
+
+  /* 전부 원래 규격으로. 세션 config 는 이미 덮어써졌으므로 호출자가 새로고침해야 한다. */
+  function clearPatch(profile) { return writePatch(profile || state.profile || profileFromLocation(), null); }
+
   /* --- 검증 (timing-spec.md 6절 표) --------------------------------------- */
 
   function majorOf(v) { return parseInt(String(v || '').split('.')[0], 10); }
@@ -405,6 +506,13 @@
   }
 
   function settle(cfg, source, profile, warnings) {
+    /* 패치는 사본에만 적용한다 — builtin 은 BUILTINS 리터럴을 공유하므로 원본을 건드리면
+     * 다음 로드/다른 프로파일까지 오염된다. 사본 비용은 config 크기라 무시할 수준이다. */
+    try { cfg = JSON.parse(JSON.stringify(cfg)); } catch (e) { /* 순환 없음 — 실패하면 원본 그대로 */ }
+    var patched = applyPatch(cfg, profile);
+    cfg = patched.cfg;
+    warnings = (warnings || []).concat(patched.warnings);
+    state.patched = patched.applied;
     state.cfg = cfg;
     state.source = source;
     state.profile = profile;
@@ -566,6 +674,10 @@
     scaleInfo: scaleInfo,
     formatScore: formatScore,
     get: get,
+    getPatch: getPatch,
+    setPatchValue: setPatchValue,
+    clearPatch: clearPatch,
+    patched: function () { return state.patched || 0; },
     validate: validate,
     config: function () { return state.cfg; },
     source: function () { return state.source; },
@@ -574,7 +686,7 @@
     warnings: function () { return state.warnings.slice(0); },
     mountBadge: mountBadge,
     _reset: function () { // 테스트 전용 — 세션 고정 해제
-      state = { cfg: null, source: null, profile: null, warnings: [], loading: false, queue: [] };
+      state = { cfg: null, source: null, profile: null, warnings: [], loading: false, queue: [], patched: 0 };
       warnedPaths = {};
     }
   };
