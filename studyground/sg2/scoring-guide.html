@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>How we score · StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudyGround">
+<style>
+/* 읽는 문서 화면이라 본문 폭을 좁힌다 — 표는 카드 안에서 따로 가로 스크롤. */
+.doc { max-width: 860px; }
+.doc h2 { font-size: 20px; font-weight: 800; margin: 0 0 10px; }
+.doc h3 { font-size: 15px; font-weight: 800; margin: 18px 0 6px; }
+.doc p, .doc li { font-size: 14.5px; line-height: 1.75; }
+.doc ul, .doc ol { margin: 8px 0 0 18px; }
+.doc li { margin-top: 5px; }
+.doc .lead { font-size: 15px; }
+.doc table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.doc th, .doc td { text-align: left; padding: 9px 11px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+.doc th { font-weight: 800; white-space: nowrap; }
+.doc .why { border-left: 3px solid var(--brand, #e8481f); padding-left: 12px; margin-top: 12px; }
+.doc .warn { background: #fff6f2; border: 1px solid #f3cdbd; border-radius: 12px; padding: 12px 14px; margin-top: 12px; }
+.doc .no { list-style: none; margin-left: 0; }
+.doc .no li::before { content: "✕ "; color: #c0392b; font-weight: 800; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
+    <nav class="nav-center">
+      <a href="tests.html">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
+      <a href="dashboard.html">📊 <span data-en>My StudyGround</span><span data-ko>내 성적</span></a>
+    </nav>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="login.html"><span data-en>Login</span><span data-ko>로그인</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap doc" style="padding-bottom:60px">
+
+  <div class="page-h mt-24" style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+    <h1 style="font-size:clamp(24px,3.4vw,36px)">
+      <span data-en>How we score, and why</span><span data-ko>채점 방식과 그 근거</span></h1>
+    <span class="chip" style="margin-bottom:8px"><span data-en>For teachers &amp; admins</span><span data-ko>선생님·관리자용</span></span>
+    <a class="btn ghost sm" id="back" href="admin-results.html" style="margin-left:auto">
+      <span data-en>Back to results</span><span data-ko>결과 목록으로</span></a>
+  </div>
+
+  <p class="muted lead mt-16">
+    <span data-en>This page answers one question: why can a score from this system be trusted, and how far
+      may it be read? What we score lives in the answer keys and rubrics; why we score that way lives here.</span>
+    <span data-ko>이 화면은 한 가지 질문에 답합니다 — 이 시스템의 점수를 왜 믿어도 되며, 어디까지 읽어도 되는가.
+      무엇을 채점하는지는 정답지와 루브릭에 있고, 왜 그렇게 채점하는지는 여기에 있습니다.</span>
+  </p>
+
+  <!-- 1 -->
+  <div class="card mt-24">
+    <h2><span data-en>1. One source of truth: the official ETS guides</span><span data-ko>1. 단일 출처 — ETS 공식 채점 가이드</span></h2>
+    <p>
+      <span data-en>Rubric wording, band counts and the 0–5 scale all come from the published ETS scoring guides.
+        We apply that standard; we do not invent our own.</span>
+      <span data-ko>루브릭 문구, 밴드 개수, 0–5 척도는 모두 ETS 공개 채점 가이드에서 가져옵니다.
+        우리는 그 기준을 적용할 뿐, 새로 짓지 않습니다.</span>
+    </p>
+    <div class="why">
+      <p><b><span data-en>Why it matters</span><span data-ko>왜 중요한가</span></b><br>
+        <span data-en>A school-made scale only means something inside that school. For our score to be a
+          conversation about the real test, it has to speak the same language as the real scale.</span>
+        <span data-ko>학원이 자체 척도를 만들면 그 점수는 그 학원 안에서만 뜻이 있습니다. 학생이 실제 시험에서
+          받을 점수와 대화가 되려면 우리 척도가 공식 척도와 같은 언어여야 합니다.</span></p>
+    </div>
+    <div class="table-wrap mt-16" style="overflow-x:auto"><table>
+      <thead><tr>
+        <th><span data-en>Section</span><span data-ko>영역</span></th>
+        <th><span data-en>Task</span><span data-ko>과제</span></th>
+        <th><span data-en>Scale</span><span data-ko>척도</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Writing</td><td>Write an Email</td><td>0–5</td></tr>
+        <tr><td>Writing</td><td>Write for an Academic Discussion</td><td>0–5</td></tr>
+        <tr><td>Speaking</td><td>Listen and Repeat</td><td>0–5</td></tr>
+        <tr><td>Speaking</td><td>Take an Interview</td><td>0–5</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted mt-16" style="font-size:12.5px">
+      <span data-en>Materials that put Speaking on 0–4 follow the older iBT standard. All four productive tasks
+        on the current test are 0–5.</span>
+      <span data-ko>Speaking 을 0–4 로 쓰는 자료는 구 iBT 기준입니다. 현행 시험의 산출형 과제 넷은 모두 0–5 입니다.</span>
+    </p>
+  </div>
+
+  <!-- 2 -->
+  <div class="card mt-16">
+    <h2><span data-en>2. We follow the current test, not the old one</span><span data-ko>2. 트렌드를 따른다 — 지금 나오는 유형으로</span></h2>
+    <p>
+      <span data-en>SET 9 mirrors the task line-up of the current (post-revision) TOEFL:</span>
+      <span data-ko>SET 9 는 현행(개정 이후) TOEFL 의 과제 구성을 그대로 옮긴 세트입니다.</span>
+    </p>
+    <div class="table-wrap mt-16" style="overflow-x:auto"><table>
+      <thead><tr>
+        <th><span data-en>Section</span><span data-ko>영역</span></th>
+        <th><span data-en>Items</span><span data-ko>구성</span></th>
+        <th><span data-en>Scored by</span><span data-ko>채점</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Reading</td>
+          <td><span data-en>30 blanks · 19 passage MCQ · 1 insert</span><span data-ko>빈칸 30 · 지문 객관식 19 · 문장삽입 1</span></td>
+          <td><span data-en>Automatic</span><span data-ko>자동</span></td></tr>
+        <tr><td>Listening</td>
+          <td><span data-en>14 audio sets · 47 multiple-choice items</span><span data-ko>오디오 세트 14 · 객관식 47</span></td>
+          <td><span data-en>Automatic</span><span data-ko>자동</span></td></tr>
+        <tr><td>Writing</td>
+          <td><span data-en>10 Build-a-Sentence · Email · Academic Discussion</span><span data-ko>문장완성 10 · 이메일 · 학술토론</span></td>
+          <td><span data-en>10 automatic + 2 rubric</span><span data-ko>10 자동 + 2 루브릭</span></td></tr>
+        <tr><td>Speaking</td>
+          <td><span data-en>7 Listen and Repeat · 4 Take an Interview</span><span data-ko>복창 7 · 인터뷰 4</span></td>
+          <td><span data-en>Rubric (repeat also compared to the script)</span><span data-ko>루브릭(복창은 원문 대조 보조)</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="why">
+      <p><b><span data-en>Why follow the trend</span><span data-ko>왜 트렌드를 따라야 하나</span></b></p>
+      <ul>
+        <li><b><span data-en>Predictive value.</span><span data-ko>예측력.</span></b>
+          <span data-en>A mock test is worth what it predicts. Different task types measure the same ability
+            differently — 90 on an old-format set does not promise 90 on the current one.</span>
+          <span data-ko>모의고사의 가치는 실제 점수의 예측력입니다. 과제 유형이 다르면 같은 능력을 재도 다른 점수가
+            나옵니다. 옛 유형 90점이 신유형 90점을 보장하지 않습니다.</span></li>
+        <li><b><span data-en>Transfer.</span><span data-ko>학습 전이.</span></b>
+          <span data-en>Students optimise for what they practise. Drilling a retired task type trains them for
+            our materials, not for the exam.</span>
+          <span data-ko>학생은 연습한 유형에 최적화됩니다. 없어진 유형을 연습시키는 것은 시험이 아니라 우리 교재에
+            맞춰 훈련시키는 일입니다.</span></li>
+        <li><b><span data-en>Rubric fit.</span><span data-ko>루브릭 정합.</span></b>
+          <span data-en>A rubric belongs to its task. Keeping the tasks current is what lets us use the official
+            rubrics unchanged.</span>
+          <span data-ko>루브릭은 과제와 짝입니다. 과제를 현행으로 맞춰야 공식 루브릭을 그대로 쓸 수 있습니다.</span></li>
+      </ul>
+      <p><span data-en>Following the trend is not fashion — it is what keeps a score interpretable.</span>
+         <span data-ko>트렌드 추종은 유행이 아니라 점수의 해석 가능성을 지키기 위한 선택입니다.</span></p>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="card mt-16">
+    <h2><span data-en>3. Why Listening is a multiple-choice model</span><span data-ko>3. 리스닝을 선택형으로 채점하는 이유</span></h2>
+    <p>
+      <span data-en>All 47 listening items are choice items — single-select and multi-select. That is a
+        deliberate measurement decision, not a convenience:</span>
+      <span data-ko>리스닝 47문항은 모두 선택형(단일선택·복수선택)입니다. 편의가 아니라 측정을 위한 선택입니다.</span>
+    </p>
+    <ol>
+      <li><b><span data-en>It measures listening, not writing.</span><span data-ko>재는 것은 듣기이지 쓰기가 아니다.</span></b>
+        <span data-en>Asking students to write what they heard mixes spelling, grammar and typing speed into a
+          listening score. A contaminated score cannot support the judgement "this student is weak at listening".</span>
+        <span data-ko>들은 것을 쓰게 하면 철자·문법·작문 속도가 듣기 점수에 섞입니다. 오염된 점수로는
+          "이 학생은 듣기가 약하다"는 판단을 내릴 수 없습니다.</span></li>
+      <li><b><span data-en>Zero rater variance.</span><span data-ko>채점자 차이가 0 이다.</span></b>
+        <span data-en>The same answer gets the same score from anyone, any day. Across many classes and many
+          teachers, a gap between classes can never be a scoring-style gap.</span>
+        <span data-ko>같은 답안은 누가 언제 채점해도 같은 점수입니다. 반과 선생님이 여럿이어도 반별 점수 차가
+          채점자 차이일 가능성이 없습니다.</span></li>
+      <li><b><span data-en>Same response format as the real test.</span><span data-ko>공식 시험과 같은 응답 형식이다.</span></b>
+        <span data-en>Real TOEFL listening is multiple choice. Same format, comparable score.</span>
+        <span data-ko>실제 TOEFL 리스닝도 선택형입니다. 형식이 같아야 점수가 비교됩니다.</span></li>
+      <li><b><span data-en>Immediate feedback.</span><span data-ko>즉시 피드백.</span></b>
+        <span data-en>Section results exist the moment the test ends, so review happens the same day. Days spent
+          waiting on hand marking are lost learning.</span>
+        <span data-ko>응시가 끝나는 즉시 영역별 결과가 나오고 그날 복습으로 이어집니다. 사람 채점을 기다리는
+          며칠은 학습 손실입니다.</span></li>
+      <li><b><span data-en>The wrong option is the diagnosis.</span><span data-ko>오답 자체가 진단이다.</span></b>
+        <span data-en>Which distractor a student chose is stored, so detail-vs-inference weakness is visible
+          item by item.</span>
+        <span data-ko>어떤 오답지를 골랐는지가 남아, 세부정보를 놓쳤는지 추론을 못 했는지 문항별로 보입니다.</span></li>
+    </ol>
+    <div class="warn">
+      <p><b><span data-en>The limits, stated plainly</span><span data-ko>한계도 분명히</span></b><br>
+        <span data-en>Choice items can be guessed, and they never measure production. We apply no guessing
+          penalty — the official test does not either — and we measure production separately in Speaking and
+          Writing. A listening score is never read as a verdict on a student's English.</span>
+        <span data-ko>선택형은 추측으로 맞을 수 있고 산출 능력을 재지 못합니다. 추측 보정은 하지 않으며(공식 시험도
+          하지 않습니다), 산출 능력은 스피킹·라이팅에서 따로 잽니다. 리스닝 점수 하나로 학생의 영어를 말하지 않습니다.</span></p>
+      <p class="mt-16">
+        <span data-en>Multi-select items are all-or-nothing: partial credit has no official basis, so we do not
+          invent one.</span>
+        <span data-ko>복수선택은 부분점수 없이 정확히 맞아야 정답입니다 — 부분점수 규칙은 공식 근거가 없으므로
+          지어내지 않습니다.</span></p>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="card mt-16">
+    <h2><span data-en>4. What automatic marking does — and does not — forgive</span><span data-ko>4. 자동 채점이 봐 주는 것과 봐 주지 않는 것</span></h2>
+    <p>
+      <span data-en>Reading, Listening and Build-a-Sentence are marked against the answer key. Before comparing,
+        only notation differences are removed:</span>
+      <span data-ko>리딩·리스닝·문장완성은 정답 대조로 채점합니다. 비교 전에 표기 차이만 지웁니다.</span>
+    </p>
+    <ul>
+      <li><span data-en>Case ignored · surrounding spaces trimmed · repeated spaces collapsed · a trailing full stop ignored</span>
+          <span data-ko>대소문자 무시 · 앞뒤 공백 제거 · 연속 공백 1칸 · 문장 끝 마침표 무시</span></li>
+      <li><span data-en>If the key holds several accepted answers, any one of them is correct</span>
+          <span data-ko>정답이 여러 개면 그중 하나만 맞아도 정답</span></li>
+    </ul>
+    <div class="why">
+      <p><b><span data-en>Why exactly this much</span><span data-ko>왜 딱 이만큼인가</span></b><br>
+        <span data-en>More forgiving (fuzzy spelling matches) lets wrong answers through; stricter (case-sensitive)
+          deducts for reasons unrelated to ability. We erase conventions of notation, never the choice of word.
+          The same answer always yields the same score — nothing random, nothing time-dependent.</span>
+        <span data-ko>더 관대하면(철자 근사 매칭) 오답이 정답으로 새고, 더 엄격하면(대소문자 구분) 능력과 무관한
+          이유로 감점됩니다. 지우는 것은 표기 관습뿐이고 어휘 선택은 지우지 않습니다. 같은 답안은 언제나 같은
+          점수입니다 — 무작위도, 시간에 따라 변하는 요소도 없습니다.</span></p>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="card mt-16">
+    <h2><span data-en>5. Speaking &amp; Writing: AI drafts, the teacher decides</span><span data-ko>5. 스피킹·라이팅 — AI 는 초안, 점수는 선생님</span></h2>
+    <p style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px">
+      <span data-en>student response → rubric draft (AI or rules) → teacher confirms → report</span>
+      <span data-ko>학생 답안 → 루브릭 초안(AI 또는 규칙) → 선생님 확정 → 성적표</span>
+    </p>
+    <ul>
+      <li><b><span data-en>A draft is a starting point, not a score.</span><span data-ko>초안은 점수가 아니라 출발점.</span></b>
+        <span data-en>It is always labelled "draft · teacher review required", and the record keeps who confirmed it.</span>
+        <span data-ko>화면에 항상 "초안 · 교사 검수 필요"로 표시되고, 확정한 사람이 기록에 남습니다.</span></li>
+      <li><b><span data-en>Drafts are deliberately conservative.</span><span data-ko>초안은 의도적으로 보수적.</span></b>
+        <span data-en>The rule-based draft starts at the middle of the band and moves only within bounds; it never
+          awards the top of the scale. A teacher raising a score is safer than an unearned top band reaching a report.</span>
+        <span data-ko>규칙 기반 초안은 밴드의 가운데에서 시작해 정해진 폭만큼만 움직이고, 척도의 최상단은 주지
+          않습니다. 근거 없는 만점이 성적표에 실리는 것보다 선생님이 올려 주는 편이 안전하기 때문입니다.</span></li>
+      <li><b><span data-en>A draft exists even offline.</span><span data-ko>네트워크가 없어도 초안이 나온다.</span></b>
+        <span data-en>On site without a network, the draft is rule-based (length, sentence count, lexical variety);
+          online, an LLM writes it. Either way the score is decided by a person.</span>
+        <span data-ko>오프라인 현장에서는 규칙 기반(길이·문장수·어휘 다양도), 온라인에서는 LLM 이 초안을 만듭니다.
+          어느 쪽이든 최종 점수의 주체는 사람입니다.</span></li>
+      <li><b><span data-en>Listen and Repeat is an exception.</span><span data-ko>복창은 예외 규칙.</span></b>
+        <span data-en>Its target is one 8–14 word sentence, so length metrics would floor even a perfect answer.
+          It is compared to the script instead.</span>
+        <span data-ko>정답이 8~14 단어짜리 한 문장이라 길이 지표로 재면 완벽한 답도 바닥 점수를 받습니다.
+          그래서 길이 감점 대신 원문 대조로 잽니다.</span></li>
+    </ul>
+  </div>
+
+  <!-- 6 -->
+  <div class="card mt-16">
+    <h2><span data-en>6. Raw score → scaled score: read this before quoting a number</span><span data-ko>6. 원점수 → 환산점수 — 숫자를 인용하기 전에</span></h2>
+    <ul>
+      <li><span data-en>The record of truth on screen and in CSV is the <b>raw score</b>: items correct out of items
+        marked, per section.</span>
+        <span data-ko>화면과 CSV 의 정본은 <b>원점수</b>입니다 — 영역별 맞은 문항 수 / 채점 대상 문항 수.</span></li>
+      <li><span data-en>Values shown on a /30 or /120 scale are currently a <b>proportional conversion</b>
+        (accuracy × 30, halves rounded up).</span>
+        <span data-ko>30점·120점 척도로 보이는 값은 현재 <b>비례 환산</b>입니다(정답률 × 30, .5 올림).</span></li>
+      <li><span data-en>That is <b>not</b> the official ETS conversion table. The code marks it as an assumption
+        pending verification.</span>
+        <span data-ko>이는 ETS 공식 환산표가 <b>아닙니다</b>. 코드에도 검증 필요 가설로 명시돼 있습니다.</span></li>
+    </ul>
+    <div class="warn">
+      <p><b><span data-en>So we never call it a predicted TOEFL score.</span><span data-ko>그래서 "예상 TOEFL 점수"라고 말하지 않습니다.</span></b><br>
+        <span data-en>A proportional conversion carries no difficulty adjustment: a hard set reads low, an easy set
+          reads high. What stays valid is comparison between numbers produced the same way — ranking and change
+          within the same set. Read it as relative and directional, not absolute.</span>
+        <span data-ko>비례 환산은 난이도 보정을 하지 않으므로 어려운 세트는 낮게, 쉬운 세트는 높게 나옵니다.
+          유효한 것은 같은 방식으로 계산된 값끼리의 비교 — 같은 세트 안에서의 순위와 변화입니다.
+          절대 점수가 아니라 상대·추세로 읽으십시오.</span></p>
+    </div>
+    <p class="muted mt-16" style="font-size:12.5px">
+      <span data-en>When a measured conversion table becomes available it replaces the assumption without a code
+        change — the IELTS band table already works that way.</span>
+      <span data-ko>측정된 환산표가 확보되면 코드 수정 없이 표만 갈아 끼웁니다 — IELTS 밴드표가 이미 그 구조입니다.</span>
+    </p>
+  </div>
+
+  <!-- 7 -->
+  <div class="card mt-16">
+    <h2><span data-en>7. How to read a result: profile first, then trend</span><span data-ko>7. 점수를 읽는 법 — 프로파일 먼저, 그다음 추세</span></h2>
+    <p>
+      <span data-en>A single sitting carries the student's condition, the set's difficulty and the room's
+        equipment. Read it in this order:</span>
+      <span data-ko>한 번의 점수는 컨디션·세트 난이도·현장 장비까지 담고 있습니다. 다음 순서로 읽습니다.</span>
+    </p>
+    <ol>
+      <li><b><span data-en>Section profile.</span><span data-ko>영역 프로파일.</span></b>
+        <span data-en>Which section is weak is fairly stable even from one sitting.</span>
+        <span data-ko>어느 영역이 낮은가는 한 회차로도 꽤 안정적입니다.</span></li>
+      <li><b><span data-en>Trend within the same set format.</span><span data-ko>같은 세트·같은 구성의 추세.</span></b>
+        <span data-en>Change difficulty and you change the number; sitting-to-sitting comparison only means
+          something when the format is the same.</span>
+        <span data-ko>세트가 바뀌면 난이도가 바뀌므로, 회차 간 비교는 구성이 같을 때만 뜻이 있습니다.</span></li>
+      <li><b><span data-en>Errors by item type.</span><span data-ko>문항 유형별 오답.</span></b>
+        <span data-en>Listening detail vs inference, reading blanks vs passage. Teaching material lives here,
+          not in the total.</span>
+        <span data-ko>리스닝 세부정보 vs 추론, 리딩 빈칸 vs 지문. 지도할 거리는 총점이 아니라 여기 있습니다.</span></li>
+      <li><b><span data-en>Keep productive skills as bands.</span><span data-ko>산출형은 밴드 그대로.</span></b>
+        <span data-en>A 0–5 band is closer to the advice you will give than any total is.</span>
+        <span data-ko>0–5 밴드가 학생에게 줄 조언에 총점보다 가깝습니다.</span></li>
+    </ol>
+    <div class="why">
+      <p><b><span data-en>How big is a real change?</span><span data-ko>의미 있는 변화의 크기</span></b><br>
+        <span data-en>Out of 47 listening items, a 1–2 item difference is noise. Change your teaching direction
+          when a section's accuracy moves 5 percentage points or more in the same direction across sittings.</span>
+        <span data-ko>리스닝 47문항에서 1~2문항 차이는 잡음입니다. 영역 정답률이 회차를 건너 5%p 이상 같은 방향으로
+          움직일 때 지도 방향을 바꿉니다.</span></p>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="card mt-16">
+    <h2><span data-en>8. What makes the data trustworthy</span><span data-ko>8. 데이터 신뢰도 장치</span></h2>
+    <p><span data-en>A score is only as trustworthy as the conditions that produced it.</span>
+       <span data-ko>점수를 믿으려면 그 점수가 만들어진 조건도 믿을 수 있어야 합니다.</span></p>
+    <div class="table-wrap mt-16" style="overflow-x:auto"><table>
+      <thead><tr>
+        <th><span data-en>Safeguard</span><span data-ko>장치</span></th>
+        <th><span data-en>What it guarantees</span><span data-ko>무엇을 보장하나</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td><span data-en>Listening plays once</span><span data-ko>리스닝 1회 재생</span></td>
+          <td><span data-en>Playback is spent in device storage, so reloading or re-entering cannot replay it. Rewinding is blocked.</span>
+              <span data-ko>재생 소진을 기기 저장소에 남깁니다. 새로고침·재진입해도 다시 듣지 못하고 되감기도 막힙니다.</span></td></tr>
+        <tr><td><span data-en>Local is the original</span><span data-ko>로컬이 원본</span></td>
+          <td><span data-en>The attempt is written to the device first, so a test finishes even with no network in the room.</span>
+              <span data-ko>응시 기록의 원본은 기기 저장소입니다. 네트워크가 끊긴 현장에서도 시험이 끝납니다.</span></td></tr>
+        <tr><td><span data-en>Server holds the copy</span><span data-ko>서버는 사본</span></td>
+          <td><span data-en>Logged in and online, it syncs so other devices and teacher screens see it. For the same session the local copy wins.</span>
+              <span data-ko>로그인·온라인이면 올라가 다른 기기·선생님 화면에서 보입니다. 같은 세션이면 로컬본이 이깁니다.</span></td></tr>
+        <tr><td><span data-en>Permission enforced server-side</span><span data-ko>권한은 서버에서</span></td>
+          <td><span data-en>Row-level security returns only a student's own rows even if they open an admin URL directly. Screen-level checks are guidance, not the defence.</span>
+              <span data-ko>학생이 관리자 주소를 직접 열어도 RLS 가 자기 것만 돌려줍니다. 화면의 역할 확인은 안내일 뿐 방어선이 아닙니다.</span></td></tr>
+        <tr><td><span data-en>Recordings kept 90 days</span><span data-ko>녹음 보관 90일</span></td>
+          <td><span data-en>Speaking audio is retained for re-marking and appeals, then deleted.</span>
+              <span data-ko>스피킹 녹음은 재채점·이의 제기용으로 90일 보관 후 삭제합니다.</span></td></tr>
+        <tr><td><span data-en>Answer keys are separated</span><span data-ko>정답지 분리</span></td>
+          <td><span data-en>Keys are service-role only; student-facing code does not carry them.</span>
+              <span data-ko>정답지는 service_role 전용입니다. 학생 화면 코드가 정답을 들고 다니지 않습니다.</span></td></tr>
+        <tr><td><span data-en>AI output is labelled</span><span data-ko>AI 초안 표시</span></td>
+          <td><span data-en>Anything an AI produced is shown as a draft, and the confirming teacher is recorded.</span>
+              <span data-ko>AI 가 만든 값은 항상 초안으로 표시되고, 확정한 사람이 기록에 남습니다.</span></td></tr>
+        <tr><td><span data-en>Usage ledger</span><span data-ko>단가·사용량 원장</span></td>
+          <td><span data-en>AI calls record tokens and cost; when a price is unknown the amount stays empty rather than estimated.</span>
+              <span data-ko>AI 호출은 토큰·금액이 원장에 남고, 단가를 모르면 추정치를 지어내지 않고 비워 둡니다.</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- 9 -->
+  <div class="card mt-16">
+    <h2><span data-en>9. What we deliberately do not do</span><span data-ko>9. 하지 않는 것 (그리고 그 이유)</span></h2>
+    <ul class="no">
+      <li><span data-en>No guessing penalty — the official test has none.</span>
+          <span data-ko>추측 보정(감점제)을 하지 않습니다 — 공식 시험이 하지 않습니다.</span></li>
+      <li><span data-en>No partial credit on multi-select — no official basis exists.</span>
+          <span data-ko>복수선택 부분점수를 주지 않습니다 — 공식 근거가 없습니다.</span></li>
+      <li><span data-en>No in-house rubrics — see section 1.</span>
+          <span data-ko>자체 루브릭을 만들지 않습니다 — 1절.</span></li>
+      <li><span data-en>No calling the scaled number a predicted official score — see section 6.</span>
+          <span data-ko>환산 점수를 공식 예상 점수라고 부르지 않습니다 — 6절.</span></li>
+      <li><span data-en>No AI score reaching a report unconfirmed — see section 5.</span>
+          <span data-ko>AI 점수를 그대로 확정하지 않습니다 — 5절.</span></li>
+    </ul>
+    <p class="muted mt-16" style="font-size:12.5px">
+      <span data-en>A new rule is written here before it is written in code. A rule with no stated reason cannot be
+        explained later, and a score nobody can explain loses trust.</span>
+      <span data-ko>새 규칙이 필요하면 코드보다 이 문서를 먼저 고칩니다. 근거 없이 생긴 규칙은 나중에 아무도
+        설명하지 못하고, 설명하지 못하는 점수는 신뢰를 잃습니다.</span>
+    </p>
+    <p class="muted mt-16" style="font-size:12.5px">
+      <span data-en>Full text for the repository: <code>docs/scoring-rationale.md</code> ·
+        official guides: <code>docs/reference/toefl-official-scoring-guides.md</code></span>
+      <span data-ko>저장소 문서: <code>docs/scoring-rationale.md</code> ·
+        공식 가이드 전문: <code>docs/reference/toefl-official-scoring-guides.md</code></span>
+    </p>
+  </div>
+
+</main>
+
+<footer class="foot"><div class="wrap foot-in">
+  <small class="muted">© SMEAG StudyGround · <span data-en>Scoring rationale</span><span data-ko>채점 근거</span></small>
+</div></footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script>
+/* 읽기 전용 안내 문서다 — 막을 비밀이 없으므로 권한 검사는 하지 않는다.
+ * 다만 학생이 흘러들어왔을 때 "결과 목록으로" 버튼이 열리지 않는 관리자 화면을
+ * 가리키면 곤란하므로, 스태프가 아니면 자기 성적 화면으로 돌린다. */
+(function () {
+  'use strict';
+  if (!window.SG_AUTH || !SG_AUTH.user()) { document.getElementById('back').href = 'dashboard.html'; return; }
+  SG_AUTH.role().then(function (role) {
+    if (role !== 'teacher' && role !== 'admin') document.getElementById('back').href = 'dashboard.html';
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>
