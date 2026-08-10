@@ -1,0 +1,245 @@
+{
+  "note": "verify_audio.py 신선도 기준. 스크립트/음성정책 해시.",
+  "items": {
+    "l1-q01": {
+      "scriptHash": "d310b3c9dc9f583ad0965abf77e6d6c8511545e412c4da8e90d13b13578ba2a2",
+      "bytes": 30973,
+      "durationSec": 1.86,
+      "audioSha256": "2327bb15583bbacd669da2da77a44ea747afa974210c19acbde01cda649c5503"
+    },
+    "l1-q02": {
+      "scriptHash": "d40d9356a999246a6dfb4499f44e835dcce84339a9918da48e5c1cde015b5624",
+      "bytes": 35152,
+      "durationSec": 2.14,
+      "audioSha256": "ce26ab4808eff9e9578ef9266b1559e4b6348654d817ede6809e50165ff363ea"
+    },
+    "l1-q03": {
+      "scriptHash": "a4372f33354f51a5d4b7f08be4ae1c6550f2fe570798202efe1b53d64ec7c2e0",
+      "bytes": 61902,
+      "durationSec": 3.81,
+      "audioSha256": "286ead190ea706d7cfaf58619c36122f0eb251e9fbde3dbb30462df851689160"
+    },
+    "l1-q04": {
+      "scriptHash": "7275e35b8bce53cad3c18cb660a91bf5cb65f6e9bc872726a62c6ab82fadf46c",
+      "bytes": 39750,
+      "durationSec": 2.41,
+      "audioSha256": "c42e65d68a4060f7a71897e9807c3a8869f2f2b5390b77d373f1ed3f424098f6"
+    },
+    "l1-q05": {
+      "scriptHash": "89916ac7fbf0ad946b2bb769cb533be94b56dcb03b0d23b8ac5249c0329d38cf",
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "9437f45e58c80257cabb60ea9be459562b7dd2254cf6cc8656259598d5ab0a18"
+    },
+    "l1-q06": {
+      "scriptHash": "726e77c11f2786b664e8633b318a9a2a8a94db374695d65d674b075b7db4e2a4",
+      "bytes": 38914,
+      "durationSec": 2.37,
+      "audioSha256": "28ab6d99f4369df58432bfdfb0a0380233ee213339946b09ca1eded99de6385e"
+    },
+    "l1-q07": {
+      "scriptHash": "856fe27e608bbd8c4abfdbcd796350f485075cb01c5d55b9a8c211196b4ef97b",
+      "bytes": 54378,
+      "durationSec": 3.34,
+      "audioSha256": "57ab63145b4dce7c80d32e8ab2ad5e126b6b3b44b3d1b6b9a9e468a16f5c9c35"
+    },
+    "l1-q08": {
+      "scriptHash": "f6824f220daa802d812d019252645889a6a1b803a98e3e3e1742cc78ef193b23",
+      "bytes": 35152,
+      "durationSec": 2.14,
+      "audioSha256": "ab40ef29236580509346751a942470d44cd3fe0e3f150e02e58440d5ff330322"
+    },
+    "l1-q09": {
+      "scriptHash": "822a112bf0a51b81a203bcf4ee8437729eaa3e0b14df52802a9dc36dd5ef4c62",
+      "bytes": 54378,
+      "durationSec": 3.34,
+      "audioSha256": "6c19d7f029d8a158cf26a4197d212e158211656c5772db9396d974df016b0aa5"
+    },
+    "l1-q10": {
+      "scriptHash": "f0cff1bb3496aad2eee8b6219cb2efe1b7760d67ab01df89137f57b60810b5ea",
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "a1259aef6b186340f3f212d70bca052d39801226b1776a56c2b7a5362ce39c1a"
+    },
+    "l1-q11": {
+      "scriptHash": "8fe68cdaabc06cc4a90ab6f60060832dddf93d5c6cbee77d40cbbda71907a608",
+      "bytes": 28465,
+      "durationSec": 1.72,
+      "audioSha256": "707c87bf197883e5bd881e6431007585cfc85dc85b8d8be5ebe04f4506382f2b"
+    },
+    "l1-q12": {
+      "scriptHash": "4d08eba9a3f8032d3f1715b50136927bd8e58f290d09e12232f4942be7027457",
+      "bytes": 61902,
+      "durationSec": 3.81,
+      "audioSha256": "df64a8c05f34db1334604f2035efd81d889d6e95a614cb31a25b7ccd9ebe06fd"
+    },
+    "l1-q13-14": {
+      "scriptHash": "07c93cc359b2b48ce4e432e8a8b96c312f21f94b5c2caf5cc535ce2418e2db10",
+      "bytes": 321223,
+      "durationSec": 30.76,
+      "audioSha256": "d4a3157b7fca2bfa5557b028091f88c271e7ebe59fcb5eea6a69da715daaeacd"
+    },
+    "l1-q15-16": {
+      "scriptHash": "23cbb0ebc5b53253e68a0326a34648fc1478e262faf77e62e11075d4825353a4",
+      "bytes": 344501,
+      "durationSec": 32.67,
+      "audioSha256": "ddc4c0fc7bee0ae334820bc6eb11f9a5b0d51321b151b26b29d8a1ceca6c0332"
+    },
+    "l1-q17-18": {
+      "scriptHash": "cd3ff79669f54143d8ab9ee6d7d35915f941b4b26c34204c3d4a4a908aeae43b",
+      "bytes": 336403,
+      "durationSec": 34.48,
+      "audioSha256": "3d8b759d5896db4923c5fd4c457edaa2faf4bde4b5ec7dfd78ad0cf05db7bd3f"
+    },
+    "l1-q19-20": {
+      "scriptHash": "53ca3d176a7731f1ea433bea689d65c0daa6ccd66f0161cff9d01ff6d258d412",
+      "bytes": 382058,
+      "durationSec": 23.82,
+      "audioSha256": "7b5c755be48eac0bdca90674d858edd77ad89f9f7023834e2546f78d56e9b1e2"
+    },
+    "l1-q21-22": {
+      "scriptHash": "15242139de82d60cb973580f1737a70fe954cb58217f739a12abbdea66f0e10d",
+      "bytes": 461888,
+      "durationSec": 28.79,
+      "audioSha256": "0e02305f3daf862060a4a96d0d7b428518032b09ba7844eaf0ccba470cfde08d"
+    },
+    "l1-q23-24": {
+      "scriptHash": "ebf9cf4d03d0c3f5a984e9310fa83991a40c132b6e2a8b1893cf7be18938fec7",
+      "bytes": 905343,
+      "durationSec": 56.52,
+      "audioSha256": "08563396e489435be48b1287c9c2d52be20c8135675de450f1997d0a119eb5a2"
+    },
+    "l1-q25-28": {
+      "scriptHash": "b7bdf95ee74b66b376b4d205e5b5f8c3c9ee4f62c07e47cc9250194593afd389",
+      "bytes": 1277723,
+      "durationSec": 129.42,
+      "audioSha256": "d6015d1b5992a42684e0c3b699b8fe7c97267023396e6c785dadf9b36fb721c0"
+    },
+    "l1-q29-32": {
+      "scriptHash": "c9e72a79158c2f823b4fb037b5f20cd4ddb68d49a800c7406502198dccc4e06b",
+      "bytes": 1150831,
+      "durationSec": 111.45,
+      "audioSha256": "e644199f5ddc9a9f3e76af7a3630ba538584e395401b1797b5cb3eddf5b67520"
+    },
+    "l2-q01": {
+      "scriptHash": "b98ef3687db630928cd5cb1954951921a96badb813ab2232d7dcd9ab33c5cd34",
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "5f867245651c702c352d5ce716aa6debf19248b5123baf82540c029efbc299ac"
+    },
+    "l2-q02": {
+      "scriptHash": "31119912392de200d27dff873f562245ccbcbb2ef6beef23905c508abd42ec85",
+      "bytes": 35988,
+      "durationSec": 2.18,
+      "audioSha256": "950cb034e0fd38bb18f964d5c4fc88ed3e50ee5629b73bc6d77c2b7dc7787304"
+    },
+    "l2-q03": {
+      "scriptHash": "5d745eea216e2105d7530752dccd5ab4ee81391811320bffa0b448cd97aec2b7",
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "9766bf721494a9998d783a0014a43b05fdce8a7e600bfd01bd26a3e0acf3c197"
+    },
+    "s1-instructions": {
+      "scriptHash": "cc4f1e695bd1e8c8d5bbc2a8e433cf230742174738fe80f4a04ca315aa1b58f4",
+      "bytes": 160958,
+      "durationSec": 9.98,
+      "audioSha256": "e2d577c1032325a43df8f3fcd8ec18780296ec1c781a969bd71c93ad0c2850d8"
+    },
+    "s1-q1": {
+      "scriptHash": "4cdb20cddbe04e5be64aedd83fd68e6cca6bdac801c16ad5ea6f06cb8ff1321b",
+      "bytes": 49363,
+      "durationSec": 3.02,
+      "audioSha256": "700243a5f851159d6631a010041370ee19ca95791f2eb8efe1194b64c7308390"
+    },
+    "s1-q2": {
+      "scriptHash": "6aa4d796f23c36a4f02b85835d8ad7d4b6433893adc87cb443af5aa2923de903",
+      "bytes": 44765,
+      "durationSec": 2.74,
+      "audioSha256": "453ed0f0f8f92489903159794c04f39f0856135e5a2de98f5b15ed3a49887956"
+    },
+    "s1-q3": {
+      "scriptHash": "011ae3ac75f5429412ac224c9f14695820e9418ebde2accef7be076e7b76f936",
+      "bytes": 51453,
+      "durationSec": 3.16,
+      "audioSha256": "6982908bcec3b138f44a4513ae2d19f0407eb8fadbe343f96ff8ae05aeaca4f6"
+    },
+    "s1-q4": {
+      "scriptHash": "03bb3248dca6f2e0fb84a5e7206cbc580b0c46d7b42745ff7f04ba1c40470383",
+      "bytes": 73186,
+      "durationSec": 4.5,
+      "audioSha256": "d1adb029c7ea01697efc8347e523f5375cdbe714dcf45dc4e5e61067015c631e"
+    },
+    "s1-q5": {
+      "scriptHash": "f2795c8f2a76d0507868fe5b3734ad8a14011353b9e08aa351c73f0bfe527297",
+      "bytes": 60648,
+      "durationSec": 3.72,
+      "audioSha256": "85a9283d56d10ec969a11ff5808888095285b4570bcd6eadba3ec0c8139ade62"
+    },
+    "s1-q6": {
+      "scriptHash": "32bea186d6fe4cfa2e8234e1353b9b4312cfd6d484af163def760c23890fcad6",
+      "bytes": 84889,
+      "durationSec": 5.25,
+      "audioSha256": "9e33d9be3926a619aa7720e58c3f2b86065be2f70227d2aeea331f5c68aa6a89"
+    },
+    "s1-q7": {
+      "scriptHash": "5cc38ffb03ab9c1035f8e1c27df73433db9a5c15a99990ae8f70b9a7d0ddadd2",
+      "bytes": 88651,
+      "durationSec": 5.48,
+      "audioSha256": "d59cb3bf0a47e2d667abba279627c2066b1895144b7a664b4918789b73d56c47"
+    },
+    "s2-instructions": {
+      "scriptHash": "29482d1a2c249330d04c53a793ddef33ec5bb6197dff191771ff54967c1636f1",
+      "bytes": 236608,
+      "durationSec": 14.72,
+      "audioSha256": "40a9d19b6a206211f12847ab07cb57a04132257ce4f2cbf4a2f0f1fbae0fdd6d"
+    },
+    "s2-q1": {
+      "scriptHash": "45def2f75e83762c8ded777d82356f75f57b01b8453014f5793c974d0815b176",
+      "bytes": 208187,
+      "durationSec": 12.96,
+      "audioSha256": "7ccf22d3a36700d0860b2a790ec210e0d7bbb75ab775a010f7e58abd1228fd43"
+    },
+    "s2-q2": {
+      "scriptHash": "16e6296483681f6d72c615ec8bdb47b08d13d2c0c332f4acc7b1868a54a86db7",
+      "bytes": 296795,
+      "durationSec": 18.48,
+      "audioSha256": "e4900b2353639524a4a6b7f8e6e967fb96bf9ea5670954c2948623cf4209b65c"
+    },
+    "s2-q3": {
+      "scriptHash": "ff1486ff356e7a30ed28e5cafcc6cc0ad41cae4451dfb9d81a77db15704830d0",
+      "bytes": 140896,
+      "durationSec": 8.73,
+      "audioSha256": "b47a1412e6f2edb935b7c5112886c1ffb10bfc3b56d057535dcae0dffd3cc614"
+    },
+    "s2-q4": {
+      "scriptHash": "03e61d1c769c8b9acfed641f6975cfbe29dc01f4f7ef9177deb89ecf11513d3e",
+      "bytes": 153435,
+      "durationSec": 9.52,
+      "audioSha256": "bda170fb54c8c8cce932ba86ea27b81cdfbef5965e0b1215d23e4995adfe9d98"
+    },
+    "set9-L2-04-05": {
+      "scriptHash": "2bb12614841363ae815a98fbbb915eca6bd7cf16120f587bf61f4dbac7c4f9f9",
+      "bytes": 941956,
+      "durationSec": 92.81,
+      "audioSha256": "d1b58b232f59946d734d1845833752d554b3bc518708265bf9de0eb89ea643aa"
+    },
+    "set9-L2-06-07": {
+      "scriptHash": "e0b9715ff17a703567ece450675b166d8509f4f491dbd879b322c0e56763a263",
+      "bytes": 774397,
+      "durationSec": 80.14,
+      "audioSha256": "88468848931c4646df13321dec889a14a1aa8f236b658b96d2228d718f92fe3b"
+    },
+    "set9-L2-08-11": {
+      "scriptHash": "d1e9ac2db620d8d54f12ed167b319b8a0f9326913f768e5150c07b4440e2243b",
+      "bytes": 1769491,
+      "durationSec": 179.14,
+      "audioSha256": "5af04599d347660856f689a4ce47c99d6b41a275569909c97e0a995b71ae7eab"
+    },
+    "set9-L2-12-15": {
+      "scriptHash": "abd099f3d50407e1634f3460b2d4fb351452fdd060f88c08bab19522a20db05a",
+      "bytes": 1557252,
+      "durationSec": 151.48,
+      "audioSha256": "cabd0c5949d99f86e02c76d79b58c485f48f619e6a01749b2b6eb81e7a7a91f4"
+    }
+  }
+}

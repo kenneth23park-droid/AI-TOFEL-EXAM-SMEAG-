@@ -233,6 +233,46 @@ RENDERERS.forEach(function (f) {
 check('SMEAG_SET1 하드코딩 조회', hardcoded.length, 0);
 hardcoded.forEach(function (h) { console.log('       ! ' + h); });
 
+/* [11] insert 문항의 삽입 지점 마커.
+ * exam-render-reading.js 의 markerTokens 는 /\{\{([A-D])\}\}/ 로 본문을 쪼개 클릭 가능한
+ * rd-marker 버튼을 만든다. 마커가 0개면 본문 어디에도 A~D 가 없는 채 "Position A~D" 라디오
+ * 4개만 뜨고 그 문항은 풀 수 없다(SET 9 R2-15 에서 실제로 그랬다).
+ * 계약: insert 문항이 있는 passage 블록은 본문 전체에 {{A}},{{B}},{{C}},{{D}} 가 정확히
+ * 하나씩 있어야 하고, insert 문항의 answer index 에 대응하는 마커가 존재해야 한다. */
+console.log('\n[11] insert 문항 지문의 {{A}}~{{D}} 마커');
+var MK = ['A', 'B', 'C', 'D'];
+var insertBlocks = 0, markerBad = 0, answerMarkerBad = 0, insertQs = 0;
+set.sections.forEach(function (sec) {
+  sec.modules.forEach(function (mod) {
+    mod.blocks.forEach(function (blk) {
+      var ins = (blk.questions || []).filter(function (q) { return q.kind === 'insert'; });
+      if (!ins.length) return;
+      insertBlocks++;
+      insertQs += ins.length;
+      var body = (blk.paragraphs || []).join('\n');
+      MK.forEach(function (L) {
+        var n = body.split('{{' + L + '}}').length - 1;
+        if (n !== 1) {
+          markerBad++;
+          console.log('       ! ' + (blk.title || mod.id) + ' : {{' + L + '}} ' + n + '개 (기대 1)');
+        }
+      });
+      ins.forEach(function (q) {
+        var a = q.answer;
+        if (typeof a !== 'number' || a < 0 || a >= MK.length ||
+            body.indexOf('{{' + MK[a] + '}}') < 0) {
+          answerMarkerBad++;
+          console.log('       ! ' + q.id + ' : answer=' + a + ' 에 대응하는 마커가 본문에 없다');
+        }
+      });
+    });
+  });
+});
+console.log('       (insert 문항 ' + insertQs + '개 / 블록 ' + insertBlocks + '개)');
+check('insert 문항이 있는 블록', insertBlocks, 1);
+check('마커 개수 위반', markerBad, 0);
+check('정답 마커 결손', answerMarkerBad, 0);
+
 if (res.warnings.length) {
   console.log('\n[compile warnings] ' + res.warnings.length + '건');
   res.warnings.slice(0, 15).forEach(function (w) { console.log('       - ' + w); });

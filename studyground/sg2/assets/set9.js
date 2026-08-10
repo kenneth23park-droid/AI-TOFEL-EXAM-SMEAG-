@@ -571,8 +571,8 @@
             "Green roofs, which feature layers of vegetation planted on building rooftops, have gained increasing popularity in urban planning as a strategy for addressing environmental challenges. These living systems offer multiple benefits that extend well beyond simple aesthetics.",
             "One significant advantage is increased energy efficiency. The layer of soil and plants provides natural insulation, substantially reducing heat transfer through the roof structure. During summer months, green roofs can lower indoor temperatures by several degrees, diminishing the need for air conditioning and reducing energy consumption.",
             "Green roofs also help combat the urban heat island effect, a phenomenon where cities become significantly warmer than surrounding rural areas due to heat- absorbing surfaces like asphalt and concrete. By replacing these dark surfaces with vegetation, green roofs reflect more sunlight and release moisture through evapotranspiration, effectively cooling the surrounding air.",
-            "Additionally, rooftop gardens enhance ecological diversity by providing habitat for insects, birds, and other wildlife in otherwise barren urban environments. Some cities have also begun using green roofs for urban food production, growing vegetables and herbs that supply local restaurants and community markets.",
-            "However, green roofs require substantial initial investment and ongoing maintenance costs. The added weight of soil and vegetation also demands reinforced structural support, which can limit installation options for older buildings."
+            "Additionally, rooftop gardens enhance ecological diversity by providing habitat for insects, birds, and other wildlife in otherwise barren urban environments. {{A}} Some cities have also begun using green roofs for urban food production, growing vegetables and herbs that supply local restaurants and community markets. {{B}}",
+            "However, green roofs require substantial initial investment and ongoing maintenance costs. {{C}} The added weight of soil and vegetation also demands reinforced structural support, which can limit installation options for older buildings. {{D}}"
           ],
           "questions": [
             {
@@ -641,7 +641,9 @@
               "answer": 3,
               "sentence": "These factors must be carefully weighed against the environmental and economic benefits described above."
             }
-          ]
+          ],
+          "markerOrigin": "authored",
+          "markerNote": "원본 NEW TOEFL MOCK TEST SET  9.docx 의 이 지문에는 A/B/C/D 표식이 아예 없다(문서에 두 번 실린 사본 모두, w:sym·도형·텍스트박스도 없음). 마커가 없으면 렌더러가 삽입 지점 버튼을 하나도 만들지 못해 문항이 성립하지 않으므로, 정답 D(answer:3) 제약과 지시어 \"These factors\"/\"benefits described above\" 의 선행사 요건에 맞춰 네 자리를 tools/build_set9.py 에서 집필했다. D = 단점 문단이 끝난 자리(모든 factor 열거 후), A·B·C 는 문법적으로는 붙을 만한 오답 자리. 원본에서 실제 마커 위치가 확보되면 build_set9.py 의 INSERT_MARKERS 표를 교체하고 이 필드를 지울 것."
         }
       ]
     }

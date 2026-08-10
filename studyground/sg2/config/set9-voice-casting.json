@@ -1,0 +1,260 @@
+{
+  "set": "SET9",
+  "provider": "elevenlabs",
+  "model": "eleven_flash_v2_5",
+  "output": "mp3_44100_128",
+  "note": [
+    "SET 9 리스닝 배역표. 13명의 화자 캐릭터를 정의하고 각자가 맡는 문항을 고정한다.",
+    "`voiceId` 가 채워진 9명은 이 저장소의 기존 ElevenLabs 산출물에서 실제로 검증된 ID다.",
+    "`voiceId` 가 null 인 4명은 계정 보이스 라이브러리에서 골라야 한다 —",
+    "tools/resolve_11labs_voices.py 가 /v1/voices 를 조회해 `criteria` 에 맞는 후보를 제시한다.",
+    "캐스팅을 바꾸려면 이 파일만 고친다. 문항↔화자 배정은 tts-voices-set9*.json 의",
+    "voice_name 과 일치해야 하며, 불일치는 빌드 시 에러로 잡는다.",
+    "2026-08-10: 계정 보이스 라이브러리 실조회 후 13명 전원 확정. Oliver=Daniel(Steady Broadcaster), Henry=George(Warm Storyteller) — 설명을 보고 초안과 맞바꿨다. 두 강의의 음색 대비가 설계 목표이기 때문."
+  ],
+  "designNotes": [
+    "구별성이 최우선이다. 리스닝 시험은 '누가 말하는지'가 문항의 일부인 경우가 있고,",
+    "화자를 구분하지 못하면 내용 이해와 무관하게 틀린다.",
+    "① 두 개의 긴 강의(ann-25-28 물리, ann-29-32 창작)는 둘 다 GB 남성이고 연속 배치된다.",
+    "   Oliver 는 분석적·또렷한 음색, Henry 는 따뜻하고 이야기하듯 — 음색을 반드시 갈라야 한다.",
+    "② 2인 대화 3건은 모두 남녀 조합이라 성별만으로 구분된다. 유지할 것.",
+    "③ Listen & Repeat 7문항은 학생이 소리 내어 따라 하는 드릴이다. 발음 명료도가",
+    "   자연스러움보다 우선이며, 한 명(Emma)이 전담해 일관성을 지킨다.",
+    "④ 등장 1회짜리 단역 4명(Noah/Alice/Ivy/Lily)은 분량이 아니라 액센트·음색 다양성이 존재 이유다."
+  ],
+  "characters": [
+    {
+      "name": "US-Ava",
+      "accent": "en-US",
+      "gender": "female",
+      "age": "20대 초반",
+      "persona": "학부 신입생. 밝고 가벼운 톤, 캠퍼스에서 길을 묻는 학생",
+      "timbre": "bright, light",
+      "items": [
+        "set9-M1-sr-01",
+        "set9-M2-sr-01"
+      ],
+      "itemCount": 2,
+      "chars": 70,
+      "voiceId": "FGY2WhTYpPnrIDTdsKH5",
+      "voiceName": "Laura",
+      "voiceDescription": "Enthusiast, Quirky Attitude"
+    },
+    {
+      "name": "US-Emma",
+      "accent": "en-US",
+      "gender": "female",
+      "age": "20대",
+      "persona": "학생 겸 교내 안내 화자. Listen & Repeat 드릴 전담 — 세트 전체에서 가장 또렷해야 하는 목소리",
+      "timbre": "warm, very clear articulation",
+      "items": [
+        "set9-M1-sr-09",
+        "set9-M1-conv-13-14",
+        "set9-M2-sr-02",
+        "set9-M2-repeat-01",
+        "set9-M2-repeat-02",
+        "set9-M2-repeat-03",
+        "set9-M2-repeat-04",
+        "set9-M2-repeat-05",
+        "set9-M2-repeat-06",
+        "set9-M2-repeat-07"
+      ],
+      "itemCount": 10,
+      "chars": 696,
+      "voiceId": "EXAVITQu4vr4xnSDxMaL",
+      "voiceName": "Sarah",
+      "voiceDescription": "Mature, Reassuring, Confident"
+    },
+    {
+      "name": "US-Mia",
+      "accent": "en-US",
+      "gender": "female",
+      "age": "20대 후반~30대",
+      "persona": "실험실 장비 담당 직원. 차분하고 도와주는 어조 (conv-15-16 예약 문제 해결)",
+      "timbre": "calm, helpful",
+      "items": [
+        "set9-M1-sr-03",
+        "set9-M1-conv-15-16"
+      ],
+      "itemCount": 2,
+      "chars": 278,
+      "voiceId": "XrExE9yKIg1WjnnlVkGX",
+      "voiceName": "Matilda",
+      "voiceDescription": "Knowledgable, Professional"
+    },
+    {
+      "name": "US-Zoe",
+      "accent": "en-US",
+      "gender": "female",
+      "age": "20대",
+      "persona": "이웃/친구. 캐주얼하고 활기참 (conv-17-18 개러지 세일 제안)",
+      "timbre": "casual, energetic",
+      "items": [
+        "set9-M1-sr-11",
+        "set9-M1-conv-17-18"
+      ],
+      "itemCount": 2,
+      "chars": 375,
+      "voiceId": "cgSgspJ2msm6clMCkdW9",
+      "voiceName": "Jessica",
+      "voiceDescription": "Playful, Bright, Warm"
+    },
+    {
+      "name": "US-Liam",
+      "accent": "en-US",
+      "gender": "male",
+      "age": "20대",
+      "persona": "학생 겸 동아리 진행자. 편안한 톤 (ann-19-20 보드게임 클럽 게임나이트 공지)",
+      "timbre": "relaxed, friendly",
+      "items": [
+        "set9-M1-sr-02",
+        "set9-M1-conv-13-14",
+        "set9-M1-ann-19-20"
+      ],
+      "itemCount": 3,
+      "chars": 753,
+      "voiceId": "TX3LPaxmHKxFdv7VOQHJ",
+      "voiceName": "Liam",
+      "voiceDescription": "Energetic, Social Media Creator"
+    },
+    {
+      "name": "US-Mason",
+      "accent": "en-US",
+      "gender": "male",
+      "age": "30~40대",
+      "persona": "프로그램 행정 담당. 안정적이고 공식적 (ann-23-24 보건계열 섀도잉 프로그램 안내)",
+      "timbre": "steady, authoritative",
+      "items": [
+        "set9-M1-sr-04",
+        "set9-M1-conv-17-18",
+        "set9-M1-ann-23-24"
+      ],
+      "itemCount": 3,
+      "chars": 1264,
+      "voiceId": "cjVigY5qzO86Huf0OWal",
+      "voiceName": "Eric",
+      "voiceDescription": "Smooth, Trustworthy"
+    },
+    {
+      "name": "US-Ethan",
+      "accent": "en-US",
+      "gender": "male",
+      "age": "30대",
+      "persona": "강사. 수업을 진행하는 어조 (ann-21-22 강의실 변경 공지) + 학생 역(conv-15-16)",
+      "timbre": "instructional, even",
+      "items": [
+        "set9-M1-sr-10",
+        "set9-M1-conv-15-16",
+        "set9-M1-ann-21-22"
+      ],
+      "itemCount": 3,
+      "chars": 859,
+      "voiceId": "nPczCjzI2devNBz1zQrb",
+      "voiceName": "Brian",
+      "voiceDescription": "Deep, Resonant and Comforting"
+    },
+    {
+      "name": "US-Noah",
+      "accent": "en-US",
+      "gender": "male",
+      "age": "20대",
+      "persona": "단역 학생 1문항. 위 남성 3인과 확실히 다른 음색이어야 존재 의미가 있다",
+      "timbre": "distinct from Liam/Mason/Ethan",
+      "items": [
+        "set9-M1-sr-08"
+      ],
+      "itemCount": 1,
+      "chars": 30,
+      "voiceId": "CwhRBWXzGAHq8TQ4Fs17",
+      "voiceName": "Roger",
+      "voiceDescription": "Laid-Back, Casual, Resonant"
+    },
+    {
+      "name": "GB-Alice",
+      "accent": "en-GB",
+      "gender": "female",
+      "age": "20~30대",
+      "persona": "단역 학생 1문항. 영국 여성 액센트 확보용",
+      "timbre": "neutral RP",
+      "items": [
+        "set9-M1-sr-05"
+      ],
+      "itemCount": 1,
+      "chars": 38,
+      "voiceId": "Xb7hH8MSUJpSbSDYk0k2",
+      "voiceName": "Alice",
+      "voiceDescription": "Clear, Engaging Educator"
+    },
+    {
+      "name": "GB-Ivy",
+      "accent": "en-GB",
+      "gender": "female",
+      "age": "20대",
+      "persona": "단역 학생 1문항(M2). GB-Alice 와 구별되어야 한다",
+      "timbre": "distinct from Alice",
+      "items": [
+        "set9-M2-sr-03"
+      ],
+      "itemCount": 1,
+      "chars": 35,
+      "voiceId": "pFZP5JQG7iQjIQuC4Bku",
+      "voiceName": "Lily",
+      "voiceDescription": "Velvety Actress"
+    },
+    {
+      "name": "GB-Henry",
+      "accent": "en-GB",
+      "gender": "male",
+      "age": "40~50대",
+      "persona": "창작 글쓰기 교수. 이야기하듯 따뜻하게 (ann-29-32 픽처 다이스 강의, 310단어)",
+      "timbre": "warm, narrative, conversational",
+      "items": [
+        "set9-M1-sr-06",
+        "set9-M1-ann-29-32"
+      ],
+      "itemCount": 2,
+      "chars": 1830,
+      "voiceId": "JBFqnCBsd6RMkjVDRZzb",
+      "voiceName": "George",
+      "voiceDescription": "Warm, Captivating Storyteller"
+    },
+    {
+      "name": "GB-Oliver",
+      "accent": "en-GB",
+      "gender": "male",
+      "age": "40~50대",
+      "persona": "물리 교수 겸 M2 인터뷰 진행자. 분석적이고 또렷 (ann-25-28 자전거 관성/구심력 강의, 301단어)",
+      "timbre": "crisp, analytical, measured",
+      "items": [
+        "set9-M1-sr-12",
+        "set9-M1-ann-25-28",
+        "set9-M2-interview-01",
+        "set9-M2-interview-02",
+        "set9-M2-interview-03",
+        "set9-M2-interview-04"
+      ],
+      "itemCount": 6,
+      "chars": 2386,
+      "voiceId": "onwK4e9ZLuTAKqWW03F9",
+      "voiceName": "Daniel",
+      "voiceDescription": "Steady Broadcaster"
+    },
+    {
+      "name": "AU-Lily",
+      "accent": "en-AU",
+      "gender": "female",
+      "age": "20대",
+      "persona": "단역 학생 1문항. SET 9 의 US/GB/AU 3종 액센트 구성을 완성하는 유일한 호주 화자",
+      "timbre": "Australian English",
+      "items": [
+        "set9-M1-sr-07"
+      ],
+      "itemCount": 1,
+      "chars": 45,
+      "voiceId": "VyyyOgRmsqOzaZXnKWnI",
+      "voiceName": "Sunny - AU Female (SET9)",
+      "voiceDescription": "Australian Female · 공유 라이브러리에서 추가"
+    }
+  ],
+  "resolvedAt": "2026-08-10"
+}

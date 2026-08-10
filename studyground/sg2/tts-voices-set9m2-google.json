@@ -1,4 +1,7 @@
 {
+  "active": false,
+  "supersededBy": "tts-voices-set9-11labs.json",
+  "supersededNote": "2026-08-10: SET 9 M2 음원은 ElevenLabs 로 재생성됐다. 이 파일은 Google 캐스팅의 기록이자 tools/tts_kokoro.py 의 입력으로 남겨두되, verify_audio 합집합에서는 빠진다 — 그러지 않으면 파일명 사전순 탓에 실제 생성기(11labs)를 덮어써 신선도 해시가 영구 불일치한다.",
   "provider": "google",
   "audioEncoding": "MP3",
   "items": [

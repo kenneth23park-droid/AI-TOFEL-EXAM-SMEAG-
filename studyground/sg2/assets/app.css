@@ -76,6 +76,9 @@ button { font-family: inherit; cursor: pointer; }
 .nav-center a:hover { background: var(--cream-2); }
 .nav-center a.on { background: var(--ink); color: #fff; }
 .nav-right { display: flex; align-items: center; gap: 8px; }
+/* 메뉴 축소: 모의고사 · 로그인만 노출 (되돌리려면 이 블록만 삭제) */
+.nav-center a:not([href="tests.html"]),
+.nav-right a:not([href="tests.html"]):not([href="login.html"]) { display: none; }
 .lang {
   display: inline-flex; border: 1px solid var(--line-2); border-radius: 999px; overflow: hidden;
   font-size: 12px; font-weight: 700;

@@ -1,0 +1,354 @@
+[
+  {
+    "segment_id": "set9-M1-sr-01",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-01.mp3",
+    "text_tts": "Where is the student lounge?",
+    "voices": [
+      "US-Ava"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Where's the student lounge?"
+  },
+  {
+    "segment_id": "set9-M1-sr-02",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-02.mp3",
+    "text_tts": "Do you know when the lecture starts?",
+    "voices": [
+      "US-Liam"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Do you know when the lecture starts?"
+  },
+  {
+    "segment_id": "set9-M1-sr-03",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-03.mp3",
+    "text_tts": "I don’t know how many people will join our study group tonight.",
+    "voices": [
+      "US-Mia"
+    ],
+    "segment_count": 1,
+    "asr_text": "! I don't know how many people will join our study group tonight."
+  },
+  {
+    "segment_id": "set9-M1-sr-04",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-04.mp3",
+    "text_tts": "Peter said he was looking for supplies.",
+    "voices": [
+      "US-Mason"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Peter said he was looking for supplies."
+  },
+  {
+    "segment_id": "set9-M1-sr-05",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-05.mp3",
+    "text_tts": "Why is the classroom light flickering?",
+    "voices": [
+      "GB-Alice"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Why is the classroom light flickering?"
+  },
+  {
+    "segment_id": "set9-M1-sr-06",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-06.mp3",
+    "text_tts": "Where can I buy the train ticket?",
+    "voices": [
+      "GB-Henry"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Where can I buy the train ticket?"
+  },
+  {
+    "segment_id": "set9-M1-sr-07",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-07.mp3",
+    "text_tts": "Maybe the power went out for the entire area.",
+    "voices": [
+      "AU-Lily"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Maybe the power went out for the entire area."
+  },
+  {
+    "segment_id": "set9-M1-sr-08",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-08.mp3",
+    "text_tts": "Why are you too late to class?",
+    "voices": [
+      "US-Noah"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Why are you too late to class?"
+  },
+  {
+    "segment_id": "set9-M1-sr-09",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-09.mp3",
+    "text_tts": "Which group is going to give the presentation first?",
+    "voices": [
+      "US-Emma"
+    ],
+    "segment_count": 1,
+    "asr_text": "!Which group is going to give the presentation first?"
+  },
+  {
+    "segment_id": "set9-M1-sr-10",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-10.mp3",
+    "text_tts": "Have you finished writing the seminar paper?",
+    "voices": [
+      "US-Ethan"
+    ],
+    "segment_count": 1,
+    "asr_text": "!Have you finished writing the seminar paper?"
+  },
+  {
+    "segment_id": "set9-M1-sr-11",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-11.mp3",
+    "text_tts": "Can you turn down the volume?",
+    "voices": [
+      "US-Zoe"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Can you turn down the volume?"
+  },
+  {
+    "segment_id": "set9-M1-sr-12",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-sr-12.mp3",
+    "text_tts": "We might have to reschedule our study group session.",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segment_count": 1,
+    "asr_text": "! We might have to reschedule our study group session."
+  },
+  {
+    "segment_id": "set9-M1-conv-13-14",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-conv-13-14.mp3",
+    "text_tts": "Have you made any progress on your senior capstone project? The final presentations are only three weeks away. I've finished the research phase, but I'm still in the weeds with the data analysis. There's more to process than I anticipated. That sounds stressful. Have you considered asking Professor Martinez for an extension? I thought about it, but she's pretty strict about deadlines. I'll just have to put in extra hours this weekend. Well, let me know if you need help proofreading your report. I'll have some free time next week.",
+    "voices": [
+      "US-Liam",
+      "US-Emma",
+      "US-Liam",
+      "US-Emma",
+      "US-Liam"
+    ],
+    "segment_count": 5,
+    "asr_text": "! Have you made any progress on your senior capstone project? The final presentations are only three weeks away. I've finished the research phase, but I'm still in the weeds with the data analysis. There's more to process than I anticipated. That sounds stressful. Have you considered asking Professor Martinez for an extension? I thought about it, but she's pretty strict about deadlines. I'll just have to put in extra hours this weekend. Well, let me know if you need help proofreading your report. I'll have some free time next week."
+  },
+  {
+    "segment_id": "set9-M1-conv-15-16",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-conv-15-16.mp3",
+    "text_tts": "Excuse me, I reserved a digital microscope for my biology lab this afternoon, but the equipment room says they don't have my reservation on file. That's odd. Did you book it through the online portal or the department office? I used the portal, but I never received a confirmation email. I just assumed it went through. The system has been glitchy lately. Let me check the backup log. If your reservation is there, I can issue you the equipment right away. That would be great. I really can't afford to postpone this experiment.",
+    "voices": [
+      "US-Ethan",
+      "US-Mia",
+      "US-Ethan",
+      "US-Mia",
+      "US-Ethan"
+    ],
+    "segment_count": 5,
+    "asr_text": "! Excuse me, I reserved a digital microscope from my biology lab this afternoon, but the equipment room says they don't have my reservation on file. That's odd. Did you book it through the online portal or the department office? I used the portal, but I never received a confirmation email. I just assumed it went through. The system has been glitchy lately. Let me check the backup log. If your reservation is there, I can issue you the equipment right away. That would be great. I really can't afford to postpone this experiment.!"
+  },
+  {
+    "segment_id": "set9-M1-conv-17-18",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-conv-17-18.mp3",
+    "text_tts": "I'm thinking of having a garage sale this Saturday to get rid of some old furniture. Want to join in? Actually, that's perfect timing. I've been meaning to declutter my apartment, and I have boxes of stuff just collecting dust. Great! We can set up tables in my driveway. People usually start showing up around 8, so we should be ready by 7:30. Sounds good. Should I bring my own change, or will you handle all the transactions? Bring some small bills and coins just in case. I've found that most buyers try to haggle, so it helps to have exact change ready.",
+    "voices": [
+      "US-Zoe",
+      "US-Mason",
+      "US-Zoe",
+      "US-Mason",
+      "US-Zoe"
+    ],
+    "segment_count": 5,
+    "asr_text": "! I'm thinking of having a garage sale this Saturday to get rid of some old furniture. Wanna join in? Actually, that's perfect timing. I've been meaning to declutter my apartment, and I have boxes of stuff just collecting dust. Great, we can set up tables in my driveway. People usually start showing up around 8, so we should be ready by 730. Sounds good. Should I bring my own change, or will you handle all the transactions? Bring some small bills and coins just in case. I've found that most buyers try to haggle.! So it helps to have exact change ready."
+  },
+  {
+    "segment_id": "set9-M1-ann-19-20",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-ann-19-20.mp3",
+    "text_tts": "Hello, everyone. The Board Game Club is excited to host our monthly game night this Friday from six to ten in the Student Lounge on the second floor of the Union Building. We'll have a wide selection of classic strategy games, card games, and several new releases for you to try out with fellow members. Please bring your own snacks to share with the group if you can. We hope to see many new faces join us for a fun evening!",
+    "voices": [
+      "US-Liam"
+    ],
+    "segment_count": 1,
+    "asr_text": "!Hello everyone, The Board Game Club is excited to host our monthly game night this Friday from 6 to 10 in the student lounge on the second floor of the Union Building. We'll have a wide selection of classic strategy games, card games, and several new releases for you to try out with fellow members. Please bring your own snacks to share with the group if you can. We hope to see many new faces join us for a fun evening!"
+  },
+  {
+    "segment_id": "set9-M1-ann-21-22",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-ann-21-22.mp3",
+    "text_tts": "Attention, class. I need to let you know about a scheduling change that will affect our meeting times next week. Because the department is hosting a guest lecture series, our regular classroom in Harris Hall will be used for those events each morning. As a result, our Monday and Wednesday sessions will be moved to Peterson Hall, Room 108. Please make sure to go directly to the new location, and don't forget to bring your project drafts for our peer review workshop. I'll send an email reminder as well.",
+    "voices": [
+      "US-Ethan"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Attention class, I need to let you know about a scheduling change that will affect our meeting times next week. Because the department is hosting a guest lecture series, our regular classroom in Harris Hall will be used for those events each morning. As a result, our Monday and Wednesday sessions will be moved to Peterson Hall, room 108. Please make sure to go directly to the new location, and don't forget to bring your project drafts for our peer review workshop. I'll send an email reminder as well."
+  },
+  {
+    "segment_id": "set9-M1-ann-23-24",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-ann-23-24.mp3",
+    "text_tts": "Welcome, everyone. The Health Sciences Shadowing Program is now open for spring semester applications, and we're thrilled to announce several exciting updates this year. This program pairs pre-med and nursing students with experienced healthcare professionals at University Medical Center for weekly observation sessions lasting three to four hours each. Participants will gain valuable firsthand clinical exposure while building meaningful connections with practicing physicians, nurses, and specialists across multiple departments. You'll also attend monthly seminars where professionals discuss their career paths and offer guidance. To register, visit the Health Sciences Building, Room 215, during office hours. Applicants must submit a brief personal statement explaining their interest in healthcare and provide proof of current immunizations. Please note that spaces are limited and selections will be made based on academic standing and demonstrated commitment, so early applications are strongly encouraged.",
+    "voices": [
+      "US-Mason"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Welcome, everyone. The Health Sciences Shadowing Program is now open for spring semester applications, and we're thrilled to announce several exciting updates this year. This program pairs premed and nursing students with experienced health care professionals at University Medical Center for weekly observation sessions lasting three to four hours each. Participants will gain valuable firsthand clinical exposure while building meaningful connections with practicing physicians, nurses, and specialists across multiple! Departments. You'll also attend monthly seminars where professionals discuss their career paths and offer guidance. To register, visit the Health Sciences Building, Room 215 during office hours. Applicants must submit a brief personal statement explaining their interest in health care and provide proof of current immunizations. Please note that spaces are limited, and selections will be made based on academic standing and demonstrated commitment, so early applications are strongly encouraged."
+  },
+  {
+    "segment_id": "set9-M1-ann-25-28",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-ann-25-28.mp3",
+    "text_tts": "So today, let's talk about something you've probably experienced without really thinking about it-how cyclists manage to stay balanced when they turn. Now, you all remember Newton's first law, right? The law of inertia. Basically, an object in motion wants to keep moving in a straight line unless some outside force acts on it. Think about it this way-if you're in a car and the driver suddenly turns left, your body gets pushed to the right. That's inertia. Your body wants to keep going straight even though the car is turning. OK, so when a cyclist is riding in a straight line, everything's fine. But what happens when they need to turn? Well, here's where it gets interesting. When you turn, your body wants to keep going straight-that's inertia at work. So cyclists have to lean into the turn. Why? Because leaning creates what we call a centripetal force. This force pulls the cyclist toward the center of the curve, counteracting that natural tendency to fly off in a straight line. You can actually see this really clearly in professional cycling races. Watch how dramatically the riders lean when they go around tight corners at high speeds. Now, the amount of lean depends on two things: how fast you're going and how sharp the turn is. The faster you go or the tighter the turn, the more you need to lean. If you don't lean enough, you'll skid outward. Lean too much, and you'll fall over. It's really a delicate balance. That's why beginner cyclists often struggle with turns-they either don't lean enough out of fear, or they overcorrect. This same principle, by the way, applies to motorcycles, and even to runners going around a track. Next, we'll look at how this concept is applied in designing curved roadways and racetracks.",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segment_count": 1,
+    "asr_text": "!So today let's talk about something you've probably experienced without really thinking about it how cyclists manage to stay balanced when they turn. Now you all remember Newton's 1st law, right? The law of inertia. Basically an object in motion wants to keep moving in a straight line unless some outside force acts on it. Think about it this way. If you're in a car and the driver suddenly turns left, your body gets.! to the right. That's inertia. Your body wants to keep going straight, even though the car is turning. Okay, so when a cyclist is riding in a straight line, everything's fine. But what happens when they need to turn? Well, here's where it gets interesting. When you turn, your body wants to keep going straight. That's inertia at work. So cyclists have to lean in to the turn. Why? Because leaning creates what we call a centripital force.! This force pulls the cyclist toward the center of the curve, counteracting that natural tendency to fly off in a straight line. You can actually see this really clearly in professional cycling races. Watch how dramatically the riders lean when they go around tight corners at high speeds. Now the amount of lean depends on two things how fast you're going and how sharp the turn is. The fast.! you go, or the tighter the turn, the more you need to lean. If you don't lean enough, you'll skid outward, lean too much, and you'll fall over. It's really a delicate balance. That's why beginner cyclists often struggle with turns. They either don't lean enough out of fear, or they over correct. This same principle, by the way, applies to motorcycles and even to runners going around a track. Next, we'll look at how this concept is.! applied in designing curved roadways and racetracks."
+  },
+  {
+    "segment_id": "set9-M1-ann-29-32",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M1-ann-29-32.mp3",
+    "text_tts": "Alright, so I want to introduce you to a really fun tool that can help when you're stuck for ideas-picture dice. Now, these are exactly what they sound like. Instead of numbers, each face of the die has a simple image on it, like a tree, a key, a lightning bolt, or maybe a person running. Some sets have objects, others have actions or emotions-there's quite a variety out there. You roll several dice at once, and whatever images come up, you use those as prompts to build a story. So let's say you roll and get a castle, a wolf, and a broken mirror. Your job is to weave these elements together into a narrative. Maybe the wolf lives in an abandoned castle and sees its reflection for the first time. Or perhaps a princess breaks a mirror to escape from a wolf. The possibilities are endless. It forces your brain to make unexpected connections, which is really the heart of creative thinking. You can't plan it out beforehand-you have to improvise. And that's actually where some of the most original ideas come from. Now, interestingly, these dice aren't just useful in writing classes. They've become quite popular at social gatherings as icebreakers. You know, when people don't know each other well, rolling these dice and taking turns telling mini-stories can really get conversation flowing. I've seen it work wonders at office team-building events and even at dinner parties. It takes the pressure off because everyone's working with random elements-there's no right or wrong answer. People laugh, they build on each other's ideas, and before you know it, strangers are chatting like old friends. So picture dice serve dual purposes: they're both a creative exercise and a social tool. Next, we're going to look at a short story written by a former student of mine who used this method.",
+    "voices": [
+      "GB-Henry"
+    ],
+    "segment_count": 1,
+    "asr_text": "!All right, so I want to introduce you to a really fun tool that can help when you're stuck for ideas picture dice. Now these are exactly what they sound like. Instead of numbers, each face of the die has a simple image on it, like a tree, a key, a lightning bolt, or maybe a person running. Some sets have objects, others have actions or emotions. There's quite a variety out there. You roll several dice at once, and whatever images come up, you use those as prompts to build!! And that's actually where some of the most original ideas come from. Now, interestingly, these dice aren't just useful in writing classes. They've become quite popular at social gatherings as icebreakers. You know, when people don't know each other well, rolling these dice and taking turns telling mini stories can really get conversation flowing. I've seen it work wonders at office team building events, and even at dinner parties. It takes the pressure off because everyone's working with random elements! There's no right or wrong answer. People laugh, they build on each other's ideas, and before you know it, strangers are chatting like old friends. So picture dice serve dual purposes. They're both a creative exercise and a social tool. Next, we're going to look at a short story written by a former student of mine who used this method."
+  },
+  {
+    "segment_id": "set9-M2-sr-01",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-sr-01.mp3",
+    "text_tts": "Did you sign up for the tutoring sessions?",
+    "voices": [
+      "US-Ava"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Did you sign up for the tutoring sessions?"
+  },
+  {
+    "segment_id": "set9-M2-sr-02",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-sr-02.mp3",
+    "text_tts": "Where’s the financial aid office?",
+    "voices": [
+      "US-Emma"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Where's the Financial Aid Office?"
+  },
+  {
+    "segment_id": "set9-M2-sr-03",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-sr-03.mp3",
+    "text_tts": "Have you decided on your major yet?",
+    "voices": [
+      "GB-Ivy"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Have you decided on your major yet?"
+  },
+  {
+    "segment_id": "set9-M2-repeat-01",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-repeat-01.mp3",
+    "text_tts": "Is this your first time in our cafeteria?",
+    "voices": [
+      "US-Emma"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Is this your first time in our cafeteria?"
+  },
+  {
+    "segment_id": "set9-M2-repeat-02",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-repeat-02.mp3",
+    "text_tts": "You can find today’s menu on the board?",
+    "voices": [
+      "US-Emma"
+    ],
+    "segment_count": 1,
+    "asr_text": "! You can find today's menu on the board."
+  },
+  {
+    "segment_id": "set9-M2-repeat-03",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-repeat-03.mp3",
+    "text_tts": "The hot food station is on the left side.",
+    "voices": [
+      "US-Emma"
+    ],
+    "segment_count": 1,
+    "asr_text": "! The hot food station is on the left side."
+  },
+  {
+    "segment_id": "set9-M2-repeat-04",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-repeat-04.mp3",
+    "text_tts": "We offer a variety of meals, snacks, and drinks every day.",
+    "voices": [
+      "US-Emma"
+    ],
+    "segment_count": 1,
+    "asr_text": "! We offer a variety of meals, snacks and drinks every day."
+  },
+  {
+    "segment_id": "set9-M2-repeat-05",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-repeat-05.mp3",
+    "text_tts": "You can pay with cash or your student ID card.",
+    "voices": [
+      "US-Emma"
+    ],
+    "segment_count": 1,
+    "asr_text": "!You can pay with cash or your student ID card."
+  },
+  {
+    "segment_id": "set9-M2-repeat-06",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-repeat-06.mp3",
+    "text_tts": "Please remember to return your tray to the collection area when finished.",
+    "voices": [
+      "US-Emma"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Please remember to return your tray to the collection area when finished."
+  },
+  {
+    "segment_id": "set9-M2-repeat-07",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-repeat-07.mp3",
+    "text_tts": "If you have any food allergies, please let the staff know before ordering.",
+    "voices": [
+      "US-Emma"
+    ],
+    "segment_count": 1,
+    "asr_text": "! If you have any food allergies, please let the staff know before ordering."
+  },
+  {
+    "segment_id": "set9-M2-interview-01",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-interview-01.mp3",
+    "text_tts": "What kind of exercise do you or someone you know typically do, such as running, swimming, or going to a gym? Why?",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segment_count": 1,
+    "asr_text": "! What kind of exercise do you or someone you know typically do, such as running, swimming, or going to a gym? Why?"
+  },
+  {
+    "segment_id": "set9-M2-interview-02",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-interview-02.mp3",
+    "text_tts": "If you wanted to encourage a friend who doesn’t exercise to become more active, would you prefer to invite them to exercise together with you, or would you prefer to share information about the benefits and let them decide on their own? Why?",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segment_count": 1,
+    "asr_text": "! If you wanted to encourage a friend who doesn't exercise to become more active, would you prefer to invite them to exercise together with you, or would you prefer to share information about the benefits and let them decide on their own? Why?"
+  },
+  {
+    "segment_id": "set9-M2-interview-03",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-interview-03.mp3",
+    "text_tts": "What are some things that might make it difficult for someone to start and maintain a regular exercise routine?",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segment_count": 1,
+    "asr_text": "! What are some things that might make it difficult for someone to start and maintain a regular exercise routine?"
+  },
+  {
+    "segment_id": "set9-M2-interview-04",
+    "audio_path": "/Users/kwangseobpark/smeag-TOFEL 자료/studyground/sg2/media/tts/set9-M2-interview-04.mp3",
+    "text_tts": "Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segment_count": 1,
+    "asr_text": "! Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?"
+  }
+]

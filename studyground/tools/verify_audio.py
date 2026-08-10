@@ -345,12 +345,19 @@ def verify(manifest_path: Path, set_id: str | None = None,
         else:
             l0["freshness"] = "FRESH"
 
-        mp3_mtime = path.stat().st_mtime
-        l0["mp3Mtime"] = round(mp3_mtime, 1)
-        if mp3_mtime + 1 < manifest_mtime and l0.get("freshness") == "FRESH":
-            # 해시는 같은데 매니페스트가 더 최근 — 음성정책 밖의 변경일 수 있다.
-            note("WARN", f"mp3 가 매니페스트보다 오래됐다 "
-                         f"({round(manifest_mtime - mp3_mtime)}초 차) — 해시는 동일")
+        # mtime 은 기록만 하고 판정에 쓰지 않는다. "mp3 가 매니페스트보다 오래됐다"를
+        # WARN 으로 걸어봤더니, 한 항목만 고쳐도 매니페스트 파일 mtime 이 갱신돼
+        # 40개 전부가 WARN 이 됐다(실측). 진짜 신호(해시 불일치 1건)가 오검출에
+        # 묻힌다. 신선도의 권위는 항목별 해시 하나로 충분하다.
+        l0["mp3Mtime"] = round(path.stat().st_mtime, 1)
+        l0["manifestMtime"] = round(manifest_mtime, 1)
+        # mp3 바이트 해시. 파일 이름이 뒤바뀐 사고를 길이에 기대지 않고 잡는다.
+        # (길이가 비슷한 두 파일을 맞바꾸면 계층 2 의 길이 모델은 못 잡는다.)
+        l0["audioSha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+        if prev and prev.get("audioSha256") == l0["audioSha256"]:
+            l0["audioChanged"] = False
+        elif prev:
+            l0["audioChanged"] = True
         l0["status"] = "OK"
         r["layers"]["layer0_mapping"] = l0
 
@@ -359,11 +366,17 @@ def verify(manifest_path: Path, set_id: str | None = None,
             r["layers"]["layer1_integrity"] = {"status": "SKIP", "reason": "audio_probe 부재"}
             spec = {}
         else:
+            on_disk = path.stat().st_size
             spec = audio_probe.probe(path)
             l1 = dict(spec)
+            l1["diskBytes"] = on_disk
             if not spec:
                 l1["status"] = "FAIL"
-                note("FAIL", "ffprobe 가 디코드하지 못했다 — 손상된 파일")
+                # 0바이트는 ffprobe 도 실패하지만, 사유를 "손상"이 아니라 정확히
+                # 말해줘야 사람이 재생성 대상인지 바로 안다.
+                note("FAIL", f"파일 크기 {on_disk}B — 빈 파일(생성이 중간에 끊겼다)"
+                     if on_disk < THRESHOLDS["min_bytes"]
+                     else "ffprobe 가 디코드하지 못했다 — 손상된 파일")
             else:
                 if spec["bytes"] < THRESHOLDS["min_bytes"]:
                     note("FAIL", f"파일 크기 {spec['bytes']}B < {THRESHOLDS['min_bytes']}B")
@@ -471,8 +484,35 @@ def verify(manifest_path: Path, set_id: str | None = None,
 
         if sig:
             new_index[d][r["id"]] = {"scriptHash": sig, "bytes": spec.get("bytes", 0),
-                                     "durationSec": duration}
+                                     "durationSec": duration,
+                                     "audioSha256": r["layers"]["layer0_mapping"]["audioSha256"]}
         results.append(r)
+
+    # ── 계층 0 전역: 파일 뒤바뀜 / 중복 ──────────────────────────────────────
+    # 인덱스에 기록된 "다른 항목의 음원"이 지금 이 항목 자리에 있으면 이름이 뒤바뀐 것이다.
+    owner_by_audio = {}
+    for d, entries in indexes.items():
+        for iid, e in entries.items():
+            if e.get("audioSha256"):
+                owner_by_audio.setdefault(e["audioSha256"], set()).add(iid)
+    by_audio_now: dict[str, list[str]] = {}
+    for r in results:
+        h = r["layers"].get("layer0_mapping", {}).get("audioSha256")
+        if not h:
+            continue
+        by_audio_now.setdefault(h, []).append(r["id"])
+        owners = owner_by_audio.get(h, set())
+        if owners and r["id"] not in owners:
+            r["verdict"] = worse(r["verdict"], "FAIL")
+            r["reasons"].append(f"[FAIL] 이 자리의 음원이 인덱스상 {sorted(owners)} 의 "
+                                f"음원과 동일하다 — 파일 이름이 뒤바뀌었다")
+    for h, ids in by_audio_now.items():
+        if len(ids) > 1:
+            for r in results:
+                if r["id"] in ids:
+                    r["verdict"] = worse(r["verdict"], "FAIL")
+                    r["reasons"].append(f"[FAIL] 여러 항목이 완전히 같은 음원 파일을 쓴다: "
+                                        f"{ids} — 한 쪽이 잘못 복사됐다")
 
     # ── 계층 0 전역: 고아 파일 / 콘텐츠 팩 교차 확인 ─────────────────────────
     declared = {(base / it["out"]).resolve() for it in items if it.get("out")}
@@ -553,7 +593,9 @@ def print_report(rep: dict) -> None:
         print(f"  SKIP  {s}")
     for g in rep["globalReasons"]:
         print(f"  {g}")
-    for r in rep["items"]:
+    # FAIL 을 먼저 찍는다. WARN 이 수십 개일 때 발행을 막는 한 건이 아래로 밀리면
+    # 사람이 못 본다.
+    for r in sorted(rep["items"], key=lambda x: VERDICTS.index(x["verdict"]), reverse=True):
         if r["verdict"] == "PASS":
             continue
         print(f"  {r['verdict']:<4} {r['id']:<18} {r['path']}")

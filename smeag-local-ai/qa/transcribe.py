@@ -149,13 +149,58 @@ class HFBackend:
             generate_kwargs={
                 "language": "en",
                 "task": "transcribe",
-                # Greedy. A sampled decode would make the gate non-reproducible:
-                # the same clip could pass one run and fail the next.
+                # Greedy first pass, then Whisper's documented temperature
+                # fallback. Observed on this corpus: on two 100 s clips the
+                # greedy decode collapsed into a repetition loop and stopped a
+                # third of the way in, emitting a transcript that *looked*
+                # fine. The gate then reported "audio appears truncated" and
+                # rejected two perfectly good files. Sampling only engages when
+                # a pass trips the thresholds below, so clean clips stay
+                # deterministic and reproducible; the alternative is a gate
+                # that blames the audio for the transcriber's failure.
                 "num_beams": 1,
-                "do_sample": False,
+                "temperature": (0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                "compression_ratio_threshold": 2.4,   # repetition-loop detector
+                "logprob_threshold": -1.0,
+                "no_speech_threshold": 0.6,
+                # Long-form collapse usually starts with the decoder attending
+                # to its own looping output rather than the audio.
+                "condition_on_prev_tokens": False,
             },
         )
-        return (out.get("text") or "").strip()
+        text = (out.get("text") or "").strip()
+        self._assert_plausible(path, text, len(audio) / SAMPLE_RATE)
+        return text
+
+    #: Continuous read-aloud speech runs roughly 2.0-2.8 words/sec. Anything
+    #: under this is not slow narration, it is a decode that gave up early.
+    #: Set well below the plausible floor so a genuinely sparse clip (long
+    #: pauses, a short prompt padded with silence) is not flagged.
+    MIN_WORDS_PER_SEC = 0.8
+    #: Below this, words/sec is dominated by lead-in and trailing silence.
+    MIN_DURATION_FOR_RATE_CHECK = 20.0
+
+    def _assert_plausible(self, path: Path, text: str, seconds: float) -> None:
+        """
+        Refuse to return a transcript that cannot cover its own audio.
+
+        Raising here is deliberate. A silently short transcript is the one
+        failure mode this whole pipeline cannot tolerate: it does not look like
+        an error, it looks like evidence, and it indicts the audio for a defect
+        the transcriber invented. Failing loudly puts an `asr_error` on the
+        segment, and the gate reports "transcription step did not run" — which
+        is the truth.
+        """
+        if seconds < self.MIN_DURATION_FOR_RATE_CHECK:
+            return
+        rate = len(text.split()) / seconds
+        if rate < self.MIN_WORDS_PER_SEC:
+            raise RuntimeError(
+                f"decode looks collapsed: {len(text.split())} words for "
+                f"{seconds:.0f}s of audio ({rate:.2f} words/sec, floor "
+                f"{self.MIN_WORDS_PER_SEC}). Re-run, or transcribe {path.name} "
+                f"in segments; do NOT treat this as a truncated recording."
+            )
 
 
 # ----------------------------------------------------------- http backend ---

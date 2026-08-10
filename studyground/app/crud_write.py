@@ -30,12 +30,8 @@ from app.models import (
     utcnow,
 )
 from app.scoring import autoscore
-from app.scoring.answer_key_set1 import (
-    ANSWER_KEY,
-    AUTO_TOTAL_BY_SKILL,
-    PRODUCTIVE_KEYS,
-    TOTAL_QUESTIONS,
-)
+from app.scoring import scale as scale_mod
+from app.scoring.answer_key import SKILLS, AnswerPack, pack_for, pack_for_attempt
 
 # architecture.md §7.2 defines the denominator as the productive rows only.
 # ⚠️ 가설(검증필요, PRD OQ-9): the live system may want every question to carry
@@ -132,7 +128,8 @@ def create_attempt(
         scale=scale or ("ielts9" if profile == "ielts" else "toefl120"),
         content_hash=content_hash,
         started_at=now,
-        total_questions=TOTAL_QUESTIONS,
+        # 문항 수는 응시할 팩(SET 1 / SET 9 …)에서 온다 — 예전처럼 SET 1 값을 고정하지 않는다.
+        total_questions=pack_for(exam.code).total_questions,
     )
     db.add(attempt)
     db.flush()
@@ -207,6 +204,7 @@ def upsert_answers(
             "submitted_count": attempt.submitted_count,
         }
 
+    pack = pack_for_attempt(attempt)
     existing = _response_map(attempt)
     accepted = 0
     rejected: list[dict] = []
@@ -217,7 +215,7 @@ def upsert_answers(
             rejected.append({"question_key": "", "reason": "missing_question_key"})
             continue
 
-        known = ANSWER_KEY.get(key) or PRODUCTIVE_KEYS.get(key) or {}
+        known = pack.meta(key) or {}
         qtype = (item.get("qtype") or known.get("qtype") or "MCQ").strip().upper()
         skill = (item.get("skill") or known.get("skill") or "").strip()
         module = (item.get("module") or known.get("module") or "").strip()
@@ -281,7 +279,8 @@ def record_media(
     asset.duration_ms = int(duration_ms or 0)
     db.flush()
 
-    known = PRODUCTIVE_KEYS.get(question_key) or ANSWER_KEY.get(question_key) or {}
+    # 키는 두 표 중 한 곳에만 있으므로 meta() 하나로 충분하다(예전 두 줄과 결과가 같다).
+    known = pack_for_attempt(attempt).meta(question_key) or {}
     row = _response_map(attempt).get(question_key)
     if row is None:
         row = QuestionResponse(
@@ -388,9 +387,9 @@ def recalc_progress(db: Session, attempt: Attempt) -> Attempt:
     """
     rows = list(attempt.question_responses)
     attempt.submitted_count = sum(1 for r in rows if _is_answered(r))
-    # Only the SET 1 content pack exists server-side, so its 91 is the floor; a
-    # future pack with more questions still reports its own real count.
-    attempt.total_questions = max(TOTAL_QUESTIONS, len(rows))
+    # 응시한 팩의 문항 수가 바닥값이다(SET 1 은 91, SET 9 는 120). 팩을 모르면 0 이라
+    # 실제로 들어온 응답 수가 그대로 총 문항 수가 된다 — 없는 문항을 지어내지 않는다.
+    attempt.total_questions = max(pack_for_attempt(attempt).total_questions, len(rows))
 
     done, total = feedback_counts(attempt)
     attempt.feedback_progress = 100 if total == 0 else round(done / total * 100)
@@ -414,8 +413,18 @@ def recalc_progress(db: Session, attempt: Attempt) -> Attempt:
 
 
 def upsert_section_score(
-    db: Session, attempt: Attempt, skill: str, *, raw_correct: float, raw_total: float
+    db: Session,
+    attempt: Attempt,
+    skill: str,
+    *,
+    raw_correct: float,
+    raw_total: float,
+    scaled: int | None = None,
 ) -> SectionScore:
+    """`scaled` 를 주지 않으면 예전과 똑같이 raw 비율로 계산한다(Reading/Listening 무변경).
+
+    루브릭 대기 중인 섹션만 `scaled=0` 을 명시해 "아직 산출된 점수가 없다"를 표현한다.
+    """
     row = next((s for s in attempt.section_scores if s.skill == skill and not s.module), None)
     if row is None:
         row = SectionScore(attempt_id=attempt.id, skill=skill)
@@ -423,9 +432,76 @@ def upsert_section_score(
         attempt.section_scores.append(row)
     row.raw_correct = float(raw_correct)
     row.raw_total = float(raw_total)
-    row.scaled = round(raw_correct / raw_total * 30) if raw_total else 0
+    if scaled is None:
+        row.scaled = round(raw_correct / raw_total * 30) if raw_total else 0
+    else:
+        row.scaled = int(scaled)
     db.flush()
     return row
+
+
+def rubric_rows_by_skill(attempt: Attempt) -> dict[str, list[dict]]:
+    """`rubric_scores` 행을 scale.rubric_to_section() 이 먹는 dict 로 바꾼다."""
+    out: dict[str, list[dict]] = {}
+    for row in getattr(attempt, "rubric_scores", []) or []:
+        skill = (row.skill or "").strip().lower()
+        if not skill:
+            continue
+        out.setdefault(skill, []).append(
+            {
+                "skill": skill,
+                "criterion": row.criterion,
+                "score": row.score,
+                "max_score": row.max_score,
+                "band": row.band,
+            }
+        )
+    return out
+
+
+def _section_from_pack(
+    db: Session,
+    attempt: Attempt,
+    pack: AnswerPack,
+    adapter,
+    skill: str,
+    auto_correct: float,
+    rubrics: list[dict],
+) -> bool:
+    """한 섹션의 원점수를 확정한다. 반환값은 "루브릭 대기 중인가".
+
+    ⚠️ 가설(검증필요) — 자동채점분과 산출형을 **문항 수 비율**로 섞는다. 실제 TOEFL 의
+    변환표가 아니다(scale.Toefl120Scale.rubric_to_section 이 스스로 밝히는 것과 같은
+    한계다). SET 9 Writing 은 build 10 + 에세이 2 라서 이 비율이면 에세이 비중이 1/6 뿐인데,
+    실제 시험은 에세이 비중이 훨씬 크다. 근거 있는 표가 확보되면 여기와 scale.py 를 함께 고친다.
+    """
+    auto_total = float(pack.auto_total_by_skill.get(skill, 0) or 0)
+    prod_total = float(pack.productive_total_by_skill.get(skill, 0) or 0)
+
+    if prod_total <= 0:
+        # Reading/Listening — 예전 경로 그대로.
+        upsert_section_score(db, attempt, skill, raw_correct=auto_correct, raw_total=auto_total)
+        return False
+
+    if not rubrics:
+        # 교사 채점 전. 자동채점분은 사실대로 남기되 분모에는 산출형 문항도 세어,
+        # "10/12 중 10개만 채점됨"이 보이게 한다. scaled 는 0 이지만 이는 0점 확정이
+        # 아니라 미산출이다 — 루브릭이 들어오면 grade_attempt 재실행으로 다시 계산된다.
+        upsert_section_score(
+            db, attempt, skill,
+            raw_correct=auto_correct, raw_total=auto_total + prod_total, scaled=0,
+        )
+        return True
+
+    section_max = float(getattr(adapter, "section_max", 30) or 30)
+    rubric_scaled = float(adapter.rubric_to_section(rubrics))
+    # 루브릭 결과(0..section_max)를 "맞춘 문항 수" 단위로 환산해 자동채점분과 더한다.
+    rubric_equiv = (rubric_scaled / section_max) * prod_total if section_max else 0.0
+    upsert_section_score(
+        db, attempt, skill,
+        raw_correct=auto_correct + rubric_equiv, raw_total=auto_total + prod_total,
+    )
+    return False
 
 
 def grade_attempt(db: Session, attempt: Attempt) -> dict:
@@ -433,13 +509,17 @@ def grade_attempt(db: Session, attempt: Attempt) -> dict:
 
     Answers are compared against the server-side key only — whatever the browser
     claimed is correct is ignored (AC6). Productive rows keep `auto_score = NULL`.
+
+    어느 정답표를 쓸지는 `attempt.exam.code` 가 정한다(app/scoring/answer_key.py).
     """
+    pack = pack_for_attempt(attempt)
+    adapter = scale_mod.get_scale(attempt.scale or attempt.profile)
     correct_by_skill: dict[str, float] = {}
     graded = 0
     pending = 0
 
     for row in attempt.question_responses:
-        entry = ANSWER_KEY.get(row.question_key or "")
+        entry = pack.lookup(row.question_key or "")
         if entry is None:
             # Productive (or unknown) — a teacher decides; leave auto_score NULL.
             row.auto_score = None
@@ -461,18 +541,30 @@ def grade_attempt(db: Session, attempt: Attempt) -> dict:
         correct_by_skill[entry["skill"]] = correct_by_skill.get(entry["skill"], 0.0) + row.auto_score
         graded += 1
 
-    for skill, raw_total in AUTO_TOTAL_BY_SKILL.items():
-        # Speaking has no auto-scorable item — scaled stays 0 until the rubric lands.
-        upsert_section_score(
-            db, attempt, skill, raw_correct=correct_by_skill.get(skill, 0.0), raw_total=raw_total
-        )
+    rubrics = rubric_rows_by_skill(attempt)
+    pending_sections: list[str] = []
+    for skill in SKILLS:
+        if _section_from_pack(
+            db, attempt, pack, adapter, skill,
+            correct_by_skill.get(skill, 0.0), rubrics.get(skill) or [],
+        ):
+            pending_sections.append(skill)
 
     crud.recalc_totals(db, attempt)
     recalc_progress(db, attempt)
     # AC8 — auto-scoring alone never completes an attempt that still owes rubrics.
-    set_status(db, attempt, "completed" if pending == 0 else "scoring", reason="autoscore")
+    # 산출형 응답이 하나도 저장되지 않은 응시라도 팩에 에세이/스피킹이 있으면
+    # 루브릭 없이는 완료가 아니다 — 그래서 pending_sections 도 함께 본다.
+    done = pending == 0 and not pending_sections
+    set_status(db, attempt, "completed" if done else "scoring", reason="autoscore")
     db.commit()
-    return {"graded": graded, "pending_productive": pending, "total_score": attempt.total_score}
+    return {
+        "graded": graded,
+        "pending_productive": pending,
+        "pending_sections": pending_sections,
+        "pack": pack.code,
+        "total_score": attempt.total_score,
+    }
 
 
 def _client_answer_value(row: QuestionResponse, qtype: str) -> Any:
@@ -516,6 +608,7 @@ __all__ = [
     "new_session_id",
     "recalc_progress",
     "record_media",
+    "rubric_rows_by_skill",
     "save_runtime_state",
     "set_status",
     "upsert_answers",

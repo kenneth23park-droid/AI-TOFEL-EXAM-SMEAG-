@@ -36,3 +36,5 @@ studyground/sg2/media/tts/_backup_google/
 
 # ── 의존성 (package.json 으로 재설치) ─────────────────────────────
 node_modules/
+studyground/sg2/media/tts/_backup_kokoro/
+studyground/sg2/media/audio/_set9_backup_say/

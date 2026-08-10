@@ -9,12 +9,15 @@
 출력:
   sg2/assets/set9.js   (window.SMEAG_SET9, ES5, 빌드 없음)
 
-하는 일은 3가지뿐이고 문항 텍스트는 한 글자도 만들지 않는다:
+하는 일은 아래뿐이고, 원본에 있는 문항 텍스트는 한 글자도 새로 만들지 않는다
+(원본이 통째로 빠뜨린 것 — 아래 4)의 insert 마커 — 만 예외이며 출처를 팩에 표시한다):
   1) fragments 의 논리적 오디오 id → 디스크에 실재하는 파일명으로 리졸브
      (TTS 담당자는 'l1-q01.mp3', 추출 담당자는 'set9-L1-q01.mp3' 로 서로 다른 규칙을 썼다).
      실재하지 않으면 audio 필드를 **떼고** warnings 에 남긴다 — 깨진 src 를 내보내지 않는다.
   2) mapping.json 의 r:embed 앵커 순서대로 삽화를 문항/블록에 붙인다.
   3) reading+listening 의 정답을 answerKey 로 평탄화한다.
+  4) kind:"insert" 문항이 붙은 지문 본문에 삽입 지점 마커 {{A}}~{{D}} 를 심는다
+     (원본 docx 에 마커가 없다 — INSERT_MARKERS 주석 참조, markerOrigin/markerNote 로 표시).
 
 표준 라이브러리만 사용. 실행:
   studyground/.venv/bin/python studyground/tools/build_set9.py
@@ -230,6 +233,145 @@ SOURCE_NOTES = {
                 u'없으므로 원문을 그대로 둔다. 정답은 [2] 이므로 채점에는 영향이 없다.'},
     ],
 }
+
+
+# ---------------------------------------------------------------- insert 마커 배치
+#
+# kind:"insert" 문항은 본문에 삽입 지점 표식이 있어야 성립한다. 렌더러
+# (sg2/assets/exam-render-reading.js 의 markerTokens)는 /\{\{([A-D])\}\}/ 로 문단을 쪼개
+# 클릭 가능한 rd-marker 버튼을 만든다. 마커가 0개면 본문 어디에도 A~D 가 없는 채로
+# "Position A~D" 라디오 4개만 뜨고, 응시자는 그 문항을 풀 수 없다(SET 1 은 set1.js 의
+# 로마 도로 지문처럼 한 문단 안에 {{A}}~{{D}} 를 갖고 있다 — 그 구조가 정본이다).
+#
+# 원본 확인 결과 (zipfile+re, 읽기 전용):
+#   NEW TOEFL MOCK TEST SET  9.docx 의 "Benefits of Green Roofs" 지문은 문서에 두 번
+#   실려 있는데(문단 284-289, 290-295) **두 사본 모두 A/B/C/D 표식이 없다**. 해당 <w:p>
+#   안에 w:sym / w:drawing / 텍스트박스도 없다. 즉 파싱 손실이 아니라 원본 자체가
+#   마커를 빠뜨렸다. 15번 문항의 지시문("Look at the four letters (A, B, C, and D) in the
+#   passage")과 선택지 4개는 정상적으로 있다.
+#
+# 그래서 마커 위치는 여기서 집필한다. 근거 없는 값을 지어내지 않는다는 규약에 따라
+# 블록에 markerOrigin:"authored" + markerNote 를 남긴다(_set9_l2/*.json 의
+# scriptOrigin/scriptNote 와 같은 패턴). 원본 마커가 확보되면 이 표만 갈아끼우면 된다.
+#
+# 배치 근거 — 삽입 문장은
+#   "These factors must be carefully weighed against the environmental and economic
+#    benefits described above."
+# 이고 정답은 D(answer:3). "These factors" 는 복수 선행사(비용·유지관리·하중·구조보강)를
+# 요구하고, "benefits described above" 는 앞에 이점 서술이 끝나 있어야 함을 요구한다.
+# 따라서 정답은 단점 문단(마지막 문단)이 다 끝난 뒤다.
+# 오답도 문법적으로는 붙을 만한 자리에 둔다(너무 뻔하면 문항이 죽는다):
+#   A = 이점 문단 중간   — 앞에 복수 명사(insects, birds, wildlife)가 있어 지시어가 걸리는 듯 보인다.
+#   B = 이점 문단 끝     — 바로 뒤가 However 단점 문단이라 "요약 자리"로 착각하기 쉽다.
+#   C = 단점 문단 중간   — 앞 문장이 investment + maintenance 두 factor 라 복수 선행사가 성립한다.
+#                          그러나 뒤에 하중·구조보강이 더 나오므로 요약이 이르다 → 오답.
+#   D = 단점 문단 끝     — factor 가 전부 열거된 뒤, 앞의 이점과 견주는 마무리. 정답.
+#
+# anchor 는 fragments 원문과 글자 단위로 일치해야 하고 문단 안에서 유일해야 한다.
+# 불일치하면 warning 을 남기고 건너뛴다(조용한 오적용 방지).
+
+MARKER_LETTERS = ['A', 'B', 'C', 'D']
+
+INSERT_MARKERS = {
+    'R2-15': {
+        'blockTitle': 'Benefits of Green Roofs',
+        # (문단 index, 이 문자열 바로 뒤에 마커를 붙인다, 글자)
+        'placements': [
+            (3, 'in otherwise barren urban environments.', 'A'),
+            (3, 'supply local restaurants and community markets.', 'B'),
+            (4, 'substantial initial investment and ongoing maintenance costs.', 'C'),
+            (4, 'which can limit installation options for older buildings.', 'D'),
+        ],
+        'origin': 'authored',
+        'note': u'원본 NEW TOEFL MOCK TEST SET  9.docx 의 이 지문에는 A/B/C/D 표식이 '
+                u'아예 없다(문서에 두 번 실린 사본 모두, w:sym·도형·텍스트박스도 없음). '
+                u'마커가 없으면 렌더러가 삽입 지점 버튼을 하나도 만들지 못해 문항이 성립하지 '
+                u'않으므로, 정답 D(answer:3) 제약과 지시어 "These factors"/"benefits described '
+                u'above" 의 선행사 요건에 맞춰 네 자리를 tools/build_set9.py 에서 집필했다. '
+                u'D = 단점 문단이 끝난 자리(모든 factor 열거 후), A·B·C 는 문법적으로는 붙을 만한 '
+                u'오답 자리. 원본에서 실제 마커 위치가 확보되면 build_set9.py 의 INSERT_MARKERS '
+                u'표를 교체하고 이 필드를 지울 것.',
+    },
+}
+
+
+def apply_insert_markers(sections):
+    """insert 문항이 붙은 지문 본문에 {{A}}~{{D}} 를 심는다. 출처는 블록에 남긴다."""
+    placed_blocks, placed_marks = 0, 0
+    seen = set()
+    for sec in sections:
+        for mod in sec['modules']:
+            for blk in mod['blocks']:
+                qs = blk.get('questions') or []
+                ins = [q for q in qs if q.get('kind') == 'insert']
+                if not ins:
+                    continue
+                paras = blk.get('paragraphs')
+                if not paras:
+                    warnings.append('insert question in a block without paragraphs: ' +
+                                    ', '.join(q['id'] for q in ins))
+                    continue
+
+                spec = None
+                for q in ins:
+                    if q['id'] in INSERT_MARKERS:
+                        spec = INSERT_MARKERS[q['id']]
+                        seen.add(q['id'])
+                        break
+                if not spec:
+                    # 이미 원본에 마커가 있으면 그대로 두고, 없으면 결손으로 남긴다.
+                    if not re.search(r'\{\{[A-D]\}\}', ' '.join(paras)):
+                        warnings.append('insert question has no markers and no placement '
+                                        'table entry: ' + ', '.join(q['id'] for q in ins))
+                    continue
+
+                title = spec.get('blockTitle')
+                if title and blk.get('title') != title:
+                    warnings.append('insert marker placement skipped: block title is ' +
+                                    str(blk.get('title')) + ', expected ' + title)
+                    continue
+
+                ok = True
+                for idx, anchor, letter in spec['placements']:
+                    if idx >= len(paras):
+                        warnings.append('insert marker skipped (paragraph ' + str(idx) +
+                                        ' out of range) for ' + str(blk.get('title')))
+                        ok = False
+                        continue
+                    if paras[idx].count(anchor) != 1:
+                        warnings.append('insert marker skipped for ' + str(blk.get('title')) +
+                                        '/' + letter + ': anchor text not found exactly once '
+                                        'in paragraph ' + str(idx))
+                        ok = False
+                        continue
+                    paras[idx] = paras[idx].replace(anchor, anchor + ' {{' + letter + '}}')
+                    placed_marks += 1
+
+                joined = ' '.join(paras)
+                for letter in MARKER_LETTERS:
+                    if joined.count('{{' + letter + '}}') != 1:
+                        warnings.append('insert marker count is not exactly 1 for ' +
+                                        str(blk.get('title')) + '/' + letter)
+                        ok = False
+
+                # 정답 index 에 대응하는 마커가 실제로 있는가
+                for q in ins:
+                    a = q.get('answer')
+                    if isinstance(a, int) and 0 <= a < len(MARKER_LETTERS):
+                        if '{{' + MARKER_LETTERS[a] + '}}' not in joined:
+                            warnings.append('insert answer marker missing for ' + q['id'] +
+                                            ' (answer=' + str(a) + ')')
+                            ok = False
+
+                if ok:
+                    placed_blocks += 1
+                blk['markerOrigin'] = spec.get('origin', 'authored')
+                blk['markerNote'] = spec.get('note', '')
+
+    unknown = set(INSERT_MARKERS) - seen
+    for qid in sorted(unknown):
+        warnings.append('insert marker table target not found in the pack: ' + qid)
+    return placed_blocks, placed_marks
 
 
 def apply_source_corrections(sections):
@@ -456,6 +598,7 @@ def main():
 
     sections = [reading, listening, writing, speaking]
     n_q, n_items = apply_source_corrections(sections)
+    n_blocks, n_marks = apply_insert_markers(sections)
     answer_key = build_answer_key(sections)
 
     parts = [HEADER]
@@ -478,6 +621,8 @@ def main():
     print('  answerKey entries: %d' % len(answer_key))
     print('  source corrections: %d edits over %d questions '
           '(originals kept in promptRaw/choicesRaw)' % (n_items, n_q))
+    print('  insert markers: %d markers over %d passage blocks '
+          '(markerOrigin/markerNote kept on the block)' % (n_marks, n_blocks))
     print('--- build warnings (%d) ---' % len(warnings))
     for w in warnings:
         print('  ! ' + w)

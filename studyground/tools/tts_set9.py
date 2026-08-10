@@ -32,6 +32,15 @@ Usage:
     ... --only l1-q13-14,s2-q1
     ... --force         regenerate ids whose mp3 already exists
     ... --manifest-only rewrite the ElevenLabs upgrade manifest and exit
+    ... --no-verify     skip the post-generation audio gate (NOT recommended)
+
+POST-GENERATION GATE (on by default). After synthesis this script runs
+    tools/verify_audio.py --manifest <manifest> --update-index --base <base>
+which re-checks every declared item (layers 0-2: mapping / freshness / integrity
+/ signal) and REWRITES the freshness baseline, because right now is the only
+moment we know the mp3 matches the script. If the gate reports FAIL this script
+exits non-zero -- a generator that silently succeeds while shipping a truncated
+or stale mp3 is exactly the accident this project already had.
 """
 
 import argparse
@@ -402,6 +411,49 @@ def write_manifest(plan):
     return MANIFEST
 
 
+# ------------------------------------------------------ post-gen gate ------
+
+VERIFY = os.path.join(HERE, "verify_audio.py")
+
+# manifest `out` paths are "media/audio/set9/<id>.mp3", i.e. relative to SG2.
+# --out may point somewhere else (a scratch tree while testing); the gate can
+# only run there if that tree has the same shape, so we derive the base by
+# stripping the known tail and REFUSE to guess when it does not match. Verifying
+# the real sg2 files after writing mp3s somewhere else would be a lie.
+OUT_TAIL = os.path.join("media", "audio", "set9")
+
+
+def verify_base_for(out_dir):
+    """(base_dir, reason). base_dir is None when the gate cannot apply."""
+    out_abs = os.path.abspath(out_dir)
+    if os.path.abspath(OUT_DIR) == out_abs:
+        return SG2, ""
+    if out_abs.endswith(os.sep + OUT_TAIL):
+        return out_abs[: -(len(OUT_TAIL) + 1)], ""
+    return None, ("--out %s does not end in %s, so the manifest's relative "
+                  "paths cannot be resolved against it" % (out_abs, OUT_TAIL))
+
+
+def run_audio_gate(out_dir):
+    """Run verify_audio.py over the manifest. Returns its exit code (0/1/2).
+
+    Non-zero here must reach the caller: FAIL means the audio must not ship.
+    """
+    base, why = verify_base_for(out_dir)
+    if base is None:
+        print("\n[audio gate] SKIPPED -- %s" % why)
+        print("             run tools/verify_audio.py by hand against the real tree.")
+        return 0
+    if not os.path.exists(VERIFY):
+        print("\n[audio gate] SKIPPED -- verifier not found: %s" % VERIFY)
+        return 0
+    cmd = [sys.executable, VERIFY, "--manifest", MANIFEST,
+           "--update-index", "--base", base]
+    print("\n[audio gate] %s" % " ".join(cmd))
+    sys.stdout.flush()   # else our buffered output lands AFTER the child's
+    return subprocess.run(cmd).returncode
+
+
 # ---------------------------------------------------------------- main -----
 
 def main():
@@ -411,6 +463,8 @@ def main():
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--manifest-only", action="store_true")
+    ap.add_argument("--no-verify", action="store_true",
+                    help="skip the post-generation audio gate (default: gate runs)")
     args = ap.parse_args()
 
     for tool in ("say", "afconvert", "lame"):
@@ -440,12 +494,12 @@ def main():
             m = AUTHORED_META[aid]
             print("  %-16s %-12s %-14s %s words"
                   % (aid, m["blockId"], m["kind"], m["wordCount"]))
-        return
+        return 0
 
     path = write_manifest(full_plan)
     print("manifest: %s" % path)
     if args.manifest_only:
-        return
+        return 0
 
     os.makedirs(args.out, exist_ok=True)
     made, skipped = 0, 0
@@ -462,6 +516,19 @@ def main():
     print("AUTHORED (body from config/_set9_l2, not from the docx): %s"
           % ", ".join(sorted(AUTHORED_META)))
 
+    if args.no_verify:
+        print("\n[audio gate] DISABLED by --no-verify. "
+              "Nothing checked the mp3s against the script.")
+        return 0
+
+    # The gate runs even when everything was skipped: an unchanged mp3 next to a
+    # changed script is precisely the stale-audio accident, and only the gate
+    # sees it. Exit code 1 = FAIL -> do not ship.
+    rc = run_audio_gate(args.out)
+    if rc:
+        print("[audio gate] FAILED (exit %d) -- audio must not be published." % rc)
+    return rc
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

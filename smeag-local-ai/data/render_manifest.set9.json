@@ -411,7 +411,8 @@
     "voices": [
       "Alex"
     ],
-    "segment_count": 1
+    "segment_count": 1,
+    "asr_text": "! Thank you for speaking with me today. I'd like to ask you some questions about exercise. What kind of exercise do you or someone you know typically do, such as running, swimming, or going to a gym? Why?"
   },
   {
     "segment_id": "s2-q2",
@@ -420,7 +421,8 @@
     "voices": [
       "Alex"
     ],
-    "segment_count": 1
+    "segment_count": 1,
+    "asr_text": "! I see. If you wanted to encourage a friend who doesn't exercise to become more active, would you prefer to invite them to exercise together with you, or would you prefer to share information about the benefits and let them decide on their own? Why?"
   },
   {
     "segment_id": "s2-q3",
@@ -429,7 +431,8 @@
     "voices": [
       "Alex"
     ],
-    "segment_count": 1
+    "segment_count": 1,
+    "asr_text": "! Interesting, what are some things that might make it difficult for someone to start and maintain a regular exercise routine?"
   },
   {
     "segment_id": "s2-q4",
@@ -438,6 +441,7 @@
     "voices": [
       "Alex"
     ],
-    "segment_count": 1
+    "segment_count": 1,
+    "asr_text": "! Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?"
   }
 ]

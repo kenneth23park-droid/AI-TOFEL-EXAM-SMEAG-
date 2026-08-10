@@ -1,0 +1,245 @@
+{
+  "note": "verify_audio.py 신선도 기준. 스크립트/음성정책 해시.",
+  "items": {
+    "read-R1-questions-13-15": {
+      "scriptHash": "707b6b459bbfd93ac1d7a47b0ba2954535454ea66a936284e5e45cc6e959faf4",
+      "bytes": 465261,
+      "durationSec": 66.99,
+      "audioSha256": "42d8a5a7fba9b2c919d00a309c5b7167b678f6d83294a022f7a37b51bd57b908"
+    },
+    "read-R1-roman-roads": {
+      "scriptHash": "5bfaf117160b9eca6dc82f166d07a66aa8e00cf8564a6a97a7eaae0e5264167b",
+      "bytes": 696192,
+      "durationSec": 87.02,
+      "audioSha256": "572f4eb5ca67911727b28f4e207fd80daaf81a862db58f03820e9a7aa22dc9f0"
+    },
+    "read-R1-subject-community-garden-opening": {
+      "scriptHash": "6cf95b65d2a3b2e8f93aec7258b09d61010c31aa37b38bc94c7a1807764e83dd",
+      "bytes": 183168,
+      "durationSec": 22.9,
+      "audioSha256": "0b72e6129e5caeba186d19ed566d0b0a46fbc21e00456cf76603782f4325b253"
+    },
+    "read-R2-ancient-irrigation-systems": {
+      "scriptHash": "17fd16d7c02218e5290f377ecdb7c016399479341ac34e240e669e5f04c1a631",
+      "bytes": 793920,
+      "durationSec": 99.24,
+      "audioSha256": "3d7ca1793b59ceb3486dc9fc6cc13530d3bd81c07e0fbb2584cb5103d2919fed"
+    },
+    "set9-M1-ann-19-20": {
+      "scriptHash": "656bb86a13390120b57031db683ebb5096079eb945d39e2b78285009c7f1586a",
+      "bytes": 394179,
+      "durationSec": 24.57,
+      "audioSha256": "ff86f86b47a56bd435b2f4bb54ea301be84b50ebda0ef9e29af1c451f8970989"
+    },
+    "set9-M1-ann-21-22": {
+      "scriptHash": "229853f5fc3cead2ddffb6b31beb4a619a6368986ca719520bc645eae5cc9c3a",
+      "bytes": 442244,
+      "durationSec": 27.59,
+      "audioSha256": "6a1be602d1737a1cb5eb324623bc6a4d4698ff64f48a1639437650986cea54fa"
+    },
+    "set9-M1-ann-23-24": {
+      "scriptHash": "c013809520399cfb8bcaf72f0430ba73eded9f188ac1974531ef861cb5142e3a",
+      "bytes": 940870,
+      "durationSec": 58.75,
+      "audioSha256": "675062db11789ace3a624c85c1868c61d49290581ca9050c241de1f924c202dc"
+    },
+    "set9-M1-ann-25-28": {
+      "scriptHash": "db99e61c94412299d9ab154ceec05d516b2f0aadb33555434b51d357cdfd9dc4",
+      "bytes": 2125366,
+      "durationSec": 132.77,
+      "audioSha256": "ce877cb88557d5084eb176b0ed97967f7236cbfc4730fe45d5c577ad1fd2558c"
+    },
+    "set9-M1-ann-29-32": {
+      "scriptHash": "864f7e0171b6304c80f9563583d6e3a0c651086dfebf8be963c68d64f44f660c",
+      "bytes": 1787237,
+      "durationSec": 111.64,
+      "audioSha256": "0037f67d0880f90c847aa79de185ccab23183f7b18c9ea597b73712037a81373"
+    },
+    "set9-M1-conv-13-14": {
+      "scriptHash": "07c93cc359b2b48ce4e432e8a8b96c312f21f94b5c2caf5cc535ce2418e2db10",
+      "bytes": 329044,
+      "durationSec": 31.69,
+      "audioSha256": "e734c6f370d910acce9fbebbcef820d279147b4cd4ffc2629001eef3d0718baf"
+    },
+    "set9-M1-conv-15-16": {
+      "scriptHash": "23cbb0ebc5b53253e68a0326a34648fc1478e262faf77e62e11075d4825353a4",
+      "bytes": 351541,
+      "durationSec": 33.83,
+      "audioSha256": "c0a9a9c8e82e9f10c0b81a07a87c6ed978dcb87e77832ff394781295e886de7e"
+    },
+    "set9-M1-conv-17-18": {
+      "scriptHash": "cd3ff79669f54143d8ab9ee6d7d35915f941b4b26c34204c3d4a4a908aeae43b",
+      "bytes": 337390,
+      "durationSec": 34.9,
+      "audioSha256": "d0a917f838bfcd1276207dfb887c6cb48c8c202cc4164fbf77d13374cfa16f6f"
+    },
+    "set9-M1-sr-01": {
+      "scriptHash": "45f6afe1aadd1f37ab674a6a816817a2e19e0d73af2e1da4f89a21172d0ef06c",
+      "bytes": 33898,
+      "durationSec": 2.04,
+      "audioSha256": "5d39e0014bb848f6469bd16c440f5f2728dc963e64e93aab7c3ea1d0990936a5"
+    },
+    "set9-M1-sr-02": {
+      "scriptHash": "e0adde97e56332a3692669e4a582107b50c74363b268b27ceaa7026c8e6bcae3",
+      "bytes": 35152,
+      "durationSec": 2.14,
+      "audioSha256": "26b750accb891b8a3d38287425c59ef6a4c386d66a49c77de2b899caaaba51e0"
+    },
+    "set9-M1-sr-03": {
+      "scriptHash": "934cfa0c821d0216eb16720ffd8586ead7f452e6589cc7f47cf50068b4082f15",
+      "bytes": 61902,
+      "durationSec": 3.81,
+      "audioSha256": "959601c160138860ee5fec6205ab4677d0bf8a34788c95fb828b20692b274666"
+    },
+    "set9-M1-sr-04": {
+      "scriptHash": "8049f203c1c6323fb43cd402fa098f628094a83a2396a51f0c5b8dc1d4738d51",
+      "bytes": 40586,
+      "durationSec": 2.46,
+      "audioSha256": "b3f9adf3871b408f5b37f89dbdc112e83398ca1cf9f0cf96ae96e8e434356501"
+    },
+    "set9-M1-sr-05": {
+      "scriptHash": "b03ff6d36435e957644f19ca07a7aefc8d155fd90f6c1152f65613c93af56b33",
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "3573ce17b3420ccf01565a579c8332bf0bf5295c49b371c92f8d5e2ca28f2c1e"
+    },
+    "set9-M1-sr-06": {
+      "scriptHash": "624dfc14ea9e567482d131ef1360e0e373d369bad049feb2bcb314b6a310c0b4",
+      "bytes": 38078,
+      "durationSec": 2.32,
+      "audioSha256": "8bd643ea1cb7f580b2466d2e0503f9513e698e63fdfeae2f96291f7bf40388c3"
+    },
+    "set9-M1-sr-07": {
+      "scriptHash": "81280465605cd20939ed1ee9eb27a4e97173ac060ca27be5f143f19cb9916038",
+      "bytes": 53960,
+      "durationSec": 3.3,
+      "audioSha256": "3acfbec91330f4a9e1e431624b00b7a08c28ec0228d8211b5ec37ed7d23ee92a"
+    },
+    "set9-M1-sr-08": {
+      "scriptHash": "ca05bae8244980d72cc737dcfb336396ebc72626a88891ceaaee8d4394314558",
+      "bytes": 38078,
+      "durationSec": 2.32,
+      "audioSha256": "3de79de5a852b3f4d2d0c5b642af01a63090337898a466a8189fd883af102a84"
+    },
+    "set9-M1-sr-09": {
+      "scriptHash": "87c6edfb117a35e6bba6029791402fb5aa2818b62f2d32736a865b66a36fb273",
+      "bytes": 56886,
+      "durationSec": 3.48,
+      "audioSha256": "123efdded9aedd017606ae4b477aa7e51076ce9e28a918f38d73ea81e9668e0f"
+    },
+    "set9-M1-sr-10": {
+      "scriptHash": "91863bb093689ed75f85e4245d9ff815b7d6a521911e114bd6ce074c0969128e",
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "7248b9b0278e1bd0aad87b9146b96d5d28c6dd22defb8bd8fa43007cc6699dfa"
+    },
+    "set9-M1-sr-11": {
+      "scriptHash": "8650043fab7a054a31ba7976f109ad9fa67fb5968d73c2f1d58bcf90474c44c0",
+      "bytes": 27629,
+      "durationSec": 1.67,
+      "audioSha256": "2113ebcca786e66bf4ac536ee1bf45ad6c3b0fc3db3caf937d1a5208e4777664"
+    },
+    "set9-M1-sr-12": {
+      "scriptHash": "af1cdf5bc564c5d566d3949e0c16a6a6ec2434fe605885d6d88b9b732ab8a7eb",
+      "bytes": 67753,
+      "durationSec": 4.18,
+      "audioSha256": "7e4e2ca7643f53629a2a1b37a6301d30ab548af36c49ae97107fb137154f37b2"
+    },
+    "set9-M2-interview-01": {
+      "scriptHash": "39e804dfbddc8f3ba7668be0c6d78a6e5a04e85b6a73d39720460368d0006896",
+      "bytes": 128775,
+      "durationSec": 7.99,
+      "audioSha256": "65569c7ba6758f9336856bc53c11aae915ae3c4d9e54b19904de05a9d92d4ad7"
+    },
+    "set9-M2-interview-02": {
+      "scriptHash": "891440c77c62785c4d2df74f32768bb7dcf1f23ccc53ac894f23651eca0e4472",
+      "bytes": 272971,
+      "durationSec": 17.0,
+      "audioSha256": "a8cea97ff35f09f304a2d2d3a112af63ddcdb67f049aed64e4e86483e8815e1d"
+    },
+    "set9-M2-interview-03": {
+      "scriptHash": "5469d2de6a6e52f421494baeee04d713f88b0b22022903107402a0d06e433395",
+      "bytes": 115400,
+      "durationSec": 7.15,
+      "audioSha256": "9d56de883e450dabd05933bf64b24d68ea2c04901a3fe8c9c367f3533fcbbe0a"
+    },
+    "set9-M2-interview-04": {
+      "scriptHash": "b1338f9fe63a7a0c4ba6aef9da7d6bc028b83eb9a951a9596c7fce850eb8eaa1",
+      "bytes": 131283,
+      "durationSec": 8.13,
+      "audioSha256": "bef810b84d7616e7dc322f9f851431d2c57b55dee5a506bddc82a148afd36bc0"
+    },
+    "set9-M2-repeat-01": {
+      "scriptHash": "cdd5b27b619f2172ae4fb99be49280a8a330e7c0be2a15c143b5beaa5e5d8a57",
+      "bytes": 48527,
+      "durationSec": 2.97,
+      "audioSha256": "ce5225093abdfc226c1981b16f1c08b0d9ac692fa17dd6efdb626af5b417fde5"
+    },
+    "set9-M2-repeat-02": {
+      "scriptHash": "5a8fff5fc3264c9da64e2102cf92e4a4e2c0c47df1dcad40c687986737e38b56",
+      "bytes": 44765,
+      "durationSec": 2.74,
+      "audioSha256": "0a7c3da064fb257aef72a9c5eb0f6c03377a31c9b34397e8679a9ed73390fe7b"
+    },
+    "set9-M2-repeat-03": {
+      "scriptHash": "8f35baf6fc5a8a0004caf1f2f4949849d5b5fe43a9d579d94ff65906e1a9c283",
+      "bytes": 51453,
+      "durationSec": 3.16,
+      "audioSha256": "30e282bb8bc19783db96900722da560dfabea63e8f838692ab99ecd7dbe33dbf"
+    },
+    "set9-M2-repeat-04": {
+      "scriptHash": "2c924780aae94dc48259ae6bf604ebf7d26eda8e2bf239c4a6c4c0f8794e55f7",
+      "bytes": 78202,
+      "durationSec": 4.83,
+      "audioSha256": "7fb2144b1959791c5f3198d67cf47563ebb6af3c6fc198fbf4e74785a4290b2d"
+    },
+    "set9-M2-repeat-05": {
+      "scriptHash": "16f6593e7cf8db95115da87355118907404dedab3283a822012124c265d13f6f",
+      "bytes": 56050,
+      "durationSec": 3.44,
+      "audioSha256": "de4ee0c98993d3e2013157c65d5249f93c7f9bb400abd3ccf06332f4db2bff8c"
+    },
+    "set9-M2-repeat-06": {
+      "scriptHash": "6562d518126a414ff5d3c938e27536ea533f57af2f45e0beecd50c7e85afef89",
+      "bytes": 84471,
+      "durationSec": 5.2,
+      "audioSha256": "a10ee9313f446130ebcf858be1735cbbed8654de3dcccca92d8e656200eee939"
+    },
+    "set9-M2-repeat-07": {
+      "scriptHash": "e96dccc6424cab52615f691965192372cfd43d451271da70f0127d0c3b040760",
+      "bytes": 82799,
+      "durationSec": 5.11,
+      "audioSha256": "e4563265113de321c110b05d14dac6fdce509cb563f93af22a5036c05753f72a"
+    },
+    "set9-M2-sr-01": {
+      "scriptHash": "3153e2515e1b05419120a5282e64f81d9934ebe4b88706e94a4c92ab8a33ee10",
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "9eb71618f67e4279de86f42eb51f34a878ee5170f9b3245a294004c6cbaccd4d"
+    },
+    "set9-M2-sr-02": {
+      "scriptHash": "5a3a5d5b509b6f016a67a75cbf568a9fc7c4a2212e75e54092e8378832531e8c",
+      "bytes": 38078,
+      "durationSec": 2.32,
+      "audioSha256": "f948b3adf75345ce8ab864c8cc47813cc2a4b0641bf08e81fd69d06e3a1e38e1"
+    },
+    "set9-M2-sr-03": {
+      "scriptHash": "7fa559fa9770a01fd704a1d21fe68754793dc84d3a32bf70025b49316c9578ec",
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "ee29cd9827946318323cfcd3e1bb6034a7db4fd3cd83d5e253bcbe88e76efda9"
+    },
+    "write-w-disc": {
+      "scriptHash": "f5db05d6728c16b93e9e5b59b2e7d8185261bb67e5ec00fd5e51ac55701a5d47",
+      "bytes": 486357,
+      "durationSec": 67.31,
+      "audioSha256": "5ccc38a0f85116f5c9ca199961e1c8fb4b1c6ea6a719091e51497b83d50bad90"
+    },
+    "write-w-email": {
+      "scriptHash": "e6f0af1cf16062054a48871886f2c821f40c8caa82385ca832b68b96aef04b7a",
+      "bytes": 127872,
+      "durationSec": 15.98,
+      "audioSha256": "4019a249112b3b891c2eea76f5f0722b0df918b609416d3166daf99071144399"
+    }
+  }
+}
