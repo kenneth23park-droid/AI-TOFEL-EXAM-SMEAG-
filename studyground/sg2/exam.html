@@ -30,6 +30,23 @@
   .qinstr { font-size:13px; color:var(--muted); margin:2px 0 6px; }
   .qitem { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
   .qitem:first-of-type { border-top:none; }
+  /* Reading 지문 블록 — 스펙: 지문은 왼쪽, 문항은 오른쪽(Reading Task 2 슬라이드).
+     리딩 섹션에서만 화면을 넓히고 2단으로 쪼갠다. 다른 섹션은 종전 1단 그대로다. */
+  .exam-wrap.wide { max-width: 1180px; }
+  .rd-split { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start; }
+  .rd-split .rd-pane { position:sticky; top:12px; min-width:0; }
+  .rd-split .rd-pane .passage { max-height:66vh; overflow:auto; margin-bottom:0; }
+  .rd-split .rd-qs { min-width:0; }
+  .rd-split .rd-qs .qitem:first-of-type { margin-top:0; padding-top:0; }
+  @media (max-width: 900px) {
+    .rd-split { grid-template-columns:minmax(0,1fr); }
+    .rd-split .rd-pane { position:static; }
+    .rd-split .rd-pane .passage { max-height:46vh; margin-bottom:14px; }
+  }
+  /* 모듈 제목 옆 타임 리밋 배지 — config/timing.<exam>.json 의 allocatedSec 이 정본이다. */
+  .mod-time { display:inline-block; margin-left:10px; padding:3px 10px; border-radius:999px;
+    background:var(--peach, #fbe3d8); color:var(--brand-ink, #b8391a);
+    font-size:12px; font-weight:800; letter-spacing:.02em; vertical-align:middle; }
   /* character page + countdown */
   .audio-unit { margin:10px 0 12px; }
   .au-stage { position:relative; background:linear-gradient(160deg,#fbe3d8,#f7d3c2); border:1px solid var(--peach-2);
@@ -100,6 +117,8 @@
   document.querySelectorAll('#seg a').forEach(function(a){ a.classList.toggle('on', a.dataset.sec===secId); });
   var section = S.sections.find(function(s){return s.id===secId;});
   var host = document.getElementById('exam');
+  // 리딩만 2단(지문 좌 / 문항 우)이라 본문 폭을 넓힌다 — 결과 바까지 같은 폭을 쓴다.
+  if(secId==='reading'){ document.querySelectorAll('.exam-wrap').forEach(function(w){ w.classList.add('wide'); }); }
   // assets bundled inside the site so it deploys self-contained
   function audioSrc(p){
     return encodeURI(p
@@ -203,8 +222,28 @@
     return wrap;
   }
 
+  // 모듈/과제의 타임 리밋(분) — config/timing.<exam>.json 이 정본이다. 로드가 비동기라
+  // 제목은 먼저 그리고 초가 도착하면 배지를 채운다(오프라인이면 내장 폴백이 즉시 settle 된다).
+  function fillModuleTime(modId, badge){
+    if(!window.SG_TIMING) return;
+    window.SG_TIMING.load(function(){
+      var sec = window.SG_TIMING.get('sections.'+secId);
+      if(!sec) return;
+      var units = (sec.modules||[]).concat(sec.tasks||[]);
+      var u = units.filter(function(x){ return x.id===modId; })[0];
+      var s = u && (u.allocatedSec || u.perTaskSec);
+      if(!s) return;
+      var mins = Math.round(s/60);
+      badge.textContent = mins + ' mins. (Time limit)';
+      badge.hidden = false;
+    });
+  }
+
   section.modules.forEach(function(mod){
-    var h=document.createElement('h2'); h.className='title'; h.style.margin='20px 0 10px'; h.textContent=mod.label; host.appendChild(h);
+    var h=document.createElement('h2'); h.className='title'; h.style.margin='20px 0 10px'; h.textContent=mod.label;
+    var badge=document.createElement('span'); badge.className='mod-time'; badge.hidden=true;
+    h.appendChild(badge); fillModuleTime(mod.id, badge);
+    host.appendChild(h);
     mod.blocks.forEach(function(blk){
       var card=document.createElement('div'); card.className='qcard';
       card.innerHTML='<div class="qh">'+esc(blk.heading||'')+'</div>'+
@@ -230,7 +269,17 @@
       }
       // MCQ / audio-set with choices
       else if(blk.questions && blk.questions.some(function(q){return q.choices;})){
-        var pass=makePassage(mod, blk); if(pass) card.appendChild(pass);
+        var pass=makePassage(mod, blk);
+        // 스펙(Reading Task 2): 지문은 왼쪽, 문항은 오른쪽. 지문이 있는 리딩 블록만 2단으로 쪼갠다.
+        // 지문이 없거나(리스닝 등) 다른 섹션이면 종전처럼 카드에 그대로 쌓는다.
+        var qHost=card;
+        if(pass && secId==='reading'){
+          var split=document.createElement('div'); split.className='rd-split';
+          var pane=document.createElement('div'); pane.className='rd-pane'; pane.appendChild(pass);
+          qHost=document.createElement('div'); qHost.className='rd-qs';
+          split.appendChild(pane); split.appendChild(qHost);
+          card.appendChild(split);
+        } else if(pass){ card.appendChild(pass); }
         blk.questions.forEach(function(q){
           if(!q.choices) return;
           var qd=document.createElement('div'); qd.className='qitem';
@@ -240,7 +289,7 @@
           q.choices.forEach(function(ch,idx){
             qd.innerHTML+='<label class="opt" data-q="'+q.id+'" data-idx="'+idx+'"><input type="radio" name="'+q.id+'" value="'+idx+'"><span>'+esc(ch)+'</span></label>';
           });
-          card.appendChild(qd);
+          qHost.appendChild(qd);
           graders.push(function(){
             var sel=card.querySelector('input[name="'+q.id+'"]:checked');
             var chosen= sel? parseInt(sel.value,10):-1;
