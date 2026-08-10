@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<!--
+  admin-set-import.html — docx 3개를 올리면 4섹션 세트가 만들어진다(관리자).
+
+  이 화면이 대체하는 것: tools/extract_set9_*.py + tools/build_set9.py 를 터미널에서
+  차례로 돌리던 작업. 파싱은 전부 브라우저에서 한다(assets/docx-read.js + set-import.js).
+
+  만들어진 팩은 assets/set9.js 와 같은 모양이고 브라우저 저장소에 들어간다
+  (assets/set-store.js). 저장 즉시 시험 화면 ?set=<코드> 로 열린다.
+
+  검산에 걸린 것은 숨기지 않는다 — 멈춤(stop)이 하나라도 있으면 저장 단추가 잠긴다.
+
+  SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Set import (admin) · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .drops { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin:16px 0 6px; }
+  .drop { position:relative; border:1.5px dashed var(--line-2); border-radius:13px; background:var(--card);
+    padding:16px 15px; cursor:pointer; transition:border-color .12s, background .12s; }
+  .drop:hover, .drop.over { border-color:var(--brand); background:var(--brand-soft,#fcece6); }
+  .drop.has { border-style:solid; border-color:var(--ok,#1f9d55); }
+  .drop input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .drop .role { font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--brand); }
+  .drop .want { display:block; font-size:13px; font-weight:750; color:var(--ink); margin-top:5px; }
+  .drop .got { display:block; font-size:11.5px; color:var(--muted); margin-top:4px; word-break:break-all; }
+  .drop.has .got { color:var(--ok,#1f9d55); font-weight:700; }
+
+  .codein { display:flex; gap:9px; align-items:center; flex-wrap:wrap; }
+  .codein input { font:inherit; font-size:14px; font-weight:750; padding:9px 12px; width:150px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .codein input:focus { outline:none; border-color:var(--brand); }
+
+  .secs { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:16px 0; }
+  @media (max-width:720px){ .secs { grid-template-columns:repeat(2,1fr); } }
+  .seccard { border:1px solid var(--line); border-top:3px solid var(--sc); border-radius:12px;
+    background:var(--card); padding:12px 13px; }
+  .seccard[data-s=reading]{ --sc:#e8481f } .seccard[data-s=listening]{ --sc:#2563c9 }
+  .seccard[data-s=writing]{ --sc:#7a4bc4 } .seccard[data-s=speaking]{ --sc:#1f9d55 }
+  .seccard .st { font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--sc); }
+  .seccard .sn { display:block; font-size:26px; font-weight:800; color:var(--ink); line-height:1.1; margin-top:4px;
+    font-variant-numeric:tabular-nums; }
+  .seccard .sd { display:block; font-size:11.5px; color:var(--muted); margin-top:3px; }
+
+  .gates { display:grid; gap:8px; margin:14px 0; }
+  .gt { display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:baseline;
+    border:1px solid var(--line); border-left:3px solid var(--gc); border-radius:10px;
+    background:var(--card); padding:10px 13px; font-size:12.5px; color:var(--ink); }
+  .gt.stop { --gc:#c62828 } .gt.warn { --gc:#d97706 }
+  .gt .lv { font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+  .gt.stop .lv { color:#c62828 } .gt.warn .lv { color:#a86400 }
+
+  .preview { border:1px solid var(--line); border-radius:12px; background:var(--card); overflow:hidden; }
+  .preview .ph { display:flex; gap:10px; align-items:center; padding:10px 14px; background:var(--cream-2);
+    border-bottom:1px solid var(--line); font-size:11.5px; font-weight:800; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--muted); }
+  .preview .pb { max-height:420px; overflow:auto; }
+  .prow { display:grid; grid-template-columns:78px 1fr auto; gap:11px; align-items:baseline;
+    padding:9px 14px; border-bottom:1px solid var(--line); font-size:12.5px; }
+  .prow:last-child { border-bottom:0; }
+  .prow b { font-size:11.5px; color:var(--brand); font-family:ui-monospace,Menlo,monospace; }
+  .prow .pt { color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .prow .pa { font-size:11.5px; font-weight:750; color:var(--muted); white-space:nowrap; }
+  .prow .pa.none { color:#c62828; }
+
+  .busy { font-size:12.5px; font-weight:750; color:var(--muted); }
+  .savedlist { display:grid; gap:8px; margin-top:10px; }
+  .saved { display:flex; gap:10px; align-items:center; flex-wrap:wrap; border:1px solid var(--line);
+    border-radius:10px; background:var(--card); padding:10px 13px; font-size:12.5px; }
+  .saved b { font-size:13px; }
+  .saved .sp { flex:1; color:var(--muted); font-size:11.5px; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Admin · Set import</small></span></a>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="admin-questions.html"><span data-en>Question editor</span><span data-ko>문항 교체</span></a>
+      <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
+      <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main" hidden>
+  <div class="page-h" style="padding-top:26px">
+    <span class="pill" style="margin-bottom:8px">Admin · Set import</span>
+    <h1 style="font-size:clamp(26px,4vw,40px)"><span data-en>Build a set from documents</span><span data-ko>문서로 세트 만들기</span></h1>
+    <p class="sub">
+      <span data-en>Drop the question, script and answer key documents. The four sections — reading, listening, writing, speaking — are assembled from what the files actually contain. Nothing is invented: anything that does not line up is listed below instead of being papered over.</span>
+      <span data-ko>문항·대본·정답지 문서를 올리면 리딩·리스닝·라이팅·스피킹 네 섹션이 문서에 있는 내용 그대로 조립됩니다. 없는 내용을 지어내지 않고, 짝이 맞지 않는 것은 아래에 그대로 표시합니다.</span>
+    </p>
+  </div>
+
+  <div class="codein">
+    <label class="mini" for="code" style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">
+      <span data-en>Set code</span><span data-ko>세트 코드</span>
+    </label>
+    <input type="text" id="code" value="SET 10" autocomplete="off" spellcheck="false">
+    <span class="muted" style="font-size:11.5px" id="codehint"></span>
+  </div>
+
+  <div class="drops" id="drops">
+    <label class="drop" data-slot="questions">
+      <span class="role">1 · <span data-en>required</span><span data-ko>필수</span></span>
+      <span class="want"><span data-en>Question document</span><span data-ko>문항 문서</span></span>
+      <span class="got"><span data-en>Prompts, choices, passages, pictures</span><span data-ko>문항·선택지·지문·삽화</span></span>
+      <input type="file" accept=".docx">
+    </label>
+    <label class="drop" data-slot="script">
+      <span class="role">2 · <span data-en>audio</span><span data-ko>음성</span></span>
+      <span class="want"><span data-en>Script document</span><span data-ko>대본 문서</span></span>
+      <span class="got"><span data-en>Listening and speaking scripts</span><span data-ko>리스닝·스피킹 대본</span></span>
+      <input type="file" accept=".docx">
+    </label>
+    <label class="drop" data-slot="answers">
+      <span class="role">3 · <span data-en>scoring</span><span data-ko>채점</span></span>
+      <span class="want"><span data-en>Answer key</span><span data-ko>정답지</span></span>
+      <span class="got"><span data-en>Answers in question order</span><span data-ko>문항 순서대로의 정답</span></span>
+      <input type="file" accept=".docx">
+    </label>
+  </div>
+
+  <div class="bar" style="margin-top:14px">
+    <button class="btn brand" id="buildBtn" disabled><span data-en>Build set</span><span data-ko>세트 만들기</span></button>
+    <span class="busy" id="busy"></span>
+  </div>
+
+  <div id="result" hidden>
+    <div class="secs" id="secs"></div>
+    <div class="gates" id="gates"></div>
+
+    <div class="bar">
+      <button class="btn brand" id="saveBtn"><span data-en>Save set</span><span data-ko>세트 저장</span></button>
+      <button class="btn ghost sm" id="jsonBtn"><span data-en>Export JSON</span><span data-ko>JSON 내보내기</span></button>
+      <button class="btn ghost sm" id="packBtn"><span data-en>Export pack .js</span><span data-ko>팩 .js 내보내기</span></button>
+      <span class="muted" id="savehint" style="font-size:11.5px;font-weight:700"></span>
+    </div>
+
+    <div class="preview">
+      <div class="ph"><span data-en>Every question found</span><span data-ko>찾은 문항 전체</span><span id="pcount" style="margin-left:auto"></span></div>
+      <div class="pb" id="pbody"></div>
+    </div>
+  </div>
+
+  <h2 style="font-size:15px;margin:30px 0 0"><span data-en>Saved sets</span><span data-ko>저장된 세트</span></h2>
+  <div class="savedlist" id="saved"></div>
+</main>
+
+<div class="wrap gate" id="gate">
+  <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
+  <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<script src="assets/docx-read.js"></script>
+<script src="assets/set-import.js"></script>
+<script src="assets/set-store.js"></script>
+<script src="assets/question-config.js"></script>
+<script src="assets/admin-session.js"></script>
+<script src="assets/admin-log.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var A = window.SG_ADMIN, STORE = window.SG_SET_STORE;
+  var files = { questions: null, script: null, answers: null };
+  var parsed = { questions: null, script: null, answers: null };
+  var built = null;
+
+  var flash = document.getElementById('flash'), flashT;
+  function toast(m) {
+    flash.textContent = m; flash.classList.add('on');
+    clearTimeout(flashT); flashT = setTimeout(function () { flash.classList.remove('on'); }, 2100);
+  }
+  function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
+  function slugOf(code) { return String(code || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+  /* ------------------------------------------------------------ 업로드 */
+
+  var drops = [].slice.call(document.querySelectorAll('.drop'));
+  drops.forEach(function (drop) {
+    var slot = drop.getAttribute('data-slot');
+    var input = drop.querySelector('input[type=file]');
+    var got = drop.querySelector('.got');
+
+    function take(file) {
+      if (!file) return;
+      if (!/\.docx$/i.test(file.name)) { toast('.docx 파일만 읽을 수 있습니다.'); return; }
+      files[slot] = file;
+      parsed[slot] = null;
+      drop.classList.add('has');
+      got.textContent = file.name + ' · ' + Math.round(file.size / 1024) + 'KB';
+      refresh();
+    }
+
+    input.addEventListener('change', function () { take(input.files && input.files[0]); });
+    ['dragenter', 'dragover'].forEach(function (e) {
+      drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.add('over'); });
+    });
+    ['dragleave', 'drop'].forEach(function (e) {
+      drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.remove('over'); });
+    });
+    drop.addEventListener('drop', function (ev) {
+      take(ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0]);
+    });
+  });
+
+  var codeEl = document.getElementById('code');
+  var buildBtn = document.getElementById('buildBtn');
+  var busy = document.getElementById('busy');
+
+  function refresh() {
+    buildBtn.disabled = !files.questions || !slugOf(codeEl.value);
+    var s = slugOf(codeEl.value);
+    document.getElementById('codehint').textContent =
+      s ? '시험 화면 주소: exam-runtime.html?set=' + s : '영문·숫자를 포함한 코드를 적어 주세요.';
+    var dup = s && STORE.get(s);
+    if (dup) document.getElementById('codehint').textContent += ' · 이미 저장된 코드입니다(덮어씁니다)';
+  }
+  codeEl.addEventListener('input', refresh);
+
+  /* -------------------------------------------------------------- 조립 */
+
+  function readFile(file) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onload = function () { resolve(fr.result); };
+      fr.onerror = function () { reject(new Error(file.name + ' 을 읽지 못했습니다.')); };
+      fr.readAsArrayBuffer(file);
+    });
+  }
+
+  buildBtn.addEventListener('click', function () {
+    buildBtn.disabled = true;
+    busy.textContent = '문서를 읽는 중…';
+
+    var slots = ['questions', 'script', 'answers'].filter(function (k) { return files[k]; });
+    Promise.all(slots.map(function (k) {
+      if (parsed[k]) return Promise.resolve();
+      return readFile(files[k])
+        .then(function (buf) { return window.SG_DOCX.read(buf); })
+        .then(function (doc) { parsed[k] = doc; });
+    })).then(function () {
+      busy.textContent = '섹션을 나누는 중…';
+      built = window.SG_SET_IMPORT.build({
+        code: codeEl.value.trim(),
+        questions: parsed.questions,
+        script: parsed.script,
+        answers: parsed.answers
+      });
+      render();
+      busy.textContent = '';
+      buildBtn.disabled = false;
+    }).catch(function (err) {
+      busy.textContent = '';
+      buildBtn.disabled = false;
+      toast(err && err.message ? err.message : '문서를 읽지 못했습니다.');
+    });
+  });
+
+  /* -------------------------------------------------------------- 표시 */
+
+  var SEC_LABEL = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
+
+  function render() {
+    if (!built || !built.pack) return;
+    document.getElementById('result').hidden = false;
+
+    var pack = built.pack, stats = built.stats;
+
+    document.getElementById('secs').innerHTML = ['reading', 'listening', 'writing', 'speaking'].map(function (id) {
+      var sec = (pack.sections || []).filter(function (s) { return s.id === id; })[0];
+      var mods = sec ? sec.modules.length : 0;
+      return '<div class="seccard" data-s="' + id + '">'
+        + '<span class="st">' + SEC_LABEL[id] + '</span>'
+        + '<span class="sn">' + (stats.bySection[id] || 0) + '</span>'
+        + '<span class="sd">' + mods + ' modules</span></div>';
+    }).join('');
+
+    var stops = built.gates.filter(function (g) { return g.level === 'stop'; });
+    document.getElementById('gates').innerHTML = built.gates.length
+      ? built.gates.map(function (g) {
+          return '<div class="gt ' + g.level + '"><span class="lv">' + (g.level === 'stop' ? '멈춤' : '확인') + '</span>'
+            + '<span>' + esc(g.message) + '</span></div>';
+        }).join('')
+      : '<div class="gt warn" style="--gc:#1f9d55"><span class="lv" style="color:#1f9d55">통과</span>'
+        + '<span>검산에 걸린 항목이 없습니다.</span></div>';
+
+    var rows = [];
+    (pack.sections || []).forEach(function (sec) {
+      sec.modules.forEach(function (mod) {
+        mod.blocks.forEach(function (blk) {
+          (blk.questions || []).forEach(function (q) {
+            var a = pack.answerKey[q.id];
+            var shown = a === undefined ? '—'
+              : (typeof a === 'number' ? String.fromCharCode(65 + a) : String(a));
+            rows.push('<div class="prow"><b>' + esc(q.id) + '</b>'
+              + '<span class="pt">' + esc(q.prompt || q.context || q.script || blk.heading || q.kind) + '</span>'
+              + '<span class="pa' + (a === undefined ? ' none' : '') + '">' + esc(shown) + '</span></div>');
+          });
+        });
+      });
+    });
+    document.getElementById('pbody').innerHTML = rows.join('');
+    document.getElementById('pcount').textContent = stats.total + '문항 · 정답 ' + stats.answered + '개';
+
+    var saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = stops.length > 0;
+    document.getElementById('savehint').textContent = stops.length
+      ? '멈춤 ' + stops.length + '건을 해결해야 저장할 수 있습니다.'
+      : '';
+  }
+
+  /* -------------------------------------------------------------- 저장 */
+
+  function download(name, text, mime) {
+    var blob = new Blob([text], { type: mime || 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', function () {
+    if (!built || !built.pack) return;
+    var slug = slugOf(codeEl.value);
+    if (STORE.get(slug) && !confirm(slug.toUpperCase() + ' 는 이미 저장돼 있습니다. 덮어쓸까요?')) return;
+
+    built.pack.importedAt = new Date().toISOString();
+    var res = STORE.put(slug, built.pack, { title: codeEl.value.trim() });
+    if (!res.ok) { toast(res.error); return; }
+    STORE.activate(slug, built.pack);
+    if (window.SG_LOG && window.SG_LOG.push) {
+      window.SG_LOG.push({ kind: 'set-import', set: slug, note: built.stats.total + '문항 가져오기' });
+    }
+    toast(slug.toUpperCase() + ' 저장 완료 — exam-runtime.html?set=' + slug + ' 에서 열립니다.');
+    renderSaved();
+    refresh();
+  });
+
+  document.getElementById('jsonBtn').addEventListener('click', function () {
+    if (!built) return;
+    download(slugOf(codeEl.value) + '.json', JSON.stringify(built.pack, null, 2));
+  });
+
+  document.getElementById('packBtn').addEventListener('click', function () {
+    if (!built) return;
+    var slug = slugOf(codeEl.value);
+    var body = '/* 자동 생성 — admin-set-import.html. 손으로 고치지 말고 문서를 고쳐 다시 만들 것. */\n'
+      + 'window.' + STORE.globalName(slug) + ' = ' + JSON.stringify(built.pack, null, 2) + ';\n';
+    download(slug + '.js', body, 'application/javascript');
+  });
+
+  /* ---------------------------------------------------- 저장된 세트 목록 */
+
+  function renderSaved() {
+    var list = STORE.list();
+    document.getElementById('saved').innerHTML = list.length
+      ? list.map(function (r) {
+          return '<div class="saved" data-slug="' + esc(r.slug) + '">'
+            + '<b>' + esc(r.title) + '</b>'
+            + '<span class="sp">' + r.total + '문항 · ' + Math.round((r.bytes || 0) / 1024) + 'KB · '
+            + esc(String(r.savedAt || '').slice(0, 10)) + '</span>'
+            + '<a class="btn ghost sm" href="exam-runtime.html?set=' + esc(r.slug) + '">시험 화면</a>'
+            + '<a class="btn ghost sm" href="admin-questions.html?set=' + esc(r.slug) + '">문항 편집</a>'
+            + '<button class="btn ghost sm" data-del="' + esc(r.slug) + '">삭제</button>'
+            + '</div>';
+        }).join('')
+      : '<p class="muted" style="font-size:12.5px">아직 없습니다.</p>';
+  }
+
+  document.getElementById('saved').addEventListener('click', function (ev) {
+    var slug = ev.target && ev.target.getAttribute && ev.target.getAttribute('data-del');
+    if (!slug) return;
+    if (!confirm(slug.toUpperCase() + ' 를 지울까요? 되돌릴 수 없습니다.')) return;
+    STORE.remove(slug);
+    renderSaved(); refresh();
+    toast(slug.toUpperCase() + ' 삭제했습니다.');
+  });
+
+  /* ---------------------------------------------------------------- 진입 */
+
+  function open() {
+    document.getElementById('gate').hidden = true;
+    document.getElementById('main').hidden = false;
+    renderSaved();
+    refresh();
+  }
+
+  /* 이 화면은 특정 SET 에 매이지 않는다 — 아무 SET 이라도 관리 권한이 있으면 연다.
+     (A.can() 을 인자 없이 부르면 "아무 SET 이라도" 로 본다.) */
+  document.getElementById('signin').addEventListener('click', function () { A.openLogin('', open); });
+  if (A.can()) open(); else A.openLogin('', open);
+})();
+</script>
+</body>
+</html>

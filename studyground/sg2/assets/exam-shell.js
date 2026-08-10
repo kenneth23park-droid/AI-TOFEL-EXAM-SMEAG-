@@ -47,6 +47,13 @@ window.SG_RUNTIME = (function () {
      exam-engine.js 의 parseUrl 은 이 파라미터를 모르므로 여기서 직접 읽는다. */
   var SET_IDS = { set1: 'SMEAG_SET1', set9: 'SMEAG_SET9' };
 
+  /* 업로드로 만든 세트(admin-set-import.html)는 저장소에 커밋된 파일이 없고
+     assets/set-store.js 가 부팅할 때 window.SMEAG_<SLUG> 로 올린다. 그래서 여기서는
+     이름 규칙만 알면 되고, 아는 세트 목록을 미리 갖고 있을 필요가 없다. */
+  function globalFor(id) {
+    return SET_IDS[id] || 'SMEAG_' + String(id || '').toUpperCase();
+  }
+
   /* 원본 사이트의 시험 코드 → 콘텐츠 팩. T-016 은 SET 1(=NT-016), T-009 는 SET 9 이다. */
   function setFromTestId(testId) {
     var t = String(testId || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -59,9 +66,9 @@ window.SG_RUNTIME = (function () {
      제 콘텐츠 팩을 싣기 위한 것이다 — URL 로 준 값이 언제나 이긴다. */
   function currentSetId() {
     var explicit = query('set').toLowerCase();
-    if (SET_IDS[explicit]) return explicit;
+    if (/^[a-z0-9]+$/.test(explicit)) return explicit;
     var routed = String(ROUTE.set || '').toLowerCase();
-    if (SET_IDS[routed]) return routed;
+    if (/^[a-z0-9]+$/.test(routed)) return routed;
     return setFromTestId(query('testId'));
   }
 
@@ -69,7 +76,7 @@ window.SG_RUNTIME = (function () {
 
   /* 선택된 팩의 전역. 로드 실패 시 set1 로 폴백한다. */
   function contentPack() {
-    var p = window[SET_IDS[SET_ID]] || window.SMEAG_SET1 || null;
+    var p = window[globalFor(SET_ID)] || window.SMEAG_SET1 || null;
     /* 렌더러들은 문항 본문을 콘텐츠 팩에서 되찾는다. 어떤 팩이 활성인지 알려주는
        유일한 채널이 이 전역이다. 설정하지 않으면 렌더러가 SMEAG_SET1 로 폴백하므로
        set9 에서 listening/writing 화면이 placeholder 로 떨어진다. */
@@ -78,7 +85,11 @@ window.SG_RUNTIME = (function () {
   }
 
   var OPTIONAL = ['assets/exam-types.js', 'assets/exam-timing.js', 'assets/exam-media.js',
-                  'assets/exam-compile.js', 'assets/' + SET_ID + '.js',
+                  'assets/exam-compile.js',
+                  /* 업로드로 만든 세트를 전역에 올린다. set-import.js 는 팩 helper 를 붙이기 위한 것.
+                     둘 다 없어도 커밋된 팩(set1/set9)은 그대로 뜬다. */
+                  'assets/set-import.js', 'assets/set-store.js',
+                  'assets/' + SET_ID + '.js',
                   /* 섹션 렌더러 — 각자 SG_RENDER.register() 로 자기를 등록한다.
                      아직 없는 파일은 onerror 로 건너뛰므로 순서·존재 여부에 의존하지 않는다. */
                   'assets/exam-recorder.js',

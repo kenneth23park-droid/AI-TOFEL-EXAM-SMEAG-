@@ -99,7 +99,7 @@
       <a class="btn ghost sm" href="admin-audio-files.html"><span data-en>Audio files</span><span data-ko>오디오 점검</span></a>
       <a class="btn ghost sm" href="admin-audio-sync.html"><span data-en>Script ↔ audio</span><span data-ko>대본 대조</span></a>
       <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
-      <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
+      <a class="btn ghost sm" href="admin-set-import.html"><span data-en>Import set</span><span data-ko>세트 가져오기</span></a>
       <a class="btn ghost sm" href="admin-log.html"><span data-en>Change log</span><span data-ko>변경 기록</span></a>
       <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
     </div>
@@ -141,6 +141,8 @@
 <script src="assets/question-config.js"></script>
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
+<script src="assets/set-import.js"></script>
+<script src="assets/set-store.js"></script>
 <script src="assets/exam-media.js"></script>
 <script src="assets/audio-index.js"></script>
 <script src="assets/audio-config.js"></script>
@@ -165,7 +167,10 @@
   var PACK_GLOBAL = { set1: 'SMEAG_SET1', set9: 'SMEAG_SET9' };
   var filterSec = 'all', filterQ = '', onlyOvr = false;
 
-  function pack(){ return window[PACK_GLOBAL[setId]] || null; }
+  /* 업로드로 만든 세트(admin-set-import.html)는 커밋된 팩 파일이 없다 —
+     assets/set-store.js 가 window.SMEAG_<SLUG> 로 올려 둔 것을 그대로 집는다. */
+  function packGlobal(id){ return PACK_GLOBAL[id] || ('SMEAG_' + String(id||'').toUpperCase()); }
+  function pack(){ return window[packGlobal(setId)] || null; }
 
   /** 화면에 그릴 문항 목록 — 팩 순서를 그대로 따른다. */
   function items() {
