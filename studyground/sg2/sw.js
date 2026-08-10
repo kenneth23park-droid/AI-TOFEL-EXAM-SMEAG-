@@ -51,7 +51,10 @@
 //      전체 학생 목록) · assets/sg-results.js 를 프리캐시에 넣는다. dashboard.html 이
 //      예시 데이터 대신 실제 응시 기록을 그리고, exam-shell.js 가 제출 직후 채점·업로드를
 //      하도록 바뀌었으므로 캐시된 옛 파일이 남으면 리뷰 문이 열리지 않는다.
-const VERSION = 'sg-v22';
+// v23: 답안지 코멘트(선생님 · AI) — assets/sg-comments.js 추가, review.html 이 코멘트를
+//      읽고(학생) 쓰고(선생님·관리자) AI 생성을 부른다. api/feedback.js 는 서버리스라
+//      프리캐시 대상이 아니다(/api/* 는 fetch 핸들러에서 이미 제외).
+const VERSION = 'sg-v23';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -62,7 +65,7 @@ const SHELL_ASSETS = [
   'admin-audio-sync.html', 'admin-set-view.html', 'config/audio-check.set9.json',
 
   // 채점 리뷰 — 제출 직후 오프라인에서도 자기 답안을 문항별로 볼 수 있어야 한다.
-  'review.html', 'admin-results.html', 'assets/sg-results.js',
+  'review.html', 'admin-results.html', 'assets/sg-results.js', 'assets/sg-comments.js',
 
   // 내부용 접근 게이트 — 오프라인 진입도 이 화면을 먼저 지난다.
   'gate.html', 'assets/gate.js', 'assets/audio-config.js',

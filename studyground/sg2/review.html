@@ -32,8 +32,11 @@
 
   <div class="page-h mt-24" style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
     <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Answer review</span><span data-ko>채점 리뷰</span></h1>
-    <a class="btn ghost sm" id="back" href="dashboard.html" style="margin-left:auto">
-      <span data-en>Back to my results</span><span data-ko>내 성적으로</span></a>
+    <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn ghost sm" id="print" type="button"><span data-en>Print</span><span data-ko>인쇄</span></button>
+      <a class="btn ghost sm" id="back" href="dashboard.html">
+        <span data-en>Back to my results</span><span data-ko>내 성적으로</span></a>
+    </div>
   </div>
 
   <!-- 못 찾음 / 권한 없음 등 안내 자리 -->
@@ -44,6 +47,13 @@
 
   <!-- 영역별 -->
   <div class="grid cols-4 mt-16 hide" id="sections"></div>
+
+  <!-- 선생님·관리자 전용 줄. 학생 화면에는 아예 그려지지 않는다. -->
+  <div class="card mt-16 hide" id="staffbar" data-staff-only
+       style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"></div>
+
+  <!-- 코멘트 — 전체 총평과 영역 총평 -->
+  <div class="card mt-16 hide" id="feedback"></div>
 
   <!-- 영역 필터 -->
   <div class="rv-tabs hide" id="tabs"></div>
@@ -79,6 +89,7 @@
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
 <script src="assets/sg-results.js"></script>
+<script src="assets/sg-comments.js"></script>
 <script>
 /* 한 회차의 채점 결과를 문항별로 편다.
  *   review.html?session=<세션 id>              내 응시 (로컬 기록 또는 서버 사본)
@@ -246,7 +257,8 @@
                : '<span class="rv-mark na">–</span>';
       var prompt = promptOf(r);
       var open = isOpen(r);
-      return '<tr class="' + (r.ok === false ? 'is-wrong' : '') + '">' +
+      var notes = commentsFor('question', r.qid);
+      var row = '<tr class="' + (r.ok === false ? 'is-wrong' : '') + '">' +
         '<td class="rv-no">' + (r.no != null ? r.no : '') + '</td>' +
         '<td><div style="font-size:12px;font-weight:750;color:var(--muted)">' + esc(r.qid) + '</div>' +
           '<div>' + esc(String(prompt).slice(0, 160)) + '</div></td>' +
@@ -255,8 +267,198 @@
                                                 : readable(r, r.key, true)) + '</td>' +
         '<td style="text-align:center">' + mark + '</td>' +
       '</tr>';
+      // 코멘트는 문항 바로 아래 줄에 붙는다 — 답과 눈이 떨어지지 않게.
+      if (notes.length || STAFF) {
+        row += '<tr class="rv-cmt"><td></td><td colspan="4">' +
+          notes.map(cardOf).join('') +
+          (STAFF ? editorFor('question', r.qid, notes) : '') +
+          '</td></tr>';
+      }
+      return row;
     }).join('');
     wirePlayback();
+    wireEditors();
+  }
+
+  /* ── 코멘트 (선생님 · AI) ─────────────────────────────────
+   * 학생은 읽기만 한다 — 편집 장치는 STAFF 일 때만 DOM 에 들어간다.
+   * 화면에서 감추는 게 아니라 아예 그리지 않는다. */
+  var CMT = [], STAFF = false, ME = null, OWNER_ID = '', PROVIDERS = [];
+
+  function commentsFor(scope, qid) {
+    return CMT.filter(function (c) {
+      return c.scope === scope && (c.question_id || '') === (qid || '');
+    }).sort(function (a, b) { return a.source === 'teacher' ? -1 : 1; });   // 선생님 말이 먼저다
+  }
+
+  function cardOf(c) {
+    var who = c.source === 'teacher'
+      ? '<span class="cm-badge">' + bi('Teacher', '선생님') + '</span>' +
+        (c.author_name ? '<span>' + esc(c.author_name) + '</span>' : '')
+      : '<span class="cm-badge">AI</span>' + (c.model ? '<span>' + esc(c.model) + '</span>' : '');
+    var list = function (label, ko, arr) {
+      if (!arr || !arr.length) return '';
+      return '<div class="cm-lab">' + bi(label, ko) + '</div><ul class="cm-list">' +
+        arr.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    };
+    return '<div class="cm ' + (c.source === 'teacher' ? 'teacher' : 'ai') + '">' +
+      '<div class="cm-who">' + who + '</div>' +
+      (c.body ? '<div class="cm-body">' + esc(c.body) + '</div>' : '') +
+      list('What went well', '잘한 점', c.strengths) +
+      list('What to work on', '보완할 점', c.improvements) +
+    '</div>';
+  }
+
+  function editorFor(scope, qid, notes) {
+    var mine = notes.filter(function (c) { return c.source === 'teacher'; })[0];
+    return '<div class="cm-edit" data-editor="' + scope + '|' + esc(qid || '') + '">' +
+      '<div class="cm-act">' +
+        '<button class="btn ghost sm" type="button" data-open>' +
+          (mine ? bi('Edit comment', '코멘트 고치기') : bi('Write a comment', '코멘트 쓰기')) + '</button>' +
+      '</div>' +
+      '<div hidden data-form>' +
+        '<textarea placeholder="Comment for the student">' + esc(mine ? mine.body : '') + '</textarea>' +
+        '<div class="cm-act">' +
+          '<button class="btn brand sm" type="button" data-save>' + bi('Save', '저장') + '</button>' +
+          '<button class="btn ghost sm" type="button" data-cancel>' + bi('Cancel', '취소') + '</button>' +
+          (mine ? '<button class="btn ghost sm" type="button" data-del="' + esc(mine.id) + '">' +
+                    bi('Delete', '삭제') + '</button>' : '') +
+          '<span class="muted" style="font-size:12px" data-say></span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function wireEditors() {
+    if (!STAFF) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-editor]'), function (box) {
+      if (box.dataset.wired) return;
+      box.dataset.wired = '1';
+      var parts = box.getAttribute('data-editor').split('|');
+      var scope = parts[0], qid = parts[1] || '';
+      var form = box.querySelector('[data-form]');
+      var ta = box.querySelector('textarea');
+      var say = box.querySelector('[data-say]');
+
+      box.querySelector('[data-open]').onclick = function () { form.hidden = !form.hidden; };
+      box.querySelector('[data-cancel]').onclick = function () { form.hidden = true; };
+      box.querySelector('[data-save]').onclick = function () {
+        say.textContent = '…';
+        SG_COMMENTS.save({
+          owner: OWNER_ID, session: SESSION, scope: scope, question_id: qid,
+          source: 'teacher', author: ME && ME.id, author_name: (ME && ME.name) || '',
+          lang: document.documentElement.lang === 'ko' ? 'ko' : 'en',
+          body: ta.value
+        }).then(function (saved) {
+          if (!saved) { say.textContent = 'failed'; return; }
+          say.textContent = '';
+          reloadComments();
+        });
+      };
+      var del = box.querySelector('[data-del]');
+      if (del) del.onclick = function () {
+        SG_COMMENTS.remove(del.getAttribute('data-del')).then(reloadComments);
+      };
+    });
+  }
+
+  function paintFeedback(det) {
+    var order = ['overall', 'reading', 'listening', 'writing', 'speaking'];
+    var any = CMT.some(function (c) { return c.scope !== 'question'; });
+    if (!any && !STAFF) { $('feedback').classList.add('hide'); return; }
+
+    var html = '<h2 style="font-size:19px;font-weight:820">' +
+      bi('Comments on your test', '내 시험에 대한 코멘트') + '</h2>';
+    order.forEach(function (scope) {
+      var notes = commentsFor(scope, '');
+      if (!notes.length && !STAFF) return;
+      var lab = scope === 'overall' ? ['Overall', '총평'] : LAB[scope];
+      html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">' +
+        '<div style="font-size:13px;font-weight:800">' + bi(lab[0], lab[1]) + '</div>' +
+        (notes.length ? notes.map(cardOf).join('')
+                      : '<div class="cm-empty" style="margin-top:6px">' +
+                          bi('No comment yet.', '아직 코멘트가 없습니다.') + '</div>') +
+        (STAFF ? editorFor(scope, '', notes) : '') +
+      '</div>';
+    });
+    $('feedback').innerHTML = html;
+    show('feedback');
+    wireEditors();
+  }
+
+  /* 선생님·관리자 줄 — AI 코멘트 생성기. 모델은 여기서 고른다. */
+  function paintStaffBar(res, det) {
+    var bar = $('staffbar');
+    var opts = '';
+    PROVIDERS.forEach(function (p) {
+      if (!p.ready) return;
+      opts += '<optgroup label="' + esc(p.label) + '">' +
+        p.models.map(function (m) {
+          return '<option value="' + esc(p.id + '::' + m) + '"' +
+                 (m === p.default ? ' selected' : '') + '>' + esc(m) + '</option>';
+        }).join('') + '</optgroup>';
+    });
+    var ready = PROVIDERS.some(function (p) { return p.ready; });
+
+    bar.innerHTML =
+      '<b style="font-size:13px">' + bi('AI comments', 'AI 코멘트') + '</b>' +
+      (ready
+        ? '<select id="ai-model" style="padding:8px 11px;border:1px solid var(--line-2);border-radius:10px;font-family:inherit;font-size:13px;background:#fff">' + opts + '</select>' +
+          '<select id="ai-lang" style="padding:8px 11px;border:1px solid var(--line-2);border-radius:10px;font-family:inherit;font-size:13px;background:#fff">' +
+            '<option value="en">English</option><option value="ko">한국어</option></select>' +
+          '<button class="btn brand sm" type="button" id="ai-go">' +
+            bi('Generate', '생성') + '</button>'
+        : '<span class="muted" style="font-size:12.5px">' +
+            bi('No AI key is configured on the server yet.', '서버에 AI 키가 아직 설정되지 않았습니다.') + '</span>') +
+      '<span class="muted" id="ai-say" style="font-size:12px;margin-left:auto"></span>';
+    bar.classList.remove('hide');
+    if (!ready) return;
+
+    $('ai-go').onclick = function () {
+      var pick = String($('ai-model').value || '').split('::');
+      var lang = $('ai-lang').value;
+      var say = $('ai-say');
+      say.textContent = '…';
+      $('ai-go').disabled = true;
+      SG_COMMENTS.generate({
+        provider: pick[0], model: pick[1], lang: lang,
+        attempt: SG_COMMENTS.attemptFor(res, det)
+      }).then(function (out) {
+        var jobs = [];
+        (out.sections || []).forEach(function (s) {
+          if (!s || !s.scope) return;
+          jobs.push(SG_COMMENTS.save({
+            owner: OWNER_ID, session: SESSION, scope: s.scope, question_id: '',
+            source: 'ai', model: out.model, lang: out.lang,
+            body: s.summary || '', strengths: s.strengths || [], improvements: s.improvements || []
+          }));
+        });
+        (out.questions || []).forEach(function (q) {
+          if (!q || !q.question_id) return;
+          jobs.push(SG_COMMENTS.save({
+            owner: OWNER_ID, session: SESSION, scope: 'question', question_id: q.question_id,
+            source: 'ai', model: out.model, lang: out.lang, body: q.body || ''
+          }));
+        });
+        return Promise.all(jobs).then(function () {
+          say.textContent = '';
+          $('ai-go').disabled = false;
+          reloadComments();
+        });
+      }).catch(function (e) {
+        say.textContent = String(e.message || e);
+        $('ai-go').disabled = false;
+      });
+    };
+  }
+
+  var DET = null, RES = null;
+  function reloadComments() {
+    return SG_COMMENTS.list(OWNER_ID, SESSION).then(function (rows) {
+      CMT = rows || [];
+      paintFeedback(DET);
+      paintRows();
+    });
   }
 
   /* 녹음은 그 기기의 IndexedDB 에만 있다. 응시한 기기에서 열었을 때만 재생이 붙고,
@@ -286,18 +488,44 @@
       return;
     }
     ALL = det.rows;
+    RES = res; DET = det;
+    OWNER_ID = OWNER || res.owner || (ME && ME.id) || '';
     paintSummary(res, det, who);
     paintSections(det);
     paintTabs();
     show('table-card');
     paintRows();
+
+    /* 코멘트는 로그인해야 오간다. 비로그인(오프라인 응시 직후)이면 답안지만 본다. */
+    if (!OWNER_ID || !window.SG_COMMENTS) return;
+    reloadComments();
+    if (!STAFF) return;
+    SG_COMMENTS.providers().then(function (list) {
+      PROVIDERS = list || [];
+      paintStaffBar(res, det);
+    });
   }
 
   function boot() {
+    $('print').onclick = function () { window.print(); };
     if (!SESSION) {
       notice('No test was specified.', '어떤 응시를 볼지 지정되지 않았습니다.');
       return;
     }
+    /* 누가 보고 있는지 먼저 정한다 — 편집 장치는 선생님·관리자일 때만 그려지고,
+     * 학생 화면에는 아예 들어가지 않기 때문이다. */
+    var me = window.SG_AUTH && SG_AUTH.user();
+    var gate = me && SG_AUTH.isStaff
+      ? SG_AUTH.profile().then(function (p) {
+          ME = p || me;
+          STAFF = !!(p && (p.role === 'teacher' || p.role === 'admin' || p.is_admin));
+        }).catch(function () { ME = me; })
+      : Promise.resolve();
+
+    gate.then(load);
+  }
+
+  function load() {
     SG_RESULTS.get(SESSION, OWNER).then(function (res) {
       if (!res) {
         notice('That test result was not found, or you are not allowed to see it.',

@@ -306,6 +306,33 @@ tr.is-wrong td { background: rgba(232,72,31,.045); }
   border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 750; }
 .rv-tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 
+/* ── 코멘트 (선생님 · AI) ─────────────────────────────────────
+   같은 자리에 나란히 놓되 출처는 한눈에 갈린다 — 선생님은 산호색, AI 는 회색. */
+.cm { border-left: 3px solid var(--line-2); padding: 10px 0 10px 12px; margin-top: 10px; }
+.cm.teacher { border-left-color: var(--brand); }
+.cm-who { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800;
+  letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.cm-badge { padding: 2px 8px; border-radius: 999px; background: var(--cream-2); color: var(--ink-2); }
+.cm.teacher .cm-badge { background: var(--brand-soft); color: var(--brand-ink); }
+.cm-body { font-size: 13.5px; color: var(--ink-2); margin-top: 5px; white-space: pre-wrap; }
+.cm-list { margin: 6px 0 0 16px; font-size: 13px; color: var(--ink-2); }
+.cm-list li { margin-top: 2px; }
+.cm-lab { font-size: 11px; font-weight: 800; color: var(--muted); margin-top: 7px; }
+.cm-edit textarea { width: 100%; min-height: 80px; padding: 11px 13px; border: 1px solid var(--line-2);
+  border-radius: 11px; font-family: inherit; font-size: 13.5px; background: var(--cream); resize: vertical; }
+.cm-edit textarea:focus { outline: none; border-color: var(--brand); background: #fff; }
+.cm-act { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+.cm-empty { font-size: 13px; color: var(--dim); }
+tr.rv-cmt td { border-bottom: 1px solid var(--line); padding-top: 0; }
+
+/* 출력 — 답안지를 그대로 종이에 옮긴다. 조작 장치는 나오지 않는다. */
+@media print {
+  .nav, .foot, .rv-tabs, .btn, button, .cm-edit, [data-staff-only] { display: none !important; }
+  body { background: #fff; }
+  .card { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+  .rv-table { font-size: 11px; }
+}
+
 /* utilities */
 .center { text-align: center; }
 .mt-8 { margin-top: 8px; } .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; }
