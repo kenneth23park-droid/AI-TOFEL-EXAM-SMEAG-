@@ -36,7 +36,9 @@
 //      tests.html 카드에 링크가 붙었다.
 // v16: 리딩 cloze 빈칸을 글자마다 끊어 그린다('_ _ _ _'). exam.css · exam-render-reading.js
 //      가 함께 바뀌므로 캐시된 옛 CSS 와 새 렌더러가 섞이지 않도록 VERSION 을 올린다.
-const VERSION = 'sg-v16';
+// v17: cloze 빈칸 밑줄을 다시 한 줄로 잇고 어간에 붙인다('popul______').
+//      exam.css 만 바뀌지만 캐시된 옛 CSS 가 남으면 화면이 그대로라 VERSION 을 올린다.
+const VERSION = 'sg-v17';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
