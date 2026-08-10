@@ -592,18 +592,186 @@
     return box;
   }
 
-  function discussionBox(q) {
-    var box = el('div', 'wr-disc');
-    if (q.professor) box.appendChild(el('div', 'wr-disc-prof', q.professor));
-    if (q.prompt) box.appendChild(el('p', 'wr-disc-prompt', q.prompt));
-    var posts = (q.posts instanceof Array) ? q.posts : [];
-    for (var i = 0; i < posts.length; i++) {
-      var card = el('div', 'wr-post');
-      card.appendChild(el('div', 'wr-post-name', posts[i].name || ''));
-      card.appendChild(el('p', 'wr-post-text', posts[i].text || ''));
-      box.appendChild(card);
+  /* 이름 → 아바타 이니셜. 사진이 없는 화자는 이니셜 원으로 대체한다. */
+  function initialsOf(name) {
+    var s = String(name || '').replace(/^professor\s+/i, '').replace(/[–—-].*$/, '');
+    var parts = s.replace(/^\s+|\s+$/g, '').split(/\s+/), out = '', i;
+    for (i = 0; i < parts.length && out.length < 2; i++) {
+      if (parts[i]) out += parts[i].charAt(0).toUpperCase();
+    }
+    return out || '?';
+  }
+
+  function avatarOf(name, src) {
+    var box = el('div', 'wr-avatar');
+    var url = '';
+    if (src) {
+      url = src;
+      if (root.SG_MEDIA && typeof root.SG_MEDIA.resolveMedia === 'function') {
+        try { url = root.SG_MEDIA.resolveMedia(src) || src; } catch (e) { url = src; }
+      }
+    }
+    if (url) {
+      var img = doc.createElement('img');
+      img.src = url; img.alt = '';
+      box.appendChild(img);
+    } else {
+      box.appendChild(el('span', 'wr-avatar-ini', initialsOf(name)));
     }
     return box;
+  }
+
+  /* 화자 카드 — 아바타(좌) + 이름·본문(우). 교수 글도 같은 형식으로 낸다. */
+  function postCard(name, text, src, textCls) {
+    var card = el('div', 'wr-post');
+    card.appendChild(avatarOf(name, src));
+    var body = el('div', 'wr-post-body');
+    body.appendChild(el('div', 'wr-post-name' + (textCls ? ' wr-disc-prof' : ''), name || ''));
+    body.appendChild(el('p', 'wr-post-text' + (textCls ? ' ' + textCls : ''), text || ''));
+    card.appendChild(body);
+    return card;
+  }
+
+  /* 'Professor Gupta – Education' → 'education' (과목명). 지시문 첫 문장에 쓴다. */
+  function topicOf(q) {
+    if (q.topic) return String(q.topic);
+    var m = String(q.professor || '').split(/[–—-]/);
+    if (m.length > 1) return m[m.length - 1].replace(/^\s+|\s+$/g, '').toLowerCase();
+    return '';
+  }
+
+  /* 화면 상단 지시문 — 최종수정사항.docx Writing Task 3 캡처와 같은 3단 구성:
+     "Your professor is teaching a class on X…" / "In your response, you should do the following." +
+     불릿 / "An effective response will contain at least N words." */
+  function discussionIntro(q) {
+    var box = el('div', 'wr-intro');
+    var topic = topicOf(q);
+    var lead = q.instruction || ('Your professor is teaching a class' + (topic ? ' on ' + topic : '') +
+      '. Write a post responding to the professor\'s question.');
+    box.appendChild(bi('p', lead,
+      '교수님이' + (topic ? ' ' + topic + ' ' : ' ') + '수업을 진행합니다. 교수님의 질문에 답하는 글을 쓰세요.',
+      'wr-intro-lead'));
+
+    box.appendChild(bi('p', 'In your response, you should do the following.',
+      '답안에는 다음 내용이 들어가야 합니다.', 'wr-intro-label'));
+
+    var list = (q.bullets instanceof Array && q.bullets.length) ? q.bullets : [
+      'Express and support your opinion.',
+      'Make a contribution to the discussion in your own words.'
+    ];
+    var ul = el('ul', 'wr-bullets-list');
+    for (var i = 0; i < list.length; i++) ul.appendChild(el('li', null, list[i]));
+    box.appendChild(ul);
+
+    var min = typeof q.minWords === 'number' ? q.minWords : 0;
+    if (min) {
+      box.appendChild(bi('p', 'An effective response will contain at least ' + min + ' words.',
+        '좋은 답안은 최소 ' + min + '단어 이상입니다.', 'wr-intro-min'));
+    }
+    return box;
+  }
+
+  function discussionBox(q) {
+    var box = el('div', 'wr-disc');
+    if (q.professor || q.prompt) {
+      box.appendChild(postCard(q.professor || 'Professor', q.prompt || '',
+        q.professorImage || q.image, 'wr-disc-prompt'));
+    }
+    var posts = (q.posts instanceof Array) ? q.posts : [];
+    for (var i = 0; i < posts.length; i++) {
+      box.appendChild(postCard(posts[i].name || '', posts[i].text || '', posts[i].image));
+    }
+    return box;
+  }
+
+  /* ── 작성창 툴바 (Cut / Paste / Undo / Redo · 단어수 표시 토글) ─────────── */
+
+  /* 브라우저 편집 명령. textarea 에 포커스를 준 뒤 실행해야 한다. */
+  function execOn(ta, cmd) {
+    try {
+      ta.focus();
+      if (doc.execCommand) return doc.execCommand(cmd, false, null);
+    } catch (e) { warn(cmd + ' failed', e); }
+    return false;
+  }
+
+  /* execCommand('paste') 는 대부분의 브라우저에서 막혀 있다. 비동기 클립보드로 폴백한다. */
+  function pasteInto(ta, after) {
+    if (execOn(ta, 'paste')) { after(); return; }
+    var nav = root.navigator;
+    if (nav && nav.clipboard && typeof nav.clipboard.readText === 'function') {
+      try {
+        nav.clipboard.readText().then(function (txt) {
+          if (typeof txt !== 'string' || !txt) return;
+          var s = ta.selectionStart, e = ta.selectionEnd;
+          if (typeof s !== 'number') { ta.value += txt; }
+          else {
+            ta.value = ta.value.slice(0, s) + txt + ta.value.slice(e);
+            ta.selectionStart = ta.selectionEnd = s + txt.length;
+          }
+          ta.focus();
+          after();
+        })['catch'](function () {});
+        return;
+      } catch (e2) { warn('clipboard paste failed', e2); }
+    }
+  }
+
+  function toolButton(label, onClick) {
+    var b = doc.createElement('button');
+    b.type = 'button';
+    b.className = 'wr-tool';
+    b.textContent = label;
+    on(b, 'click', function (e) { if (e && e.preventDefault) e.preventDefault(); onClick(); });
+    /* mousedown 기본동작(포커스 이동)을 막아 textarea 선택이 풀리지 않게 한다 — Cut 이 대상 없이 도는 것 방지. */
+    on(b, 'mousedown', function (e) { if (e && e.preventDefault) e.preventDefault(); });
+    return b;
+  }
+
+  /* 반환: { node, count, setLocked } — count 는 단어수를 다시 칠하는 함수. */
+  function editorToolbar(ta, minWords, onEdit) {
+    var bar = el('div', 'wr-tools');
+    var left = el('div', 'wr-tools-left');
+    var right = el('div', 'wr-tools-right');
+    bar.appendChild(left); bar.appendChild(right);
+
+    var btns = [
+      toolButton('Cut', function () { execOn(ta, 'cut'); onEdit(); }),
+      toolButton('Paste', function () { pasteInto(ta, onEdit); }),
+      toolButton('Undo', function () { execOn(ta, 'undo'); onEdit(); }),
+      toolButton('Redo', function () { execOn(ta, 'redo'); onEdit(); })
+    ];
+    for (var i = 0; i < btns.length; i++) left.appendChild(btns[i]);
+
+    var count = el('span', 'wr-count');
+    var toggle = doc.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'wr-count-toggle';
+    var hidden = false;
+
+    function paintToggle() {
+      toggle.textContent = (hidden ? '⊘ Show Word Count' : '⊘ Hide Word Count');
+      count.style.visibility = hidden ? 'hidden' : '';
+      toggle.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+    }
+    on(toggle, 'click', function () { hidden = !hidden; paintToggle(); });
+    paintToggle();
+
+    right.appendChild(toggle);
+    right.appendChild(count);
+
+    function paintCount() {
+      var w = wordCount(ta.value);
+      count.textContent = w + (w === 1 ? ' word' : ' words');
+      count.className = 'wr-count' + (minWords && w < minWords ? ' wr-count--warn' : '');
+      return w;
+    }
+
+    function setLocked(locked) {
+      for (var j = 0; j < btns.length; j++) btns[j].disabled = !!locked;
+    }
+
+    return { node: bar, count: paintCount, setLocked: setLocked, isHidden: function () { return hidden; } };
   }
 
   function renderFreeWrite(screen, ctx, foundList) {
@@ -642,6 +810,7 @@
           var bl = bulletsBox(q);
           if (bl) pane.appendChild(bl);
         } else {
+          pane.appendChild(discussionIntro(q));
           pane.appendChild(discussionBox(q));
         }
 
@@ -650,26 +819,26 @@
         ta.className = 'wr-textarea';
         ta.setAttribute('rows', '12');
         ta.setAttribute('spellcheck', 'false');
-        ta.placeholder = 'Type your response here (' + minWords + '+ words)';
+        ta.placeholder = 'Type your response here…';
+
+        /* 툴바(Cut/Paste/Undo/Redo · 단어수)는 작성창 위. 편집 버튼이 값을 바꾸면
+           input 이벤트가 안 오는 브라우저가 있어 schedule() 을 직접 부른다. */
+        var tools = editorToolbar(ta, minWords, function () { schedule(); });
+        answer.appendChild(tools.node);
+
         var prev = savedAnswer(q.id);
         ta.value = (prev && typeof prev.v === 'string') ? prev.v : '';
         answer.appendChild(ta);
 
         var foot = el('div', 'wr-foot');
-        var count = el('span', 'wr-count');
         var min = el('span', 'wr-min');
         min.appendChild(bi('span', 'minimum ' + minWords + ' words', '최소 ' + minWords + '단어', null));
-        foot.appendChild(count); foot.appendChild(min);
+        foot.appendChild(min);
         answer.appendChild(foot);
 
         var timer = null;
 
-        function paintCount() {
-          var w = wordCount(ta.value);
-          count.textContent = w + (w === 1 ? ' word' : ' words');
-          count.className = 'wr-count' + (minWords && w < minWords ? ' wr-count--warn' : '');
-          return w;
-        }
+        function paintCount() { return tools.count(); }
 
         function commit() {
           var w = wordCount(ta.value);
@@ -697,7 +866,7 @@
           commit(); flushAnswers();
         });
 
-        editors.push({ textarea: ta, commit: commit, count: paintCount, question: q, minWords: minWords });
+        editors.push({ textarea: ta, commit: commit, count: paintCount, tools: tools, question: q, minWords: minWords });
         wrap.appendChild(card);
       })(foundList[n]);
     }
@@ -715,6 +884,7 @@
       for (var i = 0; i < editors.length; i++) {
         // 만료 시 입력만 잠그고 내용은 남긴다 — 현재 값이 그대로 제출 대상이다.
         if (locked) { editors[i].commit(); }
+        if (editors[i].tools) editors[i].tools.setLocked(locked);
         editors[i].textarea.readOnly = !!locked;
         editors[i].textarea.setAttribute('aria-readonly', locked ? 'true' : 'false');
       }
