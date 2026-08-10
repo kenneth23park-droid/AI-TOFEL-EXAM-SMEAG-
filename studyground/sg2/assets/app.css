@@ -353,3 +353,24 @@ html[lang="ko"] [data-ko] { display: revert; }
 @media (max-width: 560px) {
   .cols-4, .price-grid, .tgrid, .tool-cards, .skill-tabs, .cols-2 { grid-template-columns: 1fr; }
 }
+
+/* ── 좁은 화면 보정 ──────────────────────────────────────
+   폰에서 헤더가 줄바꿈되면 KO/EN 토글이 옆 버튼에 눌려 글자가 잘렸다.
+   토글은 줄지 않게 두고, 넘치는 버튼이 아랫줄로 내려가게 한다. */
+.lang { flex: none; }
+@media (max-width: 720px) {
+  .nav-right { flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
+}
+
+/* admin 화면의 필터 세그먼트(.seg)는 항목이 늘면 화면 밖으로 잘려 나갔다.
+   좁은 화면에서는 가로로 밀어서 볼 수 있게 한다. 정의는 각 admin 페이지에
+   있고 각 페이지의 style 블록이 이 파일보다 뒤에 오므로, body 를 붙여 이긴다. */
+@media (max-width: 720px) {
+  body .seg { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  body .seg button { flex: none; }
+}
+
+/* 표는 좁혀서 뭉개는 대신 가로로 민다 — 파일 경로나 상태 칸이 한 글자씩
+   세로로 쪼개지던 문제. */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll > table { min-width: 620px; }
