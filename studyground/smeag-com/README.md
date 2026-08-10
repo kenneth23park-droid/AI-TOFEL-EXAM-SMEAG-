@@ -1,0 +1,54 @@
+# smeag.com — 학생 성적 조회 · 다운로드
+
+학생이 **나중에** 시험 성적을 다시 보고 내려받는 창구. 응시는 StudyGround(sg2)에서 하고,
+조회·다운로드는 smeag.com 에서 한다.
+
+- `scores.html` — 파일 하나로 끝나는 자립형 페이지. 외부 CSS/JS/CDN 없음, 빌드 없음.
+
+## 배포
+
+`scores.html` 을 smeag.com 아무 경로에나 올리면 된다.
+
+```
+/toefl/scores.html   →  https://smeag.com/toefl/scores.html
+```
+
+정적 파일 하나라 워드프레스든 PHP든 상관없다. 워드프레스라면 페이지 템플릿에
+`<iframe src="/toefl/scores.html" style="width:100%;height:1400px;border:0"></iframe>`
+로 끼워 넣어도 된다.
+
+**Supabase CORS**: 브라우저가 smeag.com 에서 Supabase 로 직접 요청하므로, Supabase
+프로젝트(`smeag-mocktest`, ref `qrmidnmlethqvdbmnyun`)의 허용 오리진에 `https://smeag.com`
+이 들어가 있어야 한다. Edge Function `sg-auth` 의 CORS 헤더도 같이 확인할 것.
+
+## 데이터 경로
+
+```
+sg2 응시 → 로컬 채점 → Supabase sg_results  ←── scores.html (본인 행만)
+```
+
+- 테이블: `sg_results` (owner, session, set_code, submitted_at, score, total, percent,
+  by_section, answers), 프로필은 `sg_profiles`.
+- 학생이 남의 성적을 못 보는 경계는 이 페이지가 아니라 **서버의 RLS** 다. 화면 코드를
+  고쳐도 서버가 자기 행 말고는 돌려주지 않는다.
+- 로그인은 sg2 와 같은 Edge Function `sg-auth` 를 쓴다 — 학번(`smeag###`) 또는 이메일.
+
+## 설정 (`scores.html` 상단 `CFG`)
+
+| 키 | 뜻 |
+|---|---|
+| `url` / `anon` | Supabase 프로젝트 주소와 공개(anon) 키 |
+| `packBase` | sg2 콘텐츠 팩(`set1.js`, `set9.js`)이 있는 주소. **비워 두면 문항별 정답을 못 그린다** — 점수·영역별 요약과 '내 답'까지만 나온다 |
+| `packs` | 세트 코드 → 팩 파일 이름 |
+| `showAnswerKey` | `false` 로 두면 정답 열을 감추고 O/X 만 보여준다 |
+
+`packBase` 를 채우는 순간 그 주소의 팩 파일에 담긴 **정답이 학생 브라우저로 내려간다**.
+sg2 번들도 지금은 같은 상태다. 정답을 감추려면 `showAnswerKey: false` 만으로는 부족하고
+(팩 파일 자체에 답이 있다) `packBase` 를 비우거나, 채점 결과를 서버에서 내려주는 쪽으로
+바꿔야 한다.
+
+## 화면
+
+- 로그인 → 요약(응시 횟수 · 평균 · 최고 · 최근) → 응시 목록 → 문항별 리뷰
+- 내려받기: **CSV(전체 목록)**, **CSV(한 응시의 문항별)**, **인쇄 · PDF**
+- 기본 언어는 영어, KO 는 토글. 모바일 폭까지 접힌다.

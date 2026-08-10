@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My TOEFL Scores · SMEAG</title>
+<!--
+  SMEAG · 학생 성적 조회 · 다운로드 (smeag.com 배포용)
+
+  sg2(응시 앱)와 같은 Supabase 프로젝트(smeag-mocktest)를 직접 읽는다. 학생은
+  본인 응시만 볼 수 있고, 그 경계는 이 화면이 아니라 서버의 RLS 가 쥐고 있다.
+
+  이 파일은 통째로 자립형이다 — 외부 CSS/JS/CDN 없음, 빌드 없음. smeag.com 어디에든
+  이 HTML 하나만 올리면 동작한다(예: https://smeag.com/toefl/scores.html).
+  자세한 배포 절차는 옆의 README.md 참고.
+-->
+<style>
+:root{
+  --ink:#17150f; --ink-2:#3f3b32; --muted:#7c766a; --dim:#a8a291;
+  --cream:#f7f4ee; --cream-2:#efe9df; --card:#fff;
+  --line:#e7e0d3; --line-2:#ded5c4;
+  --brand:#e8481f; --brand-ink:#c23a17; --brand-soft:#fcece6;
+  --ok:#1f9d55; --ok-soft:#e7f6ec; --bad:#e8481f; --bad-soft:#fdeee9;
+  --radius:16px; --shadow:0 1px 2px rgba(23,21,15,.04),0 10px 30px rgba(23,21,15,.06);
+  --maxw:1080px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",
+    "Pretendard","Malgun Gothic",Roboto,Arial,sans-serif;
+  background:var(--cream); color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased;
+  letter-spacing:-.011em;
+}
+a{color:inherit;text-decoration:none}
+button,input{font-family:inherit;font-size:inherit}
+button{cursor:pointer}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+.hide{display:none !important}
+.muted{color:var(--muted)}
+
+/* 언어 전환 — 기본은 영어, KO 는 토글이다 */
+body[data-lang="en"] [data-ko]{display:none}
+body[data-lang="ko"] [data-en]{display:none}
+
+header.nav{position:sticky;top:0;z-index:50;background:rgba(247,244,238,.9);
+  backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800}
+.brand-logo{width:34px;height:34px;border-radius:10px;background:var(--brand);color:#fff;
+  display:grid;place-items:center;font-weight:900;flex:none}
+.brand small{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);font-weight:700}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.lang{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden}
+.lang button{border:0;background:transparent;padding:6px 11px;font-size:12px;font-weight:800;color:var(--muted)}
+.lang button.on{background:var(--ink);color:#fff}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);
+  background:#fff;border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:700;color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.btn.brand{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.brand:hover{background:var(--brand-ink);border-color:var(--brand-ink)}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.btn[disabled]{opacity:.5;cursor:default}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow)}
+.mt-8{margin-top:8px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}
+h1{font-size:clamp(26px,4vw,40px);letter-spacing:-.03em;line-height:1.1}
+h2{font-size:18px;letter-spacing:-.02em}
+.page-h{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-top:28px}
+.page-h .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+.chip{display:inline-block;background:var(--cream-2);border-radius:999px;
+  padding:3px 10px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.grid{display:grid;gap:14px}
+.cols-4{grid-template-columns:repeat(4,1fr)}
+/* 리뷰 요약은 점수 + 영역 수에 따라 4~5칸이라 자동으로 맞춘다 */
+.cols-auto{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+/* 리뷰로 스크롤할 때 고정 헤더 밑으로 제목이 숨지 않게 */
+#detail{scroll-margin-top:78px}
+.stat b{display:block;font-size:30px;letter-spacing:-.03em;line-height:1.1}
+.stat .lab{font-size:12.5px;color:var(--muted);font-weight:700}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.table-wrap{overflow-x:auto}
+.right{text-align:right}
+.ok{color:var(--ok);font-weight:800}
+.bad{color:var(--bad);font-weight:800}
+tr.row-bad{background:var(--bad-soft)}
+
+.field{display:block;margin-top:12px}
+.field span{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:5px}
+.field input{width:100%;padding:11px 13px;border:1px solid var(--line-2);border-radius:11px;background:#fff}
+.field input:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+.err{background:var(--bad-soft);border:1px solid #f3c9bb;color:var(--brand-ink);
+  border-radius:11px;padding:10px 13px;font-size:13px;font-weight:700}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{padding:9px 12px;border:1px solid var(--line-2);
+  border-radius:11px;background:#fff}
+
+footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font-size:12.5px;color:var(--muted)}
+
+@media (max-width:640px){
+  .cols-4{grid-template-columns:repeat(2,1fr)}
+  .nav-in{padding:10px 16px;gap:10px}
+  .brand small{display:none}
+  .wrap{padding:0 16px}
+  .card{padding:16px}
+  .page-h .acts{width:100%;margin-left:0}
+}
+@media print{
+  header.nav,footer.foot,.no-print{display:none !important}
+  body{background:#fff}
+  .card{box-shadow:none;break-inside:avoid}
+}
+</style>
+</head>
+<body data-lang="en">
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="/"><span class="brand-logo">S</span>
+      <span>SMEAG<small>TOEFL Mock Test</small></span></a>
+    <div class="nav-right">
+      <span class="lang"><button data-set-lang="ko">KO</button><button data-set-lang="en" class="on">EN</button></span>
+      <button class="btn sm hide" id="out"><span data-en>Log out</span><span data-ko>로그아웃</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ── 로그인 ─────────────────────────────────────────── -->
+  <section id="gate" class="hide">
+    <div class="page-h"><h1><span data-en>My TOEFL scores</span><span data-ko>내 TOEFL 성적</span></h1></div>
+    <p class="muted mt-8" style="font-size:14px">
+      <span data-en>Sign in with the student ID and password you used for the mock test.</span>
+      <span data-ko>모의고사에 사용한 학번과 비밀번호로 로그인하세요.</span>
+    </p>
+    <div class="card mt-16" style="max-width:420px">
+      <form id="login">
+        <div class="err hide" id="login-err"></div>
+        <label class="field"><span data-en>Student ID or email</span><span data-ko>학번 또는 이메일</span>
+          <input id="login-id" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
+        <label class="field"><span data-en>Password</span><span data-ko>비밀번호</span>
+          <input id="login-pw" type="password" autocomplete="current-password" required></label>
+        <button class="btn brand mt-16" style="width:100%;justify-content:center" id="login-go" type="submit">
+          <span data-en>Sign in</span><span data-ko>로그인</span></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── 성적 목록 ──────────────────────────────────────── -->
+  <section id="app" class="hide">
+    <div class="page-h">
+      <h1><span data-en>My TOEFL scores</span><span data-ko>내 TOEFL 성적</span></h1>
+      <div class="acts no-print">
+        <button class="btn sm" id="dl-csv"><span data-en>Download CSV</span><span data-ko>CSV 내려받기</span></button>
+        <button class="btn sm" id="print"><span data-en>Print / PDF</span><span data-ko>인쇄 · PDF</span></button>
+      </div>
+    </div>
+    <p class="muted mt-8" style="font-size:13.5px" id="who"></p>
+
+    <div class="grid cols-4 mt-16" id="stats"></div>
+
+    <div class="card mt-16 hide" id="notice"></div>
+
+    <div class="card mt-16 no-print filters hide" id="filters">
+      <select id="f-set"></select>
+      <span class="muted" style="font-size:12.5px" id="count"></span>
+    </div>
+
+    <div class="card mt-16 hide" id="list-card" style="padding:0;overflow:hidden">
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th><span data-en>Date</span><span data-ko>날짜</span></th>
+          <th><span data-en>Test</span><span data-ko>시험</span></th>
+          <th><span data-en>Sections</span><span data-ko>영역</span></th>
+          <th class="right"><span data-en>Score</span><span data-ko>점수</span></th>
+          <th class="no-print" style="width:96px"></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+    </div>
+
+    <!-- 한 응시의 문항별 리뷰 -->
+    <section id="detail" class="hide mt-24">
+      <div class="page-h" style="padding-top:0">
+        <h2 id="detail-h"></h2>
+        <div class="acts no-print">
+          <button class="btn sm" id="dl-one"><span data-en>Download this test (CSV)</span><span data-ko>이 응시 CSV</span></button>
+          <button class="btn sm" id="detail-close"><span data-en>Close</span><span data-ko>닫기</span></button>
+        </div>
+      </div>
+      <div class="grid cols-auto mt-16" id="detail-stats"></div>
+      <div class="card mt-16 hide" id="detail-note"></div>
+      <div class="card mt-16" style="padding:0;overflow:hidden">
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th style="width:52px">#</th>
+            <th><span data-en>Question</span><span data-ko>문항</span></th>
+            <th><span data-en>Your answer</span><span data-ko>내 답</span></th>
+            <th id="th-key"><span data-en>Correct answer</span><span data-ko>정답</span></th>
+            <th class="right" style="width:80px"><span data-en>Result</span><span data-ko>결과</span></th>
+          </tr></thead>
+          <tbody id="detail-rows"></tbody>
+        </table></div>
+      </div>
+    </section>
+  </section>
+
+</main>
+
+<footer class="foot"><div class="wrap">
+  © SMEAG · <span data-en>TOEFL mock test results</span><span data-ko>TOEFL 모의고사 성적</span>
+</div></footer>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   설정 — 배포 환경에 맞춰 여기만 고치면 된다.
+   ───────────────────────────────────────────────────────────── */
+var CFG = {
+  /* sg2(응시 앱)가 쓰는 그 Supabase 프로젝트. anon 키는 공개 키이고,
+     실제 접근 경계는 sg_results 의 RLS 가 쥔다 — 학생은 자기 행만 읽는다. */
+  url: 'https://qrmidnmlethqvdbmnyun.supabase.co',
+  anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybWlkbm1sZXRocXZkYm1ueXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg3NzQsImV4cCI6MjEwMTMxNDc3NH0.U2cprYXkpIS_1tSAiEjCFuHAztZRwIIK6DYCCowgxg4',
+
+  /* 문항별 리뷰(문제 지문·정답)를 그리려면 sg2 의 콘텐츠 팩이 필요하다.
+     비워 두면 이 화면은 점수·영역별 요약과 '내 답'까지만 보여준다.
+     sg2 배포 주소를 넣으면 문항별 정답까지 펼친다. */
+  packBase: '',            // 예: 'https://smeag-studyground.vercel.app/assets/'
+  packs: { SET1: 'set1.js', SET9: 'set9.js' },
+
+  /* 학생용 문항별 정답 공개 여부. false 면 정답 열을 감추고 O/X 만 남긴다. */
+  showAnswerKey: true
+};
+
+/* ─────────────────────────────────────────────────────────────
+   세션 — sg2 와 같은 Edge Function(sg-auth)으로 로그인한다.
+   supabase-js 를 붙이지 않는 이유도 sg2 와 같다: fetch 몇 번이면 된다.
+   ───────────────────────────────────────────────────────────── */
+var AUTH = (function () {
+  var KEY = 'smeag_scores_v1';
+  var STAFF_DOMAIN = 'smeagstudyground.com';
+
+  function read() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  function write(v) { try { v ? localStorage.setItem(KEY, JSON.stringify(v)) : localStorage.removeItem(KEY); } catch (e) {} }
+
+  function store(payload) {
+    var s = payload.session || payload;
+    write({
+      user: payload.user || (s.user ? { id: s.user.id, email: s.user.email } : null),
+      access_token: s.access_token,
+      refresh_token: s.refresh_token,
+      expires_at: s.expires_at || (Math.floor(Date.now() / 1000) + (s.expires_in || 3600))
+    });
+    return read().user;
+  }
+
+  /* 수험생 아이디(smeag###)는 서버가 시험일과 묶어 이메일을 만든다.
+     선생님·관리자 상주 계정은 아이디@도메인이 곧 이메일이다. */
+  function loginId(raw) {
+    var v = String(raw || '').trim().toLowerCase();
+    if (!v || v.indexOf('@') >= 0 || /^smeag\d{3}$/.test(v)) return v;
+    return v + '@' + STAFF_DOMAIN;
+  }
+
+  function signIn(login, password) {
+    return fetch(CFG.url + '/functions/v1/sg-auth', {
+      method: 'POST',
+      headers: { apikey: CFG.anon, Authorization: 'Bearer ' + CFG.anon, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'signin', login: loginId(login), password: password })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) { var e = new Error(j.message || 'Sign-in failed'); e.messageKo = j.message_ko; throw e; }
+        return store(j);
+      });
+    }, function () {
+      var e = new Error('Cannot reach the server. Check your connection.');
+      e.messageKo = '서버에 연결할 수 없습니다. 네트워크를 확인하세요.';
+      throw e;
+    });
+  }
+
+  function signOut() {
+    var s = read();
+    if (s && s.access_token) {
+      fetch(CFG.url + '/auth/v1/logout', {
+        method: 'POST', headers: { apikey: CFG.anon, Authorization: 'Bearer ' + s.access_token }
+      }).catch(function () {});
+    }
+    write(null);
+  }
+
+  var refreshing = null;
+  function token() {
+    var s = read();
+    if (!s) return Promise.resolve(null);
+    if (s.expires_at - 60 > Math.floor(Date.now() / 1000)) return Promise.resolve(s.access_token);
+    if (refreshing) return refreshing;
+    refreshing = fetch(CFG.url + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST', headers: { apikey: CFG.anon, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    }).then(function (r) { if (!r.ok) throw new Error('refresh failed'); return r.json(); })
+      .then(function (j) { var u = s.user; store(j); var c = read(); c.user = u; write(c); return c.access_token; })
+      .catch(function () { write(null); return null; })
+      .then(function (t) { refreshing = null; return t; });
+    return refreshing;
+  }
+
+  function user() { var s = read(); return s ? s.user : null; }
+
+  /* 로컬에 저장된 프로필에는 이름·학번이 없을 수 있어 서버 사본으로 채운다. */
+  function profile() {
+    var u = user();
+    if (!u) return Promise.resolve(null);
+    if (u.name || u.student_id) return Promise.resolve(u);
+    return rest('sg_profiles?select=id,email,name,student_id,role&id=eq.' + u.id).then(function (rows) {
+      var p = rows && rows[0];
+      if (!p) return u;
+      var c = read(); if (c) { c.user = p; write(c); }
+      return p;
+    });
+  }
+
+  function rest(path) {
+    return token().then(function (tok) {
+      if (!tok) return null;
+      return fetch(CFG.url + '/rest/v1/' + path, {
+        headers: { apikey: CFG.anon, Authorization: 'Bearer ' + tok }
+      }).then(function (r) { return r.ok ? r.json().catch(function () { return null; }) : null; });
+    }).catch(function () { return null; });
+  }
+
+  return { signIn: signIn, signOut: signOut, token: token, user: user, profile: profile, rest: rest };
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   채점 — 저장된 답안 + 콘텐츠 팩으로 문항별 결과를 다시 편다.
+   sg2 의 assets/sg-results.js 와 같은 규칙을 쓴다(대소문자·공백·끝 마침표 무시).
+   ───────────────────────────────────────────────────────────── */
+var GRADE = (function () {
+  var SECTION = { R: 'reading', L: 'listening', S: 'speaking', W: 'writing' };
+  var KNOWN = { reading: 1, listening: 1, speaking: 1, writing: 1 };
+
+  function norm(v) {
+    return String(v == null ? '' : v).trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.]$/, '');
+  }
+  function hit(given, key) {
+    if (key == null) return null;                     // 채점 기준 없음 = 사람이 채점하는 문항
+    var list = Object.prototype.toString.call(key) === '[object Array]' ? key : [key];
+    for (var i = 0; i < list.length; i++) if (norm(given) === norm(list[i])) return true;
+    return false;
+  }
+  function sectionOf(qid) { return SECTION[String(qid).charAt(0).toUpperCase()] || 'other'; }
+  function sectionEntry(entry, qid) {
+    var name = entry && entry.section && (entry.section.id || entry.section.name);
+    name = String(name || '').toLowerCase();
+    return KNOWN[name] ? name : sectionOf(qid);
+  }
+  function valueOf(a, qid) {
+    var rec = a && a[qid];
+    if (rec == null) return '';
+    return (typeof rec === 'object' && 'v' in rec) ? rec.v : rec;
+  }
+
+  /* 팩이 있으면 문항별로 펼치고, 없으면 저장된 답안만 줄 세운다. */
+  function rows(pack, answers) {
+    var out = [], k;
+    if (pack) {
+      var all = typeof pack.allQuestions === 'function' ? pack.allQuestions() : [];
+      var keys = pack.answerKey || {};
+      for (var i = 0; i < all.length; i++) {
+        var q = all[i].q || all[i];
+        var key = keys.hasOwnProperty(q.id) ? keys[q.id] : q.answer;
+        out.push({
+          qid: q.id, no: q.no || (i + 1), section: sectionEntry(all[i], q.id),
+          prompt: q.prompt || q.text || q.question || '',
+          given: valueOf(answers, q.id), key: key, ok: hit(valueOf(answers, q.id), key)
+        });
+      }
+      return out;
+    }
+    var n = 0;
+    for (k in answers) {
+      if (!answers.hasOwnProperty(k)) continue;
+      out.push({ qid: k, no: ++n, section: sectionOf(k), prompt: '',
+                 given: valueOf(answers, k), key: null, ok: null });
+    }
+    return out;
+  }
+
+  /* 팩은 필요할 때 한 번만 받아 온다(SET 당 100KB 안팎). */
+  var loaded = {};
+  function pack(setCode) {
+    var code = String(setCode || '').toUpperCase();
+    var have = window['SMEAG_' + code];
+    if (have) return Promise.resolve(have);
+    if (!CFG.packBase || !CFG.packs[code]) return Promise.resolve(null);
+    if (loaded[code]) return loaded[code];
+    loaded[code] = new Promise(function (done) {
+      var s = document.createElement('script');
+      s.src = CFG.packBase.replace(/\/?$/, '/') + CFG.packs[code];
+      s.onload = function () { done(window['SMEAG_' + code] || null); };
+      s.onerror = function () { done(null); };
+      document.head.appendChild(s);
+    });
+    return loaded[code];
+  }
+
+  return { rows: rows, pack: pack, sectionOf: sectionOf };
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   화면
+   ───────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var LAB = { reading: ['Reading', '리딩'], listening: ['Listening', '리스닝'],
+              writing: ['Writing', '라이팅'], speaking: ['Speaking', '스피킹'], other: ['Other', '기타'] };
+  var ALL = [], ME = null, OPEN = null;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function bi(en, ko) { return '<span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span>'; }
+  function p2(n) { return (n < 10 ? '0' : '') + n; }
+  function when(iso, withTime) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d)) return '—';
+    var s = d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+    return withTime ? s + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()) : s;
+  }
+  function cut(s, n) { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; }
+
+  /* ── 언어 토글 ── */
+  function lang(v) {
+    document.body.setAttribute('data-lang', v);
+    try { localStorage.setItem('smeag_lang', v); } catch (e) {}
+    [].forEach.call(document.querySelectorAll('[data-set-lang]'), function (b) {
+      b.classList.toggle('on', b.getAttribute('data-set-lang') === v);
+    });
+  }
+
+  /* ── 요약 카드 ── */
+  function stat(lab, labKo, val, sub) {
+    return '<div class="card stat"><div class="lab">' + bi(lab, labKo) + '</div><b>' + val + '</b>' +
+      (sub ? '<div class="muted" style="font-size:12px">' + sub + '</div>' : '') + '</div>';
+  }
+  function paintStats() {
+    var n = ALL.length;
+    var pcts = ALL.map(function (r) { return Number(r.percent) || 0; });
+    var avg = n ? Math.round(pcts.reduce(function (a, b) { return a + b; }, 0) / n * 10) / 10 : 0;
+    var best = n ? Math.max.apply(null, pcts) : 0;
+    var last = n ? when(ALL[0].submitted_at) : '—';
+    $('stats').innerHTML =
+      stat('Tests taken', '응시 횟수', n) +
+      stat('Average', '평균', avg + '%') +
+      stat('Best', '최고', best + '%') +
+      stat('Latest', '최근 응시', '<span style="font-size:19px">' + last + '</span>');
+  }
+
+  function chips(r) {
+    var by = r.by_section || {};
+    var out = ['reading', 'listening', 'writing', 'speaking'].filter(function (s) { return by[s]; })
+      .map(function (s) {
+        var v = by[s];
+        return '<span class="chip">' + bi(LAB[s][0], LAB[s][1]) + ' ' +
+          (v.total ? v.score + '/' + v.total : '—') + '</span>';
+      }).join(' ');
+    return out || '<span class="muted">—</span>';
+  }
+
+  /* ── 목록 ── */
+  function shown() {
+    var set = $('f-set').value;
+    return ALL.filter(function (r) { return !set || r.set_code === set; });
+  }
+  function paintList() {
+    var list = shown();
+    $('count').textContent = list.length + ' / ' + ALL.length;
+    $('rows').innerHTML = list.length ? list.map(function (r) {
+      return '<tr>' +
+        '<td>' + when(r.submitted_at, true) + '</td>' +
+        '<td><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
+        '<td>' + chips(r) + '</td>' +
+        '<td class="right" style="font-weight:800;white-space:nowrap">' + r.score + ' / ' + r.total +
+          '<div class="muted" style="font-weight:600;font-size:12px">' + (r.percent || 0) + '%</div></td>' +
+        '<td class="no-print"><button class="btn sm" data-open="' + esc(r.session) + '">' +
+          bi('Review', '리뷰') + '</button></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="5" class="muted" style="padding:24px;text-align:center">' +
+      bi('No results match.', '해당하는 응시가 없습니다.') + '</td></tr>';
+
+    [].forEach.call($('rows').querySelectorAll('[data-open]'), function (b) {
+      b.onclick = function () { openDetail(b.getAttribute('data-open')); };
+    });
+  }
+  function fillSets() {
+    var seen = {}, opts = '<option value="">' + 'All tests' + '</option>';
+    ALL.forEach(function (r) {
+      if (!r.set_code || seen[r.set_code]) return;
+      seen[r.set_code] = true;
+      opts += '<option value="' + esc(r.set_code) + '">' + esc(r.set_code) + '</option>';
+    });
+    $('f-set').innerHTML = opts;
+  }
+
+  /* ── 문항별 리뷰 ── */
+  function openDetail(session) {
+    var r = null;
+    for (var i = 0; i < ALL.length; i++) if (ALL[i].session === session) r = ALL[i];
+    if (!r) return;
+    OPEN = r;
+
+    $('detail').classList.remove('hide');
+    $('detail-h').innerHTML = esc(r.set_code || '') + ' · ' + when(r.submitted_at, true);
+    $('detail-stats').innerHTML =
+      stat('Score', '점수', r.score + ' <span style="font-size:16px;color:var(--muted)">/ ' + r.total + '</span>') +
+      ['reading', 'listening', 'writing', 'speaking'].map(function (s) {
+        var v = (r.by_section || {})[s];
+        if (!v) return '';
+        return stat(LAB[s][0], LAB[s][1], v.total ? v.score + ' <span style="font-size:16px;color:var(--muted)">/ ' + v.total + '</span>'
+          : '<span style="font-size:17px">' + bi('Teacher-scored', '선생님 채점') + '</span>');
+      }).join('');
+
+    $('detail-rows').innerHTML = '<tr><td colspan="5" class="muted" style="padding:20px">' +
+      bi('Loading…', '불러오는 중…') + '</td></tr>';
+
+    GRADE.pack(r.set_code).then(function (pk) {
+      var rows = GRADE.rows(pk, r.answers || {});
+      var keyed = !!pk && CFG.showAnswerKey;
+      $('th-key').classList.toggle('hide', !keyed);
+      $('detail-note').classList.toggle('hide', !!pk);
+      if (!pk) {
+        $('detail-note').innerHTML = '<p class="muted" style="font-size:13.5px">' +
+          bi('Question text and correct answers are not available on this page — your saved answers and section scores are shown.',
+             '이 화면에는 문제 지문과 정답이 없습니다 — 저장된 내 답과 영역별 점수만 보여줍니다.') + '</p>';
+      }
+      $('detail-rows').innerHTML = rows.length ? rows.map(function (q, i) {
+        var res = q.ok === null ? '<span class="muted">—</span>' : (q.ok ? '<span class="ok">O</span>' : '<span class="bad">X</span>');
+        return '<tr' + (q.ok === false ? ' class="row-bad"' : '') + '>' +
+          '<td>' + (i + 1) + '</td>' +
+          '<td><b>' + esc(q.qid) + '</b>' +
+            (q.prompt ? '<div class="muted" style="font-size:12.5px">' + esc(cut(q.prompt, 90)) + '</div>' : '') + '</td>' +
+          '<td>' + (String(q.given || '') ? esc(String(q.given)) :
+            '<span class="muted">' + bi('(no answer)', '(무응답)') + '</span>') + '</td>' +
+          (keyed ? '<td><b>' + esc([].concat(q.key == null ? [] : q.key).join(' / ')) + '</b></td>' : '') +
+          '<td class="right">' + res + '</td>' +
+        '</tr>';
+      }).join('') : '<tr><td colspan="5" class="muted" style="padding:20px">' +
+        bi('No saved answers for this test.', '저장된 답안이 없습니다.') + '</td></tr>';
+
+      $('detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  /* ── 내려받기 ── */
+  function save(name, text) {
+    var blob = new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' });  // BOM: 엑셀에서 한글이 깨지지 않게
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+  function cell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+  function csvList() {
+    var head = ['submitted_at', 'name', 'student_id', 'test', 'score', 'total', 'percent',
+                'reading', 'listening', 'writing', 'speaking', 'session'];
+    var lines = [head.join(',')];
+    shown().forEach(function (r) {
+      var by = r.by_section || {};
+      function sec(s) { return by[s] ? by[s].score + '/' + by[s].total : ''; }
+      lines.push([r.submitted_at, (ME && ME.name) || '', (ME && ME.student_id) || '', r.set_code,
+                  r.score, r.total, r.percent, sec('reading'), sec('listening'),
+                  sec('writing'), sec('speaking'), r.session].map(cell).join(','));
+    });
+    save('smeag-toefl-scores.csv', lines.join('\r\n'));
+  }
+  function csvOne() {
+    if (!OPEN) return;
+    GRADE.pack(OPEN.set_code).then(function (pk) {
+      var rows = GRADE.rows(pk, OPEN.answers || {});
+      var keyed = !!pk && CFG.showAnswerKey;
+      var head = ['no', 'question_id', 'section', 'your_answer'].concat(keyed ? ['correct_answer'] : []).concat(['result']);
+      var lines = [head.join(',')];
+      rows.forEach(function (q, i) {
+        var row = [i + 1, q.qid, q.section, q.given];
+        if (keyed) row.push([].concat(q.key == null ? [] : q.key).join(' / '));
+        row.push(q.ok === null ? '' : (q.ok ? 'O' : 'X'));
+        lines.push(row.map(cell).join(','));
+      });
+      save('smeag-' + String(OPEN.set_code || 'test').toLowerCase() + '-' +
+           when(OPEN.submitted_at).replace(/-/g, '') + '.csv', lines.join('\r\n'));
+    });
+  }
+
+  /* ── 데이터 ── */
+  var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers';
+  function load() {
+    var u = AUTH.user();
+    return AUTH.rest('sg_results?select=' + SELECT + '&owner=eq.' + u.id + '&order=submitted_at.desc')
+      .then(function (rows) {
+        ALL = rows || [];
+        paintStats();
+        if (!ALL.length) {
+          $('notice').classList.remove('hide');
+          $('notice').innerHTML = '<p class="muted">' +
+            bi('No test result has been uploaded to your account yet.',
+               '아직 계정에 올라온 응시 결과가 없습니다.') + '</p>';
+          return;
+        }
+        fillSets();
+        $('filters').classList.remove('hide');
+        $('list-card').classList.remove('hide');
+        paintList();
+      });
+  }
+
+  /* ── 부팅 ── */
+  function showApp() {
+    $('gate').classList.add('hide');
+    $('app').classList.remove('hide');
+    $('out').classList.remove('hide');
+    AUTH.profile().then(function (p) {
+      ME = p || AUTH.user();
+      $('who').textContent = '👤 ' + [(ME && ME.name), (ME && ME.student_id) || (ME && ME.email)]
+        .filter(Boolean).join(' · ');
+    });
+    load();
+  }
+  function showGate() {
+    $('app').classList.add('hide');
+    $('out').classList.add('hide');
+    $('gate').classList.remove('hide');
+  }
+
+  function boot() {
+    try { lang(localStorage.getItem('smeag_lang') || 'en'); } catch (e) { lang('en'); }
+    [].forEach.call(document.querySelectorAll('[data-set-lang]'), function (b) {
+      b.onclick = function () { lang(b.getAttribute('data-set-lang')); };
+    });
+
+    $('login').onsubmit = function (e) {
+      e.preventDefault();
+      var btn = $('login-go'); btn.disabled = true;
+      $('login-err').classList.add('hide');
+      AUTH.signIn($('login-id').value, $('login-pw').value).then(function () {
+        btn.disabled = false;
+        showApp();
+      }).catch(function (err) {
+        btn.disabled = false;
+        $('login-err').classList.remove('hide');
+        $('login-err').innerHTML = bi(err.message || 'Sign-in failed.', err.messageKo || err.message || '로그인하지 못했습니다.');
+      });
+    };
+    $('out').onclick = function () { AUTH.signOut(); OPEN = null; ALL = []; $('detail').classList.add('hide'); showGate(); };
+    $('f-set').onchange = paintList;
+    $('dl-csv').onclick = csvList;
+    $('dl-one').onclick = csvOne;
+    $('print').onclick = function () { window.print(); };
+    $('detail-close').onclick = function () { $('detail').classList.add('hide'); OPEN = null; };
+
+    /* 저장된 세션이 아직 살아 있는지 확인한 뒤에 화면을 고른다. */
+    if (!AUTH.user()) { showGate(); return; }
+    AUTH.token().then(function (tok) { tok ? showApp() : showGate(); });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>
