@@ -91,8 +91,19 @@ window.SG_AUTH = (function () {
     }).then(store);
   }
 
+  /* 로그인 아이디 → 서버가 아는 형태로 맞춘다.
+   * 수험생 아이디(smeag###)는 서버가 시험일과 묶어 이메일을 만들어 주지만,
+   * 선생님·관리자 계정은 시험일이 없는 상주 계정이라 아이디@도메인이 곧 이메일이다.
+   * 그래서 admin 처럼 입력하면 admin@smeagstudyground.com 으로 보낸다. */
+  var STAFF_DOMAIN = 'smeagstudyground.com';
+  function loginId(raw) {
+    var v = String(raw || '').trim().toLowerCase();
+    if (!v || v.indexOf('@') >= 0 || /^smeag\d{3}$/.test(v)) return v;
+    return v + '@' + STAFF_DOMAIN;
+  }
+
   function signIn(login, password) {
-    return fn({ action: 'signin', login: login, password: password }).then(store);
+    return fn({ action: 'signin', login: loginId(login), password: password }).then(store);
   }
 
   function signOut() {
