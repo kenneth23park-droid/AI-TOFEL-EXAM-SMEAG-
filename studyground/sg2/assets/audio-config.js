@@ -8,6 +8,10 @@
  *   • URL    — any http(s) address or relative path   → localStorage
  *   • Upload — an mp3/m4a/wav from the machine        → IndexedDB (blob)
  *
+ * 말하기 속도는 클립마다가 아니라 세트 전체에 하나로 걸린다(setRate). 파일을 다시
+ * 만들지 않고 재생 배속만 바꾸는 값이라, apply() 가 훑는 모든 <audio> 에 그대로
+ * 얹힌다 — 오버라이드가 없는 클립에도 걸어야 "전체가 같은 속도"가 성립한다.
+ *
  * URL overrides survive reload as-is. Uploaded blobs live in IndexedDB and get
  * a fresh object URL each load. If IndexedDB is blocked (some file:// contexts),
  * uploads still work for the session; storageWarning() explains the limitation.
@@ -18,22 +22,34 @@
   'use strict';
 
   var LS_KEY = 'sg_audio_overrides_v1';
+  var RATE_KEY = 'sg_audio_rate_v1';
   var DB_NAME = 'sg-audio-overrides';
   var DB_STORE = 'files';
+  var RATE_MIN = 0.5, RATE_MAX = 1.5;
 
   var meta = {};          // key -> {mode:'url',url} | {mode:'file',name,size,type}
+  var rate = 1;           // 전체 말하기 속도(배속). 1 = 원본 그대로.
   var blobUrls = {};      // key -> object URL for an uploaded blob (rebuilt each load)
   var listeners = [];
   var dbFailed = false;
   var readyPromise = null;
 
+  function clampRate(v) {
+    v = Math.round(Number(v) * 100) / 100;
+    if (!isFinite(v) || !v) return 1;
+    return Math.min(RATE_MAX, Math.max(RATE_MIN, v));
+  }
   function loadMeta() {
     try { meta = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
     catch (e) { meta = {}; }
     if (!meta || typeof meta !== 'object') meta = {};
+    try { rate = clampRate(localStorage.getItem(RATE_KEY) || 1); } catch (e) { rate = 1; }
   }
   function saveMeta() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(meta)); } catch (e) { /* quota/private */ }
+  }
+  function saveRate() {
+    try { localStorage.setItem(RATE_KEY, String(rate)); } catch (e) { /* quota/private */ }
   }
 
   function openDb() {
@@ -73,6 +89,20 @@
   }
   function emit() { listeners.forEach(function (fn) { try { fn(); } catch (e) {} }); }
 
+  /** 화면 안의 모든 <audio>/<video> 에 전체 속도를 얹는다.
+   *  defaultPlaybackRate 도 함께 두는 이유: src 가 바뀌면 playbackRate 는
+   *  defaultPlaybackRate 로 돌아간다 — 교체된 클립도 같은 속도로 남아야 한다. */
+  function applyRate(root) {
+    root = root || document;
+    var els = root.querySelectorAll ? root.querySelectorAll('audio, video') : [];
+    for (var i = 0; i < els.length; i++) {
+      try { els[i].defaultPlaybackRate = rate; els[i].playbackRate = rate; } catch (e) {}
+    }
+    if (root.tagName === 'AUDIO' || root.tagName === 'VIDEO') {
+      try { root.defaultPlaybackRate = rate; root.playbackRate = rate; } catch (e) {}
+    }
+  }
+
   var API = {
     /** Rehydrate overrides + uploaded blobs. Call once before resolve(). */
     ready: function () {
@@ -108,6 +138,30 @@
       return { mode: 'default' };
     },
     isOverridden: function (key) { return !!meta[key]; },
+
+    /* ── 전체 말하기 속도 ────────────────────────────────────
+       클립 하나가 아니라 모든 클립에 한 번에 걸린다. 파일은 그대로 두고 재생
+       배속만 바꾸므로 되돌리기도 값 하나(1×)로 끝난다. */
+    rateRange: function () { return { min: RATE_MIN, max: RATE_MAX }; },
+    getRate: function () { return rate; },
+    setRate: function (v) {
+      var next = clampRate(v), prev = rate;
+      if (next === prev) return prev;
+      rate = next; saveRate();
+      applyRate(document);
+      emit();
+      if (window.SG_LOG) {
+        SG_LOG.add({ action: 'audio', target: 'all clips', field: 'speed',
+                     before: prev + '×', after: rate + '×' });
+      }
+      return rate;
+    },
+    /** 오디오 하나에 현재 속도를 얹는다 — DOM 밖의 new Audio() 용. */
+    tune: function (media) {
+      if (!media) return media;
+      try { media.defaultPlaybackRate = rate; media.playbackRate = rate; } catch (e) {}
+      return media;
+    },
     setUrl: function (key, url) {
       url = (url || '').trim();
       if (!url) return API.reset(key);
@@ -166,6 +220,7 @@
      *  The original path is remembered in data-sg-orig so re-runs stay correct. */
     apply: function (root) {
       root = root || document;
+      applyRate(root);
       var els = root.querySelectorAll ? root.querySelectorAll('audio[src], audio source[src]') : [];
       for (var i = 0; i < els.length; i++) {
         var el = els[i];

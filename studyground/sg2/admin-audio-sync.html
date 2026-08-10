@@ -37,6 +37,16 @@
   .seg button + button { border-left:1px solid var(--line-2); }
   .seg button.on { background:var(--brand); color:#fff; }
 
+  /* 전체 말하기 속도 */
+  .speed { display:flex; gap:11px; align-items:center; flex-wrap:wrap; margin:0 0 14px;
+    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 14px; }
+  .speed b { font-size:12.5px; font-weight:800; }
+  .speed input[type=range] { flex:1; min-width:150px; max-width:260px; accent-color:var(--brand); }
+  .speed .rateval { font-variant-numeric:tabular-nums; font-size:13px; font-weight:850; min-width:52px; }
+  .speed small { font-size:11px; color:var(--muted); }
+  .speed.off b, .speed.off .rateval { color:var(--ink); }
+  .speed:not(.off) .rateval { color:var(--brand-ink,#c0392b); }
+
   .stats { display:flex; gap:10px; flex-wrap:wrap; margin:4px 0 14px; }
   .stat { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 13px; min-width:96px; }
   .stat b { display:block; font-size:20px; font-weight:850; line-height:1.15; }
@@ -142,6 +152,19 @@
     <span class="prog muted" style="font-size:12px;font-weight:700" id="hint"></span>
   </div>
 
+  <!-- 전체 말하기 속도 — 클립 하나가 아니라 SET 전체에 한 번에 걸린다. -->
+  <div class="speed" id="speed">
+    <b><span data-en>Speaking speed — all clips</span><span data-ko>말하기 속도 — 전체 클립</span></b>
+    <input type="range" id="rate" min="0.5" max="1.5" step="0.05" value="1">
+    <span class="rateval" id="rateval">1×</span>
+    <span class="seg" id="ratepreset">
+      <button data-r="0.8">0.8×</button><button data-r="0.9">0.9×</button>
+      <button data-r="1">1×</button><button data-r="1.1">1.1×</button><button data-r="1.25">1.25×</button>
+    </span>
+    <small><span data-en>Applies here and in the exam — files are untouched, only playback speed.</span>
+      <span data-ko>이 화면과 시험 화면에 함께 적용됩니다 — 파일은 그대로이고 재생 속도만 바뀝니다.</span></small>
+  </div>
+
   <div class="stats" id="stats"></div>
 
   <div class="split">
@@ -174,6 +197,33 @@
   var flash=document.getElementById('flash'), flashT;
   function toast(m){ flash.textContent=m; flash.classList.add('on'); clearTimeout(flashT);
     flashT=setTimeout(function(){flash.classList.remove('on');},1700); }
+  function fmtRate(r){ return String(Math.round(r*100)/100) + '×'; }   /* 1 → "1×", 1.25 → "1.25×" */
+
+  /* ── 전체 말하기 속도 ─────────────────────────────────────
+     값은 SG_AUDIO 에 있고(모든 화면이 같은 값을 읽는다), 여기서는 슬라이더가
+     그 값을 밀고 당길 뿐이다. 이 화면의 오디오는 DOM 밖의 new Audio() 라
+     apply() 가 닿지 않으므로 tune() 으로 직접 얹는다. */
+  var rateEl = document.getElementById('rate');
+  var rateVal = document.getElementById('rateval');
+  function paintRate() {
+    var r = SG_AUDIO.getRate();
+    rateEl.value = r;
+    rateVal.textContent = fmtRate(r);
+    document.getElementById('speed').classList.toggle('off', r === 1);
+    document.querySelectorAll('#ratepreset button').forEach(function (b) {
+      b.classList.toggle('on', Math.abs(+b.getAttribute('data-r') - r) < 0.001);
+    });
+    var t = document.getElementById('trate');
+    if (t) t.textContent = fmtRate(r);
+    SG_AUDIO.tune(audio);
+  }
+  function setRate(v) { SG_AUDIO.setRate(v); paintRate(); }
+  rateEl.addEventListener('input', function () { setRate(+this.value); });
+  document.getElementById('ratepreset').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-r]'); if (!b) return;
+    setRate(+b.getAttribute('data-r'));
+    toast('Speaking speed ' + fmtRate(SG_AUDIO.getRate()) + ' · all clips');
+  });
 
   /* ── 단어 대조 ────────────────────────────────────────────
      비교는 소문자·문장부호를 뗀 토큰으로 하고, 화면에는 원문 그대로 쓴다.
@@ -426,9 +476,7 @@
         '<button class="tpb" data-act="stop">⏹</button>' +
         '<button class="tpb" data-act="back">−5s</button>' +
         '<span class="time" id="tnow">0:00 / 0:00</span>' +
-        '<select class="tpb" data-act="rate" style="min-width:70px">' +
-          '<option value="0.75">0.75×</option><option value="1" selected>1×</option>' +
-          '<option value="1.25">1.25×</option><option value="1.5">1.5×</option></select>' +
+        '<span class="time" id="trate">' + fmtRate(SG_AUDIO.getRate()) + '</span>' +
       '</div>' +
       '<div class="track" data-act="seek"><span class="fill"></span></div>' +
       '<div class="swap">' +
@@ -499,6 +547,7 @@
     audio.pause();
     audio.src = SG_AUDIO.resolve(cur.path);
     audio.currentTime = 0;
+    SG_AUDIO.tune(audio);            // 클립을 바꿔도 속도는 전체 설정 그대로
     paintList(); paintPanel();
   }
 
@@ -533,7 +582,6 @@
     }
   });
   document.getElementById('panel').addEventListener('change', function (e) {
-    if (e.target.getAttribute('data-act') === 'rate') { audio.playbackRate = +e.target.value; return; }
     if (e.target.getAttribute('data-act') !== 'file') return;
     var f = e.target.files[0]; if (!f || !cur) return;
     SG_AUDIO.setFile(cur.path, f).then(function () { toast('Uploaded · ' + f.name); select(cur.id); });
@@ -561,6 +609,7 @@
     document.getElementById('hint').innerHTML =
       '<span data-en>Space = play/pause</span><span data-ko>스페이스바 = 재생/일시정지</span>';
     Promise.all([SG_AUDIO.ready(), loadData()]).then(function () {
+      paintRate();
       paintList();
       var first = visible()[0];
       if (first) select(first.id); else paintPanel();
