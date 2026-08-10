@@ -43,7 +43,11 @@
 //      시험 셸 HTML 의 <script> 목록이 바뀌었으므로 VERSION 을 올려 캐시를 새로 채운다.
 // v19: cloze 빈칸 — 칸은 끊어 보이되(자간 .1em) 어간에 붙여 한 낱말로 읽히게 하고,
 //      낱말이 줄 끝에서 어간과 밑줄로 쪼개지지 않도록 nowrap 을 준다. exam.css 만 바뀐다.
-const VERSION = 'sg-v19';
+// v20: SET 전체 열람(admin-set-view.html) · 관리자 변경 로그(admin-log.html ·
+//      assets/admin-log.js) · 문항별 제한시간 오버라이드 추가.
+// v21: cloze 빈칸이 잇달아 올 때 낱말 경계가 보이도록 빈칸 뒤에 낱말 간격(.34em)을 준다 —
+//      칸 경계(.1em)보다 넓어야 'exper____ com___ soc__' 이 세 낱말로 읽힌다. exam.css 만 바뀐다.
+const VERSION = 'sg-v21';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 

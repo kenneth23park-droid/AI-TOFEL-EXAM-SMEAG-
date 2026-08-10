@@ -492,7 +492,10 @@ body.exam-body {
    그래서 자간은 칸 경계가 겨우 보일 만큼(.1em)만 주고, 어간과 밑줄 사이에는 여백을 두지 않는다.
    자간이 크면 낱말이 흩어지고, 0 이면 밑줄이 한 줄로 뭉쳐 글자 수가 세어지지 않는다.
    레일과 입력칸이 같은 letter-spacing 을 상속하므로 타이핑한 글자는 밑줄 자리에 그대로 앉는다. */
-.rd-blank { display: inline; white-space: nowrap; --rd-blank-gap: .1em; }
+/* 낱말 사이는 칸 사이보다 넓어야 한다. 'have {{2}} {{3}} {{4}}' 처럼 빈칸이 잇달아 오면
+   밑줄이 이어져 어디서 한 낱말이 끝나는지 보이지 않으므로, 빈칸 뒤에 낱말 간격을 더 준다
+   (칸 경계 .1em < 낱말 경계 공백+.34em). */
+.rd-blank { display: inline; white-space: nowrap; --rd-blank-gap: .1em; margin-right: .34em; }
 .rd-blank-stem { color: var(--ink); }
 .rd-blank-slot {
   position: relative; display: inline-block; vertical-align: baseline;
