@@ -584,7 +584,7 @@
         kind: 'record-set',
         heading: 'Task ' + taskNo,
         instruction: intro || label,
-        introAudio: audioRel + 's' + taskNo + '-intro.mp3',
+        introAudio: audioRel + 's' + taskNo + '-instructions.mp3',
         perQuestionAudio: true,
         questions: qs
       };
@@ -757,7 +757,19 @@
       mod.blocks.forEach(function (blk) {
         var r = questionRange(blk.heading || '');
         if (!r) return;
-        blk.audio = audioRel + mod.id.toLowerCase() + '-q' + r.from + (r.to !== r.from ? '-' + r.to : '') + '.mp3';
+        /* 파일명 규칙은 SET 9 에 이미 있는 것을 그대로 따른다(l1-q13-14.mp3, l1-q01.mp3) —
+           tools/verify_audio.py 와 tts 매니페스트가 이 이름으로 서로를 찾는다.
+           문항마다 음성이 따로 붙는 세트는 블록 음성이 없다(SET 9 도 없다). */
+        if (!blk.perQuestionAudio) {
+          /* 머리글이 아니라 실제로 들어 있는 문항 번호로 이름을 짓는다 — SET 9 의
+             'Questions 8-10' 블록에는 11번까지 들어 있었고, 파일명이 내용과 어긋나면
+             나중에 어느 음성이 어느 문항 것인지 아무도 알 수 없게 된다. */
+          var nos = blk.questions.map(function (x) { return x.no; });
+          var lo = Math.min.apply(null, nos.concat(r.from));
+          var hi = Math.max.apply(null, nos.concat(r.from));
+          blk.audio = audioRel + mod.id.toLowerCase() + '-q' + pad2(lo)
+            + (hi !== lo ? '-' + pad2(hi) : '') + '.mp3';
+        }
 
         var hit = null;
         for (var k = 0; k < groups.length; k++) {
@@ -769,21 +781,34 @@
           return;
         }
         if (hit.cue && !blk.instruction) blk.instruction = hit.cue;
+
+        /* 대본 덩어리가 두 종류다. 'Listen to a conversation.' 같은 안내 대사가 앞에 붙어
+           있으면 그 아래는 **들려줄 대사**이고, 안내 대사가 없으면 문항을 하나씩 읽어 주는
+           **문항 낭독**이다(짧은 응답 드릴). 줄 수로 가르면 4문항짜리 강의 대본이
+           문항 낭독으로 오해된다 — SET 9 의 l1-q25-28 이 정확히 그 경우였다. */
+        var isTranscript = !!hit.cue;
         blk.scriptOrigin = 'script-docx';
 
-        /* 대본이 문항 범위 전체를 한 덩어리로 실은 경우 — 줄과 문항을 번호로 맞춘다. */
-        if (hit.from != null && hit.lines.length === (hit.to - hit.from + 1)) {
-          blk.questions.forEach(function (q) {
-            var line = hit.lines[q.no - hit.from];
-            if (line) q.script = line;
-          });
-          if (blk.perQuestionAudio) {
-            blk.questions.forEach(function (q) {
-              q.audio = audioRel + mod.id.toLowerCase() + '-q' + q.no + '.mp3';
-            });
-          }
-        } else {
+        if (isTranscript) {
           blk.script = hit.text;
+          return;
+        }
+
+        /* 문항 낭독 — 줄과 문항을 번호로 맞춘다. */
+        blk.questions.forEach(function (q) {
+          var line = hit.lines[q.no - hit.from];
+          if (line) q.script = line;
+        });
+        if (blk.perQuestionAudio) {
+          blk.questions.forEach(function (q) {
+            q.audio = audioRel + mod.id.toLowerCase() + '-q' + pad2(q.no) + '.mp3';
+          });
+        } else {
+          /* 문항 낭독만 있고 들려줄 대사가 없다 — 원본 문서에 그 대화·강의가 통째로
+             빠져 있다는 뜻이다(SET 9 리스닝 Module 2 가 그랬다). 지어내지 않고 알린다. */
+          delete blk.scriptOrigin;
+          gate('warn', 'listening', mod.label + ' ' + (blk.heading || '')
+            + ' — 문항은 있는데 들려줄 대사가 원본 대본에 없습니다. 음성이 만들어지지 않습니다.');
         }
       });
     });
