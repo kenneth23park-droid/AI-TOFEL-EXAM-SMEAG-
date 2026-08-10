@@ -70,6 +70,13 @@
 
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
+  /* docx 안의 그림은 'media/image7.png' 처럼 문서 내부 이름으로 나온다.
+     팩에는 세트 폴더 기준 경로로 적어야 화면이 찾을 수 있다 — 파일명만 떼어 쓴다.
+     실제 그림 바이트는 저장할 때 assets/set-media.js 가 같은 이름으로 넣는다. */
+  function picName(ref) {
+    return String(ref || '').split('/').pop();
+  }
+
   /* ------------------------------------------------- 섹션 경계 나누기 */
 
   var SECTION_HEAD = [
@@ -571,8 +578,8 @@
         };
         if (lines[k]) q.script = lines[k];
         /* 그림이 문항 수만큼 있으면 하나씩, 하나뿐이면 전 문항이 함께 쓴다. */
-        if (images.length === count) q.image = picsRel + images[k].replace(/^media\//, '');
-        else if (images.length === 1) q.image = picsRel + images[0].replace(/^media\//, '');
+        if (images.length === count) q.image = images[k];
+        else if (images.length === 1) q.image = images[0];
         qs.push(q);
       }
       no += qs.length;
@@ -901,6 +908,30 @@
     });
     if (thin.length) gate('warn', 'choices', thin.length + '개 문항의 보기가 3개 미만입니다: ' + thin.slice(0, 8).join(', ') + (thin.length > 8 ? ' 외' : ''));
 
+    /* ---- 그림 경로 정규화 ----
+       파서마다 그림을 다른 모양으로 모은다(문서 내부 이름 'media/image7.png' 또는 파일명만).
+       화면이 찾을 수 있는 경로는 하나뿐이므로 여기서 한 번에 맞춘다. */
+    var picFiles = {};
+    sections.forEach(function (sec) {
+      sec.modules.forEach(function (mod) {
+        mod.blocks.forEach(function (blk) {
+          if (blk.images) {
+            blk.images = blk.images.map(function (ref) {
+              var name = picName(ref);
+              picFiles[name] = 1;
+              return picsRel + name;
+            });
+          }
+          (blk.questions || []).forEach(function (q) {
+            if (!q.image) return;
+            var n = picName(q.image);
+            picFiles[n] = 1;
+            q.image = picsRel + n;
+          });
+        });
+      });
+    });
+
     /* ---- 통계 ---- */
     var stats = { total: 0, bySection: {} };
     sections.forEach(function (sec) {
@@ -916,6 +947,44 @@
 
     if (!stats.total) gate('stop', 'questions', '문항을 하나도 찾지 못했습니다 — 문서 서식이 예상과 다릅니다.');
 
+    /* ---- 세트 특징 ----
+       관리자 화면이 세트를 한눈에 설명할 수 있도록, 팩을 다시 훑지 않아도 되는 요약을
+       팩 안에 넣어 둔다. 저장된 세트 목록은 이 값만 읽는다. */
+    var clips = [], withScript = 0, scriptChars = 0;
+    sections.forEach(function (sec) {
+      sec.modules.forEach(function (mod) {
+        mod.blocks.forEach(function (blk) {
+          function note(path, script) {
+            if (!path) return;
+            clips.push(path);
+            if (script) { withScript++; scriptChars += String(script).length; }
+          }
+          note(blk.introAudio, blk.introScript);
+          note(blk.audio, blk.script);
+          (blk.questions || []).forEach(function (q) { note(q.audio, q.script); });
+        });
+      });
+    });
+
+    var summary = {
+      questions: stats.total,
+      bySection: stats.bySection,
+      autoScored: stats.answered,
+      humanScored: stats.total - stats.answered,
+      pictures: Object.keys(picFiles).length,
+      audioClips: clips.length,
+      audioWithScript: withScript,
+      scriptChars: scriptChars,
+      modules: sections.map(function (s) {
+        return { id: s.id, label: s.label, modules: s.modules.length, questions: stats.bySection[s.id] || 0 };
+      }),
+      gates: {
+        stop: gates.filter(function (g) { return g.level === 'stop'; }).length,
+        warn: gates.filter(function (g) { return g.level === 'warn'; }).length
+      },
+      sources: input.sources || null
+    };
+
     var pack = {
       code: codeSlug.toUpperCase(),
       title: code,
@@ -923,6 +992,8 @@
       sections: sections,
       answerKey: answerKey,
       buildWarnings: gates.map(function (g) { return g.level + ': ' + g.message; }),
+      gates: gates,
+      summary: summary,
       importedAt: null,
       source: 'set-import'
     };

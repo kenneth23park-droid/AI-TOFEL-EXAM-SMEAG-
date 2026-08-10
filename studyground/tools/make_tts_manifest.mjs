@@ -36,7 +36,15 @@ const ROOT = path.dirname(HERE);                 // .../studyground
 const SG2 = path.join(ROOT, 'sg2');
 const CASTING = path.join(SG2, 'config', 'set9-voice-casting.json');
 
+/* 모델을 항목마다 나눠 쓴다.
+ *   1인 낭독  → Flash v2.5. 값이 절반이고, 더 중요하게는 같은 입력에 같은 소리를 낸다.
+ *               따라 읽기 드릴에 필요한 건 감정이 아니라 발음의 또렷함과 일관성이다.
+ *   다화자 대화 → v3 Dialogue. 화자들을 한 번에 만들어 말차례와 억양을 서로 맞춘다.
+ *               대화 문항은 화자 사이의 반응이 곧 정답의 단서라, 따로 만들어 이어 붙이면
+ *               문항이 요구하는 정보가 음성에 없다.
+ */
 const DEFAULTS = { model: 'eleven_flash_v2_5', output: 'mp3_44100_128' };
+const DIALOGUE_MODEL = 'eleven_v3';
 
 /* 짧은 응답 문항은 학생이 한 번 듣고 답한다 — SET 9 정본이 0.75 로 느리게 읽었다. */
 const SHORT_SPEED = 0.75;
@@ -194,7 +202,16 @@ function build(pack, opts) {
         };
       })
     };
-    if (clip.kind === 'short' || clip.kind === 'repeat') item.speed = SHORT_SPEED;
+
+    /* 화자가 둘 이상이면 대화다 — 한 번에 만든다. */
+    const voices = new Set(item.segments.map((s) => s.voice));
+    if (voices.size > 1) {
+      item.mode = 'dialogue';
+      item.model = DIALOGUE_MODEL;
+    } else if (clip.kind === 'short' || clip.kind === 'repeat') {
+      /* 낭독 속도는 1인 항목에만 걸린다. Dialogue 는 말차례를 스스로 잡으므로 건드리지 않는다. */
+      item.speed = SHORT_SPEED;
+    }
     items.push(item);
   }
 
@@ -248,6 +265,11 @@ function main() {
   const byKind = {};
   manifest.items.forEach((it) => { byKind[it.kind] = (byKind[it.kind] || 0) + 1; });
   console.log(`  종류: ${Object.entries(byKind).map(([k, v]) => `${k} ${v}`).join(' · ')}`);
+
+  const dlg = manifest.items.filter((it) => it.mode === 'dialogue');
+  const dlgChars = dlg.reduce((n, it) => n + it.segments.reduce((m, s) => m + s.text.length, 0), 0);
+  console.log(`  모델: 다화자 ${dlg.length}건 → ${DIALOGUE_MODEL} · 1인 ${manifest.items.length - dlg.length}건 → ${manifest.model}`);
+  console.log(`  예상 비용: ${((dlgChars / 1000) * 0.10 + ((chars - dlgChars) / 1000) * 0.05).toFixed(2)} (v3 $0.10/1k · Flash $0.05/1k)`);
 
   if (missing.length) {
     console.log(`\n  대본이 없는 자리 — 원본 문서에 그 대사가 없습니다:`);

@@ -88,7 +88,7 @@ window.SG_RUNTIME = (function () {
                   'assets/exam-compile.js',
                   /* 업로드로 만든 세트를 전역에 올린다. set-import.js 는 팩 helper 를 붙이기 위한 것.
                      둘 다 없어도 커밋된 팩(set1/set9)은 그대로 뜬다. */
-                  'assets/set-import.js', 'assets/set-store.js',
+                  'assets/set-import.js', 'assets/set-store.js', 'assets/set-media.js',
                   'assets/' + SET_ID + '.js',
                   /* 섹션 렌더러 — 각자 SG_RENDER.register() 로 자기를 등록한다.
                      아직 없는 파일은 onerror 로 건너뛰므로 순서·존재 여부에 의존하지 않는다. */

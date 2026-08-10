@@ -60,6 +60,9 @@ OUT_DIR = ROOT / "media" / "tts"
 SEG_DIR = OUT_DIR / "_segments"
 INDEX = OUT_DIR / "index.json"
 API = "https://api.elevenlabs.io/v1/text-to-speech/{voice}"
+# 여러 화자를 한 번에 만드는 엔드포인트. 화자마다 따로 만들어 이어 붙이면 서로에게
+# 반응하지 않는 소리가 나는데, 리스닝 대화 문항은 그 반응이 곧 단서다.
+DIALOGUE_API = "https://api.elevenlabs.io/v1/text-to-dialogue"
 
 # tools/verify_audio.py lives in the sibling studyground/tools, not here.
 VERIFIER = ROOT.parent / "tools" / "verify_audio.py"
@@ -77,15 +80,21 @@ FORCE = False
 
 
 # ── ElevenLabs call ────────────────────────────────────────────────────────────
-def synth_segment(voice: str, text: str, speed: float | None = None) -> bytes:
+def synth_segment(voice: str, text: str, speed: float | None = None,
+                  model: str | None = None) -> bytes:
     """`speed` is ElevenLabs' delivery-rate control (0.7 slowest … 1.2 fastest).
 
     It matters here because Flash v2.5 reads short prompts much faster than the
     exam's own pacing — measured 220 wpm on one-line questions and 227 wpm on the
     listen-and-repeat drills, against a 150-180 wpm listening band. A drill a
     student cannot say along with is a defect, not a style preference.
+
+    `model` lets one item override the run-wide model. Single-voice items stay on
+    the cheaper, steadier Flash; only multi-voice items move up (see synth_dialogue).
     """
-    payload: dict[str, Any] = {"text": text, "model_id": MODEL, "output_format": OUTPUT}
+    payload: dict[str, Any] = {
+        "text": text, "model_id": model or MODEL, "output_format": OUTPUT,
+    }
     if speed is not None:
         payload["voice_settings"] = {"speed": speed}
     body = json.dumps(payload).encode()
@@ -97,9 +106,45 @@ def synth_segment(voice: str, text: str, speed: float | None = None) -> bytes:
         return r.read()
 
 
-def seg_hash(voice: str, text: str, speed: float | None = None) -> str:
-    """Speed joins the key so a re-paced item invalidates only its own segments."""
-    return hashlib.sha1(f"{voice}|{MODEL}|{speed}|{text}".encode()).hexdigest()[:12]
+def synth_dialogue(segments: list[dict], model: str, seed: int) -> bytes:
+    """여러 화자를 한 번의 호출로 만든다 (POST /v1/text-to-dialogue).
+
+    왜 따로 있나. 지금까지는 대사를 한 줄씩 따로 만들어 ffmpeg 로 이어 붙였다. 그러면
+    각자 혼자 녹음한 것을 나란히 놓은 소리가 난다 — 말차례가 겹치지 않고, 앞사람 말투에
+    반응하지 않는다. 리스닝 대화 문항은 "누가 무엇을 걱정하는가" 를 묻는 경우가 많아
+    그 반응이 곧 정답의 단서이므로, 그것이 없으면 문항이 요구하는 정보가 음성에 없다.
+
+    `seed` 를 고정하는 이유는 재현성이다. 표현력이 큰 모델일수록 호출마다 결과가 달라지는데,
+    시험 음성은 대본을 고쳐 다시 만들었을 때 나머지가 그대로여야 한다.
+    """
+    payload: dict[str, Any] = {
+        "inputs": [{"text": s["text"], "voice_id": s["voice"]} for s in segments],
+        "model_id": model,
+        "output_format": OUTPUT,
+        "seed": seed,
+    }
+    body = json.dumps(payload).encode()
+    req = urllib.request.Request(
+        DIALOGUE_API, data=body, method="POST",
+        headers={"xi-api-key": API_KEY, "Content-Type": "application/json", "Accept": "audio/mpeg"},
+    )
+    with urllib.request.urlopen(req, timeout=180) as r:
+        return r.read()
+
+
+def seg_hash(voice: str, text: str, speed: float | None = None,
+             model: str | None = None) -> str:
+    """Speed and model join the key so a re-paced or re-modelled item invalidates
+    only its own segments."""
+    return hashlib.sha1(
+        f"{voice}|{model or MODEL}|{speed}|{text}".encode()).hexdigest()[:12]
+
+
+def dialogue_seed(state: "ItemState") -> int:
+    """항목 내용에서 유도한 고정 시드 — 같은 대본이면 언제나 같은 값."""
+    raw = state["id"] + "|" + "|".join(
+        s["voice"] + ":" + s["text"] for s in state["segments"])
+    return int(hashlib.sha1(raw.encode()).hexdigest()[:8], 16)
 
 
 # ── graph state ────────────────────────────────────────────────────────────────
@@ -108,6 +153,8 @@ class ItemState(TypedDict, total=False):
     title: str
     kind: str
     speed: float           # optional per-item delivery rate, 0.7-1.2
+    model: str             # optional per-item model override (default: run-wide MODEL)
+    mode: str              # "dialogue" → one multi-speaker call instead of per-segment
     segments: list[dict]
     seg_files: list[str]
     out: str
@@ -128,14 +175,24 @@ def synth(state: ItemState) -> ItemState:
     segs = state["segments"]
 
     speed = state.get("speed")
+    model = state.get("model") or MODEL
+
+    # 다화자 항목은 한 번의 호출로 통째로 만든다 — stitch 는 파일 하나를 그대로 옮긴다.
+    if state.get("mode") == "dialogue" and len(segs) > 1:
+        seed = dialogue_seed(state)
+        h = hashlib.sha1(f"dialogue|{model}|{seed}".encode()).hexdigest()[:12]
+        f = SEG_DIR / f"{state['id']}.dlg.{h}.mp3"
+        if not (f.is_file() and not FORCE):
+            f.write_bytes(synth_dialogue(segs, model, seed))
+        return {"seg_files": [str(f)]}
 
     def one(i_seg):
         i, seg = i_seg
-        h = seg_hash(seg["voice"], seg["text"], speed)
+        h = seg_hash(seg["voice"], seg["text"], speed, model)
         f = SEG_DIR / f"{state['id']}.{i:02d}.{h}.mp3"
         if f.is_file() and not FORCE:
             return str(f)
-        audio = synth_segment(seg["voice"], seg["text"], speed)
+        audio = synth_segment(seg["voice"], seg["text"], speed, model)
         f.write_bytes(audio)
         return str(f)
 

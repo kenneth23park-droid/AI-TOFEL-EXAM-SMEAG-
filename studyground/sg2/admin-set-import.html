@@ -74,10 +74,41 @@
 
   .busy { font-size:12.5px; font-weight:750; color:var(--muted); }
   .savedlist { display:grid; gap:8px; margin-top:10px; }
-  .saved { display:flex; gap:10px; align-items:center; flex-wrap:wrap; border:1px solid var(--line);
-    border-radius:10px; background:var(--card); padding:10px 13px; font-size:12.5px; }
-  .saved b { font-size:13px; }
+  .saved { border:1px solid var(--line); border-radius:12px; background:var(--card);
+    padding:12px 14px; font-size:12.5px; }
+  .saved .shead { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .saved b { font-size:13.5px; }
   .saved .sp { flex:1; color:var(--muted); font-size:11.5px; }
+
+  /* 세트 특징 */
+  .detail { margin-top:11px; padding-top:11px; border-top:1px solid var(--line); }
+  .mchips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:11px; }
+  .mchip { display:inline-flex; align-items:baseline; gap:6px; font-size:11.5px; font-weight:700;
+    border:1px solid var(--line); border-left:3px solid var(--mc); border-radius:8px;
+    padding:4px 9px; color:var(--muted); background:var(--cream-2); }
+  .mchip[data-s=reading]{ --mc:#e8481f } .mchip[data-s=listening]{ --mc:#2563c9 }
+  .mchip[data-s=writing]{ --mc:#7a4bc4 } .mchip[data-s=speaking]{ --mc:#1f9d55 }
+  .mchip b { font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .mchip i { font-style:normal; font-size:10.5px; color:var(--dim); }
+
+  .facts2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .facts2 > div { display:flex; flex-direction:column; }
+  .facts2 .fk { font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--muted); }
+  .facts2 b { font-size:16px; color:var(--ink); line-height:1.2; margin-top:2px;
+    font-variant-numeric:tabular-nums; }
+  .facts2 .fn { font-size:11px; color:var(--dim); margin-top:1px; line-height:1.4; }
+
+  .meter { height:5px; border-radius:3px; background:var(--lock,#efeadf); margin-top:12px; overflow:hidden; }
+  .meter i { display:block; height:100%; background:var(--ok,#1f9d55); border-radius:3px; }
+  .meterlab { font-size:10.5px; font-weight:700; color:var(--muted); margin-top:4px; }
+
+  .gline { margin-top:10px; font-size:11.5px; font-weight:700; color:#a86400; }
+  .gline.bad { color:#c62828; }
+  .linky { font:inherit; font-size:11px; font-weight:800; border:0; background:none; cursor:pointer;
+    color:var(--brand); text-decoration:underline; padding:0 0 0 7px; }
+  .srcline { margin-top:7px; font-size:10.5px; color:var(--dim); }
+  .gatebox { margin-top:10px; display:grid; gap:6px; }
 </style>
 </head>
 <body>
@@ -142,6 +173,17 @@
     <div class="secs" id="secs"></div>
     <div class="gates" id="gates"></div>
 
+    <!-- 겹침 검사 — 만든 세트를 이미 있는 모든 세트와 대조한다. high 는 저장을 막는다. -->
+    <div class="dupbox" id="dupbox" hidden>
+      <div class="duph">
+        <b id="dupsum"></b>
+        <span class="muted" id="dupmeta"></span>
+        <button class="btn ghost sm" id="dupall" hidden>
+          <span data-en>Show reviewed too</span><span data-ko>강등된 것까지 보기</span></button>
+      </div>
+      <div id="duphost"></div>
+    </div>
+
     <div class="bar">
       <button class="btn brand" id="saveBtn"><span data-en>Save set</span><span data-ko>세트 저장</span></button>
       <button class="btn ghost sm" id="jsonBtn"><span data-en>Export JSON</span><span data-ko>JSON 내보내기</span></button>
@@ -169,6 +211,14 @@
 <script src="assets/docx-read.js"></script>
 <script src="assets/set-import.js"></script>
 <script src="assets/set-store.js"></script>
+<script src="assets/set-media.js"></script>
+<!-- 겹침 검사: 판정(dup-core) 과 목록 UI(dup-view) 는 admin-dup.html · CI 와 같은 파일이다.
+     set1/set9 는 대조 상대라서 싣는다 — 저장된 세트는 set-store.js 가 전역에 올려 둔다. -->
+<script src="assets/dup-core.js"></script>
+<script src="assets/dup-view.js"></script>
+<script src="assets/set1.js"></script>
+<script src="assets/set9.js"></script>
+<script src="config/dup-report.js"></script>
 <script src="assets/question-config.js"></script>
 <script src="assets/admin-session.js"></script>
 <script src="assets/admin-log.js"></script>
@@ -276,6 +326,91 @@
 
   var SEC_LABEL = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
 
+  /* ── 겹침 검사 ─────────────────────────────────────────────────────────
+   * 세트를 만들 때마다 이미 있는 모든 세트와 대조한다. 나중에 터미널에서 돌리는
+   * 게 아니라 **여기서** 돌아야 한다 — 저장하고 나면 학생에게 나갈 수 있고,
+   * 겹친 문항은 그때 지워도 이미 시험지에 실려 있기 때문이다.
+   *
+   * 판정은 assets/dup-core.js 한 벌이다. 같은 팩을 두고 터미널(tools/dup_check.js)과
+   * 이 화면이 다른 답을 내는 일이 없다. */
+  var dupRes = null, dupShowAll = false;
+
+  /** 대조 상대 — 커밋된 팩(set1·set9) + 브라우저에 저장된 세트. 자기 자신은 뺀다. */
+  function rivalPacks(selfCode) {
+    var out = [], seen = {};
+    function add(p) {
+      if (!p || !p.sections) return;
+      var c = String(p.code || '').toLowerCase().replace(/\s+/g, '');
+      if (!c || c === selfCode || seen[c]) return;
+      seen[c] = 1;
+      out.push(p);
+    }
+    add(window.SMEAG_SET1);
+    add(window.SMEAG_SET9);
+    if (window.SG_SET_STORE) {
+      SG_SET_STORE.list().forEach(function (row) { add(SG_SET_STORE.get(row.slug)); });
+    }
+    return out;
+  }
+
+  /** 리포트에 실려 온 허용목록을 그대로 쓴다 — 기준을 두 벌로 만들지 않는다. */
+  function allowFromReport() {
+    var allow = {};
+    var R = window.SG_DUP_REPORT;
+    if (R && R.pairs) R.pairs.forEach(function (p) {
+      if (p.allowlisted) allow[p.key] = { reason: p.allowReason };
+    });
+    return allow;
+  }
+
+  function runDupCheck(pack) {
+    if (typeof SG_DUP === 'undefined') return null;
+    var selfCode = String(pack.code || '').toLowerCase().replace(/\s+/g, '');
+    var rivals = rivalPacks(selfCode);
+    var units = SG_DUP.unitsFromPack(pack);
+    var mine = units.length;
+    rivals.forEach(function (p) { units = units.concat(SG_DUP.unitsFromPack(p)); });
+    var res = SG_DUP.analyze(units, { allow: allowFromReport() });
+    res.rivals = rivals.map(function (p) { return p.code; });
+    res.mineUnits = mine;
+    return res;
+  }
+
+  function renderDup() {
+    var box = document.getElementById('dupbox');
+    var sum = document.getElementById('dupsum');
+    var meta = document.getElementById('dupmeta');
+    var allBtn = document.getElementById('dupall');
+    var dhost = document.getElementById('duphost');
+
+    if (!dupRes) { box.hidden = true; return; }
+    box.hidden = false;
+
+    var c = dupRes.counts;
+    box.className = 'dupbox ' + (c.high ? 'bad' : c.watch ? 'warn' : 'ok');
+    sum.textContent = c.high
+      ? '⛔ 기존과 같은 문항이 있습니다 — ' + c.high + '건'
+      : c.watch ? '⚠️ 확실한 겹침은 없습니다. 사람이 봐야 할 것 ' + c.watch + '건'
+                : '✅ 겹치는 문항이 없습니다';
+    meta.textContent = dupRes.rivals.length
+      ? '대조 상대: ' + dupRes.rivals.join(' · ') + ' · 단위 ' + dupRes.unitCount + '개' +
+        (c.allowlisted ? ' · 사람이 보고 허용한 것 ' + c.allowlisted + '건 제외' : '')
+      : '대조할 기존 세트가 없습니다 — 이 세트가 처음입니다.';
+
+    var shown = dupShowAll ? dupRes.pairs
+      : dupRes.pairs.filter(function (p) { return p.severity !== 'info'; });
+    allBtn.hidden = !dupRes.pairs.some(function (p) { return p.severity === 'info'; });
+    allBtn.textContent = dupShowAll ? '강등된 것 숨기기'
+      : '강등된 것까지 보기 (' + (dupRes.pairs.length - shown.length) + ')';
+
+    SG_DUP_VIEW.render(dhost, shown,
+      '<span data-ko>겹치는 문항이 없습니다.</span><span data-en>No overlapping items.</span>');
+  }
+
+  document.getElementById('dupall').addEventListener('click', function () {
+    dupShowAll = !dupShowAll; renderDup();
+  });
+
   function render() {
     if (!built || !built.pack) return;
     document.getElementById('result').hidden = false;
@@ -291,9 +426,30 @@
         + '<span class="sd">' + mods + ' modules</span></div>';
     }).join('');
 
-    var stops = built.gates.filter(function (g) { return g.level === 'stop'; });
-    document.getElementById('gates').innerHTML = built.gates.length
-      ? built.gates.map(function (g) {
+    /* 겹침 검사를 검산의 일부로 올린다. set-import.js 가 낸 gates 를 건드리지 않고
+     * 이 자리에서 덧붙인다 — 파싱 검산(문서를 못 읽었다)과 내용 검산(남의 문항이다)은
+     * 원인도 대처도 다르지만, 저장을 막는 조건은 하나로 합쳐져야 한다. */
+    dupRes = runDupCheck(pack);
+    var dupGates = [];
+    if (!dupRes) {
+      dupGates.push({ level: 'warn', scope: 'dup', message: '겹침 검사를 돌리지 못했습니다(assets/dup-core.js 가 로드되지 않음) — 저장 전에 반드시 확인해 주세요.' });
+    } else if (dupRes.counts.high) {
+      dupGates.push({
+        level: 'stop', scope: 'dup',
+        message: '기존과 같은 문항이 ' + dupRes.counts.high + '건 있습니다 — 아래 목록에서 한 줄을 눌러 두 문항을 나란히 확인하세요. 해당 문항을 바꾸기 전에는 저장할 수 없습니다.'
+      });
+    } else if (dupRes.counts.watch) {
+      dupGates.push({
+        level: 'warn', scope: 'dup',
+        message: '겹침으로 볼 정도는 아니지만 사람이 봐야 할 쌍이 ' + dupRes.counts.watch + '건 있습니다 — 아래 목록을 확인해 주세요.'
+      });
+    }
+    var allGates = built.gates.concat(dupGates);
+    renderDup();
+
+    var stops = allGates.filter(function (g) { return g.level === 'stop'; });
+    document.getElementById('gates').innerHTML = allGates.length
+      ? allGates.map(function (g) {
           return '<div class="gt ' + g.level + '"><span class="lv">' + (g.level === 'stop' ? '멈춤' : '확인') + '</span>'
             + '<span>' + esc(g.message) + '</span></div>';
         }).join('')
@@ -327,6 +483,23 @@
 
   /* -------------------------------------------------------------- 저장 */
 
+  /** docx 안의 그림 바이트를 팩이 가리키는 경로 그대로 저장한다. */
+  function savePictures(slug) {
+    var PICS = window.SG_SET_PICS;
+    var media = parsed.questions && parsed.questions.media;
+    if (!PICS || !media) return;
+    var prefix = 'media/pictures/' + slug + '/';
+    var map = {};
+    Object.keys(media).forEach(function (name) {
+      map[prefix + name.split('/').pop()] = media[name];
+    });
+    PICS.putAll(map).then(function (n) {
+      if (n) toast('그림 ' + n + '장 저장 완료');
+    })['catch'](function () {
+      toast('그림을 저장하지 못했습니다 — 시험 화면에서 삽화가 비어 보일 수 있습니다.');
+    });
+  }
+
   function download(name, text, mime) {
     var blob = new Blob([text], { type: mime || 'application/json' });
     var url = URL.createObjectURL(blob);
@@ -342,9 +515,16 @@
     if (STORE.get(slug) && !confirm(slug.toUpperCase() + ' 는 이미 저장돼 있습니다. 덮어쓸까요?')) return;
 
     built.pack.importedAt = new Date().toISOString();
+    if (built.pack.summary) {
+      built.pack.summary.sources = Object.keys(files).filter(function (k) { return files[k]; })
+        .map(function (k) { return files[k].name; });
+    }
     var res = STORE.put(slug, built.pack, { title: codeEl.value.trim() });
     if (!res.ok) { toast(res.error); return; }
     STORE.activate(slug, built.pack);
+
+    /* 그림은 팩과 따로 간다 — 수 MB 라 localStorage 에 들어가지 않는다(set-media.js). */
+    savePictures(slug);
     if (window.SG_LOG && window.SG_LOG.push) {
       window.SG_LOG.push({ kind: 'set-import', set: slug, note: built.stats.total + '문항 가져오기' });
     }
@@ -368,27 +548,101 @@
 
   /* ---------------------------------------------------- 저장된 세트 목록 */
 
+  /* 세트 하나가 어떤 세트인지 — 저장할 때 팩에 넣어 둔 summary 만 읽는다. */
+  function describe(pack) {
+    if (!pack || !pack.summary) return '';
+    var s = pack.summary;
+
+    var secs = (s.modules || []).map(function (m) {
+      return '<span class="mchip" data-s="' + esc(m.id) + '">' + esc(m.label)
+        + ' <b>' + m.questions + '</b>'
+        + '<i>모듈 ' + m.modules + '</i></span>';
+    }).join('');
+
+    var audioPct = s.audioClips ? Math.round(s.audioWithScript / s.audioClips * 100) : 0;
+    var missing = s.audioClips - s.audioWithScript;
+
+    var facts = [
+      { k: '자동 채점', v: s.autoScored + ' / ' + s.questions,
+        note: s.humanScored + '문항은 사람이 채점(에세이·말하기)' },
+      { k: '삽화', v: s.pictures + '장',
+        note: s.pictures ? '문서에서 뽑아 함께 저장됨' : '문서에 삽화 없음' },
+      { k: '음성 자리', v: s.audioClips + '개',
+        note: missing ? '대본 있는 것 ' + s.audioWithScript + '개 · 없는 것 ' + missing + '개'
+                      : '전부 대본 있음' },
+      { k: '읽을 분량', v: (s.scriptChars || 0).toLocaleString() + '자',
+        note: '음성 생성비 약 $' + ((s.scriptChars || 0) / 1000 * 0.06).toFixed(2) }
+    ];
+
+    var gateLine = '';
+    if (s.gates && (s.gates.stop || s.gates.warn)) {
+      gateLine = '<div class="gline' + (s.gates.stop ? ' bad' : '') + '">'
+        + (s.gates.stop ? '멈춤 ' + s.gates.stop + '건 · ' : '')
+        + '확인 필요 ' + s.gates.warn + '건'
+        + '<button class="linky" data-gates="1">자세히</button></div>';
+    }
+
+    var src = (s.sources && s.sources.length)
+      ? '<div class="srcline">출처 ' + s.sources.map(esc).join(' · ') + '</div>' : '';
+
+    return '<div class="detail">'
+      + '<div class="mchips">' + secs + '</div>'
+      + '<div class="facts2">' + facts.map(function (f) {
+          return '<div><span class="fk">' + f.k + '</span><b>' + esc(f.v) + '</b>'
+            + '<span class="fn">' + esc(f.note) + '</span></div>';
+        }).join('') + '</div>'
+      + '<div class="meter"><i style="width:' + audioPct + '%"></i></div>'
+      + '<div class="meterlab">음성 대본 확보 ' + audioPct + '%</div>'
+      + gateLine + src
+      + '</div>';
+  }
+
   function renderSaved() {
     var list = STORE.list();
     document.getElementById('saved').innerHTML = list.length
       ? list.map(function (r) {
+          var pack = STORE.get(r.slug);
           return '<div class="saved" data-slug="' + esc(r.slug) + '">'
+            + '<div class="shead">'
             + '<b>' + esc(r.title) + '</b>'
             + '<span class="sp">' + r.total + '문항 · ' + Math.round((r.bytes || 0) / 1024) + 'KB · '
             + esc(String(r.savedAt || '').slice(0, 10)) + '</span>'
             + '<a class="btn ghost sm" href="exam-runtime.html?set=' + esc(r.slug) + '">시험 화면</a>'
             + '<a class="btn ghost sm" href="admin-questions.html?set=' + esc(r.slug) + '">문항 편집</a>'
             + '<button class="btn ghost sm" data-del="' + esc(r.slug) + '">삭제</button>'
+            + '</div>'
+            + describe(pack)
+            + '<div class="gatebox" hidden>' + gateList(pack) + '</div>'
             + '</div>';
         }).join('')
       : '<p class="muted" style="font-size:12.5px">아직 없습니다.</p>';
   }
 
+  function gateList(pack) {
+    var gs = (pack && pack.gates) || [];
+    if (!gs.length) return '<p class="muted" style="font-size:12px;margin:0">검산에 걸린 항목이 없습니다.</p>';
+    return gs.map(function (g) {
+      return '<div class="gt ' + g.level + '"><span class="lv">'
+        + (g.level === 'stop' ? '멈춤' : '확인') + '</span><span>' + esc(g.message) + '</span></div>';
+    }).join('');
+  }
+
   document.getElementById('saved').addEventListener('click', function (ev) {
-    var slug = ev.target && ev.target.getAttribute && ev.target.getAttribute('data-del');
+    var t = ev.target;
+    if (!t || !t.getAttribute) return;
+
+    if (t.getAttribute('data-gates')) {
+      var box = t.closest('.saved').querySelector('.gatebox');
+      box.hidden = !box.hidden;
+      t.textContent = box.hidden ? '자세히' : '접기';
+      return;
+    }
+
+    var slug = t.getAttribute('data-del');
     if (!slug) return;
-    if (!confirm(slug.toUpperCase() + ' 를 지울까요? 되돌릴 수 없습니다.')) return;
+    if (!confirm(slug.toUpperCase() + ' 를 지울까요? 그림까지 함께 지워지며 되돌릴 수 없습니다.')) return;
     STORE.remove(slug);
+    if (window.SG_SET_PICS) window.SG_SET_PICS.removeSet('media/pictures/' + slug + '/');
     renderSaved(); refresh();
     toast(slug.toUpperCase() + ' 삭제했습니다.');
   });
