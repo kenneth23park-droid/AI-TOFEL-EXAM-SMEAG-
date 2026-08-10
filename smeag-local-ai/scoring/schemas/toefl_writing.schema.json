@@ -3,8 +3,13 @@
   "title": "TOEFL Writing — structured rubric report",
   "type": "object",
   "additionalProperties": false,
-  "required": ["criteria", "overall", "word_count", "off_topic", "summary_ko", "summary_en"],
+  "required": ["task_type", "criteria", "overall", "word_count", "off_topic", "summary_ko", "summary_en"],
   "properties": {
+    "task_type": {
+      "type": "string",
+      "description": "Which official writing task this response answers.",
+      "enum": ["write_an_email", "write_for_an_academic_discussion"]
+    },
     "criteria": {
       "type": "object",
       "additionalProperties": false,
@@ -18,7 +23,7 @@
     },
     "overall": {
       "type": "number",
-      "description": "Mean of the four criterion scores, rounded to the nearest 0.5 (.25 and .75 round up).",
+      "description": "THE OFFICIAL HOLISTIC BAND for this task (ETS TOEFL Scoring Guides, 0-5). Chosen by matching the whole response to a band descriptor - NOT the mean of the criteria below.",
       "minimum": 0,
       "maximum": 5,
       "multipleOf": 0.5
@@ -26,7 +31,7 @@
     "word_count": { "type": "integer", "minimum": 0 },
     "off_topic": {
       "type": "boolean",
-      "description": "true if the response does not address the prompt. Forces TF <= 2."
+      "description": "true if the response does not address the prompt at all. A response entirely unconnected to the prompt is band 0 by the official guide."
     },
     "corrections": {
       "type": "array",
@@ -64,7 +69,13 @@
       "additionalProperties": false,
       "required": ["score", "evidence", "rationale"],
       "properties": {
-        "score": { "type": "number", "minimum": 0, "maximum": 5, "multipleOf": 0.5 },
+        "score": {
+          "type": "number",
+          "description": "Teacher-facing breakdown only, not part of the official standard. Keep within 1.0 of overall.",
+          "minimum": 0,
+          "maximum": 5,
+          "multipleOf": 0.5
+        },
         "evidence": {
           "type": "array",
           "description": "VERBATIM quotes from the student's response. Must appear character-for-character in the submission. Empty array is NOT acceptable unless the response is blank.",

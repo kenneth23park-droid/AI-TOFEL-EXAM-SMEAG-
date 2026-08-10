@@ -3,8 +3,13 @@
   "title": "TOEFL Speaking — structured rubric report (transcript-based)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["criteria", "overall", "word_count", "is_blank", "summary_ko", "summary_en"],
+  "required": ["task_type", "criteria", "overall", "word_count", "is_blank", "summary_ko", "summary_en"],
   "properties": {
+    "task_type": {
+      "type": "string",
+      "description": "Which official speaking task this response answers.",
+      "enum": ["listen_and_repeat", "take_an_interview"]
+    },
     "criteria": {
       "type": "object",
       "additionalProperties": false,
@@ -17,9 +22,9 @@
     },
     "overall": {
       "type": "number",
-      "description": "Mean of the three criterion scores, rounded to the nearest 0.5 (.25 and .75 round up).",
+      "description": "THE OFFICIAL HOLISTIC BAND for this task (ETS TOEFL Scoring Guides, 0-5). Chosen by matching the whole response to a band descriptor - NOT the mean of the criteria below. Capped at 4 from a transcript: band 5 requires a pronunciation and intonation judgement text cannot support.",
       "minimum": 0,
-      "maximum": 4,
+      "maximum": 5,
       "multipleOf": 0.5
     },
     "word_count": { "type": "integer", "minimum": 0 },
@@ -53,7 +58,13 @@
       "additionalProperties": false,
       "required": ["score", "evidence", "rationale"],
       "properties": {
-        "score": { "type": "number", "minimum": 0, "maximum": 4, "multipleOf": 0.5 },
+        "score": {
+          "type": "number",
+          "description": "Teacher-facing breakdown only, not part of the official standard. Keep within 1.0 of overall.",
+          "minimum": 0,
+          "maximum": 5,
+          "multipleOf": 0.5
+        },
         "evidence": {
           "type": "array",
           "description": "VERBATIM spans from the transcript. Empty array is NOT acceptable unless is_blank is true.",
@@ -71,9 +82,9 @@
       "properties": {
         "score": {
           "type": "number",
-          "description": "Capped at 3 — Delivery 4 is not awardable from a transcript.",
+          "description": "Teacher-facing breakdown only. Capped at 4 — a 5 needs pronunciation evidence a transcript cannot give.",
           "minimum": 0,
-          "maximum": 3,
+          "maximum": 4,
           "multipleOf": 0.5
         },
         "evidence": {

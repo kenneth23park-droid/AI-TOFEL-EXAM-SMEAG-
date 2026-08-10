@@ -28,9 +28,10 @@ sys.path.insert(0, str(ROOT))
 from app.scoring import answer_key_set1, answer_key_set9, nodes, rubric  # noqa: E402
 from app.scoring.scale import TOEFL  # noqa: E402
 
-FLOOR = 1.0    # rubric._FLOOR[4.0]  (TOEFL speaking)
-CEILING = 3.0  # rubric._CEILING[4.0]
-CENTRE = 2.0   # rubric._CENTRE[4.0]
+# ETS 공식 가이드 기준 TOEFL speaking 은 0–5 다(구 iBT 의 0–4 아님).
+FLOOR = 1.0    # rubric._FLOOR[5.0]  (TOEFL speaking)
+CEILING = 4.0  # rubric._CEILING[5.0]
+CENTRE = 3.0   # rubric._CENTRE[5.0]
 
 
 # ── (1) 생성물: 정답키에 실린 값 ───────────────────────────────────────────────
@@ -148,7 +149,7 @@ def test_offline_beats_the_old_length_path_for_the_same_answer():
     old = max(r["score"] for r in rubric.draft("speaking", REF_Q01))
     state = _state("SET 9", [_speaking("set9-S1-q01", REF_Q01)])
     new = min(r["score"] for r in _rows_for(state, "set9-S1-q01"))
-    assert old <= 1.5 < new
+    assert old <= 2.5 < new
 
 
 def test_offline_grades_each_repeat_against_its_own_reference():
@@ -206,7 +207,7 @@ def test_online_sends_repeat_to_the_deterministic_path(monkeypatch):
     def fake_generate_rubric(skill, text, **kw):
         seen.append(text)
         return [{"skill": skill, "criterion": "Delivery", "score": 3.0,
-                 "max_score": 4.0, "band": None, "comment": "llm"}]
+                 "max_score": 5.0, "band": None, "comment": "llm"}]
 
     monkeypatch.setattr(nodes.llm, "generate_rubric", fake_generate_rubric)
     state = _state("SET 9", [
@@ -253,5 +254,5 @@ def test_many_repeat_rows_fold_into_one_section_score():
     state = _state("SET 9", responses)
     state.update(nodes.rubric_offline(state))
     out = nodes.scale(state)["scaled"]
-    # 완벽 복창 14행(7문항 × 2축)이 모두 3.0/4.0 → 0.75 × 30 = 22.5 → 23(half-up).
-    assert out["sections"]["speaking"] == 23.0
+    # 완벽 복창 14행(7문항 × 2축)이 모두 4.0/5.0 → 0.8 × 30 = 24.0.
+    assert out["sections"]["speaking"] == 24.0

@@ -8,7 +8,7 @@ DEFAULT_MIN_WORDS['speaking'] 은 60 이라, 완벽하게 따라 말해도 길�
 
 여기서 지키는 계약(기존 모듈 계약 그대로):
   · 절대 raise 하지 않는다      · 같은 입력 → 같은 출력   · 네트워크 없음
-  · 완벽한 복창이라도 _CEILING(TOEFL speaking 3.0/4.0) 을 넘지 않는다 — 초안이므로.
+  · 완벽한 복창이라도 _CEILING(TOEFL speaking 4.0/5.0) 을 넘지 않는다 — 초안이므로.
 
 모듈은 순수 함수라 DB/앱/픽스처가 없다 (tests/test_autoscore.py 와 같은 방식).
 실행: studyground/.venv/bin/python -m pytest studyground/tests/test_rubric_speaking.py -q
@@ -31,9 +31,10 @@ REF_Q01 = "Is this your first time in our cafeteria?"
 REF_Q05 = "You can pay with cash or your student ID card."
 REF_Q07 = "If you have any food allergies, please let the staff know before ordering."
 
-TOEFL_SPEAKING_MAX = 4.0
-FLOOR = 1.0    # rubric._FLOOR[4.0]
-CEILING = 3.0  # rubric._CEILING[4.0]
+# ETS 공식 가이드: Listen and Repeat · Take an Interview 모두 0–5 다(구 iBT 의 0–4 아님).
+TOEFL_SPEAKING_MAX = 5.0
+FLOOR = 1.0    # rubric._FLOOR[5.0]
+CEILING = 4.0  # rubric._CEILING[5.0]
 
 
 def _scores(rows: list[dict]) -> list[float]:
@@ -50,7 +51,8 @@ def _repeat(text: str, reference: str = REF_Q01, **kw) -> list[dict]:
 def test_the_bug_perfect_repetition_hits_the_floor_on_the_length_path():
     """근거 기록용. task_kind 없이 재면 8단어 정답이 min 60 에 걸려 바닥을 친다."""
     rows = rubric.draft("speaking", REF_Q01)
-    assert max(_scores(rows)) <= 1.5
+    # 0–5 척도에서도 완벽한 답이 절반 아래에 머문다 — 재는 자가 틀렸다는 증거.
+    assert max(_scores(rows)) <= TOEFL_SPEAKING_MAX / 2
 
 
 def test_perfect_repetition_is_well_above_the_length_path_score():
@@ -134,7 +136,7 @@ def test_blank_is_the_floor_and_never_raises(blank):
 def test_missing_reference_degrades_to_the_neutral_centre(missing):
     """원문을 모르면 대조 근거가 없다 → 감점도 가점도 없이 중앙값, comment 로 신호."""
     rows = _repeat(REF_Q01, reference=missing)
-    assert _scores(rows) == [2.0, 2.0]  # rubric._CENTRE[4.0]
+    assert _scores(rows) == [3.0, 3.0]  # rubric._CENTRE[5.0]
     assert all("Reference sentence unavailable" in r["comment"] for r in rows)
 
 

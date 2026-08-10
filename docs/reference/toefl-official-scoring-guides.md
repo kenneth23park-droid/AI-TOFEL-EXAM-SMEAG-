@@ -315,20 +315,40 @@ such as "I don't know").
 
 ---
 
-## 우리 구현과 다른 점 (2026-08-10 기준, 미해결)
+## 우리 구현과의 정합 (2026-08-10 갱신)
 
-아래는 이 공식 가이드와 현재 코드/프롬프트가 어긋나는 지점이다. 고칠 때는 이 파일을 기준으로 맞춘다.
+### 맞춘 것
 
-1. **Speaking 만점** — 공식은 두 과제 모두 **0–5**. 우리는 0–4 로 잡혀 있다:
-   [rubric.py](../../studyground/app/scoring/rubric.py) 의 `MAX_SCORE[(TOEFL, "speaking")] = 4.0`,
-   [toefl_speaking.md](../../smeag-local-ai/scoring/rubrics/toefl_speaking.md) 헤더의 "0–4 scale".
-2. **과제 종류** — 공식은 Write an Email / Write for an Academic Discussion /
-   Listen and Repeat / Take an Interview. 우리 레이터 프롬프트는 구 iBT 의
-   independent / integrated 를 전제로 쓰여 있다.
-3. **채점 축** — 공식 가이드는 과제별 **총체적(holistic) 단일 점수** 다.
-   우리 `CRITERIA` 는 분석적 4축(TF/OD/LU/VO) · 3축(DEL/LU/TD) 으로 쪼개 놓았다.
-   교사 피드백용으로 축을 유지하더라도, **보고되는 점수는 공식 0–5 총체 점수와
-   일치해야** 한다.
-4. **길이 하한** — 공식 가이드에는 단어 수 규칙이 없다. 우리 프롬프트의
-   "300 words 미만이면 TF 3 초과 불가" 같은 규칙은 SMEAG 내부 관례이지 ETS 기준이 아니다.
-   유지하려면 내부 규칙임을 명시한다.
+1. **Speaking 만점 0–5** — 구 iBT 기준의 0–4 를 걷어냈다.
+   [rubric.py](../../studyground/app/scoring/rubric.py) 의 `MAX_SCORE[(TOEFL, "speaking")]`,
+   레이터 프롬프트, JSON 스키마, 테스트를 모두 5.0 으로 맞췄다.
+   섹션 환산은 `sum(score)/sum(max)` 비례식이라 분모가 함께 커진다 — 완벽 복창 7문항의
+   speaking 섹션 점수는 23 → 24 로 바뀐다(이 값 자체가 테스트에 박혀 있다).
+2. **과제 종류** — 레이터 프롬프트를 현행 4과제(Write an Email / Write for an Academic
+   Discussion / Listen and Repeat / Take an Interview) 기준으로 다시 썼다. 밴드 서술은
+   이 문서의 원문을 그대로 옮겼고, 스키마에 `task_type` 을 필수로 넣어 모델이 어느 과제로
+   읽었는지 밝히게 했다. `answer_key_set*.py` 의 `task_kind` 는 이미 이 넷을 쓰고 있었다.
+3. **총체 밴드가 판정** — 스키마의 `overall` 을 "축 점수의 평균" 에서
+   **"공식 총체 밴드(0–5)"** 로 재정의했다. 프롬프트도 "먼저 밴드를 고르고, 축은 그
+   뒤에 교사 설명용으로 매기되 밴드에서 1.0 을 벗어나지 말 것" 으로 순서를 뒤집었다.
+4. **길이 규칙** — 공식 가이드에는 단어 수 규칙이 없다. 레이터 프롬프트에서 길이 규칙을
+   삭제했고(`There is no length rule`), 오프라인 휴리스틱의 `DEFAULT_MIN_WORDS` 에는
+   **SMEAG 내부 관례**라고 명시했다 — 오프라인 초안에는 잴 것이 길이밖에 없어서 쓰는
+   것이지 ETS 기준이 아니다.
+
+### 아직 남은 것
+
+**총체 밴드가 아직 섹션 점수의 근거는 아니다.** 지금은 저장된 분석 축 행들을
+`sum(score)/sum(max)` 로 접어 섹션 점수를 낸다(`scale.Toefl120Scale.rubric_to_section`).
+공식대로라면 과제별 총체 밴드만으로 접어야 한다.
+
+막고 있는 것은 스키마다. `rubric_scores` 는 **(attempt_id, skill, criterion)** 로 upsert
+되는데, 이 키로는 "과제별" 밴드를 표현할 수 없다 — Listen and Repeat 은 문항이 7개라
+같은 criterion 이름으로 7행이 필요하고, 지금은 그 7행이 서로 덮어쓴다(`question_key` 는
+표시용 가산 필드일 뿐 키가 아니다). 그래서 이 항목은 마이그레이션 결정을 동반한다:
+
+- (a) `rubric_scores` 키에 `question_key` 를 넣어 과제·문항별 행을 허용하고, 총체 밴드
+  행을 따로 세운 뒤 `rubric_to_section` 이 그 행만 먹게 한다.
+- (b) 총체 밴드를 `question_responses` 쪽 컬럼으로 내리고 루브릭 행은 피드백 전용으로 둔다.
+
+둘 중 어느 쪽이든 저장된 기존 점수가 바뀌므로, 재채점 범위를 정하고 나서 손대야 한다.

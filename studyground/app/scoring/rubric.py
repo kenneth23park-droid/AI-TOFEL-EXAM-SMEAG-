@@ -41,10 +41,13 @@ CRITERIA = {
     (IELTS, "speaking"): _IELTS_SPEAKING,
 }
 
-# TOEFL public rubrics: Writing is 0–5, Speaking is 0–4.
+# TOEFL public rubrics (ETS, TOEFL Scoring Guides): 현행 시험의 산출형 과제는 넷이고
+# **네 과제 모두 0–5** 다 — Write an Email · Write for an Academic Discussion ·
+# Listen and Repeat · Take an Interview. Speaking 을 0–4 로 두던 것은 구 iBT 기준이었다.
+# 전문: docs/reference/toefl-official-scoring-guides.md
 MAX_SCORE = {
     (TOEFL, "writing"): 5.0,
-    (TOEFL, "speaking"): 4.0,
+    (TOEFL, "speaking"): 5.0,
     (IELTS, "writing"): 9.0,
     (IELTS, "speaking"): 9.0,
 }
@@ -55,6 +58,11 @@ _FLOOR = {5.0: 1.0, 4.0: 1.0, 9.0: 4.0}
 _CEILING = {5.0: 4.0, 4.0: 3.0, 9.0: 6.5}
 
 # Default `minWords` when the content did not carry one.
+#
+# ⚠️ 이 하한은 **SMEAG 내부 관례**다. ETS 공식 가이드에는 단어 수 규칙이 하나도 없다 —
+# 밴드는 관련성·전개·언어 통제력(복창은 원문 충실도)으로만 갈린다. 여기서 길이를 쓰는
+# 이유는 오직 하나, 오프라인 초안에는 그것 말고 잴 것이 없기 때문이다. 교사가 확정할 때
+# 길이를 근거로 삼아서는 안 되며, LLM 레이터 프롬프트에도 길이 규칙을 넣지 않는다.
 DEFAULT_MIN_WORDS = {"writing": 150, "speaking": 60}
 
 _CONNECTIVES = frozenset(
