@@ -4,7 +4,9 @@
  * "SET id + 문항 id" 기준으로 갈아끼운다. 콘텐츠 팩(assets/set1.js·set9.js)은
  * 절대 건드리지 않는다 — 팩이 window 에 실리는 순간 이 스토어가 그 위에 덮어쓴다.
  *
- * 덮어쓸 수 있는 필드: prompt · choices[] · answer(index) · audio · image · note
+ * 덮어쓸 수 있는 필드: prompt · choices[] · answer(선택지 번호 또는 빈칸 정답 단어) ·
+ * hint(빈칸 앞글자) · sentence(insert 문장) · audio · image · note ·
+ * timeLimitSec(이 문항의 제한시간, 초 — 없으면 timing 프로필의 모듈 값이 그대로 쓰인다)
  * 원본은 문항 객체의 __sgOrig 에 한 번만 보관하므로, 되돌리기(reset)는 언제나
  * 원본 그대로를 복원한다.
  *
@@ -17,7 +19,11 @@
   'use strict';
 
   var LS_KEY = 'sg2_question_overrides_v1';
-  var FIELDS = ['prompt', 'choices', 'answer', 'audio', 'image', 'note'];
+  /* answer 는 문항 종류에 따라 뜻이 다르다 — 객관식(mcq·insert)은 선택지 번호,
+     빈칸(cloze 의 blank)은 정답 단어 그 자체다. hint 는 빈칸의 앞글자,
+     sentence 는 insert 문항이 끼워 넣을 문장. */
+  var FIELDS = ['prompt', 'choices', 'answer', 'hint', 'sentence',
+                'audio', 'image', 'note', 'timeLimitSec'];
 
   var data = {};            // "set::qid" -> patch
   var packs = [];           // 이미 적용한 팩들 [{pack, setId}] — 변경 시 재적용
@@ -94,10 +100,21 @@
       return Object.keys(data).filter(function (key) { return !pre || key.indexOf(pre) === 0; });
     },
     count: function (setId) { return API.list(setId).length; },
+    /** 이 SET 의 교체분 지문(指紋). 시험 셸이 "이어서 응시" 가능 여부를 판정할 때
+     *  콘텐츠 해시에 섞는다 — 문항이나 제한시간이 바뀌면 옛 세션을 이어받지 않는다. */
+    signature: function (setId) {
+      var keys = API.list(setId).sort();
+      return keys.map(function (key) {
+        var p = data[key] || {};
+        return key + '@' + (p.t || 0) + '#' + FIELDS.filter(function (f) { return p[f] !== undefined; }).join('.');
+      }).join('|');
+    },
 
     /** 부분 저장. 값이 null/undefined 인 필드는 "원본 유지"를 뜻한다. */
     set: function (setId, qid, patch) {
       var key = k(setId, qid), cur = data[key] || {};
+      var had = !!data[key], prev = {};
+      FIELDS.forEach(function (f) { prev[f] = cur[f]; });
       FIELDS.forEach(function (f) {
         if (patch[f] === undefined) return;
         if (patch[f] === null || patch[f] === '') delete cur[f];
@@ -106,12 +123,28 @@
       var live = FIELDS.some(function (f) { return cur[f] !== undefined; });
       if (live) { cur.t = Date.now(); data[key] = cur; } else { delete data[key]; }
       save(); emit();
+      // 개발자가 나중에 읽을 수 있게 바뀐 필드만 한 줄씩 남긴다(admin-log.html).
+      if (window.SG_LOG) {
+        var next = {}; FIELDS.forEach(function (f) { next[f] = live ? cur[f] : undefined; });
+        SG_LOG.diff({ set: setId, target: qid, fields: FIELDS, before: prev, after: next,
+                      action: had ? (live ? 'update' : 'delete') : 'create' });
+      }
       return live;
     },
-    reset: function (setId, qid) { delete data[k(setId, qid)]; save(); emit(); },
+    reset: function (setId, qid) {
+      var prev = data[k(setId, qid)];
+      delete data[k(setId, qid)]; save(); emit();
+      if (window.SG_LOG && prev) {
+        SG_LOG.add({ set: setId, action: 'delete', target: qid, note: 'reverted to the original question',
+                     before: prev });
+      }
+    },
     resetAll: function (setId) {
+      var n = API.list(setId).length;
       API.list(setId).forEach(function (key) { delete data[key]; });
       save(); emit();
+      if (window.SG_LOG) SG_LOG.add({ set: setId, action: 'reset', target: '(all questions)',
+                                      note: n + ' overrides removed' });
     },
 
     exportJson: function (setId) {
@@ -128,6 +161,8 @@
         data[key] = m[key];
       });
       save(); emit();
+      if (window.SG_LOG) SG_LOG.add({ action: 'import', target: '(questions)',
+                                      note: Object.keys(m).length + ' overrides imported' });
       return Object.keys(m).length;
     },
 

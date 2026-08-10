@@ -56,6 +56,15 @@
   .choicerow .key { flex:none; width:22px; text-align:center; font-weight:800; font-size:12px; color:var(--muted); }
   .choicerow input[type=text] { flex:1; }
   .qacts { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  /* 이 문항이 실린 자리 — 클로즈 지문 또는 읽기 지문. 읽기 전용이다. */
+  .ctx { background:var(--cream-2); border-radius:10px; padding:10px 12px; margin-bottom:11px;
+    font-size:12.5px; line-height:1.7; color:var(--ink-2); max-height:230px; overflow:auto; }
+  .ctx p { margin:0 0 6px; }
+  .ctx .ctx-h { font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:6px; }
+  .ctx b { font-weight:750; color:var(--ink); }
+  .ctx b.here { background:var(--peach,#fde5da); color:var(--brand-ink,#a8331a);
+    border-radius:4px; padding:0 4px; }
   .orig { font-size:11.5px; color:var(--dim); line-height:1.55; margin-top:8px; white-space:pre-wrap;
     background:var(--cream-2); border-radius:9px; padding:8px 10px; }
   audio { width:100%; margin-top:7px; }
@@ -270,25 +279,73 @@
       '&mode=section&goq=' + encodeURIComponent(it.q.id);
   }
 
+  /* 클로즈 지문 — {{n}} 자리를 그 번호의 정답 단어로 채우고, 지금 고치는 빈칸만 강조한다.
+     esc() 를 먼저 걸어도 {{n}} 은 그대로 남으므로 순서는 이대로가 안전하다. */
+  function clozeContext(it) {
+    var by = {};
+    (it.block.questions || []).forEach(function (s) { by[s.no] = s; });
+    return esc(it.block.template || '').replace(/\{\{(\d+)\}\}/g, function (m, n) {
+      var s = by[+n];
+      var word = s ? (s.answer || '') : '';
+      return '<b' + (s && s.id === it.q.id ? ' class="here"' : '') + '>' +
+        esc(word || ('(' + n + ')')) + '</b>';
+    });
+  }
+  function passageContext(it) {
+    return (it.block.title ? '<p><b>' + esc(it.block.title) + '</b></p>' : '') +
+      (it.block.paragraphs || []).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+  }
+  function contextHtml(it) {
+    var body = it.block.kind === 'cloze' ? clozeContext(it)
+             : it.block.kind === 'passage' ? passageContext(it) : '';
+    if (!body) return '';
+    var head = (it.block.heading || '') + (it.block.instruction ? ' · ' + it.block.instruction : '');
+    return '<div class="ctx">' + (head ? '<div class="ctx-h">' + esc(head) + '</div>' : '') +
+      body + '</div>';
+  }
+
+  /** 헤더 한 줄 요약. 빈칸 문항은 발문이 없으니 앞글자와 정답을 보여 준다. */
+  function summaryOf(q) {
+    if (q.kind === 'blank') return (q.hint || '') + '… → ' + (q.answer || '');
+    return q.prompt || (q.choices || [])[0] || '';
+  }
+
   function rowHtml(it, i) {
     var q = it.q, orig = q.__sgOrig || {}, ovr = Q.isOverridden(setId, q.id);
     var choices = q.choices || [];
     var eff = q.audio ? SG_AUDIO.resolve(audioPath(q.audio)) : '';
+    /* 문항 종류마다 있는 칸이 다르다 — 없는 칸은 아예 그리지 않는다.
+       리딩의 빈칸에는 발문도 선택지도 음원도 없고, 리딩·라이팅 전체에 음원이 없다. */
+    var isBlank = q.kind === 'blank';
+    var hasPrompt = q.prompt != null;
+    var hasSentence = q.sentence != null;
+    var hasAudio = !!(q.audio || it.block.kind === 'audio-set' || it.block.kind === 'record-set');
     return '<div class="qrow' + (ovr ? ' is-ovr' : '') + '" data-i="' + i + '" data-search="' +
-        esc(((q.id||'') + ' ' + (q.prompt||'') + ' ' + choices.join(' ')).toLowerCase()) + '"' +
+        esc(((q.id||'') + ' ' + (q.prompt||'') + ' ' + choices.join(' ') + ' ' +
+             (q.hint||'') + ' ' + (isBlank ? (q.answer||'') : '')).toLowerCase()) + '"' +
         ' data-sec="' + esc(it.sec.id) + '" data-ovr="' + (ovr?1:0) + '">' +
       '<div class="qhead"><b>' + esc(q.id || ('Q'+(q.no||''))) + '</b>' +
         '<span class="tagx sec">' + esc(it.sec.label || it.sec.id) + ' · ' + esc(it.mod.label || it.mod.id) + '</span>' +
         (ovr ? '<span class="tagx ovr"><span data-en>Replaced</span><span data-ko>교체됨</span></span>' : '') +
-        '<span class="qtxt">' + esc(q.prompt || (choices[0] || '')) + '</span>' +
+        '<span class="qtxt">' + esc(summaryOf(q)) + '</span>' +
         /* 전체화면 시험 셸의 그 문항 화면으로 바로 들어간다 — 거기서도 같은 저장소로 편집한다. */
         '<a class="shell-go" href="' + esc(shellUrl(it)) + '" target="_blank" rel="noopener"' +
           ' title="Open in the exam shell">▶ <span data-en>Exam screen</span><span data-ko>시험 화면</span></a>' +
         '</div>' +
       '<div class="qbody">' +
-        '<div class="fld"><label><span data-en>Prompt</span><span data-ko>지문 · 발문</span></label>' +
-          '<textarea rows="2" data-f="prompt">' + esc(q.prompt || '') + '</textarea></div>' +
-        (choices.length ? '<div class="fld"><label><span data-en>Choices — pick the correct one</span><span data-ko>선택지 — 정답 선택</span></label>' +
+        contextHtml(it) +
+        /* 빈칸 문항(리딩 클로즈) — 앞글자와 정답 단어가 문항의 전부다. */
+        (isBlank ? '<div class="fld"><label><span data-en>Hint (letters shown)</span><span data-ko>앞글자 힌트</span></label>' +
+            '<input type="text" data-f="hint" value="' + esc(q.hint || '') + '" style="max-width:220px"></div>' +
+          '<div class="fld"><label><span data-en>Answer word</span><span data-ko>정답 단어</span></label>' +
+            '<input type="text" data-f="answerText" value="' + esc(q.answer == null ? '' : q.answer) + '" style="max-width:320px"></div>'
+          : '') +
+        (hasPrompt ? '<div class="fld"><label><span data-en>Prompt</span><span data-ko>지문 · 발문</span></label>' +
+          '<textarea rows="2" data-f="prompt">' + esc(q.prompt) + '</textarea></div>' : '') +
+        /* insert 문항이 지문에 끼워 넣는 문장. */
+        (hasSentence ? '<div class="fld"><label><span data-en>Sentence to insert</span><span data-ko>삽입할 문장</span></label>' +
+          '<textarea rows="2" data-f="sentence">' + esc(q.sentence) + '</textarea></div>' : '') +
+        (choices.length ?'<div class="fld"><label><span data-en>Choices — pick the correct one</span><span data-ko>선택지 — 정답 선택</span></label>' +
           choices.map(function (c, ci) {
             return '<div class="choicerow">' +
               '<input type="radio" name="ans-' + esc(q.id) + '" value="' + ci + '"' + (ci === q.answer ? ' checked' : '') + '>' +
@@ -303,6 +360,8 @@
           '<span class="muted" style="font-size:11.5px;margin-left:8px">' +
             '<span data-en>blank = use the module default</span><span data-ko>비우면 모듈 기본값 사용</span></span>' +
         '</div>' +
+        /* 음원·TTS·이미지는 소리로 푸는 문항(리스닝·스피킹)에만 붙인다. */
+        (hasAudio ?
         '<div class="fld"><label><span data-en>Audio path</span><span data-ko>오디오 경로</span></label>' +
           '<input type="text" data-f="audio" value="' + esc(q.audio || '') + '" placeholder="media/audio/set9/l1-q01.mp3">' +
           (eff ? '<audio controls preload="none" src="' + esc(eff) + '"></audio>' : '') +
@@ -340,13 +399,17 @@
           '<div class="genout"></div>' +
         '</div>' +
         '<div class="fld"><label><span data-en>Image path</span><span data-ko>이미지 경로</span></label>' +
-          '<input type="text" data-f="image" value="' + esc(q.image || '') + '"></div>' +
+          '<input type="text" data-f="image" value="' + esc(q.image || '') + '"></div>'
+        : '') +
         '<div class="qacts">' +
           '<button class="btn brand sm" data-act="save" type="button"><span data-en>Save replacement</span><span data-ko>교체 저장</span></button>' +
           (ovr ? '<button class="btn ghost sm" data-act="revert" type="button"><span data-en>Revert to original</span><span data-ko>원문으로 되돌리기</span></button>' : '') +
         '</div>' +
-        (ovr ? '<div class="orig"><b>Original</b>\n' + esc((orig.prompt || '') + '\n' +
-            (orig.choices||[]).map(function(c,ci){ return (KEYS[ci]||ci)+'. '+c + (ci===orig.answer?'  ✓':''); }).join('\n') +
+        (ovr ? '<div class="orig"><b>Original</b>\n' + esc(
+            (isBlank ? (orig.hint || '') + '… → ' + (orig.answer == null ? '' : orig.answer)
+                     : (orig.prompt || '') + '\n' +
+                       (orig.choices||[]).map(function(c,ci){ return (KEYS[ci]||ci)+'. '+c + (ci===orig.answer?'  ✓':''); }).join('\n')) +
+            (orig.sentence ? '\n' + orig.sentence : '') +
             (orig.audio ? '\n' + orig.audio : '')) + '</div>' : '') +
       '</div>' +
     '</div>';
@@ -379,7 +442,8 @@
   }
 
   function readRow(row) {
-    var out = { prompt: null, choices: null, answer: null, audio: null, image: null };
+    var out = { prompt: null, choices: null, answer: null, hint: null, sentence: null,
+                audio: null, image: null };
     var p = row.querySelector('[data-f=prompt]');
     if (p) out.prompt = p.value;
     var cs = row.querySelectorAll('[data-f=choice]');
@@ -388,6 +452,10 @@
       var r = row.querySelector('input[type=radio]:checked');
       out.answer = r ? +r.value : null;
     }
+    // 빈칸 문항은 정답이 번호가 아니라 단어다.
+    var h = row.querySelector('[data-f=hint]'); if (h) out.hint = h.value.trim();
+    var at = row.querySelector('[data-f=answerText]'); if (at) out.answer = at.value.trim();
+    var sn = row.querySelector('[data-f=sentence]'); if (sn) out.sentence = sn.value.trim();
     var a = row.querySelector('[data-f=audio]'); if (a) out.audio = a.value.trim();
     var im = row.querySelector('[data-f=image]'); if (im) out.image = im.value.trim();
     var tl = row.querySelector('[data-f=timeLimitSec]');
@@ -402,6 +470,8 @@
     patch.prompt  = (edit.prompt  == null || edit.prompt  === o.prompt) ? null : edit.prompt;
     patch.choices = (edit.choices == null || same(edit.choices, o.choices)) ? null : edit.choices;
     patch.answer  = (edit.answer  == null || edit.answer  === o.answer)  ? null : edit.answer;
+    patch.hint     = (edit.hint     == null || edit.hint     === o.hint)     ? null : edit.hint;
+    patch.sentence = (edit.sentence == null || edit.sentence === o.sentence) ? null : edit.sentence;
     patch.audio   = (!edit.audio  || edit.audio  === o.audio)  ? null : edit.audio;
     patch.image   = (!edit.image  || edit.image  === o.image)  ? null : edit.image;
     patch.timeLimitSec = (edit.timeLimitSec == null || edit.timeLimitSec === o.timeLimitSec)
