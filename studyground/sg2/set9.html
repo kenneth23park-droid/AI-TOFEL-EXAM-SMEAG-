@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  GENERATED FILE — 직접 고치지 마세요.
+  원본: exam-runtime.html · 생성: tools/build_routes.py
+  SET9 의 listening 섹션으로 바로 들어가는 진입 페이지. 쿼리스트링 없이 열어도 된다.
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -10,519 +15,186 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#e8481f">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<style>
-  /* SET 9 listening 미리보기 — 시험 화면(listening-question-900s)과 같은 배치로 그린다.
-     좌: 화자 사진 / 우: 선택지. 질문은 음성으로만 나가고 화면에 쓰지 않는다(Task 1).
-     exam.css 의 .lst-* / .opt / .opt-key 를 그대로 재사용하고, 이 파일에는
-     미리보기 전용(과제 안내 배너·타이머 바·정답 공개)만 추가한다. */
-
-  /* ── 과제 안내(리마인더) ─────────────────────────────── */
-  .taskcard {
-    background: linear-gradient(160deg, var(--peach), var(--peach-2));
-    border: 1px solid var(--peach-2); border-radius: var(--radius);
-    padding: 18px 20px; margin: 18px 0 6px;
-  }
-  .taskcard + .taskcard { margin-top: 12px; }
-  .taskcard h3 { font-size: 15px; font-weight: 850; color: var(--brand-ink); margin: 0 0 8px; letter-spacing: .01em; }
-  .taskcard ul { margin: 0; padding-left: 18px; }
-  .taskcard li { font-size: 13.5px; line-height: 1.65; color: var(--ink-2); }
-  .taskcard li b { color: var(--brand-ink); }
-  .taskcard .src { display: block; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
-
-  .modwrap { margin-top: 30px; }
-  .modwrap > h2 { font-size: 21px; font-weight: 850; margin: 26px 0 4px; }
-  .blockwrap { margin-top: 20px; }
-  .blockwrap > h3 {
-    font-size: 13px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
-    color: var(--muted); margin: 0 0 2px;
-  }
-  .blockwrap > p.bins { font-size: 14px; color: var(--ink-2); margin: 0 0 12px; }
-
-  /* ── 문항 카드 ───────────────────────────────────────── */
-  .qc { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 14px; margin-bottom: 14px; }
-  .qc-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 12px; }
-  .qc-head b { font-size: 14.5px; }
-  .kind { font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px;
-    background: var(--cream-2); color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; }
-  .kind.task1 { background: var(--peach); color: var(--brand-ink); }
-
-  /* 좌 사진 / 우 선택지 — exam.css .lst-split 을 미리보기 폭에 맞게 좁힌다. */
-  .qc .lst-split { grid-template-columns: 280px minmax(0, 1fr); gap: 32px; max-width: none; margin: 0; }
-  .qc .lst-split .lst-illus-img { width: 100%; }
-
-  /* 사진 위 재생 상태 오버레이 */
-  .picwrap { position: relative; }
-  .picstate {
-    position: absolute; left: 8px; right: 8px; bottom: 8px;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 7px 10px; border-radius: 10px; font-size: 12px; font-weight: 750;
-    background: rgba(255,255,255,.93); color: var(--ink-2); border: 1px solid var(--line);
-  }
-  .qc.is-playing .picstate { color: var(--brand); border-color: var(--peach-2); animation: qc-blink 1.4s infinite; }
-  @keyframes qc-blink { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
-  .picbtns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-
-  /* 질문은 화면에 없다는 안내 (Task 1) */
-  .spoken {
-    display: flex; align-items: flex-start; gap: 9px;
-    font-size: 12.5px; line-height: 1.55; color: var(--muted);
-    background: var(--cream-2); border-radius: 10px; padding: 9px 12px; margin: 0 0 14px;
-  }
-
-  /* 20초 타이머 */
-  .tmr { margin-top: 14px; }
-  .tmr-row { display: flex; align-items: baseline; gap: 8px; }
-  .tmr-num { font-size: 22px; font-weight: 850; color: var(--brand-ink); font-variant-numeric: tabular-nums; }
-  .tmr-cap { font-size: 12px; font-weight: 700; color: var(--muted); }
-  .tmr-bar { height: 6px; border-radius: 999px; background: var(--cream-2); overflow: hidden; margin-top: 7px; }
-  .tmr-fill { height: 100%; width: 100%; background: var(--brand); border-radius: 999px; transition: width .1s linear; }
-  .tmr.is-low .tmr-num { color: #c62828; }
-  .tmr.is-low .tmr-fill { background: #c62828; }
-  .tmr.is-idle .tmr-num, .tmr.is-idle .tmr-cap { color: var(--dim); }
-  .tmr.is-idle .tmr-fill { background: var(--line); }
-
-  /* 채점 표시 (미리보기 전용 — 실제 시험 화면에는 없다) */
-  .lst-opts .opt.is-correct { border-color: #2e7d32; background: #edf7ee; }
-  .lst-opts .opt.is-correct .opt-key { background: #2e7d32; border-color: #2e7d32; color: #fff; }
-  .lst-opts .opt.is-wrong { border-color: #c62828; background: #fdeeee; }
-  .lst-opts .opt.is-wrong .opt-key { background: #c62828; border-color: #c62828; color: #fff; }
-  .verdict { font-size: 12.5px; font-weight: 750; margin-top: 10px; }
-  .verdict.ok { color: #2e7d32; }
-  .verdict.no { color: #c62828; }
-
-  .tr { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
-  .tr summary { cursor: pointer; font-size: 12px; font-weight: 700; color: var(--brand-ink); }
-  .tr p { white-space: pre-wrap; font-size: 12.5px; color: var(--ink-2); line-height: 1.6; margin-top: 8px;
-    background: var(--cream-2); border-radius: 10px; padding: 10px 12px; }
-
-  /* Task 2 — 대화/안내/강의: 오디오가 끝난 뒤 문항이 하나씩 나타난다. */
-  .setcard { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 14px; margin-bottom: 14px; }
-  .setq { border-top: 1px dashed var(--line); margin-top: 14px; padding-top: 14px; }
-  .setq .prompt { font-size: 16px; font-weight: 700; line-height: 1.4; margin: 0 0 12px; }
-  .setq-no { font-size: 11px; font-weight: 800; letter-spacing: .05em; color: var(--muted); text-transform: uppercase; }
-  .hidden { display: none; }
-  @media (max-width: 900px) {
-    .qc .lst-split { grid-template-columns: minmax(0,1fr); gap: 18px; }
-    .qc .lst-split .lst-illus-img { width: 240px; max-width: 60vw; }
-  }
-</style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudyGround">
 </head>
-<body data-sg-set="set9" data-sg-admin-bar>
+<!--
+  exam-runtime.html — 전체화면 시험 셸 (Story 1.7 / 1.8)
 
-<header class="nav">
-  <div class="nav-in">
-    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
-    <nav class="nav-center">
-      <a href="tests.html" class="on">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
-      <a href="npz.html">🎯 <span data-en>Practice</span><span data-ko>연습</span></a>
-      <a href="learning.html">🎬 <span data-en>Lectures</span><span data-ko>강의</span></a>
-      <a href="community.html">💬 <span data-en>Community</span><span data-ko>커뮤니티</span></a>
-      <a href="dashboard.html">📊 <span data-en>My StudyGround</span><span data-ko>내 성적</span></a>
-    </nav>
-    <div class="nav-right">
-      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
-      <a class="btn ghost sm" href="tests.html"><span data-en>All tests</span><span data-ko>전체 시험</span></a>
+  URL 계약:
+    exam-runtime.html?testId=SET1&sessionId=<id>&mode=exam|practice&exam=toefl|ielts#screen=<screenId>
+    · `profile=` 은 `exam=` 의 별칭으로 함께 받는다.
+    · `set=set1|set9` 로 콘텐츠 팩을 고른다(기본 set1). assets/{set}.js 를 로드해
+      window.SMEAG_SET1 / window.SMEAG_SET9 를 컴파일러에 넘긴다.
+    · 관찰된 레퍼런스 URL `/en/test-nt/{section}?testId=..&sessionId=..&mode=..&section=..` 을
+      정적 사이트에서 표현 가능한 형태로 매핑한 것이다. 경로의 {section} 은 화면 id 에 녹아
+      있으므로 `#screen=` 프래그먼트가 그 역할을 대신한다.
+    · sessionId 미지정 시 오프라인 임시 세션(offline-uuid)을 발급한다. 서버 발급 세션으로의
+      치환은 exam-sync.js(Epic 3) 가 meta.serverSession 에 매핑을 남기며 수행한다.
+    · mode 는 meta.mode 에 저장되며 세션 도중 URL 로 바꿔도 저장값이 이긴다.
+
+  기존 exam.html(연습지 모드)은 삭제하지 않는다 — 별개 용도로 계속 유지된다.
+  외부 도메인 요청 0건: 모든 스크립트/스타일/설정은 로컬 파일이다.
+-->
+<body class="exam-body" data-sg-admin-bar>
+
+<div class="exam-shell">
+
+  <!-- 상단바 1행 — 좌: 브랜드 / 우: 섹션별 버튼.
+       DOM 순서는 Exit · Volume · Help · Review · Back · Next 로 고정이며
+       관찰된 네 화면(listening / reading / speaking / moduleEnd)의 좌→우 순서를 모두 만족한다.
+       섹션별 노출은 syncActions() 가 [hidden] 으로 제어한다. -->
+  <header class="exam-topbar">
+    <div class="exam-brand">
+      <b id="exam-title">StudyGround NT-016</b>
+      <small id="exam-subtitle"></small>
+    </div>
+
+    <div class="exam-actions">
+      <button type="button" class="exam-btn danger" id="btn-exit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+        <span data-en>Exit Test</span><span data-ko>시험 나가기</span>
+      </button>
+      <button type="button" class="exam-btn" id="btn-volume" aria-expanded="false">
+        <span data-en>Volume</span><span data-ko>음량</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9a4 4 0 0 1 0 6"/><path d="M19.5 6.5a8 8 0 0 1 0 11"/></svg>
+      </button>
+      <button type="button" class="exam-btn" id="btn-help">
+        <span data-en>Help</span><span data-ko>도움말</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.8-.9 1.4v.4"/><path d="M12 17h.01"/></svg>
+      </button>
+      <!-- Review 는 현재 문항의 플래그 토글이다(눌린 상태가 보인다). -->
+      <button type="button" class="exam-btn" id="btn-review" aria-pressed="false" hidden>
+        <span data-en>Review</span><span data-ko>표시</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4h9l-1 3h6v9h-7l-1-3H5"/></svg>
+      </button>
+      <button type="button" class="exam-btn" id="btn-back" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        <span data-en>Back</span><span data-ko>이전</span>
+      </button>
+      <button type="button" class="exam-btn primary" id="btn-advance">
+        <span data-en id="advance-en">Continue</span><span data-ko id="advance-ko">계속</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 상단바 2행 · 서브바 — 좌: "Listening | Question 25 of 32", 우: MM:SS + Hide Time.
+       타이머가 없는 화면에서는 우측(#exam-time)이 통째로 비고,
+       moduleEnd 처럼 서브바 자체가 없는 화면에서는 이 행이 [hidden] 이다. -->
+  <div class="exam-subbar" id="exam-subbar" hidden>
+    <div class="exam-crumb">
+      <b id="subbar-section"></b>
+      <span class="exam-crumb-sep" id="subbar-sep">|</span>
+      <span id="subbar-progress"></span>
+    </div>
+    <div class="exam-time" id="exam-time" hidden>
+      <span class="exam-time-value" id="timer-value"></span>
+      <button type="button" class="exam-hidetime" id="btn-hide-time">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/><path d="M3 21L21 3"/></svg>
+        <span data-en id="hidetime-en">Hide Time</span><span data-ko id="hidetime-ko">시간 숨기기</span>
+      </button>
     </div>
   </div>
-</header>
 
-<main class="wrap">
-  <div class="page-h">
-    <span class="pill" style="margin-bottom:8px">SET 9 · Listening preview</span>
-    <h1 style="font-size:clamp(28px,4vw,44px)"><span data-en>SET 9 — Listening</span><span data-ko>SET 9 — 리스닝</span></h1>
-    <p class="sub"><span data-en>Same screen as the exam: the speaker's picture on the left, the choices on the right, 20 seconds per question. The question itself is spoken — it never appears on screen in Task 1.</span>
-      <span data-ko>시험 화면과 동일한 배치입니다. 왼쪽 화자 사진 · 오른쪽 선택지 · 문항당 20초. Task 1의 질문은 음성으로만 나가며 화면에 표시되지 않습니다.</span></p>
+  <main class="exam-main">
+    <div class="exam-screen" id="screen-mount"></div>
+  </main>
+
+  <!-- 음량 팝오버 — 모달이 아니라 상단바 아래 우측 패널(관찰값). -->
+  <div class="exam-popover" id="pop-volume" hidden>
+    <button type="button" class="exam-pop-close" id="btn-volume-close" aria-label="Close">&#215;</button>
+    <div class="exam-meter" id="volume-meter"></div>
+    <input type="range" id="volume-range" class="exam-vol-range" min="0" max="100" value="80">
   </div>
 
-  <!-- 과제 리마인더 -->
-  <section class="taskcard">
-    <h3><span data-en>Task 1 — Short response (spoken question)</span><span data-ko>Task 1 — 단답 응답 (음성 질문)</span></h3>
-    <ul>
-      <li><span data-en>The speaker <b>says the question aloud</b>. It is <b>not shown on screen</b> — you only see the speaker's picture.</span>
-        <span data-ko>화자가 <b>질문을 음성으로 말합니다</b>. 질문은 <b>화면에 표시되지 않고</b> 화자 사진만 보입니다.</span></li>
-      <li><span data-en>The audio <b>plays once</b>. The choices appear on the <b>right side</b> when it ends.</span>
-        <span data-ko>오디오는 <b>1회만</b> 재생되며, 재생이 끝나면 <b>오른쪽</b>에 선택지가 나타납니다.</span></li>
-      <li><span data-en>You have a <b>20-second limit</b> to choose.</span>
-        <span data-ko>선택 제한시간은 <b>20초</b>입니다.</span></li>
-    </ul>
-    <small class="src">최종수정사항.docx · TOEFL Listening Task 1</small>
-  </section>
+  <footer class="exam-footer">
+    <span class="exam-status" id="exam-status"></span>
+    <div class="exam-footctl">
+      <span class="lang">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="ko">KO</button>
+      </span>
+      <button type="button" class="exam-fs" id="btn-fullscreen" aria-label="Fullscreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg>
+      </button>
+    </div>
+  </footer>
+</div>
 
-  <section class="taskcard">
-    <h3><span data-en>Task 2 — Conversations, announcements &amp; talks</span><span data-ko>Task 2 — 대화 · 안내방송 · 강의</span></h3>
-    <ul>
-      <li><span data-en>Listen to the full audio first — no questions are on screen while it plays.</span>
-        <span data-ko>먼저 오디오를 끝까지 듣습니다. 재생 중에는 문항이 화면에 없습니다.</span></li>
-      <li><span data-en><b>Each question appears after</b> the conversation, one at a time, with a <b>20-second limit</b> to answer.</span>
-        <span data-ko>대화가 끝난 뒤 <b>문항이 하나씩 나타나며</b>, 문항마다 <b>20초</b>의 답변 제한시간이 있습니다.</span></li>
-    </ul>
-    <small class="src">최종수정사항.docx · TOEFL Listening Task 2</small>
-  </section>
+<!-- Exit Test 확인 -->
+<div class="exam-modal" id="modal-exit" hidden>
+  <div class="exam-modal-card">
+    <h2><span data-en>Exit this test?</span><span data-ko>시험을 나가시겠습니까?</span></h2>
+    <p>
+      <span data-en>Your answers and remaining time are saved. You can resume this session later.</span>
+      <span data-ko>답안과 남은 시간이 저장됩니다. 나중에 이 세션을 이어서 응시할 수 있습니다.</span>
+    </p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn" data-close="modal-exit">
+        <span data-en>Stay</span><span data-ko>계속 응시</span>
+      </button>
+      <button type="button" class="exam-btn primary" id="btn-exit-confirm">
+        <span data-en>Exit Test</span><span data-ko>나가기</span>
+      </button>
+    </div>
+  </div>
+</div>
 
-  <div id="host"></div>
-  <p class="muted" style="font-size:12px;margin:22px 0 6px">
-    <span data-en>Preview only: replay and the answer key are study aids and are disabled in the real exam runtime.</span>
-    <span data-ko>미리보기 전용: 다시 듣기와 정답 표시는 학습용이며 실제 시험 런타임에서는 제공되지 않습니다.</span>
-  </p>
-</main>
+<!-- Help -->
+<div class="exam-modal" id="modal-help" hidden>
+  <div class="exam-modal-card">
+    <h2><span data-en>Help</span><span data-ko>도움말</span></h2>
+    <p>
+      <span data-en>The timer at the right of the bar above shows the time left for the current question or module. Select Hide Time to hide it — the clock keeps running. Audio plays once. Use Continue / Next to move forward.</span>
+      <span data-ko>위 막대 오른쪽 타이머는 현재 문항 또는 모듈의 남은 시간입니다. Hide Time 을 누르면 숫자만 감춰지고 시간은 계속 흐릅니다. 오디오는 1회만 재생됩니다. Continue / Next 로 진행합니다.</span>
+    </p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn primary" data-close="modal-help">
+        <span data-en>Close</span><span data-ko>닫기</span>
+      </button>
+    </div>
+  </div>
+</div>
 
-<footer class="foot"><div class="wrap foot-in">
-  <small class="muted">© SMEAG StudyGround · SET 9 Listening</small>
-  <div class="foot-links"><a href="tests.html" data-en>Mock Tests</a><a href="tests.html" data-ko>모의고사</a></div>
-</div></footer>
+<!-- 재개 확인 -->
+<div class="exam-modal" id="modal-resume" hidden>
+  <div class="exam-modal-card">
+    <h2><span data-en>Resume your test?</span><span data-ko>시험을 이어서 볼까요?</span></h2>
+    <p id="resume-note">
+      <span data-en>An unfinished session was found on this device. Time spent while you were away has already been counted.</span>
+      <span data-ko>이 기기에 완료되지 않은 세션이 있습니다. 자리를 비운 동안의 시간도 이미 소모된 것으로 계산됩니다.</span>
+    </p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn" id="btn-restart">
+        <span data-en>Start new</span><span data-ko>새로 시작</span>
+      </button>
+      <button type="button" class="exam-btn primary" id="btn-resume">
+        <span data-en>Resume</span><span data-ko>이어서 응시</span>
+      </button>
+    </div>
+  </div>
+</div>
 
-<!-- question-config.js 는 팩보다 먼저 — 팩이 window 에 실리는 순간 문항 교체분을 입힌다. -->
+<script src="assets/app.js"></script>
+<!-- 관리자 계층 — 학생 화면에는 아무 것도 그리지 않는다(Ctrl+Alt+A 또는 좌하단 ⚙ 로 로그인).
+     question-config.js 는 exam-shell.js 가 콘텐츠 팩을 붙이기 전에 실려야 교체분이 반영된다. -->
 <script src="assets/question-config.js"></script>
-<script src="assets/set9.js"></script>
-<script src="assets/set9-audio.js"></script>
 <script src="assets/audio-config.js"></script>
 <script src="assets/admin-session.js"></script>
 <script src="assets/admin-bar.js"></script>
-<script src="assets/app.js"></script>
+<script src="assets/exam-clock.js"></script>
+<script src="assets/exam-store.js"></script>
+<script src="assets/exam-render.js"></script>
+<script src="assets/exam-engine.js"></script>
 <script>
-(function () {
-  var PACK = window.SMEAG_SET9, AUD = window.SMEAG_SET9_AUDIO;
-  var host = document.getElementById('host');
-  if (!PACK || !host) return;
-
-  var LIMIT = 20;                       // timing.toefl.json listening perQuestionSec
-  var KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
-  var FALLBACK_PIC = {
-    conversation: 'media/pictures/TOEFL Listening Image (2 People).png',
-    announcement: 'media/pictures/TOEFL Listening Image (Single male).png',
-    talk: 'media/pictures/TOEFL Listening Image (Academic, Single female).png'
-  };
-
-  function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
-  function fmt(s) { s = Math.max(0, Math.ceil(s)); return '0:' + (s < 10 ? '0' : '') + s; }
-
-  /* ── 스크립트/보이스 인덱스 ──────────────────────────────
-     set9-audio.js 의 클립 id 꼬리 번호로 문항·블록에 붙인다.
-       set9-M1-sr-01      → L1|1
-       set9-M1-conv-13-14 → L1|13-14   (블록 heading "Questions 13-14")   */
-  var META = {};
-  (AUD && AUD.modules || []).forEach(function (m) {
-    m.items.forEach(function (it) {
-      var mod = /-M2-/.test(it.id) ? 'L2' : 'L1';
-      var n = it.id.match(/(\d+)(?:-(\d+))?$/);
-      if (!n) return;
-      var key = mod + '|' + (n[2] ? (+n[1]) + '-' + (+n[2]) : String(+n[1]));
-      META[key] = { transcript: it.transcript || '', voices: it.voices || [] };
-    });
-  });
-  function metaFor(modId, label) { return META[modId + '|' + label] || null; }
-  function blockLabel(block) {
-    var m = String(block.heading || '').match(/(\d+)\s*-\s*(\d+)/);
-    return m ? (+m[1]) + '-' + (+m[2]) : null;
-  }
-  function blockPic(block) {
-    if (block.image) return block.image;
-    var i = String(block.instruction || '').toLowerCase();
-    if (i.indexOf('conversation') >= 0) return FALLBACK_PIC.conversation;
-    if (i.indexOf('announcement') >= 0) return FALLBACK_PIC.announcement;
-    return FALLBACK_PIC.talk;
-  }
-
-  /* ── 20초 카운트다운 ─────────────────────────────────── */
-  function makeTimer(onExpire) {
-    var box = document.createElement('div');
-    box.className = 'tmr is-idle';
-    box.innerHTML =
-      '<div class="tmr-row"><span class="tmr-num">' + fmt(LIMIT) + '</span>' +
-        '<span class="tmr-cap"><span data-en>seconds to answer</span><span data-ko>초 안에 선택</span></span></div>' +
-      '<div class="tmr-bar"><span class="tmr-fill"></span></div>';
-    var num = box.querySelector('.tmr-num'), fill = box.querySelector('.tmr-fill'), tick = null;
-    box.start = function () {
-      if (tick) return;
-      var end = Date.now() + LIMIT * 1000;
-      box.className = 'tmr';
-      tick = setInterval(function () {
-        var left = (end - Date.now()) / 1000;
-        num.textContent = fmt(left);
-        fill.style.width = Math.max(0, Math.min(100, left / LIMIT * 100)) + '%';
-        box.className = left <= 5 ? 'tmr is-low' : 'tmr';
-        if (left <= 0) { box.stop(); onExpire && onExpire(); }
-      }, 100);
-    };
-    box.stop = function () { if (tick) { clearInterval(tick); tick = null; } };
-    box.freeze = function (cap) {
-      box.stop(); box.className = 'tmr is-idle';
-      var c = box.querySelector('.tmr-cap');
-      if (cap) c.innerHTML = '<span data-en>' + esc(cap.en) + '</span><span data-ko>' + esc(cap.ko) + '</span>';
-    };
-    return box;
-  }
-
-  /* ── 선택지 ─────────────────────────────────────────── */
-  function makeOptions(q, timer) {
-    var box = document.createElement('div');
-    box.className = 'lst-opts is-locked';
-    var answered = false;
-    (q.choices || []).forEach(function (text, i) {
-      var lab = document.createElement('label');
-      lab.className = 'opt';
-      lab.innerHTML = '<input type="radio" name="' + esc(q.id) + '" value="' + i + '" disabled>' +
-        '<span class="opt-key">' + KEYS[i] + '</span><span class="opt-t">' + esc(text) + '</span>';
-      lab.querySelector('input').addEventListener('change', function () { pick(i); });
-      box.appendChild(lab);
-    });
-    var verdict = document.createElement('p');
-    verdict.className = 'verdict hidden';
-    box.appendChild(verdict);
-
-    function reveal(picked) {
-      answered = true;
-      box.className = 'lst-opts is-locked';
-      var opts = box.querySelectorAll('.opt');
-      for (var i = 0; i < opts.length; i++) {
-        opts[i].classList.remove('is-selected');
-        if (i === q.answer) opts[i].classList.add('is-correct');
-        else if (i === picked) opts[i].classList.add('is-wrong');
-      }
-      verdict.className = 'verdict ' + (picked === q.answer ? 'ok' : 'no');
-      verdict.innerHTML = picked === q.answer
-        ? '<span data-en>Correct — ' + KEYS[q.answer] + '</span><span data-ko>정답 — ' + KEYS[q.answer] + '</span>'
-        : (picked == null
-            ? '<span data-en>Time is up. Answer: ' + KEYS[q.answer] + '</span><span data-ko>시간 종료. 정답: ' + KEYS[q.answer] + '</span>'
-            : '<span data-en>Answer: ' + KEYS[q.answer] + '</span><span data-ko>정답: ' + KEYS[q.answer] + '</span>');
-      timer && timer.freeze(picked == null
-        ? { en: 'time expired', ko: '시간 종료' }
-        : { en: 'answered', ko: '답변 완료' });
-    }
-    function pick(i) { if (!answered) reveal(i); }
-
-    box.unlock = function () { if (answered) return; box.className = 'lst-opts';
-      var inp = box.querySelectorAll('input'); for (var i = 0; i < inp.length; i++) inp[i].disabled = false; };
-    box.expire = function () { if (!answered) reveal(null); };
-    return box;
-  }
-
-  /* ── 오디오 + 사진(좌측) ────────────────────────────── */
-  /* 화면에 들어오면 스스로 재생한다 — "재생을 누르세요" 대기 단계는 두지 않는다.
-     브라우저 자동재생 정책상 사용자 조작 이전에는 소리가 차단될 수 있으므로,
-     play() 가 거부된 카드에 한해 재생 버튼을 내준다. 조작이 한 번 일어난 뒤의
-     카드들은 그대로 자동 재생된다. */
-  var playing = null;   // 스크롤 중 여러 오디오가 겹치지 않게 한 번에 하나만 재생
-
-  function makeStage(card, src, pic, onEnded) {
-    var wrap = document.createElement('div');
-    wrap.className = 'lst-illus';
-    wrap.innerHTML =
-      '<div class="picwrap">' +
-        '<img class="lst-au-speaker lst-illus-img" src="' + esc(pic) + '" alt="speaker" loading="lazy">' +
-        '<div class="picstate"><span data-en>Audio starts automatically</span><span data-ko>오디오가 자동으로 재생됩니다</span></div>' +
-      '</div>' +
-      '<div class="picbtns">' +
-        '<button class="btn sm hidden" type="button" data-act="play">▶ <span data-en>Play</span><span data-ko>재생</span></button>' +
-        '<button class="btn ghost sm hidden" type="button" data-act="replay">🔁 <span data-en>Replay (study)</span><span data-ko>다시 듣기 (학습)</span></button>' +
-      '</div>' +
-      '<audio preload="metadata" src="' + esc(src) + '"></audio>';
-    var audio = wrap.querySelector('audio'), state = wrap.querySelector('.picstate');
-    var playBtn = wrap.querySelector('[data-act="play"]'), replayBtn = wrap.querySelector('[data-act="replay"]');
-    audio.style.display = 'none';
-    var started = false;
-
-    function say(en, ko) {
-      state.innerHTML = '<span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span>';
-    }
-    function start() {
-      if (started) return;
-      started = true;
-      if (playing && playing !== audio) { playing.pause(); }
-      playing = audio;
-      audio.play().catch(function () {
-        // 자동재생 차단 — 이 카드만 수동 재생으로 되돌린다.
-        started = false;
-        playBtn.classList.remove('hidden');
-        say('Tap play to start', '재생을 눌러 시작하세요');
-      });
-    }
-    playBtn.addEventListener('click', function () { playBtn.classList.add('hidden'); start(); });
-    replayBtn.addEventListener('click', function () { audio.currentTime = 0; audio.play(); });
-    audio.addEventListener('play', function () {
-      card.classList.add('is-playing'); playBtn.classList.add('hidden');
-      say('Audio playing — plays once', '재생 중 — 1회만 재생');
-    });
-    audio.addEventListener('timeupdate', function () {
-      if (!isFinite(audio.duration)) return;
-      var left = audio.duration - audio.currentTime;
-      say('Audio playing · ' + fmt(left) + ' left', '재생 중 · ' + fmt(left) + ' 남음');
-    });
-    audio.addEventListener('ended', function () {
-      card.classList.remove('is-playing'); replayBtn.classList.remove('hidden');
-      say('Audio finished', '재생 완료');
-      onEnded && onEnded();
-    });
-    audio.addEventListener('error', function () { say('Audio file missing', '오디오 파일 없음'); });
-
-    // 카드가 화면에 충분히 들어오면 한 번만 재생을 건다.
-    if (window.IntersectionObserver) {
-      var io = new IntersectionObserver(function (entries) {
-        for (var i = 0; i < entries.length; i++) {
-          if (entries[i].isIntersecting) { io.disconnect(); start(); return; }
-        }
-      }, { threshold: 0.55 });
-      io.observe(card);
-    } else {
-      playBtn.classList.remove('hidden');   // 폴백 — 관찰이 안 되면 수동 재생
-    }
-    return wrap;
-  }
-
-  /* 관리자로 로그인했을 때만 붙는 문항 교체 바로가기.
-     학생 화면에는 아무 것도 추가되지 않는다. */
-  function adminEdit(qid) {
-    if (!window.SG_ADMIN || !SG_ADMIN.can('set9') || !qid) return null;
-    var a = document.createElement('a');
-    a.className = 'kind';
-    a.style.cssText = 'margin-left:auto;text-decoration:none;background:var(--peach);color:var(--brand-ink);cursor:pointer';
-    a.href = 'admin-questions.html?set=set9&q=' + encodeURIComponent(qid);
-    a.innerHTML = '✎ <span data-en>Replace</span><span data-ko>교체</span>';
-    return a;
-  }
-
-  function transcriptNode(meta) {
-    if (!meta || !meta.transcript) return null;
-    var d = document.createElement('details');
-    d.className = 'tr';
-    d.innerHTML = '<summary><span data-en>Transcript</span><span data-ko>스크립트</span></summary><p>' + esc(meta.transcript) + '</p>';
-    return d;
-  }
-
-  /* ── Task 1: 문항 = 화면 1개 ─────────────────────────── */
-  function renderShort(q, modId) {
-    var meta = metaFor(modId, String(q.no));
-    var card = document.createElement('article');
-    card.className = 'qc';
-    card.innerHTML =
-      '<div class="qc-head"><b><span data-en>Question ' + q.no + '</span><span data-ko>문항 ' + q.no + '</span></b>' +
-        '<span class="kind task1">Task 1 · short response</span></div>';
-    var ed = adminEdit(q.id); if (ed) card.querySelector('.qc-head').appendChild(ed);
-
-    var split = document.createElement('div');
-    split.className = 'lst-split';
-
-    var right = document.createElement('div');
-    right.className = 'lst-q';
-    right.innerHTML = '<p class="spoken">🔊 <span data-en>The speaker asks the question aloud. It is not shown on screen — choose the best response on the right within 20 seconds.</span>' +
-      '<span data-ko>화자가 질문을 음성으로 말합니다. 질문은 화면에 표시되지 않으며, 20초 안에 오른쪽에서 가장 알맞은 응답을 고르세요.</span></p>';
-
-    var timer = makeTimer(function () { opts.expire(); });
-    var opts = makeOptions(q, timer);
-    right.appendChild(opts);
-    right.appendChild(timer);
-
-    var stage = makeStage(card, q.audio, q.image || FALLBACK_PIC.talk, function () {
-      opts.unlock(); timer.start();
-    });
-
-    split.appendChild(stage);
-    split.appendChild(right);
-    card.appendChild(split);
-    var tr = transcriptNode(meta);
-    if (tr) card.appendChild(tr);
-    return card;
-  }
-
-  /* ── Task 2: 오디오 1개 + 문항이 하나씩 등장 ─────────── */
-  function renderSet(block, modId) {
-    var label = blockLabel(block);
-    var meta = label ? metaFor(modId, label) : null;
-    var card = document.createElement('article');
-    card.className = 'qc setcard';
-    card.innerHTML =
-      '<div class="qc-head"><b>' + esc(block.heading || '') + '</b>' +
-        '<span class="kind">Task 2 · ' + esc((block.instruction || '').replace(/^Listen to (a|an) /i, '').replace(/\.$/, '')) + '</span></div>';
-    var firstQ = (block.questions || [])[0];
-    var ed = adminEdit(firstQ && firstQ.id); if (ed) card.querySelector('.qc-head').appendChild(ed);
-
-    var split = document.createElement('div');
-    split.className = 'lst-split';
-    var right = document.createElement('div');
-    right.className = 'lst-q';
-    right.innerHTML = '<p class="spoken">🔊 <span data-en>Listen to the whole audio first. Each question appears afterwards, one at a time, with 20 seconds to answer.</span>' +
-      '<span data-ko>오디오를 끝까지 들으세요. 이어서 문항이 하나씩 나타나며, 문항마다 20초의 답변 시간이 주어집니다.</span></p>';
-
-    /* 문항 큐 — 오디오가 끝나면 1번부터 순서대로 연다.
-       advance(i) 는 "지금 열려 있는 문항이 i일 때만" 다음으로 넘어간다.
-       답변 클릭과 20초 만료가 겹쳐도 한 칸만 움직인다. */
-    var at = -1;
-    var queue = (block.questions || []).map(function (q, i) {
-      var wrap = document.createElement('div');
-      wrap.className = 'setq hidden';
-      var no = document.createElement('div');
-      no.className = 'setq-no';
-      no.innerHTML = '<span data-en>Question ' + q.no + '</span><span data-ko>문항 ' + q.no + '</span>';
-      var p = document.createElement('p');
-      p.className = 'prompt';
-      p.textContent = q.prompt || '';
-      var timer = makeTimer(function () { opts.expire(); advance(i); });
-      var opts = makeOptions(q, timer);
-      // 답을 고르면 다음 문항으로 넘어간다(시험과 같은 진행).
-      wrap.addEventListener('change', function () { setTimeout(function () { advance(i); }, 900); });
-      wrap.appendChild(no); wrap.appendChild(p); wrap.appendChild(opts); wrap.appendChild(timer);
-      wrap.reveal = function () { wrap.classList.remove('hidden'); opts.unlock(); timer.start(); };
-      return wrap;
-    });
-    function advance(from) {
-      if (at !== from) return;                 // 이미 넘어간 뒤의 중복 호출
-      at = from + 1;
-      if (at >= queue.length) return;
-      queue[at].reveal();
-      queue[at].scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    var stage = makeStage(card, block.audio, blockPic(block), function () {
-      if (at >= 0 || !queue.length) return;
-      at = 0;
-      queue[0].reveal();
-    });
-    split.appendChild(stage);
-    split.appendChild(right);
-    card.appendChild(split);
-    queue.forEach(function (n) { card.appendChild(n); });
-    var tr = transcriptNode(meta);
-    if (tr) card.appendChild(tr);
-    return card;
-  }
-
-  /* ── 렌더 ────────────────────────────────────────────── */
-  var LIST = (PACK.sections || []).filter(function (s) { return s.id === 'listening'; })[0];
-  if (!LIST) return;
-
-  /* 문항 교체(SG_QUESTIONS)나 관리자 로그인 상태가 바뀌면 통째로 다시 그린다.
-     팩 객체는 이미 교체분이 반영된 상태이므로 여기서는 읽기만 하면 된다. */
-  function renderAll() {
-    host.innerHTML = '';
-    LIST.modules.forEach(function (mod) {
-      var total = mod.blocks.reduce(function (n, b) { return n + (b.questions || []).length; }, 0);
-      var w = document.createElement('div');
-      w.className = 'modwrap';
-      w.innerHTML = '<h2>' + esc(mod.label) + ' · ' + total +
-        ' <span data-en>questions</span><span data-ko>문항</span></h2>';
-
-      mod.blocks.forEach(function (block) {
-        var bw = document.createElement('div');
-        bw.className = 'blockwrap';
-        bw.innerHTML = '<h3>' + esc(block.heading || '') + '</h3>' +
-          '<p class="bins">' + esc(block.instruction || '') + '</p>';
-        if (block.perQuestionAudio) {
-          (block.questions || []).forEach(function (q) { bw.appendChild(renderShort(q, mod.id)); });
-        } else {
-          bw.appendChild(renderSet(block, mod.id));
-        }
-        w.appendChild(bw);
-      });
-      host.appendChild(w);
-    });
-  }
-
-  renderAll();
-  if (window.SG_QUESTIONS) SG_QUESTIONS.onChange(renderAll);
-  if (window.SG_ADMIN) SG_ADMIN.onChange(renderAll);
-
-})();
+window.SG_ROUTE = {
+  section: 'listening',
+  set: 'set9',
+  base: '',
+  path: location.pathname
+};
 </script>
-<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+<script src="assets/exam-shell.js"></script>
 </body>
 </html>

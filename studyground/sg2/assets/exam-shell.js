@@ -54,9 +54,14 @@ window.SG_RUNTIME = (function () {
     return 'set1';
   }
 
+  /* `?set=` > SG_ROUTE.set > `?testId=` 추론.
+     SG_ROUTE.set 은 특정 세트 전용 진입 페이지(set9.html 등)가 쿼리스트링 없이도
+     제 콘텐츠 팩을 싣기 위한 것이다 — URL 로 준 값이 언제나 이긴다. */
   function currentSetId() {
     var explicit = query('set').toLowerCase();
     if (SET_IDS[explicit]) return explicit;
+    var routed = String(ROUTE.set || '').toLowerCase();
+    if (SET_IDS[routed]) return routed;
     return setFromTestId(query('testId'));
   }
 
