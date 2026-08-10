@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<!--
+  admin-audio-sync.html — 스크립트 ↔ 오디오 대조.
+
+  admin-audio-files.html 이 "파일이 있느냐"를 본다면, 이 화면은 "그 파일이 대본대로
+  읽혔느냐"를 본다. 재생/일시정지/정지 · 문장 클릭 이동 · 파일 교체를 한 화면에 두고,
+  대본과 실제 발화를 형광으로 대조한다.
+
+  두 겹의 형광이 있다.
+    1) 재생 위치     — 지금 나오고 있는 문장에 노란 형광이 따라 붙는다(길이 비례 추정).
+    2) 불일치 단어   — config/audio-check.set9.json 의 asr(받아쓰기)과 단어 단위로 맞춰
+                       대본에만 있는 말은 노랑, 음성에만 있는 말은 빨강으로 칠한다.
+
+  asr 은 오프라인 도구(smeag-local-ai/qa/transcribe.py)가 만든 값이라 아직 없는 클립도
+  있다. 그런 클립은 대조 없이 재생 위치 형광만 쓴다.
+
+  SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Script ↔ audio check (admin) · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:14px 0 10px; }
+  .bar input[type=search] { flex:1; min-width:180px; font:inherit; font-size:12.5px; padding:9px 12px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .seg { display:inline-flex; border:1px solid var(--line-2); border-radius:9px; overflow:hidden; }
+  .seg button { font:inherit; font-size:12px; font-weight:750; padding:8px 12px; border:0; cursor:pointer;
+    background:var(--paper,#fff); color:var(--ink-2); }
+  .seg button + button { border-left:1px solid var(--line-2); }
+  .seg button.on { background:var(--brand); color:#fff; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin:4px 0 14px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 13px; min-width:96px; }
+  .stat b { display:block; font-size:20px; font-weight:850; line-height:1.15; }
+  .stat span { font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .stat.ok b { color:#1f7a44; } .stat.warn b { color:#a86b00; } .stat.bad b { color:#c62828; }
+
+  /* 좌: 클립 목록 · 우: 대조 패널 */
+  .split { display:grid; grid-template-columns:300px minmax(0,1fr); gap:18px; align-items:start; }
+  @media (max-width:900px) { .split { grid-template-columns:minmax(0,1fr); } }
+
+  .clips { border:1px solid var(--line); border-radius:13px; overflow:hidden; background:var(--card);
+    max-height:74vh; overflow-y:auto; }
+  .clip { display:block; width:100%; text-align:left; font:inherit; background:transparent; border:0;
+    border-bottom:1px solid var(--line); padding:10px 12px; cursor:pointer; }
+  .clip:hover { background:var(--cream-2); }
+  .clip.on { background:var(--peach); }
+  .clip b { display:block; font-size:12.5px; font-weight:800; }
+  .clip small { display:block; font-size:11px; color:var(--muted); margin-top:2px; }
+  .pct { float:right; font-size:11px; font-weight:850; padding:1px 7px; border-radius:999px; }
+  .pct.ok { background:#e6f5ec; color:#1f7a44; }
+  .pct.warn { background:#fdf1dc; color:#a86b00; }
+  .pct.bad { background:#fdeeee; color:#c62828; }
+  .pct.none { background:var(--cream-2); color:var(--muted); }
+
+  .panel { border:1px solid var(--line); border-radius:13px; background:var(--card); padding:15px 17px; }
+  .phead { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:4px; }
+  .phead b { font-size:15px; font-weight:850; }
+  .ppath { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; color:var(--muted);
+    word-break:break-all; margin-bottom:11px; }
+
+  /* 트랜스포트 */
+  .tp { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .tpb { font:inherit; font-size:14px; font-weight:800; min-width:44px; padding:8px 12px; border-radius:10px;
+    cursor:pointer; border:1px solid var(--line-2); background:var(--paper,#fff); color:var(--ink); }
+  .tpb.primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+  .time { font-variant-numeric:tabular-nums; font-size:12px; font-weight:750; color:var(--muted); }
+  .track { height:8px; border-radius:999px; background:var(--cream-2); margin:11px 0 4px; cursor:pointer; position:relative; }
+  .track .fill { position:absolute; inset:0 auto 0 0; width:0; background:var(--brand); border-radius:999px; }
+
+  /* 교체 */
+  .swap { display:flex; gap:7px; flex-wrap:wrap; align-items:center; margin-top:12px;
+    border-top:1px solid var(--line); padding-top:12px; }
+  .swap input[type=url] { flex:1; min-width:170px; font:inherit; font-size:12px; padding:7px 10px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .file-btn { position:relative; overflow:hidden; }
+  .file-btn input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+  /* 대조 본문 */
+  .cols { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin-top:14px; }
+  .col > h3 { font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--muted); margin:0 0 7px; }
+  .sent { font-size:14px; line-height:1.85; padding:5px 7px; border-radius:8px; cursor:pointer; margin-bottom:3px; }
+  .sent:hover { background:var(--cream-2); }
+  .sent .spk { font-size:10.5px; font-weight:800; color:var(--brand-ink); margin-right:6px; letter-spacing:.03em; }
+  .sent.now { background:#fff59d; box-shadow:0 0 0 2px #f9a825 inset; }   /* 재생 위치 형광 */
+  .asrbox { font-size:13.5px; line-height:1.85; }
+
+  /* 불일치 형광 */
+  mark.miss { background:#fff176; color:#4a3b00; padding:0 2px; border-radius:3px; }   /* 대본에만 */
+  mark.extra { background:#ff8a80; color:#5c0a02; padding:0 2px; border-radius:3px; }  /* 음성에만 */
+  .legend { display:flex; gap:12px; flex-wrap:wrap; font-size:11.5px; color:var(--muted); margin-top:10px; }
+  .legend i { font-style:normal; padding:1px 6px; border-radius:4px; }
+  .noasr { font-size:12.5px; color:var(--muted); background:var(--cream-2); border-radius:9px; padding:9px 11px; }
+  .gate { max-width:520px; margin:60px auto; text-align:center; }
+  .flash { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:var(--paper);
+    padding:10px 18px; border-radius:999px; font-size:13px; font-weight:700; opacity:0; transition:opacity .2s;
+    pointer-events:none; z-index:60; }
+  .flash.on { opacity:1; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Admin · Script ↔ audio</small></span></a>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="admin-audio-files.html"><span data-en>File check</span><span data-ko>파일 점검</span></a>
+      <a class="btn ghost sm" href="admin-questions.html"><span data-en>Questions</span><span data-ko>문항 교체</span></a>
+      <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main" hidden>
+  <div class="page-h" style="padding-top:24px">
+    <span class="pill" style="margin-bottom:8px">Admin · Script ↔ audio</span>
+    <h1 style="font-size:clamp(25px,4vw,38px)"><span data-en>Does the audio match the script?</span><span data-ko>오디오가 대본대로 읽혔나</span></h1>
+    <p class="sub"><span data-en>Play, pause and click any sentence to jump there. The sentence being spoken is highlighted; words the speech recogniser did not hear are highlighted too, so a wrong or missing line is visible at a glance.</span>
+      <span data-ko>재생·일시정지하고 문장을 클릭하면 그 지점으로 이동합니다. 지금 나오는 문장에 형광이 따라붙고, 받아쓰기와 어긋난 단어도 형광으로 표시되어 빠지거나 다르게 읽힌 부분이 한눈에 보입니다.</span></p>
+  </div>
+
+  <div class="bar">
+    <span class="seg" id="filtseg">
+      <button data-f="all" class="on"><span data-en>All</span><span data-ko>전체</span></button>
+      <button data-f="bad"><span data-en>Mismatches</span><span data-ko>불일치</span></button>
+      <button data-f="noasr"><span data-en>Not transcribed</span><span data-ko>받아쓰기 없음</span></button>
+    </span>
+    <input type="search" id="q" placeholder="Filter by id or text…">
+    <span class="prog muted" style="font-size:12px;font-weight:700" id="hint"></span>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="split">
+    <div class="clips" id="clips"></div>
+    <div class="panel" id="panel"></div>
+  </div>
+</main>
+
+<div class="wrap gate" id="gate">
+  <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
+  <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<script src="assets/set9-audio.js"></script>
+<script src="assets/audio-config.js"></script>
+<script src="assets/admin-session.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var A = window.SG_ADMIN;
+  var wantSet = (new URLSearchParams(location.search).get('set') || 'set9').toLowerCase();
+
+  function esc(t){ var d=document.createElement('div'); d.textContent=t==null?'':t; return d.innerHTML; }
+  function mmss(s){ if (s==null || !isFinite(s)) return '0:00'; s=Math.max(0,Math.round(s));
+    return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+  var flash=document.getElementById('flash'), flashT;
+  function toast(m){ flash.textContent=m; flash.classList.add('on'); clearTimeout(flashT);
+    flashT=setTimeout(function(){flash.classList.remove('on');},1700); }
+
+  /* ── 단어 대조 ────────────────────────────────────────────
+     비교는 소문자·문장부호를 뗀 토큰으로 하고, 화면에는 원문 그대로 쓴다.
+     LCS(최장공통부분수열)로 짝을 지어, 짝을 못 찾은 토큰만 형광이 된다. */
+  function tokenize(text) {
+    var out = [], re = /[A-Za-z0-9']+/g, m;
+    while ((m = re.exec(text))) out.push({ raw: m[0], at: m.index, key: m[0].toLowerCase().replace(/'/g, '') });
+    return out;
+  }
+  function lcsPairs(a, b) {
+    var n = a.length, m = b.length;
+    if (!n || !m) return { pairs: [], same: 0 };
+    // 메모리 보호: 아주 긴 텍스트는 앞부분만 맞춘다(리스닝 클립은 한참 못 미친다).
+    var LIM = 900;
+    if (n > LIM) { a = a.slice(0, LIM); n = LIM; }
+    if (m > LIM) { b = b.slice(0, LIM); m = LIM; }
+    var dp = [], i, j;
+    for (i = 0; i <= n; i++) dp.push(new Uint16Array(m + 1));
+    for (i = n - 1; i >= 0; i--) {
+      for (j = m - 1; j >= 0; j--) {
+        dp[i][j] = a[i].key === b[j].key ? dp[i + 1][j + 1] + 1
+                 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+      }
+    }
+    var pairs = [];
+    i = 0; j = 0;
+    while (i < n && j < m) {
+      if (a[i].key === b[j].key) { pairs.push([i, j]); i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+      else j++;
+    }
+    return { pairs: pairs, same: pairs.length };
+  }
+  /** 원문의 [from,to) 구간을 "형광 처리할 토큰 인덱스 집합"과 함께 HTML 로.
+   *  구간을 받는 이유: 문장별 표시와 전체 통계가 같은 한 번의 대조 결과를 쓰게 하려고 —
+   *  문장마다 다시 맞추면 같은 단어가 여러 문장에 중복으로 매칭돼 숫자가 어긋난다. */
+  function paint(text, toks, badSet, cls, from, to) {
+    from = from || 0;
+    to = to == null ? text.length : to;
+    var out = '', cur = from;
+    toks.forEach(function (t, i) {
+      if (t.at < from || t.at >= to) return;
+      out += esc(text.slice(cur, t.at));
+      out += badSet[i] ? '<mark class="' + cls + '">' + esc(t.raw) + '</mark>' : esc(t.raw);
+      cur = t.at + t.raw.length;
+    });
+    return out + esc(text.slice(cur, to));
+  }
+  function compare(item) {
+    var st = tokenize(item.text || ''), sa = tokenize(item.asr || '');
+    if (!item.asr || !sa.length) return { ratio: null, scriptHtml: esc(item.text || ''), asrHtml: '' };
+    var r = lcsPairs(st, sa);
+    var okS = {}, okA = {};
+    r.pairs.forEach(function (p) { okS[p[0]] = 1; okA[p[1]] = 1; });
+    var missS = {}, extraA = {}, k;
+    for (k = 0; k < st.length; k++) if (!okS[k]) missS[k] = 1;
+    for (k = 0; k < sa.length; k++) if (!okA[k]) extraA[k] = 1;
+    return {
+      ratio: (2 * r.same) / (st.length + sa.length),
+      missing: Object.keys(missS).length,
+      extra: Object.keys(extraA).length,
+      scriptHtml: paint(item.text, st, missS, 'miss'),
+      asrHtml: paint(item.asr, sa, extraA, 'extra')
+    };
+  }
+
+  /* ── 문장 나누기 + 재생 위치 추정 ─────────────────────────
+     문장별 정확한 타임코드는 없다. 글자 수 비례로 나눈 "추정" 구간이며,
+     화면에도 추정이라고 적는다. 클릭 이동도 같은 추정을 쓴다. */
+  function sentences(text) {
+    var out = [];
+    String(text || '').split(/\n+/).forEach(function (line) {
+      var t = line.trim(); if (!t) return;
+      var sp = '', m = /^([A-Za-z][A-Za-z0-9 ._'-]{0,20}):\s*(.*)$/.exec(t);
+      if (m) { sp = m[1]; t = m[2]; }
+      (t.match(/[^.!?]+[.!?]*/g) || [t]).forEach(function (s) {
+        s = s.trim(); if (!s) return;
+        out.push({ speaker: sp, text: s });
+        sp = '';                       // 화자 표시는 그 줄의 첫 문장에만
+      });
+    });
+    return out;
+  }
+  function windows(sents, duration) {
+    var total = sents.reduce(function (n, s) { return n + Math.max(6, s.text.length); }, 0) || 1;
+    var at = 0;
+    return sents.map(function (s) {
+      var share = Math.max(6, s.text.length) / total * (duration || 0);
+      var w = { start: at, end: at + share };
+      at += share;
+      return w;
+    });
+  }
+
+  /* ── 데이터 ─────────────────────────────────────────────── */
+  var ITEMS = [], cur = null, filt = 'all', filtQ = '';
+
+  function loadData() {
+    return fetch('config/audio-check.' + wantSet + '.json')
+      .then(function (r) { return r.ok ? r.json() : { items: [] }; })
+      .catch(function () { return { items: [] }; })
+      .then(function (j) {
+        ITEMS = (j.items || []).map(function (x) {
+          return { id: x.id, path: x.path, text: x.text || '', asr: x.asr || '',
+                   voices: x.voices || [], source: 'exam' };
+        });
+        // 미리듣기 클립(set9-audio.js)은 대본만 있고 받아쓰기가 없다 — 같이 보여준다.
+        var D = window.SMEAG_SET9_AUDIO;
+        if (D && wantSet === 'set9') {
+          (D.modules || []).forEach(function (m) {
+            (m.items || []).forEach(function (it) {
+              ITEMS.push({ id: it.id, path: it.audio, text: it.transcript || '', asr: '',
+                           voices: it.voices || [], source: 'preview' });
+            });
+          });
+        }
+        ITEMS.forEach(function (it) { it.cmp = compare(it); });
+      });
+  }
+
+  function band(it) {
+    var r = it.cmp.ratio;
+    if (r == null) return 'none';
+    if (r >= 0.97) return 'ok';
+    if (r >= 0.85) return 'warn';
+    return 'bad';
+  }
+  function visible() {
+    return ITEMS.filter(function (it) {
+      if (filt === 'bad' && band(it) !== 'bad' && band(it) !== 'warn') return false;
+      if (filt === 'noasr' && it.cmp.ratio != null) return false;
+      if (filtQ && (it.id + ' ' + it.text).toLowerCase().indexOf(filtQ) < 0) return false;
+      return true;
+    });
+  }
+
+  function paintList() {
+    var list = visible();
+    document.getElementById('clips').innerHTML = list.map(function (it) {
+      var b = band(it), r = it.cmp.ratio;
+      return '<button class="clip' + (cur && cur.id === it.id ? ' on' : '') + '" data-id="' + esc(it.id) + '">' +
+        '<span class="pct ' + b + '">' + (r == null ? 'no ASR' : Math.round(r * 100) + '%') + '</span>' +
+        '<b>' + esc(it.id) + '</b>' +
+        '<small>' + esc((it.voices || []).join(', ') || it.source) + '</small></button>';
+    }).join('') || '<div style="padding:14px;font-size:12px" class="muted">No clips match.</div>';
+
+    var withAsr = ITEMS.filter(function (i) { return i.cmp.ratio != null; });
+    var ok = withAsr.filter(function (i) { return band(i) === 'ok'; }).length;
+    var warn = withAsr.filter(function (i) { return band(i) === 'warn'; }).length;
+    var bad = withAsr.filter(function (i) { return band(i) === 'bad'; }).length;
+    document.getElementById('stats').innerHTML =
+      '<div class="stat"><b>' + ITEMS.length + '</b><span data-en>clips</span><span data-ko>클립</span></div>' +
+      '<div class="stat ok"><b>' + ok + '</b><span data-en>match</span><span data-ko>일치</span></div>' +
+      '<div class="stat warn"><b>' + warn + '</b><span data-en>minor drift</span><span data-ko>경미한 차이</span></div>' +
+      '<div class="stat bad"><b>' + bad + '</b><span data-en>mismatch</span><span data-ko>불일치</span></div>' +
+      '<div class="stat"><b>' + (ITEMS.length - withAsr.length) + '</b><span data-en>no ASR</span><span data-ko>받아쓰기 없음</span></div>';
+  }
+
+  /* ── 재생 패널 ─────────────────────────────────────────── */
+  var audio = new Audio();
+  audio.preload = 'metadata';
+  var SENTS = [], WINS = [];
+
+  function paintPanel() {
+    var host = document.getElementById('panel');
+    if (!cur) {
+      host.innerHTML = '<p class="muted" style="font-size:13px;margin:0">' +
+        '<span data-en>Pick a clip on the left.</span><span data-ko>왼쪽에서 클립을 고르세요.</span></p>';
+      return;
+    }
+    var c = cur.cmp, b = band(cur);
+    var info = SG_AUDIO.info(cur.path);
+    host.innerHTML =
+      '<div class="phead"><b>' + esc(cur.id) + '</b>' +
+        '<span class="pct ' + b + '">' + (c.ratio == null ? 'no ASR' : Math.round(c.ratio * 100) + '% match') + '</span>' +
+        (c.ratio != null ? '<span class="muted" style="font-size:11.5px">' +
+          c.missing + ' <span data-en>in script only</span><span data-ko>대본에만</span> · ' +
+          c.extra + ' <span data-en>in audio only</span><span data-ko>음성에만</span></span>' : '') +
+        (info.mode !== 'default' ? '<span class="pct warn">replaced</span>' : '') +
+      '</div>' +
+      '<div class="ppath">' + esc(decodeURI(cur.path)) + '</div>' +
+      '<div class="tp">' +
+        '<button class="tpb primary" data-act="toggle">▶</button>' +
+        '<button class="tpb" data-act="stop">⏹</button>' +
+        '<button class="tpb" data-act="back">−5s</button>' +
+        '<span class="time" id="tnow">0:00 / 0:00</span>' +
+        '<select class="tpb" data-act="rate" style="min-width:70px">' +
+          '<option value="0.75">0.75×</option><option value="1" selected>1×</option>' +
+          '<option value="1.25">1.25×</option><option value="1.5">1.5×</option></select>' +
+      '</div>' +
+      '<div class="track" data-act="seek"><span class="fill"></span></div>' +
+      '<div class="swap">' +
+        '<input type="url" data-act="url" placeholder="Replace with a URL (https://… or media/…)"' +
+          ' value="' + (info.mode === 'url' ? esc(info.url) : '') + '">' +
+        '<button class="tpb" data-act="seturl"><span data-en>Set URL</span><span data-ko>URL 적용</span></button>' +
+        '<label class="tpb file-btn"><span data-en>Upload</span><span data-ko>업로드</span>' +
+          '<input type="file" accept="audio/*" data-act="file"></label>' +
+        '<button class="tpb" data-act="revert"><span data-en>Revert</span><span data-ko>되돌리기</span></button>' +
+      '</div>' +
+      '<div class="cols">' +
+        '<div class="col"><h3><span data-en>Script — click a line to jump</span><span data-ko>대본 — 문장을 클릭하면 이동</span></h3>' +
+          '<div id="sents"></div></div>' +
+        '<div class="col"><h3><span data-en>What the recogniser heard</span><span data-ko>받아쓰기 결과</span></h3>' +
+          (c.ratio == null
+            ? '<div class="noasr"><span data-en>This clip has not been transcribed yet, so only the playback highlight is available.</span>' +
+              '<span data-ko>아직 받아쓰기가 없는 클립이라 재생 위치 형광만 표시됩니다.</span></div>'
+            : '<div class="asrbox">' + c.asrHtml + '</div>') +
+        '</div>' +
+      '</div>' +
+      '<div class="legend">' +
+        '<span><i class="miss" style="background:#fff176">' +
+          '<span data-en>in the script, not heard</span><span data-ko>대본에 있는데 안 들림</span></i></span>' +
+        '<span><i class="extra" style="background:#ff8a80">' +
+          '<span data-en>heard, not in the script</span><span data-ko>대본에 없는데 들림</span></i></span>' +
+        '<span><i style="background:#fff59d">' +
+          '<span data-en>playing now (estimated position)</span><span data-ko>지금 재생 중 (추정 위치)</span></i></span>' +
+      '</div>';
+
+    // 대본 문장 — 불일치 형광은 문장 단위로 다시 칠한다.
+    SENTS = sentences(cur.text);
+    var sc = document.getElementById('sents');
+    sc.innerHTML = SENTS.map(function (s, i) {
+      var html;
+      if (c.ratio == null) html = esc(s.text);
+      else {
+        var one = compare({ text: s.text, asr: cur.asr });   // 문장 vs 전체 받아쓰기
+        html = one.scriptHtml;
+      }
+      return '<div class="sent" data-i="' + i + '">' +
+        (s.speaker ? '<span class="spk">' + esc(s.speaker) + '</span>' : '') + html + '</div>';
+    }).join('');
+    recalcWindows();
+    tick();
+  }
+
+  function recalcWindows() { WINS = windows(SENTS, audio.duration || 0); }
+
+  function tick() {
+    var t = document.getElementById('tnow');
+    if (!t) return;
+    t.textContent = mmss(audio.currentTime) + ' / ' + mmss(audio.duration);
+    var f = document.querySelector('.track .fill');
+    if (f) f.style.width = (audio.duration ? (audio.currentTime / audio.duration * 100) : 0) + '%';
+    var btn = document.querySelector('[data-act=toggle]');
+    if (btn) btn.textContent = audio.paused ? '▶' : '⏸';
+    var idx = -1, i;
+    for (i = 0; i < WINS.length; i++) if (audio.currentTime >= WINS[i].start && audio.currentTime < WINS[i].end) { idx = i; break; }
+    var nodes = document.querySelectorAll('#sents .sent');
+    for (i = 0; i < nodes.length; i++) nodes[i].classList.toggle('now', i === idx && !audio.paused);
+  }
+  audio.addEventListener('timeupdate', tick);
+  audio.addEventListener('play', tick);
+  audio.addEventListener('pause', tick);
+  audio.addEventListener('ended', tick);
+  audio.addEventListener('loadedmetadata', function () { recalcWindows(); tick(); });
+
+  function select(id) {
+    cur = ITEMS.filter(function (i) { return i.id === id; })[0] || null;
+    if (!cur) return;
+    audio.pause();
+    audio.src = SG_AUDIO.resolve(cur.path);
+    audio.currentTime = 0;
+    paintList(); paintPanel();
+  }
+
+  document.getElementById('clips').addEventListener('click', function (e) {
+    var b = e.target.closest('.clip'); if (!b) return;
+    select(b.getAttribute('data-id'));
+  });
+
+  document.getElementById('panel').addEventListener('click', function (e) {
+    var s = e.target.closest('.sent');
+    if (s) {
+      var w = WINS[+s.getAttribute('data-i')];
+      if (w) { audio.currentTime = w.start + 0.01; audio.play().catch(function () {}); }
+      return;
+    }
+    var t = e.target.closest('[data-act]'); if (!t) return;
+    var act = t.getAttribute('data-act');
+    if (act === 'toggle') { audio.paused ? audio.play().catch(function () { toast('Cannot play this file.'); }) : audio.pause(); }
+    else if (act === 'stop') { audio.pause(); audio.currentTime = 0; tick(); }
+    else if (act === 'back') { audio.currentTime = Math.max(0, audio.currentTime - 5); }
+    else if (act === 'seek') {
+      var r = t.getBoundingClientRect();
+      if (audio.duration) audio.currentTime = (e.clientX - r.left) / r.width * audio.duration;
+    }
+    else if (act === 'seturl') {
+      var url = document.querySelector('[data-act=url]').value.trim();
+      if (!url) return;
+      SG_AUDIO.setUrl(cur.path, url).then(function () { toast('URL applied'); select(cur.id); });
+    }
+    else if (act === 'revert') {
+      SG_AUDIO.reset(cur.path).then(function () { toast('Reverted to the original clip'); select(cur.id); });
+    }
+  });
+  document.getElementById('panel').addEventListener('change', function (e) {
+    if (e.target.getAttribute('data-act') === 'rate') { audio.playbackRate = +e.target.value; return; }
+    if (e.target.getAttribute('data-act') !== 'file') return;
+    var f = e.target.files[0]; if (!f || !cur) return;
+    SG_AUDIO.setFile(cur.path, f).then(function () { toast('Uploaded · ' + f.name); select(cur.id); });
+  });
+
+  document.getElementById('filtseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-f]'); if (!b) return;
+    filt = b.getAttribute('data-f');
+    this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    paintList();
+  });
+  document.getElementById('q').addEventListener('input', function () {
+    filtQ = this.value.trim().toLowerCase(); paintList();
+  });
+  // 스페이스바 = 재생/일시정지 (입력창에 있을 때는 제외)
+  document.addEventListener('keydown', function (e) {
+    if (e.code !== 'Space' || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    e.preventDefault();
+    audio.paused ? audio.play().catch(function () {}) : audio.pause();
+  });
+
+  function open() {
+    document.getElementById('gate').hidden = true;
+    document.getElementById('main').hidden = false;
+    document.getElementById('hint').innerHTML =
+      '<span data-en>Space = play/pause</span><span data-ko>스페이스바 = 재생/일시정지</span>';
+    Promise.all([SG_AUDIO.ready(), loadData()]).then(function () {
+      paintList();
+      var first = visible()[0];
+      if (first) select(first.id); else paintPanel();
+    });
+  }
+  document.getElementById('signin').addEventListener('click', function () { A.openLogin(wantSet, open); });
+  if (A.can(wantSet)) open(); else A.openLogin(wantSet, open);
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

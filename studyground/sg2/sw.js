@@ -27,7 +27,9 @@
 //      목록이 바뀌었으므로 VERSION 을 올려 셸 캐시를 새로 채운다.
 // v12: 문항 스크립트 → 음성 생성. 서버리스 함수 api/tts.js (키는 Vercel 환경변수)와
 //      클라이언트 assets/tts-client.js 추가. /api/* 는 프리캐시·런타임 캐시 모두 제외한다.
-const VERSION = 'sg-v12';
+// v13: 대본↔오디오 대조 화면(admin-audio-sync.html)과 그 데이터
+//      (config/audio-check.set9.json) 추가. 여러 셸 HTML 의 네비가 바뀌었다.
+const VERSION = 'sg-v13';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -35,6 +37,7 @@ const SHELL_ASSETS = [
   'index.html', 'npz.html', 'tests.html', 'dashboard.html', 'learning.html',
   'community.html', 'tools.html', 'purchase.html', 'login.html', 'signup.html', 'exam.html',
   'set9.html', 'admin-audio.html', 'admin-audio-files.html', 'admin-questions.html',
+  'admin-audio-sync.html', 'config/audio-check.set9.json',
 
   // 내부용 접근 게이트 — 오프라인 진입도 이 화면을 먼저 지난다.
   'gate.html', 'assets/gate.js', 'assets/audio-config.js',

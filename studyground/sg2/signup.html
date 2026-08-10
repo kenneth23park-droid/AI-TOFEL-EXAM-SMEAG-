@@ -11,6 +11,12 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="StudyGround">
+<style>
+  .auth-err { display:none; font-size:13px; font-weight:700; color:#b3261e; background:#fdeceb;
+              border:1px solid #f5c6c2; border-radius:10px; padding:10px 12px; margin-bottom:14px; }
+  .auth-err.on { display:block; }
+  .auth-hint { font-size:12px; color:var(--dim); margin-top:6px; }
+</style>
 </head>
 <body>
 
@@ -29,11 +35,19 @@
     <span class="pill"><span data-en>Free 1-week Lite pass</span><span data-ko>무료 1주 Lite 패스</span></span>
     <h1 class="mt-16"><span data-en>Join StudyGround</span><span data-ko>StudyGround 가입</span></h1>
     <p class="sub"><span data-en>Create a free account to take the SET 1 mock test.</span><span data-ko>무료 계정을 만들고 SET 1 모의고사에 응시하세요.</span></p>
-    <form onsubmit="event.preventDefault();location.href='dashboard.html'">
-      <div class="field"><label data-en>Name</label><label data-ko>이름</label><input type="text" placeholder="Sunny" required></div>
-      <div class="field"><label data-en>Email</label><label data-ko>이메일</label><input type="email" placeholder="you@example.com" required></div>
-      <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label><input type="password" placeholder="••••••••" required></div>
-      <button class="btn brand block lg" type="submit"><span data-en>Sign up free</span><span data-ko>무료 가입</span></button>
+    <div class="auth-err" id="err"><span data-en></span><span data-ko></span></div>
+    <form id="f" autocomplete="on">
+      <div class="field"><label data-en>Name</label><label data-ko>이름</label>
+        <input id="name" type="text" name="name" autocomplete="name" placeholder="Sunny" required></div>
+      <div class="field"><label data-en>Email</label><label data-ko>이메일</label>
+        <input id="email" type="email" name="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com" required></div>
+      <div class="field"><label data-en>Student ID <span class="muted">(optional)</span></label><label data-ko>학번 <span class="muted">(선택)</span></label>
+        <input id="sid" type="text" name="student-id" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="s2025001">
+        <div class="auth-hint"><span data-en>If your class gave you one, you can log in with it instead of your email.</span><span data-ko>반에서 학번을 받았다면 이메일 대신 학번으로 로그인할 수 있습니다.</span></div></div>
+      <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
+        <input id="pw" type="password" name="new-password" autocomplete="new-password" minlength="8" placeholder="••••••••" required>
+        <div class="auth-hint"><span data-en>At least 8 characters.</span><span data-ko>8자 이상.</span></div></div>
+      <button class="btn brand block lg" id="go" type="submit"><span data-en>Sign up free</span><span data-ko>무료 가입</span></button>
     </form>
     <div class="auth-alt"><span data-en>Already have an account?</span><span data-ko>이미 계정이 있으신가요?</span>
       <a href="login.html"><span data-en>Log in</span><span data-ko>로그인</span></a></div>
@@ -41,6 +55,41 @@
 </div>
 
 <script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script>
+/* 가입 → 세션 발급까지 한 번에. 성공하면 곧바로 로그인 상태로 대시보드에 떨어진다. */
+(function () {
+  'use strict';
+  var f = document.getElementById('f'), go = document.getElementById('go'), err = document.getElementById('err');
+
+  function show(en, ko) {
+    err.querySelector('[data-en]').textContent = en;
+    err.querySelector('[data-ko]').textContent = ko || en;
+    err.classList.add('on');
+  }
+
+  // 이미 로그인해 있으면 가입 폼을 다시 보여줄 이유가 없다.
+  if (window.SG_AUTH && SG_AUTH.user()) location.replace('dashboard.html');
+
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    err.classList.remove('on');
+    go.disabled = true;
+
+    SG_AUTH.signUp({
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      studentId: document.getElementById('sid').value.trim(),
+      password: document.getElementById('pw').value
+    }).then(function () {
+      location.replace('dashboard.html');
+    }).catch(function (e2) {
+      go.disabled = false;
+      show(e2.message, e2.messageKo);
+    });
+  });
+})();
+</script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
 </html>
