@@ -8,9 +8,10 @@
  *   • URL    — any http(s) address or relative path   → localStorage
  *   • Upload — an mp3/m4a/wav from the machine        → IndexedDB (blob)
  *
- * 말하기 속도는 클립마다가 아니라 세트 전체에 하나로 걸린다(setRate). 파일을 다시
- * 만들지 않고 재생 배속만 바꾸는 값이라, apply() 가 훑는 모든 <audio> 에 그대로
- * 얹힌다 — 오버라이드가 없는 클립에도 걸어야 "전체가 같은 속도"가 성립한다.
+ * 말하기 속도는 두 층이다. 전체에 한 번에 거는 값(setRate) 위에, 클립 하나만 따로
+ * 고친 값(setClipRate)이 얹힌다 — 한 클립만 유독 빠르게 읽힌 경우를 위해서다.
+ * 파일을 다시 만들지 않고 재생 배속만 바꾸는 값이라, apply() 가 훑는 모든 <audio> 에
+ * 그대로 얹힌다 — 오버라이드가 없는 클립에도 걸어야 "전체가 같은 속도"가 성립한다.
  *
  * URL overrides survive reload as-is. Uploaded blobs live in IndexedDB and get
  * a fresh object URL each load. If IndexedDB is blocked (some file:// contexts),
@@ -23,12 +24,14 @@
 
   var LS_KEY = 'sg_audio_overrides_v1';
   var RATE_KEY = 'sg_audio_rate_v1';
+  var CLIP_RATE_KEY = 'sg_audio_clip_rates_v1';
   var DB_NAME = 'sg-audio-overrides';
   var DB_STORE = 'files';
   var RATE_MIN = 0.5, RATE_MAX = 1.5;
 
   var meta = {};          // key -> {mode:'url',url} | {mode:'file',name,size,type}
   var rate = 1;           // 전체 말하기 속도(배속). 1 = 원본 그대로.
+  var clipRates = {};     // key -> 그 클립만의 배속. 없으면 전체 값을 따른다.
   var blobUrls = {};      // key -> object URL for an uploaded blob (rebuilt each load)
   var listeners = [];
   var dbFailed = false;
@@ -44,12 +47,23 @@
     catch (e) { meta = {}; }
     if (!meta || typeof meta !== 'object') meta = {};
     try { rate = clampRate(localStorage.getItem(RATE_KEY) || 1); } catch (e) { rate = 1; }
+    try { clipRates = JSON.parse(localStorage.getItem(CLIP_RATE_KEY) || '{}'); }
+    catch (e) { clipRates = {}; }
+    if (!clipRates || typeof clipRates !== 'object') clipRates = {};
   }
   function saveMeta() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(meta)); } catch (e) { /* quota/private */ }
   }
   function saveRate() {
     try { localStorage.setItem(RATE_KEY, String(rate)); } catch (e) { /* quota/private */ }
+  }
+  function saveClipRates() {
+    try { localStorage.setItem(CLIP_RATE_KEY, JSON.stringify(clipRates)); } catch (e) { /* quota/private */ }
+  }
+  /** 이 클립이 실제로 나갈 배속. 클립 값이 있으면 그것, 없으면 전체 값. */
+  function rateFor(key) {
+    var own = key && clipRates[key];
+    return typeof own === 'number' ? own : rate;
   }
 
   function openDb() {
@@ -89,18 +103,26 @@
   }
   function emit() { listeners.forEach(function (fn) { try { fn(); } catch (e) {} }); }
 
-  /** 화면 안의 모든 <audio>/<video> 에 전체 속도를 얹는다.
+  /** 오디오 하나가 어느 클립인지 — 교체된 파일은 src 가 blob 이라 원래 경로로 본다. */
+  function keyOf(el) {
+    if (!el || !el.getAttribute) return '';
+    var own = el.getAttribute('data-sg-orig') || el.getAttribute('src');
+    if (own) return own;
+    var s = el.querySelector ? el.querySelector('source') : null;
+    return s ? (s.getAttribute('data-sg-orig') || s.getAttribute('src') || '') : '';
+  }
+  function tuneEl(el) {
+    var r = rateFor(keyOf(el));
+    try { el.defaultPlaybackRate = r; el.playbackRate = r; } catch (e) {}
+  }
+  /** 화면 안의 모든 <audio>/<video> 에 각자의 속도를 얹는다.
    *  defaultPlaybackRate 도 함께 두는 이유: src 가 바뀌면 playbackRate 는
    *  defaultPlaybackRate 로 돌아간다 — 교체된 클립도 같은 속도로 남아야 한다. */
   function applyRate(root) {
     root = root || document;
     var els = root.querySelectorAll ? root.querySelectorAll('audio, video') : [];
-    for (var i = 0; i < els.length; i++) {
-      try { els[i].defaultPlaybackRate = rate; els[i].playbackRate = rate; } catch (e) {}
-    }
-    if (root.tagName === 'AUDIO' || root.tagName === 'VIDEO') {
-      try { root.defaultPlaybackRate = rate; root.playbackRate = rate; } catch (e) {}
-    }
+    for (var i = 0; i < els.length; i++) tuneEl(els[i]);
+    if (root.tagName === 'AUDIO' || root.tagName === 'VIDEO') tuneEl(root);
   }
 
   var API = {
@@ -139,9 +161,10 @@
     },
     isOverridden: function (key) { return !!meta[key]; },
 
-    /* ── 전체 말하기 속도 ────────────────────────────────────
-       클립 하나가 아니라 모든 클립에 한 번에 걸린다. 파일은 그대로 두고 재생
-       배속만 바꾸므로 되돌리기도 값 하나(1×)로 끝난다. */
+    /* ── 말하기 속도 ─────────────────────────────────────────
+       두 층이다. 아래에 전체 값(setRate)이 깔리고, 그 위에 클립 하나만 따로
+       고친 값(setClipRate)이 얹힌다. 클립 값을 지우면 다시 전체 값을 따라간다.
+       파일은 그대로 두고 재생 배속만 바꾸므로 되돌리기가 값 하나로 끝난다. */
     rateRange: function () { return { min: RATE_MIN, max: RATE_MAX }; },
     getRate: function () { return rate; },
     setRate: function (v) {
@@ -156,10 +179,45 @@
       }
       return rate;
     },
-    /** 오디오 하나에 현재 속도를 얹는다 — DOM 밖의 new Audio() 용. */
-    tune: function (media) {
+    /** 이 클립이 실제로 나갈 배속(클립 값 없으면 전체 값). */
+    rateOf: function (key) { return rateFor(key); },
+    /** 이 클립만의 값. 전체 값을 따르는 중이면 null. */
+    clipRate: function (key) {
+      return typeof clipRates[key] === 'number' ? clipRates[key] : null;
+    },
+    /** 클립 하나의 배속. v 가 null/빈값이면 전체 값으로 되돌린다. */
+    setClipRate: function (key, v) {
+      if (!key) return rate;
+      var prev = typeof clipRates[key] === 'number' ? clipRates[key] : null;
+      var next = (v === null || v === undefined || v === '') ? null : clampRate(v);
+      if (next === prev) return rateFor(key);
+      if (next === null) delete clipRates[key]; else clipRates[key] = next;
+      saveClipRates();
+      applyRate(document);
+      emit();
+      if (window.SG_LOG) {
+        SG_LOG.add({ action: 'audio', target: key, field: 'speed',
+                     before: prev === null ? 'all (' + rate + '×)' : prev + '×',
+                     after: next === null ? 'all (' + rate + '×)' : next + '×' });
+      }
+      return rateFor(key);
+    },
+    /** 클립별 예외를 모두 지운다 — 전부 전체 값 하나로. */
+    clearClipRates: function () {
+      var n = Object.keys(clipRates).length;
+      if (!n) return 0;
+      clipRates = {}; saveClipRates(); applyRate(document); emit();
+      if (window.SG_LOG) SG_LOG.add({ action: 'audio', target: 'all clips', field: 'speed',
+                                      after: 'per-clip speeds cleared (' + n + ')' });
+      return n;
+    },
+    clipRateCount: function () { return Object.keys(clipRates).length; },
+    /** 오디오 하나에 속도를 얹는다 — DOM 밖의 new Audio() 용.
+     *  key 를 주면 그 클립 값이, 없으면 전체 값이 걸린다. */
+    tune: function (media, key) {
       if (!media) return media;
-      try { media.defaultPlaybackRate = rate; media.playbackRate = rate; } catch (e) {}
+      var r = rateFor(key);
+      try { media.defaultPlaybackRate = r; media.playbackRate = r; } catch (e) {}
       return media;
     },
     setUrl: function (key, url) {

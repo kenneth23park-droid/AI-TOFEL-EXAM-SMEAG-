@@ -44,6 +44,9 @@
   .speed input[type=range] { flex:1; min-width:150px; max-width:260px; accent-color:var(--brand); }
   .speed .rateval { font-variant-numeric:tabular-nums; font-size:13px; font-weight:850; min-width:52px; }
   .speed small { font-size:11px; color:var(--muted); }
+  .speed .rateex { display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-weight:750;
+    color:#a86b00; background:#fdf1dc; border-radius:999px; padding:3px 5px 3px 11px; }
+  .speed .rateex .tpb { font-size:11px; font-weight:800; min-width:0; padding:3px 9px; border-radius:999px; }
   .speed.off b, .speed.off .rateval { color:var(--ink); }
   .speed:not(.off) .rateval { color:var(--brand-ink,#c0392b); }
 
@@ -65,6 +68,7 @@
   .clip.on { background:var(--peach); }
   .clip b { display:block; font-size:12.5px; font-weight:800; }
   .clip small { display:block; font-size:11px; color:var(--muted); margin-top:2px; }
+  .clip .ownrate { font-weight:850; color:#a86b00; }   /* 이 클립만 따로 정한 배속 */
   .pct { float:right; font-size:11px; font-weight:850; padding:1px 7px; border-radius:999px; }
   .pct.ok { background:#e6f5ec; color:#1f7a44; }
   .pct.warn { background:#fdf1dc; color:#a86b00; }
@@ -161,8 +165,12 @@
       <button data-r="0.8">0.8×</button><button data-r="0.9">0.9×</button>
       <button data-r="1">1×</button><button data-r="1.1">1.1×</button><button data-r="1.25">1.25×</button>
     </span>
-    <small><span data-en>Applies here and in the exam — files are untouched, only playback speed.</span>
-      <span data-ko>이 화면과 시험 화면에 함께 적용됩니다 — 파일은 그대로이고 재생 속도만 바뀝니다.</span></small>
+    <small><span data-en>Applies here and in the exam — files are untouched, only playback speed. A single clip can differ; set that below the player.</span>
+      <span data-ko>이 화면과 시험 화면에 함께 적용됩니다 — 파일은 그대로이고 재생 속도만 바뀝니다. 클립 하나만 다르게 하려면 재생 줄에서 정하세요.</span></small>
+    <span class="rateex" id="rateex" hidden>
+      <span data-en><b class="n">0</b> clip(s) set separately</span><span data-ko>클립 <b class="n">0</b>개는 따로 지정됨</span>
+      <button class="tpb" data-act="clearclip"><span data-en>Clear</span><span data-ko>모두 해제</span></button>
+    </span>
   </div>
 
   <div class="stats" id="stats"></div>
@@ -199,30 +207,44 @@
     flashT=setTimeout(function(){flash.classList.remove('on');},1700); }
   function fmtRate(r){ return String(Math.round(r*100)/100) + '×'; }   /* 1 → "1×", 1.25 → "1.25×" */
 
-  /* ── 전체 말하기 속도 ─────────────────────────────────────
-     값은 SG_AUDIO 에 있고(모든 화면이 같은 값을 읽는다), 여기서는 슬라이더가
-     그 값을 밀고 당길 뿐이다. 이 화면의 오디오는 DOM 밖의 new Audio() 라
-     apply() 가 닿지 않으므로 tune() 으로 직접 얹는다. */
+  /* ── 말하기 속도 ──────────────────────────────────────────
+     두 자리에서 만진다. 위 막대는 전체 클립, 재생 줄의 드롭다운은 그 클립 하나.
+     클립 값이 있으면 그것이 이기고, "All" 로 되돌리면 다시 전체 값을 따른다.
+     값 자체는 SG_AUDIO 가 들고 있어 시험 화면도 같은 값을 읽는다. 이 화면의
+     오디오는 DOM 밖의 new Audio() 라 apply() 가 닿지 않으므로 tune() 으로 얹는다. */
+  var RATE_OPTS = ['', '0.75', '0.9', '1', '1.1', '1.25', '1.5'];
   var rateEl = document.getElementById('rate');
   var rateVal = document.getElementById('rateval');
+
+  function tuneCur() { if (cur) SG_AUDIO.tune(audio, cur.path); }
   function paintRate() {
-    var r = SG_AUDIO.getRate();
+    var r = SG_AUDIO.getRate(), n = SG_AUDIO.clipRateCount();
     rateEl.value = r;
     rateVal.textContent = fmtRate(r);
     document.getElementById('speed').classList.toggle('off', r === 1);
     document.querySelectorAll('#ratepreset button').forEach(function (b) {
       b.classList.toggle('on', Math.abs(+b.getAttribute('data-r') - r) < 0.001);
     });
-    var t = document.getElementById('trate');
-    if (t) t.textContent = fmtRate(r);
-    SG_AUDIO.tune(audio);
+    // 클립별 예외가 몇 개인지 숨기지 않는다 — 전체 값을 바꿔도 안 따라오는 클립이 있으니.
+    var ex = document.getElementById('rateex');
+    ex.hidden = !n;
+    ex.querySelectorAll('.n').forEach(function (b) { b.textContent = n; });
+    tuneCur();
   }
-  function setRate(v) { SG_AUDIO.setRate(v); paintRate(); }
+  /** 속도가 바뀌면 세 곳이 함께 움직인다 — 막대 · 클립 목록의 표식 · 재생 줄. */
+  function repaintSpeed() { paintRate(); paintList(); paintPanel(); }
+  function setRate(v) { SG_AUDIO.setRate(v); repaintSpeed(); }
   rateEl.addEventListener('input', function () { setRate(+this.value); });
   document.getElementById('ratepreset').addEventListener('click', function (e) {
     var b = e.target.closest('[data-r]'); if (!b) return;
     setRate(+b.getAttribute('data-r'));
     toast('Speaking speed ' + fmtRate(SG_AUDIO.getRate()) + ' · all clips');
+  });
+  document.getElementById('rateex').addEventListener('click', function (e) {
+    if (!e.target.closest('[data-act=clearclip]')) return;
+    var n = SG_AUDIO.clearClipRates();
+    repaintSpeed();
+    toast(n + ' per-clip speeds cleared');
   });
 
   /* ── 단어 대조 ────────────────────────────────────────────
@@ -433,7 +455,9 @@
       return '<button class="clip' + (cur && cur.id === it.id ? ' on' : '') + '" data-id="' + esc(it.id) + '">' +
         '<span class="pct ' + b + '">' + (r == null ? 'no ASR' : Math.round(r * 100) + '%') + '</span>' +
         '<b>' + esc(it.id) + '</b>' +
-        '<small>' + esc((it.voices || []).join(', ') || it.source) + '</small></button>';
+        '<small>' + esc((it.voices || []).join(', ') || it.source) +
+          (SG_AUDIO.clipRate(it.path) ? ' · <span class="ownrate">' + fmtRate(SG_AUDIO.clipRate(it.path)) + '</span>' : '') +
+        '</small></button>';
     }).join('') || '<div style="padding:14px;font-size:12px" class="muted">No clips match.</div>';
 
     var withAsr = ITEMS.filter(function (i) { return i.cmp.ratio != null; });
@@ -462,6 +486,7 @@
     }
     var c = cur.cmp, b = band(cur);
     var info = SG_AUDIO.info(cur.path);
+    var own = SG_AUDIO.clipRate(cur.path);        // null = 전체 값을 따르는 중
     host.innerHTML =
       '<div class="phead"><b>' + esc(cur.id) + '</b>' +
         '<span class="pct ' + b + '">' + (c.ratio == null ? 'no ASR' : Math.round(c.ratio * 100) + '% match') + '</span>' +
@@ -476,7 +501,16 @@
         '<button class="tpb" data-act="stop">⏹</button>' +
         '<button class="tpb" data-act="back">−5s</button>' +
         '<span class="time" id="tnow">0:00 / 0:00</span>' +
-        '<span class="time" id="trate">' + fmtRate(SG_AUDIO.getRate()) + '</span>' +
+        // 이 클립만의 배속. "전체 따름"이면 위 슬라이더 값이 그대로 나간다.
+        '<select class="tpb" data-act="cliprate" style="min-width:104px">' +
+          RATE_OPTS.map(function (v) {
+            var sel = (own === null ? v === '' : +v === own) ? ' selected' : '';
+            return '<option value="' + v + '"' + sel + '>' +
+              (v === '' ? 'All · ' + fmtRate(SG_AUDIO.getRate()) : fmtRate(+v) + ' · this clip') +
+              '</option>';
+          }).join('') +
+        '</select>' +
+        (own === null ? '' : '<button class="tpb" data-act="cliprate-clear" title="Follow the overall speed">↺</button>') +
       '</div>' +
       '<div class="track" data-act="seek"><span class="fill"></span></div>' +
       '<div class="swap">' +
@@ -547,7 +581,7 @@
     audio.pause();
     audio.src = SG_AUDIO.resolve(cur.path);
     audio.currentTime = 0;
-    SG_AUDIO.tune(audio);            // 클립을 바꿔도 속도는 전체 설정 그대로
+    SG_AUDIO.tune(audio, cur.path);  // 클립 값이 있으면 그것, 없으면 전체 값
     paintList(); paintPanel();
   }
 
@@ -577,11 +611,25 @@
       if (!url) return;
       SG_AUDIO.setUrl(cur.path, url).then(function () { toast('URL applied'); select(cur.id); });
     }
+    else if (act === 'cliprate-clear') {
+      SG_AUDIO.setClipRate(cur.path, null);
+      repaintSpeed();
+      toast('Follows the overall speed · ' + fmtRate(SG_AUDIO.getRate()));
+    }
     else if (act === 'revert') {
       SG_AUDIO.reset(cur.path).then(function () { toast('Reverted to the original clip'); select(cur.id); });
     }
   });
   document.getElementById('panel').addEventListener('change', function (e) {
+    if (e.target.getAttribute('data-act') === 'cliprate') {
+      if (!cur) return;
+      var v = e.target.value;
+      SG_AUDIO.setClipRate(cur.path, v === '' ? null : +v);
+      repaintSpeed();
+      toast(v === '' ? 'Follows the overall speed · ' + fmtRate(SG_AUDIO.getRate())
+                     : 'This clip only · ' + fmtRate(+v));
+      return;
+    }
     if (e.target.getAttribute('data-act') !== 'file') return;
     var f = e.target.files[0]; if (!f || !cur) return;
     SG_AUDIO.setFile(cur.path, f).then(function () { toast('Uploaded · ' + f.name); select(cur.id); });

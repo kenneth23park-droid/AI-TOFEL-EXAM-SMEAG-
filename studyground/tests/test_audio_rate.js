@@ -112,7 +112,43 @@ ok(SG2API.getRate() === 1.25, '리로드 뒤에도 값이 남는다', '실제: '
 SG2API.tune(later);
 ok(later.playbackRate === 1.25, 'DOM 밖의 new Audio() 는 tune() 으로 맞춘다', '실제: ' + later.playbackRate);
 
-/* ── 5. 화면이 값을 되읽을 수 있다 ───────────────────────────────────────── */
+/* ── 5. 클립 하나만 따로 ─────────────────────────────────────────────────── */
+
+var envC = makeEnv({});
+var a1 = makeAudio(); a1.setAttribute('src', 'media/audio/set9/l1-q01.mp3');
+var a2 = makeAudio(); a2.setAttribute('src', 'media/audio/set9/l1-q02.mp3');
+envC.medias.push(a1, a2);
+var C = loadStore(envC);
+
+C.setRate(0.9);
+C.setClipRate('media/audio/set9/l1-q02.mp3', 1.25);
+ok(a1.playbackRate === 0.9, '지정하지 않은 클립은 전체 값을 따른다', '실제: ' + a1.playbackRate);
+ok(a2.playbackRate === 1.25, '따로 정한 클립은 그 값이 이긴다', '실제: ' + a2.playbackRate);
+ok(C.clipRate('media/audio/set9/l1-q01.mp3') === null, '전체를 따르는 클립은 clipRate 가 null');
+ok(C.clipRateCount() === 1, '따로 정한 클립 수를 센다', '실제: ' + C.clipRateCount());
+
+C.setRate(1.1);
+ok(a1.playbackRate === 1.1, '전체 값을 바꾸면 따라오는 클립은 따라온다', '실제: ' + a1.playbackRate);
+ok(a2.playbackRate === 1.25, '전체 값을 바꿔도 따로 정한 클립은 그대로다', '실제: ' + a2.playbackRate);
+
+C.setClipRate('media/audio/set9/l1-q02.mp3', null);
+ok(a2.playbackRate === 1.1, 'null 로 지우면 다시 전체 값을 따른다', '실제: ' + a2.playbackRate);
+ok(C.clipRateCount() === 0, '지우면 예외 수가 0 이 된다', '실제: ' + C.clipRateCount());
+
+C.setClipRate('media/audio/set9/l1-q01.mp3', 1.5);
+C.setClipRate('media/audio/set9/l1-q02.mp3', 0.75);
+ok(C.clearClipRates() === 2, 'clearClipRates() 가 지운 개수를 돌려준다');
+ok(a1.playbackRate === 1.1 && a2.playbackRate === 1.1, '모두 해제하면 전부 전체 값',
+   a1.playbackRate + ' / ' + a2.playbackRate);
+
+/* 파일을 교체한 클립도 원래 경로로 알아본다 — src 는 blob 이라 알아볼 수 없다. */
+C.setClipRate('media/audio/set9/l1-q02.mp3', 0.8);
+a2.setAttribute('data-sg-orig', 'media/audio/set9/l1-q02.mp3');
+a2.setAttribute('src', 'blob:whatever');
+C.setRate(1);                                  // 다시 훑게 만든다
+ok(a2.playbackRate === 0.8, '교체된 클립도 원래 경로로 제 속도를 찾는다', '실제: ' + a2.playbackRate);
+
+/* ── 6. 화면이 값을 되읽을 수 있다 ───────────────────────────────────────── */
 
 var range = SG2API.rateRange();
 ok(range.min > 0 && range.max > range.min, 'rateRange() 가 슬라이더 범위를 준다',
