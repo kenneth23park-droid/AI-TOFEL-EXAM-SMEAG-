@@ -51,6 +51,17 @@
     font-variant-numeric:tabular-nums; }
   .seccard .sd { display:block; font-size:11.5px; color:var(--muted); margin-top:3px; }
 
+  /* 겹침 검사 패널 — 목록 자체의 모양은 assets/dup-view.js 가 들고 있다. */
+  .dupbox { border:1px solid var(--line); border-radius:14px; padding:13px 15px 15px; margin:14px 0; background:var(--card); }
+  .dupbox.bad  { border-color:#e0796a; background:var(--peach,#fde5da); }
+  .dupbox.warn { border-color:#e6c15a; background:#fdf6e3; }
+  .dupbox.ok   { border-color:#8fc6a3; background:#eef8f1; }
+  .dupbox .duph { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:11px; }
+  .dupbox .duph b { font-size:14px; }
+  .dupbox .duph .muted { font-size:11.5px; font-weight:700; }
+  .dupbox .duph button { margin-left:auto; }
+  .dupbox .dupv .prow { background:var(--paper,#fff); }
+
   .gates { display:grid; gap:8px; margin:14px 0; }
   .gt { display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:baseline;
     border:1px solid var(--line); border-left:3px solid var(--gc); border-radius:10px;

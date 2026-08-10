@@ -1,0 +1,154 @@
+<!doctype html>
+<!--
+  _verify_dup.html — 겹침 검사 화면의 헤드리스 검증. 배포에서 제외된다(.vercelignore).
+
+  node studyground/tools/dup_check.js 와 tests/test_dup_check.js 는 **판정**을 검산한다.
+  이 페이지가 검산하는 것은 그 다음, 즉 **화면이 실제로 그려지는가**다.
+    · admin-dup.html 이 리포트를 읽어 목록을 그리는가
+    · 한 줄을 누르면 두 문항이 나란히 펼쳐지는가 (사용자가 요구한 "클릭시 그 문항을 보여준다")
+    · 일치 구간이 <mark> 로 칠해지는가
+    · "이 문항 열기" 링크가 admin-questions.html 의 그 문항을 가리키는가
+    · admin-set-import.html 이 dup-core/dup-view 를 싣고 있는가 (세트 생성 시점 검사)
+  페이지 콘솔 에러도 같이 걷는다.
+
+  실행:
+    (cd studyground/sg2 && python3 -m http.server 8899 &)
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+      --disable-gpu --virtual-time-budget=8000 --dump-dom \
+      http://localhost:8899/_verify_dup.html | grep -A99 'id="out"'
+-->
+<html lang="en">
+<head><meta charset="utf-8"><title>verify dup</title></head>
+<body>
+<pre id="out">RUNNING</pre>
+<iframe id="fr" style="width:1100px;height:700px;border:1px solid #ccc"></iframe>
+
+<script>
+var LOG = [], FAILS = 0;
+function ok(cond, label, detail) {
+  LOG.push((cond ? '  ok   ' : '  FAIL ') + label + (cond || !detail ? '' : '\n         ' + detail));
+  if (!cond) FAILS++;
+}
+function done() {
+  document.getElementById('out').textContent =
+    LOG.join('\n') + '\n\n' + (FAILS ? 'FAILED: ' + FAILS : 'ALL PASS');
+}
+
+/* 관리자 게이트를 통과시킨다 — 로그인 모달은 이 검증의 대상이 아니다.
+   키·모양은 assets/admin-session.js 의 것과 같아야 한다. */
+try {
+  localStorage.setItem('sg2_admin_v1', JSON.stringify({
+    id: 'admin', label: 'Master admin', labelKo: '전체 관리자', sets: ['*'], t: Date.now()
+  }));
+  localStorage.setItem('sg2_gate', String(Date.now()));
+} catch (e) {}
+
+var fr = document.getElementById('fr');
+
+function step2() {
+  var d = fr.contentDocument, w = fr.contentWindow;
+
+  ok(!!w.SG_DUP, 'admin-dup.html 이 dup-core.js 를 싣는다');
+  ok(!!w.SG_DUP_VIEW, 'admin-dup.html 이 dup-view.js 를 싣는다');
+  ok(!!w.SG_DUP_REPORT, 'config/dup-report.js 가 로드됐다');
+
+  var main = d.getElementById('main');
+  ok(main && !main.hidden, '관리자 게이트를 통과해 본문이 열렸다');
+
+  var verdict = d.getElementById('verdict');
+  ok(verdict && verdict.textContent.trim().length > 0, '판정 배너가 그려졌다',
+     verdict ? '(비어 있음)' : '(요소 없음)');
+
+  /* 기준선은 high 0 · watch 0 이라 목록이 비어 있다. 클릭 동작을 보려면 강등된
+     것(info)까지 보여 주는 필터로 바꿔야 한다 — 허용목록에 4건이 있다. */
+  var infoBtn = d.querySelector('#sevseg [data-sev="info"]');
+  ok(!!infoBtn, '심각도 필터 단추가 있다');
+  if (infoBtn) infoBtn.click();
+
+  var rows = d.querySelectorAll('#host .prow');
+  ok(rows.length > 0, '겹침 목록이 그려졌다 (' + rows.length + '줄)');
+  if (!rows.length) { done(); return; }
+
+  var row = rows[0];
+  var body = row.querySelector('.pbody');
+  ok(!!body, '첫 줄에 펼침 영역이 있다');
+  var before = body ? w.getComputedStyle(body).display : '';
+  ok(before === 'none', '펼치기 전에는 접혀 있다 (display=' + before + ')');
+
+  /* ── 사용자가 요구한 동작: 한 줄을 누르면 그 문항을 보여 준다 ── */
+  row.querySelector('.phead').click();
+
+  var after = w.getComputedStyle(body).display;
+  ok(after !== 'none', '줄을 누르면 펼쳐진다 (display=' + after + ')');
+
+  var sides = row.querySelectorAll('.side');
+  ok(sides.length === 2, '두 문항이 나란히 나온다 (side ' + sides.length + '개)');
+
+  var texts = row.querySelectorAll('.side .txt');
+  var hasText = texts.length === 2 && texts[0].textContent.trim() && texts[1].textContent.trim();
+  ok(!!hasText, '양쪽 모두 문항 본문을 보여 준다',
+     texts.length ? '[A] ' + texts[0].textContent.slice(0, 60) : '(본문 없음)');
+
+  var marks = row.querySelectorAll('.side .txt mark, .side ol.ch li.same');
+  ok(marks.length > 0, '일치 구간이 표시된다 (' + marks.length + '곳)');
+
+  var link = row.querySelector('.side .acts a');
+  ok(!!link && /admin-questions\.html\?set=/.test(link.getAttribute('href')),
+     '"이 문항 열기" 가 그 문항으로 간다',
+     link ? link.getAttribute('href') : '(링크 없음)');
+
+  var reasons = row.querySelectorAll('.reasons li');
+  ok(reasons.length > 0, '판정 사유가 나온다 (' + reasons.length + '개)');
+
+  var metrics = row.querySelectorAll('.metrics span');
+  ok(metrics.length >= 4, '지표(4-gram·containment·최장연속·선택지)가 나온다');
+
+  /* 다시 누르면 접힌다 */
+  row.querySelector('.phead').click();
+  ok(w.getComputedStyle(body).display === 'none', '다시 누르면 접힌다');
+
+  /* 필터가 실제로 거른다 */
+  var highBtn = d.querySelector('#sevseg [data-sev="high"]');
+  if (highBtn) {
+    highBtn.click();
+    var visible = 0;
+    d.querySelectorAll('#host .prow').forEach(function (r) {
+      if (r.style.display !== 'none') visible++;
+    });
+    ok(visible === 0, 'high 필터에서 아무것도 안 보인다 (기준선에 high 가 없으므로)');
+  }
+
+  step3();
+}
+
+/* 세트 생성 화면 — 겹침 검사가 실제로 배선돼 있는가 */
+function step3() {
+  fr.onload = function () {
+    var d = fr.contentDocument, w = fr.contentWindow;
+    ok(!!w.SG_DUP, 'admin-set-import.html 이 dup-core.js 를 싣는다');
+    ok(!!w.SG_DUP_VIEW, 'admin-set-import.html 이 dup-view.js 를 싣는다');
+    ok(!!w.SMEAG_SET1 && !!w.SMEAG_SET9, '대조 상대(SET1·SET9)가 전역에 올라 있다');
+    ok(!!d.getElementById('dupbox'), '겹침 검사 패널이 있다');
+    ok(!!d.getElementById('duphost'), '겹침 목록이 들어갈 자리가 있다');
+
+    /* 코어가 이 화면에서도 같은 판정을 내는지 — 세트를 만들지 않고 코어만 직접 돌린다. */
+    try {
+      var units = w.SG_DUP.unitsFromPack(w.SMEAG_SET1).concat(w.SG_DUP.unitsFromPack(w.SMEAG_SET9));
+      var res = w.SG_DUP.analyze(units, { allow: {} });
+      ok(res && res.counts && typeof res.counts.high === 'number',
+         '브라우저에서 코어가 돈다 (high ' + res.counts.high + ' · watch ' + res.counts.watch + ')');
+      ok(res.counts.high === 0, '브라우저 판정도 터미널과 같다 — 기준선 high 0');
+    } catch (e) {
+      ok(false, '브라우저에서 코어가 돈다', String(e && e.message));
+    }
+    done();
+  };
+  fr.src = 'admin-set-import.html';
+}
+
+fr.onload = function () { fr.onload = null; setTimeout(step2, 400); };
+fr.src = 'admin-dup.html';
+setTimeout(function () { if (document.getElementById('out').textContent === 'RUNNING') { LOG.push('  FAIL 시간 초과'); FAILS++; done(); } }, 12000);
+</script>
+</body>
+</html>

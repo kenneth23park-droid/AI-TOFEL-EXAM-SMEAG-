@@ -1,5 +1,6 @@
 {
   "tool": "studyground/tools/dup_check.js",
+  "core": "sg2/assets/dup-core.js",
   "viewer": "sg2/admin-dup.html",
   "packs": [
     {
@@ -36,7 +37,8 @@
     "sharedChoicesHigh": 3,
     "minTokens": 6,
     "boilerplateDf": 3,
-    "frameDf": 3
+    "frameDf": 3,
+    "clusterJaccard": 0.5
   },
   "fieldPolicy": {
     "mcq": {
@@ -78,9 +80,9 @@
     "interview": null
   },
   "coverage": {
-    "note": "팩에 텍스트로 존재하는 것만 비교한다. mp3 만 있고 전사가 없는 오디오는 비교 대상이 아니다.",
+    "note": "팩에 텍스트로 존재하는 것만 비교한다. mp3 만 있고 대본이 없는 오디오는 비교 대상이 아니다.",
     "scriptsLoaded": "SET1:0 SET9:36",
-    "frameNote": "유형이 강제하는 정형문(같은 줄이 서로 다른 단위 3곳 이상)은 비교에서 제외했다. 제외된 줄은 각 단위의 framedOut 에 df 와 함께 남는다.",
+    "frameNote": "유형이 강제하는 정형문(같은 줄이 서로 다른 문항 군집 3곳 이상)은 비교에서 제외했다. 제외된 줄은 각 단위의 framedOut 에 df 와 함께 남는다.",
     "frameOnlyUnits": "0개 단위는 내용이 전부 정형문이라 비교 대상에서 빠졌다."
   },
   "counts": {
