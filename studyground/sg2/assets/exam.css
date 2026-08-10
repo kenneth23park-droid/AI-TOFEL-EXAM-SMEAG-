@@ -727,14 +727,10 @@ body.exam-body {
 }
 .speaking-portrait {
   max-width: 300px; width: 100%; height: auto;
-  transition: transform .25s ease;
 }
-/* 오디오 재생 중에만 애니메이션. 재생이 끝나면 즉시 멈춘다. */
-.speaking-stage.is-playing .speaking-portrait { animation: speaking-talk 1.1s ease-in-out infinite; }
-@keyframes speaking-talk {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.035); }
-}
+/* 제시 이미지는 재생 중에도 정지 상태를 유지한다 — 실제 시험처럼 흔들리지 않는다.
+   (구 speaking-talk 확대/축소 맥동 규칙 삭제) */
+.speaking-stage.is-playing .speaking-portrait { animation: none; transform: none; }
 /* (구 .speaking-caption 15px 규칙 삭제 — 위의 관찰값 27px 제목 규칙이 정본이다) */
 .speaking-audio { display: none; }   /* 재생은 1회 자동 — 컨트롤을 노출하지 않는다 */
 
@@ -794,7 +790,6 @@ body.exam-body {
 .speaking-preview { width: 100%; max-width: 380px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .speaking-stage.is-playing .speaking-portrait,
   .response-box.is-recording { animation: none; }
 }
 
