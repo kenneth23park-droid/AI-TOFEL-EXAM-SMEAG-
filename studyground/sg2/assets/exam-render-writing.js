@@ -805,7 +805,6 @@
         if (bar.firstChild) pane.appendChild(bar);
 
         if (isEmail) {
-          pane.appendChild(emailHeader(q));
           pane.appendChild(situationBox(q));
           var bl = bulletsBox(q);
           if (bl) pane.appendChild(bl);
@@ -819,7 +818,12 @@
         ta.className = 'wr-textarea';
         ta.setAttribute('rows', '12');
         ta.setAttribute('spellcheck', 'false');
-        ta.placeholder = 'Type your response here…';
+        ta.placeholder = isEmail ? 'Type your email here…' : 'Type your response here…';
+
+        /* 응답 패널 머리 — 스크린샷 규격: "Your Response:" 아래에 To/Subject 가 오고
+           그 다음 줄이 편집 툴바다. 이메일 과제에서만 To/Subject 를 보여준다. */
+        answer.appendChild(bi('h3', 'Your Response:', '작성란', 'wr-resp-head'));
+        if (isEmail) answer.appendChild(emailHeader(q));
 
         /* 툴바(Cut/Paste/Undo/Redo · 단어수)는 작성창 위. 편집 버튼이 값을 바꾸면
            input 이벤트가 안 오는 브라우저가 있어 schedule() 을 직접 부른다. */
