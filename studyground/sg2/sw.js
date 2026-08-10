@@ -41,7 +41,9 @@
 // v18: 관리자 플로팅 바(assets/admin-bar.js) 삭제 — 오디오 트랜스포트·클립 즉시 교체를
 //      걷어내고, 로그인 진입점(⚙ · Ctrl+Alt+A)만 assets/admin-entry.js 로 남긴다.
 //      시험 셸 HTML 의 <script> 목록이 바뀌었으므로 VERSION 을 올려 캐시를 새로 채운다.
-const VERSION = 'sg-v18';
+// v19: cloze 빈칸 — 칸은 끊어 보이되(자간 .1em) 어간에 붙여 한 낱말로 읽히게 하고,
+//      낱말이 줄 끝에서 어간과 밑줄로 쪼개지지 않도록 nowrap 을 준다. exam.css 만 바뀐다.
+const VERSION = 'sg-v19';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 

@@ -488,11 +488,11 @@ body.exam-body {
 .rd-cloze-card { padding-top: 34px; }
 .rd-cloze-text { font-size: 19px; line-height: 2.05; color: var(--ink); }
 
-/* 밑줄은 한 줄로 이어 그리고, 어간에 바로 붙인다 — 'popul______'.
-   칸마다 끊으면 낱말이 'popul _ _ _ _ _ _' 처럼 흩어져 한 단어로 읽히지 않는다.
-   레일과 입력칸이 같은 letter-spacing 을 상속하므로 타이핑한 글자는 밑줄 자리에 그대로 앉는다
-   (--rd-blank-gap 을 키우면 칸이 다시 끊기고 너비도 따라온다). */
-.rd-blank { display: inline; --rd-blank-gap: 0px; }
+/* 칸은 끊어 보이되 낱말은 한 낱말로 읽혀야 한다 — 'popul_ _ _ _ _ _'가 아니라 'popul¦_¦_¦_'.
+   그래서 자간은 칸 경계가 겨우 보일 만큼(.1em)만 주고, 어간과 밑줄 사이에는 여백을 두지 않는다.
+   자간이 크면 낱말이 흩어지고, 0 이면 밑줄이 한 줄로 뭉쳐 글자 수가 세어지지 않는다.
+   레일과 입력칸이 같은 letter-spacing 을 상속하므로 타이핑한 글자는 밑줄 자리에 그대로 앉는다. */
+.rd-blank { display: inline; white-space: nowrap; --rd-blank-gap: .1em; }
 .rd-blank-stem { color: var(--ink); }
 .rd-blank-slot {
   position: relative; display: inline-block; vertical-align: baseline;
