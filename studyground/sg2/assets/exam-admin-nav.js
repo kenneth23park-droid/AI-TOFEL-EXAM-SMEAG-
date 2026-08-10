@@ -1,7 +1,7 @@
 /* SMEAG StudyGround — 시험 셸 안의 관리자 화면 이동 + 문항 편집 패널.
  *
  * 전체화면 시험 셸(exam-runtime.html · en/test-nt/* · set9*.html)에서
- *   · 화면을 앞뒤로(◀ Before / Next ▶) 자유롭게 넘기고
+ *   · 화면을 앞뒤로(◀ Pre / Next ▶) 자유롭게 넘기고
  *   · 지금 보이는 문항을 그 자리에서 고쳐 바로 확인한다.
  * 저장은 assets/question-config.js 의 오버라이드 스토어로 간다 — 콘텐츠 팩
  * (assets/set1.js · set9.js)은 건드리지 않으며, admin-questions.html 에서 저장한 것과
@@ -111,7 +111,7 @@
     var h =
       (msg ? '<div class="sgnav-msg">' + esc(msg) + '</div>' : '') +
       '<div class="sgnav-row">' +
-        '<button class="sgnb wide" data-act="prev"' + (i <= 0 ? ' disabled' : '') + '>◀ <span data-en>Before</span><span data-ko>이전</span></button>' +
+        '<button class="sgnb wide" data-act="prev"' + (i <= 0 ? ' disabled' : '') + '>◀ <span data-en>Pre</span><span data-ko>이전</span></button>' +
         '<button class="sgnb wide" data-act="next"' + (i >= list.length - 1 ? ' disabled' : '') + '><span data-en>Next</span><span data-ko>다음</span> ▶</button>' +
       '</div>' +
       '<div class="sgnav-row"><select data-act="pick">' + opts + '</select></div>' +
