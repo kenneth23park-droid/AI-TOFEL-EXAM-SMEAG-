@@ -195,6 +195,7 @@ footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font
         <h2 id="detail-h"></h2>
         <div class="acts no-print">
           <button class="btn sm" id="dl-one"><span data-en>Download this test (CSV)</span><span data-ko>이 응시 CSV</span></button>
+          <button class="btn sm hide" id="dl-report"><span data-en>Score report</span><span data-ko>성적 보고서</span></button>
           <button class="btn sm" id="detail-close"><span data-en>Close</span><span data-ko>닫기</span></button>
         </div>
       </div>
@@ -238,7 +239,12 @@ var CFG = {
   packs: { SET1: 'set1.js', SET9: 'set9.js' },
 
   /* 학생용 문항별 정답 공개 여부. false 면 정답 열을 감추고 O/X 만 남긴다. */
-  showAnswerKey: true
+  showAnswerKey: true,
+
+  /* 성적 보고서(Word·PDF·Excel) 생성기 주소. 비워 두면 '보고서 만들기' 버튼이
+     아예 나오지 않는다 — 조회·CSV 까지만 쓰는 배포에서도 그대로 올라간다.
+     예: 'https://smeag-report.vercel.app/' */
+  reportUrl: ''
 };
 
 /* ─────────────────────────────────────────────────────────────
@@ -565,6 +571,108 @@ var GRADE = (function () {
     });
   }
 
+  /* ── 보고서 연동 ─────────────────────────────────────────────
+     조회 화면이 쥐고 있는 것은 원점수(맞은 개수)뿐이다. 보고서는 시험 눈금
+     위의 점수를 원하므로 여기서 한 번 환산한다 — TOEFL 은 영역 /30·총점 /120,
+     IELTS 는 밴드다. 환산 규칙은 studyground/app/scoring/scale.py 와 짝이다.
+
+     점수는 리포트 서버로 미리 보내지 않고 URL 조각(#d=…)에 실어 넘긴다.
+     조각은 요청에 포함되지 않으므로 학생 점수가 남의 서버 로그에 남지 않는다. */
+  var REPORT = (function () {
+    var SKILLS = ['reading', 'listening', 'writing', 'speaking'];
+
+    /* ⚠️ 가설(검증필요) — app/scoring/ielts_band_table.json 의 사본이다.
+       실측 표로 바꿀 때는 두 곳을 함께 고쳐야 한다. writing·speaking 은
+       표가 없다(루브릭 채점) — 비율 환산으로 떨어진다. */
+    var BANDS = {
+      raw: 40,
+      listening: [[39,9],[37,8.5],[35,8],[32,7.5],[30,7],[26,6.5],[23,6],[18,5.5],[16,5],[13,4.5],[11,4],[8,3.5],[6,3],[4,2.5],[3,2],[2,1.5],[1,1],[0,0]],
+      reading:   [[39,9],[37,8.5],[35,8],[33,7.5],[30,7],[27,6.5],[23,6],[19,5.5],[15,5],[13,4.5],[10,4],[8,3.5],[6,3],[4,2.5],[3,2],[2,1.5],[1,1],[0,0]]
+    };
+    /* CEFR 구간 — app/models.py 의 _CEFR_BANDS 와 같은 표(총점 /120 기준). */
+    var CEFR = [[102,'C1'],[90,'B2+'],[78,'B2'],[66,'B1+'],[54,'B1'],[36,'A2'],[0,'A1']];
+
+    function halfUp(x) { return Math.floor(Number(x) + 0.5); }       // .5 는 항상 올린다
+    function toHalf(x) { return Math.floor(Number(x) * 2 + 0.5) / 2; }  // 0.5 단위
+    function cefrFor(total120) {
+      for (var i = 0; i < CEFR.length; i++) if (total120 >= CEFR[i][0]) return CEFR[i][1];
+      return 'A1';
+    }
+    function profileOf(code) {
+      return /IELTS/.test(String(code || '').toUpperCase()) ? 'ielts' : 'toefl';
+    }
+    function bandFor(skill, got, tot) {
+      var rows = BANDS[skill];
+      if (!rows || !tot) return toHalf((tot ? got / tot : 0) * 9);
+      var n = got * (BANDS.raw / tot);          // 시험지가 늘 /40 은 아니다
+      for (var i = 0; i < rows.length; i++) if (n >= rows[i][0]) return rows[i][1];
+      return rows[rows.length - 1][1];
+    }
+
+    function build(r, me) {
+      var ielts = profileOf(r.set_code) === 'ielts';
+      var by = r.by_section || {}, scores = [], pts = [], missing = [];
+      SKILLS.forEach(function (s) {
+        var v = by[s];
+        if (!v) { missing.push(LAB[s][0]); return; }
+        var tot = Number(v.total) || 0, got = Number(v.score) || 0;
+        var rate = tot ? got / tot : null;
+        /* 선생님 채점 영역(총 문항 0)은 점수 칸을 비운다 — 0 으로 찍으면 오해가 된다. */
+        var points = tot ? (ielts ? bandFor(s, got, tot) : halfUp(rate * 30)) : null;
+        if (points === null) missing.push(LAB[s][0]);
+        else pts.push(points);
+        scores.push({
+          skill: LAB[s][0],
+          rate: rate,
+          points: points,
+          /* ⚠️ 가설(검증필요) — 영역 CEFR 은 환산점수를 4배 해 총점 표에 대본 값이다.
+             공식 영역별 대응표가 아니다. */
+          level: (!ielts && points !== null) ? cefrFor(points * 4) : null
+        });
+      });
+
+      var sum = pts.reduce(function (a, b) { return a + b; }, 0);
+      var average = pts.length ? (ielts ? toHalf(sum / pts.length) : sum / pts.length) : null;
+      var total = pts.length ? (ielts ? toHalf(sum / pts.length) : sum) : null;
+      var warnings = [];
+      if (missing.length) {
+        warnings.push(missing.join(' · ') + ' 영역은 아직 점수가 없어 총점에서 빠졌습니다.');
+      }
+
+      return {
+        profile: ielts ? 'ielts' : 'toefl',
+        set_code: r.set_code || '',
+        student: {
+          name: (me && me.name) || (me && me.student_id) || '',
+          ename: '',
+          date: when(r.submitted_at)
+        },
+        scores: scores,
+        average: average,
+        total: total,
+        /* 영역이 빠진 채 매긴 등급은 실제보다 낮게 보인다 — 아예 비워 둔다. */
+        grade: (total === null || missing.length) ? ''
+          : (ielts ? 'Band ' + total.toFixed(1) : cefrFor(total)),
+        warnings: warnings
+      };
+    }
+
+    /* UTF-8 → base64url. 한글 이름이 깨지지 않게 바이트로 먼저 바꾼다. */
+    function encode(obj) {
+      var bytes = new TextEncoder().encode(JSON.stringify(obj)), bin = '';
+      for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function open_(r, me) {
+      if (!CFG.reportUrl) return;
+      var base = String(CFG.reportUrl).split('#')[0];
+      window.open(base + '#d=' + encode(build(r, me)), '_blank', 'noopener');
+    }
+
+    return { build: build, open: open_, profileOf: profileOf };
+  })();
+
   /* ── 내려받기 ── */
   function save(name, text) {
     var blob = new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' });  // BOM: 엑셀에서 한글이 깨지지 않게
@@ -669,6 +777,11 @@ var GRADE = (function () {
     $('f-set').onchange = paintList;
     $('dl-csv').onclick = csvList;
     $('dl-one').onclick = csvOne;
+    /* 리포트 생성기 주소가 설정된 배포에서만 보고서 버튼을 보여준다. */
+    if (CFG.reportUrl) {
+      $('dl-report').classList.remove('hide');
+      $('dl-report').onclick = function () { if (OPEN) REPORT.open(OPEN, ME); };
+    }
     $('print').onclick = function () { window.print(); };
     $('detail-close').onclick = function () { $('detail').classList.add('hide'); OPEN = null; };
 
