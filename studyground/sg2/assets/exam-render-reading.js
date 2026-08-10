@@ -238,7 +238,8 @@
     if (stem) wrap.appendChild(textEl('span', 'rd-blank-stem', stem));
 
     var slot = el('span', 'rd-blank-slot');
-    if (slot.style) slot.style.width = width + 'ch';
+    // 자간(--rd-blank-gap)만큼 칸마다 벌어지므로 너비도 글자수 × (1ch + 자간) 이다.
+    if (slot.style) slot.style.width = 'calc(' + width + 'ch + ' + width + ' * var(--rd-blank-gap, 0px))';
 
     var rail = el('span', 'rd-blank-rail');
     rail.setAttribute('aria-hidden', 'true');
