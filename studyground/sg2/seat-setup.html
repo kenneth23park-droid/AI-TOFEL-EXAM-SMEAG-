@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<!--
+  seat-setup.html — 이 컴퓨터가 몇 번 좌석인지 각인한다.
+
+  시험장 PC 를 처음 켰을 때 한 번만 하는 일이다. 번호를 고르면 이 브라우저에
+  저장되고(assets/sg-seats.js · localStorage 'sg2_seat'), 이후 로그인·시험 화면은
+  그 번호로 관리자가 지정한 설정(모드·코스·세트·문항·배속·언어)을 읽어 간다.
+
+  일부러 관리자 로그인을 요구하지 않는다 — 시험 전날 PC 30대를 돌며 번호만 찍는
+  일이라 매번 로그인하면 도리어 느리다. 대신 이 화면은 아무 데서도 링크되지 않고,
+  각인된 뒤에는 "지금 번호"를 크게 보여 준 다음 바꿀지 물어본다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Which computer is this? · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .seatpick { max-width:720px; margin:0 auto; padding:40px 0 60px; text-align:center; }
+  .nums { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin:26px 0 0; }
+  @media (max-width:640px) { .nums { grid-template-columns:repeat(5,minmax(0,1fr)); } }
+  @media (max-width:400px) { .nums { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+  .nums button { font:800 19px/1 ui-monospace,Menlo,Consolas,monospace; font-variant-numeric:tabular-nums;
+    padding:16px 0; border:1px solid var(--line-2); border-radius:12px; background:#fff; color:var(--ink);
+    cursor:pointer; transition:transform .1s, border-color .1s; }
+  .nums button:hover { transform:translateY(-2px); border-color:var(--ink); }
+  .nums button.on { background:var(--brand); border-color:var(--brand); color:#fff; }
+  .now { font:800 46px/1 ui-monospace,Menlo,Consolas,monospace; letter-spacing:-.02em; margin:6px 0 2px; }
+  .cfg { display:inline-flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:14px; }
+  .cfg span { font:750 11.5px/1 ui-monospace,Menlo,monospace; letter-spacing:.04em; color:var(--ink-2);
+    border:1px solid var(--line-2); border-radius:999px; padding:7px 11px; background:#fff; }
+  .go { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:24px; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Exam room setup</small></span></a>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="admin-seats.html"><span data-en>Seat board</span><span data-ko>좌석 보드</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 아직 각인 전 -->
+  <section class="seatpick" id="pick" hidden>
+    <span class="pill">Setup</span>
+    <h1 style="font-size:clamp(26px,4vw,40px);margin-top:10px">
+      <span data-en>Which computer is this?</span><span data-ko>이 컴퓨터는 몇 번입니까?</span></h1>
+    <p class="sub">
+      <span data-en>Pick the number written on this machine. You only do this once — the computer remembers it, and everything else comes from the seat board.</span>
+      <span data-ko>이 컴퓨터에 붙은 번호를 고르세요. 한 번만 하면 됩니다 — 번호는 이 컴퓨터가 기억하고, 나머지는 좌석 보드에서 내려옵니다.</span>
+    </p>
+    <div class="nums" id="nums"></div>
+  </section>
+
+  <!-- 각인된 뒤 -->
+  <section class="seatpick" id="done" hidden>
+    <span class="pill"><span data-en>This computer</span><span data-ko>이 컴퓨터</span></span>
+    <p class="now" id="now">—</p>
+    <p class="sub" id="label" style="margin-top:0">
+      <span data-en>is set up and ready.</span><span data-ko>번 좌석으로 지정돼 있습니다.</span></p>
+
+    <div class="cfg" id="cfg"></div>
+
+    <div class="go">
+      <a class="btn brand lg" href="login.html"><span data-en>Go to the login screen</span><span data-ko>로그인 화면으로</span></a>
+      <button class="btn ghost lg" id="change"><span data-en>Change the number</span><span data-ko>번호 바꾸기</span></button>
+    </div>
+    <p class="muted" style="font-size:11.5px;margin-top:22px">
+      <span data-en>Clearing the number does not delete any answers already saved on this machine.</span>
+      <span data-ko>번호를 지워도 이 컴퓨터에 저장된 답안은 사라지지 않습니다.</span>
+    </p>
+  </section>
+
+</main>
+
+<script src="assets/admin-session.js"></script>
+<script src="assets/sg-seats.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var S = window.SG_SEATS;
+
+  function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
+  function ko() { return document.documentElement.lang === 'ko'; }
+
+  function paintNums() {
+    var mine = S.mine(), html = '';
+    for (var i = 1; i <= S.COUNT; i++) {
+      html += '<button type="button" data-no="' + i + '"' + (i === mine ? ' class="on"' : '') + '>' +
+              ('0' + i).slice(-2) + '</button>';
+    }
+    document.getElementById('nums').innerHTML = html;
+  }
+
+  /* 각인된 좌석에 관리자가 무엇을 지정해 뒀는지 그대로 보여 준다 —
+     시험 전 순회 점검에서 "이 자리는 준비가 됐는가"를 눈으로 확인하는 자리다. */
+  function paintCfg(s) {
+    var bits = [];
+    bits.push(s.mode === 'cloud' ? (ko() ? '인터넷 모드' : 'Internet mode') : (ko() ? '로컬 모드' : 'Local mode'));
+    if (s.setId) {
+      bits.push((s.course || 'toefl').toUpperCase() + ' · ' + s.setId.toUpperCase());
+      bits.push(s.items ? s.items : (s.module === 'full' ? (ko() ? '전체 4섹션' : 'All 4 sections') : s.module));
+    } else {
+      bits.push(ko() ? '배정된 시험 없음' : 'No test assigned');
+    }
+    if (Number(s.audioRate) !== 1) bits.push(s.audioRate + '×');
+    bits.push(s.lang === 'free' ? (ko() ? '언어: 학생 선택' : 'Language: student picks')
+                                : (ko() ? '언어 고정: ' : 'Language: ') + String(s.lang).toUpperCase());
+    if (s.kiosk) bits.push(ko() ? '시험 전용' : 'Exam-only');
+    document.getElementById('cfg').innerHTML = bits.map(function (b) {
+      return '<span>' + esc(b) + '</span>';
+    }).join('');
+  }
+
+  function render() {
+    var mine = S.mine();
+    document.getElementById('pick').hidden = !!mine;
+    document.getElementById('done').hidden = !mine;
+    if (!mine) { paintNums(); return; }
+    document.getElementById('now').textContent = ko() ? (mine + '번') : ('Computer ' + mine);
+    paintCfg(S.get(mine));
+  }
+
+  document.getElementById('nums').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-no]');
+    if (!b) return;
+    S.bind(Number(b.getAttribute('data-no')));
+    render();
+  });
+  document.getElementById('change').addEventListener('click', function () {
+    S.bind(0);
+    render();
+  });
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.lang button')) setTimeout(render, 0);   // 언어를 바꾸면 문구도 다시 그린다
+  });
+
+  render();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

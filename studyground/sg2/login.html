@@ -15,6 +15,12 @@
   .auth-err { display:none; font-size:13px; font-weight:700; color:#b3261e; background:#fdeceb;
               border:1px solid #f5c6c2; border-radius:10px; padding:10px 12px; margin-bottom:14px; }
   .auth-err.on { display:block; }
+  /* 좌석 배지 — 자리를 잘못 앉았는지 학생이 한눈에 안다. */
+  .seat-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:14px; }
+  .seat-assigned { margin-top:14px; padding-top:12px; border-top:1px dashed var(--line-2);
+                   font-size:12.5px; color:var(--ink-2); }
+  .seat-assigned b { color:var(--ink); }
+  .seat-wait { font-size:12.5px; color:var(--muted); }
   /* QR 스캐너 — 버튼을 누르기 전엔 카메라를 켜지 않는다. */
   .scan { display:none; margin-bottom:14px; }
   .scan.on { display:block; }
@@ -36,6 +42,7 @@
 
 <div class="auth">
   <div class="auth-card">
+    <div class="seat-row" data-seat-badge hidden></div>
     <h1><span data-en>Welcome back</span><span data-ko>다시 오신 걸 환영해요</span></h1>
     <p class="sub"><span data-en>Log in to continue your TOEFL prep.</span><span data-ko>TOEFL 학습을 이어가려면 로그인하세요.</span></p>
     <div class="auth-err" id="err"><span data-en></span><span data-ko></span></div>
@@ -63,9 +70,13 @@
     <a class="btn ghost block" id="guest" href="tests.html"><span data-en>Continue as guest</span><span data-ko>게스트로 계속</span></a>
     <div class="auth-alt"><span data-en>New to StudyGround?</span><span data-ko>StudyGround가 처음이신가요?</span>
       <a href="signup.html"><span data-en>Sign up free</span><span data-ko>무료 가입</span></a></div>
+    <div class="seat-assigned" id="seatAssigned" hidden></div>
   </div>
 </div>
 
+<!-- 좌석 설정(언어 고정·시험 전용 모드)은 app.js 가 언어를 읽기 전에 정해져야 한다. -->
+<script src="assets/sg-seats.js"></script>
+<script src="assets/seat-runtime.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/sg-auth.js"></script>
 <script src="assets/sg-qr.js"></script>
@@ -80,20 +91,61 @@
   // 돌아갈 곳이 따로 없으면 모의고사 목록으로 — 로그인하고 바로 시험을 보는 게 기본 동선이다.
   var next = /^[\w.-]+\.html(\?[^#]*)?$/.test(raw) && raw.indexOf('login.html') !== 0 ? raw : 'tests.html';
 
+  /* ── 좌석이 정해 준 행선지 ──────────────────────────────────
+   *
+   * 시험장 PC 는 관리자가 배정한 시험으로 곧장 들어간다 — 세트를 고르는 화면을
+   * 아예 지난다. ?next= 로 온 사람은 보던 페이지가 우선이고, 좌석에 배정이 없으면
+   * "대기 중"을 보여 준 뒤 20초마다 보드를 다시 읽는다. */
+  var RT = window.SG_SEAT_RT;
+  var seatBox = document.getElementById('seatAssigned');
+
+  function seatLine() {
+    if (!RT || !RT.bound()) return;
+    var isKo = document.documentElement.lang === 'ko';
+    var s = RT.seat();
+    seatBox.hidden = false;
+    if (RT.assigned()) {
+      var scope = s.items ? s.items
+        : (s.module && s.module !== 'full' ? s.module : (isKo ? '전체' : 'Full'));
+      seatBox.innerHTML = (isKo ? '배정된 시험 · ' : 'Assigned test · ') +
+        '<b>' + (s.course || 'toefl').toUpperCase() + ' ' + s.setId.toUpperCase() + ' — ' + scope + '</b><br>' +
+        (isKo ? '로그인하면 곧바로 시작합니다.' : 'Starts automatically after login.');
+    } else {
+      seatBox.innerHTML = '<span class="seat-wait">' +
+        (isKo ? '아직 배정된 시험이 없습니다. 감독관이 지정할 때까지 기다려 주세요.'
+              : 'No test assigned yet. Please wait for the invigilator.') + '</span>';
+    }
+  }
+
+  /** 로그인 뒤 갈 곳. 좌석 배정이 ?next= 보다 뒤에 온다 — 원래 보던 페이지가 먼저. */
+  function landing() {
+    if (raw) return next;
+    if (RT && RT.assigned()) return RT.examUrl();
+    return next;
+  }
+
+  if (RT && RT.bound()) {
+    seatLine();
+    setInterval(function () { RT.refresh(); seatLine(); }, 20000);
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.lang button')) setTimeout(seatLine, 0);
+    });
+  }
+
   function show(en, ko) {
     err.querySelector('[data-en]').textContent = en;
     err.querySelector('[data-ko]').textContent = ko || en;
     err.classList.add('on');
   }
 
-  if (window.SG_AUTH && SG_AUTH.user()) location.replace(next);
-  document.getElementById('guest').setAttribute('href', next);
+  if (window.SG_AUTH && SG_AUTH.user()) location.replace(landing());
+  document.getElementById('guest').setAttribute('href', landing());
 
   function enter(id, pw, examDate) {
     err.classList.remove('on');
     go.disabled = true;
     return SG_AUTH.signIn(id, pw, examDate)
-      .then(function () { location.replace(next); })
+      .then(function () { location.replace(landing()); })
       .catch(function (e2) {
         go.disabled = false;
         document.getElementById('pw').value = '2222';

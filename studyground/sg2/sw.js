@@ -69,7 +69,11 @@
 //      오디오 배속·화면 언어 지정)과 저장소 assets/sg-seats.js, 그리고 흩어져 있던
 //      관리자 화면을 한데 모은 admin.html 허브가 생겼다. 시험 당일 인터넷이 끊겨도
 //      좌석 보드를 열 수 있어야 하므로 셋 다 셸에 넣는다.
-const VERSION = 'sg-v27';
+// v28: 좌석 설정이 학생 화면까지 내려온다 — seat-setup.html(이 PC 는 몇 번인가)과
+//      assets/seat-runtime.js(화면 언어 고정 · 시험 전용 모드 · 오디오 배속 · 좌석 배지).
+//      login.html 은 배정된 시험으로 곧장 들어가고, exam-runtime.html · tests.html 의
+//      <script> 목록이 바뀌었다.
+const VERSION = 'sg-v28';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -97,6 +101,7 @@ const SHELL_ASSETS = [
 
   // 관리자 홈과 좌석 관리 — 시험장에서 회선이 없어도 좌석을 다시 짤 수 있어야 한다.
   'admin.html', 'admin-seats.html', 'assets/sg-seats.js',
+  'seat-setup.html', 'assets/seat-runtime.js',
 
   // 오프라인 사전 다운로드 — 목록 자체가 캐시에 있어야, 두 번째 방문이 오프라인이어도
   // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.
