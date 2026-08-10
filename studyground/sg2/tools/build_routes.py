@@ -31,6 +31,7 @@ SOURCE = 'exam-runtime.html'
 # 세트 전용 진입 페이지: 출력파일 → (세트, 섹션, 탭 제목)
 SET_PAGES = {
     'set9.html': ('set9', 'listening', 'SET 9 Listening · SMEAG StudyGround'),
+    'set9-reading.html': ('set9', 'reading', 'SET 9 Reading · SMEAG StudyGround'),
 }
 
 BASE_TAG = '<base href="../../../">'

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!--
+  GENERATED FILE — 직접 고치지 마세요.
+  원본: exam-runtime.html · 생성: tools/build_routes.py
+  SET9 의 reading 섹션으로 바로 들어가는 진입 페이지. 쿼리스트링 없이 열어도 된다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>SET 9 Reading · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/exam.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudyGround">
+</head>
+<!--
+  exam-runtime.html — 전체화면 시험 셸 (Story 1.7 / 1.8)
+
+  URL 계약:
+    exam-runtime.html?testId=SET1&sessionId=<id>&mode=exam|practice&exam=toefl|ielts#screen=<screenId>
+    · `profile=` 은 `exam=` 의 별칭으로 함께 받는다.
+    · `set=set1|set9` 로 콘텐츠 팩을 고른다(기본 set1). assets/{set}.js 를 로드해
+      window.SMEAG_SET1 / window.SMEAG_SET9 를 컴파일러에 넘긴다.
+    · 관찰된 레퍼런스 URL `/en/test-nt/{section}?testId=..&sessionId=..&mode=..&section=..` 을
+      정적 사이트에서 표현 가능한 형태로 매핑한 것이다. 경로의 {section} 은 화면 id 에 녹아
+      있으므로 `#screen=` 프래그먼트가 그 역할을 대신한다.
+    · sessionId 미지정 시 오프라인 임시 세션(offline-uuid)을 발급한다. 서버 발급 세션으로의
+      치환은 exam-sync.js(Epic 3) 가 meta.serverSession 에 매핑을 남기며 수행한다.
+    · mode 는 meta.mode 에 저장되며 세션 도중 URL 로 바꿔도 저장값이 이긴다.
+
+  기존 exam.html(연습지 모드)은 삭제하지 않는다 — 별개 용도로 계속 유지된다.
+  외부 도메인 요청 0건: 모든 스크립트/스타일/설정은 로컬 파일이다.
+-->
+<body class="exam-body" data-sg-admin-bar>
+
+<div class="exam-shell">
+
+  <!-- 상단바 1행 — 좌: 브랜드 / 우: 섹션별 버튼.
+       DOM 순서는 Exit · Volume · Help · Review · Back · Next 로 고정이며
+       관찰된 네 화면(listening / reading / speaking / moduleEnd)의 좌→우 순서를 모두 만족한다.
+       섹션별 노출은 syncActions() 가 [hidden] 으로 제어한다. -->
+  <header class="exam-topbar">
+    <div class="exam-brand">
+      <b id="exam-title">StudyGround NT-016</b>
+      <small id="exam-subtitle"></small>
+    </div>
+
+    <div class="exam-actions">
+      <button type="button" class="exam-btn danger" id="btn-exit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+        <span data-en>Exit Test</span><span data-ko>시험 나가기</span>
+      </button>
+      <button type="button" class="exam-btn" id="btn-volume" aria-expanded="false">
+        <span data-en>Volume</span><span data-ko>음량</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9a4 4 0 0 1 0 6"/><path d="M19.5 6.5a8 8 0 0 1 0 11"/></svg>
+      </button>
+      <button type="button" class="exam-btn" id="btn-help">
+        <span data-en>Help</span><span data-ko>도움말</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.8-.9 1.4v.4"/><path d="M12 17h.01"/></svg>
+      </button>
+      <!-- Review 는 현재 문항의 플래그 토글이다(눌린 상태가 보인다). -->
+      <button type="button" class="exam-btn" id="btn-review" aria-pressed="false" hidden>
+        <span data-en>Review</span><span data-ko>표시</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4h9l-1 3h6v9h-7l-1-3H5"/></svg>
+      </button>
+      <button type="button" class="exam-btn" id="btn-back" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        <span data-en>Back</span><span data-ko>이전</span>
+      </button>
+      <button type="button" class="exam-btn primary" id="btn-advance">
+        <span data-en id="advance-en">Continue</span><span data-ko id="advance-ko">계속</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 상단바 2행 · 서브바 — 좌: "Listening | Question 25 of 32", 우: MM:SS + Hide Time.
+       타이머가 없는 화면에서는 우측(#exam-time)이 통째로 비고,
+       moduleEnd 처럼 서브바 자체가 없는 화면에서는 이 행이 [hidden] 이다. -->
+  <div class="exam-subbar" id="exam-subbar" hidden>
+    <div class="exam-crumb">
+      <b id="subbar-section"></b>
+      <span class="exam-crumb-sep" id="subbar-sep">|</span>
+      <span id="subbar-progress"></span>
+    </div>
+    <div class="exam-time" id="exam-time" hidden>
+      <span class="exam-time-value" id="timer-value"></span>
+      <button type="button" class="exam-hidetime" id="btn-hide-time">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/><path d="M3 21L21 3"/></svg>
+        <span data-en id="hidetime-en">Hide Time</span><span data-ko id="hidetime-ko">시간 숨기기</span>
+      </button>
+    </div>
+  </div>
+
+  <main class="exam-main">
+    <div class="exam-screen" id="screen-mount"></div>
+  </main>
+
+  <!-- 음량 팝오버 — 모달이 아니라 상단바 아래 우측 패널(관찰값). -->
+  <div class="exam-popover" id="pop-volume" hidden>
+    <button type="button" class="exam-pop-close" id="btn-volume-close" aria-label="Close">&#215;</button>
+    <div class="exam-meter" id="volume-meter"></div>
+    <input type="range" id="volume-range" class="exam-vol-range" min="0" max="100" value="80">
+  </div>
+
+  <footer class="exam-footer">
+    <span class="exam-status" id="exam-status"></span>
+    <div class="exam-footctl">
+      <span class="lang">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="ko">KO</button>
+      </span>
+      <button type="button" class="exam-fs" id="btn-fullscreen" aria-label="Fullscreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg>
+      </button>
+    </div>
+  </footer>
+</div>
+
+<!-- Exit Test 확인 -->
+<div class="exam-modal" id="modal-exit" hidden>
+  <div class="exam-modal-card">
+    <h2><span data-en>Exit this test?</span><span data-ko>시험을 나가시겠습니까?</span></h2>
+    <p>
+      <span data-en>Your answers and remaining time are saved. You can resume this session later.</span>
+      <span data-ko>답안과 남은 시간이 저장됩니다. 나중에 이 세션을 이어서 응시할 수 있습니다.</span>
+    </p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn" data-close="modal-exit">
+        <span data-en>Stay</span><span data-ko>계속 응시</span>
+      </button>
+      <button type="button" class="exam-btn primary" id="btn-exit-confirm">
+        <span data-en>Exit Test</span><span data-ko>나가기</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Help -->
+<div class="exam-modal" id="modal-help" hidden>
+  <div class="exam-modal-card">
+    <h2><span data-en>Help</span><span data-ko>도움말</span></h2>
+    <p>
+      <span data-en>The timer at the right of the bar above shows the time left for the current question or module. Select Hide Time to hide it — the clock keeps running. Audio plays once. Use Continue / Next to move forward.</span>
+      <span data-ko>위 막대 오른쪽 타이머는 현재 문항 또는 모듈의 남은 시간입니다. Hide Time 을 누르면 숫자만 감춰지고 시간은 계속 흐릅니다. 오디오는 1회만 재생됩니다. Continue / Next 로 진행합니다.</span>
+    </p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn primary" data-close="modal-help">
+        <span data-en>Close</span><span data-ko>닫기</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 재개 확인 -->
+<div class="exam-modal" id="modal-resume" hidden>
+  <div class="exam-modal-card">
+    <h2><span data-en>Resume your test?</span><span data-ko>시험을 이어서 볼까요?</span></h2>
+    <p id="resume-note">
+      <span data-en>An unfinished session was found on this device. Time spent while you were away has already been counted.</span>
+      <span data-ko>이 기기에 완료되지 않은 세션이 있습니다. 자리를 비운 동안의 시간도 이미 소모된 것으로 계산됩니다.</span>
+    </p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn" id="btn-restart">
+        <span data-en>Start new</span><span data-ko>새로 시작</span>
+      </button>
+      <button type="button" class="exam-btn primary" id="btn-resume">
+        <span data-en>Resume</span><span data-ko>이어서 응시</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<!-- 관리자 계층 — 학생 화면에는 아무 것도 그리지 않는다(Ctrl+Alt+A 또는 좌하단 ⚙ 로 로그인).
+     question-config.js 는 exam-shell.js 가 콘텐츠 팩을 붙이기 전에 실려야 교체분이 반영된다. -->
+<script src="assets/question-config.js"></script>
+<script src="assets/audio-config.js"></script>
+<script src="assets/admin-session.js"></script>
+<script src="assets/admin-bar.js"></script>
+<script src="assets/exam-clock.js"></script>
+<script src="assets/exam-store.js"></script>
+<script src="assets/exam-render.js"></script>
+<script src="assets/exam-engine.js"></script>
+<script>
+window.SG_ROUTE = {
+  section: 'reading',
+  set: 'set9',
+  base: '',
+  path: location.pathname
+};
+</script>
+<script src="assets/exam-shell.js"></script>
+</body>
+</html>
