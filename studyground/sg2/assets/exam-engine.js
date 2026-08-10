@@ -241,6 +241,24 @@
       return true;
     }
 
+    /* 관리자 전용 자유 이동 — 출제·검수용이다. 학생 흐름은 goTo/next 만 쓰므로
+       "역방향 이동 없음"(Story 1.4 AC3) 계약은 그대로다. 이 함수를 부르는 코드는
+       assets/exam-admin-nav.js 하나뿐이고, 그 파일은 관리자 로그인 없이는 아무 것도 하지 않는다.
+       되돌아간 화면의 screen/question scope 시계는 새로 arm 되도록 비워 준다 —
+       그러지 않으면 이미 만료된 45초 응답시계 때문에 화면이 즉시 넘어간다. */
+    function adminJumpTo(nextIdx, reason) {
+      if (destroyed) return false;
+      if (typeof nextIdx !== 'number' || nextIdx < 0 || nextIdx >= list.length) return false;
+      if (nextIdx === idx) return false;
+      if (state !== 'in_progress') return false;
+      var prev = current();
+      releaseScreenClocks(prev);
+      releaseScreenClocks(list[nextIdx]);
+      idx = nextIdx;
+      enter(prev ? prev.id : null, reason || 'admin_jump');
+      return true;
+    }
+
     function finish(reason) {
       var prev = current();
       state = 'submitting';
@@ -394,6 +412,7 @@
       start: start, next: next, answer: answer, audioEnded: audioEnded, phaseNext: phaseNext,
       phaseIndex: function () { return phaseIndex; },
       markSubmitted: markSubmitted, snapshot: snapshot, restoreTo: restoreTo,
+      adminJumpTo: adminJumpTo,
       onTransition: onTransition, on: on,
       installHistoryGuard: installHistoryGuard, syncHash: syncHash, destroy: destroy,
       clockKeyFor: clockKeyFor

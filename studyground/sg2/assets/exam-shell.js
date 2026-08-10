@@ -86,7 +86,9 @@ window.SG_RUNTIME = (function () {
                   'assets/exam-render-listening.js',
                   'assets/exam-render-reading.js',
                   'assets/exam-render-writing.js',
-                  'assets/exam-render-speaking.js'];
+                  'assets/exam-render-speaking.js',
+                  /* 관리자 전용 화면 이동·문항 편집 패널. 로그인 전에는 아무 것도 그리지 않는다. */
+                  'assets/exam-admin-nav.js'];
 
   function loadOptional(list, done) {
     var i = 0;
@@ -174,6 +176,16 @@ window.SG_RUNTIME = (function () {
     var only = [], i;
     for (i = 0; i < list.length; i++) if (list[i].section === section) only.push(list[i]);
     return only.length ? only : list;
+  }
+
+  /* 문항 id → 그 문항이 실린 화면의 인덱스. 없으면 -1. */
+  function screenIndexOfQuestion(list, qid) {
+    if (!qid) return -1;
+    for (var i = 0; i < list.length; i++) {
+      var ids = list[i] && list[i].questionIds;
+      if (ids && ids.indexOf(qid) >= 0) return i;
+    }
+    return -1;
   }
 
   function sectionStartIndex(list, section) {
@@ -554,7 +566,9 @@ window.SG_RUNTIME = (function () {
         STORE.open(session);
         CLOCK.attachStore(STORE);
 
-        var resumable = (session === active) && STORE.canResume(contentHash, timingHash).ok && !!STORE.cursor();
+        /* `?goq=` 는 "이 문항 화면을 지금 열어라"는 관리자 진입이다 — 이어보기보다 우선한다. */
+        var resumable = (session === active) && !query('goq') &&
+                        STORE.canResume(contentHash, timingHash).ok && !!STORE.cursor();
         var titleEl = document.getElementById('exam-title');
         var code = (pack0 && pack0.code) || url.testId;
         if (titleEl) titleEl.textContent = 'StudyGround ' + (code === 'SET1' ? 'NT-016' : code);
@@ -603,6 +617,11 @@ window.SG_RUNTIME = (function () {
     } else if (url.screenId) {
       var i = STORE.findScreenIndex(screens, url.screenId);
       if (i > 0) { startIndex = i; machine.restoreTo(i, 0); }
+    } else if (query('goq')) {
+      /* `?goq=<문항 id>` — 관리자 페이지(admin-questions.html)의 "시험 화면에서 열기".
+         화면 id 를 알 필요 없이 문항 id 만으로 그 문항이 실린 화면에서 시작한다. */
+      var gi = screenIndexOfQuestion(screens, query('goq'));
+      if (gi > 0) { startIndex = gi; machine.restoreTo(gi, 0); }
     } else if (startIndex > 0) {
       machine.restoreTo(startIndex, 0);
     }
@@ -635,6 +654,11 @@ window.SG_RUNTIME = (function () {
     bindLifecycle();
     machine.installHistoryGuard();
     machine.start(startIndex);
+
+    /* 관리자 패널 — 파일이 없거나 관리자 로그인이 없으면 아무 일도 하지 않는다. */
+    if (window.SG_EXAM_ADMIN && typeof window.SG_EXAM_ADMIN.mount === 'function') {
+      try { window.SG_EXAM_ADMIN.mount({ set: SET_ID, runtime: window.SG_RUNTIME }); } catch (e) {}
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
@@ -643,6 +667,14 @@ window.SG_RUNTIME = (function () {
   return {
     machine: function () { return machine; },
     screens: function () { return screens; },
+    setId: function () { return SET_ID; },
+    /* 현재 화면을 그대로 다시 그린다 — 관리자 편집이 콘텐츠 팩을 고친 뒤 쓴다. */
+    rerender: function () {
+      if (!machine || !machine.current()) return false;
+      window.SG_RENDER.render(machine.current(),
+        { engine: machine, mode: machine.mode(), phaseIndex: machine.phaseIndex() });
+      return true;
+    },
     timing: function () { return timing; },
     volume: function () { return volume; }
   };

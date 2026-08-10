@@ -39,6 +39,9 @@
   .tagx { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
   .tagx.ovr { background:var(--peach,#fde5da); color:var(--brand-ink,#a8331a); }
   .tagx.sec { background:var(--cream-2); color:var(--muted); }
+  .shell-go { flex:none; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:999px;
+    border:1px solid var(--line-2); background:var(--paper,#fff); color:var(--brand); text-decoration:none; }
+  .shell-go:hover { background:var(--brand); border-color:var(--brand); color:#fff; }
 
   .qbody { display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:12px; }
   .qrow.open .qbody { display:block; }
@@ -95,6 +98,7 @@
       <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
       <a class="btn ghost sm" href="admin-audio-files.html"><span data-en>Audio files</span><span data-ko>오디오 점검</span></a>
       <a class="btn ghost sm" href="admin-audio-sync.html"><span data-en>Script ↔ audio</span><span data-ko>대본 대조</span></a>
+      <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
       <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
     </div>
   </div>
@@ -178,6 +182,16 @@
 
   function audioPath(raw){ return raw ? SG_AUDIO_INDEX.resolve(raw) : ''; }
 
+  /** 이 문항이 실린 시험 화면 주소. 화면 id 를 몰라도 되도록 `?goq=` 로 문항 id 를 넘긴다
+   *  — exam-shell.js 가 questionIds 로 화면을 찾아 거기서 시작한다. */
+  function shellUrl(it) {
+    return 'exam-runtime.html?set=' + encodeURIComponent(setId) +
+      '&testId=' + encodeURIComponent(setId.toUpperCase()) +
+      '&section=' + encodeURIComponent(it.sec.id) +
+      '&sessionId=admin-preview' +
+      '&mode=section&goq=' + encodeURIComponent(it.q.id);
+  }
+
   function rowHtml(it, i) {
     var q = it.q, orig = q.__sgOrig || {}, ovr = Q.isOverridden(setId, q.id);
     var choices = q.choices || [];
@@ -188,7 +202,11 @@
       '<div class="qhead"><b>' + esc(q.id || ('Q'+(q.no||''))) + '</b>' +
         '<span class="tagx sec">' + esc(it.sec.label || it.sec.id) + ' · ' + esc(it.mod.label || it.mod.id) + '</span>' +
         (ovr ? '<span class="tagx ovr"><span data-en>Replaced</span><span data-ko>교체됨</span></span>' : '') +
-        '<span class="qtxt">' + esc(q.prompt || (choices[0] || '')) + '</span></div>' +
+        '<span class="qtxt">' + esc(q.prompt || (choices[0] || '')) + '</span>' +
+        /* 전체화면 시험 셸의 그 문항 화면으로 바로 들어간다 — 거기서도 같은 저장소로 편집한다. */
+        '<a class="shell-go" href="' + esc(shellUrl(it)) + '" target="_blank" rel="noopener"' +
+          ' title="Open in the exam shell">▶ <span data-en>Exam screen</span><span data-ko>시험 화면</span></a>' +
+        '</div>' +
       '<div class="qbody">' +
         '<div class="fld"><label><span data-en>Prompt</span><span data-ko>지문 · 발문</span></label>' +
           '<textarea rows="2" data-f="prompt">' + esc(q.prompt || '') + '</textarea></div>' +
@@ -435,6 +453,8 @@
   }
 
   host.addEventListener('click', function (e) {
+    // 헤더 안의 "시험 화면" 링크는 행을 펼치지 않고 그대로 새 탭으로 나간다.
+    if (e.target.closest('.shell-go')) return;
     var head = e.target.closest('.qhead');
     if (head) {
       head.parentNode.classList.toggle('open');
