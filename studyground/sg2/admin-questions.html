@@ -99,6 +99,8 @@
       <a class="btn ghost sm" href="admin-audio-files.html"><span data-en>Audio files</span><span data-ko>오디오 점검</span></a>
       <a class="btn ghost sm" href="admin-audio-sync.html"><span data-en>Script ↔ audio</span><span data-ko>대본 대조</span></a>
       <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
+      <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
+      <a class="btn ghost sm" href="admin-log.html"><span data-en>Change log</span><span data-ko>변경 기록</span></a>
       <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
     </div>
   </div>
@@ -143,6 +145,7 @@
 <script src="assets/audio-index.js"></script>
 <script src="assets/audio-config.js"></script>
 <script src="assets/admin-session.js"></script>
+<script src="assets/admin-log.js"></script>
 <script src="assets/tts-client.js"></script>
 <script src="assets/app.js"></script>
 <script>
@@ -182,6 +185,76 @@
 
   function audioPath(raw){ return raw ? SG_AUDIO_INDEX.resolve(raw) : ''; }
 
+  /* 이 문항이 지금 쓰고 있는 기본 제한시간(초). config/timing.toefl.json 의
+     섹션·모듈 값이며, 못 읽으면 빈 문자열을 돌려준다(안내 문구용이라 실패해도 무해). */
+  var TIMING = null;
+  fetch('config/timing.toefl.json').then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) { TIMING = j; }).catch(function () {});
+  function defaultSecFor(it) {
+    if (!TIMING || !it) return '';
+    var sec = TIMING.sections && TIMING.sections[it.sec.id];
+    if (!sec) return '';
+    var unit = (sec.modules || []).filter(function (m) { return m.id === it.mod.id; })[0];
+    var v = (unit && unit.perQuestionSec) || sec.fallbackPerQuestionSec ||
+            (unit && unit.allocatedSec ? '' : '');
+    return v ? String(v) : '';
+  }
+
+  /* 이 문항의 실제 대본. 대본이 실려 있는 자리가 셋이라 순서대로 찾는다.
+     ① 문항에 직접 붙은 script ② 한 대본을 여러 문항이 나눠 쓰는 L2 는 블록의 script
+     ③ 문항마다 한 줄인 L1 · S1 은 config/_set9_fragments/*_script.json.
+     ③ 은 fetch 라 늦게 도착하므로, 도착하면 fillScripts() 가 빈 상자만 채운다. */
+  var SCRIPTS = {};
+  if (setId === 'set9') {
+    ['listening_script', 'speaking_script'].forEach(function (name) {
+      fetch('config/_set9_fragments/' + name + '.json')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          if (!j) return;
+          // 리스닝은 {id: {text}} 꼴, 스피킹은 {lines: [{id, text}]} 꼴로 저장돼 있다.
+          if (Array.isArray(j.lines)) {
+            j.lines.forEach(function (l) { if (l && l.id) SCRIPTS[l.id] = l.text || ''; });
+          } else {
+            Object.keys(j).forEach(function (k) { SCRIPTS[k] = (j[k] && j[k].text) || ''; });
+          }
+          fillScripts();
+        }).catch(function () {});
+    });
+  }
+
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+  /** 대본 키는 문항 하나짜리면 'set9-L1-q04', 한 음원을 여러 문항이 나눠 쓰면
+   *  그 번호 범위인 'set9-L1-13-14' 다. 문항 id 는 'L1-4' 라 번호를 두 자리로 맞춘다. */
+  function scriptFor(it) {
+    if (!it) return '';
+    if (it.q.script) return it.q.script;
+    if (it.block && it.block.script) return it.block.script;
+    if (SCRIPTS[it.q.id]) return SCRIPTS[it.q.id];   // 스피킹은 id 자체가 대본 키다
+    var m = /^(.+)-(\d+)$/.exec(it.q.id || '');
+    if (!m) return '';
+    var mod = setId + '-' + m[1], n = +m[2];
+    var sibs = (it.block && it.block.questions) || [];
+    if (sibs.length > 1) {
+      var nums = sibs.map(function (s) { return +(/(\d+)$/.exec(s.id || '') || [0, 0])[1]; });
+      var key = mod + '-' + pad2(Math.min.apply(null, nums)) + '-' + pad2(Math.max.apply(null, nums));
+      if (SCRIPTS[key]) return SCRIPTS[key];
+    }
+    return SCRIPTS[mod + '-q' + pad2(n)] || SCRIPTS[mod + '-q' + n] || '';
+  }
+
+  /** 늦게 도착한 대본을 아직 비어 있는 상자에만 넣는다 — 편집 중인 글은 건드리지 않는다. */
+  function fillScripts() {
+    host.querySelectorAll('.qrow').forEach(function (row) {
+      var ta = row.querySelector('[data-f=script]');
+      if (!ta || ta.value.trim()) return;
+      var s = scriptFor(LIST[+row.getAttribute('data-i')]);
+      if (!s) return;
+      ta.value = s;
+      if (row.classList.contains('open')) paintVoices(row);
+    });
+  }
+
   /** 이 문항이 실린 시험 화면 주소. 화면 id 를 몰라도 되도록 `?goq=` 로 문항 id 를 넘긴다
    *  — exam-shell.js 가 questionIds 로 화면을 찾아 거기서 시작한다. */
   function shellUrl(it) {
@@ -217,6 +290,14 @@
               '<span class="key">' + (KEYS[ci]||ci) + '</span>' +
               '<input type="text" data-f="choice" data-ci="' + ci + '" value="' + esc(c) + '"></div>';
           }).join('') + '</div>' : '') +
+        /* 이 문항만의 제한시간. 비우면 timing 프로필(모듈 값)이 그대로 쓰인다. */
+        '<div class="fld"><label><span data-en>Time limit (seconds)</span><span data-ko>제한시간 (초)</span></label>' +
+          '<input type="number" min="1" max="3600" step="1" data-f="timeLimitSec" style="width:120px"' +
+            ' value="' + (q.timeLimitSec == null ? '' : esc(q.timeLimitSec)) + '"' +
+            ' placeholder="' + esc(defaultSecFor(it)) + '">' +
+          '<span class="muted" style="font-size:11.5px;margin-left:8px">' +
+            '<span data-en>blank = use the module default</span><span data-ko>비우면 모듈 기본값 사용</span></span>' +
+        '</div>' +
         '<div class="fld"><label><span data-en>Audio path</span><span data-ko>오디오 경로</span></label>' +
           '<input type="text" data-f="audio" value="' + esc(q.audio || '') + '" placeholder="media/audio/set9/l1-q01.mp3">' +
           (eff ? '<audio controls preload="none" src="' + esc(eff) + '"></audio>' : '') +
@@ -230,7 +311,8 @@
           '<p class="muted" style="font-size:11.5px;line-height:1.55;margin:0 0 7px">' +
             '<span data-en>One line per turn — write <b>Speaker 1: …</b> to split speakers; each gets its own voice. Runs on the deployed site only (the API key lives on the server).</span>' +
             '<span data-ko>한 줄에 한 대사 — <b>Speaker 1: …</b> 형식으로 쓰면 화자별로 다른 목소리가 배정됩니다. API 키가 서버에 있으므로 배포된 사이트에서만 동작합니다.</span></p>' +
-          '<textarea rows="4" data-f="script" placeholder="Speaker 1: Where is the student lounge?&#10;Speaker 2: It&#39;s on the second floor, near the elevators."></textarea>' +
+          '<textarea rows="4" data-f="script" placeholder="Speaker 1: Where is the student lounge?&#10;Speaker 2: It&#39;s on the second floor, near the elevators.">' +
+            esc(scriptFor(it)) + '</textarea>' +
           /* 엔진 · 언어 · 모델 — mp3 를 그대로 내주는 엔진만 서버가 싣는다. */
           '<div class="engines">' +
             '<label class="mini"><span data-en>engine</span><span data-ko>엔진</span>' +
@@ -303,6 +385,8 @@
     }
     var a = row.querySelector('[data-f=audio]'); if (a) out.audio = a.value.trim();
     var im = row.querySelector('[data-f=image]'); if (im) out.image = im.value.trim();
+    var tl = row.querySelector('[data-f=timeLimitSec]');
+    if (tl) { var v = parseInt(tl.value, 10); out.timeLimitSec = isFinite(v) && v > 0 ? v : null; }
     return out;
   }
 
@@ -315,6 +399,8 @@
     patch.answer  = (edit.answer  == null || edit.answer  === o.answer)  ? null : edit.answer;
     patch.audio   = (!edit.audio  || edit.audio  === o.audio)  ? null : edit.audio;
     patch.image   = (!edit.image  || edit.image  === o.image)  ? null : edit.image;
+    patch.timeLimitSec = (edit.timeLimitSec == null || edit.timeLimitSec === o.timeLimitSec)
+      ? null : edit.timeLimitSec;
     return patch;
   }
 
