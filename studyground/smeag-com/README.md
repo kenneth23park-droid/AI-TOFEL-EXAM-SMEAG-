@@ -50,7 +50,8 @@ sg2 번들도 지금은 같은 상태다. 정답을 감추려면 `showAnswerKey:
 
 ## 성적 보고서 연동
 
-`CFG.reportUrl` 을 채우면 응시 상세에 **성적 보고서** 버튼이 붙는다. 누르면 리포트
+`CFG.reportUrl` 을 채우면 응시 상세에 **성적 보고서** 버튼이 붙는다.
+지금 연결된 곳은 <https://smeag-report-alpha.vercel.app/> (Vercel 프로젝트 `smeag-report`). 누르면 리포트
 생성기(`AI 토플 평가시스템(smeag)/TOFEL RESULT/report-generator`)가 새 탭에서 열리고,
 거기서 그래프·형식·교사 코멘트를 골라 Word·PDF·Excel 을 내려받는다.
 
