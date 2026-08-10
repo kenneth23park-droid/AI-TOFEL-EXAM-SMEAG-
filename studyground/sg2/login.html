@@ -42,7 +42,7 @@
       <button class="btn brand block lg" id="go" type="submit"><span data-en>Log in</span><span data-ko>로그인</span></button>
     </form>
     <div class="divider"><span data-en>or</span><span data-ko>또는</span></div>
-    <a class="btn ghost block" id="guest" href="dashboard.html"><span data-en>Continue as guest</span><span data-ko>게스트로 계속</span></a>
+    <a class="btn ghost block" id="guest" href="tests.html"><span data-en>Continue as guest</span><span data-ko>게스트로 계속</span></a>
     <div class="auth-alt"><span data-en>New to StudyGround?</span><span data-ko>StudyGround가 처음이신가요?</span>
       <a href="signup.html"><span data-en>Sign up free</span><span data-ko>무료 가입</span></a></div>
   </div>
@@ -58,7 +58,8 @@
 
   // ?next= 는 이 사이트 안의 페이지 이름만 받는다 — 외부 주소로 튕기지 않게.
   var raw = new URLSearchParams(location.search).get('next') || '';
-  var next = /^[\w.-]+\.html(\?[^#]*)?$/.test(raw) && raw.indexOf('login.html') !== 0 ? raw : 'dashboard.html';
+  // 돌아갈 곳이 따로 없으면 모의고사 목록으로 — 로그인하고 바로 시험을 보는 게 기본 동선이다.
+  var next = /^[\w.-]+\.html(\?[^#]*)?$/.test(raw) && raw.indexOf('login.html') !== 0 ? raw : 'tests.html';
 
   function show(en, ko) {
     err.querySelector('[data-en]').textContent = en;
