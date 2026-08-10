@@ -122,20 +122,22 @@ ANSWER_KEY: dict[str, dict] = {
 }
 
 # Productive questions — graded by a teacher / rubric, never auto-scored.
+# task_kind 는 채점 방식을 고르는 스위치이고(repeat 이면 원문 대조),
+# reference 는 복창 원문이다(speaking_script.json 출처, 복창이 아니면 None).
 PRODUCTIVE_KEYS: dict[str, dict] = {
-    "set9-W2-email": {"qtype": "WRITING", "skill": "writing", "module": "W2", "no": 11, "answer": None, "max_score": 1},
-    "set9-W3-disc": {"qtype": "WRITING", "skill": "writing", "module": "W3", "no": 12, "answer": None, "max_score": 1},
-    "set9-S1-q01": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 1, "answer": None, "max_score": 1},
-    "set9-S1-q02": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 2, "answer": None, "max_score": 1},
-    "set9-S1-q03": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 3, "answer": None, "max_score": 1},
-    "set9-S1-q04": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 4, "answer": None, "max_score": 1},
-    "set9-S1-q05": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 5, "answer": None, "max_score": 1},
-    "set9-S1-q06": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 6, "answer": None, "max_score": 1},
-    "set9-S1-q07": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 7, "answer": None, "max_score": 1},
-    "set9-S2-q01": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 8, "answer": None, "max_score": 1},
-    "set9-S2-q02": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 9, "answer": None, "max_score": 1},
-    "set9-S2-q03": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 10, "answer": None, "max_score": 1},
-    "set9-S2-q04": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 11, "answer": None, "max_score": 1},
+    "set9-W2-email": {"qtype": "WRITING", "skill": "writing", "module": "W2", "no": 11, "answer": None, "max_score": 1, "task_kind": "email", "reference": None},
+    "set9-W3-disc": {"qtype": "WRITING", "skill": "writing", "module": "W3", "no": 12, "answer": None, "max_score": 1, "task_kind": "discussion", "reference": None},
+    "set9-S1-q01": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 1, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": "Is this your first time in our cafeteria?"},
+    "set9-S1-q02": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 2, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": "You can find today’s menu on the board?"},
+    "set9-S1-q03": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 3, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": "The hot food station is on the left side."},
+    "set9-S1-q04": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 4, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": "We offer a variety of meals, snacks, and drinks every day."},
+    "set9-S1-q05": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 5, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": "You can pay with cash or your student ID card."},
+    "set9-S1-q06": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 6, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": "Please remember to return your tray to the collection area when finished."},
+    "set9-S1-q07": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 7, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": "If you have any food allergies, please let the staff know before ordering."},
+    "set9-S2-q01": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 8, "answer": None, "max_score": 1, "task_kind": "interview", "reference": None},
+    "set9-S2-q02": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 9, "answer": None, "max_score": 1, "task_kind": "interview", "reference": None},
+    "set9-S2-q03": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 10, "answer": None, "max_score": 1, "task_kind": "interview", "reference": None},
+    "set9-S2-q04": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 11, "answer": None, "max_score": 1, "task_kind": "interview", "reference": None},
 }
 
 AUTO_TOTAL_BY_SKILL: dict[str, int] = {

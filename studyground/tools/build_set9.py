@@ -244,11 +244,19 @@ SOURCE_NOTES = {
 # 로마 도로 지문처럼 한 문단 안에 {{A}}~{{D}} 를 갖고 있다 — 그 구조가 정본이다).
 #
 # 원본 확인 결과 (zipfile+re, 읽기 전용):
-#   NEW TOEFL MOCK TEST SET  9.docx 의 "Benefits of Green Roofs" 지문은 문서에 두 번
-#   실려 있는데(문단 284-289, 290-295) **두 사본 모두 A/B/C/D 표식이 없다**. 해당 <w:p>
-#   안에 w:sym / w:drawing / 텍스트박스도 없다. 즉 파싱 손실이 아니라 원본 자체가
+#   NEW TOEFL MOCK TEST SET  9.docx 의 "Benefits of Green Roofs" 지문은 본문 문단이 아니라
+#   **텍스트박스 안에 있다**. 조상 태그를 끝까지 따라가면
+#     w:body > w:p > mc:AlternateContent > mc:Choice > w:drawing > wps:txbx > w:txbxContent > w:p
+#   이다. 문서 안에서 이 지문이 두 번 잡히는 것은 사본이 둘이어서가 아니라,
+#   같은 텍스트박스를 mc:Choice(w:drawing/wps:txbx)와 mc:Fallback(w:pict/v:textbox)이
+#   중복 기술하기 때문이다 — extract_set9_reading.py 머리말의 주의점 2)와 같은 사정이다.
+#   그 mc:AlternateContent 블록 전체(약 9.2KB)의 w:t 를 텍스트박스 내부까지 전수 추출해
+#   3,106자를 얻었고 **그 안에 A/B/C/D 표식이 하나도 없다**(w:sym 0개, 마커로 쓸 만한
+#   기호 문자 0개, 한두 글자짜리 w:t 조각 0개). 즉 파싱 손실이 아니라 원본 자체가
 #   마커를 빠뜨렸다. 15번 문항의 지시문("Look at the four letters (A, B, C, and D) in the
 #   passage")과 선택지 4개는 정상적으로 있다.
+#   ※ 나중에 원본을 재확인하려는 사람에게 — 본문 <w:p> 만 훑으면 이 지문은 아예 잡히지
+#     않는다. 반드시 w:txbxContent 안쪽까지 내려가서 확인할 것.
 #
 # 그래서 마커 위치는 여기서 집필한다. 근거 없는 값을 지어내지 않는다는 규약에 따라
 # 블록에 markerOrigin:"authored" + markerNote 를 남긴다(_set9_l2/*.json 의
@@ -284,7 +292,9 @@ INSERT_MARKERS = {
         ],
         'origin': 'authored',
         'note': u'원본 NEW TOEFL MOCK TEST SET  9.docx 의 이 지문에는 A/B/C/D 표식이 '
-                u'아예 없다(문서에 두 번 실린 사본 모두, w:sym·도형·텍스트박스도 없음). '
+                u'아예 없다. 이 지문은 본문 문단이 아니라 텍스트박스(w:txbxContent) 안에 '
+                u'있고 mc:Choice/mc:Fallback 으로 두 번 기술되는데, 텍스트박스 내부 w:t 까지 '
+                u'전수 추출해 확인해도 마커도 w:sym 도 없다. '
                 u'마커가 없으면 렌더러가 삽입 지점 버튼을 하나도 만들지 못해 문항이 성립하지 '
                 u'않으므로, 정답 D(answer:3) 제약과 지시어 "These factors"/"benefits described '
                 u'above" 의 선행사 요건에 맞춰 네 자리를 tools/build_set9.py 에서 집필했다. '

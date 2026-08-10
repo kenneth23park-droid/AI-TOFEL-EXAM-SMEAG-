@@ -236,6 +236,21 @@ STEPS: list[tuple[str, list[tuple]]] = [
             )
         ],
     ),
+    (
+        # 상태를 셋으로 가르기 위한 두 컬럼(둘 다 가산형이다).
+        #   rubric_scores.source     — 'teacher' 만 확정본. 완료 판정이 여기 걸린다.
+        #   section_scores.provisional — 점수는 나왔지만 확정은 아니라는 표시.
+        # 기존 행은 그대로 둔다: DEFAULT 가 채우는 값('ai_draft' / false)이 곧
+        # "출처를 모르니 확정이 아니다"라는 사실이라, 백필 UPDATE 가 따로 필요 없다.
+        # 로컬 SQLite 와 클라우드 Postgres 어느 쪽에 먼저 닿아도 결과가 같다.
+        "0008_rubric_source_section_provisional",
+        [
+            add_column("rubric_scores", "source", "VARCHAR(16) NOT NULL DEFAULT 'ai_draft'"),
+            add_column("section_scores", "provisional", "BOOLEAN NOT NULL DEFAULT 0",
+                       pg_ddl="BOOLEAN NOT NULL DEFAULT false"),
+            check("rubric_scores", "ck_rubric_source", "source IN ('ai_draft','teacher')"),
+        ],
+    ),
 ]
 
 

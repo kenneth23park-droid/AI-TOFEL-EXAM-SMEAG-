@@ -93,20 +93,22 @@ ANSWER_KEY: dict[str, dict] = {
 }
 
 # Productive questions — graded by a teacher / rubric, never auto-scored.
+# task_kind 는 채점 방식을 고르는 스위치다. reference(복창 원문)는 SET 1 에 대본 파일이
+# 없어 전부 None — 채점기는 "원문 없음" degrade 경로를 탄다(rubric.draft docstring).
 PRODUCTIVE_KEYS: dict[str, dict] = {
-    "W-EMAIL": {"qtype": "WRITING", "skill": "writing", "module": "W2", "no": 11, "answer": None, "max_score": 1},
-    "W-DISC": {"qtype": "WRITING", "skill": "writing", "module": "W3", "no": 12, "answer": None, "max_score": 1},
-    "S-1": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 1, "answer": None, "max_score": 1},
-    "S-2": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 2, "answer": None, "max_score": 1},
-    "S-3": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 3, "answer": None, "max_score": 1},
-    "S-4": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 4, "answer": None, "max_score": 1},
-    "S-5": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 5, "answer": None, "max_score": 1},
-    "S-6": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 6, "answer": None, "max_score": 1},
-    "S-7": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 7, "answer": None, "max_score": 1},
-    "S-8": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 8, "answer": None, "max_score": 1},
-    "S-9": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 9, "answer": None, "max_score": 1},
-    "S-10": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 10, "answer": None, "max_score": 1},
-    "S-11": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 11, "answer": None, "max_score": 1},
+    "W-EMAIL": {"qtype": "WRITING", "skill": "writing", "module": "W2", "no": 11, "answer": None, "max_score": 1, "task_kind": "email", "reference": None},
+    "W-DISC": {"qtype": "WRITING", "skill": "writing", "module": "W3", "no": 12, "answer": None, "max_score": 1, "task_kind": "discussion", "reference": None},
+    "S-1": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 1, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": None},
+    "S-2": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 2, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": None},
+    "S-3": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 3, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": None},
+    "S-4": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 4, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": None},
+    "S-5": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 5, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": None},
+    "S-6": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 6, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": None},
+    "S-7": {"qtype": "SPEAKING", "skill": "speaking", "module": "S1", "no": 7, "answer": None, "max_score": 1, "task_kind": "repeat", "reference": None},
+    "S-8": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 8, "answer": None, "max_score": 1, "task_kind": "interview", "reference": None},
+    "S-9": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 9, "answer": None, "max_score": 1, "task_kind": "interview", "reference": None},
+    "S-10": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 10, "answer": None, "max_score": 1, "task_kind": "interview", "reference": None},
+    "S-11": {"qtype": "SPEAKING", "skill": "speaking", "module": "S2", "no": 11, "answer": None, "max_score": 1, "task_kind": "interview", "reference": None},
 }
 
 AUTO_TOTAL_BY_SKILL: dict[str, int] = {

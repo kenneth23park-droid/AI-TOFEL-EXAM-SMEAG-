@@ -111,6 +111,11 @@ Seed is deterministic (`SEED = 20260804`): 6 students, 3 exam sets, 12 attempts,
 and identical rule-based feedback on every fresh database. Re-seeding a
 populated DB is a no-op; `python -m app.seed` re-runs it.
 
+Exam audio has its own gate — it runs whenever an mp3 is added or replaced
+(generators, `tools/audio_gate.py`, and the pre-commit hook all call it), and
+layer 3 transcribes the changed audio back to text to check it against the
+script. See [docs/audio-gate.md](docs/audio-gate.md).
+
 ## BMAD streams
 
 | Stream | Scope | Contract |

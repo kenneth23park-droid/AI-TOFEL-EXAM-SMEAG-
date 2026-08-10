@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<!--
+  admin-log.html — 관리자 변경 로그(개발자용).
+
+  누가 · 언제 · 무엇을 · 어떻게 바꿨는지 한 줄씩 본다. 문항 신규/수정/삭제(되돌리기),
+  오디오 URL·업로드 교체, 문항별 제한시간 변경이 모두 여기로 들어온다.
+  기록은 assets/admin-log.js 가 localStorage 에 남긴다 — 정적 사이트라 서버 로그가
+  없으므로, 개발자에게 넘길 때는 JSON/CSV 로 내보낸다.
+
+  SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Change log (admin) · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:14px 0 10px; }
+  .bar input[type=search] { flex:1; min-width:190px; font:inherit; font-size:12.5px; padding:9px 12px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .seg { display:inline-flex; border:1px solid var(--line-2); border-radius:9px; overflow:hidden; }
+  .seg button { font:inherit; font-size:12px; font-weight:750; padding:8px 12px; border:0; cursor:pointer;
+    background:var(--paper,#fff); color:var(--ink-2); }
+  .seg button + button { border-left:1px solid var(--line-2); }
+  .seg button.on { background:var(--brand); color:#fff; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin:4px 0 14px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 13px; min-width:92px; }
+  .stat b { display:block; font-size:20px; font-weight:850; line-height:1.15; }
+  .stat span { font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+
+  table.log { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.log th { text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--muted); padding:8px 9px; border-bottom:1px solid var(--line-2); white-space:nowrap; }
+  table.log td { padding:9px; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.log tr:hover td { background:var(--cream-2); }
+  .when { white-space:nowrap; font-variant-numeric:tabular-nums; color:var(--muted); font-size:11.5px; }
+  .who { font-weight:800; }
+  .act { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
+  .act.create { background:#e6f5ec; color:#1f7a44; }
+  .act.update { background:#e2eef6; color:#2f6f9f; }
+  .act.delete { background:#fdeeee; color:#c62828; }
+  .act.reset  { background:#fdeeee; color:#c62828; }
+  .act.import { background:#efe7fb; color:#6b3fbe; }
+  .act.audio  { background:#fdf1dc; color:#a86b00; }
+  .tgt { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; word-break:break-all; }
+  .fld { font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .val { font-size:12px; line-height:1.6; word-break:break-word; }
+  .val del { background:#ffe0e0; color:#7a1c14; text-decoration:none; padding:0 3px; border-radius:3px; }
+  .val ins { background:#dcf3e4; color:#12522f; text-decoration:none; padding:0 3px; border-radius:3px; }
+  .val .arrow { color:var(--dim); margin:0 5px; }
+  .gate { max-width:520px; margin:60px auto; text-align:center; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Admin · Change log</small></span></a>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="admin-set-view.html"><span data-en>Set overview</span><span data-ko>SET 전체 보기</span></a>
+      <a class="btn ghost sm" href="admin-questions.html"><span data-en>Questions</span><span data-ko>문항 교체</span></a>
+      <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main" hidden>
+  <div class="page-h" style="padding-top:24px">
+    <span class="pill" style="margin-bottom:8px">Admin · Change log</span>
+    <h1 style="font-size:clamp(25px,4vw,38px)"><span data-en>What the admins changed</span><span data-ko>관리자 변경 기록</span></h1>
+    <p class="sub"><span data-en>Every question created, edited or reverted, every audio replacement and every time-limit change — with the old and new value side by side. Export it to hand the developer a full trail.</span>
+      <span data-ko>문항 신규·수정·되돌리기, 오디오 교체, 제한시간 변경이 이전값 → 새값과 함께 한 줄씩 남습니다. 내보내기로 개발자에게 그대로 넘길 수 있습니다.</span></p>
+  </div>
+
+  <div class="bar">
+    <span class="seg" id="actseg"></span>
+    <span class="seg" id="setseg"></span>
+    <input type="search" id="q" placeholder="Filter by question id, field, value…">
+    <button class="btn ghost sm" id="jsonBtn"><span data-en>Export JSON</span><span data-ko>JSON 내보내기</span></button>
+    <button class="btn ghost sm" id="csvBtn"><span data-en>Export CSV</span><span data-ko>CSV 내보내기</span></button>
+    <button class="btn ghost sm" id="clearBtn"><span data-en>Clear log</span><span data-ko>기록 비우기</span></button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <table class="log">
+    <thead><tr>
+      <th><span data-en>When</span><span data-ko>시각</span></th>
+      <th><span data-en>Who</span><span data-ko>계정</span></th>
+      <th><span data-en>Action</span><span data-ko>동작</span></th>
+      <th><span data-en>Target</span><span data-ko>대상</span></th>
+      <th><span data-en>Change</span><span data-ko>변경 내용</span></th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p class="muted" style="font-size:11.5px;margin-top:14px">
+    <span data-en>The log lives in this browser (most recent 800 entries). It is not sent anywhere — export it to share.</span>
+    <span data-ko>기록은 이 브라우저에 최근 800건까지 남습니다. 어디로도 전송되지 않으므로, 공유하려면 내보내기를 쓰세요.</span>
+  </p>
+</main>
+
+<div class="wrap gate" id="gate">
+  <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
+  <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+</div>
+
+<script src="assets/admin-session.js"></script>
+<script src="assets/admin-log.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var A = window.SG_ADMIN, L = window.SG_LOG;
+  var ACTIONS = ['all', 'create', 'update', 'delete', 'reset', 'audio', 'import'];
+  var fAct = 'all', fSet = 'all', fQ = '';
+
+  function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return iso;
+    var p = function (n) { return ('0' + n).slice(-2); };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' +
+           p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  function change(r) {
+    if (r.before == null && r.after == null) return esc(r.note || '');
+    var bits = '';
+    if (r.before != null) bits += '<del>' + esc(r.before) + '</del>';
+    if (r.before != null && r.after != null) bits += '<span class="arrow">→</span>';
+    if (r.after != null) bits += '<ins>' + esc(r.after) + '</ins>';
+    return (r.field ? '<span class="fld">' + esc(r.field) + '</span> ' : '') + bits +
+           (r.note ? ' <span class="muted">· ' + esc(r.note) + '</span>' : '');
+  }
+
+  function rowsNow() { return L.list({ q: fQ, action: fAct === 'all' ? '' : fAct, set: fSet === 'all' ? '' : fSet }); }
+
+  function render() {
+    var list = rowsNow();
+    document.getElementById('rows').innerHTML = list.map(function (r) {
+      return '<tr>' +
+        '<td class="when">' + esc(when(r.iso)) + '</td>' +
+        '<td class="who">' + esc(r.who) + (r.set ? '<div class="fld">' + esc(r.set) + '</div>' : '') + '</td>' +
+        '<td><span class="act ' + esc(r.action) + '">' + esc(r.action) + '</span></td>' +
+        '<td class="tgt">' + esc(r.target) + (r.page ? '<div class="fld">' + esc(r.page) + '</div>' : '') + '</td>' +
+        '<td class="val">' + change(r) + '</td>' +
+      '</tr>';
+    }).join('') || '<tr><td colspan="5" class="muted" style="padding:18px 9px">' +
+      '<span data-en>No changes recorded yet.</span><span data-ko>아직 기록된 변경이 없습니다.</span></td></tr>';
+
+    var all = L.list({});
+    var by = {};
+    all.forEach(function (r) { by[r.action] = (by[r.action] || 0) + 1; });
+    document.getElementById('stats').innerHTML =
+      '<div class="stat"><b>' + all.length + '</b><span data-en>entries</span><span data-ko>기록</span></div>' +
+      '<div class="stat"><b>' + (by.create || 0) + '</b><span data-en>created</span><span data-ko>신규</span></div>' +
+      '<div class="stat"><b>' + (by.update || 0) + '</b><span data-en>edited</span><span data-ko>수정</span></div>' +
+      '<div class="stat"><b>' + ((by['delete'] || 0) + (by.reset || 0)) + '</b><span data-en>reverted</span><span data-ko>되돌림</span></div>' +
+      '<div class="stat"><b>' + (by.audio || 0) + '</b><span data-en>audio swaps</span><span data-ko>오디오 교체</span></div>';
+  }
+
+  function paintSegs() {
+    document.getElementById('actseg').innerHTML = ACTIONS.map(function (a) {
+      return '<button data-act="' + a + '"' + (a === fAct ? ' class="on"' : '') + '>' +
+        (a === 'all' ? '<span data-en>All</span><span data-ko>전체</span>' : a) + '</button>';
+    }).join('');
+    document.getElementById('setseg').innerHTML = ['all'].concat(A.allowedSets()).map(function (s) {
+      return '<button data-set="' + s + '"' + (s === fSet ? ' class="on"' : '') + '>' +
+        (s === 'all' ? '<span data-en>All sets</span><span data-ko>전체 SET</span>' : s.toUpperCase()) + '</button>';
+    }).join('');
+  }
+
+  document.getElementById('actseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    fAct = b.getAttribute('data-act'); paintSegs(); render();
+  });
+  document.getElementById('setseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-set]'); if (!b) return;
+    fSet = b.getAttribute('data-set'); paintSegs(); render();
+  });
+  document.getElementById('q').addEventListener('input', function () { fQ = this.value.trim(); render(); });
+
+  function download(text, name, type) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: type }));
+    a.download = name; a.click();
+  }
+  document.getElementById('jsonBtn').addEventListener('click', function () {
+    download(L.exportJson(), 'sg-admin-log.json', 'application/json');
+  });
+  document.getElementById('csvBtn').addEventListener('click', function () {
+    download(L.exportCsv(), 'sg-admin-log.csv', 'text/csv');
+  });
+  document.getElementById('clearBtn').addEventListener('click', function () {
+    if (!confirm('Clear the whole change log on this device? Export it first if you need it.')) return;
+    L.clear(); render();
+  });
+
+  function open() {
+    document.getElementById('gate').hidden = true;
+    document.getElementById('main').hidden = false;
+    paintSegs(); render();
+    L.onChange(render);
+  }
+  document.getElementById('signin').addEventListener('click', function () { A.openLogin('', open); });
+  if (A.can()) open(); else A.openLogin('', open);
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

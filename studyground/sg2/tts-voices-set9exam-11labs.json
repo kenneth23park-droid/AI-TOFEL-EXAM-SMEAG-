@@ -902,9 +902,17 @@
           "voice": "onwK4e9ZLuTAKqWW03F9",
           "voice_name": "GB-Oliver",
           "el_voice": "Daniel",
-          "text": "Good points. Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?"
+          "text": "Good points."
+        },
+        {
+          "speaker": "M",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?"
         }
-      ]
+      ],
+      "splitNote": "선두의 짧은 문장 'Good points.' 를 ElevenLabs 가 반복적으로 누락했다(재생성 2회 모두 확인). 별도 세그먼트로 분리해 렌더링을 보장한다."
     }
   ]
 }

@@ -14,10 +14,14 @@ If `langgraph` is installed the four nodes run as a compiled StateGraph; otherwi
 the SAME node functions run sequentially (offline demos never depend on it).
 
 The per-item `verify` node only proves a file was written. The REAL gate runs
-once at the end of the run: tools/verify_audio.py (layers 0-2 — mapping,
-freshness, integrity, signal) over a derived manifest, with --update-index so
-the freshness baseline is stamped at the one moment we know audio matches
-script. FAIL there makes this script exit non-zero. --no-verify turns it off.
+once at the end of the run: tools/verify_audio.py over a derived manifest —
+layers 0-2 (mapping, freshness, integrity, signal) plus layer 3, which
+transcribes the audio it just made and compares it to the script (WER). Layer 3
+is scoped to changed audio, which after a generation run is exactly what was
+written. --update-index --stamp-on-pass stamps the freshness baseline at the one
+moment we know audio matches script, and leaves FAILing items unstamped so they
+keep getting caught. FAIL makes this script exit non-zero. --no-verify turns it off.
+See studyground/docs/audio-gate.md.
 
 Why a *derived* manifest: media/tts/ is written by several generators
 (tts-voices.json here, tts-voices-*-google.json elsewhere), and verify_audio
@@ -290,7 +294,7 @@ def run_audio_gate() -> int:
         return 0
     man = build_verify_manifest()
     cmd = [sys.executable, str(VERIFIER), "--manifest", str(man),
-           "--update-index", "--base", str(ROOT)]
+           "--update-index", "--stamp-on-pass", "--base", str(ROOT)]
     print(f"\n[audio gate] {' '.join(cmd)}")
     sys.stdout.flush()   # else our buffered output lands AFTER the child's
     return subprocess.run(cmd).returncode

@@ -643,7 +643,7 @@
             }
           ],
           "markerOrigin": "authored",
-          "markerNote": "원본 NEW TOEFL MOCK TEST SET  9.docx 의 이 지문에는 A/B/C/D 표식이 아예 없다(문서에 두 번 실린 사본 모두, w:sym·도형·텍스트박스도 없음). 마커가 없으면 렌더러가 삽입 지점 버튼을 하나도 만들지 못해 문항이 성립하지 않으므로, 정답 D(answer:3) 제약과 지시어 \"These factors\"/\"benefits described above\" 의 선행사 요건에 맞춰 네 자리를 tools/build_set9.py 에서 집필했다. D = 단점 문단이 끝난 자리(모든 factor 열거 후), A·B·C 는 문법적으로는 붙을 만한 오답 자리. 원본에서 실제 마커 위치가 확보되면 build_set9.py 의 INSERT_MARKERS 표를 교체하고 이 필드를 지울 것."
+          "markerNote": "원본 NEW TOEFL MOCK TEST SET  9.docx 의 이 지문에는 A/B/C/D 표식이 아예 없다. 이 지문은 본문 문단이 아니라 텍스트박스(w:txbxContent) 안에 있고 mc:Choice/mc:Fallback 으로 두 번 기술되는데, 텍스트박스 내부 w:t 까지 전수 추출해 확인해도 마커도 w:sym 도 없다. 마커가 없으면 렌더러가 삽입 지점 버튼을 하나도 만들지 못해 문항이 성립하지 않으므로, 정답 D(answer:3) 제약과 지시어 \"These factors\"/\"benefits described above\" 의 선행사 요건에 맞춰 네 자리를 tools/build_set9.py 에서 집필했다. D = 단점 문단이 끝난 자리(모든 factor 열거 후), A·B·C 는 문법적으로는 붙을 만한 오답 자리. 원본에서 실제 마커 위치가 확보되면 build_set9.py 의 INSERT_MARKERS 표를 교체하고 이 필드를 지울 것."
         }
       ]
     }

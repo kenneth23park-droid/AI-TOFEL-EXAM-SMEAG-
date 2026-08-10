@@ -111,7 +111,10 @@
     setUrl: function (key, url) {
       url = (url || '').trim();
       if (!url) return API.reset(key);
-      return API.reset(key).then(function () { meta[key] = { mode: 'url', url: url }; saveMeta(); emit(); });
+      return API.reset(key, true).then(function () {
+        meta[key] = { mode: 'url', url: url }; saveMeta(); emit();
+        if (window.SG_LOG) SG_LOG.add({ action: 'audio', target: key, field: 'url', after: url });
+      });
     },
     setFile: function (key, file) {
       if (!file) return Promise.resolve();
@@ -121,10 +124,16 @@
           blobUrls[key] = URL.createObjectURL(file);
           meta[key] = { mode: 'file', name: file.name, size: file.size, type: file.type };
           saveMeta(); emit();
+          if (window.SG_LOG) SG_LOG.add({ action: 'audio', target: key, field: 'upload',
+                                          after: file.name + ' · ' + Math.round(file.size / 1024) + ' KB' });
         });
     },
-    reset: function (key) {
-      revoke(key); var had = !!meta[key]; delete meta[key]; if (had) saveMeta();
+    reset: function (key, quiet) {
+      revoke(key); var had = !!meta[key], prev = meta[key]; delete meta[key]; if (had) saveMeta();
+      if (had && !quiet && window.SG_LOG) {
+        SG_LOG.add({ action: 'audio', target: key, field: 'revert',
+                     before: prev.mode === 'url' ? prev.url : prev.name });
+      }
       return dbDelete(key).catch(function () {}).then(function () { if (had) emit(); });
     },
     resetAll: function () {

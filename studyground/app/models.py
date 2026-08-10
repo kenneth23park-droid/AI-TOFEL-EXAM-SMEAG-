@@ -57,6 +57,25 @@ QTYPES = ("WORD_FILLING", "MCQ", "CLOZE", "INSERT", "BUILD_SENTENCE", "WRITING",
 PROFILES = ("toefl", "ielts")
 SCALES = ("toefl120", "ielts9")
 
+# 루브릭 행의 출처. 'teacher' 만 **확정본**이고 나머지는 전부 잠정 초안이다 —
+# 완료(status='completed') 판정이 이 값 하나에 걸린다(crud_write.grade_attempt).
+# 값의 정본은 app/scoring/rubric.py 의 DRAFT_SOURCE 인데, 그 모듈은 scale.py 를 거쳐
+# 이 파일을 import 한다(rubric → scale → models). 여기서 되끌어오면 순환이므로
+# 문자열을 한 번 더 적는다. 두 값이 어긋나면 tests/test_rubric_source.py 가 잡는다.
+RUBRIC_SOURCE_DRAFT = "ai_draft"
+RUBRIC_SOURCE_TEACHER = "teacher"
+RUBRIC_SOURCES = (RUBRIC_SOURCE_DRAFT, RUBRIC_SOURCE_TEACHER)
+
+# 교사 확정으로 읽어야 하는 별칭들. nodes._apply_teacher_rubrics 는 교사 행에
+# source='manual' 을 붙인다 — 그 값이 DB 로 흘러들어도 초안으로 강등되면 안 된다.
+_TEACHER_ALIASES = frozenset({RUBRIC_SOURCE_TEACHER, "manual", "human"})
+
+
+def normalize_rubric_source(value: str | None) -> str:
+    """알 수 없는 값은 초안으로 본다 — 확정은 명시적으로만 얻는다."""
+    raw = (value or "").strip().lower()
+    return RUBRIC_SOURCE_TEACHER if raw in _TEACHER_ALIASES else RUBRIC_SOURCE_DRAFT
+
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc)
@@ -178,6 +197,11 @@ class SectionScore(Base):
     raw_total: Mapped[float] = mapped_column(Float, default=0)
     scaled: Mapped[int] = mapped_column(Integer, default=0)   # /30
     module: Mapped[str] = mapped_column(String(8), default="")  # 'R1'/'L2'… blank = whole skill
+    # 잠정 점수인가 — 산출형(에세이·스피킹)이 아직 교사 확정 루브릭을 못 받은 섹션은
+    # 점수가 나와도 확정이 아니다. 화면이 "잠정"을 표시할 수 있게 데이터에 남긴다.
+    provisional: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default=text("false"), nullable=False
+    )
 
     attempt: Mapped[Attempt] = relationship(back_populates="section_scores")
 
@@ -243,6 +267,19 @@ class RubricScore(Base):
     comment: Mapped[str] = mapped_column(Text, default="")
     # IELTS band for this criterion in 0.5 steps; NULL on the TOEFL rubric.
     band: Mapped[float | None] = mapped_column(Numeric(2, 1, asdecimal=False), nullable=True)
+    # ai_draft | teacher — 가산형 컬럼(server_default). 이미 있던 행은 마이그레이션이
+    # 'ai_draft' 로 채운다: 출처를 모르는 행을 확정본으로 승격시키지 않기 위해서다.
+    source: Mapped[str] = mapped_column(
+        String(16),
+        default=RUBRIC_SOURCE_DRAFT,
+        server_default=text("'" + RUBRIC_SOURCE_DRAFT + "'"),
+        nullable=False,
+    )
+
+    @validates("source")
+    def _validate_source(self, _key: str, value: str) -> str:
+        """SQLite 에는 CHECK 이 없다 — 모르는 값은 초안으로 눌러 둔다."""
+        return normalize_rubric_source(value)
 
     attempt: Mapped[Attempt] = relationship(back_populates="rubric_scores")
 

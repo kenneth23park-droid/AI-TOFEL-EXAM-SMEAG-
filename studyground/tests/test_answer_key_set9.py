@@ -206,7 +206,10 @@ def test_writing_is_pending_not_thirty_when_the_essays_have_no_rubric(db):
     writing = _section(attempt, "writing")
     assert writing.raw_correct == 10        # build 10문항은 실제로 다 맞았고
     assert writing.raw_total == 12          # 분모에는 에세이 2편도 들어간다
-    assert writing.scaled == 0              # 아직 산출된 /30 점수는 없다(0점 확정이 아님)
+    # 30 도 아니고 0 도 아니다 — 에세이를 0점으로 본 **하한**이 잠정으로 들어간다.
+    # (0 으로 굳히면 총점 0 · grade A1 이 확정된 결과처럼 읽힌다.)
+    assert 0 < writing.scaled < 30
+    assert writing.provisional is True
     assert "writing" in result["pending_sections"]
     assert "speaking" in result["pending_sections"]
     assert attempt.status == "scoring"      # AC8 — 루브릭 전에는 완료가 아니다
@@ -259,7 +262,8 @@ def test_speaking_is_the_rubric_alone(db):
     result = crud_write.grade_attempt(db, attempt)
     speaking = _section(attempt, "speaking")
     assert speaking.raw_total == 11          # 자동채점 0, 산출형 11
-    assert speaking.scaled == 0
+    assert speaking.scaled == 0              # 자동채점분이 0 이니 하한도 0 이다
+    assert speaking.provisional is True      # 다만 확정된 0 이 아니라 잠정이다
     assert "speaking" in result["pending_sections"]
 
     for criterion in ("Delivery", "Language Use", "Topic Development"):
@@ -285,7 +289,9 @@ def test_an_unknown_exam_code_keeps_the_answers_and_scores_nothing(db):
     assert len(attempt.question_responses) == 1          # 답안은 그대로 남는다
     assert attempt.question_responses[0].student_answer == "populations"
     assert attempt.question_responses[0].auto_score is None
-    assert _section(attempt, "reading").scaled == 0
+    # 섹션 점수는 한 줄도 쓰지 않는다 — 0/0 을 쓰면 총점 0 이 확정된 결과가 된다.
+    assert attempt.section_scores == []
+    assert result["gradable"] is False and result["reason"] == "pack_unknown"
 
 
 def test_set1_attempt_still_grades_exactly_as_before(db):

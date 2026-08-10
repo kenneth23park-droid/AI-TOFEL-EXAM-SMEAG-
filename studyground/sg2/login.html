@@ -11,6 +11,11 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="StudyGround">
+<style>
+  .auth-err { display:none; font-size:13px; font-weight:700; color:#b3261e; background:#fdeceb;
+              border:1px solid #f5c6c2; border-radius:10px; padding:10px 12px; margin-bottom:14px; }
+  .auth-err.on { display:block; }
+</style>
 </head>
 <body>
 
@@ -28,21 +33,57 @@
   <div class="auth-card">
     <h1><span data-en>Welcome back</span><span data-ko>다시 오신 걸 환영해요</span></h1>
     <p class="sub"><span data-en>Log in to continue your TOEFL prep.</span><span data-ko>TOEFL 학습을 이어가려면 로그인하세요.</span></p>
-    <form onsubmit="event.preventDefault();location.href='dashboard.html'">
+    <div class="auth-err" id="err"><span data-en></span><span data-ko></span></div>
+    <form id="f">
       <div class="field"><label data-en>Student ID or email</label><label data-ko>학번 또는 이메일</label>
-        <input type="text" placeholder="s2025001" required></div>
+        <input id="login" type="text" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="s2025001" required></div>
       <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
-        <input type="password" placeholder="••••••••" required></div>
-      <button class="btn brand block lg" type="submit"><span data-en>Log in</span><span data-ko>로그인</span></button>
+        <input id="pw" type="password" name="password" autocomplete="current-password" placeholder="••••••••" required></div>
+      <button class="btn brand block lg" id="go" type="submit"><span data-en>Log in</span><span data-ko>로그인</span></button>
     </form>
     <div class="divider"><span data-en>or</span><span data-ko>또는</span></div>
-    <a class="btn ghost block" href="dashboard.html"><span data-en>Continue as guest</span><span data-ko>게스트로 계속</span></a>
+    <a class="btn ghost block" id="guest" href="dashboard.html"><span data-en>Continue as guest</span><span data-ko>게스트로 계속</span></a>
     <div class="auth-alt"><span data-en>New to StudyGround?</span><span data-ko>StudyGround가 처음이신가요?</span>
       <a href="signup.html"><span data-en>Sign up free</span><span data-ko>무료 가입</span></a></div>
   </div>
 </div>
 
 <script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script>
+/* 이메일 또는 학번 + 비밀번호 → Supabase 세션. ?next= 가 있으면 그 페이지로 돌아간다. */
+(function () {
+  'use strict';
+  var f = document.getElementById('f'), go = document.getElementById('go'), err = document.getElementById('err');
+
+  // ?next= 는 이 사이트 안의 페이지 이름만 받는다 — 외부 주소로 튕기지 않게.
+  var raw = new URLSearchParams(location.search).get('next') || '';
+  var next = /^[\w.-]+\.html(\?[^#]*)?$/.test(raw) && raw.indexOf('login.html') !== 0 ? raw : 'dashboard.html';
+
+  function show(en, ko) {
+    err.querySelector('[data-en]').textContent = en;
+    err.querySelector('[data-ko]').textContent = ko || en;
+    err.classList.add('on');
+  }
+
+  if (window.SG_AUTH && SG_AUTH.user()) location.replace(next);
+  document.getElementById('guest').setAttribute('href', next);
+
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    err.classList.remove('on');
+    go.disabled = true;
+
+    SG_AUTH.signIn(document.getElementById('login').value.trim(), document.getElementById('pw').value)
+      .then(function () { location.replace(next); })
+      .catch(function (e2) {
+        go.disabled = false;
+        document.getElementById('pw').value = '';
+        show(e2.message, e2.messageKo);
+      });
+  });
+})();
+</script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
 </html>

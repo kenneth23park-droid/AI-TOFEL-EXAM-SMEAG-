@@ -1,0 +1,647 @@
+{
+  "note": "verify_audio.py 신선도 기준. 스크립트/음성정책 해시 + 계층3 판정. 매니페스트별로 따로 둔다(한 폴더를 두 매니페스트가 선언할 수 있다). 손으로 고치지 말고 tools/audio_gate.py 로 다시 세워라.",
+  "manifest": ".verify-manifest.tts.json",
+  "sigVersion": 3,
+  "items": {
+    "l1-q01": {
+      "scriptHash": "5bde360ce28276119d4905df6d42b33d6ab34461b5dc166f2d879dc1073007f7",
+      "sigVersion": 3,
+      "bytes": 30973,
+      "durationSec": 1.86,
+      "audioSha256": "2327bb15583bbacd669da2da77a44ea747afa974210c19acbde01cda649c5503",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where is the Student Lounge?",
+        "audioSha256": "2327bb15583bbacd669da2da77a44ea747afa974210c19acbde01cda649c5503",
+        "scriptHash": "5bde360ce28276119d4905df6d42b33d6ab34461b5dc166f2d879dc1073007f7"
+      }
+    },
+    "l1-q02": {
+      "scriptHash": "4cc36a3fbbd621136ae23c3aadc96b02f9a21b193930db5f76ca337386c38005",
+      "sigVersion": 3,
+      "bytes": 35152,
+      "durationSec": 2.14,
+      "audioSha256": "ce26ab4808eff9e9578ef9266b1559e4b6348654d817ede6809e50165ff363ea",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Do you know when the lecture starts?",
+        "audioSha256": "ce26ab4808eff9e9578ef9266b1559e4b6348654d817ede6809e50165ff363ea",
+        "scriptHash": "4cc36a3fbbd621136ae23c3aadc96b02f9a21b193930db5f76ca337386c38005"
+      }
+    },
+    "l1-q03": {
+      "scriptHash": "ec1ef7959cf4ed4a7803031306ec4912699c10e6c2648e0ec45f79a17657222b",
+      "sigVersion": 3,
+      "bytes": 61902,
+      "durationSec": 3.81,
+      "audioSha256": "286ead190ea706d7cfaf58619c36122f0eb251e9fbde3dbb30462df851689160",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I don't know how many people will join our study group tonight.",
+        "audioSha256": "286ead190ea706d7cfaf58619c36122f0eb251e9fbde3dbb30462df851689160",
+        "scriptHash": "ec1ef7959cf4ed4a7803031306ec4912699c10e6c2648e0ec45f79a17657222b"
+      }
+    },
+    "l1-q04": {
+      "scriptHash": "2ebf1bdff1888e4d273f2700c1b283c1e9d8e4f96293c4241306ee3576a97ad8",
+      "sigVersion": 3,
+      "bytes": 39750,
+      "durationSec": 2.41,
+      "audioSha256": "c42e65d68a4060f7a71897e9807c3a8869f2f2b5390b77d373f1ed3f424098f6",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Peter said he was looking for supplies.",
+        "audioSha256": "c42e65d68a4060f7a71897e9807c3a8869f2f2b5390b77d373f1ed3f424098f6",
+        "scriptHash": "2ebf1bdff1888e4d273f2700c1b283c1e9d8e4f96293c4241306ee3576a97ad8"
+      }
+    },
+    "l1-q05": {
+      "scriptHash": "400f4090ec053ed2dd5f7e929c56be69eabfe1bd8cc78d1c9320ff92a890e296",
+      "sigVersion": 3,
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "9437f45e58c80257cabb60ea9be459562b7dd2254cf6cc8656259598d5ab0a18",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Why is the classroom light flickering?",
+        "audioSha256": "9437f45e58c80257cabb60ea9be459562b7dd2254cf6cc8656259598d5ab0a18",
+        "scriptHash": "400f4090ec053ed2dd5f7e929c56be69eabfe1bd8cc78d1c9320ff92a890e296"
+      }
+    },
+    "l1-q06": {
+      "scriptHash": "67f07069845051b694d961ccc2feccc7ccd735e8125f87bc3b33b29c53700fca",
+      "sigVersion": 3,
+      "bytes": 38914,
+      "durationSec": 2.37,
+      "audioSha256": "28ab6d99f4369df58432bfdfb0a0380233ee213339946b09ca1eded99de6385e",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where can I buy the train ticket?",
+        "audioSha256": "28ab6d99f4369df58432bfdfb0a0380233ee213339946b09ca1eded99de6385e",
+        "scriptHash": "67f07069845051b694d961ccc2feccc7ccd735e8125f87bc3b33b29c53700fca"
+      }
+    },
+    "l1-q07": {
+      "scriptHash": "f37f9996c3260d76030f1b68c82a85005cb297feacc0dad4146c710416f77965",
+      "sigVersion": 3,
+      "bytes": 54378,
+      "durationSec": 3.34,
+      "audioSha256": "57ab63145b4dce7c80d32e8ab2ad5e126b6b3b44b3d1b6b9a9e468a16f5c9c35",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Maybe the power went out for the entire area.",
+        "audioSha256": "57ab63145b4dce7c80d32e8ab2ad5e126b6b3b44b3d1b6b9a9e468a16f5c9c35",
+        "scriptHash": "f37f9996c3260d76030f1b68c82a85005cb297feacc0dad4146c710416f77965"
+      }
+    },
+    "l1-q08": {
+      "scriptHash": "ca40aa23e789129347fb5f968b058476475cd3c05132a8b5a2989e4e6ded9713",
+      "sigVersion": 3,
+      "bytes": 35152,
+      "durationSec": 2.14,
+      "audioSha256": "ab40ef29236580509346751a942470d44cd3fe0e3f150e02e58440d5ff330322",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Why are you too late to class?",
+        "audioSha256": "ab40ef29236580509346751a942470d44cd3fe0e3f150e02e58440d5ff330322",
+        "scriptHash": "ca40aa23e789129347fb5f968b058476475cd3c05132a8b5a2989e4e6ded9713"
+      }
+    },
+    "l1-q09": {
+      "scriptHash": "900443b760b3cefcf22bc34507f918352ef8e44a133e7c9862c31505b9cea2ae",
+      "sigVersion": 3,
+      "bytes": 54378,
+      "durationSec": 3.34,
+      "audioSha256": "6c19d7f029d8a158cf26a4197d212e158211656c5772db9396d974df016b0aa5",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Which group is going to give the presentation first?",
+        "audioSha256": "6c19d7f029d8a158cf26a4197d212e158211656c5772db9396d974df016b0aa5",
+        "scriptHash": "900443b760b3cefcf22bc34507f918352ef8e44a133e7c9862c31505b9cea2ae"
+      }
+    },
+    "l1-q10": {
+      "scriptHash": "0d4e2c12d1eb07a28ae257a0ae4498d016dac165ff538be157e1842d5e2d6848",
+      "sigVersion": 3,
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "a1259aef6b186340f3f212d70bca052d39801226b1776a56c2b7a5362ce39c1a",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you finished writing the seminar paper?",
+        "audioSha256": "a1259aef6b186340f3f212d70bca052d39801226b1776a56c2b7a5362ce39c1a",
+        "scriptHash": "0d4e2c12d1eb07a28ae257a0ae4498d016dac165ff538be157e1842d5e2d6848"
+      }
+    },
+    "l1-q11": {
+      "scriptHash": "1e75e82a4ecaaa834dc9761323092f3ee5528b7b9d501f35d6aef8f683bc9960",
+      "sigVersion": 3,
+      "bytes": 28465,
+      "durationSec": 1.72,
+      "audioSha256": "707c87bf197883e5bd881e6431007585cfc85dc85b8d8be5ebe04f4506382f2b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Can you turn down the volume?",
+        "audioSha256": "707c87bf197883e5bd881e6431007585cfc85dc85b8d8be5ebe04f4506382f2b",
+        "scriptHash": "1e75e82a4ecaaa834dc9761323092f3ee5528b7b9d501f35d6aef8f683bc9960"
+      }
+    },
+    "l1-q12": {
+      "scriptHash": "43f3d91521824dc024f525cccaa9496d7355587f82d9cf76bc3763121e08b9ea",
+      "sigVersion": 3,
+      "bytes": 61902,
+      "durationSec": 3.81,
+      "audioSha256": "df64a8c05f34db1334604f2035efd81d889d6e95a614cb31a25b7ccd9ebe06fd",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "we might have to reschedule our study group session.",
+        "audioSha256": "df64a8c05f34db1334604f2035efd81d889d6e95a614cb31a25b7ccd9ebe06fd",
+        "scriptHash": "43f3d91521824dc024f525cccaa9496d7355587f82d9cf76bc3763121e08b9ea"
+      }
+    },
+    "l1-q13-14": {
+      "scriptHash": "b8e285b9ec9116feb552d1d13f15fbac7a1a28f9941c415d34cdf4d826e0f94e",
+      "sigVersion": 3,
+      "bytes": 321223,
+      "durationSec": 30.76,
+      "audioSha256": "d4a3157b7fca2bfa5557b028091f88c271e7ebe59fcb5eea6a69da715daaeacd",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0111,
+        "backend": "faster_whisper",
+        "reason": "WER 1.1%",
+        "transcript": "Have you made any progress on your senior capstone project? The final presentations are only three weeks away. I finished the research phase, but I'm still in the weeds with the data analysis. There's more to process than I anticipated. That sounds stressful. Have you considered asking Professor Martinez for an extension? I thought about it, but she's pretty strict about deadlines. I'll just have to put in extra hours this weekend. Well, let me know if you need help proofreading your report. I'll have some free time next week.",
+        "audioSha256": "d4a3157b7fca2bfa5557b028091f88c271e7ebe59fcb5eea6a69da715daaeacd",
+        "scriptHash": "b8e285b9ec9116feb552d1d13f15fbac7a1a28f9941c415d34cdf4d826e0f94e"
+      }
+    },
+    "l1-q15-16": {
+      "scriptHash": "e28c17542605e18902cea37b5c96a9e4f104bdba43a30c9fabcff5976a09222e",
+      "sigVersion": 3,
+      "bytes": 344501,
+      "durationSec": 32.67,
+      "audioSha256": "ddc4c0fc7bee0ae334820bc6eb11f9a5b0d51321b151b26b29d8a1ceca6c0332",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Excuse me, I reserved a digital microscope for my biology lab this afternoon, but the equipment room says they don't have my reservation on file. That's odd. Did you book it through the online portal or the department office? I used the portal but I never received a confirmation email. I just assumed it went through. The system has been glitchy lately. Let me check the backup log. If your reservation is there, I can issue you the equipment right away. That would be great. I really can't afford to postpone this experiment.",
+        "audioSha256": "ddc4c0fc7bee0ae334820bc6eb11f9a5b0d51321b151b26b29d8a1ceca6c0332",
+        "scriptHash": "e28c17542605e18902cea37b5c96a9e4f104bdba43a30c9fabcff5976a09222e"
+      }
+    },
+    "l1-q17-18": {
+      "scriptHash": "b6781b32aca293ebb9830071b7a154ecf80d03e2a105753121cf29bd5d025436",
+      "sigVersion": 3,
+      "bytes": 336403,
+      "durationSec": 34.48,
+      "audioSha256": "3d8b759d5896db4923c5fd4c457edaa2faf4bde4b5ec7dfd78ad0cf05db7bd3f",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0288,
+        "backend": "faster_whisper",
+        "reason": "WER 2.9% — queue for a human listen",
+        "transcript": "I'm thinking of having a garage sale this Saturday to get rid of some old furniture. Wanna join in? Actually, that's perfect timing. I've been meaning to declutter my apartment and I have boxes of stuff just collecting dust. Great, we can set up tables in my driveway. People usually start showing up around eight so we should be ready by 7.30. Sounds good, should I bring my own change or will you handle all the transactions? Bring some small bills and coins just in case. I found that most buyers try to haggle so it helps to have exact change ready.",
+        "audioSha256": "3d8b759d5896db4923c5fd4c457edaa2faf4bde4b5ec7dfd78ad0cf05db7bd3f",
+        "scriptHash": "b6781b32aca293ebb9830071b7a154ecf80d03e2a105753121cf29bd5d025436"
+      }
+    },
+    "l1-q19-20": {
+      "scriptHash": "ec8889ba8535ac091fe068db4c4aa2df152f100d24551cae34d7161f1265b3b6",
+      "sigVersion": 3,
+      "bytes": 382058,
+      "durationSec": 23.82,
+      "audioSha256": "7b5c755be48eac0bdca90674d858edd77ad89f9f7023834e2546f78d56e9b1e2",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Hello everyone, the Board Game Club is excited to host our monthly game night this Friday from 6 to 10 in the Student Lounge on the second floor of the Union Building. We'll have a wide selection of classic strategy games, card games, and several new releases for you to try out with fellow members. Please bring your own snacks to share with the group if you can. We hope to see many new faces join us for a fun evening!",
+        "audioSha256": "7b5c755be48eac0bdca90674d858edd77ad89f9f7023834e2546f78d56e9b1e2",
+        "scriptHash": "ec8889ba8535ac091fe068db4c4aa2df152f100d24551cae34d7161f1265b3b6"
+      }
+    },
+    "l1-q21-22": {
+      "scriptHash": "01c6a8fada1d4a00ee6e37e116fa96156ad6a293ce1b8417d4d99168f7869e0f",
+      "sigVersion": 3,
+      "bytes": 461888,
+      "durationSec": 28.79,
+      "audioSha256": "0e02305f3daf862060a4a96d0d7b428518032b09ba7844eaf0ccba470cfde08d",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Attention class, I need to let you know about a scheduling change that will affect our meeting times next week. Because the department is hosting a guest lecture series, our regular classroom in Harris Hall will be used for those events each morning. As a result, our Monday and Wednesday sessions will be moved to Peterson Hall, Room 108. Please make sure to go directly to the new location, and don't forget to bring your project drafts for our peer review workshop. I'll send an email reminder as well.",
+        "audioSha256": "0e02305f3daf862060a4a96d0d7b428518032b09ba7844eaf0ccba470cfde08d",
+        "scriptHash": "01c6a8fada1d4a00ee6e37e116fa96156ad6a293ce1b8417d4d99168f7869e0f"
+      }
+    },
+    "l1-q23-24": {
+      "scriptHash": "8a26d05607baed5541e98188321b85dbd5db5f19524ab8d033012a4821e0b051",
+      "sigVersion": 3,
+      "bytes": 905343,
+      "durationSec": 56.52,
+      "audioSha256": "08563396e489435be48b1287c9c2d52be20c8135675de450f1997d0a119eb5a2",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0357,
+        "backend": "faster_whisper",
+        "reason": "WER 3.6% — queue for a human listen",
+        "transcript": "Welcome, everyone. The Health Sciences Shadowing Program is now open for spring semester applications, and we're thrilled to announce several exciting updates this year. This program pairs pre-Sesmedan nursing students with experienced healthcare professionals at University Medical Center for weekly observation sessions, lasting three to four hours each. Participants will gain valuable first-hand clinical exposure while building meaningful connections with practicing physicians, nurses, and specialists across multiple departments. You'll also attend monthly seminars where professionals discuss their career paths and offer guidance. To register, visit the Health Sciences Building, room 215, during the office hours. Applicants must submit a brief personal statement explaining their interest in healthcare and provide proof of current immunizations. Please note that spaces are limited and selections will be made based on academic standing and demonstrated commitment so early applications are strongly encouraged.",
+        "audioSha256": "08563396e489435be48b1287c9c2d52be20c8135675de450f1997d0a119eb5a2",
+        "scriptHash": "8a26d05607baed5541e98188321b85dbd5db5f19524ab8d033012a4821e0b051"
+      }
+    },
+    "l1-q25-28": {
+      "scriptHash": "1f054ae6c83650c074ef1005bd47f9bcf46bab9b644bbcd91eb535d50eea9dcc",
+      "sigVersion": 3,
+      "bytes": 1277723,
+      "durationSec": 129.42,
+      "audioSha256": "d6015d1b5992a42684e0c3b699b8fe7c97267023396e6c785dadf9b36fb721c0",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0098,
+        "backend": "faster_whisper",
+        "reason": "WER 1.0%",
+        "transcript": "So today, let's talk about something you've probably experienced without really thinking about it. How cyclists manage to stay balanced when they turn. Now you all remember Newton's first law, right? The law of inertia. Basically, an object in motion wants to keep moving in a straight line unless some outside force acts on it. Think about it this way. If you're in a car and the driver suddenly turns left, your body gets pushed to the right. That's inertia. Your body wants to keep going straight, even though the car is turning. Okay, so when a cyclist is riding in a straight line, everything's fine. But what happens when they need to turn? Well, here's where it gets interesting. When you turn, your body wants to keep going straight. That's inertia at work. So cyclists have to lean into the turn. Why? Because leaning creates what we call a centripetal force. This force pulls the cyclist toward the center of the curve, counteracting that natural tendency to fly off in a straight line. You can actually see this really clearly in professional cycling races. Watch how dramatically the riders lean when they go around tight corners at high speeds. Now, the amount of lean depends on two things. How fast you're going and how sharp the turn is. The faster you go or the tighter the turn, the more you need to lean. If you don't lean enough, you'll skid outward. Lean too much and you'll fall over. It's really a delicate balance. That's why beginner cyclists often struggle with turns. They either don't lean enough out of fear or they overcorrect. This same principle, by the way, applies to motorcycles and even to runners going around a track. Next, we'll look at how this concept is applied in designing curved roadways and race tracks.",
+        "audioSha256": "d6015d1b5992a42684e0c3b699b8fe7c97267023396e6c785dadf9b36fb721c0",
+        "scriptHash": "1f054ae6c83650c074ef1005bd47f9bcf46bab9b644bbcd91eb535d50eea9dcc"
+      }
+    },
+    "l1-q29-32": {
+      "scriptHash": "e49cdcb9279826198e10b6e94cdb4d3056a09a3706522eb5db45fd08d8ef00ab",
+      "sigVersion": 3,
+      "bytes": 1150831,
+      "durationSec": 111.45,
+      "audioSha256": "e644199f5ddc9a9f3e76af7a3630ba538584e395401b1797b5cb3eddf5b67520",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Alright, so I want to introduce you to a really fun tool that can help when you're stuck for ideas, picture dice. Now these are exactly what they sound like. Instead of numbers, each face of the die has a simple image on it, like a tree, a key, a lightning bolt, or maybe a person running. Some sets have objects, others have actions or emotions. There's quite a variety out there. You roll several dice at once and whatever images come up. You use those as prompts to build a story. So let's say you roll and get a castle, a wolf, and a broken mirror. Your job is to weave these elements together into a narrative. Maybe the wolf lives in an abandoned castle and sees its reflection for the first time. Or perhaps a princess breaks a mirror to escape from a wolf. The possibilities are endless. It forces your brain to make unexpected connections, which is really the heart of creative thinking. You can't plan it out beforehand, you have to improvise. And that's actually where some of the most original ideas come from. Now, interestingly, these dice aren't just useful in writing classes. They've become quite popular at social gatherings as icebreakers. You know, when people don't know each other well, rolling these dice and taking turns telling mini, stories can really get conversation flowing. I've seen it work wonders at office team, building events, and even at dinner parties. It takes the pressure off because everyone's working with random elements. There's no right or wrong answer. People laugh, they build on each other's ideas, and before you know it, strangers are chatting like old friends. So picture dice serve dual purposes. They're both a creative exercise and a social tool. Next, we're going to look at a short story, written by a former student of mine who used this method.",
+        "audioSha256": "e644199f5ddc9a9f3e76af7a3630ba538584e395401b1797b5cb3eddf5b67520",
+        "scriptHash": "e49cdcb9279826198e10b6e94cdb4d3056a09a3706522eb5db45fd08d8ef00ab"
+      }
+    },
+    "l2-q01": {
+      "scriptHash": "c6ecb0dc7539adae81284c942173106f077a6436c03495e6095d905efa4503ec",
+      "sigVersion": 3,
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "5f867245651c702c352d5ce716aa6debf19248b5123baf82540c029efbc299ac",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Did you sign up for the tutoring sessions?",
+        "audioSha256": "5f867245651c702c352d5ce716aa6debf19248b5123baf82540c029efbc299ac",
+        "scriptHash": "c6ecb0dc7539adae81284c942173106f077a6436c03495e6095d905efa4503ec"
+      }
+    },
+    "l2-q02": {
+      "scriptHash": "c7133ae059ddcae7d9daa4e02f98976a635e3c64eadd3610d923f3ee9452f9cd",
+      "sigVersion": 3,
+      "bytes": 35988,
+      "durationSec": 2.18,
+      "audioSha256": "950cb034e0fd38bb18f964d5c4fc88ed3e50ee5629b73bc6d77c2b7dc7787304",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where's the financial aid office?",
+        "audioSha256": "950cb034e0fd38bb18f964d5c4fc88ed3e50ee5629b73bc6d77c2b7dc7787304",
+        "scriptHash": "c7133ae059ddcae7d9daa4e02f98976a635e3c64eadd3610d923f3ee9452f9cd"
+      }
+    },
+    "l2-q03": {
+      "scriptHash": "5945c3e72590796383aa52cf6eda7e395e285a3337c8fa0bbd7ddae74ea55e15",
+      "sigVersion": 3,
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "9766bf721494a9998d783a0014a43b05fdce8a7e600bfd01bd26a3e0acf3c197",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you decided on your major yet?",
+        "audioSha256": "9766bf721494a9998d783a0014a43b05fdce8a7e600bfd01bd26a3e0acf3c197",
+        "scriptHash": "5945c3e72590796383aa52cf6eda7e395e285a3337c8fa0bbd7ddae74ea55e15"
+      }
+    },
+    "s1-instructions": {
+      "scriptHash": "fe25b81961e2f50261f931909c386bb8c9a9553b959fa28d3b2f69c654307ec1",
+      "sigVersion": 3,
+      "bytes": 160958,
+      "durationSec": 9.98,
+      "audioSha256": "e2d577c1032325a43df8f3fcd8ec18780296ec1c781a969bd71c93ad0c2850d8",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0417,
+        "backend": "faster_whisper",
+        "reason": "WER 4.2% but only 1 word on a 24-word segment — short-segment rule, queue for a human listen",
+        "transcript": "Instructions. You are being trained to help students at the University cafeteria listen to your trainer and repeat what she says. Repeat only once.",
+        "audioSha256": "e2d577c1032325a43df8f3fcd8ec18780296ec1c781a969bd71c93ad0c2850d8",
+        "scriptHash": "fe25b81961e2f50261f931909c386bb8c9a9553b959fa28d3b2f69c654307ec1"
+      }
+    },
+    "s1-q1": {
+      "scriptHash": "fdf60550aa26b920f82767f7690fef25a7deb07512ae2fc9c07280b9eaf07e18",
+      "sigVersion": 3,
+      "bytes": 49363,
+      "durationSec": 3.02,
+      "audioSha256": "700243a5f851159d6631a010041370ee19ca95791f2eb8efe1194b64c7308390",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Is this your first time in our cafeteria?",
+        "audioSha256": "700243a5f851159d6631a010041370ee19ca95791f2eb8efe1194b64c7308390",
+        "scriptHash": "fdf60550aa26b920f82767f7690fef25a7deb07512ae2fc9c07280b9eaf07e18"
+      }
+    },
+    "s1-q2": {
+      "scriptHash": "6a1f470cefb0ca72a1ce27b4ee28474cd1e3a9540d2414b84bc61b898a963b5e",
+      "sigVersion": 3,
+      "bytes": 44765,
+      "durationSec": 2.74,
+      "audioSha256": "453ed0f0f8f92489903159794c04f39f0856135e5a2de98f5b15ed3a49887956",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You can find today's menu on the board.",
+        "audioSha256": "453ed0f0f8f92489903159794c04f39f0856135e5a2de98f5b15ed3a49887956",
+        "scriptHash": "6a1f470cefb0ca72a1ce27b4ee28474cd1e3a9540d2414b84bc61b898a963b5e"
+      }
+    },
+    "s1-q3": {
+      "scriptHash": "3f9d324a870886f3c83cab2cfd8649d5a5d64edca6ba6280c0665f5208765865",
+      "sigVersion": 3,
+      "bytes": 51453,
+      "durationSec": 3.16,
+      "audioSha256": "6982908bcec3b138f44a4513ae2d19f0407eb8fadbe343f96ff8ae05aeaca4f6",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "The hot food station is on the left side.",
+        "audioSha256": "6982908bcec3b138f44a4513ae2d19f0407eb8fadbe343f96ff8ae05aeaca4f6",
+        "scriptHash": "3f9d324a870886f3c83cab2cfd8649d5a5d64edca6ba6280c0665f5208765865"
+      }
+    },
+    "s1-q4": {
+      "scriptHash": "4857bbbf0f8e426915dc4ceb0d853a18f6f29da1622cc4b5d8ebf1cad2334fb4",
+      "sigVersion": 3,
+      "bytes": 73186,
+      "durationSec": 4.5,
+      "audioSha256": "d1adb029c7ea01697efc8347e523f5375cdbe714dcf45dc4e5e61067015c631e",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "We offer a variety of meals, snacks, and drinks every day.",
+        "audioSha256": "d1adb029c7ea01697efc8347e523f5375cdbe714dcf45dc4e5e61067015c631e",
+        "scriptHash": "4857bbbf0f8e426915dc4ceb0d853a18f6f29da1622cc4b5d8ebf1cad2334fb4"
+      }
+    },
+    "s1-q5": {
+      "scriptHash": "c063b3749a8761dc6302c579cacc6bdb962179d08e5e4491417d3e10f7e38126",
+      "sigVersion": 3,
+      "bytes": 60648,
+      "durationSec": 3.72,
+      "audioSha256": "85a9283d56d10ec969a11ff5808888095285b4570bcd6eadba3ec0c8139ade62",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You can pay with cash or your student ID card.",
+        "audioSha256": "85a9283d56d10ec969a11ff5808888095285b4570bcd6eadba3ec0c8139ade62",
+        "scriptHash": "c063b3749a8761dc6302c579cacc6bdb962179d08e5e4491417d3e10f7e38126"
+      }
+    },
+    "s1-q6": {
+      "scriptHash": "4abfb659de2e870c42dc1e45dfdfc1cea90e7eab05c344bd6acd5ca89d1fd134",
+      "sigVersion": 3,
+      "bytes": 84889,
+      "durationSec": 5.25,
+      "audioSha256": "9e33d9be3926a619aa7720e58c3f2b86065be2f70227d2aeea331f5c68aa6a89",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Please remember to return your tray to the collection area when finished.",
+        "audioSha256": "9e33d9be3926a619aa7720e58c3f2b86065be2f70227d2aeea331f5c68aa6a89",
+        "scriptHash": "4abfb659de2e870c42dc1e45dfdfc1cea90e7eab05c344bd6acd5ca89d1fd134"
+      }
+    },
+    "s1-q7": {
+      "scriptHash": "238c38a4663d67c9ad1a76cf012359dc862166cf616788928f3c63a74abbc035",
+      "sigVersion": 3,
+      "bytes": 88651,
+      "durationSec": 5.48,
+      "audioSha256": "d59cb3bf0a47e2d667abba279627c2066b1895144b7a664b4918789b73d56c47",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "If you have any food allergies, please let the staff know before ordering.",
+        "audioSha256": "d59cb3bf0a47e2d667abba279627c2066b1895144b7a664b4918789b73d56c47",
+        "scriptHash": "238c38a4663d67c9ad1a76cf012359dc862166cf616788928f3c63a74abbc035"
+      }
+    },
+    "s2-instructions": {
+      "scriptHash": "ea88368c81fa064f51f68e97b45aa84bfa2958da433592720b3bd32c6ee5c6c1",
+      "sigVersion": 3,
+      "bytes": 236608,
+      "durationSec": 14.72,
+      "audioSha256": "40a9d19b6a206211f12847ab07cb57a04132257ce4f2cbf4a2f0f1fbae0fdd6d",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Instructions. You have volunteered for a research study on exercise and physical activity. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+        "audioSha256": "40a9d19b6a206211f12847ab07cb57a04132257ce4f2cbf4a2f0f1fbae0fdd6d",
+        "scriptHash": "ea88368c81fa064f51f68e97b45aa84bfa2958da433592720b3bd32c6ee5c6c1"
+      }
+    },
+    "s2-q1": {
+      "scriptHash": "92f1f5828071631dde884056cd308f0dfbaa0b82603b844118ae256229af4040",
+      "sigVersion": 3,
+      "bytes": 208187,
+      "durationSec": 12.96,
+      "audioSha256": "7ccf22d3a36700d0860b2a790ec210e0d7bbb75ab775a010f7e58abd1228fd43",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Thank you for speaking with me today. I'd like to ask you some questions about exercise. What kind of exercise do you or someone you know typically do, such as running, swimming, or going to a gym? Why?",
+        "audioSha256": "7ccf22d3a36700d0860b2a790ec210e0d7bbb75ab775a010f7e58abd1228fd43",
+        "scriptHash": "92f1f5828071631dde884056cd308f0dfbaa0b82603b844118ae256229af4040"
+      }
+    },
+    "s2-q2": {
+      "scriptHash": "dee0cc3fe25b2532ae629f9862708d1663e2baa08adf2b19f8d263c8bd9aa9a3",
+      "sigVersion": 3,
+      "bytes": 296795,
+      "durationSec": 18.48,
+      "audioSha256": "e4900b2353639524a4a6b7f8e6e967fb96bf9ea5670954c2948623cf4209b65c",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I see. If you wanted to encourage a friend who doesn't exercise to become more active, would you prefer to invite them to exercise together with you? Or would you prefer to share information about the benefits and let them decide on their own? Why?",
+        "audioSha256": "e4900b2353639524a4a6b7f8e6e967fb96bf9ea5670954c2948623cf4209b65c",
+        "scriptHash": "dee0cc3fe25b2532ae629f9862708d1663e2baa08adf2b19f8d263c8bd9aa9a3"
+      }
+    },
+    "s2-q3": {
+      "scriptHash": "5c9c4516625034e71f51ba911c1afe098c089d403255156dc15653faaef35e06",
+      "sigVersion": 3,
+      "bytes": 140896,
+      "durationSec": 8.73,
+      "audioSha256": "b47a1412e6f2edb935b7c5112886c1ffb10bfc3b56d057535dcae0dffd3cc614",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Interesting, what are some things that might make it difficult for someone to start and maintain a regular exercise routine?",
+        "audioSha256": "b47a1412e6f2edb935b7c5112886c1ffb10bfc3b56d057535dcae0dffd3cc614",
+        "scriptHash": "5c9c4516625034e71f51ba911c1afe098c089d403255156dc15653faaef35e06"
+      }
+    },
+    "s2-q4": {
+      "scriptHash": "740f20fa5fb87169b0efcf5fc6ee6928c4a524828dce84f31b575e95b2d57681",
+      "sigVersion": 3,
+      "bytes": 100311,
+      "durationSec": 9.69,
+      "audioSha256": "93a6173b500ae940c360360972a005f2075ad17a2e6ecc1e621f40a2048786ab",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "good points. Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?",
+        "audioSha256": "93a6173b500ae940c360360972a005f2075ad17a2e6ecc1e621f40a2048786ab",
+        "scriptHash": "740f20fa5fb87169b0efcf5fc6ee6928c4a524828dce84f31b575e95b2d57681"
+      }
+    },
+    "set9-L2-04-05": {
+      "scriptHash": "d233c6f64f16510b0790493d983b65c0f3db268c465315fa58a12572e9ae4fd5",
+      "sigVersion": 3,
+      "bytes": 941956,
+      "durationSec": 92.81,
+      "audioSha256": "d1b58b232f59946d734d1845833752d554b3bc518708265bf9de0eb89ea643aa",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0162,
+        "backend": "faster_whisper",
+        "reason": "WER 1.6%",
+        "transcript": "You will not believe my morning. 6 a.m. and the registrar system sends me a seat confirmation, Sociolinguistics. The Thursday seminar, I read it four times. You're in? That thing filled up before I finished typing my ID number. I'm 14th in the queue. I'd stopped watching it honestly. Two students in the class dropped over the weekend. The queue ran overnight and it took the next two names off the top. Mine was one of them. Overnight. So it's just the software moving people around. Start to finish. Hammond gets the roster from the registrar the Monday before class is open and whoever's on it is who he teaches that term. 14th, what are my odds here realistically? Low enough that you want a second plan moving this week. Look at what else clears the same methods requirement and get yourself registered for one of those before Friday because Friday is when ad, drop shuts. There are two courses that count for it and both were down to single seats yesterday afternoon. If those fill, you're carrying that requirement into next year. And if my number does come up after I've signed for something? Then you release the other one and walk into the seminar. It doesn't meet until week three anyway and the roster locks the Friday before that. So it's all settled before anyone's in a classroom. Two courses one week, right. There's a methods section Tuesday mornings. I'll register for it this afternoon.",
+        "audioSha256": "d1b58b232f59946d734d1845833752d554b3bc518708265bf9de0eb89ea643aa",
+        "scriptHash": "d233c6f64f16510b0790493d983b65c0f3db268c465315fa58a12572e9ae4fd5"
+      }
+    },
+    "set9-L2-06-07": {
+      "scriptHash": "5cfc6874c0ab65865c5978da11a2fc32fd7cda5a14b490a7989b2c7c80b2a4da",
+      "sigVersion": 3,
+      "bytes": 774397,
+      "durationSec": 80.14,
+      "audioSha256": "88468848931c4646df13321dec889a14a1aa8f236b658b96d2228d718f92fe3b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.012,
+        "backend": "faster_whisper",
+        "reason": "WER 1.2%",
+        "transcript": "My landlord slid an envelope under my door yesterday. I've read it about nine times since. Nine times, what was in it? Two things, the renewal form for September, which I'd signed tonight if you handed me a pen, and a new figure, $400 more a month. $400 on what the lab pays you? It's about a third on top of what I pay now. $400 is my groceries, my bus pass, and whatever's left over at the end, all of it. I stood in the kitchen running the arithmetic until two in the morning and it never came out. And you like that apartment? 10 minutes on foot to the lab. I've been in that lab since sophomore year, and I've never once had to think about how I'd get there. Then go talk to her before you sign anything. Four years in that unit, and in four years I've never seen you counting days at the end of the month, or peeling one of those yellow notices off your door. That goes in a file somewhere. Two empty months would cost her more than $400. Huh, I'd been picturing it as begging. It's the opposite. Call her tonight. She's downstairs at the desk until eight, same as always. I did scroll listings across the river for 10 minutes last night out of spite, and close the tab. Dana took in two roommates when hers went up. Sign nothing until you've talked to her.",
+        "audioSha256": "88468848931c4646df13321dec889a14a1aa8f236b658b96d2228d718f92fe3b",
+        "scriptHash": "5cfc6874c0ab65865c5978da11a2fc32fd7cda5a14b490a7989b2c7c80b2a4da"
+      }
+    },
+    "set9-L2-08-11": {
+      "scriptHash": "7d108bf444ee2fde7d27298c04031ec33a83de269cc4b66e87b02f71aae0f89f",
+      "sigVersion": 3,
+      "bytes": 1769491,
+      "durationSec": 179.14,
+      "audioSha256": "5af04599d347660856f689a4ce47c99d6b41a275569909c97e0a995b71ae7eab",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0183,
+        "backend": "faster_whisper",
+        "reason": "WER 1.8%",
+        "transcript": "A black pole warbler weighs less than a candy bar. Some evening in September, it lifts out of a spruce forest in Northern Canada, and weeks later it drops into the same few acres of Central America where it spent the previous winter. So, let's take up the steering. By day, a migrant has references we would recognize, the sun's position, red against an internal clock that stays accurate to within minutes. And the ground underneath, a coastline, a river cut, a ridge running the right way, which a bird can follow the way you would follow a highway. Underneath both of those is a magnetic sense, and the earth's field gives a rough bearing even through heavy cloud. Most songbirds, though, do their travelling between dusk and dawn, 2,000 meters up at midnight. What lies below is one unbroken dark, and the shoreline that served so well at noon is somewhere down inside it. What the bird still has is overhead. In the planetarium work of the 60s, warblers kept indoors, settled onto their normal autumn heading under a projected sky, and when the projector was turned, the birds swung around with it and held the new bearing. It was the arrangement above them they were steering by. Now, a tower sheathed in glass does two things to a night migrant. In daylight, the glass hands back a copy of the sky and the trees behind the bird, and the bird flies hard into what it reads as open air. Collisions with buildings kill birds by the hundreds of millions a year in North America alone. On an overcast night, the lit floors of that same tower pull migrants off their line, and they circle the globe for hours, spending fuel they were carrying for a thousand kilometers of flight. Walk downtown at sunrise in May, and you will find a warbler on a window ledge too spent to lift itself off the stone. Volunteers pick those birds up by hand, one at a time, and carry them out in paper bags. There is one more pressure, and it works more slowly. The trip north runs off the same clock. Day length starts them out of the wintering grounds, and April day length is exactly what it was a century ago, so they reach the boreal forest on the old date, and their chicks hatch on the old date. That forest, though, is warming. Being there now opens a week or two ahead of where it sat 40 years ago, and caterpillars take their cue from temperature. They hatch, and they peak on the new spring.",
+        "audioSha256": "5af04599d347660856f689a4ce47c99d6b41a275569909c97e0a995b71ae7eab",
+        "scriptHash": "7d108bf444ee2fde7d27298c04031ec33a83de269cc4b66e87b02f71aae0f89f"
+      }
+    },
+    "set9-L2-12-15": {
+      "scriptHash": "7adba514652b570444af34f0d306a4d34740885bc2edfd7ffc131f7de6e5aa28",
+      "sigVersion": 3,
+      "bytes": 1557252,
+      "durationSec": 151.48,
+      "audioSha256": "cabd0c5949d99f86e02c76d79b58c485f48f619e6a01749b2b6eb81e7a7a91f4",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0044,
+        "backend": "faster_whisper",
+        "reason": "WER 0.4%",
+        "transcript": "Every book on jazz gets to the same word by about page 3. Improvisation. It gets used loosely, so let's look at where it actually happens, the bandstand. So picture the second set. The tune comes around, and it is your turn to step out. That afternoon, in your apartment, you worked something out that you liked. A climbing figure you were saving for the fifth bar. You get 8 bars in, and the bass player starts placing the beat later than you expected. The drummer leans ahead of him. The pianist arrives at the fifth bar and substitutes a chord from somewhere else entirely. And your climbing figure now belongs to a bar that has stopped existing. Whatever comes out of your horn next has to come out in the same second. All of that reaches you. You are still holding a note while you decide. That is the job up there. You are taking in four other people continuously and bending the line you are already in the middle of, so that it fits what they just did to it. Now students hear this word improvisation and take it to mean anything goes. So consider breakfast. You sit down and start telling your roommate about your weekend. Nobody handed you those sentences in advance. You pick the words as you go, and starting a sentence you have no clear idea how you will land it. And yet the grammar holds all the way through, and you finish the thought you opened, or your roommate stops following you. The freedom lives inside a set of things you keep. On the bandstand those things are the key, the chord changes, the form. And how many bars before the whole thing comes around again, all of it is settled before anyone plays. What goes inside it is yours. Made up as you go, yes. Made up out of thin air, no. And because what goes inside is yours, a strong improviser is recognizable in about four notes. The phrasing is as particular as handwriting. This way of working also spread outward. Picture a dance band in 1935 before recordings circulated widely. You played the arrangement. The arrangement was the point. Tuesday's version and Saturday's version were the same version, and what a listener weighed was how cleanly a settled piece had been executed. The concert hall ran on that same principle and largely still does. Then the records got around and by the 60s you had rock and blues bands leaving whole stretches of a song open, a chorus where the notes had been fixed by nobody in advance and the thing came out different every night.",
+        "audioSha256": "cabd0c5949d99f86e02c76d79b58c485f48f619e6a01749b2b6eb81e7a7a91f4",
+        "scriptHash": "7adba514652b570444af34f0d306a4d34740885bc2edfd7ffc131f7de6e5aa28"
+      }
+    }
+  }
+}

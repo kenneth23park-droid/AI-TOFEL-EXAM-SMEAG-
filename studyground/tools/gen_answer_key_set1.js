@@ -12,6 +12,15 @@
  *   build              -> BUILD_SENTENCE  (answerTokens 순서 완전일치)
  *   email/discussion   -> WRITING         (자동채점 없음)
  *   repeat/interview   -> SPEAKING        (자동채점 없음)
+ *
+ * 산출형(PRODUCTIVE_KEYS) 행에는 set9 와 같은 두 필드를 싣는다(가산형 — 자동채점 행은 그대로).
+ *   task_kind : 문항 kind 그대로. rubric.draft() 가 이 값으로 채점 경로를 고른다.
+ *   reference : 복창 원문. **SET 1 은 전부 None 이다** — SET 9 의 speaking_script.json 에
+ *               해당하는 대본 파일이 SET 1 에는 없고(set1.js 의 repeat 문항은 audio 경로만
+ *               갖는다), 오디오에서 받아 적은 값을 여기서 지어낼 수는 없다.
+ *               그래도 task_kind 는 싣는다: 복창임을 알면 rubric.draft() 가 길이 기반
+ *               감점(minWords 60)을 건너뛰고 "원문 없음" degrade 경로를 타서 한 문장짜리
+ *               정답이 플로어를 맞는 일이 사라진다. 대본이 생기면 여기에 물리면 된다.
  */
 'use strict';
 
@@ -68,7 +77,13 @@ window.SMEAG_SET1.allQuestions().forEach(function (e) {
     answer: AUTO[qtype] ? (qtype === 'BUILD_SENTENCE' ? q.answerTokens : q.answer) : null,
     max_score: 1
   };
-  if (AUTO[qtype]) rows.push(row); else productive.push(row);
+  if (AUTO[qtype]) {
+    rows.push(row);
+  } else {
+    row.task_kind = q.kind;
+    row.reference = null;   // SET 1 대본 없음 — 머리말 참조. 지어내지 않는다.
+    productive.push(row);
+  }
 });
 
 function block(list) {
@@ -80,6 +95,21 @@ function block(list) {
       '"no": ' + py(r.no) + ', ' +
       '"answer": ' + py(r.answer) + ', ' +
       '"max_score": ' + py(r.max_score) + '},';
+  }).join('\n');
+}
+
+// 산출형 전용 블록 — 검증된 자동채점 행의 바이트를 흔들지 않으려고 함수를 나눠 둔다.
+function productiveBlock(list) {
+  return list.map(function (r) {
+    return '    ' + JSON.stringify(r.key) + ': {' +
+      '"qtype": ' + py(r.qtype) + ', ' +
+      '"skill": ' + py(r.skill) + ', ' +
+      '"module": ' + py(r.module) + ', ' +
+      '"no": ' + py(r.no) + ', ' +
+      '"answer": ' + py(r.answer) + ', ' +
+      '"max_score": ' + py(r.max_score) + ', ' +
+      '"task_kind": ' + py(r.task_kind) + ', ' +
+      '"reference": ' + py(r.reference) + '},';
   }).join('\n');
 }
 
@@ -105,8 +135,10 @@ var text = [
   '}',
   '',
   '# Productive questions — graded by a teacher / rubric, never auto-scored.',
+  '# task_kind 는 채점 방식을 고르는 스위치다. reference(복창 원문)는 SET 1 에 대본 파일이',
+  '# 없어 전부 None — 채점기는 "원문 없음" degrade 경로를 탄다(rubric.draft docstring).',
   'PRODUCTIVE_KEYS: dict[str, dict] = {',
-  block(productive),
+  productiveBlock(productive),
   '}',
   '',
   'AUTO_TOTAL_BY_SKILL: dict[str, int] = {',

@@ -482,6 +482,21 @@
     if (!cfg) { warnings.push('no timing config; nothing compiled'); return { screens: [], index: emptyIndex(), warnings: warnings }; }
     if (!set || !isArr(set.sections)) { warnings.push('no content pack; nothing compiled'); return { screens: [], index: emptyIndex(), warnings: warnings }; }
 
+    /* 문항별 제한시간 오버라이드(assets/question-config.js 가 문항 객체에 실어 둔
+       timeLimitSec)를 화면 조립 때 꺼내 쓰기 위한 인덱스다. 오버라이드가 없으면
+       이 맵은 그냥 쓰이지 않는다 — 기존 타이밍 계산은 한 글자도 바뀌지 않는다. */
+    var qById = {};
+    for (var qs_i = 0; qs_i < set.sections.length; qs_i++) {
+      var qs_sec = set.sections[qs_i], qs_mods = isArr(qs_sec.modules) ? qs_sec.modules : [];
+      for (var qs_j = 0; qs_j < qs_mods.length; qs_j++) {
+        var qs_blocks = isArr(qs_mods[qs_j].blocks) ? qs_mods[qs_j].blocks : [];
+        for (var qs_k = 0; qs_k < qs_blocks.length; qs_k++) {
+          var qs_list = isArr(qs_blocks[qs_k].questions) ? qs_blocks[qs_k].questions : [];
+          for (var qs_l = 0; qs_l < qs_list.length; qs_l++) qById[qs_list[qs_l].id] = qs_list[qs_l];
+        }
+      }
+    }
+
     var order = isArr(cfg.sectionOrder) && cfg.sectionOrder.length ? cfg.sectionOrder : DEFAULT_ORDER;
     var dirs = isArr(cfg.directions) ? cfg.directions : [];
     var si, i, j;
@@ -539,6 +554,25 @@
           };
           if (spec.timer !== undefined) { s.timer = spec.timer; s.timers = spec.timers; }
           else { s.timer = clocks.length ? clocks[0] : null; if (clocks.length) s.timers = clocks; }
+
+          /* 관리자가 이 문항만 다른 제한시간을 준 경우(§ admin-questions.html).
+             화면이 문항 하나를 담을 때만 적용하고, 모듈 전체가 공유하는 clocks 배열은
+             건드리지 않도록 이 화면 몫으로 복제해서 바꾼다. */
+          var oneQ = isArr(s.questionIds) && s.questionIds.length === 1 ? qById[s.questionIds[0]] : null;
+          var over = oneQ && isNum(oneQ.timeLimitSec) && oneQ.timeLimitSec > 0 ? oneQ.timeLimitSec : null;
+          if (over && s.timers && s.timers.length) {
+            s.timers = s.timers.map(function (t) {
+              if (t.scope !== 'question' && t.scope !== 'screen') return t;
+              var c = {}; for (var kk in t) if (t.hasOwnProperty(kk)) c[kk] = t[kk];
+              c.seconds = over;
+              return c;
+            });
+            s.timer = s.timers[0];
+          } else if (over && s.timer && (s.timer.scope === 'question' || s.timer.scope === 'screen')) {
+            var t1 = {}; for (var k2 in s.timer) if (s.timer.hasOwnProperty(k2)) t1[k2] = s.timer[k2];
+            t1.seconds = over;
+            s.timer = t1; s.timers = [t1];
+          }
           /* progress — 실측 서브바 표기(§ 파일 머리말). qn>1 이면 범위 표기다. */
           if (total) {
             var qn = spec.questionCount || 0;

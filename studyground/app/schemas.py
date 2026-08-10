@@ -40,6 +40,8 @@ class SectionScoreOut(ORMModel):
     scaled: int
     max_score: int = SECTION_MAX
     module: str = ""
+    # 교사 확정 루브릭이 붙기 전의 산출형 섹션은 점수가 나와도 잠정이다(가산 필드).
+    provisional: bool = False
 
 
 class QuestionResponseOut(ORMModel):
@@ -66,6 +68,8 @@ class RubricScoreOut(ORMModel):
     max_score: float
     comment: str = ""
     band: float | None = None       # IELTS only, 0.5 steps
+    # ai_draft | teacher — 'teacher' 만 확정본이다(가산 필드).
+    source: str = "ai_draft"
 
 
 class FeedbackOut(ORMModel):
@@ -138,6 +142,9 @@ class RescoreResponse(BaseModel):
     fell_back: bool = False
     note: str = ""
     feedback: list[FeedbackOut] = Field(default_factory=list)
+    # 이번 호출이 저장한 루브릭 행 수와, 덮지 않고 지켜 낸 교사 확정 행 수(가산 필드).
+    rubrics_saved: int = 0
+    rubrics_kept_teacher: int = 0
 
 
 # ── runtime API (architecture.md §7.1 — Stories 3.2 / 3.3 / 3.5) ──────────

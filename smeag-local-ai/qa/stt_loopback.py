@@ -32,17 +32,102 @@ WER_WARN = 0.02            # 2-5% -> human listen
 _PUNCT = re.compile(r"[^\w\s']", re.UNICODE)
 _WS = re.compile(r"\s+")
 
+#: Scripts spell numbers out ("four hundred dollars"); a verbatim ASR writes the
+#: digits it heard ("400"). Both render as identical audio, so counting them as
+#: errors punishes exactly the segments most worth trusting — the ones dense with
+#: prices, room numbers and times. Numerals are folded to words before comparison.
+#:
+#: Known residual: digit strings that are *spoken* digit-wise still differ —
+#: "seven thirty" vs 730, "two oh four" vs 204 fold to "seven hundred thirty" and
+#: "two hundred four". Cardinal reading is the right default and these cost 1-2
+#: words on a whole segment; the alternative is guessing at intent from context.
+_ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+         "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+         "seventeen", "eighteen", "nineteen"]
+_TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+_ORD = {"1st": "first", "2nd": "second", "3rd": "third", "5th": "fifth", "8th": "eighth",
+        "9th": "ninth", "12th": "twelfth"}
+
+
+def _int_to_words(n: int) -> list[str]:
+    if n < 20:
+        return [_ONES[n]]
+    if n < 100:
+        return [_TENS[n // 10]] + ([_ONES[n % 10]] if n % 10 else [])
+    if n < 1000:
+        rest = _int_to_words(n % 100) if n % 100 else []
+        return [_ONES[n // 100], "hundred"] + rest
+    if n < 1_000_000:
+        rest = _int_to_words(n % 1000) if n % 1000 else []
+        return _int_to_words(n // 1000) + ["thousand"] + rest
+    return [str(n)]
+
+
+def _merge_orphan_clitics(tokens: list[str]) -> list[str]:
+    """Rejoin a possessive/contraction the ASR split off ("interviewer 's")."""
+    out: list[str] = []
+    for t in tokens:
+        if out and t.startswith("'") and len(t) <= 3:
+            out[-1] += t
+        else:
+            out.append(t)
+    return out
+
+
+def _expand_numerals(tokens: list[str]) -> list[str]:
+    out: list[str] = []
+    for t in tokens:
+        if t in _ORD:
+            out.append(_ORD[t]); continue
+        m = re.fullmatch(r"(\d+)(st|nd|rd|th)", t)          # 14th -> fourteenth
+        if m:
+            w = _int_to_words(int(m.group(1)))
+            last = w[-1]
+            suffix = {"one": "first", "two": "second", "three": "third", "five": "fifth",
+                      "eight": "eighth", "nine": "ninth", "twelve": "twelfth"}.get(last)
+            if suffix is None:
+                suffix = last[:-1] + "ieth" if last.endswith("y") else last + "th"
+            out += w[:-1] + [suffix]
+            continue
+        if t.isdigit() and len(t) <= 6:
+            out += _int_to_words(int(t)); continue
+        out.append(t)
+    return out
+
+
+#: Typographic marks an authored script uses and an ASR never emits. NFKC leaves
+#: U+2019 alone, so `don’t` lost its apostrophe to _PUNCT and became two tokens
+#: (`don`, `t`) while the ASR's `don't` stayed one — a substitution plus a deletion
+#: on every contraction. On short exam prompts that one artefact is 15-33% WER, i.e.
+#: a FAIL on audio a listener would call perfect. Measured on SET 9: all four
+#: layer-3 failures were this and nothing else.
+_TYPOGRAPHIC = str.maketrans({
+    "‘": "'", "’": "'", "‛": "'", "′": "'",   # ‘ ’ ‛ ′
+    "“": '"', "”": '"',                                  # “ ”
+    "–": " ", "—": " ", "−": " ",                   # – — −
+    " ": " ", " ": " ",                                  # nbsp, narrow nbsp
+    "…": " ",                                                 # …
+})
+
+#: `%` survives as a symbol in ASR output but scripts spell it out. Same reasoning
+#: as the numeral folding above: both render as identical audio.
+_SYMBOL_WORDS = {"%": " percent ", "&": " and ", "+": " plus ", "=": " equals "}
+
 
 def normalise(text: str) -> list[str]:
     """
-    Lowercase, strip punctuation, collapse whitespace, split to words.
+    Lowercase, strip punctuation, collapse whitespace, fold numerals, split to words.
 
     ASR output has no reliable casing or punctuation, so comparing those would
-    manufacture errors the listener would never hear.
+    manufacture errors the listener would never hear. The same applies to how a
+    number is written down — see the note on `_ONES` above — and to the shape of a
+    quote mark or a `%`, which the script and the engine simply spell differently.
     """
-    text = unicodedata.normalize("NFKC", text).lower()
+    text = unicodedata.normalize("NFKC", text).lower().translate(_TYPOGRAPHIC)
+    for sym, word in _SYMBOL_WORDS.items():
+        text = text.replace(sym, word)
     text = _PUNCT.sub(" ", text)
-    return _WS.sub(" ", text).strip().split()
+    return _expand_numerals(_merge_orphan_clitics(_WS.sub(" ", text).strip().split()))
 
 
 def levenshtein_words(ref: list[str], hyp: list[str]) -> tuple[int, int, int, int]:
@@ -184,6 +269,16 @@ def selftest() -> int:
          "morning bringing their identification cards and two sharpened pencils",
          "students should report to room forty seventeen at nine thirteen on thursday "
          "morning bringing their identity cards and two sharpened pencils", "REJECT"),
+        # A typographic apostrophe in the script against the ASR's ASCII one is not
+        # an error a listener could hear. Before the fold it cost a substitution plus
+        # a deletion per contraction, which on a short prompt is an outright REJECT —
+        # all four SET 9 layer-3 failures were exactly this and nothing else.
+        ("Where’s the financial aid office?", "Where's the Financial Aid Office?", "PASS"),
+        ("I don’t know how many people will join our study group tonight.",
+         "I don't know how many people will join our study group tonight.", "PASS"),
+        # Same argument for a symbol the script spells out and the engine writes.
+        ("reduce training spending by fifteen percent immediately",
+         "reduce training spending by 15% immediately", "PASS"),
     ]
     failures = 0
     print("WER gate self-test")

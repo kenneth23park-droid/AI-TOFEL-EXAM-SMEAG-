@@ -35,12 +35,16 @@ Usage:
     ... --no-verify     skip the post-generation audio gate (NOT recommended)
 
 POST-GENERATION GATE (on by default). After synthesis this script runs
-    tools/verify_audio.py --manifest <manifest> --update-index --base <base>
-which re-checks every declared item (layers 0-2: mapping / freshness / integrity
-/ signal) and REWRITES the freshness baseline, because right now is the only
-moment we know the mp3 matches the script. If the gate reports FAIL this script
-exits non-zero -- a generator that silently succeeds while shipping a truncated
-or stale mp3 is exactly the accident this project already had.
+    tools/verify_audio.py --manifest <manifest> --update-index --stamp-on-pass --base <base>
+which re-checks every declared item -- layers 0-2 (mapping / freshness /
+integrity / signal) plus layer 3, which transcribes the audio back to text and
+compares it to the script (WER). Layer 3 is scoped to audio that changed, i.e.
+what this run just wrote. The gate REWRITES the freshness baseline, because right
+now is the only moment we know the mp3 matches the script -- except for items that
+FAILed, which are left unstamped so they keep getting caught. If the gate reports
+FAIL this script exits non-zero -- a generator that silently succeeds while
+shipping a truncated or stale mp3 is exactly the accident this project already had.
+See studyground/docs/audio-gate.md.
 """
 
 import argparse
@@ -448,7 +452,7 @@ def run_audio_gate(out_dir):
         print("\n[audio gate] SKIPPED -- verifier not found: %s" % VERIFY)
         return 0
     cmd = [sys.executable, VERIFY, "--manifest", MANIFEST,
-           "--update-index", "--base", base]
+           "--update-index", "--stamp-on-pass", "--base", base]
     print("\n[audio gate] %s" % " ".join(cmd))
     sys.stdout.flush()   # else our buffered output lands AFTER the child's
     return subprocess.run(cmd).returncode

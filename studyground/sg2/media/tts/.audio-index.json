@@ -2,7 +2,7 @@
   "note": "verify_audio.py 신선도 기준. 스크립트/음성정책 해시.",
   "items": {
     "read-R1-questions-13-15": {
-      "scriptHash": "707b6b459bbfd93ac1d7a47b0ba2954535454ea66a936284e5e45cc6e959faf4",
+      "scriptHash": "d71f88ce440d4228320d68602d2470d90696cef3ca1e62c25e28c9ce47b2f5da",
       "bytes": 465261,
       "durationSec": 66.99,
       "audioSha256": "42d8a5a7fba9b2c919d00a309c5b7167b678f6d83294a022f7a37b51bd57b908"
@@ -14,13 +14,13 @@
       "audioSha256": "572f4eb5ca67911727b28f4e207fd80daaf81a862db58f03820e9a7aa22dc9f0"
     },
     "read-R1-subject-community-garden-opening": {
-      "scriptHash": "6cf95b65d2a3b2e8f93aec7258b09d61010c31aa37b38bc94c7a1807764e83dd",
+      "scriptHash": "29ca221cfe849adb1099fdce5710a0226c9b6deaff2be35ebf8935ab32bff136",
       "bytes": 183168,
       "durationSec": 22.9,
       "audioSha256": "0b72e6129e5caeba186d19ed566d0b0a46fbc21e00456cf76603782f4325b253"
     },
     "read-R2-ancient-irrigation-systems": {
-      "scriptHash": "17fd16d7c02218e5290f377ecdb7c016399479341ac34e240e669e5f04c1a631",
+      "scriptHash": "0923b68f1c860e864cf363b4600a9c91e8190484507c22a7ae6491b274f78a70",
       "bytes": 793920,
       "durationSec": 99.24,
       "audioSha256": "3d7ca1793b59ceb3486dc9fc6cc13530d3bd81c07e0fbb2584cb5103d2919fed"
@@ -32,13 +32,13 @@
       "audioSha256": "ff86f86b47a56bd435b2f4bb54ea301be84b50ebda0ef9e29af1c451f8970989"
     },
     "set9-M1-ann-21-22": {
-      "scriptHash": "229853f5fc3cead2ddffb6b31beb4a619a6368986ca719520bc645eae5cc9c3a",
+      "scriptHash": "7f73003332c201d0b4ab433f00f9e426ad34946f11993916262f3221d8480d3e",
       "bytes": 442244,
       "durationSec": 27.59,
       "audioSha256": "6a1be602d1737a1cb5eb324623bc6a4d4698ff64f48a1639437650986cea54fa"
     },
     "set9-M1-ann-23-24": {
-      "scriptHash": "c013809520399cfb8bcaf72f0430ba73eded9f188ac1974531ef861cb5142e3a",
+      "scriptHash": "0a02fb73de4224a1c343219cf2b97f32b7ad3e0d99b507e797585310bf2710c0",
       "bytes": 940870,
       "durationSec": 58.75,
       "audioSha256": "675062db11789ace3a624c85c1868c61d49290581ca9050c241de1f924c202dc"
@@ -68,7 +68,7 @@
       "audioSha256": "c0a9a9c8e82e9f10c0b81a07a87c6ed978dcb87e77832ff394781295e886de7e"
     },
     "set9-M1-conv-17-18": {
-      "scriptHash": "cd3ff79669f54143d8ab9ee6d7d35915f941b4b26c34204c3d4a4a908aeae43b",
+      "scriptHash": "095d313416377f2c878ee18d241aa3519375f1b80eff762994bc01bf4b2cfe33",
       "bytes": 337390,
       "durationSec": 34.9,
       "audioSha256": "d0a917f838bfcd1276207dfb887c6cb48c8c202cc4164fbf77d13374cfa16f6f"

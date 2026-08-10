@@ -44,6 +44,9 @@
       <div class="field"><label data-en>Student ID <span class="muted">(optional)</span></label><label data-ko>학번 <span class="muted">(선택)</span></label>
         <input id="sid" type="text" name="student-id" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="s2025001">
         <div class="auth-hint"><span data-en>If your class gave you one, you can log in with it instead of your email.</span><span data-ko>반에서 학번을 받았다면 이메일 대신 학번으로 로그인할 수 있습니다.</span></div></div>
+      <div class="field"><label data-en>Date of birth <span class="muted">(optional)</span></label><label data-ko>생년월일 <span class="muted">(선택)</span></label>
+        <input id="dob" type="date" name="bday">
+        <div class="auth-hint" id="verdict"><span data-en>Used to match you against the school roster.</span><span data-ko>어드민 전산 명부와 본인 확인을 위해 씁니다.</span></div></div>
       <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
         <input id="pw" type="password" name="new-password" autocomplete="new-password" minlength="8" placeholder="••••••••" required>
         <div class="auth-hint"><span data-en>At least 8 characters.</span><span data-ko>8자 이상.</span></div></div>
@@ -71,6 +74,37 @@
   // 이미 로그인해 있으면 가입 폼을 다시 보여줄 이유가 없다.
   if (window.SG_AUTH && SG_AUTH.user()) location.replace('dashboard.html');
 
+  /* 학번 + 생년월일을 어드민 전산 명부와 대조해 결과만 보여준다.
+   * 지금은 확인이 안 돼도 가입을 막지 않는다 — 관리자가 나중에 명부에서 정리한다. */
+  var sid = document.getElementById('sid'), dob = document.getElementById('dob');
+  var verdict = document.getElementById('verdict');
+
+  function say(en, ko, color) {
+    verdict.innerHTML = '<span data-en></span><span data-ko></span>';
+    verdict.querySelector('[data-en]').textContent = en;
+    verdict.querySelector('[data-ko]').textContent = ko;
+    verdict.style.color = color || '';
+  }
+
+  function check() {
+    if (!sid.value.trim() || !dob.value) return;
+    SG_AUTH.lookup(sid.value.trim(), dob.value).then(function (r) {
+      if (r.found && r.claimed) {
+        say('Already registered — log in instead.', '이미 가입된 학번입니다 — 로그인해 주세요.', '#b3261e');
+      } else if (r.found) {
+        say('Matched: ' + r.name + (r.class_name ? ' · ' + r.class_name : ''),
+            '명부 확인: ' + r.name + (r.class_name ? ' · ' + r.class_name : ''), '#1a7f37');
+        if (!document.getElementById('name').value.trim()) document.getElementById('name').value = r.name;
+      } else {
+        say('Not found on the roster — you can still sign up; a teacher will confirm later.',
+            '명부에서 확인되지 않았습니다 — 그대로 가입할 수 있고, 선생님이 나중에 확인합니다.', '#8a6d00');
+      }
+    }).catch(function () { /* 오프라인이면 조용히 넘어간다 */ });
+  }
+
+  sid.addEventListener('change', check);
+  dob.addEventListener('change', check);
+
   f.addEventListener('submit', function (e) {
     e.preventDefault();
     err.classList.remove('on');
@@ -80,6 +114,7 @@
       name: document.getElementById('name').value.trim(),
       email: document.getElementById('email').value.trim(),
       studentId: document.getElementById('sid').value.trim(),
+      birthDate: document.getElementById('dob').value,
       password: document.getElementById('pw').value
     }).then(function () {
       location.replace('dashboard.html');

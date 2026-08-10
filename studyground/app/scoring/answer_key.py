@@ -19,6 +19,20 @@
     모르는 code        → EMPTY_PACK   (자동채점 0건, 전 문항이 교사 채점 대기로 남음)
 
 EMPTY_PACK 은 자동채점을 건너뛸 뿐 답안 저장·제출·상태 전이는 그대로 돈다.
+
+## EMPTY_PACK 을 받은 응시가 실제로 어떻게 되는가
+
+한동안 이 문서와 코드가 어긋나 있었다. 여기서는 "전 문항이 교사 채점 대기"라고
+약속했는데, `crud_write.grade_attempt` 는 그대로 섹션 합산까지 돌려 네 섹션을 모두
+0/0 으로 기록하고 총점 0 · grade A1 · status='completed' 로 확정해 버렸다.
+지금은 코드가 이 약속을 지킨다 —
+
+    grade_attempt 가 `pack.code == ""` 를 보면 **섹션 점수를 한 줄도 쓰지 않고**
+    status='scoring' (reason='pack_unknown') 으로 빠진다. 반환 dict 의
+    `gradable=False` / `reason='pack_unknown'` / `sections_written=False` 가 그 사실을
+    말한다. 답안·오디오·이벤트는 전부 남는다.
+
+app/seed.py 가 등록하는 SET 8 · SET 7 이 정확히 이 경로를 탄다(둘 다 PACKS 에 없다).
 """
 
 from __future__ import annotations

@@ -1,0 +1,647 @@
+{
+  "note": "verify_audio.py 신선도 기준. 스크립트/음성정책 해시 + 계층3 판정. 매니페스트별로 따로 둔다(한 폴더를 두 매니페스트가 선언할 수 있다). 손으로 고치지 말고 tools/audio_gate.py 로 다시 세워라.",
+  "manifest": ".verify-manifest.tts.json",
+  "sigVersion": 3,
+  "items": {
+    "read-R1-roman-roads": {
+      "scriptHash": "5623a2c053ae4a598d00a2927db2fc6d47339a7a06ec80eeb24fb78b43f0107c",
+      "sigVersion": 3,
+      "bytes": 696192,
+      "durationSec": 87.02,
+      "audioSha256": "572f4eb5ca67911727b28f4e207fd80daaf81a862db58f03820e9a7aa22dc9f0",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0099,
+        "backend": "faster_whisper",
+        "reason": "WER 1.0%",
+        "transcript": "At its height, the Roman Empire maintained over 80,000 kilometers of paved roads stretching from Britain to Mesopotamia. These highways served primarily military purposes, allowing legions to march quickly to trouble spots anywhere in the Empire. The roads also transformed commerce and cultural exchange across three continents. Roman engineers developed sophisticated construction techniques that made their roads remarkably durable. Rivers first excavated a trench and filled it with layers of progressively finer materials. Large stones at the bottom, then gravel, then sand, topped with carefully fitted paving stones that created a smooth surface. The roads curved slightly upward at the center, allowing rainwater to drain into ditches along the sides and preventing the accumulation of standing water that would erode the foundation. Building and maintaining this vast network demanded enormous resources that only a powerful central government could provide. A. Each major road required thousands of workers and years of construction. B. Local communities bore responsibility for upkeep within their territories, a burden that sometimes sparked resentment. C. When the Empire weakened in later centuries, maintenance declined and many roads fell into despair. D. Some routes, however, remained in use through the medieval period and formed the basis for modern European highways.",
+        "audioSha256": "572f4eb5ca67911727b28f4e207fd80daaf81a862db58f03820e9a7aa22dc9f0",
+        "scriptHash": "5623a2c053ae4a598d00a2927db2fc6d47339a7a06ec80eeb24fb78b43f0107c"
+      }
+    },
+    "read-R1-subject-community-garden-opening": {
+      "scriptHash": "fb125e8067d1a8e15c785fb4f08f6425353cc60c9ed7ea90a1214e5f1be5d223",
+      "sigVersion": 3,
+      "bytes": 183168,
+      "durationSec": 22.9,
+      "audioSha256": "0b72e6129e5caeba186d19ed566d0b0a46fbc21e00456cf76603782f4325b253",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Dear Ms Alvarez, The Riverside Community Garden is now fully prepared and ready for use starting April 1. Garden space assignments will be emailed to registered members by March 25. Please bring your own seeds and gardening gloves. Water hoses and wheelbarrows are available at the tool shed. Best regards, Thomas Bergman, Community Programs.",
+        "audioSha256": "0b72e6129e5caeba186d19ed566d0b0a46fbc21e00456cf76603782f4325b253",
+        "scriptHash": "fb125e8067d1a8e15c785fb4f08f6425353cc60c9ed7ea90a1214e5f1be5d223"
+      }
+    },
+    "read-R2-ancient-irrigation-systems": {
+      "scriptHash": "b1ec12e348280d1fc2580fc1a538db9fee82b841a9b3bd27ca6cca2845423e76",
+      "sigVersion": 3,
+      "bytes": 793920,
+      "durationSec": 99.24,
+      "audioSha256": "3d7ca1793b59ceb3486dc9fc6cc13530d3bd81c07e0fbb2584cb5103d2919fed",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0151,
+        "backend": "faster_whisper",
+        "reason": "WER 1.5%",
+        "transcript": "Ancient Mesopotamian civilizations developed sophisticated irrigation systems that transformed arid river valleys into productive agricultural land. Beginning around 6000 BCE, farmers in the region between the Tigris and Euphrates rivers constructed canals to divert floodwaters onto their fields. This innovation allowed populations to grow beyond what rainfall alone could support, laying the foundation for the world's earliest cities. The Sumerians refined these techniques into elaborate networks of primary canals, secondary channels, and distribution gates. Engineers calculated precise gradients to maintain steady water flow across distances of many kilometers without mechanical pumps. Storage basins collected excess water during floods for release during dry months. Records on clay tablets show that dedicated officials managed water allocation, resolving disputes between farmers and ensuring equitable distribution throughout the growing season. Despite their ingenuity, these systems faced persistent challenges. Irrigated fields gradually accumulated salt as water evaporated and left minerals behind, reducing soil fertility over centuries of continuous cultivation. SILTH buildup required constant canal maintenance, demanding substantial labor from the population. The environmental instability could interrupt this maintenance, sometimes causing rapid agricultural decline. These vulnerabilities help explain why several Mesopotamian city-states experienced dramatic population collapses even at the height of their technological sophistication.",
+        "audioSha256": "3d7ca1793b59ceb3486dc9fc6cc13530d3bd81c07e0fbb2584cb5103d2919fed",
+        "scriptHash": "b1ec12e348280d1fc2580fc1a538db9fee82b841a9b3bd27ca6cca2845423e76"
+      }
+    },
+    "set9-M1-ann-19-20": {
+      "scriptHash": "7e02ea6eae80182a9dd2a6ca0dcce8b8512db4b14f8961b60b7d0316b8d080ff",
+      "sigVersion": 3,
+      "bytes": 394179,
+      "durationSec": 24.57,
+      "audioSha256": "ff86f86b47a56bd435b2f4bb54ea301be84b50ebda0ef9e29af1c451f8970989",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Hello everyone! The Board Game Club is excited to host our monthly game night this Friday from 6 to 10 in the Student Lounge on the second floor of the Union Building. We'll have a wide selection of classic strategy games, card games, and several new releases for you to try out with fellow members. Please bring your own snacks to share with the group if you can. We hope to see many new faces join us for a fun evening.",
+        "audioSha256": "ff86f86b47a56bd435b2f4bb54ea301be84b50ebda0ef9e29af1c451f8970989",
+        "scriptHash": "7e02ea6eae80182a9dd2a6ca0dcce8b8512db4b14f8961b60b7d0316b8d080ff"
+      }
+    },
+    "set9-M1-ann-21-22": {
+      "scriptHash": "c84dea8012fc1d61cec9ba244a1b21349f4c372433d7a08b0cbe2bbe14f28643",
+      "sigVersion": 3,
+      "bytes": 442244,
+      "durationSec": 27.59,
+      "audioSha256": "6a1be602d1737a1cb5eb324623bc6a4d4698ff64f48a1639437650986cea54fa",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Attention class, I need to let you know about a scheduling change that will affect our meeting times next week. Because the department is hosting a guest lecture series, our regular classroom in Harris Hall will be used for those events each morning. As a result, our Monday and Wednesday sessions will be moved to Peterson Hall, Room 108. Please make sure to go directly to the new location, and don't forget to bring your project drafts for our peer review workshop. I'll send an email reminder as well.",
+        "audioSha256": "6a1be602d1737a1cb5eb324623bc6a4d4698ff64f48a1639437650986cea54fa",
+        "scriptHash": "c84dea8012fc1d61cec9ba244a1b21349f4c372433d7a08b0cbe2bbe14f28643"
+      }
+    },
+    "set9-M1-ann-23-24": {
+      "scriptHash": "27584c71c257d0bf8b35a4d7a8cc26fcc9d38f43e848df0e35701a9bcb92bf0a",
+      "sigVersion": 3,
+      "bytes": 940870,
+      "durationSec": 58.75,
+      "audioSha256": "675062db11789ace3a624c85c1868c61d49290581ca9050c241de1f924c202dc",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0143,
+        "backend": "faster_whisper",
+        "reason": "WER 1.4%",
+        "transcript": "Welcome everyone! The Health Sciences Shadowing program is now open for spring semester applications, and we're thrilled to announce several exciting updates this year. This program pairs pre-med and nursing students with experienced healthcare professionals at University Medical Center for weekly observation sessions, lasting three to four hours each. Participants will gain valuable first-hand clinical exposure while building meaningful connections with practicing physicians, nurses, and specialists across multiple departments. You'll also attend monthly seminars where professionals discuss their career paths and offer guidance. To register, visit the Health Sciences Building, Room 215, during office hours. Applicants must submit a brief personal statement explaining their interest in healthcare and provide proof of current immunizations. Please note that spaces are limited and selections will be made based on academic standing and demonstrated commitment, so early applications are strongly encouraged.",
+        "audioSha256": "675062db11789ace3a624c85c1868c61d49290581ca9050c241de1f924c202dc",
+        "scriptHash": "27584c71c257d0bf8b35a4d7a8cc26fcc9d38f43e848df0e35701a9bcb92bf0a"
+      }
+    },
+    "set9-M1-ann-25-28": {
+      "scriptHash": "ba0bdd9e261017806b5e5b82dc565fdaef909c2b0ceb1e371a3656debb9b3c5a",
+      "sigVersion": 3,
+      "bytes": 2125366,
+      "durationSec": 132.77,
+      "audioSha256": "ce877cb88557d5084eb176b0ed97967f7236cbfc4730fe45d5c577ad1fd2558c",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0098,
+        "backend": "faster_whisper",
+        "reason": "WER 1.0%",
+        "transcript": "So today, let's talk about something you've probably experienced without really thinking about it, how cyclists manage to stay balanced when they turn. Now you all remember Newton's first law, right? The law of inertia. Basically, an object in motion wants to keep moving in a straight line unless some outside force acts on it. Think about it this way. If you're in a car and the driver suddenly turns left, your body gets pushed to the right. That's inertia. Your body wants to keep going straight even though the car is turning. Okay, so when a cyclist is riding in a straight line, everything's fine. But what happens when they need to turn? Well, here's where it gets interesting. When you turn, your body wants to keep going straight. That's inertia at work. So cyclists have to lean into the turn. Why? Because leaning creates what we call a centripetal force. This force pulls the cyclist toward the center of the curve, counteracting that natural tendency to fly off in a straight line. You can actually see this really clearly in professional cycling races. Watch how dramatically the riders lean when they go around tight corners at high speeds. Now the amount of lean depends on two things. How fast you're going and how sharp the turn is. The faster you go or the tighter the turn, the more you need to lean. If you don't lean enough, you'll skid outward, lean too much and you'll fall over. It's really a delicate balance. That's why beginner cyclists often struggle with turns. They either don't lean enough out of fear or they over-correct. This same principle, by the way, applies to motorcycles and even to runners going around a track. Next, we'll look at how this concept is applied in designing curved roadways and racetracks.",
+        "audioSha256": "ce877cb88557d5084eb176b0ed97967f7236cbfc4730fe45d5c577ad1fd2558c",
+        "scriptHash": "ba0bdd9e261017806b5e5b82dc565fdaef909c2b0ceb1e371a3656debb9b3c5a"
+      }
+    },
+    "set9-M1-ann-29-32": {
+      "scriptHash": "aac3cf432305a0848eb4df6beacb207c5aee7aa9d1cbfd444bc288c02ec03bf9",
+      "sigVersion": 3,
+      "bytes": 1787237,
+      "durationSec": 111.64,
+      "audioSha256": "0037f67d0880f90c847aa79de185ccab23183f7b18c9ea597b73712037a81373",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0063,
+        "backend": "faster_whisper",
+        "reason": "WER 0.6%",
+        "transcript": "All right, so I want to introduce you to a really fun tool that can help when you're stuck for ideas picture dice. Now these are exactly what they sound like. Instead of numbers, each face of the die has a simple image on it. Like a tree, a key, a lightning bolt, or maybe a person running. Some sets have objects, others have actions or emotions, there's quite a variety out there. You roll several dice at once and whatever images come up, you use those as prompts to build a story. So let's say you roll and get a castle, a wolf, and a broken mirror. Your job is to weave these elements together into a narrative. Maybe the wolf lives in an abandoned castle and sees its reflection for the first time, or perhaps a princess breaks a mirror to escape from a wolf. The possibilities are endless. It forces your brain to make unexpected connections, which is really the heart of creative thinking. You can't plan it out beforehand, you have to improvise. And that's actually where some of the most original ideas come from. Now interestingly, these dice aren't just useful in writing classes. They've become quite popular at social gatherings as icebreakers. You know, when people don't know each other well, rolling these dice and taking turns telling mini stories can really get conversation flowing. I've seen it work wonders at office team building events and even at dinner parties. It takes the pressure off because everyone's working with random elements, there's no right or wrong answer. People laugh, they build on each other's ideas, and before you know it, strangers are chatting like old friends. So picture dice serve dual purposes, they're both a creative exercise and a social tool. Next, we're going to look at a short story, written by a former student of mine who used this method.",
+        "audioSha256": "0037f67d0880f90c847aa79de185ccab23183f7b18c9ea597b73712037a81373",
+        "scriptHash": "aac3cf432305a0848eb4df6beacb207c5aee7aa9d1cbfd444bc288c02ec03bf9"
+      }
+    },
+    "set9-M1-conv-13-14": {
+      "scriptHash": "b8e285b9ec9116feb552d1d13f15fbac7a1a28f9941c415d34cdf4d826e0f94e",
+      "sigVersion": 3,
+      "bytes": 329044,
+      "durationSec": 31.69,
+      "audioSha256": "e734c6f370d910acce9fbebbcef820d279147b4cd4ffc2629001eef3d0718baf",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you made any progress on your senior capstone project? The final presentations are only three weeks away. I've finished the research phase, but I'm still in the weeds with the data analysis. There's more to process than I anticipated. That sounds stressful. Have you considered asking Professor Martinez for an extension? I thought about it, but she's pretty strict about deadlines. I'll just have to put in extra hours this weekend. Well, let me know if you need help proofreading your report. I'll have some free time next week.",
+        "audioSha256": "e734c6f370d910acce9fbebbcef820d279147b4cd4ffc2629001eef3d0718baf",
+        "scriptHash": "b8e285b9ec9116feb552d1d13f15fbac7a1a28f9941c415d34cdf4d826e0f94e"
+      }
+    },
+    "set9-M1-conv-15-16": {
+      "scriptHash": "e28c17542605e18902cea37b5c96a9e4f104bdba43a30c9fabcff5976a09222e",
+      "sigVersion": 3,
+      "bytes": 351541,
+      "durationSec": 33.83,
+      "audioSha256": "c0a9a9c8e82e9f10c0b81a07a87c6ed978dcb87e77832ff394781295e886de7e",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0215,
+        "backend": "faster_whisper",
+        "reason": "WER 2.2% — queue for a human listen",
+        "transcript": "Excuse me, I reserved a digital microscope for my biology lab this afternoon, but the equipment room says they don't have my reservation on file. That's odd. Did you book it that through the online portal or the department office? I use the portal, but I never received a confirmation email. I just assumed it went through. The system has been glitchy lately. Let me check the backup log. If your reservation is there, I can issue you the equipment right away. That would be great. I really can't afford to postpone this experiment.",
+        "audioSha256": "c0a9a9c8e82e9f10c0b81a07a87c6ed978dcb87e77832ff394781295e886de7e",
+        "scriptHash": "e28c17542605e18902cea37b5c96a9e4f104bdba43a30c9fabcff5976a09222e"
+      }
+    },
+    "set9-M1-conv-17-18": {
+      "scriptHash": "b6781b32aca293ebb9830071b7a154ecf80d03e2a105753121cf29bd5d025436",
+      "sigVersion": 3,
+      "bytes": 337390,
+      "durationSec": 34.9,
+      "audioSha256": "d0a917f838bfcd1276207dfb887c6cb48c8c202cc4164fbf77d13374cfa16f6f",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0288,
+        "backend": "faster_whisper",
+        "reason": "WER 2.9% — queue for a human listen",
+        "transcript": "I'm thinking of having a garage sale this Saturday to get rid of some old furniture. Wanna join in? Actually, that's perfect timing. I've been meaning to declutter my apartment and I have boxes of stuff just collecting dust. Great, we can set up tables in my driveway. People usually start showing up around eight, so we should be ready by 7.30. Sounds good. Should I bring my own change or will you handle all the transactions? Bring some small bills and coins just in case. I found that most buyers try to haggle, so it helps to have exact change ready.",
+        "audioSha256": "d0a917f838bfcd1276207dfb887c6cb48c8c202cc4164fbf77d13374cfa16f6f",
+        "scriptHash": "b6781b32aca293ebb9830071b7a154ecf80d03e2a105753121cf29bd5d025436"
+      }
+    },
+    "set9-M1-sr-01": {
+      "scriptHash": "a2300c719a262bfdf6f89a2d352fdf4d076513ba775c5f5966f2bc382ae140f6",
+      "sigVersion": 3,
+      "bytes": 33898,
+      "durationSec": 2.04,
+      "audioSha256": "5d39e0014bb848f6469bd16c440f5f2728dc963e64e93aab7c3ea1d0990936a5",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where is the student lounge?",
+        "audioSha256": "5d39e0014bb848f6469bd16c440f5f2728dc963e64e93aab7c3ea1d0990936a5",
+        "scriptHash": "a2300c719a262bfdf6f89a2d352fdf4d076513ba775c5f5966f2bc382ae140f6"
+      }
+    },
+    "set9-M1-sr-02": {
+      "scriptHash": "2d986fe74d353177c25756f55356c067bce025bd0fdb1dd68e8a571864e06ccf",
+      "sigVersion": 3,
+      "bytes": 35152,
+      "durationSec": 2.14,
+      "audioSha256": "26b750accb891b8a3d38287425c59ef6a4c386d66a49c77de2b899caaaba51e0",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Do you know when the lecture starts?",
+        "audioSha256": "26b750accb891b8a3d38287425c59ef6a4c386d66a49c77de2b899caaaba51e0",
+        "scriptHash": "2d986fe74d353177c25756f55356c067bce025bd0fdb1dd68e8a571864e06ccf"
+      }
+    },
+    "set9-M1-sr-04": {
+      "scriptHash": "ddf70502c96688a72c3c5511c0ae5ad9666927713f5d540911721fd26545b451",
+      "sigVersion": 3,
+      "bytes": 40586,
+      "durationSec": 2.46,
+      "audioSha256": "b3f9adf3871b408f5b37f89dbdc112e83398ca1cf9f0cf96ae96e8e434356501",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Peter said he was looking for supplies.",
+        "audioSha256": "b3f9adf3871b408f5b37f89dbdc112e83398ca1cf9f0cf96ae96e8e434356501",
+        "scriptHash": "ddf70502c96688a72c3c5511c0ae5ad9666927713f5d540911721fd26545b451"
+      }
+    },
+    "set9-M1-sr-05": {
+      "scriptHash": "707ce94bd9bf9bf423620d491cff1c1adcdd5186abe7e4f75a564c7246650dfc",
+      "sigVersion": 3,
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "3573ce17b3420ccf01565a579c8332bf0bf5295c49b371c92f8d5e2ca28f2c1e",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Why is the classroom light flickering?",
+        "audioSha256": "3573ce17b3420ccf01565a579c8332bf0bf5295c49b371c92f8d5e2ca28f2c1e",
+        "scriptHash": "707ce94bd9bf9bf423620d491cff1c1adcdd5186abe7e4f75a564c7246650dfc"
+      }
+    },
+    "set9-M1-sr-06": {
+      "scriptHash": "1439315bf7bb130b2e8ffdedb719ccb107bb6c540e57b347b3832b3232334df4",
+      "sigVersion": 3,
+      "bytes": 38078,
+      "durationSec": 2.32,
+      "audioSha256": "8bd643ea1cb7f580b2466d2e0503f9513e698e63fdfeae2f96291f7bf40388c3",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where can I buy the train ticket?",
+        "audioSha256": "8bd643ea1cb7f580b2466d2e0503f9513e698e63fdfeae2f96291f7bf40388c3",
+        "scriptHash": "1439315bf7bb130b2e8ffdedb719ccb107bb6c540e57b347b3832b3232334df4"
+      }
+    },
+    "set9-M1-sr-07": {
+      "scriptHash": "b57aa29c5f7966016a85f364440c4ee8a8b6c38587dced9c547b096b91bb5b87",
+      "sigVersion": 3,
+      "bytes": 53960,
+      "durationSec": 3.3,
+      "audioSha256": "3acfbec91330f4a9e1e431624b00b7a08c28ec0228d8211b5ec37ed7d23ee92a",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Maybe the power went out for the entire area.",
+        "audioSha256": "3acfbec91330f4a9e1e431624b00b7a08c28ec0228d8211b5ec37ed7d23ee92a",
+        "scriptHash": "b57aa29c5f7966016a85f364440c4ee8a8b6c38587dced9c547b096b91bb5b87"
+      }
+    },
+    "set9-M1-sr-08": {
+      "scriptHash": "d08c0c5e997afc20ef0581790ecfd19d39293fec07bb0c27553c01492a2bd891",
+      "sigVersion": 3,
+      "bytes": 38078,
+      "durationSec": 2.32,
+      "audioSha256": "3de79de5a852b3f4d2d0c5b642af01a63090337898a466a8189fd883af102a84",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Why are you too late to class?",
+        "audioSha256": "3de79de5a852b3f4d2d0c5b642af01a63090337898a466a8189fd883af102a84",
+        "scriptHash": "d08c0c5e997afc20ef0581790ecfd19d39293fec07bb0c27553c01492a2bd891"
+      }
+    },
+    "set9-M1-sr-09": {
+      "scriptHash": "9997f09a61834d8f4b4c564d4bfd443d7fce3b9323b98f5eda13b72954ebaeb7",
+      "sigVersion": 3,
+      "bytes": 56886,
+      "durationSec": 3.48,
+      "audioSha256": "123efdded9aedd017606ae4b477aa7e51076ce9e28a918f38d73ea81e9668e0f",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Which group is going to give the presentation first?",
+        "audioSha256": "123efdded9aedd017606ae4b477aa7e51076ce9e28a918f38d73ea81e9668e0f",
+        "scriptHash": "9997f09a61834d8f4b4c564d4bfd443d7fce3b9323b98f5eda13b72954ebaeb7"
+      }
+    },
+    "set9-M1-sr-10": {
+      "scriptHash": "fa9ce94e08dcca050a890f9ebf9045416d9ebcda93aaef72874c5217290736e0",
+      "sigVersion": 3,
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "7248b9b0278e1bd0aad87b9146b96d5d28c6dd22defb8bd8fa43007cc6699dfa",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you finished writing the seminar paper?",
+        "audioSha256": "7248b9b0278e1bd0aad87b9146b96d5d28c6dd22defb8bd8fa43007cc6699dfa",
+        "scriptHash": "fa9ce94e08dcca050a890f9ebf9045416d9ebcda93aaef72874c5217290736e0"
+      }
+    },
+    "set9-M1-sr-11": {
+      "scriptHash": "b0614f5d02fe9a8cd1b31bd5a51f2dd47a871d978ae4bfef2833539376f9d14c",
+      "sigVersion": 3,
+      "bytes": 27629,
+      "durationSec": 1.67,
+      "audioSha256": "2113ebcca786e66bf4ac536ee1bf45ad6c3b0fc3db3caf937d1a5208e4777664",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Can you turn down the volume?",
+        "audioSha256": "2113ebcca786e66bf4ac536ee1bf45ad6c3b0fc3db3caf937d1a5208e4777664",
+        "scriptHash": "b0614f5d02fe9a8cd1b31bd5a51f2dd47a871d978ae4bfef2833539376f9d14c"
+      }
+    },
+    "set9-M1-sr-12": {
+      "scriptHash": "8da8995fb54df3414d740fa0929be77aad89caaa78268b49c9f5896a4ecaff5b",
+      "sigVersion": 3,
+      "bytes": 67753,
+      "durationSec": 4.18,
+      "audioSha256": "7e4e2ca7643f53629a2a1b37a6301d30ab548af36c49ae97107fb137154f37b2",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "we might have to reschedule our study group session.",
+        "audioSha256": "7e4e2ca7643f53629a2a1b37a6301d30ab548af36c49ae97107fb137154f37b2",
+        "scriptHash": "8da8995fb54df3414d740fa0929be77aad89caaa78268b49c9f5896a4ecaff5b"
+      }
+    },
+    "set9-M2-interview-01": {
+      "scriptHash": "a70ae48b4e1ad231b5603015872c5dac644d1b3f6eb657363eceb78db8d38d85",
+      "sigVersion": 3,
+      "bytes": 128775,
+      "durationSec": 7.99,
+      "audioSha256": "65569c7ba6758f9336856bc53c11aae915ae3c4d9e54b19904de05a9d92d4ad7",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "What kind of exercise do you or someone you know typically do, such as running, swimming or going to a gym? Why?",
+        "audioSha256": "65569c7ba6758f9336856bc53c11aae915ae3c4d9e54b19904de05a9d92d4ad7",
+        "scriptHash": "a70ae48b4e1ad231b5603015872c5dac644d1b3f6eb657363eceb78db8d38d85"
+      }
+    },
+    "set9-M2-interview-02": {
+      "scriptHash": "808069b2eb410ef626586f91a1014c5a14ba26a7214058d00a8ad8666a8be0ea",
+      "sigVersion": 3,
+      "bytes": 272971,
+      "durationSec": 17.0,
+      "audioSha256": "a8cea97ff35f09f304a2d2d3a112af63ddcdb67f049aed64e4e86483e8815e1d",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "If you wanted to encourage a friend who doesn't exercise to become more active, would you prefer to invite them to exercise together with you? Or would you prefer to share information about the benefits and let them decide on their own? Why?",
+        "audioSha256": "a8cea97ff35f09f304a2d2d3a112af63ddcdb67f049aed64e4e86483e8815e1d",
+        "scriptHash": "808069b2eb410ef626586f91a1014c5a14ba26a7214058d00a8ad8666a8be0ea"
+      }
+    },
+    "set9-M2-interview-03": {
+      "scriptHash": "0c1be07846402f12118c9ec9b632568d3648c66fccefcc77f4f597aca7ffb26f",
+      "sigVersion": 3,
+      "bytes": 115400,
+      "durationSec": 7.15,
+      "audioSha256": "9d56de883e450dabd05933bf64b24d68ea2c04901a3fe8c9c367f3533fcbbe0a",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "What are some things that might make it difficult for someone to start and maintain a regular exercise routine?",
+        "audioSha256": "9d56de883e450dabd05933bf64b24d68ea2c04901a3fe8c9c367f3533fcbbe0a",
+        "scriptHash": "0c1be07846402f12118c9ec9b632568d3648c66fccefcc77f4f597aca7ffb26f"
+      }
+    },
+    "set9-M2-interview-04": {
+      "scriptHash": "82586dcecf4a740f289e8f009bccd8c22fba589a99ac902ddfd818301e397fba",
+      "sigVersion": 3,
+      "bytes": 131283,
+      "durationSec": 8.13,
+      "audioSha256": "bef810b84d7616e7dc322f9f851431d2c57b55dee5a506bddc82a148afd36bc0",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?",
+        "audioSha256": "bef810b84d7616e7dc322f9f851431d2c57b55dee5a506bddc82a148afd36bc0",
+        "scriptHash": "82586dcecf4a740f289e8f009bccd8c22fba589a99ac902ddfd818301e397fba"
+      }
+    },
+    "set9-M2-repeat-01": {
+      "scriptHash": "470f93830e50e824da3637c4bc0794917c3864aa5fa3061bd9b174895f59ffba",
+      "sigVersion": 3,
+      "bytes": 48527,
+      "durationSec": 2.97,
+      "audioSha256": "ce5225093abdfc226c1981b16f1c08b0d9ac692fa17dd6efdb626af5b417fde5",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Is this your first time in our cafeteria?",
+        "audioSha256": "ce5225093abdfc226c1981b16f1c08b0d9ac692fa17dd6efdb626af5b417fde5",
+        "scriptHash": "470f93830e50e824da3637c4bc0794917c3864aa5fa3061bd9b174895f59ffba"
+      }
+    },
+    "set9-M2-repeat-03": {
+      "scriptHash": "89d0e063345366d7af71c4d66c4a10a1a450254aca2006d93ff47eb85717933c",
+      "sigVersion": 3,
+      "bytes": 51453,
+      "durationSec": 3.16,
+      "audioSha256": "30e282bb8bc19783db96900722da560dfabea63e8f838692ab99ecd7dbe33dbf",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "The Hot Food Station is on the left side.",
+        "audioSha256": "30e282bb8bc19783db96900722da560dfabea63e8f838692ab99ecd7dbe33dbf",
+        "scriptHash": "89d0e063345366d7af71c4d66c4a10a1a450254aca2006d93ff47eb85717933c"
+      }
+    },
+    "set9-M2-repeat-04": {
+      "scriptHash": "3fb883dd23236065b65965b3d5e33ff539ac3ab37206adc3c3147aad5b677244",
+      "sigVersion": 3,
+      "bytes": 78202,
+      "durationSec": 4.83,
+      "audioSha256": "7fb2144b1959791c5f3198d67cf47563ebb6af3c6fc198fbf4e74785a4290b2d",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "We offer a variety of meals, snacks and drinks every day.",
+        "audioSha256": "7fb2144b1959791c5f3198d67cf47563ebb6af3c6fc198fbf4e74785a4290b2d",
+        "scriptHash": "3fb883dd23236065b65965b3d5e33ff539ac3ab37206adc3c3147aad5b677244"
+      }
+    },
+    "set9-M2-repeat-05": {
+      "scriptHash": "11cf32e697f1ef3fc968eb3fe35f1539f89396d480fbfcd99c612c8ed57a98fe",
+      "sigVersion": 3,
+      "bytes": 56050,
+      "durationSec": 3.44,
+      "audioSha256": "de4ee0c98993d3e2013157c65d5249f93c7f9bb400abd3ccf06332f4db2bff8c",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You can pay with cash or your student ID card.",
+        "audioSha256": "de4ee0c98993d3e2013157c65d5249f93c7f9bb400abd3ccf06332f4db2bff8c",
+        "scriptHash": "11cf32e697f1ef3fc968eb3fe35f1539f89396d480fbfcd99c612c8ed57a98fe"
+      }
+    },
+    "set9-M2-repeat-06": {
+      "scriptHash": "1df85617a635e0e98f44cd03eeb6046b88e4f600e256bc5ada63850befe78959",
+      "sigVersion": 3,
+      "bytes": 84471,
+      "durationSec": 5.2,
+      "audioSha256": "a10ee9313f446130ebcf858be1735cbbed8654de3dcccca92d8e656200eee939",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Please remember to return your tray to the collection area when finished.",
+        "audioSha256": "a10ee9313f446130ebcf858be1735cbbed8654de3dcccca92d8e656200eee939",
+        "scriptHash": "1df85617a635e0e98f44cd03eeb6046b88e4f600e256bc5ada63850befe78959"
+      }
+    },
+    "set9-M2-repeat-07": {
+      "scriptHash": "270f75390260792cfdd6222a65b76775466209c113614aecebdee76a198fdaa1",
+      "sigVersion": 3,
+      "bytes": 82799,
+      "durationSec": 5.11,
+      "audioSha256": "e4563265113de321c110b05d14dac6fdce509cb563f93af22a5036c05753f72a",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "If you have any food allergies, please let the staff know before ordering.",
+        "audioSha256": "e4563265113de321c110b05d14dac6fdce509cb563f93af22a5036c05753f72a",
+        "scriptHash": "270f75390260792cfdd6222a65b76775466209c113614aecebdee76a198fdaa1"
+      }
+    },
+    "set9-M2-sr-01": {
+      "scriptHash": "547d66b2821fd24b422b133f53be674f58ef640805687dc3da2e6ee46aef9190",
+      "sigVersion": 3,
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "9eb71618f67e4279de86f42eb51f34a878ee5170f9b3245a294004c6cbaccd4d",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Did you sign up for the tutoring sessions?",
+        "audioSha256": "9eb71618f67e4279de86f42eb51f34a878ee5170f9b3245a294004c6cbaccd4d",
+        "scriptHash": "547d66b2821fd24b422b133f53be674f58ef640805687dc3da2e6ee46aef9190"
+      }
+    },
+    "set9-M2-sr-03": {
+      "scriptHash": "cb51b17ccacd8cc9a1c51a049a643a1633001e1bc867223dad40ea8f4470d6fb",
+      "sigVersion": 3,
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "ee29cd9827946318323cfcd3e1bb6034a7db4fd3cd83d5e253bcbe88e76efda9",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you decided on your major yet?",
+        "audioSha256": "ee29cd9827946318323cfcd3e1bb6034a7db4fd3cd83d5e253bcbe88e76efda9",
+        "scriptHash": "cb51b17ccacd8cc9a1c51a049a643a1633001e1bc867223dad40ea8f4470d6fb"
+      }
+    },
+    "write-w-disc": {
+      "scriptHash": "3d2f06e38e6fc2e2c4c381a3fb9cab17f4c6b9ec34036ba84579d066b74647e3",
+      "sigVersion": 3,
+      "bytes": 486357,
+      "durationSec": 67.31,
+      "audioSha256": "5ccc38a0f85116f5c9ca199961e1c8fb4b1c6ea6a719091e51497b83d50bad90",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Professor Gupta, Education. This week we'll be discussing exam formats, specifically the use of open books exams versus closed books exams. Some educators argue that open book exams better reflect real-world problem-solving skills, while others believe that closed book exams encourage deeper learning and better memory retention. In your opinion, which type of exam is more beneficial for students? I believe open book exams are more beneficial. In real-life situations, people have access to resources when solving problems, so it makes sense to allow students to use their notes or textbooks. Open book exams encourage critical thinking, as students need to apply the material rather than just memorize it. This type of assessment is more reflective of real-world problem-solving. I think closed book exams are better for student learning. They encourage students to study and truly understand the material, rather than relying on their ability to look up information during the test. Closed book exams test a student's knowledge and memory, helping them retain information longer. It's a more rigorous way of assessing what students have learned.",
+        "audioSha256": "5ccc38a0f85116f5c9ca199961e1c8fb4b1c6ea6a719091e51497b83d50bad90",
+        "scriptHash": "3d2f06e38e6fc2e2c4c381a3fb9cab17f4c6b9ec34036ba84579d066b74647e3"
+      }
+    },
+    "write-w-email": {
+      "scriptHash": "47e3dc6942a5a5b3f401b2f3a11ca86d42b3fd947e18f2ef9b720bb688c17438",
+      "sigVersion": 3,
+      "bytes": 127872,
+      "durationSec": 15.98,
+      "audioSha256": "4019a249112b3b891c2eea76f5f0722b0df918b609416d3166daf99071144399",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "A literary magazine has invited readers to submit short stories for publication. You decided to submit one of your stories using their online submission form. However, after clicking the submit button, you received an error message and are unsure whether your submission was received.",
+        "audioSha256": "4019a249112b3b891c2eea76f5f0722b0df918b609416d3166daf99071144399",
+        "scriptHash": "47e3dc6942a5a5b3f401b2f3a11ca86d42b3fd947e18f2ef9b720bb688c17438"
+      }
+    },
+    "read-R1-questions-13-15": {
+      "scriptHash": "6446c5d12bf934210ff5cf6f167a5c8fb7f88c893304b7ab2f8b477300272a2a",
+      "sigVersion": 3,
+      "bytes": 465261,
+      "durationSec": 66.99,
+      "audioSha256": "42d8a5a7fba9b2c919d00a309c5b7167b678f6d83294a022f7a37b51bd57b908",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "just got off the phone with finance. Due to the quarterly budget cuts, we need to reduce our training department spending by 15% immediately. This affects our upcoming leadership development program. That's significant. The external facilitators alone account for about 40% of the program budget. Should we consider using internal trainers instead? I could lead the communication skills module since I've done similar workshops before. That would save us the cost of one external speaker. That would help. Sandra, can you review the catering contract? We originally planned for a full lunch service, but switching to a lighter refreshment option might also reduce costs. I'll call the catering company this afternoon. They mentioned flexibility in their proposal. What about the venue? Let's keep the hotel venue. The professional setting is important for senior participants. Focus on the facilitators and catering first, and we'll reassess if needed. Understood. I'll prepare an outline for my session and send it to you for approval by Thursday.",
+        "audioSha256": "42d8a5a7fba9b2c919d00a309c5b7167b678f6d83294a022f7a37b51bd57b908",
+        "scriptHash": "6446c5d12bf934210ff5cf6f167a5c8fb7f88c893304b7ab2f8b477300272a2a"
+      }
+    },
+    "set9-M1-sr-03": {
+      "scriptHash": "fef8654b9012be710583099d6eac8cc4dfca7b0e7bbd3e08c182a4db7c3f9f79",
+      "sigVersion": 3,
+      "bytes": 61902,
+      "durationSec": 3.81,
+      "audioSha256": "959601c160138860ee5fec6205ab4677d0bf8a34788c95fb828b20692b274666",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I don't know how many people will join our study group tonight.",
+        "audioSha256": "959601c160138860ee5fec6205ab4677d0bf8a34788c95fb828b20692b274666",
+        "scriptHash": "fef8654b9012be710583099d6eac8cc4dfca7b0e7bbd3e08c182a4db7c3f9f79"
+      }
+    },
+    "set9-M2-repeat-02": {
+      "scriptHash": "a5c04d60637c47ae5e334c84525dcf25fc9e8cb6ad9b3a0994fca6683f832391",
+      "sigVersion": 3,
+      "bytes": 44765,
+      "durationSec": 2.74,
+      "audioSha256": "0a7c3da064fb257aef72a9c5eb0f6c03377a31c9b34397e8679a9ed73390fe7b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You can find today's menu on the board.",
+        "audioSha256": "0a7c3da064fb257aef72a9c5eb0f6c03377a31c9b34397e8679a9ed73390fe7b",
+        "scriptHash": "a5c04d60637c47ae5e334c84525dcf25fc9e8cb6ad9b3a0994fca6683f832391"
+      }
+    },
+    "set9-M2-sr-02": {
+      "scriptHash": "f85e83a6ba8bfd73eaa7d213585c0a5e88ecff44083a014e93d9493fd7693ab6",
+      "sigVersion": 3,
+      "bytes": 38078,
+      "durationSec": 2.32,
+      "audioSha256": "f948b3adf75345ce8ab864c8cc47813cc2a4b0641bf08e81fd69d06e3a1e38e1",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where's the Financial Aid Office?",
+        "audioSha256": "f948b3adf75345ce8ab864c8cc47813cc2a4b0641bf08e81fd69d06e3a1e38e1",
+        "scriptHash": "f85e83a6ba8bfd73eaa7d213585c0a5e88ecff44083a014e93d9493fd7693ab6"
+      }
+    }
+  }
+}

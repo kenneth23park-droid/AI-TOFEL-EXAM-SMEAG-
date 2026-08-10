@@ -683,7 +683,12 @@
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
-          "text": "Good points. Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?"
+          "text": "Good points."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?"
         }
       ],
       "origin": "tts-voices-set9exam-11labs.json"

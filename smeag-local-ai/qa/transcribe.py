@@ -31,7 +31,11 @@ commercial scoring path — for that, use an appropriately licensed model via
 
 BACKENDS
 --------
-    --backend hf     load the model locally via transformers (default)
+    --backend hf     load the model locally via transformers (default). Falls
+                     back to faster-whisper on any clip whose decode collapses;
+                     pass --no-fallback to keep the failure instead.
+    --backend fw     faster-whisper (CTranslate2) directly — a second opinion
+                     with a different runtime and different weights
     --backend http   POST to an OpenAI-compatible /v1/audio/transcriptions
                      endpoint (the campus `whisper` service in
                      serving/docker-compose.yml, or any drop-in replacement)
@@ -89,8 +93,25 @@ def decode_pcm(path: Path) -> "list[float]":
     return audio
 
 
+# --------------------------------------------------------- plausibility ---
+class Plausible:
+    """Shared "did this decode actually cover the audio?" floor.
+
+    Lives on a mixin because every local backend needs the identical rule and a
+    second copy of the threshold is a second thing to forget to update.
+    """
+
+    #: Continuous read-aloud speech runs roughly 2.0-2.8 words/sec. Anything
+    #: under this is not slow narration, it is a decode that gave up early.
+    #: Set well below the plausible floor so a genuinely sparse clip (long
+    #: pauses, a short prompt padded with silence) is not flagged.
+    MIN_WORDS_PER_SEC = 0.8
+    #: Below this, words/sec is dominated by lead-in and trailing silence.
+    MIN_DURATION_FOR_RATE_CHECK = 20.0
+
+
 # ------------------------------------------------------------- hf backend ---
-class HFBackend:
+class HFBackend(Plausible):
     """Local CrisperWhisper via transformers."""
 
     def __init__(self, model_id: str = MODEL_ID, device: str | None = None):
@@ -172,14 +193,6 @@ class HFBackend:
         self._assert_plausible(path, text, len(audio) / SAMPLE_RATE)
         return text
 
-    #: Continuous read-aloud speech runs roughly 2.0-2.8 words/sec. Anything
-    #: under this is not slow narration, it is a decode that gave up early.
-    #: Set well below the plausible floor so a genuinely sparse clip (long
-    #: pauses, a short prompt padded with silence) is not flagged.
-    MIN_WORDS_PER_SEC = 0.8
-    #: Below this, words/sec is dominated by lead-in and trailing silence.
-    MIN_DURATION_FOR_RATE_CHECK = 20.0
-
     def _assert_plausible(self, path: Path, text: str, seconds: float) -> None:
         """
         Refuse to return a transcript that cannot cover its own audio.
@@ -201,6 +214,78 @@ class HFBackend:
                 f"{self.MIN_WORDS_PER_SEC}). Re-run, or transcribe {path.name} "
                 f"in segments; do NOT treat this as a truncated recording."
             )
+
+
+# --------------------------------------------------- faster-whisper backend ---
+class FasterWhisperBackend(Plausible):
+    """CTranslate2 Whisper — the second opinion when the primary decode collapses.
+
+    Kept deliberately independent of HFBackend: a fallback that shares the
+    primary's decoder shares its failure mode too, and then a "second opinion"
+    is just the same wrong answer twice. Different runtime, different beam
+    search, separate model weights.
+    """
+
+    DEFAULT_MODEL = "Systran/faster-whisper-medium.en"
+
+    def __init__(self, model_id: str | None = None, device: str = "cpu",
+                 compute_type: str = "int8"):
+        from faster_whisper import WhisperModel
+
+        self.model_id = model_id or self.DEFAULT_MODEL
+        print(f"loading faster-whisper {self.model_id} on {device} ({compute_type})…",
+              file=sys.stderr, flush=True)
+        self.model = WhisperModel(self.model_id, device=device, compute_type=compute_type)
+
+    def transcribe(self, path: Path) -> str:
+        segments, info = self.model.transcribe(
+            str(path),
+            language="en",
+            beam_size=5,
+            # Same reasoning as the primary: a decoder attending to its own
+            # output is how long-form collapse starts.
+            condition_on_previous_text=False,
+            # No VAD. Trimming silence here would hide the very defect this
+            # pipeline exists to catch — a clip that really is short.
+            vad_filter=False,
+        )
+        text = " ".join(s.text.strip() for s in segments).strip()
+        self._assert_plausible(path, text, float(info.duration))
+        return text
+
+
+class FallbackBackend:
+    """Try the primary; on an implausible decode, ask the secondary.
+
+    This exists because of a specific, repeated incident: CrisperWhisper's greedy
+    decode collapsed on the long lecture blocks and returned a transcript that
+    covered a third of the audio — or nothing at all. The gate then reported the
+    *audio* as truncated and demanded a re-render of files that were fine. On
+    SET 9 that was 9 of 40 clips; a second engine cleared all 9 at 0.97-1.00.
+
+    Only `RuntimeError` triggers the fallback — that is what `_assert_plausible`
+    raises. A missing file or a decode crash is a real error and still surfaces.
+    """
+
+    def __init__(self, primary, make_secondary):
+        self.primary = primary
+        self._make_secondary = make_secondary
+        self.secondary = None
+        self.fallbacks: list[str] = []
+
+    def transcribe(self, path: Path) -> str:
+        try:
+            return self.primary.transcribe(path)
+        except RuntimeError as exc:
+            if self.secondary is None:
+                print(f"  primary decode collapsed on {path.name} ({exc}); "
+                      f"loading fallback engine", file=sys.stderr, flush=True)
+                self.secondary = self._make_secondary()
+            text = self.secondary.transcribe(path)
+            self.fallbacks.append(path.name)
+            print(f"  fallback recovered {path.name}: {len(text.split())} words",
+                  file=sys.stderr, flush=True)
+            return text
 
 
 # ----------------------------------------------------------- http backend ---
@@ -335,7 +420,10 @@ def selftest() -> int:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--manifest")
-    ap.add_argument("--backend", choices=["hf", "http"], default="hf")
+    ap.add_argument("--backend", choices=["hf", "fw", "http"], default="hf")
+    ap.add_argument("--no-fallback", action="store_true",
+                    help="hf 백엔드가 붕괴해도 faster-whisper 로 재시도하지 않는다")
+    ap.add_argument("--fallback-model", default=FasterWhisperBackend.DEFAULT_MODEL)
     ap.add_argument("--model", default=MODEL_ID)
     ap.add_argument("--device", default=None, help="cuda:0 | mps | cpu (default: autodetect)")
     ap.add_argument("--url", default="http://127.0.0.1:8001/v1", help="http backend base URL")
@@ -351,9 +439,24 @@ def main() -> None:
         ap.print_help()
         sys.exit(2)
 
-    backend = (HFBackend(args.model, args.device) if args.backend == "hf"
-               else HTTPBackend(args.url, args.model, args.api_key))
-    sys.exit(run(Path(args.manifest), backend, args.force, args.limit))
+    if args.backend == "fw":
+        backend = FasterWhisperBackend(args.fallback_model)
+    elif args.backend == "http":
+        backend = HTTPBackend(args.url, args.model, args.api_key)
+    else:
+        backend = HFBackend(args.model, args.device)
+        # Loaded lazily: the fallback weights are only fetched if a clip actually
+        # collapses, so a clean run costs nothing.
+        if not args.no_fallback:
+            backend = FallbackBackend(
+                backend, lambda: FasterWhisperBackend(args.fallback_model))
+
+    rc = run(Path(args.manifest), backend, args.force, args.limit)
+    used = getattr(backend, "fallbacks", [])
+    if used:
+        print(f"fallback engine transcribed {len(used)} clip(s): "
+              + ", ".join(used[:8]), file=sys.stderr)
+    sys.exit(rc)
 
 
 if __name__ == "__main__":

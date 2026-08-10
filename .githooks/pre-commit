@@ -1,0 +1,56 @@
+#!/bin/sh
+# 음원 검증 게이트 — mp3 가 스테이지에 올라온 커밋에서만 돈다.
+#
+# 왜 훅인가. 생성기(tts_*.py)는 스스로 게이트를 부르지만, 실제로 음원이 바뀌는 경로는
+# 그것만이 아니다. 손으로 덮어쓰기, 외부에서 받은 파일 복사, Finder 드래그 — 이 경로들은
+# 어떤 도구도 거치지 않는다. 커밋은 그 전부가 반드시 통과하는 단 하나의 길목이다.
+#
+# 검사 범위는 '바뀐 음원'뿐이다(계층 0~3, ASR 대본대조 포함). 보통 한두 개라 몇 초면 끝난다.
+#
+# 통과하면 신선도 기준(.audio-index.json)이 갱신되고, 같은 커밋에 함께 올라간다 —
+# 음원과 그 음원의 검증 기준이 갈라지지 않게.
+#
+# 급할 때: SKIP_AUDIO_GATE=1 git commit ...   (건너뛴 사실이 화면에 남는다)
+
+set -e
+
+if [ -n "$SKIP_AUDIO_GATE" ]; then
+    echo "[audio gate] SKIP_AUDIO_GATE=1 — 음원 검증을 건너뛰고 커밋한다. 발행 전에 반드시 손으로 돌려라:"
+    echo "             studyground/.venv/bin/python studyground/tools/audio_gate.py"
+    exit 0
+fi
+
+ROOT=$(git rev-parse --show-toplevel)
+STAGED_AUDIO=$(git diff --cached --name-only --diff-filter=ACMR \
+               | grep -E '^studyground/sg2/media/.*\.(mp3|wav|m4a|ogg)$' || true)
+
+[ -z "$STAGED_AUDIO" ] && exit 0
+
+GATE="$ROOT/studyground/tools/audio_gate.py"
+PY="$ROOT/studyground/.venv/bin/python"
+[ -x "$PY" ] || PY=python3
+if [ ! -f "$GATE" ]; then
+    echo "[audio gate] 게이트를 찾지 못했다: $GATE — 커밋은 통과시키되, 검증은 안 됐다."
+    exit 0
+fi
+
+echo "[audio gate] 스테이지에 음원 $(echo "$STAGED_AUDIO" | wc -l | tr -d ' ')개 — 검증을 돌린다."
+if ! "$PY" "$GATE"; then
+    cat <<'MSG'
+
+[audio gate] 커밋을 막았다. 위 FAIL 을 고친 뒤 다시 커밋하라.
+             음원을 다시 굽거나, 파일이 뒤바뀐 자리를 바로잡아야 한다.
+             정말로 이대로 커밋해야 한다면:  SKIP_AUDIO_GATE=1 git commit ...
+MSG
+    exit 1
+fi
+
+# 갱신된 신선도 기준을 같은 커밋에 싣는다. 따로 두면 음원과 기준이 다른 커밋에 갈라진다.
+INDEXES=$(git diff --name-only -- studyground/sg2/media | grep '/\.audio-index\.' || true)
+if [ -n "$INDEXES" ]; then
+    echo "$INDEXES" | while read -r f; do
+        [ -n "$f" ] && git add "$f" && echo "[audio gate] 기준 갱신본을 함께 스테이지: $f"
+    done
+fi
+
+exit 0

@@ -17,6 +17,13 @@
  *   build              -> BUILD_SENTENCE  (answerTokens 순서 완전일치)
  *   email/discussion   -> WRITING         (자동채점 없음)
  *   repeat/interview   -> SPEAKING        (자동채점 없음)
+ *
+ * 산출형(PRODUCTIVE_KEYS) 행에는 채점기가 쓸 두 필드를 더 싣는다(가산형 — 기존 키는 그대로).
+ *   task_kind : 문항 kind 그대로(repeat / interview / email / discussion).
+ *               rubric.draft() 가 이 값으로 복창 채점 경로를 켠다.
+ *   reference : 복창 원문. speaking_script.json 의 lines[] 에서 문항 id 로 찾는다
+ *               (오디오 대본과 같은 출처 — 여기서 새로 지어내지 않는다).
+ *               복창이 아닌 문항은 None 이다. 에세이·인터뷰에는 "정답 원문"이 없다.
  */
 'use strict';
 
@@ -25,6 +32,7 @@ var path = require('path');
 
 var ROOT = path.join(__dirname, '..');
 var SET9 = path.join(ROOT, 'sg2', 'assets', 'set9.js');
+var SCRIPT = path.join(ROOT, 'sg2', 'config', '_set9_fragments', 'speaking_script.json');
 var OUT = path.join(ROOT, 'app', 'scoring', 'answer_key_set9.py');
 
 global.window = global;
@@ -42,6 +50,21 @@ var QTYPE_BY_KIND = {
 };
 
 var AUTO = { CLOZE: 1, MCQ: 1, INSERT: 1, BUILD_SENTENCE: 1, WORD_FILLING: 1 };
+
+// 복창 원문이 필요한 kind. 지금은 repeat 하나뿐이지만, 이 판단을 아래 코드 여기저기에
+// 흩뿌리지 않으려고 이름을 붙여 둔다.
+var NEEDS_REFERENCE = { repeat: 1 };
+
+// speaking_script.json 의 lines[] → { id: text }. 오디오 대본과 같은 파일이라
+// 대본이 바뀌면 정답키도 같이 바뀐다(재생성 시 --check 가 잡는다).
+var SCRIPT_LINES = (function () {
+  var raw = JSON.parse(fs.readFileSync(SCRIPT, 'utf8'));
+  var map = {};
+  (raw.lines || []).forEach(function (line) {
+    if (line && line.id) map[line.id] = String(line.text || '').trim();
+  });
+  return map;
+})();
 
 // SET 9 실측값 — set1 의 78/13/91 을 그대로 베끼지 않는다.
 // reading 50(blank 30 + mcq 19 + insert 1) / listening 47 / writing build 10 = 107,
@@ -87,6 +110,15 @@ window.SMEAG_SET9.allQuestions().forEach(function (e) {
     }
     rows.push(row);
   } else {
+    // 산출형에만 붙는 두 필드. task_kind 는 kind 그대로고, reference 는 복창에만 있다.
+    row.task_kind = q.kind;
+    row.reference = null;
+    if (NEEDS_REFERENCE[q.kind]) {
+      var line = SCRIPT_LINES[q.id];
+      // 근거 없는 값을 만들지 않는다 — 원문이 없으면 빈 문자열로 때우지 말고 여기서 멈춘다.
+      if (!line) throw new Error('repeat question without a script line: ' + q.id);
+      row.reference = line;
+    }
     productive.push(row);
   }
 });
@@ -100,6 +132,21 @@ function block(list) {
       '"no": ' + py(r.no) + ', ' +
       '"answer": ' + py(r.answer) + ', ' +
       '"max_score": ' + py(r.max_score) + '},';
+  }).join('\n');
+}
+
+// 산출형 전용 블록 — 자동채점 행의 바이트는 건드리지 않으려고 함수를 나눠 둔다.
+function productiveBlock(list) {
+  return list.map(function (r) {
+    return '    ' + JSON.stringify(r.key) + ': {' +
+      '"qtype": ' + py(r.qtype) + ', ' +
+      '"skill": ' + py(r.skill) + ', ' +
+      '"module": ' + py(r.module) + ', ' +
+      '"no": ' + py(r.no) + ', ' +
+      '"answer": ' + py(r.answer) + ', ' +
+      '"max_score": ' + py(r.max_score) + ', ' +
+      '"task_kind": ' + py(r.task_kind) + ', ' +
+      '"reference": ' + py(r.reference) + '},';
   }).join('\n');
 }
 
@@ -128,8 +175,10 @@ var text = [
   '}',
   '',
   '# Productive questions — graded by a teacher / rubric, never auto-scored.',
+  '# task_kind 는 채점 방식을 고르는 스위치이고(repeat 이면 원문 대조),',
+  '# reference 는 복창 원문이다(speaking_script.json 출처, 복창이 아니면 None).',
   'PRODUCTIVE_KEYS: dict[str, dict] = {',
-  block(productive),
+  productiveBlock(productive),
   '}',
   '',
   'AUTO_TOTAL_BY_SKILL: dict[str, int] = {',
@@ -162,6 +211,17 @@ if (rows.length !== EXPECT_AUTO || productive.length !== EXPECT_PRODUCTIVE) {
     'SET 9 문항 수가 실측값과 다르다: auto ' + rows.length + '/' + EXPECT_AUTO +
     ', productive ' + productive.length + '/' + EXPECT_PRODUCTIVE +
     ' — set9.js 가 바뀌었다면 이 상수부터 갱신하라.'
+  );
+}
+
+// SET 9 S1 은 복창 7문항이다(실측). 원문이 하나라도 새면 채점이 조용히 중앙값으로 내려앉으므로
+// 여기서 잡는다 — 미채점보다 "그럴듯하게 틀린 점수"가 나쁘다.
+var EXPECT_REFERENCES = 7;
+var withReference = productive.filter(function (r) { return r.reference; }).length;
+if (withReference !== EXPECT_REFERENCES) {
+  throw new Error(
+    '복창 원문이 실린 문항 수가 다르다: ' + withReference + '/' + EXPECT_REFERENCES +
+    ' — speaking_script.json 의 lines[] id 와 set9.js 문항 id 가 어긋났는지 보라.'
   );
 }
 

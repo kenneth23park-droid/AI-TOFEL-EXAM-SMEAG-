@@ -217,9 +217,12 @@ def compare_repeat(text: str, reference: str) -> dict:
     """전사와 원문의 토큰 단위 대조. 표준 라이브러리(difflib)만 쓴다.
 
     정규화는 autoscore.normalize_text 와 동일 — 대소문자/앞뒤·중간 공백을 무시한다.
-    구두점은 토큰에 붙은 채로 남는데(`cafeteria?` ≠ `cafeteria`), 전사기가 구두점을
-    거의 찍지 않으므로 원문 쪽 구두점만 떨어뜨린다. 아포스트로피는 단어의 일부라
-    보존한다(`today's` 는 한 토큰).
+    그 위에 _repeat_tokens() 가 **원문·전사 양쪽에 똑같이** 붙어 있는 구두점을 떨어뜨린다
+    (`cafeteria?` == `cafeteria`, similarity 1.0). 전사기는 물음표·쉼표를 거의 찍지 않으므로,
+    한쪽만 떨어뜨리면 잘 따라 말한 답이 구두점 때문에 깎인다. 아포스트로피는 단어의
+    일부라 보존한다(`today's`, `don't` 는 각각 한 토큰 — 곧은따옴표로 통일한 뒤 남긴다).
+    하이픈은 구두점이므로 단어를 쪼갠다(`first-time` → ['first', 'time']).
+    숫자는 남지만 소수점은 구두점이라 갈라진다(`3.5` → ['3', '5']).
     """
     ref = _repeat_tokens(reference)
     hyp = _repeat_tokens(text)

@@ -2,9 +2,17 @@
 
 > ## ⚠️ 출처 경고 — 반드시 먼저 읽을 것
 > **"Benefits of Green Roofs" 지문의 `{{A}}`~`{{D}}` 네 자리는 원본 SMEAG 자료가 아니다.**
-> `NEW TOEFL MOCK TEST SET  9.docx` 는 이 지문을 두 번 싣고 있는데(문단 284-289, 290-295)
-> **두 사본 모두 A/B/C/D 표식이 없다.** 해당 `<w:p>` 안에 `w:sym`·도형·텍스트박스도 없으므로
-> 파싱 손실이 아니라 원본 자체의 결손이다. 15번 문항의 지시문
+> `NEW TOEFL MOCK TEST SET  9.docx` 안에서 이 지문은 본문 문단이 아니라 **텍스트박스
+> (`w:txbxContent`) 안에** 들어 있다. 조상 태그를 끝까지 따라가면
+> `w:body > w:p > mc:AlternateContent > mc:Choice > w:drawing > wps:txbx > w:txbxContent > w:p` 다.
+> 지문이 문서에서 두 번 잡히는 것도 사본이 둘이어서가 아니라, 같은 텍스트박스를
+> `mc:Choice`(`w:drawing`/`wps:txbx`)와 `mc:Fallback`(`w:pict`/`v:textbox`)이 중복 기술하기
+> 때문이다. 그 `mc:AlternateContent` 블록 전체의 `w:t` 를 **텍스트박스 내부까지 전수 추출**해
+> 3,106자를 얻었고, 그 안에 A/B/C/D 표식이 하나도 없다(`w:sym` 0개, 마커로 쓸 만한 기호 문자
+> 0개, 한두 글자짜리 `w:t` 조각 0개). 파싱 손실이 아니라 원본 자체의 결손이다.
+> **재확인할 사람에게** — 본문 `<w:p>` 만 훑으면 이 지문은 아예 잡히지 않는다.
+> 반드시 `w:txbxContent` 안쪽까지 내려가서 볼 것(`tools/extract_set9_reading.py` 머리말의
+> 주의점 1)·2) 참조). 15번 문항의 지시문
 > ("Look at the four letters (A, B, C, and D) in the passage …"), 선택지 4개(Position A~D),
 > 삽입 문장, 정답키(D = `answer:3`) 는 모두 원본 그대로다.
 > **원본 마커 위치가 확보되면 즉시 교체 대상이다.**

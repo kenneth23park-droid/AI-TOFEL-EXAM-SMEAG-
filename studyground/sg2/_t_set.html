@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<!--
+  admin-set-view.html — 모의고사 SET 전체 열람(관리자).
+
+  출제자가 한 화면에서 시험 한 벌을 통째로 본다.
+    · 구성  — 섹션 → 모듈 → 블록 → 문항 순서와 개수
+    · 대본  — 리스닝 오디오의 스크립트(있으면 재생 버튼도 함께)
+    · 정답  — 문항별 정답을 형광으로, 그리고 섹션별 정답표(복사·CSV)
+
+  데이터는 이미 있는 것만 모은다. 콘텐츠 팩(assets/set1.js·set9.js) + 문항 교체분
+  (assets/question-config.js) + 대본(config/audio-check.set9.json · set9-audio.js).
+  이 화면은 읽기 전용이다 — 고치는 곳은 admin-questions.html 이다.
+
+  SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Set overview (admin) · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:14px 0 10px; }
+  .bar input[type=search] { flex:1; min-width:180px; font:inherit; font-size:12.5px; padding:9px 12px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .seg { display:inline-flex; border:1px solid var(--line-2); border-radius:9px; overflow:hidden; }
+  .seg button { font:inherit; font-size:12px; font-weight:750; padding:8px 12px; border:0; cursor:pointer;
+    background:var(--paper,#fff); color:var(--ink-2); }
+  .seg button + button { border-left:1px solid var(--line-2); }
+  .seg button.on { background:var(--brand); color:#fff; }
+  .chk { font-size:12px; font-weight:700; color:var(--ink-2); display:inline-flex; align-items:center; gap:6px; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin:4px 0 16px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 13px; min-width:92px; }
+  .stat b { display:block; font-size:20px; font-weight:850; line-height:1.15; }
+  .stat span { font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+
+  .sec { margin-top:26px; }
+  .sec > h2 { font-size:19px; font-weight:850; margin:0 0 3px; }
+  .sec > p.cnt { font-size:12px; color:var(--muted); margin:0 0 12px; }
+  .mod { margin-top:16px; }
+  .mod > h3 { font-size:13px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--muted); margin:0 0 8px; }
+
+  .blk { background:var(--card); border:1px solid var(--line); border-radius:13px; padding:14px 16px; margin-bottom:12px; }
+  .blk-h { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:4px; }
+  .blk-h b { font-size:14px; font-weight:850; }
+  .blk-i { font-size:12.5px; color:var(--ink-2); margin:0 0 10px; }
+  .tagx { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px;
+    text-transform:uppercase; letter-spacing:.04em; }
+  .tagx.aud { background:#e2eef6; color:#2f6f9f; }
+  .tagx.ovr { background:var(--peach,#fde5da); color:var(--brand-ink,#a8331a); }
+  .tagx.sec { background:var(--cream-2); color:var(--muted); }
+
+  .scriptbox { border-left:3px solid var(--peach-2,#f6d3c6); background:var(--cream-2); border-radius:0 10px 10px 0;
+    padding:10px 12px; margin:0 0 12px; font-size:13px; line-height:1.75; white-space:pre-wrap; }
+  .scriptbox .spk { font-weight:800; color:var(--brand-ink); }
+  .audrow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .audrow .path { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px; color:var(--muted);
+    word-break:break-all; }
+  .mini { font:inherit; font-size:12px; font-weight:750; padding:6px 11px; border-radius:8px; cursor:pointer;
+    border:1px solid var(--line-2); background:var(--paper,#fff); color:var(--ink); }
+  .mini.on { background:var(--brand); border-color:var(--brand); color:#fff; }
+
+  .q { border-top:1px dashed var(--line); padding-top:11px; margin-top:11px; }
+  .q-h { font-size:11px; font-weight:800; letter-spacing:.04em; color:var(--muted); text-transform:uppercase; }
+  .q-p { font-size:13.5px; line-height:1.6; margin:4px 0 8px; }
+  .opt { font-size:13px; line-height:1.7; padding:2px 6px; border-radius:6px; display:block; }
+  .opt .k { display:inline-block; width:20px; font-weight:800; color:var(--muted); }
+  .opt.is-key { background:#fff59d; }                 /* 정답 형광 */
+  .opt.is-key .k { color:#7a5a00; }
+  body.hide-key .opt.is-key { background:transparent; }
+  body.hide-key .opt.is-key .k { color:var(--muted); }
+  body.hide-key .keycol, body.hide-key .keytable { display:none; }
+
+  .keytable { width:100%; border-collapse:collapse; font-size:12.5px; margin:10px 0 4px; }
+  .keytable th, .keytable td { border:1px solid var(--line); padding:5px 8px; text-align:center;
+    font-variant-numeric:tabular-nums; }
+  .keytable th { background:var(--cream-2); font-size:10.5px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.04em; color:var(--muted); }
+  .keytable td b { color:var(--brand-ink); }
+
+  .gate { max-width:520px; margin:60px auto; text-align:center; }
+  @media print {
+    .nav, .bar, .foot, .stats, .audrow, .mini { display:none !important; }
+    .blk { break-inside:avoid; border-color:#ddd; }
+    .opt.is-key { background:#ffe08a !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Admin · Set overview</small></span></a>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="admin-audio-sync.html"><span data-en>Script ↔ audio</span><span data-ko>대본 대조</span></a>
+      <a class="btn ghost sm" href="admin-questions.html"><span data-en>Edit questions</span><span data-ko>문항 교체</span></a>
+      <a class="btn ghost sm" href="tests.html"><span data-en>Back to tests</span><span data-ko>시험으로</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main" hidden>
+  <div class="page-h" style="padding-top:24px">
+    <span class="pill" style="margin-bottom:8px">Admin · Set overview</span>
+    <h1 style="font-size:clamp(25px,4vw,38px)"><span data-en>The whole mock test on one page</span><span data-ko>시험 한 벌을 한 화면에</span></h1>
+    <p class="sub"><span data-en>Structure, listening scripts and the answer key together — read-only. The correct choice is highlighted, and each section also gets a compact answer table you can copy or print.</span>
+      <span data-ko>시험 구성 · 리스닝 대본 · 정답을 한 번에 봅니다(읽기 전용). 정답 선택지는 형광으로 표시되고, 섹션마다 복사·인쇄용 정답표가 함께 나옵니다.</span></p>
+  </div>
+
+  <div class="bar">
+    <span class="seg" id="setseg"></span>
+    <span class="seg" id="secseg"></span>
+    <input type="search" id="q" placeholder="Filter by question id, prompt, choice or script…">
+    <label class="chk"><input type="checkbox" id="showKey" checked>
+      <span data-en>Answer key</span><span data-ko>정답 표시</span></label>
+    <label class="chk"><input type="checkbox" id="showScript" checked>
+      <span data-en>Scripts</span><span data-ko>대본</span></label>
+    <button class="btn ghost sm" id="csvBtn"><span data-en>Answer key CSV</span><span data-ko>정답 CSV</span></button>
+    <button class="btn ghost sm" id="printBtn"><span data-en>Print</span><span data-ko>인쇄</span></button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div id="host"></div>
+</main>
+
+<div class="wrap gate" id="gate">
+  <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
+  <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+</div>
+
+<script src="assets/question-config.js"></script>
+<script src="assets/set1.js"></script>
+<script src="assets/set9.js"></script>
+<script src="assets/set9-audio.js"></script>
+<script src="assets/exam-media.js"></script>
+<script src="assets/audio-index.js"></script>
+<script src="assets/audio-config.js"></script>
+<script src="assets/admin-session.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var A = window.SG_ADMIN, Q = window.SG_QUESTIONS;
+  var KEYS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+  var PACK_GLOBAL = { set1: 'SMEAG_SET1', set9: 'SMEAG_SET9' };
+  var setId = (new URLSearchParams(location.search).get('set') || '').toLowerCase();
+  var filterSec = 'all', filterQ = '';
+  var SCRIPTS = {};        // 오디오 경로 → 대본
+
+  function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
+  function pack() { return window[PACK_GLOBAL[setId]] || null; }
+  function apath(raw) { return raw ? SG_AUDIO_INDEX.resolve(raw) : ''; }
+
+  /* ── 대본 모으기 ─────────────────────────────────────────
+     시험 오디오는 config/audio-check.<set>.json 의 text(=합성에 쓴 원문),
+     미리듣기 클립은 set9-audio.js 의 transcript 를 쓴다. 키는 둘 다 오디오 경로다. */
+  function loadScripts() {
+    var D = window.SMEAG_SET9_AUDIO;
+    if (D) (D.modules || []).forEach(function (m) {
+      (m.items || []).forEach(function (it) { if (it.transcript) SCRIPTS[apath(it.audio)] = it.transcript; });
+    });
+    return fetch('config/audio-check.' + setId + '.json')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        (j && j.items || []).forEach(function (x) { if (x.text) SCRIPTS[apath(x.path)] = x.text; });
+      })
+      .catch(function () {});
+  }
+  function scriptFor(rawPath) { return rawPath ? (SCRIPTS[apath(rawPath)] || '') : ''; }
+
+  /* 대본의 "M:" / "Speaker 1:" 화자 표시를 굵게. */
+  function scriptHtml(t) {
+    return String(t).split(/\n/).map(function (line) {
+      var m = /^\s*([A-Za-z][A-Za-z0-9 ._'-]{0,20}):\s*(.*)$/.exec(line);
+      return m ? '<span class="spk">' + esc(m[1]) + ':</span> ' + esc(m[2]) : esc(line);
+    }).join('\n');
+  }
+
+  function matches(text) { return !filterQ || String(text).toLowerCase().indexOf(filterQ) >= 0; }
+
+  /* ── 렌더 ───────────────────────────────────────────────── */
+  function questionHtml(q) {
+    var ovr = Q && Q.isOverridden(setId, q.id);
+    var choices = q.choices || [];
+    return '<div class="q" data-search="' + esc(((q.id || '') + ' ' + (q.prompt || '') + ' ' + choices.join(' ')).toLowerCase()) + '">' +
+      '<div class="q-h">' + esc(q.id || '') + (q.no ? ' · Q' + q.no : '') +
+        (ovr ? ' <span class="tagx ovr">replaced</span>' : '') + '</div>' +
+      (q.prompt ? '<p class="q-p">' + esc(q.prompt) + '</p>' : '') +
+      choices.map(function (c, i) {
+        return '<span class="opt' + (i === q.answer ? ' is-key' : '') + '">' +
+          '<span class="k">' + (KEYS[i] || i) + '</span>' + esc(c) + '</span>';
+      }).join('') +
+    '</div>';
+  }
+
+  function blockHtml(block, mod) {
+    var qs = block.questions || [];
+    var audio = block.audio || (qs.length === 1 && qs[0].audio) || '';
+    var script = scriptFor(block.audio) || (qs.length ? scriptFor(qs[0].audio) : '');
+    var perQ = qs.filter(function (q) { return q.audio; }).length > 1;
+    return '<div class="blk">' +
+      '<div class="blk-h"><b>' + esc(block.heading || mod.label || '') + '</b>' +
+        (qs.length ? '<span class="tagx sec">' + qs.length + ' Q</span>' : '') +
+        (audio || perQ ? '<span class="tagx aud">audio</span>' : '') + '</div>' +
+      (block.instruction ? '<p class="blk-i">' + esc(block.instruction) + '</p>' : '') +
+      (audio ? '<div class="audrow"><button class="mini" data-play="' + esc(apath(audio)) + '">▶</button>' +
+        '<span class="path">' + esc(decodeURI(apath(audio))) + '</span></div>' : '') +
+      (script ? '<div class="scriptbox">' + scriptHtml(script) + '</div>' : '') +
+      qs.map(function (q) {
+        var qs2 = q.audio && q.audio !== block.audio
+          ? '<div class="audrow"><button class="mini" data-play="' + esc(apath(q.audio)) + '">▶</button>' +
+            '<span class="path">' + esc(decodeURI(apath(q.audio))) + '</span></div>' +
+            (scriptFor(q.audio) ? '<div class="scriptbox">' + scriptHtml(scriptFor(q.audio)) + '</div>' : '')
+          : '';
+        return questionHtml(q).replace('</div>', qs2 + '</div>');
+      }).join('') +
+    '</div>';
+  }
+
+  function keyTable(sec) {
+    var rows = [];
+    (sec.modules || []).forEach(function (m) {
+      (m.blocks || []).forEach(function (b) {
+        (b.questions || []).forEach(function (q) {
+          if (q.answer == null || !(q.choices || []).length) return;
+          rows.push({ no: q.no || q.id, key: KEYS[q.answer] || q.answer });
+        });
+      });
+    });
+    if (!rows.length) return '';
+    return '<table class="keytable"><thead><tr>' +
+      rows.map(function (r) { return '<th>' + esc(r.no) + '</th>'; }).join('') + '</tr></thead><tbody><tr>' +
+      rows.map(function (r) { return '<td><b>' + esc(r.key) + '</b></td>'; }).join('') + '</tr></tbody></table>';
+  }
+
+  function render() {
+    var p = pack();
+    var host = document.getElementById('host');
+    if (!p) { host.innerHTML = '<p class="muted">Set not loaded.</p>'; return; }
+
+    host.innerHTML = (p.sections || []).filter(function (s) {
+      return filterSec === 'all' || s.id === filterSec;
+    }).map(function (sec) {
+      var n = 0, au = 0;
+      (sec.modules || []).forEach(function (m) {
+        (m.blocks || []).forEach(function (b) {
+          n += (b.questions || []).length;
+          if (b.audio) au++;
+          (b.questions || []).forEach(function (q) { if (q.audio) au++; });
+        });
+      });
+      return '<div class="sec" data-sec="' + esc(sec.id) + '">' +
+        '<h2>' + esc(sec.label || sec.id) + '</h2>' +
+        '<p class="cnt">' + n + ' questions · ' + au + ' audio clips</p>' +
+        '<div class="keycol">' + keyTable(sec) + '</div>' +
+        (sec.modules || []).map(function (mod) {
+          return '<div class="mod"><h3>' + esc(mod.label || mod.id) + '</h3>' +
+            (mod.blocks || []).map(function (b) { return blockHtml(b, mod); }).join('') + '</div>';
+        }).join('') +
+      '</div>';
+    }).join('');
+
+    applyFilter();
+    paintStats();
+    paintSecSeg();
+  }
+
+  function applyFilter() {
+    document.querySelectorAll('#host .blk').forEach(function (blk) {
+      var hit = !filterQ || matches(blk.textContent);
+      blk.style.display = hit ? '' : 'none';
+    });
+  }
+
+  function paintStats() {
+    var p = pack(); if (!p) return;
+    var q = 0, au = 0, sc = 0, ovr = Q ? Q.count(setId) : 0;
+    (p.sections || []).forEach(function (sec) {
+      (sec.modules || []).forEach(function (m) {
+        (m.blocks || []).forEach(function (b) {
+          q += (b.questions || []).length;
+          if (b.audio) { au++; if (scriptFor(b.audio)) sc++; }
+          (b.questions || []).forEach(function (x) { if (x.audio) { au++; if (scriptFor(x.audio)) sc++; } });
+        });
+      });
+    });
+    document.getElementById('stats').innerHTML =
+      '<div class="stat"><b>' + q + '</b><span data-en>questions</span><span data-ko>문항</span></div>' +
+      '<div class="stat"><b>' + au + '</b><span data-en>audio</span><span data-ko>오디오</span></div>' +
+      '<div class="stat"><b>' + sc + '</b><span data-en>with script</span><span data-ko>대본 있음</span></div>' +
+      '<div class="stat"><b>' + ovr + '</b><span data-en>replaced</span><span data-ko>교체됨</span></div>';
+  }
+
+  function paintSecSeg() {
+    var p = pack(); if (!p) return;
+    var ids = (p.sections || []).map(function (s) { return s.id; });
+    document.getElementById('secseg').innerHTML = ['all'].concat(ids).map(function (s) {
+      return '<button data-sec="' + esc(s) + '"' + (s === filterSec ? ' class="on"' : '') + '>' +
+        (s === 'all' ? '<span data-en>All</span><span data-ko>전체</span>' : esc(s)) + '</button>';
+    }).join('');
+  }
+  function paintSetSeg() {
+    var allowed = A.allowedSets();
+    document.getElementById('setseg').innerHTML = A.SETS
+      .filter(function (s) { return allowed.indexOf(s.id) >= 0; })
+      .map(function (s) {
+        return '<button data-set="' + s.id + '"' + (s.id === setId ? ' class="on"' : '') + '>' + s.label + '</button>';
+      }).join('');
+  }
+
+  /* ── 이벤트 ─────────────────────────────────────────────── */
+  var player = new Audio();
+  document.getElementById('host').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-play]'); if (!b) return;
+    var src = SG_AUDIO.resolve(b.getAttribute('data-play'));
+    var same = player.src && player.src.indexOf(src) >= 0;
+    document.querySelectorAll('#host .mini.on').forEach(function (x) { x.classList.remove('on'); });
+    if (same && !player.paused) { player.pause(); return; }
+    if (!same) { player.src = src; player.currentTime = 0; }
+    player.play().catch(function () {});
+    b.classList.add('on');
+  });
+  player.addEventListener('ended', function () {
+    document.querySelectorAll('#host .mini.on').forEach(function (x) { x.classList.remove('on'); });
+  });
+
+  document.getElementById('secseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sec]'); if (!b) return;
+    filterSec = b.getAttribute('data-sec'); render();
+  });
+  document.getElementById('setseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-set]'); if (!b) return;
+    setId = b.getAttribute('data-set');
+    history.replaceState(null, '', 'admin-set-view.html?set=' + setId);
+    SCRIPTS = {};
+    paintSetSeg();
+    loadScripts().then(render);
+  });
+  document.getElementById('q').addEventListener('input', function () {
+    filterQ = this.value.trim().toLowerCase(); applyFilter();
+  });
+  document.getElementById('showKey').addEventListener('change', function () {
+    document.body.classList.toggle('hide-key', !this.checked);
+  });
+  document.getElementById('showScript').addEventListener('change', function () {
+    var on = this.checked;
+    document.querySelectorAll('.scriptbox').forEach(function (s) { s.style.display = on ? '' : 'none'; });
+  });
+  document.getElementById('printBtn').addEventListener('click', function () { window.print(); });
+  document.getElementById('csvBtn').addEventListener('click', function () {
+    var p = pack(); if (!p) return;
+    var lines = ['set,section,module,block,question_id,no,answer_key,answer_text'];
+    (p.sections || []).forEach(function (sec) {
+      (sec.modules || []).forEach(function (m) {
+        (m.blocks || []).forEach(function (b) {
+          (b.questions || []).forEach(function (q) {
+            if (q.answer == null) return;
+            lines.push([setId, sec.id, m.label || m.id, b.heading || '', q.id, q.no || '',
+                        KEYS[q.answer] || q.answer, (q.choices || [])[q.answer] || '']
+              .map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','));
+          });
+        });
+      });
+    });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+    a.download = 'sg-answer-key-' + setId + '.csv';
+    a.click();
+  });
+
+  function open() {
+    var allowed = A.allowedSets();
+    if (!setId || allowed.indexOf(setId) < 0) setId = allowed[0] || 'set9';
+    document.getElementById('gate').hidden = true;
+    document.getElementById('main').hidden = false;
+    paintSetSeg();
+    Promise.all([SG_AUDIO.ready(), loadScripts()]).then(render);
+    if (Q) Q.onChange(render);
+  }
+  document.getElementById('signin').addEventListener('click', function () { A.openLogin(setId, open); });
+  if (A.can(setId)) open(); else A.openLogin(setId, open);
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+<script>
+function out(t){var p=document.getElementById("__t")||document.createElement("pre");p.id="__t";p.textContent=t;document.documentElement.appendChild(p);}
+window.addEventListener("load",function(){setTimeout(function(){try{
+ var keys=document.querySelectorAll(".opt.is-key").length;
+ var scripts=document.querySelectorAll(".scriptbox").length;
+ var blocks=document.querySelectorAll(".blk").length;
+ var tables=document.querySelectorAll(".keytable").length;
+ var stats=document.getElementById("stats").textContent.replace(/\s+/g," ").trim();
+ var secs=Array.prototype.map.call(document.querySelectorAll("#secseg button"),function(b){return b.textContent}).join("|");
+ var firstScript=(document.querySelector(".scriptbox")||{textContent:""}).textContent.slice(0,60).replace(/\n/g," ");
+ // 정답 숨기기 토글
+ document.getElementById("showKey").checked=false;
+ document.getElementById("showKey").dispatchEvent(new Event("change"));
+ var hidden=getComputedStyle(document.querySelector(".opt.is-key")).backgroundColor;
+ // 섹션 필터
+ var lst=document.querySelector("#secseg [data-sec=listening]"); if(lst) lst.click();
+ setTimeout(function(){
+  out("blocks="+blocks+" keysHighlighted="+keys+" scripts="+scripts+" keyTables="+tables+
+      "\nstats="+stats+"\nsections="+secs+"\nfirstScript='"+firstScript+"'"+
+      "\nafterHideKey bg="+hidden+"\nafterListeningFilter secs="+document.querySelectorAll("#host .sec").length+
+      " blocks="+document.querySelectorAll("#host .blk").length);
+ },700);
+}catch(e){out("ERR "+e+"\n"+e.stack)}},5000)});
+</script></body>
+</html>

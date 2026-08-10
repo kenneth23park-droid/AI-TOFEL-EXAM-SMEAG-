@@ -1,0 +1,28 @@
+<!doctype html><meta charset="utf-8"><pre id="o">…</pre>
+<script src="assets/question-config.js"></script>
+<script src="assets/set9.js"></script>
+<script src="assets/exam-types.js"></script>
+<script src="assets/exam-media.js"></script>
+<script src="assets/exam-timing.js"></script>
+<script src="assets/exam-compile.js"></script>
+<script>
+function run(){
+ fetch('config/timing.toefl.json').then(r=>r.json()).then(function(t){
+  function secsFor(qid){
+   var C = window.SG_COMPILE || window.SG_EXAM_COMPILE;
+   var out = C.compileScreens(window.SMEAG_SET9, t, {});
+   var s = out.screens.filter(x => (x.questionIds||[]).length===1 && x.questionIds[0]===qid)[0];
+   return s && s.timer ? s.timer.seconds + '(' + s.timer.scope + ')' : 'no timer';
+  }
+  var before = secsFor('L1-1');
+  SG_QUESTIONS.set('set9','L1-1',{timeLimitSec:35});
+  var after = secsFor('L1-1');
+  var other = secsFor('L1-2');
+  SG_QUESTIONS.reset('set9','L1-1');
+  var reverted = secsFor('L1-1');
+  document.getElementById('o').textContent =
+    'L1-1 default='+before+'  after override='+after+'  neighbour L1-2='+other+'  after revert='+reverted;
+ }).catch(e=>document.getElementById('o').textContent='ERR '+e);
+}
+window.addEventListener('load',function(){setTimeout(run,400)});
+</script>

@@ -43,6 +43,7 @@
         "autoPlay": true,
         "replayAllowed": false
       },
+      "audioOnQuestionScreen": true,
       "questionCountSource": "content",
       "sectionSec": null,
       "modules": [
@@ -575,9 +576,15 @@
         "verify": "녹화에 Writing 구간 미포함 — 실제 시험 Writing 전환 화면 확보 필요"
       },
       {
-        "path": "sections.listening — 오디오 화면 / 답변 화면 분리",
-        "level": "observed",
-        "source": "실측 두 프레임 비교: 700s(docs/reference/screens/listening-audio-700s.png)는 'Listening | Question 25 of 32' + 화자 사진 + 제목 'Listen to an academic talk.' 만 있고 선택지도 타이머도 없다. 900s(listening-question-900s.png)는 같은 서브바에 선택지 4개 + 타이머 00:13. → 오디오 재생과 답변은 별개 화면이다. exam-compile.js 의 audioSetBlock 이 blockKind 'audio-play'(타이머 없음) 화면을 답변 화면 앞에 넣는다",
+        "path": "sections.listening.audioOnQuestionScreen",
+        "level": "spec",
+        "source": "발주처 요구(2026-08-10) — 오디오 전용 화면(화자 사진 + 'Audio Playing' 만 있는 화면)과 답변 화면의 분리를 없앤다. 사진과 선택지가 함께 있는 한 화면에서 오디오가 재생되어야 한다. 종전 분리는 실측 두 프레임(700s docs/reference/screens/listening-audio-700s.png = 사진만 · 900s listening-question-900s.png = 선택지 + 타이머 00:13)에 근거한 observed 값이었으나, provenance.levels.spec 규칙대로 확정 규격이 실측을 이긴다. true 면 exam-compile.js 의 audioSetBlock 이 blockKind 'audio-play' 화면을 만들지 않고 답변 화면에 audio 를 그대로 싣는다. IELTS(timing.ielts.json)에는 이 키가 없어 종전 timerScope 기반 판정 그대로다 — 출력 무변경",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "sections.listening.modules[*].perQuestionSec — 시계 시작 시점",
+        "level": "spec",
+        "source": "audioOnQuestionScreen:true 로 오디오와 답변이 한 화면이 되면서 20초 답변 시계는 화면 진입이 아니라 오디오 종료 시점에 걸린다. 분리 화면 시절에는 오디오 화면에 타이머가 없어(700s 프레임) 자연히 보장되던 성질이다 — 합친 뒤에도 오디오가 도는 동안 답변 시간이 깎이면 안 된다. 컴파일러가 화면에 timerStartsOnAudioEnd:true 를 달고, exam-engine.js 가 question/screen scope clock 의 arm 을 미뤘다가 렌더러의 재생 종료 신호(startDeferredClocks)에 건다",
         "verify": "없음(확정)"
       },
       {

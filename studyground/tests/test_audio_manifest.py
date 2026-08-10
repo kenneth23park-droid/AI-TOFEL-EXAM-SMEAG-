@@ -74,6 +74,10 @@ def _report(with_signal: bool) -> dict:
     with_signal=False 일 때 signal_scan 을 잠시 무력화한다. 계층 2 의 ffmpeg 디코드만
     빼고 계층 0~1 은 **진짜 코드 경로 그대로** 돌리기 위해서다. 여기서 계층 0/1 판정을
     직접 재구현하면 임계값이 두 벌이 되어 버린다.
+
+    stt_scope="none" 인 이유: verify() 의 기본값은 "changed" 라 바뀐 음원을 전사한다.
+    기본 스위트에서 그게 돌면 계층 2 의 13초짜리 실행에 전사 수 분이 얹힌다. 계층 3 은
+    아래 test_layer3_stt_contrast 가 `-m stt` 아래에서 따로 돌린다.
     """
     key = "full" if with_signal else "fast"
     if key not in _CACHE:
@@ -81,7 +85,7 @@ def _report(with_signal: bool) -> dict:
         if not with_signal:
             va.signal_scan = lambda path, duration: None
         try:
-            _CACHE[key] = va.verify(MANIFEST, update_index=False, base=SG2)
+            _CACHE[key] = va.verify(MANIFEST, update_index=False, base=SG2, stt_scope="none")
         finally:
             va.signal_scan = original
     return _CACHE[key]
@@ -224,6 +228,128 @@ def test_layer2_warnings_are_reported(request):
 
 # ── 계층 3 — 텍스트 대조 (STT 있을 때만) ─────────────────────────────────────
 @pytest.mark.stt
+def test_layer3_is_wired_into_the_gate():
+    """계층 3 이 게이트에 실제로 붙어 있는지 — 전사 없이 배선만 확인한다.
+
+    이 검사가 없으면 '계층 3 은 항상 SKIP' 으로 되돌아가도 아무 테스트도 안 깨진다.
+    그건 게이트가 있다고 믿는데 안 도는 상태이고, 이 프로젝트가 이미 겪은 사고 유형이다.
+    """
+    assert va.verify_stt is not None, (
+        f"verify_audio 가 계층 3 모듈을 못 읽는다 ({va._VERIFY_STT}) — ASR 대조가 꺼진다")
+    assert va.verify_stt.THRESHOLDS["wer_reject"] == va.stt_loopback.WER_REJECT, (
+        "계층 3 임계값이 stt_loopback 원본과 갈라졌다")
+
+    rep = va.verify(MANIFEST, update_index=False, base=SG2, stt_scope="none")
+    assert any("--stt-scope none" in s for s in rep["skipped"]), (
+        "계층 3 을 껐는데 그 사실이 리포트에 안 남는다 — 조용한 통과")
+    for it in rep["items"]:
+        l3 = it["layers"].get("layer3_transcript")
+        assert l3 and l3["status"] == "SKIP", f"{it['id']}: 계층 3 칸이 비었다"
+
+
+def test_changed_detection_flags_unverified_audio():
+    """'무엇을 다시 검사할까'의 정의 — 교체·대본변경·ASR 미대조를 모두 잡아야 한다."""
+    man = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    item = man["items"][0]
+    base_dir = (SG2 / item["out"]).parent
+    real = va.load_index(base_dir, va.manifest_key_for(MANIFEST)).get(item["id"]) or {}
+    sha = real.get("audioSha256") or va.audio_sha(SG2 / item["out"])
+    sig = va.script_signature(item, man)
+
+    v = va.SIGNATURE_VERSION
+
+    def why(entry):
+        if entry is not None:
+            entry = dict({"sigVersion": v}, **entry)
+        return va.change_reason(item, man, SG2, {base_dir: {item["id"]: entry}})
+
+    assert why(None) == "인덱스에 기준이 없음(신규)"
+    assert why({"audioSha256": "다른해시", "scriptHash": sig}) == "음원 교체됨"
+    assert why({"audioSha256": sha, "scriptHash": "다른대본"}) == "대본·음성정책 변경"
+    assert why({"audioSha256": sha, "scriptHash": sig}) == "ASR 미대조"
+    assert why({"audioSha256": sha, "scriptHash": sig,
+                "stt": {"audioSha256": sha, "verdict": "PASS",
+                        "transcript": "whatever was heard"}}) is None
+    # 판정만 있고 전사문이 없으면 대조를 마쳤다고 볼 수 없다 — 대본이 바뀌면 재계산할
+    # 근거가 없어 결국 다시 전사해야 한다.
+    assert why({"audioSha256": sha, "scriptHash": sig,
+                "stt": {"audioSha256": sha, "verdict": "PASS"}}) == "ASR 미대조"
+    # 해시 정의가 바뀌면 옛 기준과는 비교 자체가 성립하지 않는다 — 다시 세워야 한다
+    assert va.change_reason(item, man, SG2, {base_dir: {item["id"]: {
+        "sigVersion": v - 1, "audioSha256": sha, "scriptHash": sig,
+        "stt": {"audioSha256": sha, "verdict": "PASS"}}}}) == f"해시 정의 변경(v{v - 1}→v{v})"
+    # ASR 을 끄고 물으면 미대조는 이유가 되지 않는다
+    assert va.change_reason(item, man, SG2, {base_dir: {item["id"]: {
+        "sigVersion": v, "audioSha256": sha, "scriptHash": sig}}}, need_stt=False) is None
+
+
+def _page_sync_report(item_id, transcript, sha, backend="faster_whisper"):
+    """sync_review_page 가 읽는 최소 리포트 모양."""
+    return {"items": [{
+        "id": item_id,
+        "layers": {
+            "layer0_mapping": {"audioSha256": sha},
+            "layer3_transcript": {"status": "OK", "transcript": transcript,
+                                  "backend": backend},
+        },
+    }]}
+
+
+def test_review_page_sync_only_rewrites_replaced_audio(tmp_path, monkeypatch):
+    """대조 화면의 받아쓰기는 '음원이 실제로 바뀐' 클립만 새로 쓴다.
+
+    음원을 교체했는데 화면 데이터가 그대로면, 화면은 옛 음원의 받아쓰기와 새 대본을
+    견주며 '일치'라고 말한다 — 검증 화면이 낼 수 있는 가장 나쁜 거짓 초록이다.
+    반대로 음원이 그대로인데 덮어쓰면, 더 정밀한 기존 받아쓰기를 이 게이트의 small
+    모델 산출물로 갈아치우게 된다. 두 방향 다 여기서 막는다.
+    """
+    ag = _load("_audio_gate", STUDYGROUND / "tools" / "audio_gate.py")
+    if ag is None:
+        pytest.skip("tools/audio_gate.py 를 로드하지 못했다")
+    cfg_dir = tmp_path / "config"
+    cfg_dir.mkdir()
+    cfg = cfg_dir / "audio-check.setX.json"
+    monkeypatch.setattr(ag, "REVIEW_CONFIGS", cfg_dir)
+
+    def rows():
+        return json.loads(cfg.read_text(encoding="utf-8"))["items"]
+
+    cfg.write_text(json.dumps({"set": "setX", "items": [
+        {"id": "a", "path": "x/a.mp3", "text": "hello", "asr": "정밀한 기존 받아쓰기"},
+        {"id": "b", "path": "x/b.mp3", "text": "hello", "asr": ""},
+    ]}, ensure_ascii=False), encoding="utf-8")
+
+    # 1) 음원은 그대로(최초 백필) — 기존 받아쓰기를 살리고 해시만 도장 찍는다
+    out = ag.sync_review_page(_page_sync_report("a", "새 전사", "sha-1"), SG2,
+                              {"a": "ASR 미대조"})
+    assert out["stamped"] == ["a"] and not out["updated"]
+    assert rows()[0]["asr"] == "정밀한 기존 받아쓰기"
+    assert rows()[0]["asrAudioSha256"] == "sha-1"
+
+    # 2) 같은 바이트로 또 돌면 아무것도 건드리지 않는다
+    out = ag.sync_review_page(_page_sync_report("a", "또 다른 전사", "sha-1"), SG2,
+                              {"a": "ASR 미대조"})
+    assert not (out["stamped"] or out["updated"] or out["filled"])
+    assert rows()[0]["asr"] == "정밀한 기존 받아쓰기"
+
+    # 3) 음원이 교체되면 새 전사로 갈아탄다 — 옛 받아쓰기는 이제 거짓이다
+    out = ag.sync_review_page(_page_sync_report("a", "교체된 음원의 전사", "sha-2"), SG2,
+                              {"a": "음원 교체됨"})
+    assert out["updated"] == ["a"]
+    assert rows()[0]["asr"] == "교체된 음원의 전사"
+    assert rows()[0]["asrAudioSha256"] == "sha-2"
+
+    # 4) 받아쓰기가 비어 있던 항목은 음원이 그대로여도 채운다
+    out = ag.sync_review_page(_page_sync_report("b", "처음 채우는 전사", "sha-9"), SG2,
+                              {"b": "ASR 미대조"})
+    assert out["filled"] == ["b"]
+    assert rows()[1]["asr"] == "처음 채우는 전사"
+
+    # 5) 화면에 없는 id 는 조용히 흘리지 않고 보고한다
+    out = ag.sync_review_page(_page_sync_report("zzz", "t", "sha-3"), SG2, {})
+    assert out["unknown"] == ["zzz"]
+
+
 def test_layer3_stt_contrast(request):
     """음원이 '지문 대신 문항 질문문'인 사고는 이 계층만 잡는다.
 

@@ -222,7 +222,22 @@ def list_voices() -> None:
             print(f"  {v['name']:26s} {v.get('ssmlGender',''):8s} {codes}")
 
 
-def main() -> None:
+# ── post-run gate ─────────────────────────────────────────────────────────────
+# 판정 기준은 여기 복사하지 않는다. 진입점 하나(studyground/tools/audio_gate.py)만 부르고,
+# 그쪽이 계층 0~3(매핑·신선도 / 무결성 / 신호 / ASR 대본대조)을 바뀐 음원에만 돌린다.
+GATE = ROOT.parent / "tools" / "audio_gate.py"
+
+
+def run_audio_gate() -> int:
+    if not GATE.is_file():
+        print(f"\n[audio gate] SKIPPED — 게이트를 찾지 못했다: {GATE}")
+        return 0
+    print(f"\n[audio gate] {GATE}")
+    sys.stdout.flush()   # 안 그러면 우리 출력이 자식 출력 뒤로 밀린다
+    return subprocess.run([sys.executable, str(GATE)]).returncode
+
+
+def main() -> int:
     global API_KEY, ENCODING, FORCE
     ap = argparse.ArgumentParser()
     ap.add_argument("--api-key", default=os.getenv("GOOGLE_TTS_API_KEY") or os.getenv("GOOGLE_API_KEY", ""))
@@ -242,7 +257,7 @@ def main() -> None:
         if mode == "none":
             sys.exit("No credentials. Set GOOGLE_APPLICATION_CREDENTIALS or GOOGLE_TTS_API_KEY.")
         list_voices()
-        return
+        return 0
 
     if not VOICES.is_file():
         sys.exit(f"voices manifest not found: {VOICES}")
@@ -259,8 +274,8 @@ def main() -> None:
         for it in items:
             vs = ", ".join(dict.fromkeys(s.get("voice_name", "?") for s in it["segments"]))
             print(f"  - {it['id']:42s} segs={len(it['segments']):>2}  voices=[{vs}]")
-        print("\n[dry-run] no API calls, no ffmpeg.")
-        return
+        print("\n[dry-run] no API calls, no ffmpeg, no audio gate.")
+        return 0
 
     if mode == "none":
         sys.exit(
@@ -298,6 +313,11 @@ def main() -> None:
     INDEX.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\ndone — generated {made}, failed {failed}. backend={_backend}. index → {INDEX}")
 
+    rc = run_audio_gate()
+    if rc:
+        print(f"[audio gate] FAILED (exit {rc}) — 이 음원은 발행하면 안 된다.")
+    return rc or (1 if failed else 0)
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

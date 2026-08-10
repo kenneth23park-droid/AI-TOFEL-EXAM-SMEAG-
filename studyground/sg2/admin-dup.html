@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<!--
+  admin-dup.html — 문항 겹침(중복) 검사 결과.
+
+  node studyground/tools/dup_check.js 가 만든 config/dup-report.js 를 그대로 그린다.
+  이 화면은 판정하지 않는다 — 판정은 전부 검사기에 있고, 여기서는 그 결과를 사람이
+  확인하고 원본 문항으로 건너뛰기 위한 창구다.
+
+  겹침 한 줄을 누르면 두 문항을 나란히 펼치고, 실제로 일치한 부분을 노란색으로 칠한다.
+  "이 문항 열기"는 admin-questions.html 의 해당 문항으로 바로 보낸다.
+
+  SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Overlap check (admin) · SMEAG StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:16px 0 12px; }
+  .bar input[type=search] { flex:1; min-width:190px; font:inherit; font-size:12.5px; padding:9px 12px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .seg { display:inline-flex; border:1px solid var(--line-2); border-radius:9px; overflow:hidden; }
+  .seg button { font:inherit; font-size:12px; font-weight:750; padding:8px 12px; border:0; cursor:pointer;
+    background:var(--paper,#fff); color:var(--ink-2); }
+  .seg button + button { border-left:1px solid var(--line-2); }
+  .seg button.on { background:var(--brand); color:#fff; }
+
+  /* 최상단 판정 배너 — 이 페이지에서 제일 먼저 읽혀야 하는 한 문장. */
+  .verdict { border-radius:14px; padding:15px 18px; margin:4px 0 16px; border:1px solid var(--line);
+    background:var(--card); display:flex; gap:13px; align-items:flex-start; }
+  .verdict .ico { font-size:22px; line-height:1.2; flex:none; }
+  .verdict b { display:block; font-size:15.5px; margin-bottom:3px; }
+  .verdict p { margin:0; font-size:12.5px; color:var(--muted); line-height:1.6; }
+  .verdict.bad  { border-color:#e0796a; background:var(--peach,#fde5da); }
+  .verdict.bad b { color:#a8331a; }
+  .verdict.warn { border-color:#e6c15a; background:#fdf6e3; }
+  .verdict.warn b { color:#8a6212; }
+  .verdict.ok   { border-color:#8fc6a3; background:#eef8f1; }
+  .verdict.ok b { color:#1f6b3d; }
+
+  .prow { background:var(--card); border:1px solid var(--line); border-radius:13px; margin-bottom:10px; }
+  .prow.sev-high  { border-color:#e0796a; }
+  .prow.sev-watch { border-color:#e6c15a; }
+  .phead { display:flex; align-items:center; gap:9px; flex-wrap:wrap; cursor:pointer; padding:13px 15px; }
+  .phead .ids { font-size:13px; font-weight:800; }
+  .phead .ids .arrow { color:var(--muted); margin:0 5px; font-weight:600; }
+  .phead .why { flex:1; min-width:170px; font-size:12px; color:var(--muted);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .phead .chev { flex:none; color:var(--muted); font-size:12px; transition:transform .15s; }
+  .prow.open .phead .chev { transform:rotate(90deg); }
+
+  .tagx { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px;
+    text-transform:uppercase; letter-spacing:.04em; flex:none; }
+  .tagx.high  { background:#f7d3cb; color:#a8331a; }
+  .tagx.watch { background:#faeec4; color:#8a6212; }
+  .tagx.info  { background:var(--cream-2); color:var(--muted); }
+  .tagx.sec   { background:var(--cream-2); color:var(--muted); }
+  .tagx.cross { background:#dde8f7; color:#28527f; }
+
+  .pbody { display:none; border-top:1px solid var(--line); padding:14px 15px 16px; }
+  .prow.open .pbody { display:block; }
+
+  .reasons { margin:0 0 13px; padding:10px 12px; background:var(--cream-2); border-radius:9px; }
+  .reasons li { font-size:12.5px; line-height:1.65; color:var(--ink-2); margin-left:16px; }
+  .metrics { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:13px; }
+  .metrics span { font-size:11px; font-weight:750; color:var(--muted); background:var(--cream-2);
+    border-radius:7px; padding:4px 8px; }
+
+  .sides { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px) { .sides { grid-template-columns:1fr; } }
+  .side { border:1px solid var(--line-2); border-radius:11px; padding:11px 13px; background:var(--paper,#fff); }
+  .side h4 { margin:0 0 3px; font-size:12.5px; font-weight:800; }
+  .side .loc { font-size:11px; color:var(--muted); margin-bottom:9px; }
+  .side .txt { font-size:12.5px; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
+  .side .txt mark { background:#ffe89a; color:inherit; border-radius:3px; padding:0 1px; }
+  .side ol.ch { margin:9px 0 0 18px; padding:0; }
+  .side ol.ch li { font-size:12.5px; line-height:1.65; }
+  .side ol.ch li.same { background:#ffe89a; border-radius:4px; padding:0 3px; }
+  .side .ans { margin-top:9px; font-size:12px; font-weight:750; color:var(--brand-ink,#a8331a); }
+  .side .framed { margin-top:9px; font-size:11px; color:var(--dim); line-height:1.55; }
+  .side .acts { margin-top:11px; }
+
+  .empty { text-align:center; color:var(--muted); font-size:13px; padding:34px 0; }
+  .gate { max-width:520px; margin:60px auto; text-align:center; }
+  .note { font-size:11.5px; color:var(--dim); line-height:1.6; margin-top:18px; }
+  code { font-size:11.5px; background:var(--cream-2); border-radius:5px; padding:1px 5px; }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap nav">
+  <a class="brandmark" href="index.html">SMEAG <span>StudyGround</span></a>
+</div></header>
+
+<main class="wrap" id="main" hidden>
+  <div class="page-h" style="padding-top:26px">
+    <span class="pill" style="margin-bottom:8px">Admin · Overlap check</span>
+    <h1 style="font-size:clamp(26px,4vw,40px)"><span data-en>Overlap check</span><span data-ko>겹침 검사</span></h1>
+    <p class="sub"><span data-en>Every item and passage in every content pack, compared against every other. Click a row to see both items side by side with the matching text highlighted.</span>
+      <span data-ko>모든 SET 의 문항·지문을 서로 대조한 결과입니다. 한 줄을 누르면 두 문항을 나란히 펼치고 실제로 일치한 부분을 칠해 보여 줍니다.</span></p>
+  </div>
+
+  <div id="verdict"></div>
+
+  <div class="bar">
+    <span class="seg" id="sevseg"></span>
+    <span class="seg" id="scopeseg"></span>
+    <input type="search" id="q" placeholder="Filter by id, set or text…">
+  </div>
+
+  <div id="host"></div>
+
+  <p class="note" id="meta"></p>
+</main>
+
+<div class="wrap gate" id="gate">
+  <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
+  <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+</div>
+
+<!-- 리포트는 fetch 가 아니라 <script src> 로 싣는다 — file:// 로 열어도 동작해야 한다. -->
+<script src="config/dup-report.js"></script>
+<script src="assets/admin-session.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var A = window.SG_ADMIN;
+  var R = window.SG_DUP_REPORT || null;
+  var host = document.getElementById('host');
+  var filterSev = 'actionable', filterScope = 'all', filterQ = '';
+
+  function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
+
+  /* ── 일치 구간 하이라이트 ───────────────────────────────────────────────
+   * 검사기가 쓴 것과 같은 정규화·shingle 규칙으로 두 쪽의 공통 4-gram 을 구하고,
+   * 그 4-gram 에 속한 토큰만 칠한다. 임계값 숫자만 보여 주고 "어디가 같은지"를
+   * 안 보여 주면 사람이 판정을 되짚을 수 없다. */
+  var K = (R && R.thresholds && R.thresholds.shingleK) || 4;
+
+  function norm(s) {
+    return String(s == null ? '' : s)
+      .replace(/[‘’ʼ]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, '-')
+      .replace(/\{\{\s*[A-Za-z0-9]+\s*\}\}/g, ' ')
+      .toLowerCase().replace(/[^a-z0-9'\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  /** 원문을 토큰으로 쪼개되 원문 조각(공백·문장부호 포함)을 같이 들고 간다. */
+  function split(text) {
+    var out = [], re = /[A-Za-z0-9’']+/g, m, last = 0;
+    while ((m = re.exec(text)) !== null) {
+      if (m.index > last) out.push({ raw: text.slice(last, m.index), tok: null });
+      out.push({ raw: m[0], tok: norm(m[0]) });
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) out.push({ raw: text.slice(last), tok: null });
+    return out;
+  }
+  function shingleSet(toks) {
+    var s = Object.create(null);
+    if (toks.length < K) { if (toks.length) s[toks.join(' ')] = 1; return s; }
+    for (var i = 0; i + K <= toks.length; i++) s[toks.slice(i, i + K).join(' ')] = 1;
+    return s;
+  }
+  /** a 의 토큰 중 b 와 공유하는 4-gram 안에 든 것만 표시해 HTML 로 돌려준다. */
+  function highlight(aText, bText) {
+    var pa = split(aText), pb = split(bText);
+    var ta = pa.filter(function (p) { return p.tok; });
+    var tb = pb.filter(function (p) { return p.tok; }).map(function (p) { return p.tok; });
+    var bs = shingleSet(tb);
+    var hit = new Array(ta.length).fill(false);
+    if (ta.length >= K) {
+      for (var i = 0; i + K <= ta.length; i++) {
+        var key = ta.slice(i, i + K).map(function (p) { return p.tok; }).join(' ');
+        if (bs[key]) for (var j = i; j < i + K; j++) hit[j] = true;
+      }
+    }
+    var ti = 0, out = '', open = false;
+    pa.forEach(function (p) {
+      if (!p.tok) { if (open) { out += '</mark>'; open = false; } out += esc(p.raw); return; }
+      var on = hit[ti++];
+      if (on && !open) { out += '<mark>'; open = true; }
+      if (!on && open) { out += '</mark>'; open = false; }
+      out += esc(p.raw);
+    });
+    if (open) out += '</mark>';
+    return out;
+  }
+
+  function sideHtml(u, other, label) {
+    var otherChoices = (other.choices || []).map(norm);
+    var ch = (u.choices || []).map(function (c) {
+      var same = otherChoices.indexOf(norm(c)) >= 0;
+      return '<li class="' + (same ? 'same' : '') + '">' + esc(c) + '</li>';
+    }).join('');
+    var framed = (u.framedOut || []).length
+      ? '<div class="framed"><span data-en>Excluded as type boilerplate: </span><span data-ko>유형 정형문으로 제외: </span>' +
+        u.framedOut.map(function (f) { return esc(f.line) + ' (' + f.df + ')'; }).join(' · ') + '</div>'
+      : '';
+    return '<div class="side">' +
+      '<h4>' + esc(label) + ' — ' + esc(u.uid) + '</h4>' +
+      '<div class="loc">' + esc(u.set + ' · ' + u.sectionLabel + ' · ' + u.moduleLabel + ' · ' + u.blockKind) +
+        (u.qkind ? ' · ' + esc(u.qkind) : '') + '</div>' +
+      '<div class="txt">' + highlight(u.text, other.text) + '</div>' +
+      (ch ? '<ol class="ch">' + ch + '</ol>' : '') +
+      (u.answerText ? '<div class="ans"><span data-en>Answer: </span><span data-ko>정답: </span>' + esc(u.answerText) + '</div>' : '') +
+      framed +
+      '<div class="acts"><a class="btn ghost sm" href="' + esc(u.href) + '">' +
+        '<span data-en>Open this item</span><span data-ko>이 문항 열기</span></a></div>' +
+    '</div>';
+  }
+
+  function rowHtml(p, i) {
+    var m = p.metrics;
+    var chips = [
+      '4-gram ' + (m.jaccard * 100).toFixed(0) + '%',
+      'containment ' + (m.containment * 100).toFixed(0) + '%',
+      '<span data-en>longest run</span><span data-ko>최장연속</span> ' + m.longestRun,
+      '<span data-en>shared choices</span><span data-ko>선택지 일치</span> ' + m.sharedChoices
+    ].map(function (t) { return '<span>' + t + '</span>'; }).join('');
+
+    var hay = (p.key + ' ' + p.a.text + ' ' + p.b.text + ' ' + p.a.set + ' ' + p.b.set).toLowerCase();
+
+    return '<div class="prow sev-' + p.severity + '" data-i="' + i + '" data-sev="' + p.severity +
+        '" data-scope="' + p.scope + '" data-search="' + esc(hay) + '">' +
+      '<div class="phead">' +
+        '<span class="tagx ' + p.severity + '">' + p.severity + '</span>' +
+        (p.scope === 'cross' ? '<span class="tagx cross"><span data-en>across sets</span><span data-ko>SET 간</span></span>'
+                             : '<span class="tagx sec"><span data-en>same set</span><span data-ko>같은 SET</span></span>') +
+        '<span class="ids">' + esc(p.a.uid) + '<span class="arrow">↔</span>' + esc(p.b.uid) + '</span>' +
+        '<span class="why">' + esc(p.reasons[0] || '') + '</span>' +
+        '<span class="chev">▶</span>' +
+      '</div>' +
+      '<div class="pbody">' +
+        '<ul class="reasons">' + p.reasons.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' +
+        '<div class="metrics">' + chips + '</div>' +
+        '<div class="sides">' + sideHtml(p.a, p.b, 'A') + sideHtml(p.b, p.a, 'B') + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function verdict() {
+    var c = R.counts, el = document.getElementById('verdict');
+    var cls, ico, en, ko;
+    if (c.high) {
+      cls = 'bad'; ico = '⛔';
+      en = 'Overlap found — ' + c.high + ' item(s) match existing content.';
+      ko = '기존과 같은 문항이 있습니다 — ' + c.high + '건.';
+    } else if (c.watch) {
+      cls = 'warn'; ico = '⚠️';
+      en = 'No confirmed overlap. ' + c.watch + ' pair(s) need a human look.';
+      ko = '확실한 겹침은 없습니다. 사람이 봐야 할 것 ' + c.watch + '건.';
+    } else {
+      cls = 'ok'; ico = '✅';
+      en = 'No overlapping items.';
+      ko = '겹치는 문항이 없습니다.';
+    }
+    var tail_en = ' Compared ' + R.unitCount + ' units across ' + R.packs.length + ' packs' +
+      (c.allowlisted ? '; ' + c.allowlisted + ' reviewed and allowed.' : '.');
+    var tail_ko = ' 팩 ' + R.packs.length + '개의 단위 ' + R.unitCount + '개를 대조했습니다' +
+      (c.allowlisted ? '. 사람이 보고 허용한 것 ' + c.allowlisted + '건은 등급을 내렸습니다(dup-allowlist.json).' : '.');
+    el.className = 'verdict ' + cls;
+    el.innerHTML = '<span class="ico">' + ico + '</span><div><b><span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span></b>' +
+      '<p><span data-en>' + esc(tail_en) + '</span><span data-ko>' + esc(tail_ko) + '</span></p></div>';
+  }
+
+  function applyFilter() {
+    var rows = host.querySelectorAll('.prow'), shown = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i], sev = r.getAttribute('data-sev');
+      var okSev = filterSev === 'all' ? true
+                : filterSev === 'actionable' ? (sev === 'high' || sev === 'watch')
+                : sev === filterSev;
+      var okScope = filterScope === 'all' || r.getAttribute('data-scope') === filterScope;
+      var okQ = !filterQ || r.getAttribute('data-search').indexOf(filterQ) >= 0;
+      var on = okSev && okScope && okQ;
+      r.style.display = on ? '' : 'none';
+      if (on) shown++;
+    }
+    var e = host.querySelector('.empty');
+    if (e) e.remove();
+    if (!shown) {
+      var d = document.createElement('div');
+      d.className = 'empty';
+      d.innerHTML = '<span data-en>Nothing matches this filter.</span><span data-ko>이 조건에 해당하는 겹침이 없습니다.</span>';
+      host.appendChild(d);
+    }
+    if (window.SG_I18N && SG_I18N.apply) SG_I18N.apply();
+  }
+
+  function render() {
+    if (!R) {
+      host.innerHTML = '<div class="empty"><span data-en>No report found. Run <code>node studyground/tools/dup_check.js</code> first.</span>' +
+        '<span data-ko>리포트가 없습니다. 먼저 <code>node studyground/tools/dup_check.js</code> 를 실행하세요.</span></div>';
+      document.getElementById('verdict').innerHTML = '';
+      return;
+    }
+    verdict();
+
+    var c = R.counts;
+    document.getElementById('sevseg').innerHTML =
+      [['actionable', '처리 필요 ' + (c.high + c.watch)], ['high', 'high ' + c.high],
+       ['watch', 'watch ' + c.watch], ['info', 'info ' + c.info], ['all', '전체 ' + R.pairs.length]]
+      .map(function (s) { return '<button data-sev="' + s[0] + '"' + (s[0] === filterSev ? ' class="on"' : '') + '>' + s[1] + '</button>'; }).join('');
+    document.getElementById('scopeseg').innerHTML =
+      [['all', '전체'], ['cross', 'SET 간'], ['intra', '같은 SET']]
+      .map(function (s) { return '<button data-scope="' + s[0] + '"' + (s[0] === filterScope ? ' class="on"' : '') + '>' + s[1] + '</button>'; }).join('');
+
+    host.innerHTML = R.pairs.map(rowHtml).join('') ||
+      '<div class="empty"><span data-en>No overlaps at all.</span><span data-ko>겹침이 전혀 없습니다.</span></div>';
+
+    document.getElementById('meta').innerHTML =
+      esc(R.packs.map(function (p) { return p.code + '(' + p.items + '문항/' + p.texts + '지문/' + p.scripts + '전사)'; }).join(' · ')) +
+      ' · <span data-en>candidate pairs</span><span data-ko>후보 쌍</span> ' + R.candidatePairs +
+      '<br>' + esc(R.coverage.note) + '<br>' + esc(R.coverage.frameNote) +
+      '<br><span data-en>Regenerate: </span><span data-ko>다시 만들기: </span><code>node studyground/tools/dup_check.js</code>';
+
+    applyFilter();
+  }
+
+  host.addEventListener('click', function (e) {
+    if (e.target.closest('a')) return;                  // "이 문항 열기" 는 그대로 통과
+    var head = e.target.closest('.phead'); if (!head) return;
+    head.parentNode.classList.toggle('open');
+  });
+  document.getElementById('sevseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sev]'); if (!b) return;
+    filterSev = b.getAttribute('data-sev'); render();
+  });
+  document.getElementById('scopeseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-scope]'); if (!b) return;
+    filterScope = b.getAttribute('data-scope'); render();
+  });
+  document.getElementById('q').addEventListener('input', function () {
+    filterQ = this.value.trim().toLowerCase(); applyFilter();
+  });
+
+  function open() {
+    document.getElementById('gate').hidden = true;
+    document.getElementById('main').hidden = false;
+    render();
+    /* 다른 화면에서 ?pair=<key> 로 건너뛰어 온 경우 그 줄만 펼쳐 준다. */
+    var want = new URLSearchParams(location.search).get('pair');
+    if (!want) return;
+    for (var i = 0; i < R.pairs.length; i++) {
+      if (R.pairs[i].key === want) {
+        var row = host.querySelector('.prow[data-i="' + i + '"]');
+        if (row) { row.classList.add('open'); row.scrollIntoView({ block: 'center' }); }
+        break;
+      }
+    }
+  }
+  document.getElementById('signin').addEventListener('click', function () { A.openLogin(null, open); });
+  if (A.can('*') || A.allowedSets().length) open(); else A.openLogin(null, open);
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

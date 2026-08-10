@@ -79,7 +79,8 @@ def test_perfect_repetition_scores_at_the_ceiling_but_never_full_marks(reference
 def test_normalisation_matches_autoscore_philosophy(said):
     """대소문자·공백은 무시한다(autoscore.normalize_text 와 같은 철학).
 
-    구두점은 원문 쪽에서만 떨어뜨린다 — 전사기는 물음표를 거의 찍지 않는다.
+    구두점은 원문·전사 양쪽에서 똑같이 떨어뜨린다 — 전사기는 물음표를 거의 찍지 않으므로
+    한쪽만 떨어뜨리면 잘 따라 말한 답이 구두점 때문에 깎인다.
     """
     assert _scores(_repeat(said)) == [CEILING, CEILING]
 
