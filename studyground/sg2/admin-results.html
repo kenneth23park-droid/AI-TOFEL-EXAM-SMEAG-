@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Student results · StudyGround</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
+    <nav class="nav-center">
+      <a href="tests.html">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
+      <a href="dashboard.html">📊 <span data-en>My StudyGround</span><span data-ko>내 성적</span></a>
+    </nav>
+    <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
+      <a class="btn ghost sm" href="login.html"><span data-en>Login</span><span data-ko>로그인</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:60px">
+  <div class="page-h mt-24" style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+    <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Student results</span><span data-ko>학생 응시 결과</span></h1>
+    <span class="chip" id="who" style="margin-bottom:8px"></span>
+    <button class="btn ghost sm" id="csv" style="margin-left:auto"><span data-en>Download CSV</span><span data-ko>CSV 내려받기</span></button>
+  </div>
+
+  <div class="card mt-16 hide" id="notice"></div>
+
+  <div class="card mt-16 hide" id="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <input id="q" placeholder="Name or student ID" style="flex:1;min-width:220px;padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:var(--cream)">
+    <select id="set" style="padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:#fff"></select>
+    <span class="muted" style="font-size:12.5px" id="count"></span>
+  </div>
+
+  <div class="card mt-16 hide" id="table-card" style="padding:0;overflow:hidden">
+    <div class="table-wrap" style="overflow-x:auto"><table class="rv-table">
+      <thead><tr>
+        <th><span data-en>Date</span><span data-ko>날짜</span></th>
+        <th><span data-en>Student</span><span data-ko>학생</span></th>
+        <th><span data-en>Test</span><span data-ko>시험</span></th>
+        <th><span data-en>Sections</span><span data-ko>영역</span></th>
+        <th style="text-align:right"><span data-en>Score</span><span data-ko>점수</span></th>
+        <th style="width:110px"></th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap foot-in">
+  <small class="muted">© SMEAG StudyGround · Student results</small>
+</div></footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script src="assets/sg-results.js"></script>
+<script>
+/* 선생님·관리자용 전체 응시 목록. 한 줄이 한 응시이고, 리뷰 버튼이 그 응시의
+ * 문항별 채점(review.html)으로 간다.
+ *
+ * 권한의 정본은 Supabase RLS(sg_is_staff) 다 — 학생이 이 주소를 직접 열어도
+ * 서버가 자기 것 말고는 돌려주지 않는다. 아래 role 확인은 안내 문구용이다. */
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var LAB = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
+  var ALL = [];
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function bi(en, ko) { return '<span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span>'; }
+  function notice(en, ko) { $('notice').innerHTML = '<p>' + bi(en, ko) + '</p>'; $('notice').classList.remove('hide'); }
+  function when(iso) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d)) return '—';
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function nameOf(r) { return (r.student && (r.student.name || r.student.email)) || '—'; }
+  function idOf(r) { return (r.student && r.student.student_id) || ''; }
+
+  function chips(r) {
+    var by = r.by_section || {};
+    return Object.keys(LAB).filter(function (s) { return by[s]; }).map(function (s) {
+      var v = by[s];
+      return '<span class="chip">' + LAB[s] + ' ' + (v.total ? v.score + '/' + v.total : '—') + '</span>';
+    }).join(' ') || '<span class="muted">—</span>';
+  }
+
+  function shown() {
+    var q = ($('q').value || '').trim().toLowerCase();
+    var set = $('set').value;
+    return ALL.filter(function (r) {
+      if (set && r.set_code !== set) return false;
+      if (!q) return true;
+      return (nameOf(r) + ' ' + idOf(r)).toLowerCase().indexOf(q) >= 0;
+    });
+  }
+
+  function paint() {
+    var list = shown();
+    $('count').textContent = list.length + ' / ' + ALL.length;
+    $('rows').innerHTML = list.length ? list.map(function (r) {
+      return '<tr>' +
+        '<td>' + when(r.submitted_at) + '</td>' +
+        '<td><b>' + esc(nameOf(r)) + '</b>' +
+          (idOf(r) ? '<div class="muted" style="font-size:12px">' + esc(idOf(r)) + '</div>' : '') + '</td>' +
+        '<td><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
+        '<td><span class="chips" style="margin:0">' + chips(r) + '</span></td>' +
+        '<td style="text-align:right;font-weight:800">' + r.score + ' / ' + r.total + '</td>' +
+        '<td><a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) +
+          '&owner=' + encodeURIComponent(r.owner) + '">' + bi('Review', '리뷰') + '</a></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="6" class="muted" style="padding:24px;text-align:center">' +
+      bi('No results match.', '해당하는 응시가 없습니다.') + '</td></tr>';
+  }
+
+  function fillSets() {
+    var seen = {}, opts = '<option value="">' + 'All sets' + '</option>';
+    ALL.forEach(function (r) {
+      if (!r.set_code || seen[r.set_code]) return;
+      seen[r.set_code] = true;
+      opts += '<option value="' + esc(r.set_code) + '">' + esc(r.set_code) + '</option>';
+    });
+    $('set').innerHTML = opts;
+  }
+
+  function csv() {
+    var head = ['submitted_at', 'name', 'student_id', 'set', 'score', 'total', 'percent', 'session'];
+    var lines = [head.join(',')];
+    shown().forEach(function (r) {
+      lines.push([r.submitted_at || '', nameOf(r), idOf(r), r.set_code || '',
+                  r.score, r.total, r.percent, r.session]
+        .map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','));
+    });
+    var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'studyground-results.csv';
+    a.click();
+  }
+
+  function load() {
+    SG_RESULTS.listAll().then(function (rows) {
+      ALL = rows || [];
+      if (!ALL.length) {
+        notice('No submitted test has been uploaded yet.', '아직 올라온 응시 결과가 없습니다.');
+        return;
+      }
+      fillSets();
+      $('filters').classList.remove('hide');
+      $('table-card').classList.remove('hide');
+      paint();
+      $('q').oninput = paint;
+      $('set').onchange = paint;
+    }).catch(function () {
+      notice('Could not load results.', '결과를 불러오지 못했습니다.');
+    });
+  }
+
+  function boot() {
+    $('csv').onclick = csv;
+    if (!window.SG_AUTH || !SG_AUTH.user()) {
+      SG_AUTH.require();
+      return;
+    }
+    SG_AUTH.role().then(function (role) {
+      $('who').textContent = role;
+      if (role !== 'teacher' && role !== 'admin') {
+        notice('This page is for teachers and administrators.', '이 화면은 선생님·관리자 전용입니다.');
+        return;
+      }
+      load();
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

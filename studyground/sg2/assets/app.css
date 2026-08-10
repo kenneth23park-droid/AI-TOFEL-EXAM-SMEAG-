@@ -76,8 +76,8 @@ button { font-family: inherit; cursor: pointer; }
 .nav-center a:hover { background: var(--cream-2); }
 .nav-center a.on { background: var(--ink); color: #fff; }
 .nav-right { display: flex; align-items: center; gap: 8px; }
-/* 메뉴 축소: 모의고사 · 로그인만 노출 (되돌리려면 이 블록만 삭제) */
-.nav-center a:not([href="tests.html"]),
+/* 메뉴 축소: 모의고사 · 내 성적 · 로그인만 노출 (되돌리려면 이 블록만 삭제) */
+.nav-center a:not([href="tests.html"]):not([href="dashboard.html"]),
 .nav-right a:not([href="tests.html"]):not([href="login.html"]) { display: none; }
 .lang {
   display: inline-flex; border: 1px solid var(--line-2); border-radius: 999px; overflow: hidden;
@@ -276,6 +276,35 @@ h2.title { font-size: clamp(24px, 3vw, 34px); font-weight: 820; letter-spacing: 
 .auth-alt a { color: var(--brand); font-weight: 750; }
 .divider { display: flex; align-items: center; gap: 12px; color: var(--dim); font-size: 12px; margin: 18px 0; }
 .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+/* ── 채점 리뷰 (review.html · dashboard.html · admin-results.html) ──────
+   한 화면에서 답이 맞았는지를 눈으로만 훑을 수 있어야 한다. 그래서 색은
+   맞음(초록)·틀림(빨강)·미채점(회색) 셋뿐이고, 그 밖에는 쓰지 않는다. */
+.rv-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.rv-big { font-size: 40px; font-weight: 850; letter-spacing: -.03em; line-height: 1; }
+.rv-sec { display: flex; align-items: baseline; gap: 8px; }
+.rv-bar { height: 6px; border-radius: 999px; background: var(--cream-2); overflow: hidden; margin-top: 8px; }
+.rv-bar i { display: block; height: 100%; background: var(--brand); }
+
+.rv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rv-table th, .rv-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.rv-table th { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.rv-table tbody tr:hover { background: var(--cream); }
+.rv-no { width: 48px; font-weight: 800; color: var(--muted); }
+.rv-ans { font-weight: 700; }
+.rv-open { white-space: pre-wrap; font-size: 12.5px; color: var(--ink-2); max-width: 560px; }
+
+.rv-mark { display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 999px; font-size: 12px; font-weight: 850; }
+.rv-mark.ok { background: var(--ok-soft); color: var(--ok); }
+.rv-mark.no { background: var(--brand-soft); color: var(--brand-ink); }
+.rv-mark.na { background: var(--cream-2); color: var(--dim); }
+tr.is-wrong td { background: rgba(232,72,31,.045); }
+
+.rv-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 10px; }
+.rv-tabs button { border: 1px solid var(--line-2); background: #fff; color: var(--ink-2);
+  border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 750; }
+.rv-tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 
 /* utilities */
 .center { text-align: center; }

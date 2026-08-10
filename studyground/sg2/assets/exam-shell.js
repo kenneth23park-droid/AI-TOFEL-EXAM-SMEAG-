@@ -99,7 +99,10 @@ window.SG_RUNTIME = (function () {
                   'assets/exam-render-writing.js',
                   'assets/exam-render-speaking.js',
                   /* 관리자 전용 화면 이동·문항 편집 패널. 로그인 전에는 아무 것도 그리지 않는다. */
-                  'assets/exam-admin-nav.js'];
+                  'assets/exam-admin-nav.js',
+                  /* 제출 직후 채점·결과 업로드용. 없으면 제출은 그대로 끝나고 리뷰만 안 뜬다. */
+                  'assets/sg-auth.js',
+                  'assets/sg-results.js'];
 
   function loadOptional(list, done) {
     var i = 0;
@@ -620,6 +623,75 @@ window.SG_RUNTIME = (function () {
     });
   }
 
+  /* ── 제출 직후 ──────────────────────────────────────────────
+   * 셸이 하는 일은 셋이다. (1) 로컬 기록에 제출 시각을 박는다 — 이게 없으면
+   * 성적표(sg-results.js)가 이 응시를 "아직 시험 중"으로 보고 건너뛴다.
+   * (2) 로그인해 있으면 채점 결과 사본을 Supabase 로 올린다. (3) 리뷰로 가는
+   * 문을 그린다. 셋 다 실패해도 응시 기록 자체는 기기에 그대로 남는다. */
+  function finishScreen(session) {
+    var mount = document.getElementById('screen-mount');
+    if (!mount) return;
+
+    // 끝난 시험에 Continue·타이머가 남아 있으면 안 된다.
+    ['btn-advance', 'btn-review', 'btn-back', 'exam-time', 'exam-subbar'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.hidden = true;
+    });
+    var scored = null;
+    try {
+      if (window.SG_RESULTS) scored = SG_RESULTS.score(SG_RESULTS.pack(query('testId') || SET_ID), STORE.answers());
+    } catch (e) { scored = null; }
+
+    var line = scored && scored.total
+      ? scored.score + ' / ' + scored.total + ' (' + scored.percent + '%)'
+      : '';
+
+    mount.innerHTML =
+      '<div class="exam-done" style="max-width:640px;margin:64px auto;text-align:center">' +
+        '<h2 style="font-size:26px;margin:0 0 10px">' +
+          '<span data-en>Your test has been submitted.</span><span data-ko>제출이 완료되었습니다.</span></h2>' +
+        (line ? '<p style="font-size:34px;font-weight:850;margin:18px 0">' + line + '</p>' +
+                '<p style="opacity:.7;font-size:13px;margin:0 0 6px">' +
+                  '<span data-en>Auto-scored questions only. Writing and Speaking are reviewed by a teacher.</span>' +
+                  '<span data-ko>자동 채점 문항 기준입니다. 라이팅·스피킹은 선생님이 확인합니다.</span></p>'
+              : '<p style="opacity:.7"><span data-en>Your answers are saved.</span><span data-ko>답안이 저장되었습니다.</span></p>') +
+        '<p id="done-sync" style="opacity:.6;font-size:12px;margin:14px 0"></p>' +
+        '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">' +
+          '<a class="exam-btn primary" href="review.html?session=' + encodeURIComponent(session) + '">' +
+            '<span data-en>Review my answers</span><span data-ko>내 답안 리뷰</span></a>' +
+          '<a class="exam-btn" href="dashboard.html">' +
+            '<span data-en>My results</span><span data-ko>내 성적</span></a>' +
+        '</div>' +
+      '</div>';
+
+    var note = document.getElementById('done-sync');
+    function say(en, ko) {
+      if (note) note.innerHTML = '<span data-en>' + en + '</span><span data-ko>' + ko + '</span>';
+    }
+    if (!window.SG_RESULTS || !window.SG_AUTH || !SG_AUTH.user()) {
+      say('Saved on this device.', '이 기기에 저장되었습니다.');
+      return;
+    }
+    say('Uploading…', '업로드 중…');
+    SG_RESULTS.push().then(function (r) {
+      if (r && r.failed) say('Saved on this device. It will upload when you are online.',
+                             '이 기기에 저장했습니다. 온라인이 되면 올라갑니다.');
+      else say('Saved to your account.', '계정에 저장되었습니다.');
+    }).catch(function () {
+      say('Saved on this device.', '이 기기에 저장되었습니다.');
+    });
+  }
+
+  function finishUp(session) {
+    if (machine && machine.status() !== 'submitted') {
+      try { machine.markSubmitted(); } catch (e) { STORE.patchMeta({ submittedAt: Date.now() }); }
+    } else {
+      STORE.patchMeta({ submittedAt: Date.now() });
+    }
+    try { STORE.flushAnswers(); } catch (e) {}
+    finishScreen(session);
+  }
+
   function startRun(url, session, contentHash, timingHash, resume, section) {
     var meta = STORE.meta();
     if (!meta || !meta.session) {
@@ -665,9 +737,15 @@ window.SG_RUNTIME = (function () {
       syncRoutePath(sc);
       closeVolume();
       machine.syncHash();
-      if (!sc && machine.status() === 'submitting') {
-        // 제출 단계는 Epic 3(exam-sync.js) 이 담당한다. 셸은 상태만 남긴다.
+      /* 제출은 화면이 사라지는 전이다(to === null). 엔진은 제출해도 커서를 옮기지
+         않으므로 machine.current() 는 마지막 화면 그대로다 — 여기서 화면이 아니라
+         전이의 도착지를 봐야 하는 이유이고, to 를 안 보던 동안은 이 가지가 한 번도
+         돌지 않아 제출 기록이 남지 않았다. */
+      if (!tr.to && machine.status() === 'submitting') {
+        // 서버 전송은 Epic 3(exam-sync.js) 의 아웃박스가 담당한다.
         STORE.enqueue('submit', { session: session, at: Date.now() });
+        // 채점·결과 저장·리뷰 안내는 여기서 끝낸다 — 서버가 없어도 학생은 결과를 본다.
+        finishUp(session);
       }
     });
 

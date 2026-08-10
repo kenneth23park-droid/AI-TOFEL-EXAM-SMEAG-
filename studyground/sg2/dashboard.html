@@ -36,35 +36,43 @@
 <main class="wrap">
   <div class="page-h"><h1 style="font-size:clamp(28px,4vw,44px)"><span data-en>My StudyGround</span><span data-ko>내 StudyGround</span></h1></div>
 
-  <!-- score summary -->
-  <div class="grid cols-4 mt-16">
-    <div class="card"><div class="muted" style="font-size:12px" data-en>Reading</div><div class="muted" style="font-size:12px" data-ko>리딩</div><div style="font-size:30px;font-weight:850;color:var(--brand)">6.0</div><div class="muted" style="font-size:12px" data-en>best band</div><div class="muted" style="font-size:12px" data-ko>최고 밴드</div></div>
-    <div class="card"><div class="muted" style="font-size:12px" data-en>Listening</div><div class="muted" style="font-size:12px" data-ko>리스닝</div><div style="font-size:30px;font-weight:850;color:var(--brand)">5.5</div><div class="muted" style="font-size:12px" data-en>best band</div><div class="muted" style="font-size:12px" data-ko>최고 밴드</div></div>
-    <div class="card"><div class="muted" style="font-size:12px" data-en>Writing</div><div class="muted" style="font-size:12px" data-ko>라이팅</div><div style="font-size:30px;font-weight:850;color:var(--brand)">6.0</div><div class="muted" style="font-size:12px" data-en>best band</div><div class="muted" style="font-size:12px" data-ko>최고 밴드</div></div>
-    <div class="card"><div class="muted" style="font-size:12px" data-en>Speaking</div><div class="muted" style="font-size:12px" data-ko>스피킹</div><div style="font-size:30px;font-weight:850;color:var(--brand)">5.5</div><div class="muted" style="font-size:12px" data-en>best band</div><div class="muted" style="font-size:12px" data-ko>최고 밴드</div></div>
+  <!-- 로그인한 사람이 누구인지 화면에 그대로 보여준다 (sg-auth.js 가 채운다) -->
+  <div class="card mt-16" id="acct" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div id="acct-body" class="muted" style="font-size:13px">…</div>
+    <div style="margin-left:auto;display:flex;gap:8px" id="acct-act"></div>
   </div>
 
+  <!-- 선생님·관리자로 로그인했으면 전체 학생 화면으로 가는 문을 연다 -->
+  <div class="card mt-16 hide" id="staff" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div><b><span data-en>You are signed in as staff.</span><span data-ko>선생님·관리자로 로그인했습니다.</span></b>
+      <div class="muted" style="font-size:12.5px"><span data-en>You can review every student's graded test.</span><span data-ko>모든 학생의 채점 결과를 볼 수 있습니다.</span></div></div>
+    <a class="btn brand sm" href="admin-results.html" style="margin-left:auto"><span data-en>All students' results</span><span data-ko>전체 학생 결과</span></a>
+  </div>
+
+  <!-- 영역별 최고 정답률 (자동 채점 영역만) -->
+  <div class="grid cols-4 mt-16" id="bests"></div>
+
   <!-- CTA when empty -->
-  <div class="empty-hero mt-24">
+  <div class="empty-hero mt-24 hide" id="empty">
     <div class="pill" style="margin:0 auto"><span data-en>Get started</span><span data-ko>시작하기</span></div>
     <h2 class="title mt-16"><span data-en>Start your TOEFL journey today</span><span data-ko>오늘 TOEFL 여정을 시작하세요</span></h2>
-    <p class="muted mt-8"><span data-en>SET 1 mock test and 91 practice questions are ready for you.</span><span data-ko>SET 1 모의고사와 연습 91문항이 준비돼 있습니다.</span></p>
+    <p class="muted mt-8"><span data-en>No graded test yet. Take a mock test and your review will appear here.</span><span data-ko>아직 채점된 응시가 없습니다. 모의고사를 보면 이곳에 리뷰가 쌓입니다.</span></p>
     <div class="mt-24" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <a class="btn brand lg" href="tests.html"><span data-en>Take the free mock test</span><span data-ko>무료 모의고사 응시</span></a>
-      <a class="btn ghost lg" href="npz.html"><span data-en>Go to Practice Zone</span><span data-ko>연습존으로</span></a>
+      <a class="btn brand lg" href="tests.html"><span data-en>Take the mock test</span><span data-ko>모의고사 응시</span></a>
     </div>
   </div>
 
   <!-- recent scores table -->
-  <section class="section" style="padding:40px 0">
+  <section class="section hide" id="recent" style="padding:40px 0">
     <h2 class="title mb-24"><span data-en>Recent scores</span><span data-ko>최근 성적</span></h2>
     <div class="card" style="padding:0;overflow:hidden">
-      <div class="table-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <div class="table-wrap" style="overflow-x:auto"><table class="rv-table">
         <thead><tr>
-          <th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-en>Date</th><th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-ko>날짜</th>
-          <th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-en>Test</th><th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-ko>시험</th>
-          <th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-en>Section</th><th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)" data-ko>영역</th>
-          <th style="text-align:right;padding:12px 14px;border-bottom:1px solid var(--line)" data-en>Score</th><th style="text-align:right;padding:12px 14px;border-bottom:1px solid var(--line)" data-ko>점수</th>
+          <th><span data-en>Date</span><span data-ko>날짜</span></th>
+          <th><span data-en>Test</span><span data-ko>시험</span></th>
+          <th><span data-en>Sections</span><span data-ko>영역</span></th>
+          <th style="text-align:right"><span data-en>Score</span><span data-ko>점수</span></th>
+          <th style="width:110px"></th>
         </tr></thead>
         <tbody id="rows"></tbody>
       </table></div>
@@ -78,22 +86,122 @@
 </div></footer>
 
 <script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<!-- 응시 기록은 기기(localStorage)가 정본이고, 로그인해 있으면 서버 사본이 합쳐진다.
+     문항별 점수를 다시 세려면 콘텐츠 팩이 필요하다. -->
+<script src="assets/set1.js"></script>
+<script src="assets/set9.js"></script>
+<script src="assets/sg-results.js"></script>
 <script>
-  var rows=[
-    ['2026-08-04','SET 1','Listening','24/33'],
-    ['2026-08-03','SET 1','Reading','28/35'],
-    ['2026-07-29','SET 1','Writing','10/12'],
-    ['2026-07-27','SET 1','Speaking','—'],
-    ['2026-07-23','SET 1','Reading','22/35']
-  ];
-  document.getElementById('rows').innerHTML=rows.map(function(r){
-    return '<tr>'+
-      '<td style="padding:11px 14px;border-bottom:1px solid var(--line)" class="mono">'+r[0]+'</td>'+
-      '<td style="padding:11px 14px;border-bottom:1px solid var(--line)"><span class="chip">'+r[1]+'</span></td>'+
-      '<td style="padding:11px 14px;border-bottom:1px solid var(--line)">'+r[2]+'</td>'+
-      '<td style="padding:11px 14px;border-bottom:1px solid var(--line);text-align:right;font-weight:750">'+r[3]+'</td>'+
-    '</tr>';
-  }).join('');
+/* 내 성적 — 실제 응시 기록만 그린다. 예시 데이터는 두지 않는다.
+ * 로그인 없이도 이 기기에서 본 시험은 보인다(오프라인 고사장 대응). */
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var LAB = { reading: ['Reading', '리딩'], listening: ['Listening', '리스닝'],
+              writing: ['Writing', '라이팅'], speaking: ['Speaking', '스피킹'] };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function bi(en, ko) { return '<span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span>'; }
+  function when(iso) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d)) return '—';
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+
+  /* 계정 줄 */
+  function paintAccount() {
+    var u = window.SG_AUTH && SG_AUTH.user();
+    if (!u) {
+      $('acct-body').innerHTML = bi('Not signed in — showing tests taken on this device only.',
+                                    '비로그인 상태 — 이 기기에서 본 시험만 보입니다.');
+      $('acct-act').innerHTML = '<a class="btn brand sm" href="login.html">' + bi('Log in', '로그인') + '</a>';
+      return;
+    }
+    $('acct-body').innerHTML = '<b style="font-size:14px;color:var(--ink)">' +
+      esc(u.name || u.email) + '</b> · ' + esc(u.student_id || u.email);
+    $('acct-act').innerHTML = '<a class="btn ghost sm" href="tests.html">' + bi('Take a test', '응시하기') + '</a>';
+    if (SG_AUTH.isStaff) {
+      SG_AUTH.isStaff().then(function (yes) { if (yes) $('staff').classList.remove('hide'); });
+    }
+  }
+
+  /* 영역별 최고 정답률. 라이팅·스피킹은 자동 채점이 없으니 응시 횟수만 센다. */
+  function paintBests(list) {
+    var best = {}, taken = {};
+    list.forEach(function (r) {
+      var by = r.by_section || {};
+      Object.keys(LAB).forEach(function (sec) {
+        var s = by[sec];
+        if (!s) return;
+        taken[sec] = (taken[sec] || 0) + 1;
+        if (s.total) {
+          var pct = Math.round(s.score / s.total * 100);
+          if (best[sec] == null || pct > best[sec]) best[sec] = pct;
+        }
+      });
+    });
+    $('bests').innerHTML = Object.keys(LAB).map(function (sec) {
+      var has = best[sec] != null;
+      return '<div class="card">' +
+        '<div class="muted" style="font-size:12px">' + bi(LAB[sec][0], LAB[sec][1]) + '</div>' +
+        '<div style="font-size:30px;font-weight:850;color:var(--brand)">' +
+          (has ? best[sec] + '<span style="font-size:16px">%</span>' : '—') + '</div>' +
+        '<div class="muted" style="font-size:12px">' +
+          (has ? bi('best accuracy', '최고 정답률')
+               : taken[sec] ? bi('teacher-scored', '선생님 채점')
+                            : bi('not taken yet', '아직 응시 없음')) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function sectionChips(r) {
+    var by = r.by_section || {};
+    return Object.keys(LAB).filter(function (s) { return by[s]; }).map(function (s) {
+      var v = by[s];
+      return '<span class="chip">' + esc(LAB[s][0]) + ' ' +
+        (v.total ? v.score + '/' + v.total : '—') + '</span>';
+    }).join(' ') || '<span class="muted">—</span>';
+  }
+
+  function paintRows(list) {
+    $('rows').innerHTML = list.map(function (r) {
+      return '<tr>' +
+        '<td>' + when(r.submitted_at) + '</td>' +
+        '<td><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
+        '<td><span class="chips" style="margin:0">' + sectionChips(r) + '</span></td>' +
+        '<td style="text-align:right;font-weight:800">' + r.score + ' / ' + r.total + '</td>' +
+        '<td><a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) + '">' +
+          bi('Review', '리뷰') + '</a></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function boot() {
+    paintAccount();
+    // 이 기기에 남아 있고 아직 안 올라간 응시가 있으면 조용히 올린다.
+    if (window.SG_RESULTS && SG_AUTH.user()) { SG_RESULTS.push().catch(function () {}); }
+
+    SG_RESULTS.list().then(function (list) {
+      paintBests(list);
+      if (!list.length) { $('empty').classList.remove('hide'); return; }
+      paintRows(list);
+      $('recent').classList.remove('hide');
+    }).catch(function () {
+      paintBests([]);
+      $('empty').classList.remove('hide');
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>

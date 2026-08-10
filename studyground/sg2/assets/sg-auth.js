@@ -7,11 +7,19 @@
  * 만들기 때문에 확인 메일을 기다리지 않고 가입 즉시 로그인 상태가 된다.
  * 로그인도 같은 함수를 거쳐 이메일뿐 아니라 학번으로도 들어올 수 있다.
  *
+ * 가입 시 학번 + 생년월일을 어드민 전산 명부(sg_roster)와 대조하지만, 지금은 그
+ * 대조가 가입을 막지 않는다(soft verify) — 확인되면 profile.verified = true,
+ * 아니면 false 로 두고 관리자가 명부 화면에서 정리한다.
+ *
  * 노출 전역: window.SG_AUTH
- *   SG_AUTH.signUp({ name, email, password, studentId }) → Promise<user>
+ *   SG_AUTH.lookup(studentId, birthDate) → Promise<{found, name?, class_name?, claimed?}>
+ *   SG_AUTH.signUp({ name, email, password, studentId, birthDate }) → Promise<user>
  *   SG_AUTH.signIn(login, password)                      → Promise<user>
  *   SG_AUTH.signOut()            현재 기기의 세션만 지운다
  *   SG_AUTH.user()               로그인 상태면 프로필 객체, 아니면 null
+ *   SG_AUTH.profile(force)       → Promise<프로필|null>  서버 사본으로 갱신(role 포함)
+ *   SG_AUTH.role()               → Promise<'student'|'teacher'|'admin'>
+ *   SG_AUTH.isStaff()            → Promise<boolean>  선생님 또는 관리자
  *   SG_AUTH.token()              → Promise<string|null>  만료됐으면 알아서 갱신
  *   SG_AUTH.require()            비로그인이면 login.html?next= 로 보낸다
  *   SG_AUTH.onChange(fn)         로그인/로그아웃 때 호출
@@ -68,13 +76,18 @@ window.SG_AUTH = (function () {
     });
   }
 
+  function lookup(studentId, birthDate) {
+    return fn({ action: 'lookup', student_id: studentId || '', birth_date: birthDate || '' });
+  }
+
   function signUp(o) {
     return fn({
       action: 'signup',
       name: o.name || '',
       email: o.email || '',
       password: o.password || '',
-      student_id: o.studentId || ''
+      student_id: o.studentId || '',
+      birth_date: o.birthDate || ''
     }).then(store);
   }
 
@@ -97,6 +110,41 @@ window.SG_AUTH = (function () {
   function user() {
     var s = read();
     return s ? s.user : null;
+  }
+
+  /* 저장해 둔 프로필에는 role 이 없을 수 있다 — 로그인 응답이 만들어진 시점보다
+   * role 이 늦게 생겼거나, 관리자가 나중에 선생님으로 올렸을 수 있기 때문이다.
+   * 그래서 필요할 때 서버 사본으로 한 번 채우고 로컬에 그대로 붙여 둔다.
+   * 오프라인이면 들고 있던 값을 그대로 돌려준다 — 시험은 멈추지 않는다. */
+  var PROFILE_COLS = 'id,email,name,student_id,plan,role,is_admin,verified';
+  function profile(force) {
+    var s = read();
+    if (!s || !s.user) return Promise.resolve(null);
+    if (!force && s.user.role) return Promise.resolve(s.user);
+    return token().then(function (tok) {
+      if (!tok) return s.user;
+      return fetch(URL_ + '/rest/v1/sg_profiles?select=' + PROFILE_COLS + '&id=eq.' + s.user.id, {
+        headers: { apikey: ANON, Authorization: 'Bearer ' + tok }
+      }).then(function (r) { return r.ok ? r.json() : null; }).then(function (rows) {
+        var p = rows && rows[0];
+        if (!p) return s.user;
+        var cur = read();
+        if (!cur) return p;
+        cur.user = p; write(cur);
+        return p;
+      });
+    }).catch(function () { return s.user; });
+  }
+
+  /** role 이 없던 시절 계정도 있으니 is_admin 을 예비로 본다. */
+  function role() {
+    return profile().then(function (p) {
+      if (!p) return 'student';
+      return p.role || (p.is_admin ? 'admin' : 'student');
+    });
+  }
+  function isStaff() {
+    return role().then(function (r) { return r === 'teacher' || r === 'admin'; });
   }
 
   var refreshing = null;
@@ -175,8 +223,9 @@ window.SG_AUTH = (function () {
   onChange(paintNav);
 
   return {
-    signUp: signUp, signIn: signIn, signOut: signOut,
-    user: user, token: token, require: require_, onChange: onChange,
+    lookup: lookup, signUp: signUp, signIn: signIn, signOut: signOut,
+    user: user, profile: profile, role: role, isStaff: isStaff,
+    token: token, require: require_, onChange: onChange,
     url: URL_, anonKey: ANON
   };
 })();

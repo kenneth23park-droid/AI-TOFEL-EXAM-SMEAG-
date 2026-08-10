@@ -47,7 +47,11 @@
 //      assets/admin-log.js) · 문항별 제한시간 오버라이드 추가.
 // v21: cloze 빈칸이 잇달아 올 때 낱말 경계가 보이도록 빈칸 뒤에 낱말 간격(.34em)을 준다 —
 //      칸 경계(.1em)보다 넓어야 'exper____ com___ soc__' 이 세 낱말로 읽힌다. exam.css 만 바뀐다.
-const VERSION = 'sg-v21';
+// v22: 채점 리뷰 추가 — review.html(문항별 정오) · admin-results.html(선생님·관리자용
+//      전체 학생 목록) · assets/sg-results.js 를 프리캐시에 넣는다. dashboard.html 이
+//      예시 데이터 대신 실제 응시 기록을 그리고, exam-shell.js 가 제출 직후 채점·업로드를
+//      하도록 바뀌었으므로 캐시된 옛 파일이 남으면 리뷰 문이 열리지 않는다.
+const VERSION = 'sg-v22';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -56,6 +60,9 @@ const SHELL_ASSETS = [
   'community.html', 'tools.html', 'purchase.html', 'login.html', 'signup.html', 'exam.html',
   'set9.html', 'set9-reading.html', 'admin-audio.html', 'admin-audio-files.html', 'admin-questions.html',
   'admin-audio-sync.html', 'admin-set-view.html', 'config/audio-check.set9.json',
+
+  // 채점 리뷰 — 제출 직후 오프라인에서도 자기 답안을 문항별로 볼 수 있어야 한다.
+  'review.html', 'admin-results.html', 'assets/sg-results.js',
 
   // 내부용 접근 게이트 — 오프라인 진입도 이 화면을 먼저 지난다.
   'gate.html', 'assets/gate.js', 'assets/audio-config.js',
