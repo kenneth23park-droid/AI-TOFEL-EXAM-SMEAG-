@@ -11,7 +11,8 @@
  *    만들지 않는다. 진행은 화면 안 CTA 또는 상단바 Continue 버튼(둘 다 engine.next)로만.
  *  - 모든 문구는 data-en / data-ko 이중 표기(F5). app.css 의 [data-ko]{display:none} 규칙이
  *    언어 토글을 처리하므로 여기서 lang 을 읽지 않는다.
- *  - 실패는 throw 하지 않는다(F12). 마이크가 없어도 "Continue without microphone" 으로 진행된다.
+ *  - 실패는 throw 하지 않는다(F12). 다만 마이크는 필수다 — 잡히기 전에는 진행을 잠그고
+ *    재시도만 열어 둔다(건너뛰기 없음, 2026-08-11).
  */
 (function (root) {
   'use strict';
@@ -1158,6 +1159,10 @@
     var sample = bi('p', MIC_SAMPLE_EN, MIC_SAMPLE_KO);
     sample.className = 'instr-mic-sample';
     right.appendChild(sample);
+    var must = bi('p', 'This check is required. You cannot continue until one recording is complete.',
+      '이 점검은 필수입니다. 녹음을 한 번 마쳐야 다음으로 넘어갈 수 있습니다.');
+    must.className = 'instr-mic-required';
+    right.appendChild(must);
     panel.appendChild(right);
     wrap.appendChild(panel);
 
@@ -1169,25 +1174,23 @@
     biInto(status, 'Select Record when you are ready.', '준비되면 Record 를 선택하세요.');
     wrap.appendChild(status);
 
-    /* 액션 — 판정 전에는 Skip 만, 통과하면 Continue 가 붙는다 */
+    /* 액션 — 마이크 점검은 필수다(건너뛰기 없음).
+     * 소리가 실제로 잡힌 녹음을 한 번 끝내야 Continue 가 붙는다. */
     var actions = el('div', 'instr-actions instr-mic-actions');
     var cont = ctaNode(screen, ctx);
     cont.style.display = 'none';
-    var skip = button('exam-btn instr-mic-skip', 'Skip microphone check', '마이크 점검 건너뛰기');
-    skip.onclick = function () {
-      var st = store();
-      if (st && typeof st.pushEvent === 'function') st.pushEvent('mic_skipped', screen.id, {});
-      if (ctx && ctx.engine && typeof ctx.engine.next === 'function') ctx.engine.next('manual');
-    };
+    var retry = button('exam-btn instr-mic-retry', 'Try microphone again', '마이크 다시 시도');
+    retry.style.display = 'none';
+    retry.onclick = function () { requestNow(); };
     actions.appendChild(cont);
-    actions.appendChild(skip);
+    actions.appendChild(retry);
     wrap.appendChild(actions);
 
     lockAdvance(true);
 
     var state = {
       alive: true, stream: null, audioCtx: null, raf: null,
-      tick: null, phase: 'idle', peak: 0, adopted: false
+      tick: null, poll: null, wait: null, sample: null, phase: 'idle', peak: 0, adopted: false, passed: false
     };
 
     function setStatus(en, ko, cls) {
@@ -1206,13 +1209,28 @@
       state.tick = null;
     }
 
+    function clearPoll() {
+      if (state.poll !== null) { try { root.clearInterval(state.poll); } catch (e) {} }
+      state.poll = null;
+    }
+
+    function clearWait() {
+      if (state.wait !== null && typeof root.clearTimeout === 'function') {
+        try { root.clearTimeout(state.wait); } catch (e) {}
+      }
+      state.wait = null;
+    }
+
     function cleanup() {
       state.alive = false;
       clearTick();
+      clearPoll();
+      clearWait();
       if (state.raf !== null && root.cancelAnimationFrame) {
         try { root.cancelAnimationFrame(state.raf); } catch (e) {}
       }
       state.raf = null;
+      state.sample = null;
       if (state.audioCtx) { try { state.audioCtx.close(); } catch (e2) {} state.audioCtx = null; }
       // 스트림은 SG_RECORDER 가 물려받았으면 살려 둔다 — 스피킹에서 권한을 다시 묻지 않기 위해서다.
       if (state.stream && !state.adopted) {
@@ -1235,6 +1253,14 @@
         analyser.fftSize = 1024;
         ac.createMediaStreamSource(stream).connect(analyser);
         var buf = new Uint8Array(analyser.fftSize);
+        /* 레벨 한 번 읽기. 탭이 뒤로 가면 rAF 가 멈추므로 1초 틱도 이걸 부른다 —
+         * 그렇지 않으면 정상 발화도 peak 0(무음)으로 잘못 판정된다. */
+        state.sample = function () {
+          analyser.getByteTimeDomainData(buf);
+          var s = 0, x;
+          for (var k = 0; k < buf.length; k++) { x = (buf[k] - 128) / 128; s += x * x; }
+          return Math.min(1, Math.sqrt(s / buf.length) * 3.2);
+        };
         var loop = function () {
           if (!state.alive) return;
           analyser.getByteTimeDomainData(buf);
@@ -1276,7 +1302,15 @@
         setStatus('No sound was detected. Check that the right microphone is selected, then record again.',
           '소리가 감지되지 않았습니다. 올바른 마이크가 선택되어 있는지 확인한 뒤 다시 녹음하세요.', 'is-error');
       }
-      // 판정과 무관하게 한 번 녹음했으면 진행은 열어 준다(FR14 — 시험을 멈추지 않는다).
+      // 마이크 점검은 필수다 — 소리가 실제로 잡힌 녹음을 한 번 끝내야 진행이 열린다.
+      // 너무 작거나 큰 건 스피킹 채점에서 되살릴 수 있으니 통과시키고, 무음만 막는다.
+      if (verdict === 'silent') {
+        state.passed = false;
+        cont.style.display = 'none';
+        lockAdvance(true);
+        return;
+      }
+      state.passed = true;
       cont.style.display = '';
       cont.disabled = false;
       lockAdvance(false);
@@ -1294,6 +1328,10 @@
         '지문을 소리 내어 읽으세요. ' + left2 + '초 남았습니다.');
       state.tick = root.setInterval(function () {
         if (!state.alive) { clearTick(); return; }
+        if (state.sample) {
+          var lv = state.sample();
+          if (lv > state.peak) state.peak = lv;
+        }
         left2 -= 1;
         if (left2 <= 0) { finish(); return; }
         setStatus('Read the paragraph aloud. ' + left2 + ' seconds remaining.',
@@ -1317,13 +1355,38 @@
       }, 1000);
     }
 
-    function unavailable(en, ko) {
+    /* 실패는 막다른 길이 아니다 — 안내를 띄우고 재시도 버튼을 연다.
+     * 마이크가 붙기 전에는 진행을 열지 않는다(점검 필수). */
+    function failed(en, ko, autoPoll) {
       setStatus(en, ko, 'is-error');
       rec.disabled = true;
       setRecLabel('RECORD', '녹음');
       rec.className = 'instr-mic-record is-disabled';
-      // 마이크가 없어도 시험은 계속된다 — Skip 만 남기고 상단바를 푼다.
-      lockAdvance(false);
+      meter.setActive(false);
+      meter.setLevel(0);
+      retry.style.display = '';
+      retry.disabled = false;
+      lockAdvance(true);
+      // 기기를 새로 꽂는 경우가 있다 — 장치를 못 찾은 실패만 조용히 다시 물어본다.
+      if (autoPoll && state.poll === null && typeof root.setInterval === 'function') {
+        state.poll = root.setInterval(function () {
+          if (!state.alive || state.stream) { clearPoll(); return; }
+          requestNow();
+        }, 5000);
+      }
+    }
+
+    function unavailable(en, ko) { failed(en, ko, false); }
+
+    /* 재시도 — 버튼과 자동 폴링이 함께 쓴다. */
+    function requestNow() {
+      if (!state.alive || state.stream) return;
+      retry.disabled = true;
+      ensureStream(function () {
+        if (!state.alive || state.phase !== 'idle') return;
+        setStatus('Microphone is active — the bar moves as you speak. Select Record when you are ready.',
+          '마이크가 켜졌습니다 — 말하면 막대가 움직입니다. 준비되면 Record 를 선택하세요.', 'is-ok');
+      });
     }
 
     function ensureStream(then) {
@@ -1341,25 +1404,42 @@
       }
       var nav = root.navigator;
       if (!nav || !nav.mediaDevices || typeof nav.mediaDevices.getUserMedia !== 'function') {
-        unavailable('This browser cannot access a microphone. You can continue, but Speaking answers will not be recorded.',
-          '이 브라우저는 마이크에 접근할 수 없습니다. 계속 진행할 수 있으나 스피킹 답변은 녹음되지 않습니다.');
+        var c1 = insecureOrigin() ? micWaitCopy() : {
+          en: 'This browser cannot access a microphone. Open the test in Chrome, Edge or Safari over https to continue.',
+          ko: '이 브라우저는 마이크에 접근할 수 없습니다. Chrome·Edge·Safari 에서 https 로 다시 열어야 진행할 수 있습니다.'
+        };
+        unavailable(c1.en, c1.ko);
         return;
       }
       setStatus('Requesting microphone access…', '마이크 권한을 요청하는 중…');
       rec.disabled = true;
+      clearWait();
+      // 응답 없이 멈추는 요청이 있다 — 기다림이 길어지면 원인을 말하고 재시도를 연다.
+      if (typeof root.setTimeout === 'function') {
+        state.wait = root.setTimeout(function () {
+          state.wait = null;
+          if (!state.alive || state.stream) return;
+          var c = micWaitCopy();
+          failed(c.en, c.ko, false);
+        }, MIC_WAIT_MS);
+      }
       var p;
       try { p = nav.mediaDevices.getUserMedia({ audio: true }); } catch (e) { p = null; }
       if (!p || !p.then) {
+        clearWait();
         unavailable('Microphone request failed.', '마이크 요청에 실패했습니다.');
         return;
       }
       p.then(function (stream) {
+        clearWait();
         if (!state.alive) {
           var tr = stream.getTracks ? stream.getTracks() : [];
           for (var i = 0; i < tr.length; i++) { try { tr[i].stop(); } catch (e) {} }
           return;
         }
         state.stream = stream;
+        clearPoll();
+        retry.style.display = 'none';
         if (R2 && typeof R2.adoptStream === 'function') { state.adopted = !!R2.adoptStream(stream); }
         var st = store();
         if (st && typeof st.pushEvent === 'function') st.pushEvent('mic_granted', screen.id, {});
@@ -1368,19 +1448,16 @@
         rec.className = 'instr-mic-record is-live';
         then(stream);
       })['catch'](function (err) {
+        clearWait();
         var name = err && err.name ? err.name : 'Error';
         var denied = name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError';
-        rec.disabled = false;
-        rec.className = 'instr-mic-record';
-        setRecLabel('RECORD', '녹음');
         if (denied) {
-          setStatus('Microphone access was blocked. Allow the microphone in your browser settings, then select Record again.',
-            '마이크 접근이 차단되었습니다. 브라우저 설정에서 마이크를 허용한 뒤 Record 를 다시 선택하세요.', 'is-error');
+          failed('Microphone access was blocked. The test cannot continue without it — allow the microphone in your browser settings, then select Try microphone again.',
+            '마이크 접근이 차단되었습니다. 마이크 없이는 시험을 진행할 수 없습니다 — 브라우저 설정에서 마이크를 허용한 뒤 Try microphone again 을 누르세요.', false);
         } else {
-          setStatus('No microphone was found. Connect one and select Record again, or skip the check.',
-            '마이크를 찾지 못했습니다. 마이크를 연결한 뒤 Record 를 다시 선택하거나 점검을 건너뛰세요.', 'is-error');
+          failed('No microphone was found. Connect one — the test will pick it up automatically.',
+            '마이크를 찾지 못했습니다. 마이크를 연결하면 자동으로 인식합니다.', true);
         }
-        lockAdvance(false);
         var st2 = store();
         if (st2 && typeof st2.pushEvent === 'function') st2.pushEvent('mic_denied', screen.id, { name: name });
       });
@@ -1393,22 +1470,44 @@
     };
 
     /* 화면에 들어오면 곧바로 마이크를 붙인다 — 아이콘이 살아나고 레벨 바가 바로 움직인다.
-     * 권한이 거부돼도 ensureStream 이 안내를 띄우고 Skip 으로 계속 갈 수 있다. */
-    function armOnMount() {
-      if (!state.alive || state.stream) return;
-      ensureStream(function () {
-        if (!state.alive || state.phase !== 'idle') return;
-        setStatus('Microphone is active — the bar moves as you speak. Select Record when you are ready.',
-          '마이크가 켜졌습니다 — 말하면 막대가 움직입니다. 준비되면 Record 를 선택하세요.', 'is-ok');
-      });
-    }
-    if (typeof root.setTimeout === 'function') root.setTimeout(armOnMount, 0);
-    else armOnMount();
+     * 실패하면 failed() 가 재시도를 열어 두고 진행은 계속 잠겨 있다. */
+    if (typeof root.setTimeout === 'function') root.setTimeout(requestNow, 0);
+    else requestNow();
 
     return wrap;
   }
 
   /* ── hardwareCheck ──────────────────────────────────────── */
+
+  /* 권한 요청이 영원히 대기하는 경우가 있다 — 탭이 뒤에 있거나, 프롬프트가 가려졌거나,
+   * 보안 컨텍스트가 아니라 브라우저가 조용히 삼킨 경우다. 그럴 때 화면은 "Requesting…"
+   * 에 멈추고 학생은 아무 것도 누를 수 없다. 원인을 골라 문구로 돌려준다. */
+  var MIC_WAIT_MS = 8000;
+
+  function insecureOrigin() {
+    var loc = root.location;
+    if (!loc) return false;
+    if (root.isSecureContext === true) return false;
+    var p = String(loc.protocol || '');
+    if (p === 'https:') return false;
+    var h = String(loc.hostname || '');
+    if (h === 'localhost' || h === '127.0.0.1' || h === '::1' || h === '') return p === 'file:';
+    return true;
+  }
+
+  function micWaitCopy() {
+    if (insecureOrigin()) {
+      var origin = root.location ? String(root.location.protocol + '//' + (root.location.host || '')) : '';
+      return {
+        en: 'The browser will not grant a microphone on this address (' + origin + '). Open the test over https, or over http://localhost, then reload.',
+        ko: '이 주소(' + origin + ')에서는 브라우저가 마이크를 허용하지 않습니다. https 또는 http://localhost 로 열고 새로고침하세요.'
+      };
+    }
+    return {
+      en: 'Still waiting for microphone permission. Look for the permission prompt near the address bar and choose Allow — the prompt only appears while this tab is in front. Then select Retry microphone.',
+      ko: '아직 마이크 권한을 기다리고 있습니다. 주소창 근처의 허용 창에서 Allow 를 누르세요 — 이 탭이 앞에 있어야 창이 뜹니다. 그 뒤 Retry microphone 을 누르세요.'
+    };
+  }
 
   /* 상단바 Continue 를 잠근다(AC4: 권한 확보 전 Begin 비활성).
    * 화면을 떠날 때 반드시 복구한다 — onLeave 훅에서 되돌린다. */
@@ -1428,7 +1527,7 @@
     var body = bodyNode(screen);
     if (body) wrap.appendChild(body);
 
-    var state = { stream: null, ctxAudio: null, raf: null, granted: false, alive: true };
+    var state = { stream: null, ctxAudio: null, raf: null, granted: false, alive: true, wait: null };
 
     /* 1) 스피커 테스트 — 볼륨 화면과 동일한 합성음. */
     var speakerRow = el('div', 'instr-hw-row');
@@ -1467,19 +1566,11 @@
     micRow.appendChild(retry);
     wrap.appendChild(micRow);
 
-    /* 3) 진행 — 권한을 받으면 Begin 활성, 거부해도 명시적 폴백으로 계속(FR14). */
+    /* 3) 진행 — 마이크 권한을 받아야만 Begin 이 열린다(녹음 없는 스피킹은 없다). */
     var actions = el('div', 'instr-actions');
     var begin = ctaNode(screen, ctx);
     begin.disabled = true;
     actions.appendChild(begin);
-    var skip = button('exam-btn', 'Continue without microphone', '마이크 없이 계속');
-    skip.style.display = 'none';
-    skip.onclick = function () {
-      var st = store();
-      if (st && typeof st.pushEvent === 'function') st.pushEvent('mic_skipped', screen.id, {});
-      if (ctx && ctx.engine && typeof ctx.engine.next === 'function') ctx.engine.next('manual');
-    };
-    actions.appendChild(skip);
     wrap.appendChild(actions);
 
     lockAdvance(true);
@@ -1490,8 +1581,16 @@
       biInto(micStatus, en, ko);
     }
 
+    function clearWait() {
+      if (state.wait !== null && typeof root.clearTimeout === 'function') {
+        try { root.clearTimeout(state.wait); } catch (e) {}
+      }
+      state.wait = null;
+    }
+
     function cleanup() {
       state.alive = false;
+      clearWait();
       if (state.raf !== null && root.cancelAnimationFrame) {
         try { root.cancelAnimationFrame(state.raf); } catch (e) {}
       }
@@ -1536,25 +1635,39 @@
     function request() {
       var nav = root.navigator;
       if (!nav || !nav.mediaDevices || typeof nav.mediaDevices.getUserMedia !== 'function') {
-        setStatus('This browser cannot access a microphone. You can continue, but Speaking answers will not be recorded.',
-          '이 브라우저는 마이크에 접근할 수 없습니다. 계속 진행할 수 있으나 스피킹 답변은 녹음되지 않습니다.', 'is-error');
-        retry.style.display = 'none';
-        skip.style.display = '';
-        lockAdvance(false);
+        var c0 = insecureOrigin() ? micWaitCopy() : {
+          en: 'This browser cannot access a microphone. Open the test in Chrome, Edge or Safari over https to continue.',
+          ko: '이 브라우저는 마이크에 접근할 수 없습니다. Chrome·Edge·Safari 에서 https 로 다시 열어야 진행할 수 있습니다.'
+        };
+        setStatus(c0.en, c0.ko, 'is-error');
+        retry.style.display = '';
+        lockAdvance(true);
         return;
       }
       setStatus('Requesting microphone access…', '마이크 권한을 요청하는 중…', '');
       retry.style.display = 'none';
-      skip.style.display = 'none';
+      clearWait();
+      // 응답 없이 멈추는 요청이 있다 — 기다림이 길어지면 원인을 말하고 재시도를 연다.
+      if (typeof root.setTimeout === 'function') {
+        state.wait = root.setTimeout(function () {
+          state.wait = null;
+          if (!state.alive || state.granted) return;
+          var c = micWaitCopy();
+          setStatus(c.en, c.ko, 'is-error');
+          retry.style.display = '';
+        }, MIC_WAIT_MS);
+      }
       var p;
       try { p = nav.mediaDevices.getUserMedia({ audio: true }); } catch (e) { p = null; }
       if (!p || !p.then) {
-        setStatus('Microphone request failed.', '마이크 요청에 실패했습니다.', 'is-error');
+        clearWait();
+        setStatus('Microphone request failed. Select Retry microphone.', '마이크 요청에 실패했습니다. 다시 시도를 누르세요.', 'is-error');
         retry.style.display = '';
-        skip.style.display = '';
+        lockAdvance(true);
         return;
       }
       p.then(function (stream) {
+        clearWait();
         if (!state.alive) {
           var tr = stream.getTracks ? stream.getTracks() : [];
           for (var i = 0; i < tr.length; i++) { try { tr[i].stop(); } catch (e) {} }
@@ -1570,20 +1683,20 @@
         if (st && typeof st.pushEvent === 'function') st.pushEvent('mic_granted', screen.id, {});
         startMeter(stream);
       })['catch'](function (err) {
+        clearWait();
         var name = err && err.name ? err.name : 'Error';
         var denied = name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError';
         if (denied) {
-          setStatus('Microphone access was blocked. Allow the microphone in your browser settings, then press Retry.',
-            '마이크 접근이 차단되었습니다. 브라우저 설정에서 마이크를 허용한 뒤 다시 시도를 누르세요.', 'is-error');
+          setStatus('Microphone access was blocked. Speaking cannot start without it — allow the microphone in your browser settings, then press Retry.',
+            '마이크 접근이 차단되었습니다. 마이크 없이는 스피킹을 시작할 수 없습니다 — 브라우저 설정에서 마이크를 허용한 뒤 다시 시도를 누르세요.', 'is-error');
         } else {
-          setStatus('No microphone was found. Connect one and press Retry, or continue without recording.',
-            '마이크를 찾지 못했습니다. 마이크를 연결한 뒤 다시 시도하거나 녹음 없이 계속하세요.', 'is-error');
+          setStatus('No microphone was found. Connect one and press Retry.',
+            '마이크를 찾지 못했습니다. 마이크를 연결한 뒤 다시 시도를 누르세요.', 'is-error');
         }
         retry.style.display = '';
-        skip.style.display = '';
         begin.disabled = true;
-        // 시험을 멈추지 않는다(FR14) — 상단바는 풀되 화면 안 Begin 은 잠근 채로 둔다.
-        lockAdvance(false);
+        // 마이크는 필수다 — 잡힐 때까지 상단바 Begin 도 잠근 채로 둔다.
+        lockAdvance(true);
         var st2 = store();
         if (st2 && typeof st2.pushEvent === 'function') st2.pushEvent('mic_denied', screen.id, { name: name });
       });
