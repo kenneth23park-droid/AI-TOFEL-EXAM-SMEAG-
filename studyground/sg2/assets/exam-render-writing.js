@@ -684,64 +684,26 @@
     return box;
   }
 
-  /* ── 작성창 툴바 (Cut / Paste / Undo / Redo · 단어수 표시 토글) ─────────── */
-
-  /* 브라우저 편집 명령. textarea 에 포커스를 준 뒤 실행해야 한다. */
-  function execOn(ta, cmd) {
-    try {
-      ta.focus();
-      if (doc.execCommand) return doc.execCommand(cmd, false, null);
-    } catch (e) { warn(cmd + ' failed', e); }
-    return false;
+  /* 지문 영역 복사 차단 — CSS user-select 로 선택을 막고, 전체선택(Ctrl+A) 같은
+   * 우회 경로를 위해 copy/cut/drag/우클릭도 취소한다. */
+  function noCopy(node) {
+    var kill = function (e) { if (e && e.preventDefault) e.preventDefault(); return false; };
+    on(node, 'copy', kill);
+    on(node, 'cut', kill);
+    on(node, 'dragstart', kill);
+    on(node, 'contextmenu', kill);
+    return node;
   }
 
-  /* execCommand('paste') 는 대부분의 브라우저에서 막혀 있다. 비동기 클립보드로 폴백한다. */
-  function pasteInto(ta, after) {
-    if (execOn(ta, 'paste')) { after(); return; }
-    var nav = root.navigator;
-    if (nav && nav.clipboard && typeof nav.clipboard.readText === 'function') {
-      try {
-        nav.clipboard.readText().then(function (txt) {
-          if (typeof txt !== 'string' || !txt) return;
-          var s = ta.selectionStart, e = ta.selectionEnd;
-          if (typeof s !== 'number') { ta.value += txt; }
-          else {
-            ta.value = ta.value.slice(0, s) + txt + ta.value.slice(e);
-            ta.selectionStart = ta.selectionEnd = s + txt.length;
-          }
-          ta.focus();
-          after();
-        })['catch'](function () {});
-        return;
-      } catch (e2) { warn('clipboard paste failed', e2); }
-    }
-  }
+  /* ── 작성창 툴바 (단어수 표시 토글) ──────────────────────────────────────
+   * Cut/Paste/Undo/Redo 버튼은 두지 않는다 — 편집은 키보드 단축키로만. */
 
-  function toolButton(label, onClick) {
-    var b = doc.createElement('button');
-    b.type = 'button';
-    b.className = 'wr-tool';
-    b.textContent = label;
-    on(b, 'click', function (e) { if (e && e.preventDefault) e.preventDefault(); onClick(); });
-    /* mousedown 기본동작(포커스 이동)을 막아 textarea 선택이 풀리지 않게 한다 — Cut 이 대상 없이 도는 것 방지. */
-    on(b, 'mousedown', function (e) { if (e && e.preventDefault) e.preventDefault(); });
-    return b;
-  }
-
-  /* 반환: { node, count, setLocked } — count 는 단어수를 다시 칠하는 함수. */
-  function editorToolbar(ta, minWords, onEdit) {
+  /* 반환: { node, count } — count 는 단어수를 다시 칠하는 함수. */
+  function editorToolbar(ta, minWords) {
     var bar = el('div', 'wr-tools');
     var left = el('div', 'wr-tools-left');
     var right = el('div', 'wr-tools-right');
     bar.appendChild(left); bar.appendChild(right);
-
-    var btns = [
-      toolButton('Cut', function () { execOn(ta, 'cut'); onEdit(); }),
-      toolButton('Paste', function () { pasteInto(ta, onEdit); }),
-      toolButton('Undo', function () { execOn(ta, 'undo'); onEdit(); }),
-      toolButton('Redo', function () { execOn(ta, 'redo'); onEdit(); })
-    ];
-    for (var i = 0; i < btns.length; i++) left.appendChild(btns[i]);
 
     var count = el('span', 'wr-count');
     var toggle = doc.createElement('button');
@@ -767,11 +729,7 @@
       return w;
     }
 
-    function setLocked(locked) {
-      for (var j = 0; j < btns.length; j++) btns[j].disabled = !!locked;
-    }
-
-    return { node: bar, count: paintCount, setLocked: setLocked, isHidden: function () { return hidden; } };
+    return { node: bar, count: paintCount, isHidden: function () { return hidden; } };
   }
 
   function renderFreeWrite(screen, ctx, foundList) {
@@ -794,6 +752,7 @@
          * 좁은 화면에서는 CSS 가 1단으로 접는다. */
         var cols = el('div', 'wr-cols');
         var pane = el('div', 'wr-pane wr-pane-task');
+        noCopy(pane);
         var answer = el('div', 'wr-pane wr-pane-answer');
         cols.appendChild(pane);
         cols.appendChild(answer);
@@ -825,9 +784,8 @@
         answer.appendChild(bi('h3', 'Your Response:', '작성란', 'wr-resp-head'));
         if (isEmail) answer.appendChild(emailHeader(q));
 
-        /* 툴바(Cut/Paste/Undo/Redo · 단어수)는 작성창 위. 편집 버튼이 값을 바꾸면
-           input 이벤트가 안 오는 브라우저가 있어 schedule() 을 직접 부른다. */
-        var tools = editorToolbar(ta, minWords, function () { schedule(); });
+        /* 툴바(단어수 표시 토글)는 작성창 위. */
+        var tools = editorToolbar(ta, minWords);
         answer.appendChild(tools.node);
 
         var prev = savedAnswer(q.id);
@@ -888,7 +846,6 @@
       for (var i = 0; i < editors.length; i++) {
         // 만료 시 입력만 잠그고 내용은 남긴다 — 현재 값이 그대로 제출 대상이다.
         if (locked) { editors[i].commit(); }
-        if (editors[i].tools) editors[i].tools.setLocked(locked);
         editors[i].textarea.readOnly = !!locked;
         editors[i].textarea.setAttribute('aria-readonly', locked ? 'true' : 'false');
       }

@@ -658,6 +658,12 @@ body.exam-body {
 .wr-pane-answer { position: sticky; top: 0; }
 /* 과제 지문이 길어도 작성창 높이를 밀지 않도록 왼쪽 칸만 스크롤한다(실제 시험 화면과 동일). */
 .wr-pane-task { max-height: calc(100vh - 230px); overflow-y: auto; padding-right: 10px; }
+/* 지문은 드래그 선택·복사 금지 — 답안창에 통째로 붙여넣는 것을 막는다. */
+.wr-pane-task {
+  -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+}
+.wr-pane-task button, .wr-pane-task a { -webkit-user-select: none; user-select: none; }
 @media (max-width: 900px) {
   .wr-cols { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .wr-pane-answer { position: static; }
@@ -712,17 +718,10 @@ body.exam-body {
 .wr-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .wr-avatar-ini { font-size: 14px; font-weight: 800; color: var(--muted); letter-spacing: .02em; }
 
-/* 작성창 툴바 — Cut/Paste/Undo/Redo (좌) · 단어수 표시 토글 (우) */
-.wr-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+/* 작성창 툴바 — 단어수 표시 토글 (우). 편집 버튼(Cut/Paste/Undo/Redo)은 두지 않는다. */
+.wr-tools { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
 .wr-tools-left { display: flex; gap: 6px; }
 .wr-tools-right { display: flex; align-items: center; gap: 10px; }
-.wr-tool {
-  font: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink-2);
-  background: var(--cream); border: 1px solid var(--line-2); border-radius: 6px;
-  padding: 4px 12px; cursor: pointer;
-}
-.wr-tool:hover { background: var(--cream-2); }
-.wr-tool:disabled { opacity: .45; cursor: not-allowed; }
 .wr-count-toggle {
   font: inherit; font-size: 12.5px; font-weight: 700; color: var(--brand-ink);
   background: none; border: 0; padding: 2px 4px; cursor: pointer;
