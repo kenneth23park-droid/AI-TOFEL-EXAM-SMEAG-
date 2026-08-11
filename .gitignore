@@ -38,3 +38,6 @@ studyground/sg2/media/tts/_backup_google/
 node_modules/
 studyground/sg2/media/tts/_backup_kokoro/
 studyground/sg2/media/audio/_set9_backup_say/
+
+# Claude Code 개인 설정 (옵시디언 볼트 경로 등 로컬 전용)
+.claude/settings.local.json
