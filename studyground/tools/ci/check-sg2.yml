@@ -1,0 +1,74 @@
+# sg2 검사 — 배포 전에 돌고, 실패하면 배포가 붙지 않는다.
+#
+# 세 가지를 본다.
+#   1) 겹침 검사   새 문항이 기존 문항과 겹치면(high) 실패. 판정은 sg2/assets/dup-core.js.
+#   2) 리포트 신선도  커밋된 config/dup-report.* 가 지금 콘텐츠로 다시 만든 것과 같은가.
+#                    이게 없으면 리포트가 조용히 낡아 "겹침 없음"이 거짓말이 된다 —
+#                    실제로 그렇게 낡아서 SET9 지시문 겹침을 며칠 놓쳤다.
+#   3) 회귀 테스트  studyground/tests/*.js 전부. 의존성이 없어 그냥 node 로 돈다.
+#
+# 파이썬 테스트(studyground/tests/*.py)는 여기서 돌리지 않는다 — venv 와 패키지가
+# 필요하고, 이 저장소의 CI 는 아직 그 준비가 없다. 로컬에서 pytest 로 돌린다.
+
+name: check sg2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'studyground/sg2/**'
+      - 'studyground/tools/**'
+      - 'studyground/tests/**'
+      - '.github/workflows/check-sg2.yml'
+  pull_request:
+    paths:
+      - 'studyground/sg2/**'
+      - 'studyground/tools/**'
+      - 'studyground/tests/**'
+  workflow_dispatch:
+
+concurrency:
+  group: check-sg2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 겹침 검사. high 가 하나라도 있으면 여기서 0 이 아닌 코드로 끝난다.
+      - name: 겹침 검사 (문항 중복)
+        run: node studyground/tools/dup_check.js
+
+      # 위 단계가 리포트를 다시 만들었다. 커밋된 것과 다르면 낡았다는 뜻이다.
+      - name: 리포트 신선도
+        run: |
+          if ! git diff --quiet -- studyground/sg2/config/dup-report.json studyground/sg2/config/dup-report.js; then
+            echo "::error::커밋된 겹침 리포트가 지금 콘텐츠와 다릅니다 — 낡았습니다."
+            echo "고치는 법:  node studyground/tools/dup_check.js  후 config/dup-report.{js,json} 을 같이 커밋하세요."
+            git --no-pager diff --stat -- studyground/sg2/config/dup-report.json studyground/sg2/config/dup-report.js
+            exit 1
+          fi
+          echo "리포트가 최신입니다."
+
+      - name: 회귀 테스트 (studyground/tests/*.js)
+        run: |
+          fail=0
+          for t in studyground/tests/*.js; do
+            if node "$t" > /tmp/out.txt 2>&1; then
+              echo "PASS  $(basename "$t")"
+            else
+              fail=$((fail+1))
+              echo "::group::FAIL  $(basename "$t")"
+              tail -40 /tmp/out.txt
+              echo "::endgroup::"
+              echo "::error file=$t::$(basename "$t") 실패"
+            fi
+          done
+          echo "실패 $fail 건"
+          exit $fail
