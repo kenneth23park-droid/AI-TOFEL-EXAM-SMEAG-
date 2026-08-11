@@ -255,6 +255,18 @@ window.SG_RUNTIME = (function () {
        · moduleEnd 화면에는 서브바 자체가 없다.
      빨간 중앙 pill 은 SMEAG 관리자 미리보기(test_listening.php)의 UI 라 제거했다. */
 
+  /* ── 화면 안의 문항 이동 ───────────────────────────────────
+     리딩은 지문 한 편이 화면 하나지만 학생에게는 문항을 하나씩 보여 준다.
+     그 렌더러(exam-render-reading.js)가 window.SG_SCREEN_NAV 를 올려 두면,
+     Next/Back 은 화면을 넘기기 전에 먼저 이 nav 에게 묻는다. 다른 섹션 렌더러는
+     이 전역을 지우지 않으므로 화면 id 가 지금 화면과 같을 때만 인정한다. */
+  function screenNav() {
+    var nav = window.SG_SCREEN_NAV;
+    var sc = machine && machine.current();
+    if (!nav || !sc || nav.screenId !== sc.id) return null;
+    return nav;
+  }
+
   function sectionLabel(section) {
     var s = String(section || '');
     if (!s) return '';
@@ -288,13 +300,17 @@ window.SG_RUNTIME = (function () {
     /* progress 는 담당 A 의 컴파일러가 만든다: {first,last,total,style}.
        레거시 {index,total} 도 SG_TYPES.formatProgress 가 흡수한다. */
     var text = '';
-    if (screen.progress) {
+    /* 화면 안에서 문항을 하나씩 넘기는 중이면 그 문항 번호가 곧 진행 표시다
+       ("Questions 31-35 of 50" 이 아니라 "Question 31 of 50"). */
+    var nav = screenNav();
+    var p = (nav && typeof nav.progress === 'function' && nav.progress()) || screen.progress;
+    if (p) {
       if (window.SG_TYPES && window.SG_TYPES.formatProgress) {
         text = (document.documentElement.lang === 'ko' && window.SG_TYPES.formatProgressKo)
-          ? window.SG_TYPES.formatProgressKo(screen.progress)
-          : window.SG_TYPES.formatProgress(screen.progress);
-      } else if (typeof screen.progress.index === 'number') {
-        text = 'Question ' + screen.progress.index + ' of ' + screen.progress.total;
+          ? window.SG_TYPES.formatProgressKo(p)
+          : window.SG_TYPES.formatProgress(p);
+      } else if (typeof p.index === 'number') {
+        text = 'Question ' + p.index + ' of ' + p.total;
       }
     }
     if (prog) prog.textContent = text;
@@ -346,11 +362,14 @@ window.SG_RUNTIME = (function () {
     set('btn-back', showBack);
     set('btn-advance', showAdvance);
 
-    /* Back — 상태머신(SG_EXAM)에 역방향 이동 API 가 없어 지금은 항상 비활성이다.
-       참조 프레임(reading-cloze-2760s.png)도 비활성 상태로 찍혀 있다.
-       엔진에 back() 이 생기면 screen.allowBack 으로 열어주면 된다. */
+    /* Back — 화면 사이의 역방향 이동은 여전히 없다(상태머신에 API 가 없다).
+       열리는 것은 "같은 화면 안의 앞 문항" 뿐이다: 리딩은 지문 한 편의 문항을
+       하나씩 보여 주므로 그 안에서는 되돌아갈 수 있어야 한다. 첫 문항에서는 비활성. */
     var back = document.getElementById('btn-back');
-    if (back) back.disabled = true;
+    if (back) {
+      var nav0 = screenNav();
+      back.disabled = !(nav0 && typeof nav0.canPrev === 'function' && nav0.canPrev());
+    }
 
     /* Review 는 화면 단위 플래그다 — 화면이 바뀌면 눌린 상태를 다시 읽어 온다. */
     var rev = document.getElementById('btn-review');
@@ -830,8 +849,20 @@ window.SG_RUNTIME = (function () {
 
     document.getElementById('btn-advance').onclick = function () {
       if (machine.status() === 'submitting' || machine.status() === 'submitted') return;
+      /* 화면 안에 아직 안 본 문항이 남았으면 화면을 넘기지 않는다 — 다음 문항을 편다.
+         마지막 문항이면 next() 가 false 라 그대로 다음 화면(=다음 지문)으로 간다. */
+      var nav = screenNav();
+      if (nav && typeof nav.next === 'function' && nav.next()) return;
       machine.next('manual');
     };
+
+    var backBtn = document.getElementById('btn-back');
+    if (backBtn) {
+      backBtn.onclick = function () {
+        var nav = screenNav();
+        if (nav && typeof nav.prev === 'function') nav.prev();
+      };
+    }
 
     bindModals();
     bindSubbar(session);
@@ -853,6 +884,15 @@ window.SG_RUNTIME = (function () {
     machine: function () { return machine; },
     screens: function () { return screens; },
     setId: function () { return SET_ID; },
+    /* 화면 안에서 문항이 바뀌었을 때 렌더러가 부른다 — 진행 표시와 Back 상태를 다시 맞춘다.
+       (엔진 전이가 아니라 화면 내부 이동이라 onTransition 이 돌지 않는다.) */
+    syncNav: function () {
+      var sc = machine && machine.current();
+      if (!sc) return false;
+      syncSubbar(sc);
+      syncActions(sc);
+      return true;
+    },
     /* 현재 화면을 그대로 다시 그린다 — 관리자 편집이 콘텐츠 팩을 고친 뒤 쓴다. */
     rerender: function () {
       if (!machine || !machine.current()) return false;

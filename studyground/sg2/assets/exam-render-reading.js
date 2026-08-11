@@ -31,6 +31,20 @@
   var ALIAS = 'reading-question';   // 별칭 screenType — 위 주석의 공존 전략
   var MARKERS = ['A', 'B', 'C', 'D'];
 
+  /* 한 화면에 실린 문항을 한 개씩만 보여 준다(passage/chat).
+     화면열은 그대로다 — 지문 한 편이 화면 하나라는 컴파일 결과를 바꾸지 않고,
+     그 안에서 문항 카드를 하나만 펴고 나머지는 감춘다. 마지막 문항에서 Next 를
+     누르면 그때 화면이 넘어가므로 "한 지문이 끝나면 다음 지문" 이 된다.
+     셸(exam-shell.js)의 Next/Back 은 아래 SG_SCREEN_NAV 를 먼저 물어본다.
+     화면 id 를 함께 실어 두는 이유: 다른 섹션 렌더러는 이 전역을 지우지 않으므로
+     셸이 "지금 화면의 것인가"를 스스로 확인할 수 있어야 한다. */
+  function setNav(nav) { root.SG_SCREEN_NAV = nav || null; }
+
+  function syncShellNav() {
+    var R = root.SG_RUNTIME;
+    if (R && typeof R.syncNav === 'function') { try { R.syncNav(); } catch (e) {} }
+  }
+
   /* ── 순수 헬퍼 (node 에서 그대로 검증 가능 — F9) ─────────── */
 
   // 지문 텍스트는 블록마다 필드가 다르다(passage / paragraphs / messages). exam.html 의
@@ -425,6 +439,7 @@
   function render(screen, ctx) {
     if (!doc) return null;
     ctx = ctx || {};
+    setNav(null);                      // 이 화면에서 다시 채운다(passage/chat 만)
     var wrap = el('div', 'rd-screen');
     var blk = blockOf(screen);
     var kind0 = (screen && screen.blockKind) || (blk && blk.kind) || '';
@@ -451,8 +466,27 @@
     var insertQ = insertQuestionOf(blk, qs);
 
     // 렌더 지역 상태 — 마커/라디오/그리드가 서로를 갱신한다.
+    var cards = {};                    // qid → 문항 카드(한 개만 펴 둔다)
+    var cur = 0;                       // 지금 보이는 문항의 인덱스
     var api = {
       markers: {}, radios: {}, gridBtns: {}, blanks: [], qs: qs,
+      // 문항 하나만 펴고 나머지는 감춘다. 그리드의 현재 표시와 셸 버튼도 함께 맞춘다.
+      showQuestion: function (i) {
+        if (i < 0 || i >= qs.length) return false;
+        cur = i;
+        var j, card;
+        for (j = 0; j < qs.length; j++) {
+          card = cards[qs[j].id];
+          if (card) card.hidden = (j !== i);
+        }
+        api.refreshGrid();
+        syncShellNav();
+        return true;
+      },
+      indexOfQuestion: function (qid) {
+        for (var j = 0; j < qs.length; j++) { if (qs[j].id === qid) return j; }
+        return -1;
+      },
       paintChoice: function (qid, index) {
         var labs = wrap.querySelectorAll('label[data-q="' + qid + '"]'), i;
         for (i = 0; i < labs.length; i++) {
@@ -466,7 +500,9 @@
           if (!btn) continue;
           var v = savedAnswer(q.id);
           var done = v !== null && v !== undefined && String(v) !== '';
-          btn.className = done ? 'answered' : '';
+          var cls = done ? 'answered' : '';
+          if (i === cur) cls = cls ? cls + ' current' : 'current';
+          btn.className = cls;
         }
       },
       // insert 답안 단일 진입점 — 마커 클릭과 라디오가 양방향으로 같은 상태를 쓴다(AC4).
@@ -486,6 +522,9 @@
         }
         api.refreshGrid();
         if (fromMarker) {
+          // 지문의 마커를 눌렀는데 다른 문항이 펴져 있을 수 있다 — 그 문항으로 옮겨 준다.
+          var at = api.indexOfQuestion(insertQ.id);
+          if (at >= 0 && at !== cur) api.showQuestion(at);
           var card = doc.getElementById('rd-card-' + insertQ.id);
           if (card && card.scrollIntoView) { try { card.scrollIntoView({ block: 'nearest' }); } catch (e) { card.scrollIntoView(); } }
         }
@@ -517,8 +556,13 @@
 
     var right = el('div', 'rd-right');
     right.appendChild(gridNav(qs, api));
-    var i;
-    for (i = 0; i < qs.length; i++) right.appendChild(questionCard(screen, ctx, qs[i], api));
+    var i, card;
+    for (i = 0; i < qs.length; i++) {
+      card = questionCard(screen, ctx, qs[i], api);
+      cards[qs[i].id] = card;
+      card.hidden = (i !== 0);         // 첫 문항만 펴 둔다
+      right.appendChild(card);
+    }
 
     cols.appendChild(left);
     cols.appendChild(right);
@@ -530,6 +574,23 @@
       if (prev !== null && prev !== undefined && prev !== '') api.setInsert(parseInt(prev, 10), false);
     }
     api.refreshGrid();
+
+    /* 셸의 Next/Back 이 화면을 넘기기 전에 이 화면 안의 문항을 먼저 넘긴다.
+       마지막 문항에서 next() 가 false 를 돌려주면 셸이 다음 화면(=다음 지문)으로 간다. */
+    setNav({
+      screenId: screen && screen.id,
+      count: qs.length,
+      index: function () { return cur; },
+      canPrev: function () { return cur > 0; },
+      next: function () { return cur + 1 < qs.length ? api.showQuestion(cur + 1) : false; },
+      prev: function () { return cur > 0 ? api.showQuestion(cur - 1) : false; },
+      /* 서브바 표시 — 화면이 "31-35 of 50" 이어도 지금 보이는 건 한 문항이다. */
+      progress: function () {
+        var q = qs[cur], total = screen && screen.progress ? screen.progress.total : 0;
+        if (!q || q.no === undefined || !total) return null;
+        return { first: q.no, last: q.no, total: total, style: 'single' };
+      }
+    });
     return wrap;
   }
 
@@ -544,14 +605,20 @@
       b.type = 'button';
       b.textContent = String(q.no === undefined ? i + 1 : q.no);
       b.setAttribute('data-qid', q.id);
-      (function (qq) {
+      (function (qq, at) {
         b.onclick = function () {
+          // 한 번에 한 문항만 보이므로, 스크롤이 아니라 그 문항으로 갈아 끼운다.
+          if (typeof api.showQuestion === 'function' && api.showQuestion(at)) {
+            var shown = doc.getElementById('rd-card-' + qq.id);
+            if (shown && shown.scrollIntoView) { try { shown.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+            return;
+          }
           var target = doc.getElementById('rd-card-' + qq.id) || doc.getElementById('rd-q-' + qq.id);
           if (!target) return;
           if (target.scrollIntoView) { try { target.scrollIntoView({ block: 'center' }); } catch (e) { target.scrollIntoView(); } }
           if (target.focus) { try { target.focus(); } catch (e) {} }
         };
-      })(q);
+      })(q, i);
       api.gridBtns[q.id] = b;
       nav.appendChild(b);
     }

@@ -561,7 +561,9 @@ body.exam-body {
 .rd-chat-text { font-size: 13.5px; line-height: 1.65; color: var(--ink-2); white-space: pre-wrap; }
 
 /* 문항 카드 · 선택 상태 */
+/* 리딩은 한 화면(=지문 한 편) 안에서도 문항을 하나씩만 편다 — 나머지는 [hidden] 이다. */
 .rd-q { margin-bottom: 12px; }
+.rd-q[hidden] { display: none; }
 .rd-q .opt.is-chosen { background: var(--brand-soft); border-color: var(--brand); }
 .rd-grid { margin-bottom: 12px; }
 

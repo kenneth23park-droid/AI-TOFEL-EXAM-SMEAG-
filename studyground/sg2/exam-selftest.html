@@ -146,6 +146,29 @@ window.SG_SELFTEST = (function () {
              qs.reduce(function (a, q) { return a + (q.choices || []).length; }, 0));
         T.ok(s.id + ' 그리드 네비게이션', !!node.querySelector('.grid-nav'));
         T.ok(s.id + ' 지문 스크롤 영역', !!node.querySelector('.rd-scroll'));
+
+        /* 한 번에 한 문항만 — 나머지 카드는 [hidden] 이고, 셸의 Next/Back 이 쓰는
+           SG_SCREEN_NAV 가 이 화면의 것으로 올라와 있어야 한다. */
+        function shown() { return node.querySelectorAll('.rd-q:not([hidden])'); }
+        var nav = window.SG_SCREEN_NAV;
+        T.ok(s.id + ' 보이는 문항 1개', shown().length === 1, String(shown().length));
+        T.ok(s.id + ' 화면 nav 등록', !!nav && nav.screenId === s.id);
+        if (nav) {
+          T.eq(s.id + ' nav 문항 수', nav.count, qs.length);
+          T.ok(s.id + ' 첫 문항에서 Back 불가', nav.canPrev() === false);
+          T.ok(s.id + ' 첫 진행 표시', !!nav.progress() && nav.progress().first === qs[0].no,
+               JSON.stringify(nav.progress()));
+          var steps = 0;
+          while (nav.next()) { steps++; if (steps > 50) break; }
+          T.eq(s.id + ' Next 로 끝까지', steps, qs.length - 1);
+          T.ok(s.id + ' 마지막에서 화면 넘김', nav.next() === false);
+          T.ok(s.id + ' 마지막 문항이 보인다',
+               shown().length === 1 && shown()[0].getAttribute('data-qid') === qs[qs.length - 1].id);
+          T.ok(s.id + ' 마지막에서 Back 가능', nav.canPrev() === (qs.length > 1));
+          while (nav.prev()) {}                                // 첫 문항으로 되돌린다
+          T.ok(s.id + ' Back 으로 첫 문항 복귀',
+               shown()[0].getAttribute('data-qid') === qs[0].id);
+        }
         if (s.blockKind === 'chat') {
           T.eq(s.id + ' 말풍선', node.querySelectorAll('.rd-chat-bubble').length, blk.messages.length);
         }
