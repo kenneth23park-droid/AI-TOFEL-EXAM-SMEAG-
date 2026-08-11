@@ -345,7 +345,7 @@ window.SG_REVIEW_WRITING = (function () {
    * 화면 전체 HTML.
    * @param {Array}  m      model()
    * @param {Object} state  { m: 과제 index, q: 그 과제 안 문항 index }
-   * @param {Object} opts   { extraFor: fn(qid) → HTML }
+   * @param {Object} opts   { extraFor: fn(qid, item) → HTML }
    */
   function html(m, state, opts) {
     opts = opts || {};
@@ -380,7 +380,7 @@ window.SG_REVIEW_WRITING = (function () {
         '<div class="lr-left">' + taskHtml(it) + '</div>' +
         '<div class="lr-right">' +
           answerHtml(it) + verdictHtml(it) + rubricHtml(it) +
-          (opts.extraFor ? opts.extraFor(it.qid) : '') +
+          (opts.extraFor ? opts.extraFor(it.qid, it) : '') +
         '</div>' +
       '</div>' +
     '</div>';
@@ -393,7 +393,7 @@ window.SG_REVIEW_WRITING = (function () {
    *   opts.pack      콘텐츠 팩
    *   opts.rows      SG_RESULTS.detail(res).rows
    *   opts.tasks     sg_task_scores 행[] (늦게 와도 된다 — setTasks 로 갈아 끼운다)
-   *   opts.extraFor  fn(qid) → 문항 아래 붙일 HTML(코멘트 등)
+   *   opts.extraFor  fn(qid, item) → 문항 아래 붙일 HTML(코멘트 등)
    *   opts.onPaint   fn(el) 다시 그린 뒤 부를 것(코멘트 편집기 배선 등)
    * @returns {{repaint, setTasks, state, model}}
    */

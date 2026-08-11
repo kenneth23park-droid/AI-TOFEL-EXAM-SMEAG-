@@ -411,8 +411,13 @@
     if (WRITE) { WRITE.repaint(); return true; }
     WRITE = SG_REVIEW_WRITING.mount(el, {
       pack: PACK, rows: ALL, tasks: TASKS,
-      extraFor: function (qid) {
+      extraFor: function (qid, it) {
         var notes = commentsFor('question', qid);
+        /* Build a Sentence 에는 AI 리뷰를 붙이지 않는다 — 정답이 이미 옆에 펴져 있다.
+           예전에 만들어 둔 초안이 남아 있어도 여기서는 접는다. 선생님 말은 남는다. */
+        if (it && it.kind === 'build') {
+          notes = notes.filter(function (c) { return c.source === 'teacher'; });
+        }
         if (!notes.length && !STAFF) return '';
         return '<div class="mt-16">' + notes.map(cardOf).join('') +
                (STAFF ? editorFor('question', qid, notes) : '') + '</div>';

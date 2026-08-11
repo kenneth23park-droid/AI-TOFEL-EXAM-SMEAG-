@@ -117,10 +117,15 @@ window.SG_COMMENTS = (function () {
 
   /* AI 에게 보낼 채점 요약. 이름·학번·이메일은 넣지 않는다 — 코멘트를 쓰는 데
    * 필요 없고, 필요 없는 것을 밖으로 내보내지 않는 게 기본이다.
-   * 틀린 문항과 서술형 답안만 실어 보낸다(맞은 문항 90개는 할 말이 없다). */
+   * 틀린 문항과 서술형 답안만 실어 보낸다(맞은 문항 90개는 할 말이 없다).
+   *
+   * Build a Sentence 는 빼고 보낸다 — 정답표대로 어순을 맞추는 문항이라 리뷰 화면이
+   * 이미 빈칸마다 맞고 틀림과 정답을 나란히 보여 준다. AI 가 여기에 덧붙일 말은
+   * 정답을 다시 읽어 주는 것뿐이고, 채점(sg_task_scores)에서도 이미 빠져 있다. */
   function attemptFor(result, detail) {
     var wrong = [], open = [];
     (detail.rows || []).forEach(function (r) {
+      if (r.kind === 'build') return;
       if (r.ok === false && wrong.length < 40) {
         wrong.push({
           question_id: r.qid, no: r.no, section: r.section, kind: r.kind,
