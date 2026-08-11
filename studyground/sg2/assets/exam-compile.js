@@ -461,7 +461,10 @@
        * 아래 분기가 전혀 실행되지 않는다 — TOEFL phases 출력은 종전과 바이트 단위로 같다. */
       var cue = cueOf(q.cueCard, ctx.warnings, where);
       // §3.3: TOEFL 도 항상 prep phase 를 갖는다. seconds:0 인 phase 는 엔진이 즉시 통과시킨다.
-      if (tt.promptSelfPaced) phases.push({ name: 'read', seconds: 0, selfPaced: true });
+      /* 인터뷰 지시문은 멈춰 세우는 화면이 아니다 — 관찰(30:00)에서 응시자가 누르는 버튼 없이
+         지시문이 선 채로 인터뷰어 영상이 곧바로 돈다. seconds:0 · selfPaced 없음 = 즉시 통과이고,
+         렌더러가 이 phase 를 보고 지시문을 화면 진입 순간부터 세워 둔다. */
+      if (tt.promptSelfPaced) phases.push({ name: 'read', seconds: 0 });
       else if (cue) phases.push({ name: 'read', seconds: 0, selfPaced: true, cue: cue });
       var listenMedia = mediaOf(q.audio, tt.listenReplays, ctx.warnings, where);
       if (listenMedia) phases.push({ name: 'listen', seconds: 0, media: listenMedia });

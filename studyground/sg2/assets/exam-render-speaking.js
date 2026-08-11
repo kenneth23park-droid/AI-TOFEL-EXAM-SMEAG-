@@ -51,6 +51,17 @@
     return null;
   }
 
+  /* 즉시 통과하는 read phase(인터뷰) — 버튼으로 멈춰 세우지 않고, 지시문만 화면 진입
+     순간부터 세워 둔다. cue card 를 가진 IELTS 의 selfPaced read 는 여기 걸리지 않는다. */
+  function hasStandingRead(phases) {
+    var list = phases || [];
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i];
+      if (p && p.name === 'read' && endCondition(p) === 'immediate') return true;
+    }
+    return false;
+  }
+
   function endCondition(phase) {
     if (!phase) return 'none';
     if (phase.selfPaced === true) return 'button';
@@ -675,8 +686,9 @@
         stickyCaption = true;
         if (endCondition(p) === 'button') setButton('Continue', '계속', function () { fire('button'); });
       } else if (p.name === 'listen') {
-        setCaption('Listen carefully. The audio plays only once.', '잘 들으세요. 오디오는 한 번만 재생됩니다.');
-        stickyCaption = false;
+        /* 인터뷰 지시문이 이미 서 있으면 덮지 않는다 — 관찰(1830s)에서 인터뷰어 영상이 도는
+           동안에도 상단 지시문은 그대로다. 그런 지시문이 없는 S1 에서만 청취 안내를 쓴다. */
+        if (!stickyCaption) setCaption('Listen carefully. The audio plays only once.', '잘 들으세요. 오디오는 한 번만 재생됩니다.');
       } else if (p.name === 'prompt') {
         setCaption('Read the prompt.', '문제를 읽으세요.');
         stickyCaption = true;
@@ -734,6 +746,12 @@
     }
 
     function begin() {
+      /* 인터뷰 지시문은 phase 에 안착하지 않고 지나가므로(즉시 통과), 화면에 들어서는
+         이 자리에서 세운다. 이후 listen·prep·record 가 덮지 않는다. */
+      if (hasStandingRead(phases)) {
+        setCaption("Please answer the interviewer's questions.", '면접관의 질문에 답하세요.');
+        stickyCaption = true;
+      }
       if (detectInterrupted()) {
         var s = STORE();
         var prev = (s && typeof s.getAnswer === 'function') ? s.getAnswer(qid) : null;

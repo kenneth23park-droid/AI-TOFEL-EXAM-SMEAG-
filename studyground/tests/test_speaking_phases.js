@@ -122,9 +122,11 @@ check('S1 timer.mode', s1.timer.mode, 'response');
 
 check('S2 첫 화면 id', s2.id, 'speaking.q.S2.01');
 var rS2 = drive(s2.phases);
-check('S2 궤적', names(rS2), 'read → listen → prep → record → (end)');
+/* read 는 멈춰 세우지 않는다 — 화면에 들어서면 지시문이 선 채로 인터뷰어가 곧바로 말한다.
+   그래서 궤적의 첫 정거장은 read 가 아니라 listen 이다(read 는 즉시 통과). */
+check('S2 궤적', names(rS2), 'listen → prep → record → (end)');
 check('S2 액션', acts(rS2), 'playMedia,startRecord,stopRecord,screenDone');
-check('S2 read 는 selfPaced', s2.phases[0].selfPaced, true);
+check('S2 read 는 버튼으로 멈추지 않는다', SP.endCondition(s2.phases[0]), 'immediate');
 check('S2 record 초 (interview.responseSec)', s2.phases[3].seconds, 45);
 
 console.log('\n[3b] 11문항 전부가 record phase 로 끝나고 done 에 도달');
