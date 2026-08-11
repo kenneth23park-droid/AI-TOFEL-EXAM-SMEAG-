@@ -385,6 +385,16 @@
     return out;
   }
 
+  /* 안내 방송의 대본을 화면 본문으로 쓴다(2026-08-11 발주처 요구 — 인터뷰 안내를
+   * 듣기만 하면 놓친다. 실제 시험처럼 같은 문장을 눈으로도 읽게 한다).
+   * 콘텐츠의 script 는 "Instructions: ..." 로 시작하는데, 그 머리말은 화면 제목이
+   * 이미 하는 말이라 떼어 낸다. script 가 없는 팩(set1)은 종전대로 instruction 을 쓴다. */
+  function narrationBody(block) {
+    var s = String((block && block.script) || '').replace(/^\s*instructions\s*[:：]\s*/i, '');
+    s = s.replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
+    return s || String((block && block.instruction) || '');
+  }
+
   /* record-set (speaking): introAudio → instruction 화면 1개 + 문항마다 speaking 화면 */
   function recordSetBlock(ctx, block) {
     var out = [], qs = block.questions || [], i;
@@ -435,7 +445,7 @@
         copy: {
           titleEn: block.heading || (ctx.moduleLabel + ' Directions'),
           titleKo: ctx.moduleLabel + ' 안내',
-          bodyEn: block.instruction || '',
+          bodyEn: narrationBody(block),
           bodyKo: '',
           ctaEn: CTA.begin.en,
           ctaKo: CTA.begin.ko

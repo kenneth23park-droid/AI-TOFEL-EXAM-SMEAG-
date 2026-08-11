@@ -297,6 +297,22 @@ check('insert 문항이 있는 블록', insertBlocks, 1);
 check('마커 개수 위반', markerBad, 0);
 check('정답 마커 결손', answerMarkerBad, 0);
 
+/* 스피킹 안내 화면 — 방송(오디오)과 같은 문장이 화면에도 떠야 한다.
+   듣기만으로는 인터뷰 지시를 놓치는 응시자가 있어 대본을 본문으로 쓴다(2026-08-11). */
+console.log('\n[speaking intro] 안내 방송 + 같은 문장 표시');
+['S1', 'S2'].forEach(function (mid) {
+  var scr = res.screens.filter(function (s) { return s.id === 'speaking.intro.' + mid; })[0];
+  check(mid + ' 안내 화면 존재', !!scr, true);
+  if (!scr) return;
+  check(mid + ' 안내 오디오', !!(scr.audio && scr.audio.src), true);
+  var blk = null;
+  set.sections.filter(function (s) { return s.id === 'speaking'; })[0].modules
+    .filter(function (m) { return m.id === mid; })
+    .forEach(function (m) { blk = m.blocks[0]; });
+  var want = String(blk.script || '').replace(/^\s*instructions\s*[:：]\s*/i, '').replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
+  check(mid + ' 본문 = 방송 대본', scr.copy.bodyEn, want);
+});
+
 if (res.warnings.length) {
   console.log('\n[compile warnings] ' + res.warnings.length + '건');
   res.warnings.slice(0, 15).forEach(function (w) { console.log('       - ' + w); });
