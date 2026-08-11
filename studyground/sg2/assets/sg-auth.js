@@ -160,6 +160,8 @@ window.SG_AUTH = (function () {
       }).catch(function () {});
     }
     write(null);
+    // 로그아웃하면 전체화면도 함께 놓아 준다 — 시험이 끝난 화면을 창으로 돌려준다.
+    if (window.SG_FS) window.SG_FS.release();
   }
 
   function user() {

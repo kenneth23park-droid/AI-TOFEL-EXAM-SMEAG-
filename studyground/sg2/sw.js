@@ -132,7 +132,11 @@
 // v42: 리딩 cloze 빈칸은 영어만 받는다 — exam-render-reading.js 가 ASCII 아닌 글자를
 //      걷어내고(IME 조합이 끝난 뒤에) 입력칸에 lang="en" 을 준다. 한글 자판을 켠 채로
 //      친 답이 그대로 저장돼 오답이 되던 자리다. 캐시된 옛 렌더러가 남으면 그대로라 판올림.
-const VERSION = 'sg-v42';
+// v43: 학생은 로그인하는 순간 전체화면으로 들어가고, 시험 본문이 화면보다 길면
+//      확대율을 낮춰 한 화면에 담는다 — assets/sg-fullscreen.js 를 새로 넣고 거의
+//      모든 셸 HTML 의 <script> 목록이 바뀌었다(login.html 은 버튼을 누른 그 순간에
+//      전체화면을 요청한다). 캐시된 옛 셸이 남으면 그 기기만 창 모드로 시험을 본다.
+const VERSION = 'sg-v43';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -170,6 +174,9 @@ const SHELL_ASSETS = [
   // 오프라인 사전 다운로드 — 목록 자체가 캐시에 있어야, 두 번째 방문이 오프라인이어도
   // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.
   'assets/offline-prep.js', 'config/offline.set9.json',
+
+  // 전체화면 자동 진입 · 화면 맞춤 — 오프라인 시험장에서도 첫 화면부터 적용돼야 한다.
+  'assets/sg-fullscreen.js',
 
   'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',

@@ -75,6 +75,7 @@
 <script src="assets/sg-seats.js"></script>
 <script src="assets/seat-runtime.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/sg-fullscreen.js"></script>
 <script src="assets/sg-auth.js"></script>
 <script src="assets/sg-qr.js"></script>
 <script>
@@ -138,7 +139,17 @@
     err.classList.remove('on');
     go.disabled = true;
     return SG_AUTH.signIn(id, pw, examDate)
-      .then(function () { location.replace(landing()); })
+      .then(function () {
+        // 학생은 전체화면으로 들어간다. 선생님·관리자는 창을 여러 개 쓰므로 돌려준다.
+        // 전체화면 요청 자체는 버튼을 누른 순간에 이미 나갔다(아래 submit 핸들러) —
+        // 로그인 응답을 기다린 뒤에는 브라우저가 사용자 동작으로 쳐 주지 않는다.
+        if (!window.SG_FS) return location.replace(landing());
+        return SG_AUTH.isStaff().catch(function () { return false; })
+          .then(function (staff) {
+            if (staff) SG_FS.release();
+            location.replace(landing());
+          });
+      })
       .catch(function (e2) {
         go.disabled = false;
         document.getElementById('pw').value = '2222';
@@ -148,6 +159,7 @@
 
   f.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (window.SG_FS) SG_FS.armAndEnter();     // 누른 그 순간에만 전체화면이 열린다
     enter(document.getElementById('login').value.trim(), document.getElementById('pw').value);
   });
 
@@ -168,6 +180,7 @@
       return;
     }
     document.getElementById('login').value = c.id;
+    if (window.SG_FS) SG_FS.armAndEnter();     // QR 로 들어와도 학생 화면은 전체화면
     enter(c.id, '2222', c.date);   // 카드가 자기 시험일을 들고 온다
   }
 

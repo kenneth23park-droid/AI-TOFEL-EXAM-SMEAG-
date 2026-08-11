@@ -544,8 +544,15 @@ window.SG_RUNTIME = (function () {
     if (fs) {
       fs.onclick = function () {
         var d = document, el = d.documentElement;
+        var isOn = !!(d.fullscreenElement || d.webkitFullscreenElement);
+        /* 이 버튼은 학생의 뜻이다. 나가겠다고 눌렀으면 자동 복귀도 함께 끈다 —
+           안 그러면 다음 클릭에서 sg-fullscreen 이 도로 전체화면으로 끌고 간다. */
+        if (window.SG_FS) {
+          if (isOn) SG_FS.release(); else SG_FS.armAndEnter();
+          return;
+        }
         try {
-          if (d.fullscreenElement || d.webkitFullscreenElement) {
+          if (isOn) {
             (d.exitFullscreen || d.webkitExitFullscreen).call(d);
           } else {
             (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
