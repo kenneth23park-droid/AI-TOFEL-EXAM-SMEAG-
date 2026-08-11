@@ -107,7 +107,7 @@
         return null;
       }
       return fetch(SG_AUTH.url + '/rest/v1/sg_exam_accounts?exam_date=eq.' + date +
-                   '&select=student_id,name,exam_date&order=student_id.asc', {
+                   '&select=student_id,name,email,exam_date&order=student_id.asc', {
         headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok }
       }).then(function (r) { return r.ok ? r.json() : null; });
     }).then(function (rows) {
@@ -121,6 +121,7 @@
         return '<div class="card-qr">' +
           '<div class="nm">' + esc(r.name) + '</div>' +
           '<div class="id">' + esc(r.student_id) + '</div>' +
+          (r.email ? '<div class="meta">' + esc(r.email) + '</div>' : '') +
           '<div class="meta">' + esc(r.exam_date) + ' · PW 2222</div>' +
           (window.SG_QR ? SG_QR.svg(payload, { size: 132 }) : '') +
           '</div>';

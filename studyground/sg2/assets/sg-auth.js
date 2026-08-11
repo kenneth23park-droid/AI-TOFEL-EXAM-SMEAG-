@@ -7,13 +7,14 @@
  * 만들기 때문에 확인 메일을 기다리지 않고 가입 즉시 로그인 상태가 된다.
  * 로그인도 같은 함수를 거쳐 이메일뿐 아니라 학번으로도 들어올 수 있다.
  *
- * 가입 시 학번 + 생년월일을 어드민 전산 명부(sg_roster)와 대조하지만, 지금은 그
- * 대조가 가입을 막지 않는다(soft verify) — 확인되면 profile.verified = true,
- * 아니면 false 로 두고 관리자가 명부 화면에서 정리한다.
+ * 수험생 계정 규칙: 아이디는 smeag000~smeag999 를 서버가 자동 배정하고 비밀번호는
+ * 전부 2222. 키는 (아이디, 시험일자)라 같은 날 중복은 불가, 다른 날 재사용은 가능하다.
+ * 로그인은 아이디 수동 입력과 QR 스캔(assets/sg-qr.js) 둘 다로 들어온다.
  *
  * 노출 전역: window.SG_AUTH
- *   SG_AUTH.lookup(studentId, birthDate) → Promise<{found, name?, class_name?, claimed?}>
- *   SG_AUTH.signUp({ name, email, password, studentId, birthDate }) → Promise<user>
+ *   SG_AUTH.nextId(examDate)     → Promise<{student_id, used, free}>  빈 아이디 미리보기
+ *   SG_AUTH.register({ name, examDate, studentId?, force? })
+ *                                → Promise<{user, student_id, password, exam_date}>
  *   SG_AUTH.signIn(login, password)                      → Promise<user>
  *   SG_AUTH.signOut()            현재 기기의 세션만 지운다
  *   SG_AUTH.user()               로그인 상태면 프로필 객체, 아니면 null
@@ -76,19 +77,28 @@ window.SG_AUTH = (function () {
     });
   }
 
-  function lookup(studentId, birthDate) {
-    return fn({ action: 'lookup', student_id: studentId || '', birth_date: birthDate || '' });
+  /** 그 시험일에 아직 안 쓴 가장 빠른 아이디. 화면에 미리 보여줄 때만 쓴다. */
+  function nextId(examDate) {
+    return fn({ action: 'next_id', exam_date: examDate || '' });
   }
 
-  function signUp(o) {
+  /* 가입 입력은 이름 + 이메일 + 시험일자. 아이디(smeag000~999)는 서버가 배정하고
+   * 비밀번호는 2222 로 통일돼 있어 학생이 정할 것이 없다.
+   * 같은 시험일에 같은 이메일은 409 email_taken_today 로 막힌다(force 로도 못 넘는다).
+   * 같은 시험일에 같은 이름이 이미 있으면 409 same_name_today 로 되돌아온다 —
+   * 화면이 팝업으로 묻고, 그대로 진행하려면 { force: true } 로 다시 부른다. */
+  function register(o) {
     return fn({
-      action: 'signup',
+      action: 'register',
       name: o.name || '',
       email: o.email || '',
-      password: o.password || '',
+      exam_date: o.examDate || '',
       student_id: o.studentId || '',
-      birth_date: o.birthDate || ''
-    }).then(store);
+      force: o.force === true
+    }).then(function (j) {
+      store(j);
+      return j;                     // { user, student_id, password, exam_date }
+    });
   }
 
   /* 로그인 아이디 → 서버가 아는 형태로 맞춘다.
@@ -102,8 +112,13 @@ window.SG_AUTH = (function () {
     return v + '@' + STAFF_DOMAIN;
   }
 
-  function signIn(login, password) {
-    return fn({ action: 'signin', login: loginId(login), password: password }).then(store);
+  /* examDate 는 QR 카드로 들어올 때만 넘어온다. 같은 아이디가 여러 시험일에 걸쳐
+   * 있을 수 있어서, 카드가 자기 날짜를 들고 오면 그 계정으로 정확히 들어간다.
+   * 손으로 칠 때는 비워 두고, 서버가 오늘 → 최근 과거 → 가까운 미래 순으로 고른다. */
+  function signIn(login, password, examDate) {
+    return fn({
+      action: 'signin', login: loginId(login), password: password, exam_date: examDate || ''
+    }).then(store);
   }
 
   function signOut() {
@@ -234,7 +249,7 @@ window.SG_AUTH = (function () {
   onChange(paintNav);
 
   return {
-    lookup: lookup, signUp: signUp, signIn: signIn, signOut: signOut,
+    nextId: nextId, register: register, signIn: signIn, signOut: signOut,
     user: user, profile: profile, role: role, isStaff: isStaff,
     token: token, require: require_, onChange: onChange,
     url: URL_, anonKey: ANON

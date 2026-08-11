@@ -76,7 +76,11 @@
 // v29: 대본 대조 규칙을 공용 모듈로 뺐다 — assets/audio-script-check.js 를 프리캐시에
 //      넣고, 이제 admin-audio-files.html · admin-audio-sync.html 둘 다 이 파일을 부른다.
 //      두 화면의 <script> 목록이 바뀌었으므로 VERSION 을 올려 셸 캐시를 새로 채운다.
-const VERSION = 'sg-v29';
+// v30: 등록의 주요 키가 학생아이디 · 이메일 · 이름 이 되었다. signup.html 이 이메일을
+//      받고, login.html 은 아이디뿐 아니라 등록한 이메일로도 들어간다. admin-qr.html
+//      카드에 이메일이 함께 찍힌다. 세 화면 모두 셸이라 VERSION 을 올려야 재방문
+//      기기가 이메일 칸 없는 옛 폼을 계속 보지 않는다.
+const VERSION = 'sg-v30';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
