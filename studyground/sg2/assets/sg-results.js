@@ -389,25 +389,48 @@ window.SG_RESULTS = (function () {
    * 서버에 AI 채점을 요청한다. 실패는 조용히 null 이다 — 채점이 안 됐다고 해서
    * 학생의 성적 화면이 멈추거나 에러를 띄울 이유는 없다(선생님이 확정하면 그만이다).
    */
+  /* 한 요청에 담는 과제 수. 서버는 과제마다 (스피킹이면 전사 + ) 모델 호출을 하고,
+   * 서버리스 함수에는 실행시간 상한이 있다. SET 9 는 W 3 + S 15 = 18 과제라 한 번에
+   * 보내면 상한을 넘겨 통째로 날아간다 — 나눠 보내면 앞의 묶음은 이미 저장돼 있고
+   * 뒤에서 끊겨도 다음 방문 때 못 매긴 것만 이어서 매긴다(서버가 already_scored 로 거른다). */
+  var SCORE_BATCH = 3;
+
   function aiScore(row, opts) {
     opts = opts || {};
     var list = opts.tasks || productive(row);
     if (!list.length || !window.SG_AUTH) return Promise.resolve(null);
     return SG_AUTH.token().then(function (tok) {
       if (!tok) return null;
-      return fetch('/api/score', {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session: row.session,
-          owner: opts.owner || undefined,
-          provider: opts.provider || undefined,
-          model: opts.model || undefined,
-          lang: opts.lang || undefined,
-          force: !!opts.force,
-          tasks: list
-        })
-      }).then(function (r) { return r.ok ? r.json() : null; });
+
+      var merged = null;
+
+      function send(i) {
+        if (i >= list.length) return Promise.resolve(merged);
+        return fetch('/api/score', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session: row.session,
+            owner: opts.owner || undefined,
+            provider: opts.provider || undefined,
+            model: opts.model || undefined,
+            lang: opts.lang || undefined,
+            force: !!opts.force,
+            tasks: list.slice(i, i + SCORE_BATCH)
+          })
+        }).then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (out) {
+            if (out) {
+              if (!merged) merged = { session: row.session, scored: [], skipped: [] };
+              merged.scored = merged.scored.concat(out.scored || []);
+              merged.skipped = merged.skipped.concat(out.skipped || []);
+              merged.provider = out.provider; merged.model = out.model; merged.owner = out.owner;
+            }
+            return send(i + SCORE_BATCH);
+          })['catch'](function () { return merged; });   // 한 묶음이 끊겨도 앞의 결과는 남는다
+      }
+
+      return send(0);
     }).catch(function () { return null; });
   }
 

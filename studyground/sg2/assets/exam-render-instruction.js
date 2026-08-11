@@ -589,6 +589,32 @@
     return wrap;
   }
 
+  /* 안내 방송이 끝나면 응시자를 기다리지 않고 다음 화면으로 넘어간다(발주처 요구,
+   * 2026-08-11 — 스피킹 섹션). 실제 시험의 스피킹 안내 방송은 "지금부터 시작합니다"로
+   * 끝나고 곧바로 첫 문항이 나온다 — 여기서 버튼을 기다리면 그 흐름이 끊긴다.
+   *
+   * 'ended' 일 때만 넘긴다. 'error'(오디오 404·오프라인)면 방송을 못 들은 것이므로
+   * Begin 버튼을 남겨 응시자가 직접 시작하게 둔다 — 못 들은 안내를 자동으로 지나치면
+   * 무슨 일이 일어났는지 알 수 없다.
+   *
+   * 넘기는 주체는 렌더러가 아니라 엔진이다. 화면이 이미 바뀐 뒤 늦게 도착한 ended 가
+   * 다음 화면을 한 칸 더 밀지 않도록, 넘기기 직전에 현재 화면이 아직 이 화면인지 본다. */
+  function autoAdvanceOnAnnouncement(screen, ctx) {
+    var engine = ctx && ctx.engine;
+    if (!engine || typeof engine.next !== 'function') return null;
+    if (screen.section !== 'speaking') return null;
+    return function (reason) {
+      if (reason !== 'ended') return;
+      var go = function () {
+        var cur = typeof engine.current === 'function' ? engine.current() : null;
+        if (cur && cur.id !== screen.id) return;
+        engine.next('auto');
+      };
+      // 방송이 끝나자마자 화면이 튀면 사람이 따라오지 못한다 — 한 박자 둔다.
+      if (root.setTimeout) root.setTimeout(go, 700); else go();
+    };
+  }
+
   /* Directions 화면의 introAudio(FR16) — 1회 재생. 소진 관리는 listening 렌더러의
    * 공용 유닛(window.SG_LISTEN.makeAudioUnit)에 위임한다. 없으면 배지로 degrade. */
   function introAudioNode(screen, ctx) {
@@ -602,7 +628,7 @@
         captionEn: 'Directions — plays once',
         captionKo: '안내 음성 — 1회 재생',
         engine: ctx && ctx.engine,
-        onEnded: null
+        onEnded: autoAdvanceOnAnnouncement(screen, ctx)
       });
     }
     var b = el('p', 'exam-badge');
@@ -1622,6 +1648,7 @@
     questionCountsByModule: questionCountsByModule,
     unitWords: unitWords,
     micVerdict: micVerdict,
+    autoAdvanceOnAnnouncement: autoAdvanceOnAnnouncement,
     MIC_SAMPLE_EN: MIC_SAMPLE_EN,
     // 렌더 함수(셀프테스트에서 직접 호출)
     renderInstruction: renderInstruction,

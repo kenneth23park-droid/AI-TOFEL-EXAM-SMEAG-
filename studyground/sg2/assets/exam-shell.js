@@ -652,8 +652,8 @@ window.SG_RUNTIME = (function () {
           '<span data-en>Your test has been submitted.</span><span data-ko>제출이 완료되었습니다.</span></h2>' +
         (line ? '<p style="font-size:34px;font-weight:850;margin:18px 0">' + line + '</p>' +
                 '<p style="opacity:.7;font-size:13px;margin:0 0 6px">' +
-                  '<span data-en>Auto-scored questions only. Writing and Speaking are reviewed by a teacher.</span>' +
-                  '<span data-ko>자동 채점 문항 기준입니다. 라이팅·스피킹은 선생님이 확인합니다.</span></p>'
+                  '<span data-en>Auto-scored questions only. Writing and Speaking are scored by AI first, then confirmed by a teacher.</span>' +
+                  '<span data-ko>자동 채점 문항 기준입니다. 라이팅·스피킹은 AI 가 먼저 채점하고 선생님이 확정합니다.</span></p>'
               : '<p style="opacity:.7"><span data-en>Your answers are saved.</span><span data-ko>답안이 저장되었습니다.</span></p>') +
         '<p id="done-sync" style="opacity:.6;font-size:12px;margin:14px 0"></p>' +
         '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">' +
@@ -672,11 +672,15 @@ window.SG_RUNTIME = (function () {
       say('Saved on this device.', '이 기기에 저장되었습니다.');
       return;
     }
-    say('Uploading…', '업로드 중…');
+    /* push() 는 답안 → 스피킹 녹음 → AI 채점을 이 순서로 건다. 녹음 업로드까지는
+       기다리므로(스피킹 15문항이면 몇 초) 그동안 무슨 일이 일어나는지 말해 준다.
+       채점 자체는 기다리지 않는다 — 결과는 성적 화면에서 밴드로 나타난다. */
+    say('Uploading your answers and recordings…', '답안과 녹음을 올리는 중…');
     SG_RESULTS.push().then(function (r) {
       if (r && r.failed) say('Saved on this device. It will upload when you are online.',
                              '이 기기에 저장했습니다. 온라인이 되면 올라갑니다.');
-      else say('Saved to your account.', '계정에 저장되었습니다.');
+      else say('Saved to your account. Writing and Speaking are being scored — check My results in a few minutes.',
+               '계정에 저장되었습니다. 라이팅·스피킹은 채점 중입니다 — 잠시 후 내 성적에서 확인하세요.');
     }).catch(function () {
       say('Saved on this device.', '이 기기에 저장되었습니다.');
     });

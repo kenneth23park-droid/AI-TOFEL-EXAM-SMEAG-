@@ -175,6 +175,43 @@
     return '--:--:--';
   }
 
+  /* ── 녹음 시작 신호음(beep) ────────────────────────────────
+     발주처 요구(2026-08-11): 질문이 끝나고 녹음이 시작되기 전에 "삐" 소리로 알린다.
+     실제 TOEFL 과 같은 신호로, 응시자는 소리를 듣고 말하기 시작하면 된다.
+
+     소리 파일을 쓰지 않고 WebAudio 로 합성한다 — 오프라인 응시에서도 404 가 없고
+     tts-manifest 에 항목이 늘지 않는다(볼륨 테스트음과 같은 이유).
+
+     신호음이 마이크에 녹음되지 않도록 **소리가 끝난 뒤에** 녹음을 연다. 같은 이유로
+     응답 시계도 신호음이 끝난 뒤 건다 — 안 그러면 8초짜리 문항에서 0.4초를 잃는다. */
+  var BEEP_HZ = 880;
+  var BEEP_SEC = 0.28;
+  var BEEP_GAP_MS = 120;      // 소리가 사라지고 마이크가 열리기까지의 여유
+
+  function beepMs() { return Math.round(BEEP_SEC * 1000) + BEEP_GAP_MS; }
+
+  function playBeep() {
+    var AC = root.AudioContext || root.webkitAudioContext;
+    if (!AC) return false;
+    try {
+      var actx = new AC();
+      var osc = actx.createOscillator();
+      var gain = actx.createGain();
+      var t0 = actx.currentTime;
+      var peak = Math.max(0.0002, volume() * 0.25);
+      osc.type = 'sine';
+      osc.frequency.value = BEEP_HZ;
+      // 사각파처럼 뚝 끊으면 '틱' 잡음이 난다. 짧은 어택·릴리스를 준다.
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(peak, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + BEEP_SEC);
+      osc.connect(gain); gain.connect(actx.destination);
+      osc.start(t0); osc.stop(t0 + BEEP_SEC + 0.02);
+      osc.onended = function () { try { actx.close(); } catch (e) {} };
+      return true;
+    } catch (e) { return false; }
+  }
+
   function volume() {
     var RT = root.SG_RUNTIME;
     if (RT && typeof RT.volume === 'function') {
@@ -226,6 +263,8 @@
     var armedKeys = [];
     var recording = false;
     var recordFailed = false;
+    var beepTimer = null;        // 신호음이 울리는 동안만 살아 있다
+    var pendingArm = null;       // 신호음이 끝나고 걸 응답 시계 {index, phase}
     var stickyCaption = false;   // read/prompt 가 세운 지시문을 prep·record 내내 유지할지
 
     /* ── DOM 골격 ── */
@@ -430,7 +469,8 @@
       var i = state.phaseIndex;
       var p = state.phases[i];
       if (!p) return;
-      if (p.name === 'record') rtime.textContent = fmt(remainingOf(i), 'HH:MM:SS');
+      // 신호음이 우는 동안은 시계가 아직 안 걸렸다 — 0 이 아니라 만 시간을 보여준다.
+      if (p.name === 'record') rtime.textContent = fmt(pendingArm ? (p.seconds || 0) : remainingOf(i), 'HH:MM:SS');
       else if (p.name === 'prep' && p.seconds > 0) prepTime.textContent = fmt(remainingOf(i), 'MM:SS');
     }
 
@@ -500,6 +540,32 @@
 
     /* ── 녹음 ── */
 
+    /* record phase 진입 → 신호음 → (소리가 끝나면) 마이크 열기 + 응답 시계.
+       AudioContext 가 없어 소리가 안 나는 브라우저에서도 순서와 타이밍은 같다 —
+       들리느냐만 다르고 시험 진행은 한 갈래로 유지한다. */
+    function beepThenRecord() {
+      var audible = playBeep();
+      logEvent('record_beep', screen.id, { qid: qid, audible: audible });
+      function run() {
+        beepTimer = null;
+        if (disposed) return;
+        startRecording();
+        if (pendingArm) {
+          armPhaseClock(pendingArm.index, pendingArm.phase);
+          pendingArm = null;
+          paint();
+        }
+      }
+      if (root.setTimeout) beepTimer = root.setTimeout(run, beepMs());
+      else run();
+    }
+
+    function cancelBeep() {
+      if (beepTimer !== null && root.clearTimeout) { try { root.clearTimeout(beepTimer); } catch (e) {} }
+      beepTimer = null;
+      pendingArm = null;
+    }
+
     function startRecording() {
       var R = REC();
       recordFailed = false;
@@ -532,6 +598,8 @@
 
     function stopRecording() {
       var R = REC();
+      // 신호음이 울리는 사이에 phase 가 끝났다면(force·강제전진) 마이크를 열지 않는다.
+      cancelBeep();
       if (!R || !recording) { recording = false; rbox.classList.remove('is-recording'); return; }
       recording = false;
       rbox.classList.remove('is-recording');
@@ -572,7 +640,7 @@
     function applyActions(list) {
       for (var i = 0; i < list.length; i++) {
         var a = list[i];
-        if (a === 'startRecord') startRecording();
+        if (a === 'startRecord') beepThenRecord();
         else if (a === 'stopRecord') stopRecording();
         // 'playMedia' 는 안착한 phase 를 그릴 때 처리한다(중간에 건너뛴 phase 는 재생 대상이 아니다).
         // 'screenDone' 은 renderPhase 에서 처리한다.
@@ -639,7 +707,10 @@
         rbox.hidden = false;
       }
 
-      armPhaseClock(i, p);
+      /* record 의 응답 시계는 신호음이 끝난 뒤에 건다(beepThenRecord 가 건다).
+         여기서 걸어 버리면 아직 마이크가 열리지도 않은 0.4초가 응답 시간에서 깎인다. */
+      if (p.name === 'record' && beepTimer !== null) pendingArm = { index: i, phase: p };
+      else armPhaseClock(i, p);
       if (isPlayable(p.media)) playPhaseMedia(i, p);
       paint();
     }
@@ -699,6 +770,7 @@
       if (disposed) return;
       disposed = true;
       stopAudio();
+      cancelBeep();
       var R = REC();
       if (R && R.isRecording()) { try { R.abort(); } catch (e) {} }
       recording = false;
@@ -750,6 +822,9 @@
     mediaKind: mediaKind,
     nextPhase: nextPhase,
     initialState: initialState,
+    beepMs: beepMs,
+    BEEP_HZ: BEEP_HZ,
+    BEEP_SEC: BEEP_SEC,
     // 렌더
     render: renderSpeaking,
     phaseKey: phaseKey,

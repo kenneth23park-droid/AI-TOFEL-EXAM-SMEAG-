@@ -434,3 +434,8 @@ function row(owner, session, task, score, rubric, provider, model, usage, error,
 }
 
 module.exports.answerText = answerText;   // 테스트용
+
+/* 과제 하나에 전사 + 채점 두 번의 모델 호출이 붙는다. 기본 상한(10초)으로는 스피킹
+ * 한 문항도 못 끝낸다. 클라이언트는 3개씩 나눠 보내지만(sg-results.js SCORE_BATCH),
+ * 그 묶음 하나가 들어갈 자리는 있어야 한다. */
+module.exports.config = { maxDuration: 60 };

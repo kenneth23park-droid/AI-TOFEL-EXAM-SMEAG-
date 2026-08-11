@@ -279,7 +279,12 @@
     function next(reason) {
       if (destroyed) return false;
       var r = reason || 'manual';
-      if (r !== 'manual' && r !== 'expire') return false;
+      /* 'auto' — 응시자가 아니라 콘텐츠가 화면을 끝낸 경우다. 지금은 스피킹 안내
+         방송이 끝났을 때 렌더러가 쓴다. 'expire'(시간 만료)와 구별해 두는 이유는
+         아래 advance:'manual' 가드다 — 그 가드는 "시간이 다 됐다고 안내 화면을
+         건너뛰지 말라"는 뜻이지, "방송이 끝나도 서 있으라"는 뜻이 아니다.
+         이벤트 로그에도 사람이 눌렀는지 아닌지가 그대로 남는다. */
+      if (r !== 'manual' && r !== 'expire' && r !== 'auto') return false;
       if (state === 'submitted' || state === 'submitting') return false;
       if (state === 'not_started') return false;
       var sc = current();
