@@ -89,7 +89,10 @@
 //      남성 오디오에 여성 면접관 캡처가 들어가 있었다. set9.js 가 또 바뀌어 판올림한다.
 // v33: 제출하면 그 자리에서 채점한다 — exam-shell 이 AI 채점을 끝까지 기다리고
 //      네 영역 밴드를 제출 화면에 편다. sg-band.js 가 시험 셸에도 실린다.
-const VERSION = 'sg-v33';
+// v34: 영역별 문항 리뷰 모듈 — review.html 이 리스닝(assets/sg-review-listening.js)과
+//      라이팅(assets/sg-review-writing.js)을 표 대신 문항 카드로 편다. 제출 직후
+//      오프라인에서도 열려야 하므로 둘 다 셸에 넣고 VERSION 을 올린다.
+const VERSION = 'sg-v34';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -101,6 +104,7 @@ const SHELL_ASSETS = [
 
   // 채점 리뷰 — 제출 직후 오프라인에서도 자기 답안을 문항별로 볼 수 있어야 한다.
   'review.html', 'admin-results.html', 'assets/sg-results.js', 'assets/sg-comments.js',
+  'assets/sg-review-listening.js', 'assets/sg-review-writing.js',
   // 밴드 환산 — 제출 화면이 채점 직후 네 영역 점수를 그 자리에서 편다.
   'assets/sg-band.js',
 
