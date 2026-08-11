@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SMEAG · StudyGround — 시험 셸 파생 페이지 생성기.
+"""SMEAG · MockTest — 시험 셸 파생 페이지 생성기.
 
 exam-runtime.html 의 셸 마크업을 단일 원본으로 삼아 두 종류를 찍어낸다.
 
@@ -30,8 +30,8 @@ SOURCE = 'exam-runtime.html'
 
 # 세트 전용 진입 페이지: 출력파일 → (세트, 섹션, 탭 제목)
 SET_PAGES = {
-    'set9.html': ('set9', 'listening', 'SET 9 Listening · SMEAG StudyGround'),
-    'set9-reading.html': ('set9', 'reading', 'SET 9 Reading · SMEAG StudyGround'),
+    'set9.html': ('set9', 'listening', 'SET 9 Listening · SMEAG MockTest'),
+    'set9-reading.html': ('set9', 'reading', 'SET 9 Reading · SMEAG MockTest'),
 }
 
 BASE_TAG = '<base href="../../../">'
@@ -62,7 +62,7 @@ def build(section: str, source: str) -> str:
     # 2) 문서 제목 — 원본 탭 제목과 같은 결로.
     out = re.sub(
         r'<title>.*?</title>',
-        '<title>%s · NT Mock Test · SMEAG StudyGround</title>' % section.capitalize(),
+        '<title>%s · NT Mock Test · SMEAG MockTest</title>' % section.capitalize(),
         out,
         count=1,
         flags=re.S,

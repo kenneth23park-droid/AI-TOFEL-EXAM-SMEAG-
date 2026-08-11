@@ -12,7 +12,7 @@ LANG_COOKIE = "sg_lang"
 
 STRINGS: dict[str, dict[str, str]] = {
     # chrome
-    "app.name": {"en": "StudyGround", "ko": "StudyGround"},
+    "app.name": {"en": "MockTest", "ko": "MockTest"},
     "app.tagline": {"en": "SMEAG score reports", "ko": "SMEAG 성적 리포트"},
     "nav.scores": {"en": "Scores", "ko": "성적"},
     "lang.toggle": {"en": "한국어", "ko": "English"},

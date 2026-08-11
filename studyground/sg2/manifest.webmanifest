@@ -1,6 +1,6 @@
 {
-  "name": "SMEAG StudyGround",
-  "short_name": "StudyGround",
+  "name": "SMEAG MockTest",
+  "short_name": "MockTest",
   "description": "SMEAG New TOEFL preparation — mock tests, practice, AI scoring. Works offline.",
   "start_url": "index.html",
   "scope": "./",

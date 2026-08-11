@@ -1,4 +1,4 @@
-// SMEAG StudyGround — Electron main process. Loads the bundled static site
+// SMEAG MockTest — Electron main process. Loads the bundled static site
 // from disk (file://) so the app runs fully offline. No network required.
 const { app, BrowserWindow, shell, Menu } = require('electron');
 const path = require('path');
@@ -9,7 +9,7 @@ function createWindow() {
     height: 860,
     minWidth: 380,
     backgroundColor: '#f7f4ee',
-    title: 'SMEAG StudyGround',
+    title: 'SMEAG MockTest',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

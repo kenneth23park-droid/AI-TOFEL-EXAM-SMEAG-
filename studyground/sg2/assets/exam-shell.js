@@ -1,4 +1,4 @@
-/* SMEAG · StudyGround — exam-shell.js
+/* SMEAG · MockTest — exam-shell.js
  * 시험 셸 바인딩. exam-runtime.html 의 인라인 스크립트를 그대로 옮긴 것이며,
  * 라우트 페이지(en/test-nt/{section}/index.html)도 같은 DOM 을 쓰므로 함께 로드한다.
  *
@@ -604,7 +604,7 @@ window.SG_RUNTIME = (function () {
         }
         var titleEl = document.getElementById('exam-title');
         var code = (pack0 && pack0.code) || url.testId;
-        if (titleEl) titleEl.textContent = 'StudyGround ' + (code === 'SET1' ? 'NT-016' : code);
+        if (titleEl) titleEl.textContent = 'MockTest ' + (code === 'SET1' ? 'NT-016' : code);
 
         if (resumable) {
           openModal('modal-resume');

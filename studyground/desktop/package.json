@@ -1,6 +1,6 @@
 {
   "name": "smeag-studyground",
-  "productName": "SMEAG StudyGround",
+  "productName": "SMEAG MockTest",
   "version": "1.0.0",
   "description": "SMEAG New TOEFL preparation — offline desktop app.",
   "main": "main.js",
@@ -13,7 +13,7 @@
   },
   "build": {
     "appId": "ai.smeag.studyground",
-    "productName": "SMEAG StudyGround",
+    "productName": "SMEAG MockTest",
     "directories": { "output": "release" },
     "files": ["main.js", "preload.js", "site/**/*"],
     "mac": { "target": ["dir", "dmg"], "category": "public.app-category.education" },

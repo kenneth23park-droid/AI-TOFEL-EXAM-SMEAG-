@@ -39,7 +39,7 @@ async def lifespan(_: FastAPI):
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
-        title="StudyGround",
+        title="MockTest",
         description="SMEAG score reports — offline + cloud dual mode.",
         version="1.0.0",
         lifespan=lifespan,
@@ -60,7 +60,7 @@ def create_app() -> FastAPI:
             return JSONResponse({"detail": detail}, status_code=404)
         return render(request, "404.html", resolve_lang(request), {}, status_code=404)
 
-    log.info("StudyGround starting — mode=%s scoring=%s", settings.app_mode, settings.scoring_mode)
+    log.info("MockTest starting — mode=%s scoring=%s", settings.app_mode, settings.scoring_mode)
     return app
 
 

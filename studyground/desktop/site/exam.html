@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SET 1 · Exam · SMEAG StudyGround</title>
+<title>SET 1 · Exam · SMEAG MockTest</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#e8481f">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="StudyGround">
+<meta name="apple-mobile-web-app-title" content="MockTest">
 <style>
   .exam-wrap { max-width: 860px; }
   .seg { display:inline-flex; background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px; gap:4px; }
@@ -50,13 +50,13 @@
 
 <header class="nav">
   <div class="nav-in">
-    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Learn · Practice · Test · Repeat</small></span></a>
     <nav class="nav-center">
       <a href="tests.html" class="on">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
       <a href="npz.html">🎯 <span data-en>Practice</span><span data-ko>연습</span></a>
       <a href="learning.html">🎬 <span data-en>Lectures</span><span data-ko>강의</span></a>
       <a href="community.html">💬 <span data-en>Community</span><span data-ko>커뮤니티</span></a>
-      <a href="dashboard.html">📊 <span data-en>My StudyGround</span><span data-ko>내 성적</span></a>
+      <a href="dashboard.html">📊 <span data-en>My MockTest</span><span data-ko>내 성적</span></a>
     </nav>
     <div class="nav-right">
       <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
@@ -100,7 +100,7 @@
   }
   var answerKey = S.answerKey || {};
   var explanations = S.explanations || {};
-  document.title = (isSet9 ? 'NEW TOEFL SET 9' : 'NEW TOEFL SET 1') + ' · Exam · SMEAG StudyGround';
+  document.title = (isSet9 ? 'NEW TOEFL SET 9' : 'NEW TOEFL SET 1') + ' · Exam · SMEAG MockTest';
   var titleEl = document.getElementById('examTitle');
   if (titleEl) {
     titleEl.innerHTML = '<span data-en>' + (isSet9 ? 'NEW TOEFL SET 9' : 'NEW TOEFL SET 1') + '</span><span data-ko>' + (isSet9 ? 'NEW TOEFL SET 9' : 'NEW TOEFL SET 1') + '</span>';
