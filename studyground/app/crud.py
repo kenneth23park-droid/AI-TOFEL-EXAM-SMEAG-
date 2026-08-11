@@ -510,6 +510,80 @@ def llm_usage_by(db: Session, column, *, date_from=None, date_to=None, limit: in
     ]
 
 
+def _usage_agg(db: Session, key, conds, *, join_attempt: bool, order_key=None, limit: int = 200):
+    """(key, calls, attempts, cost, unpriced) 묶음. 세 절단면이 같은 모양을 쓴다."""
+    stmt = select(
+        key,
+        func.count(LlmUsage.id),
+        func.count(func.distinct(LlmUsage.attempt_id)),
+        func.coalesce(func.sum(LlmUsage.cost_micros), 0),
+        func.sum(case((LlmUsage.cost_micros.is_(None), 1), else_=0)),
+    )
+    if join_attempt:
+        # outerjoin 이라야 attempt_id 가 NULL 인 행(응시 삭제 후 남은 회계 기록)이
+        # 조용히 사라지지 않는다. 그 돈은 실제로 썼고, 귀속만 사라진 것이다.
+        stmt = stmt.outerjoin(Attempt, LlmUsage.attempt_id == Attempt.id)
+    rows = db.execute(
+        stmt.where(*conds).group_by(key).order_by((order_key if order_key is not None else key).desc()).limit(limit)
+    ).all()
+    return [
+        {
+            "key": r[0], "calls": int(r[1] or 0), "attempts": int(r[2] or 0),
+            "cost_micros": int(r[3] or 0), "unpriced_calls": int(r[4] or 0),
+            "cost_per_attempt_micros": (int(r[3] or 0) // int(r[2])) if r[2] else 0,
+        }
+        for r in rows
+    ]
+
+
+def llm_usage_by_student(db: Session, *, date_from=None, date_to=None, limit: int = 200) -> list[dict]:
+    """학생 한 명당 얼마를 썼나. 응시가 지워진 행은 '(귀속 없음)'으로 묶인다."""
+    conds = _usage_window(date_from, date_to)
+    cost = func.coalesce(func.sum(LlmUsage.cost_micros), 0)
+    stmt = (
+        select(
+            func.coalesce(Student.student_no, ""),
+            func.coalesce(Student.name, ""),
+            func.count(LlmUsage.id),
+            func.count(func.distinct(LlmUsage.attempt_id)),
+            cost,
+            func.sum(case((LlmUsage.cost_micros.is_(None), 1), else_=0)),
+        )
+        .outerjoin(Attempt, LlmUsage.attempt_id == Attempt.id)
+        .outerjoin(Student, Attempt.student_id == Student.id)
+        .where(*conds)
+        .group_by(Student.student_no, Student.name)
+        .order_by(cost.desc())
+        .limit(limit)
+    )
+    out = []
+    for r in db.execute(stmt).all():
+        attempts = int(r[3] or 0)
+        c = int(r[4] or 0)
+        out.append({
+            "student_no": r[0] or "—", "name": r[1] or "(귀속 없음)",
+            "calls": int(r[2] or 0), "attempts": attempts,
+            "cost_micros": c, "unpriced_calls": int(r[5] or 0),
+            "cost_per_attempt_micros": (c // attempts) if attempts else 0,
+        })
+    return out
+
+
+def llm_usage_by_exam_date(db: Session, *, date_from=None, date_to=None, limit: int = 120) -> list[dict]:
+    """일정(시험일)당. LLM 을 언제 호출했는지가 아니라 어느 시험 회차에 딸린 비용인지다 —
+    재채점은 며칠 뒤에 돌아도 그 회차의 원가로 잡혀야 예산이 맞는다."""
+    conds = _usage_window(date_from, date_to)
+    key = func.cast(Attempt.exam_date, String(32))
+    return _usage_agg(db, key, conds, join_attempt=True, limit=limit)
+
+
+def llm_usage_monthly(db: Session, *, date_from=None, date_to=None, limit: int = 36) -> list[dict]:
+    """월별. 호출 시각 기준이다 — 청구서가 그렇게 오기 때문이다."""
+    conds = _usage_window(date_from, date_to)
+    key = func.substr(func.cast(LlmUsage.created_at, String(32)), 1, 7)
+    return _usage_agg(db, key, conds, join_attempt=False, limit=limit)
+
+
 def llm_usage_daily(db: Session, *, date_from=None, date_to=None, limit: int = 60) -> list[dict]:
     """일별 추이. 날짜 문자열로 묶어 SQLite/Postgres 모두에서 같은 결과를 낸다."""
     conds = _usage_window(date_from, date_to)

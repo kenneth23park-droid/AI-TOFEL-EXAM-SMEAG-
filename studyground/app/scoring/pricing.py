@@ -103,6 +103,25 @@ PRICES: dict[str, dict[str, tuple[tuple[date, date | None, Rate], ...]]] = {
     "openai": OPENAI_PRICES,
 }
 
+# 스킬별 라우트도 원장에는 프로바이더 이름으로 남는다(llm.py). 어느 단가표를 볼지
+# 여기서 정한다 — 라우트 이름을 그대로 조회하면 전부 "단가 미등록"이 되어,
+# 라우팅을 켠 순간 사용량 화면의 금액이 통째로 비어 버린다.
+#
+# gemma 는 일부러 비워 둔다. 자체 호스팅에는 토큰 단가가 없다 — 실제 비용은
+# 전기요금과 장비 상각이고, 그건 호출 원장이 아니라 smeag-local-ai/roi 의
+# 몫이다. cost_micros 는 NULL 로 남고, 그것이 "0원"이 아니라 "여기서 셀 수
+# 없는 비용"이라는 뜻이다(models.py LlmUsage 문서 참조).
+PROVIDER_ALIASES: dict[str, str] = {
+    "codex": "openai",      # Codex 는 OpenAI 단가표를 따른다
+    "gemma": "",            # 자체 호스팅 — 토큰 단가 없음
+}
+
+
+def pricing_provider(provider: str) -> str:
+    """원장의 프로바이더 이름 → 단가표 이름. 자체 호스팅이면 빈 문자열."""
+    raw = (provider or "").strip().lower()
+    return PROVIDER_ALIASES.get(raw, raw)
+
 
 def normalize_model(model: str | None) -> str:
     """단가표 조회용 키. 날짜 접미사가 붙은 스냅샷 ID 를 별칭으로 되돌린다."""
@@ -123,7 +142,7 @@ def normalize_model(model: str | None) -> str:
 
 def rate_for(provider: str, model: str, when: date | None = None) -> Rate | None:
     """그 날짜에 유효한 Rate. 단가를 모르면 None."""
-    table = PRICES.get((provider or "").strip().lower())
+    table = PRICES.get(pricing_provider(provider))
     if not table:
         return None
     tiers = table.get(normalize_model(model))

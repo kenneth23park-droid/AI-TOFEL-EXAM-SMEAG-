@@ -52,6 +52,10 @@ async def usage_costs(
     by_provider = crud.llm_usage_by(db, LlmUsage.provider, **window)
     by_scope = crud.llm_usage_by(db, LlmUsage.scope, **window)
     daily = crud.llm_usage_daily(db, **window)
+    # 예산을 짜는 세 가지 눈금 — 학생 한 명당 / 시험 일정당 / 월당.
+    by_student = crud.llm_usage_by_student(db, **window)
+    by_exam_date = crud.llm_usage_by_exam_date(db, **window)
+    monthly = crud.llm_usage_monthly(db, **window)
 
     peak = max((d["cost_micros"] for d in daily), default=0) or 1
 
@@ -64,6 +68,9 @@ async def usage_costs(
         "by_scope": by_scope,
         "daily": daily,
         "daily_peak": peak,
+        "by_student": by_student,
+        "by_exam_date": by_exam_date,
+        "monthly": monthly,
         "usd": pricing.format_usd,
         "price_version": pricing.PRICE_VERSION,
     })

@@ -153,6 +153,60 @@ STRINGS: dict[str, dict[str, str]] = {
     "rank.empty": {"en": "No ranked attempts for this filter.", "ko": "해당 조건의 순위 데이터가 없습니다."},
     "col.rank": {"en": "Rank", "ko": "순위"},
     "col.studentNo": {"en": "Student No", "ko": "학번"},
+
+    # AI usage & cost — 이 키들은 등록된 적이 없어 화면에 'usage.byModel' 이 그대로
+    # 찍히고 있었다. 템플릿이 쓰는 키를 전부 여기서 채운다.
+    "usage.title": {"en": "AI Usage & Cost", "ko": "AI 사용량·비용"},
+    "usage.callsTitle": {"en": "AI Calls (developer view)", "ko": "AI 호출 원장 (개발자용)"},
+    "usage.intro": {
+        "en": "One row per API call. Re-opening a report re-runs grading, so a single "
+              "attempt can carry several calls — that is the cost of re-reads, measured.",
+        "ko": "한 행이 API 호출 하나다. 리포트를 다시 열면 채점이 다시 돌기 때문에 한 응시에 "
+              "여러 행이 붙는다 — 재조회가 쓰는 돈이 그대로 관측된다.",
+    },
+    "usage.empty": {"en": "No AI calls in this window.", "ko": "이 기간에는 AI 호출이 없습니다."},
+    "usage.spend": {"en": "Total spend", "ko": "총 지출"},
+    "usage.attempt": {"en": "Per attempt", "ko": "응시 1건당"},
+    "usage.attempts": {"en": "Attempts", "ko": "응시"},
+    "usage.calls": {"en": "Calls", "ko": "호출"},
+    "usage.cost": {"en": "Cost", "ko": "비용"},
+    "usage.perAttempt": {"en": "Per attempt", "ko": "응시당"},
+    "usage.tokens": {"en": "Tokens", "ko": "토큰"},
+    "usage.inputTokens": {"en": "Input", "ko": "입력"},
+    "usage.outputTokens": {"en": "Output", "ko": "출력"},
+    "usage.unpriced": {"en": "Unpriced", "ko": "단가 미등록"},
+    "usage.failed": {"en": "Failed", "ko": "실패"},
+    "usage.failRate": {"en": "Fallback rate", "ko": "폴백률"},
+    "usage.latency": {"en": "Latency p95", "ko": "지연 p95"},
+    "usage.daily": {"en": "Daily trend", "ko": "일별 추이"},
+    "usage.model": {"en": "Model", "ko": "모델"},
+    "usage.provider": {"en": "Provider", "ko": "프로바이더"},
+    "usage.scope": {"en": "Scope", "ko": "호출 지점"},
+    "usage.byModel": {"en": "By model", "ko": "모델별"},
+    "usage.byProvider": {"en": "By provider", "ko": "프로바이더별"},
+    "usage.byScope": {"en": "By scope", "ko": "호출 지점별"},
+    "usage.byStudent": {"en": "By student", "ko": "학생별"},
+    "usage.byExamDate": {"en": "By exam date", "ko": "시험 일정별"},
+    "usage.byMonth": {"en": "By month", "ko": "월별"},
+    "usage.studentNo": {"en": "Student No", "ko": "학번"},
+    "usage.studentName": {"en": "Name", "ko": "이름"},
+    "usage.examDate": {"en": "Exam date", "ko": "시험일"},
+    "usage.month": {"en": "Month", "ko": "월"},
+    "usage.when": {"en": "When", "ko": "시각"},
+    "usage.status": {"en": "Status", "ko": "상태"},
+    "usage.ok": {"en": "OK", "ko": "성공"},
+    "usage.error": {"en": "Error", "ko": "오류"},
+    "usage.onlyFailed": {"en": "Failed only", "ko": "실패만"},
+    "usage.viewCalls": {"en": "Call ledger", "ko": "호출 원장"},
+    "usage.viewCosts": {"en": "Cost view", "ko": "비용 화면"},
+    "usage.priceVersion": {"en": "Price table", "ko": "단가표 버전"},
+    "usage.selfHostedNote": {
+        "en": "Self-hosted models (campus vLLM) have no per-token price, so their calls "
+              "count as unpriced rather than zero. Their real cost is power and hardware "
+              "amortisation — see the ROI model, not this ledger.",
+        "ko": "자체 호스팅 모델(캠퍼스 vLLM)에는 토큰 단가가 없어 0원이 아니라 '단가 미등록'으로 "
+              "잡힌다. 실제 비용은 전기요금과 장비 상각이며, 그건 이 원장이 아니라 ROI 모델의 몫이다.",
+    },
 }
 
 

@@ -60,7 +60,8 @@
   <h2 class="card-title">{{ at('usage.daily') }}</h2>
   <table class="grid">
     <thead>
-      <tr><th>{{ at('detail.year') }}</th><th>{{ at('usage.calls') }}</th>
+      {# 'detail.year' 를 쓰고 있어서 일별 표의 첫 칸이 'Year' 로 찍혔다. #}
+      <tr><th>{{ at('usage.when') }}</th><th>{{ at('usage.calls') }}</th>
           <th>{{ at('usage.cost') }}</th><th></th></tr>
     </thead>
     <tbody>
@@ -80,15 +81,17 @@
   </table>
 </section>
 
-{% for title, rows in [(at('usage.byModel'), by_model),
-                       (at('usage.byProvider'), by_provider),
-                       (at('usage.byScope'), by_scope)] %}
+{# 머리글은 각 절단면이 직접 들고 온다. 전에는 "모델이 아니면 전부 Scope" 였던 탓에
+   프로바이더 표의 첫 칸이 'Scope' 로 찍혔다. #}
+{% for title, rows, keyhead in [(at('usage.byModel'), by_model, at('usage.model')),
+                                (at('usage.byProvider'), by_provider, at('usage.provider')),
+                                (at('usage.byScope'), by_scope, at('usage.scope'))] %}
 <section class="card">
   <h2 class="card-title">{{ title }}</h2>
   <table class="grid">
     <thead>
       <tr>
-        <th>{{ at('usage.model') if title == at('usage.byModel') else at('usage.scope') }}</th>
+        <th>{{ keyhead }}</th>
         <th>{{ at('usage.calls') }}</th>
         <th>{{ at('usage.inputTokens') }}</th>
         <th>{{ at('usage.outputTokens') }}</th>
@@ -112,6 +115,71 @@
 </section>
 {% endfor %}
 
+{# 예산을 짜는 세 눈금. 위의 절단면들이 "무엇에 썼나"라면, 아래는 "누가·언제 썼나"다.
+   1인당 비용은 응시 수로 나눈 값이다 — 한 응시를 재조회하면 채점이 다시 돌아
+   호출이 늘지만 응시 수는 그대로다. 그 차이가 곧 재조회 비용이다. #}
+<section class="card">
+  <h2 class="card-title">{{ at('usage.byStudent') }}</h2>
+  <table class="grid">
+    <thead>
+      <tr>
+        <th>{{ at('usage.studentNo') }}</th>
+        <th>{{ at('usage.studentName') }}</th>
+        <th>{{ at('usage.attempts') }}</th>
+        <th>{{ at('usage.calls') }}</th>
+        <th>{{ at('usage.cost') }}</th>
+        <th>{{ at('usage.perAttempt') }}</th>
+        <th>{{ at('usage.unpriced') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in by_student %}
+      <tr>
+        <td>{{ r.student_no }}</td>
+        <td>{{ r.name }}</td>
+        <td class="num">{{ r.attempts }}</td>
+        <td class="num">{{ r.calls }}</td>
+        <td class="num">{{ usd(r.cost_micros) }}</td>
+        <td class="num">{{ usd(r.cost_per_attempt_micros) }}</td>
+        <td class="num">{{ r.unpriced_calls or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% for title, rows, keyhead in [(at('usage.byExamDate'), by_exam_date, at('usage.examDate')),
+                                (at('usage.byMonth'), monthly, at('usage.month'))] %}
+<section class="card">
+  <h2 class="card-title">{{ title }}</h2>
+  <table class="grid">
+    <thead>
+      <tr>
+        <th>{{ keyhead }}</th>
+        <th>{{ at('usage.attempts') }}</th>
+        <th>{{ at('usage.calls') }}</th>
+        <th>{{ at('usage.cost') }}</th>
+        <th>{{ at('usage.perAttempt') }}</th>
+        <th>{{ at('usage.unpriced') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.key or '—' }}</td>
+        <td class="num">{{ r.attempts }}</td>
+        <td class="num">{{ r.calls }}</td>
+        <td class="num">{{ usd(r.cost_micros) }}</td>
+        <td class="num">{{ usd(r.cost_per_attempt_micros) }}</td>
+        <td class="num">{{ r.unpriced_calls or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endfor %}
+
 <p class="sub">{{ at('usage.priceVersion') }}: {{ price_version }}</p>
+<p class="sub">{{ at('usage.selfHostedNote') }}</p>
 {% endif %}
 {% endblock %}
