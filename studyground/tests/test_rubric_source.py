@@ -361,3 +361,105 @@ def test_set1_question_grading_is_untouched(db):
     # 바뀐 것은 섹션 합산·상태뿐이다: 교사 확정 전에는 완료가 아니고 Writing 은 잠정이다.
     assert attempt.status == "scoring"
     assert _section(attempt, "writing").provisional is True
+
+
+# ── S4 — 공식 총체 밴드가 섹션 점수를 정한다 ──────────────────────────────
+#
+# ETS 가이드는 과제마다 총체 밴드 하나로 채점한다. 분석 축(TF/OD/LU/VO)은 교사가
+# 학생에게 짚어 줄 거리일 뿐이라 섹션 점수에 섞이면 안 된다 — 섞이면 같은 답안이
+# 축을 몇 개 매겼느냐에 따라 다른 점수를 받는다.
+
+OFFICIAL = rubric_mod.OFFICIAL_CRITERION
+
+
+def _official(skill: str, score: float, *, question_key: str = "", source=RUBRIC_SOURCE_DRAFT):
+    return {
+        "skill": skill, "question_key": question_key, "criterion": OFFICIAL,
+        "score": score, "max_score": 5.0, "comment": "", "band": None, "source": source,
+    }
+
+
+def test_the_official_band_alone_decides_the_section_score(db):
+    """축은 1.0(바닥)인데 공식 밴드가 5.0 이면 섹션은 만점이어야 한다."""
+    attempt = _attempt(db, "SET 9")
+    _answer_all(db, attempt, SET9_PACK, skills=("writing",))
+    crud_write.upsert_rubric_rows(
+        db, attempt,
+        _rows("writing", WRITING_CRITERIA, 1.0, RUBRIC_SOURCE_DRAFT) + [_official("writing", 5.0)],
+    )
+    crud_write.grade_attempt(db, attempt)
+    assert _section(attempt, "writing").scaled == 30
+
+
+def test_without_an_official_band_the_old_axis_folding_still_works(db):
+    """옛 응시(밴드 행이 없는 데이터)는 재채점 없이도 그대로 열려야 한다."""
+    attempt = _attempt(db, "SET 9")
+    _answer_all(db, attempt, SET9_PACK, skills=("writing",))
+    crud_write.upsert_rubric_rows(
+        db, attempt, _rows("writing", WRITING_CRITERIA, 5.0, RUBRIC_SOURCE_DRAFT)
+    )
+    crud_write.grade_attempt(db, attempt)
+    assert _section(attempt, "writing").scaled == 30
+
+
+def test_axis_count_no_longer_moves_the_section_score():
+    """축을 몇 개 매겼든 공식 밴드가 같으면 섹션 점수도 같다.
+
+    DB 없이 환산 함수만 본다 — 여기서 갈리면 위의 배선 테스트도 함께 무너진다.
+    """
+    from app.scoring.scale import get_scale
+
+    adapter = get_scale("toefl120")
+    four = _rows("writing", WRITING_CRITERIA, 1.0, RUBRIC_SOURCE_DRAFT) + [_official("writing", 4.0)]
+    two = _rows("writing", WRITING_CRITERIA[:2], 1.0, RUBRIC_SOURCE_DRAFT) + [_official("writing", 4.0)]
+    assert adapter.rubric_to_section(four) == adapter.rubric_to_section(two)
+    assert adapter.rubric_to_section(four) == 24.0     # 4.0/5.0 × 30
+
+    # 밴드 행이 없으면 옛 방식(축 합산)이라 축 개수가 결과를 바꾼다 — 그래서 갈아탄 것이다.
+    axes_only_four = _rows("writing", WRITING_CRITERIA, 1.0, RUBRIC_SOURCE_DRAFT)
+    assert adapter.rubric_to_section(axes_only_four) == 6.0
+
+
+# ── S5 — question_key 가 키에 들어가야 복창 7문항이 살아남는다 ─────────────
+
+
+def test_per_question_rubric_rows_do_not_overwrite_each_other(db):
+    """복창은 문항마다 원문이 달라 문항 단위로 채점한다.
+
+    키가 (attempt, skill, criterion) 뿐이던 시절에는 7문항이 한 자리를 두고 다퉈
+    마지막 문항만 남았다. question_key 가 키에 들어가야 7행이 각자 산다.
+    """
+    attempt = _attempt(db, "SET 9")
+    rows = [_official("speaking", float(i % 5), question_key=f"set9-S1-q0{i}") for i in range(1, 8)]
+    crud_write.upsert_rubric_rows(db, attempt, rows)
+
+    saved = [r for r in attempt.rubric_scores if r.criterion == OFFICIAL]
+    assert len(saved) == 7
+    assert {r.question_key for r in saved} == {f"set9-S1-q0{i}" for i in range(1, 8)}
+
+
+def test_the_same_question_key_still_upserts_in_place(db):
+    """같은 문항을 다시 채점하면 행이 늘지 않고 갱신된다."""
+    attempt = _attempt(db, "SET 9")
+    crud_write.upsert_rubric_rows(db, attempt, [_official("speaking", 2.0, question_key="q1")])
+    crud_write.upsert_rubric_rows(db, attempt, [_official("speaking", 4.0, question_key="q1")])
+
+    saved = [r for r in attempt.rubric_scores if r.criterion == OFFICIAL]
+    assert len(saved) == 1
+    assert saved[0].score == 4.0
+
+
+def test_a_teacher_row_is_still_protected_per_question(db):
+    """교사 확정본을 지키는 규칙이 문항 단위에서도 그대로여야 한다."""
+    attempt = _attempt(db, "SET 9")
+    crud_write.upsert_rubric_rows(
+        db, attempt, [_official("speaking", 5.0, question_key="q1", source=RUBRIC_SOURCE_TEACHER)]
+    )
+    crud_write.upsert_rubric_rows(db, attempt, [_official("speaking", 1.0, question_key="q1")])
+
+    saved = [r for r in attempt.rubric_scores if r.question_key == "q1"]
+    assert len(saved) == 1
+    assert saved[0].score == 5.0                      # 초안이 확정본을 덮지 않았다
+    # 다른 문항은 초안이 그대로 들어간다 — 보호는 그 문항에만 걸린다.
+    crud_write.upsert_rubric_rows(db, attempt, [_official("speaking", 1.0, question_key="q2")])
+    assert next(r for r in attempt.rubric_scores if r.question_key == "q2").score == 1.0

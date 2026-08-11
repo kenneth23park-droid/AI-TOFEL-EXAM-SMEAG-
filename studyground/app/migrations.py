@@ -304,6 +304,17 @@ STEPS: list[tuple[str, list[tuple]]] = [
             sql("CREATE INDEX IF NOT EXISTS ix_llm_usage_attempt_id ON llm_usage (attempt_id)"),
         ],
     ),
+    (
+        # 루브릭 행을 문항 단위로도 담을 수 있게 한다. 지금까지 키는
+        # (attempt_id, skill, criterion) 하나뿐이라, 문항마다 원문이 다른
+        # Listen and Repeat 7문항이 같은 자리를 두고 서로 덮어썼다.
+        # 가산형이다: 기존 행은 DEFAULT '' 로 채워지고, '' 는 곧 "스킬 단위로 합쳐
+        # 채점한 행"이라는 사실이라 백필 UPDATE 가 필요 없다.
+        "0010_rubric_question_key",
+        [
+            add_column("rubric_scores", "question_key", "VARCHAR(64) NOT NULL DEFAULT ''"),
+        ],
+    ),
 ]
 
 

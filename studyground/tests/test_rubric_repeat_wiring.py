@@ -32,6 +32,7 @@ from app.scoring.scale import TOEFL  # noqa: E402
 FLOOR = 1.0    # rubric._FLOOR[5.0]  (TOEFL speaking)
 CEILING = 4.0  # rubric._CEILING[5.0]
 CENTRE = 3.0   # rubric._CENTRE[5.0]
+OFFICIAL = rubric.OFFICIAL_CRITERION   # 공식 총체 밴드 행 — 섹션 점수는 이 행만 먹는다
 
 
 # ── (1) 생성물: 정답키에 실린 값 ───────────────────────────────────────────────
@@ -139,7 +140,7 @@ def _rows_for(state, key):
 def test_offline_scores_a_perfect_repetition_high_not_at_the_floor():
     state = _state("SET 9", [_speaking("set9-S1-q01", REF_Q01)])
     rows = _rows_for(state, "set9-S1-q01")
-    assert [r["criterion"] for r in rows] == ["Repetition Accuracy", "Completeness"]
+    assert [r["criterion"] for r in rows] == ["Repetition Accuracy", "Completeness", OFFICIAL]
     assert min(r["score"] for r in rows) == CEILING   # 완벽 복창 → 초안 실링
     assert max(r["score"] for r in rows) <= CEILING   # 초안은 만점을 주지 않는다
 
@@ -173,12 +174,12 @@ def test_offline_leaves_interviews_on_the_free_speech_path():
     ])
     rows = nodes.rubric_offline(state)["rubrics"]
     free = [r for r in rows if not r.get("question_key")]
-    assert [r["criterion"] for r in free] == list(rubric.CRITERIA[(TOEFL, "speaking")])
+    assert [r["criterion"] for r in free] == [*rubric.CRITERIA[(TOEFL, "speaking")], OFFICIAL]
 
 
 def test_offline_blank_repeat_is_zero_not_a_crash():
     state = _state("SET 9", [_speaking("set9-S1-q01", "")])
-    assert [r["score"] for r in _rows_for(state, "set9-S1-q01")] == [0.0, 0.0]
+    assert [r["score"] for r in _rows_for(state, "set9-S1-q01")] == [0.0, 0.0, 0.0]
 
 
 # ── (3) degrade: 원문을 모를 때 ────────────────────────────────────────────────
@@ -189,7 +190,7 @@ def test_repeat_without_a_reference_degrades_to_the_centre():
               correct_answer="", max_score=1, feedback="", audio_ref="", auto_score=None)
     state = _state("SET 1", [row])
     rows = _rows_for(state, "S-1")
-    assert [r["score"] for r in rows] == [CENTRE, CENTRE]
+    assert [r["score"] for r in rows] == [CENTRE, CENTRE, CENTRE]
     assert all("Reference sentence unavailable" in r["comment"] for r in rows)
 
 
@@ -219,7 +220,7 @@ def test_online_sends_repeat_to_the_deterministic_path(monkeypatch):
     rows = nodes.rubric_online(state)["rubrics"]
     assert seen == ["I exercise every morning."]          # 복창은 LLM 에 가지 않았다
     repeat_rows = [r for r in rows if r.get("question_key") == "set9-S1-q01"]
-    assert [r["criterion"] for r in repeat_rows] == ["Repetition Accuracy", "Completeness"]
+    assert [r["criterion"] for r in repeat_rows] == ["Repetition Accuracy", "Completeness", OFFICIAL]
 
 
 def test_online_repeat_survives_an_llm_failure():

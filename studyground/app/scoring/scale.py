@@ -1,14 +1,22 @@
 """Score scale adapters — architecture.md 9 (Story 6.4).
 
-Two scales share one Protocol so the rest of the app never branches on the exam
+Three scales share one Protocol so the rest of the app never branches on the exam
 profile:
 
     toefl120  → sections /30, total /120, CEFR grade, band_score = None
+    toefl6    → sections and total are Bands 1.0..6.0 in 0.5 steps (ETS, 2026-01~)
     ielts9    → sections and total are Bands 0..9 in 0.5 steps, grade "Band 6.5"
 
 Everything here is pure and offline: no DB, no network, no new dependency.
-The IELTS raw→band table lives in `ielts_band_table.json` next to this file so a
-measured table replaces the ⚠️assumed one without a code change.
+Both raw→band tables live in JSON next to this file (`ielts_band_table.json`,
+`toefl6_band_table.json`) so a corrected table replaces the current one without a
+code change.
+
+toefl120 과 toefl6 의 관계
+  같은 시험의 **표기 방식**이 둘이라는 뜻이다. ETS 는 2026-01 부터 1~6 밴드로
+  보고하고 2028 까지 0~120 을 병기한다. 그래서 toefl6 은 toefl120 을 대체하는 게
+  아니라 그 위에 얹히며, 두 눈금 모두 같은 원점수에서 나온다 — 어느 쪽을 성적표에
+  쓸지는 `attempts.scale` 이 정한다.
 """
 
 from __future__ import annotations
@@ -24,12 +32,16 @@ from app.models import SECTION_MAX, TOTAL_MAX, cefr_for
 log = logging.getLogger("studyground.scoring")
 
 BAND_TABLE_PATH = Path(__file__).resolve().parent / "ielts_band_table.json"
+TOEFL6_TABLE_PATH = Path(__file__).resolve().parent / "toefl6_band_table.json"
 
 TOEFL = "toefl120"
+TOEFL6 = "toefl6"
 IELTS = "ielts9"
-SCALE_KEYS = (TOEFL, IELTS)
+SCALE_KEYS = (TOEFL, TOEFL6, IELTS)
 
 # profile ('toefl'|'ielts') → scale key, for callers that only carry the profile.
+# 'toefl' 은 여전히 0~120 이다 — 밴드로 넘기는 것은 명시적으로 scale='toefl6' 을
+# 지정한 응시뿐이다(전환기에 두 눈금이 공존한다).
 PROFILE_TO_SCALE = {"toefl": TOEFL, "ielts": IELTS}
 
 
@@ -55,6 +67,25 @@ def round_half_up_to_half(x: float) -> float:
 
 def _mean(values: list[float]) -> float:
     return (sum(values) / len(values)) if values else 0.0
+
+
+# 공식 총체 밴드 행의 criterion 이름. rubric.OFFICIAL_CRITERION 과 같은 문자열이지만
+# 여기서 다시 적는다 — scale 은 rubric 을 import 하지 않는다(rubric 이 scale 을 쓴다).
+OFFICIAL_CRITERION = "Official Band"
+
+
+def _official_only(rubrics: list[dict]) -> list[dict]:
+    """공식 총체 밴드 행만. 한 행도 없으면 빈 리스트(= 호출부가 옛 경로로 간다).
+
+    ETS 가이드는 과제마다 총체 밴드 하나로 채점한다. 분석 축(TF/OD/LU/VO 등)은
+    교사 설명용이라 섹션 점수에 섞이면 안 된다 — 섞으면 같은 답안이 축 개수에 따라
+    다른 섹션 점수를 받는다.
+    """
+    return [
+        row
+        for row in rubrics or []
+        if isinstance(row, dict) and str(row.get("criterion") or "").strip() == OFFICIAL_CRITERION
+    ]
 
 
 def _rubric_values(rubrics: list[dict], *, prefer_band: bool) -> list[float]:
@@ -117,7 +148,13 @@ class Toefl120Scale:
         return f"{round_half_up(value)}/{round_half_up(top)}"
 
     def rubric_to_section(self, rubrics: list[dict]) -> float:
-        """⚠️ 가설(검증필요) — proportional, not the real TOEFL conversion table."""
+        """⚠️ 가설(검증필요) — proportional, not the real TOEFL conversion table.
+
+        공식 총체 밴드 행이 하나라도 있으면 **그 행들만** 접는다. 축 행은 교사
+        설명용이라 섞으면 안 된다. 밴드 행이 전혀 없는 옛 데이터는 예전처럼
+        모든 행을 접는다 — 재채점 없이도 이전 응시가 계속 열려야 한다.
+        """
+        rubrics = _official_only(rubrics) or rubrics
         earned = _rubric_values(rubrics, prefer_band=False)
         if not earned:
             return 0.0
@@ -138,6 +175,161 @@ class Toefl120Scale:
     def storage_total(self, total: float) -> int:
         """architecture.md 9.5 — attempts.total_score is an integer column."""
         return int(round_half_up(total))
+
+
+# ── TOEFL 1~6 밴드 (ETS, 2026-01~) ────────────────────────────────────────────
+class Toefl6Scale:
+    """네 영역과 종합을 1.0~6.0(0.5 단위)로 낸다. 종합은 **합이 아니라 평균**이다.
+
+    두 단계를 지난다. 근거의 등급이 서로 다르므로 코드에서도 갈라 둔다.
+
+        1) 원점수 → 0~30 환산   ⚠️가설(검증필요). 정답률 비례.
+        2) 0~30 → 1~6 밴드      ✅ETS 공식 표(`toefl6_band_table.json`).
+
+    1단계가 가설인 이유: ETS 표는 "0~30 환산점수"에서 출발하는데, SMEAG 모의고사는
+    문항 수가 실제 시험과 다르다(SET 9 는 R 50 · L 47 문항). 실측 환산표가 생기면
+    `scaled_from_raw()` 하나만 갈아 끼우면 되고 밴드 경계는 건드릴 필요가 없다.
+
+    Writing·Speaking 은 맞은 개수가 없으므로 루브릭(과제당 0~5)의 평균을 0~30 으로
+    편 뒤 같은 표를 태운다 — `rubric_to_section()` 참조.
+
+    밴드 바닥은 1.0 이다. ETS 표에서 0점도 밴드 1 이므로 0.0 은 존재하지 않는다.
+    "아직 채점 안 된 영역"은 밴드 1 이 아니라 **없음(None)** 이며, 종합 평균에서
+    통째로 빠진다 — `combine()` 참조.
+    """
+
+    key = TOEFL6
+    section_max: float = 6.0
+    total_max: float = 6.0
+    uses_band = True
+    scaled_max: float = 30.0
+
+    def __init__(self, table_path: Path | None = None) -> None:
+        self._path = Path(table_path) if table_path else TOEFL6_TABLE_PATH
+        self._table: dict | None = None
+
+    # -- table -----------------------------------------------------------------
+    def _load(self) -> dict:
+        if self._table is None:
+            try:
+                raw = json.loads(self._path.read_text(encoding="utf-8"))
+                self._table = {
+                    "scaled_max": float(raw.get("scaled_max") or 30),
+                    "sections": {
+                        skill: sorted(
+                            [
+                                {"min": float(r["min"]), "band": float(r["band"])}
+                                for r in rows
+                                if isinstance(r, dict) and "min" in r and "band" in r
+                            ],
+                            key=lambda r: r["min"],
+                            reverse=True,
+                        )
+                        for skill, rows in (raw.get("sections") or {}).items()
+                    },
+                    "cefr": {str(k): str(v) for k, v in (raw.get("cefr") or {}).items()},
+                }
+            except Exception as exc:  # noqa: BLE001 — 표가 없다고 채점이 멈춰선 안 된다
+                log.warning("toefl6 band table unusable (%s) — falling back to linear", exc)
+                self._table = {"scaled_max": 30.0, "sections": {}, "cefr": {}}
+        return self._table
+
+    def scaled_from_raw(self, raw_correct: float, raw_total: float) -> float:
+        """⚠️가설(검증필요) — 정답률을 그대로 0~30 으로 편다.
+
+        실측 raw→scaled 표가 생기면 여기만 바꾼다. 실제 ETS 환산은 문항 난이도까지
+        보정하므로 이 값은 근사치이며, 성적표에도 그렇게 표기해야 한다.
+        """
+        if not raw_total:
+            return 0.0
+        ratio = min(max(float(raw_correct) / float(raw_total), 0.0), 1.0)
+        return float(round_half_up(ratio * self.scaled_max))
+
+    def band_for_scaled(self, scaled: float, skill: str = "") -> float:
+        """0~30 환산점수 → 밴드. ETS 공식 표를 그대로 읽는다."""
+        rows = self._load()["sections"].get((skill or "").strip().lower())
+        if not rows:
+            # 표에 없는 영역: 비례 추정. 로그만 남기고 절대 예외를 던지지 않는다.
+            log.info("no TOEFL 1-6 band bracket for skill %r — using a linear estimate", skill)
+            ratio = min(max(float(scaled) / self.scaled_max, 0.0), 1.0)
+            return round_half_up_to_half(1.0 + ratio * (self.section_max - 1.0))
+        value = float(scaled)
+        for row in rows:                       # 높은 구간부터
+            if value >= row["min"]:
+                return float(row["band"])
+        return float(rows[-1]["band"])
+
+    # -- ScoreScale ------------------------------------------------------------
+    def section_score(self, raw_correct: float, raw_total: float, *, skill: str = "") -> float:
+        return self.band_for_scaled(self.scaled_from_raw(raw_correct, raw_total), skill)
+
+    def combine(self, sections: dict[str, float]) -> float:
+        """네 영역 밴드의 산술평균을 0.5 단위로 반올림한다(ETS 규칙).
+
+        ETS 예시: 평균 5.125 → 5.0, 5.25 → 5.5. `round_half_up_to_half` 가 바로
+        그 규칙이다(.25 는 올림). 값이 없는(None) 영역은 평균에서 빠진다 — 채점
+        대기 중인 라이팅을 0 으로 세면 종합이 실제보다 낮게 굳어 버린다.
+        """
+        values: list[float] = []
+        for v in (sections or {}).values():
+            if v is None:
+                continue
+            try:
+                values.append(float(v))
+            except (TypeError, ValueError):
+                continue
+        if not values:
+            return 0.0
+        return round_half_up_to_half(_mean(values))
+
+    def grade(self, total: float) -> str:
+        return f"Band {round_half_up_to_half(total):.1f}"
+
+    def cefr(self, band: float) -> str:
+        """밴드 → CEFR. ETS 가 같은 표에서 함께 발표한 대응이다(6=C2, 5~5.5=C1 …)."""
+        return self._load()["cefr"].get(f"{round_half_up_to_half(band):.1f}", "")
+
+    def display(self, value: float, maximum: float | None = None) -> str:
+        return f"{round_half_up_to_half(value):.1f}"
+
+    def rubric_to_section(self, rubrics: list[dict]) -> float:
+        """루브릭(과제당 0~5) → 0~30 → 밴드.
+
+        ETS 공식 산출형 루브릭은 네 과제 모두 0~5 다(docs/reference 참조). 과제별
+        총체 밴드의 합을 `max_score` 합으로 나눈 비율을 0~30 에 얹는다 — 원점수→환산
+        단계와 같은 성격의 ⚠️가설이다.
+
+        Toefl120Scale 과 똑같이, 공식 총체 밴드 행이 있으면 **그 행들만** 접는다.
+        분석 축(TF/OD/LU/VO)은 교사 설명용이라 섞으면 축 개수가 점수를 바꾼다.
+        영역(skill)은 루브릭 행이 들고 있다. 섞여 있으면 첫 행을 따른다.
+        """
+        rubrics = _official_only(rubrics) or rubrics
+        earned = _rubric_values(rubrics, prefer_band=False)
+        if not earned:
+            return 0.0
+        maxes: list[float] = []
+        for row in rubrics or []:
+            try:
+                maxes.append(float(row.get("max_score") or 0))
+            except (TypeError, ValueError):
+                maxes.append(0.0)
+        top = sum(maxes)
+        if top <= 0:
+            return 0.0
+        skill = ""
+        for row in rubrics or []:
+            if isinstance(row, dict) and row.get("skill"):
+                skill = str(row["skill"]).strip().lower()
+                break
+        ratio = min(max(sum(earned) / top, 0.0), 1.0)
+        return self.band_for_scaled(round_half_up(ratio * self.scaled_max), skill)
+
+    def band_score(self, total: float) -> float | None:
+        return round_half_up_to_half(total)
+
+    def storage_total(self, total: float) -> int:
+        """architecture.md 9.5 — 밴드 × 10 이라야 정수 칼럼에서도 정렬이 산다."""
+        return int(round_half_up(round_half_up_to_half(total) * 10))
 
 
 # ── IELTS ─────────────────────────────────────────────────────────────────────
@@ -223,8 +415,14 @@ class Ielts9Scale:
         return f"{round_half_up_to_half(value):.1f}"
 
     def rubric_to_section(self, rubrics: list[dict]) -> float:
-        """Arithmetic mean of the criterion bands (ielts_writing_task2.md hard rule)."""
-        return round_half_up_to_half(_mean(_rubric_values(rubrics, prefer_band=True)))
+        """Arithmetic mean of the criterion bands (ielts_writing_task2.md hard rule).
+
+        IELTS 는 원래 분석적 4축 채점이라 축의 평균이 곧 밴드다 — TOEFL 과 달리
+        총체 밴드로 갈아탈 이유가 없다. 다만 TOEFL 쪽에서 붙는 Official Band 행이
+        IELTS 응시에 섞여 들어오면 평균이 한 번 더 눌리므로 여기서 걷어낸다.
+        """
+        rows = [row for row in rubrics or [] if not _official_only([row])]
+        return round_half_up_to_half(_mean(_rubric_values(rows or rubrics, prefer_band=True)))
 
     def band_score(self, total: float) -> float | None:
         return round_half_up_to_half(total)
@@ -235,15 +433,19 @@ class Ielts9Scale:
 
 
 _TOEFL_SINGLETON = Toefl120Scale()
+_TOEFL6_SINGLETON = Toefl6Scale()
 _IELTS_SINGLETON = Ielts9Scale()
 
 
 def get_scale(key: str | None) -> ScoreScale:
-    """`'ielts9'`/`'ielts'` → Band scale; anything else (incl. None) → TOEFL."""
+    """`'ielts9'`/`'ielts'` → IELTS 밴드, `'toefl6'` → TOEFL 1~6 밴드,
+    그 밖의 값(None 포함) → toefl120."""
     raw = (key or "").strip().lower()
     raw = PROFILE_TO_SCALE.get(raw, raw)
     if raw == IELTS:
         return _IELTS_SINGLETON
+    if raw == TOEFL6:
+        return _TOEFL6_SINGLETON
     if raw and raw != TOEFL:
         log.info("unknown scale key %r — defaulting to %s", key, TOEFL)
     return _TOEFL_SINGLETON
@@ -256,7 +458,10 @@ __all__ = [
     "SCALE_KEYS",
     "ScoreScale",
     "TOEFL",
+    "TOEFL6",
+    "TOEFL6_TABLE_PATH",
     "Toefl120Scale",
+    "Toefl6Scale",
     "get_scale",
     "round_half_up",
     "round_half_up_to_half",

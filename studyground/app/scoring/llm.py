@@ -210,9 +210,15 @@ RUBRIC_ROOT = Path(
 )
 
 # (scale_key, skill) → basename shared by rubrics/*.md and schemas/*.schema.json
+#
+# toefl6 은 toefl120 과 **같은 루브릭 파일**을 쓴다. 1~6 밴드는 보고 눈금이 바뀐
+# 것이지 채점 기준이 바뀐 것이 아니다 — ETS 산출형 루브릭은 여전히 과제당 0~5 이고,
+# 밴드 환산은 채점이 끝난 뒤 scale.Toefl6Scale.rubric_to_section() 이 한다.
 RUBRIC_FILES = {
     ("toefl120", "writing"): "toefl_writing",
     ("toefl120", "speaking"): "toefl_speaking",
+    ("toefl6", "writing"): "toefl_writing",
+    ("toefl6", "speaking"): "toefl_speaking",
     ("ielts9", "writing"): "ielts_writing_task2",
     ("ielts9", "speaking"): "ielts_speaking",
 }
@@ -230,6 +236,11 @@ _CRITERION_ALIASES = {
     "DEL": "Delivery",
     "TD": "Topic Development",
 }
+
+# rubric.OFFICIAL_CRITERION 과 같은 문자열. 여기서 다시 적는 이유는 llm 이
+# app.scoring.rubric 을 import 하지 않기 때문이다(순환을 만들지 않는다).
+OFFICIAL_CRITERION = "Official Band"
+_OFFICIAL_NOTE = "Official holistic band (ETS TOEFL Scoring Guides)."
 
 _RUBRIC_LANG = {
     "en": "Write every rationale, comment and summary in English.",
@@ -362,4 +373,26 @@ def _parse_rubric(
         )
     if not rows:
         raise ValueError("model response had no usable criteria")
+
+    # 공식 총체 밴드. 스키마의 `overall` 은 "축 평균" 이 아니라 ETS 가이드의 밴드다
+    # (schemas/toefl_*.schema.json 의 description 참조). 섹션 점수로 접히는 것은
+    # 이 행 하나뿐이므로, 모델이 안 줬거나 숫자가 아니면 축을 대신 쓰지 않고
+    # 통째로 실패시킨다 — 조용히 옛 방식(축 합산)으로 돌아가면 그게 더 나쁘다.
+    try:
+        band = float(payload.get("overall"))
+    except (TypeError, ValueError):
+        raise ValueError("model response has no usable 'overall' band") from None
+    rows.append(
+        {
+            "skill": skill,
+            "criterion": OFFICIAL_CRITERION,
+            "score": band,
+            "max_score": float(max_score),
+            "band": band if is_band else None,
+            "comment": (summary + " " + _OFFICIAL_NOTE).strip(),
+            "source": "ai_draft",
+            "origin": "online",
+            "provider": provider,
+        }
+    )
     return rows

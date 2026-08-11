@@ -23,9 +23,24 @@ import re
 # 따라서 여기서 끌어와도 순환 import 가 생기지 않는다 — 정규화 철학을
 # 두 벌로 갈라 쓰지 않기 위해 normalize_text 를 그대로 재사용한다.
 from app.scoring.autoscore import normalize_text
-from app.scoring.scale import IELTS, TOEFL, round_half_up_to_half
+from app.scoring.scale import IELTS, TOEFL, TOEFL6, round_half_up_to_half
 
 DRAFT_SOURCE = "ai_draft"
+
+# ── 공식 총체 밴드 ────────────────────────────────────────────────────────────
+# ETS 가이드는 과제마다 **총체(holistic) 밴드 한 개**를 매긴다. 아래 CRITERIA 의
+# 분석 축(TF/OD/LU/VO · DEL/LU/TD)은 공식 기준이 아니라 교사가 학생에게 짚어 줄
+# 거리를 만드는 보조 축이다. 그래서 섹션 점수로 접히는 것은 이 행 하나뿐이고
+# (scale.Toefl120Scale.rubric_to_section), 축 행은 화면에만 남는다.
+#
+# 이 이름이 곧 표식이다 — rubric_scores 에 kind 컬럼이 없으므로 criterion 문자열로
+# 가려낸다. 이름을 바꾸면 섹션 환산이 축 합산으로 조용히 되돌아가니 바꾸지 말 것.
+OFFICIAL_CRITERION = "Official Band"
+
+_OFFICIAL_NOTE = {
+    "en": "Official holistic band (ETS TOEFL Scoring Guides). Offline estimate — teacher review required.",
+    "ko": "공식 총체 밴드(ETS TOEFL Scoring Guides). 오프라인 추정치 — 교사 검수 필요.",
+}
 
 # ── criterion sets ────────────────────────────────────────────────────────────
 # (criterion label, weight of each metric family) — the label is what the teacher sees.
@@ -40,6 +55,19 @@ CRITERIA = {
     (IELTS, "writing"): _IELTS_WRITING,
     (IELTS, "speaking"): _IELTS_SPEAKING,
 }
+
+
+def normalize_scale(scale_key: str) -> str:
+    """루브릭에 관한 한 toefl6 은 toefl120 과 같다.
+
+    1~6 밴드는 **보고 눈금**이지 채점 기준이 아니다. ETS 산출형 루브릭은 두 눈금
+    모두에서 과제당 0~5 이고, 밴드로 펴는 일은 채점이 끝난 뒤 scale.py 가 한다.
+    이 함수 덕에 CRITERIA·MAX_SCORE 에 toefl6 행을 두 벌 적지 않아도 된다.
+    """
+    raw = (scale_key or "").strip().lower()
+    if raw == TOEFL6:
+        return TOEFL
+    return raw if raw in (TOEFL, IELTS) else TOEFL
 
 # TOEFL public rubrics (ETS, TOEFL Scoring Guides): 현행 시험의 산출형 과제는 넷이고
 # **네 과제 모두 0–5** 다 — Write an Email · Write for an Academic Discussion ·
@@ -299,11 +327,40 @@ def _repeat_comment(criterion: str, r: dict, lang: str) -> str:
 def criteria_for(scale_key: str, skill: str, task_kind: str = "") -> tuple[str, ...]:
     if skill == "speaking" and is_repeat_task(task_kind):
         return _REPEAT_CRITERIA
-    return CRITERIA.get((scale_key, skill), CRITERIA[(TOEFL, "writing")])
+    return CRITERIA.get((normalize_scale(scale_key), skill), CRITERIA[(TOEFL, "writing")])
 
 
 def max_score_for(scale_key: str, skill: str) -> float:
-    return MAX_SCORE.get((scale_key, skill), 5.0)
+    return MAX_SCORE.get((normalize_scale(scale_key), skill), 5.0)
+
+
+def is_official_row(row: dict) -> bool:
+    """이 행이 공식 총체 밴드인가. dict 든 ORM 행이든 criterion 만 본다."""
+    name = row.get("criterion") if isinstance(row, dict) else getattr(row, "criterion", "")
+    return str(name or "").strip() == OFFICIAL_CRITERION
+
+
+def official_row(
+    skill: str,
+    value: float,
+    *,
+    scale_key: str,
+    comment: str,
+    metrics: dict,
+) -> dict:
+    """공식 총체 밴드 한 행. 축 행과 모양이 같아야 downstream 이 갈라지지 않는다."""
+    top = max_score_for(scale_key, skill)
+    return {
+        "skill": skill,
+        "criterion": OFFICIAL_CRITERION,
+        "score": value,
+        "max_score": top,
+        "band": value if normalize_scale(scale_key) == IELTS else None,
+        "comment": comment,
+        "source": DRAFT_SOURCE,
+        "origin": "offline",
+        "metrics": metrics,
+    }
 
 
 def _comment(criterion: str, m: dict, min_words: int, lang: str) -> str:
@@ -361,6 +418,28 @@ def _repeat_draft(
                 "metrics": metrics,
             }
         )
+
+    # 공식 밴드는 둘 중 약한 쪽이 정한다. Listen and Repeat 의 밴드는 "원문을 얼마나
+    # 그대로 되풀이했나" 하나로 갈리는데, 정확도만 높고 절반을 빠뜨렸거나(coverage 낮음)
+    # 다 말했지만 순서·단어가 어긋났으면(similarity 낮음) 둘 다 밴드를 끌어내린다.
+    # 애매할 때 낮은 쪽을 택하라는 채점 원칙(프롬프트의 tie-breaking)과도 같은 방향이다.
+    if r["said_word_count"] == 0:
+        official = 0.0
+    elif not r["reference_available"]:
+        official = round_half_up_to_half(centre)
+    else:
+        official = _repeat_value(min(r["similarity"], r["coverage"]), top)
+    rows.append(
+        official_row(
+            skill,
+            official,
+            scale_key=scale_key,
+            comment=_repeat_comment(OFFICIAL_CRITERION, r, lang)
+            + " "
+            + _OFFICIAL_NOTE.get(lang, _OFFICIAL_NOTE["en"]),
+            metrics=metrics,
+        )
+    )
     return rows
 
 
@@ -390,7 +469,7 @@ def draft(
       빈 답안은 이 경우에도 0.0 이다(답이 없는 것은 근거가 없는 것과 다르다).
     """
     skill = (skill or "").strip().lower() or "writing"
-    scale_key = scale_key if scale_key in (TOEFL, IELTS) else TOEFL
+    scale_key = normalize_scale(scale_key)
     if skill == "speaking" and is_repeat_task(task_kind):
         return _repeat_draft(skill, text, reference, scale_key=scale_key, lang=lang)
     if not min_words:
@@ -416,6 +495,24 @@ def draft(
                 "metrics": m,
             }
         )
+
+    # 오프라인에서 공식 밴드를 총체적으로 판단할 방법은 없다 — 길이·다양성·연결어
+    # 밖에 재지 못하기 때문이다. 그래서 축의 평균을 **추정치**로 낸다. LLM 경로가
+    # 살아 있으면 그쪽이 진짜 총체 밴드(overall)로 이 행을 덮어쓴다.
+    official = 0.0 if m["is_blank"] else round_half_up_to_half(
+        sum(r["score"] for r in rows) / len(rows)
+    )
+    rows.append(
+        official_row(
+            skill,
+            official,
+            scale_key=scale_key,
+            comment=_comment(OFFICIAL_CRITERION, m, min_words, lang)
+            + " "
+            + _OFFICIAL_NOTE.get(lang, _OFFICIAL_NOTE["en"]),
+            metrics=m,
+        )
+    )
     return rows
 
 
@@ -424,10 +521,13 @@ __all__ = [
     "DEFAULT_MIN_WORDS",
     "DRAFT_SOURCE",
     "MAX_SCORE",
+    "OFFICIAL_CRITERION",
     "compare_repeat",
     "criteria_for",
     "draft",
+    "is_official_row",
     "is_repeat_task",
     "max_score_for",
     "measure",
+    "official_row",
 ]

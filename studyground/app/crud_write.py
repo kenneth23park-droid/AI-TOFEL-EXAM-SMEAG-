@@ -461,6 +461,7 @@ def rubric_rows_by_skill(attempt: Attempt) -> dict[str, list[dict]]:
         out.setdefault(skill, []).append(
             {
                 "skill": skill,
+                "question_key": getattr(row, "question_key", "") or "",
                 "criterion": row.criterion,
                 "score": row.score,
                 "max_score": row.max_score,
@@ -492,7 +493,11 @@ def upsert_rubric_rows(
     *,
     source: str = RUBRIC_SOURCE_DRAFT,
 ) -> dict:
-    """(attempt_id, skill, criterion) 키로 루브릭 행을 upsert 한다.
+    """(attempt_id, skill, question_key, criterion) 키로 루브릭 행을 upsert 한다.
+
+    `question_key` 는 문항 단위로 채점하는 과제(Listen and Repeat)에만 붙고, 스킬을
+    합쳐 채점하는 과제(에세이·인터뷰)는 '' 다. 이 컬럼이 키에 없으면 원문이 서로 다른
+    복창 7문항이 한 자리를 두고 덮어써서 마지막 문항만 남는다.
 
     **source='teacher' 인 행은 절대 덮지 않는다.** 이 함수의 존재 이유가 그것이다:
     리포트를 다시 요청할 때마다 AI 초안이 다시 흘러 들어오는데, 교사가 확정해 둔
@@ -501,9 +506,15 @@ def upsert_rubric_rows(
 
     각 행의 `source` 가 우선이고, 없으면 인자 `source` 를 쓴다(모르는 값 → 초안).
     """
-    existing: dict[tuple[str, str], RubricScore] = {}
+    existing: dict[tuple[str, str, str], RubricScore] = {}
     for row in getattr(attempt, "rubric_scores", []) or []:
-        existing[((row.skill or "").strip().lower(), (row.criterion or "").strip())] = row
+        existing[
+            (
+                (row.skill or "").strip().lower(),
+                (getattr(row, "question_key", "") or "").strip(),
+                (row.criterion or "").strip(),
+            )
+        ] = row
 
     written = 0
     kept_teacher = 0
@@ -511,23 +522,29 @@ def upsert_rubric_rows(
 
     for item in rows or []:
         skill = (item.get("skill") or "").strip().lower()
+        question_key = (item.get("question_key") or "").strip()
         criterion = (item.get("criterion") or "").strip()
         if not skill or not criterion:
             skipped += 1
             continue
 
         incoming = normalize_rubric_source(item.get("source") or source)
-        current = existing.get((skill, criterion))
+        current = existing.get((skill, question_key, criterion))
         if current is not None and incoming != RUBRIC_SOURCE_TEACHER:
             if normalize_rubric_source(getattr(current, "source", "")) == RUBRIC_SOURCE_TEACHER:
                 kept_teacher += 1
                 continue
 
         if current is None:
-            current = RubricScore(attempt_id=attempt.id, skill=skill, criterion=criterion)
+            current = RubricScore(
+                attempt_id=attempt.id,
+                skill=skill,
+                question_key=question_key,
+                criterion=criterion,
+            )
             db.add(current)
             attempt.rubric_scores.append(current)
-            existing[(skill, criterion)] = current
+            existing[(skill, question_key, criterion)] = current
 
         current.score = float(item.get("score") or 0)
         current.max_score = float(item.get("max_score") or 5)

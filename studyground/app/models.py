@@ -261,6 +261,12 @@ class RubricScore(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     attempt_id: Mapped[int] = mapped_column(ForeignKey("attempts.id", ondelete="CASCADE"), index=True)
     skill: Mapped[str] = mapped_column(String(16), index=True)
+    # 어느 문항의 행인가. 스킬 단위로 합쳐 채점하는 과제(에세이·인터뷰)는 ''.
+    # Listen and Repeat 은 문항마다 원문이 달라 문항 단위로 채점하므로, 이 컬럼이
+    # 없으면 7문항이 (attempt, skill, criterion) 한 자리를 두고 서로 덮어쓴다.
+    question_key: Mapped[str] = mapped_column(
+        String(64), default="", server_default=text("''"), nullable=False
+    )
     criterion: Mapped[str] = mapped_column(String(64))
     score: Mapped[float] = mapped_column(Float, default=0)
     max_score: Mapped[float] = mapped_column(Float, default=5)

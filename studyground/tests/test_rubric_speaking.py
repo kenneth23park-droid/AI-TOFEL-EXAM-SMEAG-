@@ -37,8 +37,20 @@ FLOOR = 1.0    # rubric._FLOOR[5.0]
 CEILING = 4.0  # rubric._CEILING[5.0]
 
 
+OFFICIAL = rubric.OFFICIAL_CRITERION
+
+
+def _axes(rows: list[dict]) -> list[dict]:
+    """분석 축 행만. 공식 총체 밴드 행은 따로 본다(_official)."""
+    return [r for r in rows if r["criterion"] != OFFICIAL]
+
+
+def _official(rows: list[dict]) -> dict:
+    return next(r for r in rows if r["criterion"] == OFFICIAL)
+
+
 def _scores(rows: list[dict]) -> list[float]:
-    return [r["score"] for r in rows]
+    return [r["score"] for r in _axes(rows)]
 
 
 def _repeat(text: str, reference: str = REF_Q01, **kw) -> list[dict]:
@@ -150,7 +162,7 @@ def test_missing_reference_still_floors_a_blank_answer():
 
 def test_repeat_uses_its_own_criteria_not_the_free_speech_axes():
     names = [r["criterion"] for r in _repeat(REF_Q01)]
-    assert names == ["Repetition Accuracy", "Completeness"]
+    assert names == ["Repetition Accuracy", "Completeness", OFFICIAL]
     assert "Delivery" not in names and "Topic Development" not in names
 
 
@@ -223,7 +235,9 @@ def test_free_speech_interview_still_uses_the_length_axes():
     """S2 Interview(kind:"interview", 45초 자유 발화)는 기존 루브릭이 맞다."""
     text = " ".join(["I usually go running in the morning because it wakes me up."] * 8)
     rows = rubric.draft("speaking", text, task_kind="interview")
-    assert [r["criterion"] for r in rows] == ["Delivery", "Language Use", "Topic Development"]
+    assert [r["criterion"] for r in rows] == [
+        "Delivery", "Language Use", "Topic Development", OFFICIAL,
+    ]
     assert rows == rubric.draft("speaking", text)
 
 
@@ -251,6 +265,6 @@ def test_non_repeat_kinds_are_not_mistaken_for_repeat(kind):
 @pytest.mark.parametrize("reference", [None, REF_Q01, 0, []])
 def test_junk_input_never_raises(text, reference):
     rows = rubric.draft("speaking", text, task_kind="repeat", reference=reference)
-    assert len(rows) == 2
+    assert len(rows) == 3          # 축 2 + 공식 총체 밴드 1
     for row in rows:
         assert 0.0 <= row["score"] <= CEILING

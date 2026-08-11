@@ -1,0 +1,98 @@
+{
+  "_comment": "TOEFL 1~6 밴드 대응표. 2026-01 부터 ETS 는 네 영역과 종합을 1.0~6.0(0.5 단위)로 보고한다. 이 표는 '영역별 0~30 환산점수 → 밴드' 와 '종합 0~120 → 밴드' 두 벌이다. 코드가 아니라 데이터 파일인 이유: ETS 가 표를 갱신해도 코드를 고치지 않기 위해서다(scale.py Toefl6Scale 이 읽는다). sg2/assets/sg-band.js 와 smeag-com/scores.html 에 같은 표의 사본이 있다 — 고칠 때 세 곳을 함께 고칠 것.",
+  "_provenance": {
+    "level": "official",
+    "source": "ETS — TOEFL iBT Score Scale Update (concordance table)",
+    "url": "https://www.ets.org/toefl/institutions/ibt/score-scale-update.html",
+    "captured": "2026-08-11",
+    "note": "밴드 경계(0~30 → 1~6)는 ETS 공식 표 그대로다. 다만 '원점수(맞은 개수) → 0~30 환산' 단계는 이 표에 없다 — SMEAG 모의고사는 문항 수가 실제 시험과 다르기 때문에(SET 9 는 R 50 · L 47 문항) 정답률 비례로 0~30 을 만든다. 그 단계는 ⚠️가설(검증필요)이며 scale.py 의 scaled_from_raw() 에 표시해 두었다."
+  },
+  "scaled_max": 30,
+  "band_min": 1.0,
+  "band_max": 6.0,
+  "band_step": 0.5,
+
+  "sections": {
+    "reading": [
+      {"min": 29, "band": 6.0},
+      {"min": 27, "band": 5.5},
+      {"min": 24, "band": 5.0},
+      {"min": 22, "band": 4.5},
+      {"min": 18, "band": 4.0},
+      {"min": 12, "band": 3.5},
+      {"min": 6, "band": 3.0},
+      {"min": 4, "band": 2.5},
+      {"min": 3, "band": 2.0},
+      {"min": 2, "band": 1.5},
+      {"min": 0, "band": 1.0}
+    ],
+    "listening": [
+      {"min": 28, "band": 6.0},
+      {"min": 26, "band": 5.5},
+      {"min": 22, "band": 5.0},
+      {"min": 20, "band": 4.5},
+      {"min": 17, "band": 4.0},
+      {"min": 13, "band": 3.5},
+      {"min": 9, "band": 3.0},
+      {"min": 6, "band": 2.5},
+      {"min": 4, "band": 2.0},
+      {"min": 2, "band": 1.5},
+      {"min": 0, "band": 1.0}
+    ],
+    "writing": [
+      {"min": 29, "band": 6.0},
+      {"min": 27, "band": 5.5},
+      {"min": 24, "band": 5.0},
+      {"min": 21, "band": 4.5},
+      {"min": 17, "band": 4.0},
+      {"min": 15, "band": 3.5},
+      {"min": 13, "band": 3.0},
+      {"min": 11, "band": 2.5},
+      {"min": 7, "band": 2.0},
+      {"min": 3, "band": 1.5},
+      {"min": 0, "band": 1.0}
+    ],
+    "speaking": [
+      {"min": 28, "band": 6.0},
+      {"min": 27, "band": 5.5},
+      {"min": 25, "band": 5.0},
+      {"min": 23, "band": 4.5},
+      {"min": 20, "band": 4.0},
+      {"min": 18, "band": 3.5},
+      {"min": 16, "band": 3.0},
+      {"min": 13, "band": 2.5},
+      {"min": 10, "band": 2.0},
+      {"min": 5, "band": 1.5},
+      {"min": 0, "band": 1.0}
+    ]
+  },
+
+  "_overall_comment": "종합은 네 영역 밴드의 **평균**이다(옛 스케일처럼 합이 아니다). 아래 0~120 표는 전환기(2026~2028) 병기용 참고치일 뿐 종합 밴드 산출에 쓰지 않는다 — ETS 도 '서로 다른 영역 조합에서 같은 총점이 나온다'고 단서를 달았다.",
+  "overall_legacy_total": [
+    {"min": 114, "band": 6.0},
+    {"min": 107, "band": 5.5},
+    {"min": 95, "band": 5.0},
+    {"min": 86, "band": 4.5},
+    {"min": 72, "band": 4.0},
+    {"min": 58, "band": 3.5},
+    {"min": 44, "band": 3.0},
+    {"min": 34, "band": 2.5},
+    {"min": 24, "band": 2.0},
+    {"min": 12, "band": 1.5},
+    {"min": 0, "band": 1.0}
+  ],
+
+  "cefr": {
+    "6.0": "C2",
+    "5.5": "C1",
+    "5.0": "C1",
+    "4.5": "B2",
+    "4.0": "B2",
+    "3.5": "B1",
+    "3.0": "B1",
+    "2.5": "A2",
+    "2.0": "A2",
+    "1.5": "A1",
+    "1.0": "A1"
+  }
+}

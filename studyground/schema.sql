@@ -88,6 +88,8 @@ create table if not exists rubric_scores (
     id          serial primary key,
     attempt_id  integer     not null references attempts (id) on delete cascade,
     skill       varchar(16) not null,
+    -- 문항 단위로 채점하는 과제(Listen and Repeat)만 채운다. 합산 과제는 ''.
+    question_key varchar(64) not null default '',
     criterion   varchar(64) not null,
     score       double precision not null default 0,
     max_score   double precision not null default 5,
