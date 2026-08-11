@@ -7,7 +7,12 @@
 
 ## 배포
 
-`scores.html` 을 smeag.com 아무 경로에나 올리면 된다.
+**지금 도는 곳**: <https://smeag-scores.vercel.app/scores.html> (Vercel 프로젝트 `smeag-scores`).
+smeag.com 에 올리기 전까지 쓰는 임시 주소다 — 이 폴더에서 `vercel deploy --prod` 하면
+갱신된다. `vercel.json` 은 루트(`/`)를 `scores.html` 로 보내는 한 줄이 전부라,
+smeag.com 에 파일만 올릴 때는 딸려가도 그만이고 지워도 그만이다.
+
+최종 자리는 그대로 smeag.com 이다. `scores.html` 을 아무 경로에나 올리면 된다.
 
 ```
 /toefl/scores.html   →  https://smeag.com/toefl/scores.html
