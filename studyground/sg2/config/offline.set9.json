@@ -2,7 +2,7 @@
  "set": "SET9",
  "label": "NEW TOEFL SET 9",
  "count": 92,
- "bytes": 24842133,
+ "bytes": 24644163,
  "files": [
   {
    "u": "media/audio/set9/l1-q01.mp3",
@@ -190,7 +190,7 @@
   },
   {
    "u": "media/pictures/set9/l2-q12-15-talk.webp",
-   "b": 67076
+   "b": 49858
   },
   {
    "u": "media/pictures/set9/l2-q4-5-conversation.webp",
@@ -202,7 +202,7 @@
   },
   {
    "u": "media/pictures/set9/l2-q8-11-talk.webp",
-   "b": 34586
+   "b": 67076
   },
   {
    "u": "media/pictures/set9/s-task1-repeat-1.png",
@@ -233,8 +233,8 @@
    "b": 477331
   },
   {
-   "u": "media/pictures/set9/s-task2-interview.png",
-   "b": 280318
+   "u": "media/pictures/set9/s-task2-interviewer.webp",
+   "b": 67076
   },
   {
    "u": "media/tts/set9-M1-ann-19-20.mp3",

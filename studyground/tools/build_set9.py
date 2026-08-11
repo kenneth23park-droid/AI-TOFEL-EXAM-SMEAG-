@@ -120,13 +120,45 @@ def resolve_audio(ref, where):
 #
 # 화자 캐릭터 → 얼굴 (한 캐릭터는 세트 내내 같은 얼굴. 이웃한 두 문항은 다른 얼굴)
 #   Ava·Zoe·Lily → b   Mia·Alice·Ivy → d   Emma → f
-#   Liam·Noah → a      Mason·Ethan → c     Henry·Oliver → e
+#   Liam·Noah → a      Mason·Henry → c      Ethan·Oliver → e
+# 남성 얼굴 3장으로 남성 화자 6명을 감당해야 하므로 둘씩 짝지을 수밖에 없다. 짝을 이렇게
+# 묶은 이유는 배역표 designNotes ① 때문이다 — Oliver 와 Henry 는 연속된 두 강의를 맡는다
+# (M1 25-28 / 29-32, M2 8-11 / 12-15). 음색을 일부러 갈라 놓은 두 사람이므로 얼굴까지
+# 같으면 화면이 도로 헷갈리게 만든다. 그래서 둘을 서로 다른 짝에 넣었다.
 #
 # M1 Q1-12 화자: Ava Liam Mia Mason Alice Henry Lily Noah Emma Ethan Zoe Oliver
 # M2 Q1-3  화자: Ava Emma Ivy
-L1_Q1_12_IMAGES = ['b', 'a', 'd', 'c', 'd', 'e', 'b', 'a', 'f', 'c', 'b', 'e']
+L1_Q1_12_IMAGES = ['b', 'a', 'd', 'c', 'd', 'c', 'b', 'a', 'f', 'e', 'b', 'e']
 L2_Q1_3_IMAGES = ['b', 'f', 'd']
 PIC_EXT = '.webp'
+#
+# ── L1 블록(대화·공지·강의) 삽화 (2026-08-11) ──────────────────────────────
+# docx 는 M1 Q13-32 자리에 삽화를 하나도 붙여 두지 않았다. 그래서 답변 화면 왼쪽 칸이
+# 통째로 비어 선택지만 오른쪽에 떠 있었다 — 발주 요구는 "대화형은 왼쪽 사진 · 오른쪽 4지".
+# 아래 표로 블록마다 사진을 고정한다. 기준은 M2 블록과 같다:
+#   2인 대화  → 장면 삽화(l2-*-conversation)
+#   1인 공지  → 그 화자의 얼굴(위 캐릭터→얼굴 표)
+#   1인 강의  → 강의 장면 또는 그 화자의 얼굴
+# 배역(config/set9-voice-casting.json):
+#   13-14 Emma+Liam · 15-16 Mia+Ethan · 17-18 Zoe+Mason (전부 남녀 2인)
+#   19-20 Liam(a) · 21-22 Ethan(e) · 23-24 Mason(c) · 25-28 Oliver(e) · 29-32 Henry(c)
+# 고해상 남성 얼굴이 a·c·e 셋뿐이라 완전 배타 배정은 불가능하다. "한 캐릭터=한 얼굴"을
+# 먼저 지키되, 이웃한 두 블록에 같은 얼굴이 오지 않도록 짝을 골랐다.
+# 남성 얼굴이 더 들어오면 이 표만 고치면 된다.
+L1_BLOCK_IMAGES = {
+    'Questions 13-14': 'l2-q4-5-conversation' + PIC_EXT,
+    'Questions 15-16': 'l2-q6-7-conversation' + PIC_EXT,
+    'Questions 17-18': 'l2-q4-5-conversation' + PIC_EXT,
+    'Questions 19-20': 'l1-q1-12-speaker-a' + PIC_EXT,
+    'Questions 21-22': 'l1-q1-12-speaker-e' + PIC_EXT,
+    'Questions 23-24': 'l1-q1-12-speaker-c' + PIC_EXT,
+    'Questions 25-28': 'l1-q1-12-speaker-e' + PIC_EXT,
+    'Questions 29-32': 'l1-q1-12-speaker-c' + PIC_EXT,
+}
+# M2 블록. 대화 둘은 남녀 2인 장면(배역도 남녀 한 쌍이라 그대로 맞는다)이고,
+# 강의 둘은 화자 한 명이 나오는 인물 사진이라 배역을 따른다 —
+#   8-11 = GB-Oliver → 얼굴 e · 12-15 = GB-Henry → 얼굴 c.
+# 2026-08-11 이전에는 8-11 자리에 여성 사진이 들어가 있었다(오디오는 남성 Oliver).
 L2_BLOCK_IMAGES = {
     'Questions 4-5': 'l2-q4-5-conversation' + PIC_EXT,
     'Questions 6-7': 'l2-q6-7-conversation' + PIC_EXT,
@@ -511,8 +543,9 @@ def wire_listening(sec):
                         p = pic('l1-q1-12-speaker-' + L2_Q1_3_IMAGES[i] + PIC_EXT, where0 + '/' + q['id'])
                         if p:
                             q['image'] = p
-            elif mod['id'] == 'L2':
-                name = L2_BLOCK_IMAGES.get(blk.get('heading'))
+            else:
+                table = L1_BLOCK_IMAGES if mod['id'] == 'L1' else L2_BLOCK_IMAGES
+                name = table.get(blk.get('heading'))
                 if name:
                     p = pic(name, where0)
                     if p:
@@ -538,7 +571,12 @@ def wire_speaking(sec):
                     else:
                         del q['audio']
                         q['audioMissing'] = True
-                name = ('s-task1-repeat-' + str(i + 1) + '.png') if mod['id'] == 'S1' else 's-task2-interview.png'
+                # Task 1 은 카페테리아 장면 그림(따라 말할 부분이 초록 테두리로 표시된다) —
+                # 화자 사진이 아니므로 docx 원본을 그대로 쓴다.
+                # Task 2 는 화면의 인물 사진 자리다. docx 가 넣어 둔 것은 여성 면접관이 찍힌
+                # 문항지 캡처(4분할·응답시간 UI 포함)였는데 오디오는 GB-Oliver(남)다.
+                # 얼굴 c(= M2 8-11 강의와 같은 Oliver)로 바꾼다.
+                name = ('s-task1-repeat-' + str(i + 1) + '.png') if mod['id'] == 'S1' else 's-task2-interviewer.webp'
                 p = pic(name, where0 + '/' + q['id'])
                 if p:
                     q['image'] = p

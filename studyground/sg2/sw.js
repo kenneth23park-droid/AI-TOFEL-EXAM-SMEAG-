@@ -84,7 +84,10 @@
 //      셸에 든 set9.js 가 바뀌었으므로 VERSION 을 올려야 재방문 기기가 남녀가
 //      뒤바뀐 옛 배정을 계속 보지 않는다. 여성 얼굴 한 장(speaker-f)이 늘어
 //      config/offline.set9.json 도 92개로 갱신되었다.
-const VERSION = 'sg-v31';
+// v32: 화자 사진 맞추기 2차 — M2 강의 두 개(8-11 Oliver · 12-15 Henry)와 스피킹 Task 2
+//      면접관까지 배역대로 바꿨다. 8-11 자리에는 남성 오디오에 여성 사진이, Task 2 에는
+//      남성 오디오에 여성 면접관 캡처가 들어가 있었다. set9.js 가 또 바뀌어 판올림한다.
+const VERSION = 'sg-v32';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 

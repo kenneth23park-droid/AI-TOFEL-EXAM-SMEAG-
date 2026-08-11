@@ -49,8 +49,10 @@ DUMP_JS = r"""
 global.window = global;
 require(process.argv[1]);
 var out = [];
-window[process.argv[2]].sections.find(function (s) { return s.id === 'listening'; })
-  .modules.forEach(function (m) {
+window[process.argv[2]].sections.filter(function (s) {
+  return s.id === 'listening' || s.id === 'speaking';
+}).forEach(function (s) {
+  s.modules.forEach(function (m) {
     m.blocks.forEach(function (b) {
       if (b.audio) out.push({ id: b.heading || m.id, audio: b.audio, image: b.image || '', level: 'block' });
       (b.questions || []).forEach(function (q) {
@@ -58,6 +60,7 @@ window[process.argv[2]].sections.find(function (s) { return s.id === 'listening'
       });
     });
   });
+});
 process.stdout.write(JSON.stringify(out));
 """
 
@@ -70,15 +73,33 @@ def listening_pairs(asset: str, global_name: str):
     return json.loads(proc.stdout)
 
 
-# SET 9 는 삽화 파일명(speaker-a..f)이 성별을 말해 주지 않는다. 사진 실물을 보고 적은 표이며,
-# tools/build_set9.py 의 배정 주석과 짝을 이룬다. 사진을 갈아 끼우면 여기도 고칠 것.
+# 파일명이 성별을 말해 주지 않는 삽화들. 사진 실물을 보고 적은 표이며,
+# SET 9 쪽은 tools/build_set9.py 의 배정 주석과 짝을 이룬다. 사진을 갈아 끼우면 여기도 고칠 것.
+# 'duo' 는 인물이 여럿이거나 장면 그림이라 화자 성별을 물을 수 없는 삽화다.
 SET9_FACE_GENDER = {
+    # SET 1 스피킹 — image1~7 은 상황 그림, image8 은 면접관 사진
+    "image1.png": "duo", "image2.png": "duo", "image3.png": "duo", "image4.png": "duo",
+    "image5.png": "duo", "image6.png": "duo", "image7.png": "duo",
+    "image8.png": "female",
     "l1-q1-12-speaker-a.webp": "male",     # 20대 아시아계
     "l1-q1-12-speaker-b.webp": "female",   # 20대 아시아계
     "l1-q1-12-speaker-c.webp": "male",     # 30~40대 백인(민머리)
     "l1-q1-12-speaker-d.webp": "female",   # 40대 백인
     "l1-q1-12-speaker-e.webp": "male",     # 30대 흑인(안경)
     "l1-q1-12-speaker-f.webp": "female",   # 40대 흑인
+    "l2-q8-11-talk.webp": "male",          # = speaker-e 와 같은 인물(강의 화자 Oliver)
+    "l2-q12-15-talk.webp": "male",         # = speaker-c 와 같은 인물(강의 화자 Henry)
+    "s-task2-interviewer.webp": "male",    # = speaker-e 와 같은 인물(면접관 Oliver)
+    "l2-q4-5-conversation.webp": "duo",    # 2인 대화 장면
+    "l2-q6-7-conversation.webp": "duo",    # 2인 대화 장면
+    # 스피킹 Task 1 은 카페테리아 장면 그림(따라 말할 부분이 표시된다) — 화자 사진이 아니다.
+    "s-task1-repeat-1.png": "duo",
+    "s-task1-repeat-2.png": "duo",
+    "s-task1-repeat-3.png": "duo",
+    "s-task1-repeat-4.png": "duo",
+    "s-task1-repeat-5.png": "duo",
+    "s-task1-repeat-6.png": "duo",
+    "s-task1-repeat-7.png": "duo",
 }
 
 
@@ -94,8 +115,6 @@ def image_gender(image: str):
     name = Path(image).name.lower()
     if name in SET9_FACE_GENDER:
         return SET9_FACE_GENDER[name]
-    if "/set9/" in image.replace("\\", "/"):
-        return "duo"      # 대화·강의 장면 삽화 — 인물이 여럿이라 판정 대상이 아니다
     if "2 people" in name or "2 persons" in name:
         return "duo"
     if "female" in name:

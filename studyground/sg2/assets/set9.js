@@ -760,7 +760,7 @@
               "answer": 0,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q06.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-e.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
             },
             {
               "id": "L1-7",
@@ -824,7 +824,7 @@
               "answer": 0,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q10.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-e.webp"
             },
             {
               "id": "L1-11",
@@ -893,7 +893,8 @@
               "answer": 3
             }
           ],
-          "audio": "media/audio/set9/l1-q13-14.mp3"
+          "audio": "media/audio/set9/l1-q13-14.mp3",
+          "image": "media/pictures/set9/l2-q4-5-conversation.webp"
         },
         {
           "kind": "audio-set",
@@ -927,7 +928,8 @@
               "answer": 3
             }
           ],
-          "audio": "media/audio/set9/l1-q15-16.mp3"
+          "audio": "media/audio/set9/l1-q15-16.mp3",
+          "image": "media/pictures/set9/l2-q6-7-conversation.webp"
         },
         {
           "kind": "audio-set",
@@ -961,7 +963,8 @@
               "answer": 1
             }
           ],
-          "audio": "media/audio/set9/l1-q17-18.mp3"
+          "audio": "media/audio/set9/l1-q17-18.mp3",
+          "image": "media/pictures/set9/l2-q4-5-conversation.webp"
         },
         {
           "kind": "audio-set",
@@ -995,7 +998,8 @@
               "answer": 1
             }
           ],
-          "audio": "media/audio/set9/l1-q19-20.mp3"
+          "audio": "media/audio/set9/l1-q19-20.mp3",
+          "image": "media/pictures/set9/l1-q1-12-speaker-a.webp"
         },
         {
           "kind": "audio-set",
@@ -1029,7 +1033,8 @@
               "answer": 0
             }
           ],
-          "audio": "media/audio/set9/l1-q21-22.mp3"
+          "audio": "media/audio/set9/l1-q21-22.mp3",
+          "image": "media/pictures/set9/l1-q1-12-speaker-e.webp"
         },
         {
           "kind": "audio-set",
@@ -1063,7 +1068,8 @@
               "answer": 3
             }
           ],
-          "audio": "media/audio/set9/l1-q23-24.mp3"
+          "audio": "media/audio/set9/l1-q23-24.mp3",
+          "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
         },
         {
           "kind": "audio-set",
@@ -1123,7 +1129,8 @@
               "answer": 1
             }
           ],
-          "audio": "media/audio/set9/l1-q25-28.mp3"
+          "audio": "media/audio/set9/l1-q25-28.mp3",
+          "image": "media/pictures/set9/l1-q1-12-speaker-e.webp"
         },
         {
           "kind": "audio-set",
@@ -1183,7 +1190,8 @@
               "answer": 3
             }
           ],
-          "audio": "media/audio/set9/l1-q29-32.mp3"
+          "audio": "media/audio/set9/l1-q29-32.mp3",
+          "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
         }
       ]
     },
@@ -2321,7 +2329,7 @@
               "audio": "media/audio/set9/s2-q1.mp3",
               "prepSec": 3,
               "respondSec": 45,
-              "image": "media/pictures/set9/s-task2-interview.png"
+              "image": "media/pictures/set9/s-task2-interviewer.webp"
             },
             {
               "id": "set9-S2-q02",
@@ -2330,7 +2338,7 @@
               "audio": "media/audio/set9/s2-q2.mp3",
               "prepSec": 3,
               "respondSec": 45,
-              "image": "media/pictures/set9/s-task2-interview.png"
+              "image": "media/pictures/set9/s-task2-interviewer.webp"
             },
             {
               "id": "set9-S2-q03",
@@ -2339,7 +2347,7 @@
               "audio": "media/audio/set9/s2-q3.mp3",
               "prepSec": 3,
               "respondSec": 45,
-              "image": "media/pictures/set9/s-task2-interview.png"
+              "image": "media/pictures/set9/s-task2-interviewer.webp"
             },
             {
               "id": "set9-S2-q04",
@@ -2348,7 +2356,7 @@
               "audio": "media/audio/set9/s2-q4.mp3",
               "prepSec": 3,
               "respondSec": 45,
-              "image": "media/pictures/set9/s-task2-interview.png"
+              "image": "media/pictures/set9/s-task2-interviewer.webp"
             }
           ]
         }
