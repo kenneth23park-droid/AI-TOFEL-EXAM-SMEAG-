@@ -11,6 +11,26 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MockTest">
+
+<!-- ── 수험생 계정으로 들어오면 시험 한 벌만 남긴다 ──────────────────────────
+     학생에게 이 화면은 고를 자리가 아니라 들어갈 문이다. 로그인해 있는 동안은
+     지금 치를 시험(SET 9) 전체 과정 하나만 남기고, 영역별 응시·연습지·다른 SET·
+     관리자 도구는 접는다. 비로그인 방문자와 선생님/관리자 계정은 전체를 본다.
+     admin-session.js 의 studentSignedIn() 과 같은 판정을 쓴다. -->
+<script>
+(function () {
+  'use strict';
+  // 본문이 그려지기 전에 정해야 카드가 한 번 보였다 사라지지 않는다 — 저장소를 직접 읽는다.
+  try {
+    var s = JSON.parse(localStorage.getItem('sg2_auth_v1') || 'null');
+    var u = s && s.user;
+    if (!u) return;
+    var r = u.role || (u.is_admin ? 'admin' : 'student');   // role 이 없던 옛 계정은 학생으로 본다
+    if (r !== 'teacher' && r !== 'admin') document.documentElement.classList.add('sg-student');
+  } catch (e) { /* 프라이빗 모드 — 아래 sg-auth 재확인이 맡는다 */ }
+})();
+</script>
+<style>.sg-student [data-staff-only]{display:none!important}</style>
 </head>
 <body>
 
@@ -38,7 +58,7 @@
   </div>
 
   <!-- featured SET 1 -->
-  <div class="promo peach mt-16" data-set="SET1" style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap">
+  <div class="promo peach mt-16" data-set="SET1" data-staff-only style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap">
     <div>
       <span class="tag new">FREE</span> <span class="tag soft">SET 1</span>
       <h3 class="mt-8"><span data-en>NEW TOEFL SET 1 — Full Mock Test</span><span data-ko>NEW TOEFL SET 1 — 전체 모의고사</span></h3>
@@ -62,7 +82,7 @@
   </div>
 
   <!-- section breakdown -->
-  <section class="section" style="padding:34px 0">
+  <section class="section" data-staff-only style="padding:34px 0">
     <h2 class="title mb-24"><span data-en>What's inside SET 1</span><span data-ko>SET 1 구성</span></h2>
     <div class="grid cols-4">
       <div class="testcard"><div class="code">R</div><div class="body"><h4 data-en>Reading</h4><h4 data-ko>리딩</h4><p data-en>2 modules · 35 questions</p><p data-ko>2 모듈 · 35문항</p><div class="chips"><span class="chip">Cloze</span><span class="chip">Daily Life</span><span class="chip">Academic</span></div></div></div>
@@ -76,7 +96,7 @@
   <section class="section" style="padding:10px 0 40px">
     <h2 class="title mb-24"><span data-en>Mock test library</span><span data-ko>모의고사 라이브러리</span></h2>
     <div class="grid" style="gap:12px">
-      <div class="testcard" data-set="SET1"><div class="code">01</div><div class="body"><h4>NEW TOEFL SET 1</h4><p data-en>Full 4-section mock · real SET 1 audio</p><p data-ko>4영역 전체 모의고사 · SET 1 실제 오디오</p>
+      <div class="testcard" data-set="SET1" data-staff-only><div class="code">01</div><div class="body"><h4>NEW TOEFL SET 1</h4><p data-en>Full 4-section mock · real SET 1 audio</p><p data-ko>4영역 전체 모의고사 · SET 1 실제 오디오</p>
         <div class="scope"><span class="scope-lab"><span data-en>One section</span><span data-ko>한 영역만</span></span>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=reading&amp;profile=toefl"><span data-en>Reading</span><span data-ko>리딩</span></a>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=listening&amp;profile=toefl"><span data-en>Listening</span><span data-ko>리스닝</span></a>
@@ -84,21 +104,21 @@
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=writing&amp;profile=toefl"><span data-en>Writing</span><span data-ko>라이팅</span></a>
         </div></div><a class="btn brand" href="exam-runtime.html?mode=exam&amp;profile=toefl"><span data-en>Full test</span><span data-ko>전체 과정</span></a></div>
       <div class="testcard" data-set="SET9"><div class="code">09</div><div class="body"><h4>NEW TOEFL SET 9</h4><p data-en>Full 4-section mock · 120 questions (R 50 · L 47 · W 12 · S 11)</p><p data-ko>4영역 전체 모의고사 · 120문항 (리딩 50 · 리스닝 47 · 라이팅 12 · 스피킹 11)</p><div class="chips"><span class="chip">🔊 34 audio clips</span><span class="chip">12 voices · US/GB/AU</span></div>
-        <div class="scope"><span class="scope-lab"><span data-en>One section</span><span data-ko>한 영역만</span></span>
+        <div class="scope" data-staff-only><span class="scope-lab"><span data-en>One section</span><span data-ko>한 영역만</span></span>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=reading&amp;profile=toefl&amp;set=set9"><span data-en>Reading</span><span data-ko>리딩</span></a>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=listening&amp;profile=toefl&amp;set=set9"><span data-en>Listening</span><span data-ko>리스닝</span></a>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=speaking&amp;profile=toefl&amp;set=set9"><span data-en>Speaking</span><span data-ko>스피킹</span></a>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=writing&amp;profile=toefl&amp;set=set9"><span data-en>Writing</span><span data-ko>라이팅</span></a>
-        </div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" href="set9-reading.html"><span data-en>📖 Reading sheet</span><span data-ko>📖 리딩 연습지</span></a><a class="btn ghost" href="set9.html"><span data-en>🔊 Listening audio</span><span data-ko>🔊 리스닝 오디오</span></a><a class="btn brand" href="exam-runtime.html?mode=exam&amp;profile=toefl&amp;set=set9"><span data-en>Full test</span><span data-ko>전체 과정</span></a></div></div>
-      <div class="testcard"><div class="code">02</div><div class="body"><h4>NEW TOEFL SET 2</h4><p data-en>Releasing soon</p><p data-ko>곧 공개</p></div><button class="btn ghost" disabled>Locked</button></div>
-      <div class="testcard"><div class="code">03</div><div class="body"><h4>NEW TOEFL SET 3</h4><p data-en>Releasing soon</p><p data-ko>곧 공개</p></div><button class="btn ghost" disabled>Locked</button></div>
+        </div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" data-staff-only href="set9-reading.html"><span data-en>📖 Reading sheet</span><span data-ko>📖 리딩 연습지</span></a><a class="btn ghost" data-staff-only href="set9.html"><span data-en>🔊 Listening audio</span><span data-ko>🔊 리스닝 오디오</span></a><a class="btn brand" href="exam-runtime.html?mode=exam&amp;profile=toefl&amp;set=set9"><span data-en>Full test</span><span data-ko>전체 과정</span></a></div></div>
+      <div class="testcard" data-staff-only><div class="code">02</div><div class="body"><h4>NEW TOEFL SET 2</h4><p data-en>Releasing soon</p><p data-ko>곧 공개</p></div><button class="btn ghost" disabled>Locked</button></div>
+      <div class="testcard" data-staff-only><div class="code">03</div><div class="body"><h4>NEW TOEFL SET 3</h4><p data-en>Releasing soon</p><p data-ko>곧 공개</p></div><button class="btn ghost" disabled>Locked</button></div>
     </div>
     <!-- 관리자 도구 — SET 별 관리자 로그인을 통과해야 열린다(assets/admin-session.js). -->
-    <div class="testcard" style="margin-top:12px"><div class="code">⚙︎</div><div class="body"><h4 data-en>Listening audio settings (admin)</h4><h4 data-ko>듣기 오디오 설정 (관리자)</h4><p data-en>Assign or upload the mp3 for each listening item.</p><p data-ko>리스닝 문항별 mp3 지정·업로드.</p></div><a class="btn ghost" href="admin-audio.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
-    <div class="testcard" style="margin-top:12px"><div class="code">📁</div><div class="body"><h4 data-en>Audio file check (admin)</h4><h4 data-ko>오디오 파일 점검 (관리자)</h4><p data-en>Audio only — path, size, length and whether a clip is missing or replaced.</p><p data-ko>오디오만 봅니다 — 경로·용량·길이·누락/교체 여부.</p></div><a class="btn ghost" href="admin-audio-files.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
-    <div class="testcard" style="margin-top:12px"><div class="code">📋</div><div class="body"><h4 data-en>Set overview — script &amp; answer key (admin)</h4><h4 data-ko>SET 전체 보기 — 대본 · 정답 (관리자)</h4><p data-en>The whole mock test on one page: structure, listening scripts and the answer key.</p><p data-ko>시험 한 벌을 한 화면에: 구성 · 리스닝 대본 · 정답표.</p></div><a class="btn ghost" href="admin-set-view.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
-    <div class="testcard" style="margin-top:12px"><div class="code">🎧</div><div class="body"><h4 data-en>Script ↔ audio check (admin)</h4><h4 data-ko>대본 · 오디오 대조 (관리자)</h4><p data-en>Play with the script beside it — mismatched words are highlighted.</p><p data-ko>대본을 나란히 두고 재생 — 어긋난 단어를 형광으로 표시.</p></div><a class="btn ghost" href="admin-audio-sync.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
-    <div class="testcard" style="margin-top:12px"><div class="code">✎</div><div class="body"><h4 data-en>Question editor (admin)</h4><h4 data-ko>문항 교체 (관리자)</h4><p data-en>Replace a prompt, the choices, the answer key or the audio path — revertible per item.</p><p data-ko>발문·선택지·정답·오디오 경로 교체. 문항별로 되돌릴 수 있습니다.</p></div><a class="btn ghost" href="admin-questions.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
+    <div class="testcard" data-staff-only style="margin-top:12px"><div class="code">⚙︎</div><div class="body"><h4 data-en>Listening audio settings (admin)</h4><h4 data-ko>듣기 오디오 설정 (관리자)</h4><p data-en>Assign or upload the mp3 for each listening item.</p><p data-ko>리스닝 문항별 mp3 지정·업로드.</p></div><a class="btn ghost" href="admin-audio.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
+    <div class="testcard" data-staff-only style="margin-top:12px"><div class="code">📁</div><div class="body"><h4 data-en>Audio file check (admin)</h4><h4 data-ko>오디오 파일 점검 (관리자)</h4><p data-en>Audio only — path, size, length and whether a clip is missing or replaced.</p><p data-ko>오디오만 봅니다 — 경로·용량·길이·누락/교체 여부.</p></div><a class="btn ghost" href="admin-audio-files.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
+    <div class="testcard" data-staff-only style="margin-top:12px"><div class="code">📋</div><div class="body"><h4 data-en>Set overview — script &amp; answer key (admin)</h4><h4 data-ko>SET 전체 보기 — 대본 · 정답 (관리자)</h4><p data-en>The whole mock test on one page: structure, listening scripts and the answer key.</p><p data-ko>시험 한 벌을 한 화면에: 구성 · 리스닝 대본 · 정답표.</p></div><a class="btn ghost" href="admin-set-view.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
+    <div class="testcard" data-staff-only style="margin-top:12px"><div class="code">🎧</div><div class="body"><h4 data-en>Script ↔ audio check (admin)</h4><h4 data-ko>대본 · 오디오 대조 (관리자)</h4><p data-en>Play with the script beside it — mismatched words are highlighted.</p><p data-ko>대본을 나란히 두고 재생 — 어긋난 단어를 형광으로 표시.</p></div><a class="btn ghost" href="admin-audio-sync.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
+    <div class="testcard" data-staff-only style="margin-top:12px"><div class="code">✎</div><div class="body"><h4 data-en>Question editor (admin)</h4><h4 data-ko>문항 교체 (관리자)</h4><p data-en>Replace a prompt, the choices, the answer key or the audio path — revertible per item.</p><p data-ko>발문·선택지·정답·오디오 경로 교체. 문항별로 되돌릴 수 있습니다.</p></div><a class="btn ghost" href="admin-questions.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
   </section>
 </main>
 
@@ -112,6 +132,23 @@
 <script src="assets/seat-runtime.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/sg-auth.js"></script>
+<script>
+/* 머리에서 내린 판정은 기기에 저장된 프로필만 보고 한 것이라, 서버 사본으로 한 번
+   되짚는다. 선생님·관리자면 접었던 것을 다시 펴고, 로그인/로그아웃마다 다시 판정한다. */
+(function () {
+  'use strict';
+  var A = window.SG_AUTH;
+  if (!A) return;
+  function sync() {
+    var cl = document.documentElement.classList;
+    if (!A.user()) { cl.remove('sg-student'); return; }
+    cl.add('sg-student');                                  // 막는 쪽이 기본 — 확인되면 푼다
+    A.isStaff().then(function (staff) { if (staff) cl.remove('sg-student'); }, function () {});
+  }
+  A.onChange(sync);
+  sync();
+})();
+</script>
 <!-- 이미 응시한 세트 표시 — 기기에 남은 응시 기록(+로그인했으면 서버 사본)만 읽는다. -->
 <script src="assets/sg-results.js"></script>
 <script>
