@@ -108,7 +108,7 @@ check('S1 첫 화면 id', s1.id, 'speaking.q.S1.01');
 var rS1 = drive(s1.phases);
 check('S1 궤적', names(rS1), 'listen → prep → record → (end)');
 check('S1 액션', acts(rS1), 'playMedia,startRecord,stopRecord,screenDone');
-check('S1 prep 초', s1.phases[1].seconds, 3);
+check('S1 prep 초', s1.phases[1].seconds, 2);
 check('S1 record 초 (responseSecByIndex[0])', s1.phases[2].seconds, 8);
 /* Task 1 문장별 답변 시간 — 1~2번 8초 / 3~5번 10초 / 6~7번 12초 (최종수정사항.docx). */
 check('S1 7문항 record 초 시퀀스',

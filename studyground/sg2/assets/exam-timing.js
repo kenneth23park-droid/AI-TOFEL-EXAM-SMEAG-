@@ -74,7 +74,7 @@
         ],
         "tasks": null,
         "taskTypes": {
-          "listenAndRepeat": {"id": "listenAndRepeat", "label": "Listen and Repeat", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 3, "responseSec": 12, "responseSecByIndex": [8, 8, 10, 10, 10, 12, 12], "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"},
+          "listenAndRepeat": {"id": "listenAndRepeat", "label": "Listen and Repeat", "mediaType": "audio", "promptSelfPaced": false, "listenReplays": 1, "prepSec": 2, "responseSec": 12, "responseSecByIndex": [8, 8, 10, 10, 10, 12, 12], "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"},
           "interview": {"id": "interview", "label": "Take an Interview", "mediaType": "video", "promptSelfPaced": true, "listenReplays": 1, "prepSec": 3, "responseSec": 45, "responseSecByIndex": null, "responseSecMin": null, "responseSecMax": null, "recording": true, "onExpire": "stopRecord"}
         },
         "fallbackPerQuestionSec": null,

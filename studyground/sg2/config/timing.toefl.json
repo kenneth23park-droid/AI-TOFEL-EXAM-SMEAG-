@@ -115,7 +115,7 @@
           "mediaType": "audio",
           "promptSelfPaced": false,
           "listenReplays": 1,
-          "prepSec": 3,
+          "prepSec": 2,
           "responseSec": 12,
           "responseSecByIndex": [8, 8, 10, 10, 10, 12, 12],
           "responseSecMin": null,

@@ -8,7 +8,7 @@
  *   [3] Reading 3지문 60분 단일 카운트다운(timer.scope === 'section')
  *   [4] Writing Task1 1200초 / Task2 2400초 (timer.scope === 'task')
  *   [5] Speaking Part2 phases === [read, prep(60), record(120)]  ← §3.3 핵심 검증점
- *   [6] TOEFL 무회귀: S1 phases === [listen, prep(3), record(20)], transfer 화면 0개
+ *   [6] TOEFL 무회귀: S1 phases === [listen, prep(2), record(20)], transfer 화면 0개
  *   [7] timing.ielts.json ↔ SG_TIMING 내장 폴백 값 동일 + 두 프로파일 키 구조 동일
  *   [8] 프로파일 폴백: 알 수 없는 프로파일 → toefl + warn
  */
@@ -156,7 +156,7 @@ t.screens.forEach(function (s) {
   if (s.transfer) trCount += 1;
 });
 // record:20 → 8 — Task 1 첫 문장은 8초(최종수정사항.docx responseSecByIndex[0]).
-check('TOEFL S1 phase', s1.phases.map(function (p) { return p.name + ':' + p.seconds; }), ['listen:0', 'prep:3', 'record:8']);
+check('TOEFL S1 phase', s1.phases.map(function (p) { return p.name + ':' + p.seconds; }), ['listen:0', 'prep:2', 'record:8']);
 check('TOEFL transfer 화면 수', trCount, 0);
 var tRead = null;
 t.screens.forEach(function (s) { if (!tRead && s.section === 'reading' && s.screenType === 'question') tRead = s; });
