@@ -91,6 +91,11 @@
 
   var FREE_WIDTH = 10;
 
+  // 빈칸은 영어 단어만 받는다. 한글 자판이 켜진 채로 쳐도 화면에도 저장에도 한글은 남지 않는다
+  // (IME 조합 중에는 손대지 않고, compositionend 에서 한 번에 걷어낸다 — 조합이 깨지지 않게).
+  var NON_ASCII = /[^\x20-\x7E]/g;
+  function asciiOnly(s) { return (s === null || s === undefined) ? '' : String(s).replace(NON_ASCII, ''); }
+
   function stemOf(q) { return (q && q.hint) ? String(q.hint) : ''; }
 
   // 빠진 글자 수. 0 = 알 수 없음(자유 입력).
@@ -232,6 +237,10 @@
 
   function syncBlank(b) {
     var typed = b.input.value || '';
+    if (!b.composing) {
+      var only = asciiOnly(typed);
+      if (only !== typed) { typed = only; b.input.value = typed; }
+    }
     if (b.need && typed.length > b.need) { typed = typed.slice(0, b.need); b.input.value = typed; }
     b.rail.textContent = railText(b.width, typed.length);
     var cls = 'rd-blank';
@@ -266,13 +275,16 @@
     inp.setAttribute('autocapitalize', 'off');
     inp.setAttribute('autocorrect', 'off');
     inp.setAttribute('spellcheck', 'false');
+    inp.setAttribute('lang', 'en');                 // 모바일 자판에 영문을 먼저 권한다
+    inp.setAttribute('inputmode', 'text');
+    if (inp.style) inp.style.imeMode = 'disabled';  // 구형 파이어폭스/IE 만 알아듣는다
     if (need) inp.maxLength = need;
 
     slot.appendChild(rail);
     slot.appendChild(inp);
     wrap.appendChild(slot);
 
-    var b = { wrap: wrap, input: inp, rail: rail, need: need, width: width, q: q, focused: false, index: api.blanks.length };
+    var b = { wrap: wrap, input: inp, rail: rail, need: need, width: width, q: q, focused: false, composing: false, index: api.blanks.length };
     api.blanks.push(b);
 
     if (!q) {                              // template 과 questions 가 어긋난 경우(F12)
@@ -283,9 +295,12 @@
 
     inp.id = 'rd-q-' + q.id;
     inp.setAttribute('aria-label', 'Blank ' + no + (need ? (', ' + need + ' letters') : ''));
-    inp.value = typedFrom(q, savedAnswer(q.id));
+    inp.value = asciiOnly(typedFrom(q, savedAnswer(q.id)));
 
+    inp.oncompositionstart = function () { b.composing = true; };
+    inp.oncompositionend = function () { b.composing = false; if (inp.oninput) inp.oninput(); };
     inp.oninput = function () {
+      if (b.composing) return;                      // 조합이 끝나면 compositionend 가 다시 부른다
       var typed = syncBlank(b);
       saveAnswer(ctx, q.id, composeAnswer(q, typed));
       api.refreshGrid();

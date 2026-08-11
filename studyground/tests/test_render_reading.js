@@ -384,5 +384,29 @@ ok('포커스 칸 강조', navBlanks[0].className.indexOf('is-focus') > 0, navBl
 ins[0].onblur();
 ok('블러 시 강조 해제', navBlanks[0].className.indexOf('is-focus') < 0, navBlanks[0].className);
 
+/* ── [11] 빈칸은 영어만 받는다 ────────────────────────────────────────────
+ * 한글 자판이 켜진 채로 쳐도 화면에도 저장에도 한글이 남으면 안 된다. */
+console.log('\n[11] cloze 빈칸 영문 강제');
+var kb = ins[5];                                   // maxLength 6
+ok('입력칸 lang="en"', kb.getAttribute('lang') === 'en', String(kb.getAttribute('lang')));
+
+kb.value = '한글'; kb.oninput();
+check('한글만 친 경우 남는 값', kb.value, '');
+
+kb.value = 'a한b글c'; kb.oninput();
+check('섞어 친 경우 영문만 남는다', kb.value, 'abc');
+
+kb.value = ''; kb.oninput();
+kb.oncompositionstart();
+kb.value = 'ㅎ'; kb.oninput();
+check('IME 조합 중에는 건드리지 않는다', kb.value, 'ㅎ');
+kb.oncompositionend();
+check('조합이 끝나면 걷어낸다', kb.value, '');
+
+var kbId = String(kb.id || '').replace('rd-q-', '');
+var savedKb = window.SG_STORE && window.SG_STORE.getAnswer ? window.SG_STORE.getAnswer(kbId) : null;
+ok('저장에도 한글이 남지 않는다', !savedKb || !/[^\x20-\x7E]/.test(String(savedKb.v || '')),
+   savedKb ? JSON.stringify(savedKb.v) : 'none');
+
 console.log('\n' + (fails.length ? 'FAILED: ' + fails.join(', ') : 'ALL PASS'));
 process.exit(fails.length ? 1 : 0);

@@ -129,7 +129,10 @@
 //      review.html)은 재생기 밑에 길이·용량·입력 최대치를 적는다. muted 트랙을 물고
 //      있던 스트림도 버리고 다시 연다 — 길이만 있고 소리는 없는 파일의 원인이었다.
 //      모두 셸 자산이라 판올림하지 않으면 재방문 기기가 옛 녹음기를 계속 쓴다.
-const VERSION = 'sg-v41';
+// v42: 리딩 cloze 빈칸은 영어만 받는다 — exam-render-reading.js 가 ASCII 아닌 글자를
+//      걷어내고(IME 조합이 끝난 뒤에) 입력칸에 lang="en" 을 준다. 한글 자판을 켠 채로
+//      친 답이 그대로 저장돼 오답이 되던 자리다. 캐시된 옛 렌더러가 남으면 그대로라 판올림.
+const VERSION = 'sg-v42';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
