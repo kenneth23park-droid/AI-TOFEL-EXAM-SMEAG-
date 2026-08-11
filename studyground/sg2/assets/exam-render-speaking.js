@@ -276,6 +276,7 @@
     var recordFailed = false;
     var beepTimer = null;        // 신호음이 울리는 동안만 살아 있다
     var pendingArm = null;       // 신호음이 끝나고 걸 응답 시계 {index, phase}
+    var advanceTimer = null;     // 응답 종료 후 자동 전진까지의 짧은 대기
     var stickyCaption = false;   // read/prompt 가 세운 지시문을 prep·record 내내 유지할지
 
     /* ── DOM 골격 ── */
@@ -435,10 +436,30 @@
 
     /* engine.phaseNext() 를 쓰지 않는 이유(의도된 차이):
        그 API 는 phaseIndex 를 정확히 1 씩만 올리고 마지막 phase 에서 화면을 자동 전진시킨다.
-       (a) settle() 은 0-length phase 를 여러 개 한 번에 건너뛸 수 있고,
-       (b) AC6 은 마지막 phase 뒤에 "미리듣기 + Next 만" 남기라고 요구한다.
-       그래서 phase 커서는 SG_STORE.saveCursor 로 직접 남기고, 화면 전진은
-       응시자의 Next(engine.next('manual')) 로만 일으킨다. localStorage 직접 접근은 없다. */
+       settle() 은 0-length phase 를 여러 개 한 번에 건너뛸 수 있으므로 phase 커서는
+       SG_STORE.saveCursor 로 직접 남긴다. localStorage 직접 접근은 없다. */
+
+    /* 스피킹은 응시자가 누를 것이 없다 — 응답 시간이 끝나면 실제 시험처럼 스스로 넘어간다.
+       녹음 저장(stopRecording 의 콜백)이 끝날 틈을 주려고 잠깐만 머문다. */
+    var ADVANCE_MS = 1500;
+    var ADVANCE_MS_NOTICE = 6000;   // 안내(중단·이미 녹음됨)를 읽을 시간은 준다
+    var advanceMs = ADVANCE_MS;
+
+    function cancelAdvance() {
+      if (advanceTimer !== null && root.clearTimeout) { try { root.clearTimeout(advanceTimer); } catch (e) {} }
+      advanceTimer = null;
+    }
+
+    function autoAdvance() {
+      if (advanceTimer !== null) return;   // 이미 예약돼 있으면 두 번 걸지 않는다
+      function go() {
+        advanceTimer = null;
+        if (disposed) return;
+        if (engine && typeof engine.next === 'function') engine.next('auto');
+      }
+      if (root.setTimeout) advanceTimer = root.setTimeout(go, advanceMs);
+      else go();
+    }
 
     function markNotSubmit(reason) {
       var R = REC();
@@ -577,9 +598,30 @@
       pendingArm = null;
     }
 
-    function startRecording() {
+    /* 마이크가 한 번 실패했다고 문항을 포기하지 않는다 — 응답 시간이 남아 있는 동안
+     * 조용히 다시 연다(권한이 늦게 허용되거나 장치가 잠깐 물린 경우가 대부분이다). */
+    var RETRY_MS = 1000, RETRY_MAX = 5;
+    var retryTimer = null, retryLeft = RETRY_MAX;
+
+    function cancelRetry() {
+      if (retryTimer !== null && root.clearTimeout) { try { root.clearTimeout(retryTimer); } catch (e) {} }
+      retryTimer = null;
+    }
+
+    function scheduleRetry() {
+      if (retryLeft <= 0 || disposed || retryTimer !== null || !root.setTimeout) return;
+      retryLeft -= 1;
+      retryTimer = root.setTimeout(function () {
+        retryTimer = null;
+        if (disposed || recording) return;
+        startRecording(true);
+      }, RETRY_MS);
+    }
+
+    function startRecording(isRetry) {
       var R = REC();
       recordFailed = false;
+      if (!isRetry) { retryLeft = RETRY_MAX; cancelRetry(); }
       if (!R || !R.isSupported()) {
         recordFailed = true;
         markNotSubmit('unsupported');
@@ -595,14 +637,21 @@
           recording = false;
           rbox.classList.remove('is-recording');
           markNotSubmit(e.code || 'recorder_error');
-          setBanner('Microphone is unavailable (' + (e.code || 'error') + '). This question is marked NOT SUBMIT and the test continues.',
-                    '마이크를 사용할 수 없습니다 (' + (e.code || 'error') + '). 이 문항은 NOT SUBMIT 으로 표시되고 시험은 계속됩니다.', 'error');
-          logEvent('record_failed', screen.id, { qid: qid, code: e.code || '' });
+          if (retryLeft > 0) {
+            setBanner('Microphone did not open — retrying. Keep speaking; allow the microphone if your browser asks.',
+                      '마이크가 열리지 않아 다시 시도합니다. 계속 말씀하세요. 브라우저가 물으면 마이크를 허용하세요.', 'error');
+            scheduleRetry();
+          } else {
+            setBanner('Microphone is unavailable (' + (e.code || 'error') + '). This question is marked NOT SUBMIT and the test continues.',
+                      '마이크를 사용할 수 없습니다 (' + (e.code || 'error') + '). 이 문항은 NOT SUBMIT 으로 표시되고 시험은 계속됩니다.', 'error');
+          }
+          logEvent('record_failed', screen.id, { qid: qid, code: e.code || '', retryLeft: retryLeft });
           return;
         }
+        cancelRetry();
         recording = true;
         rbox.classList.add('is-recording');
-        logEvent('record_start', screen.id, { qid: qid });
+        logEvent('record_start', screen.id, { qid: qid, retried: retryLeft < RETRY_MAX });
       });
       if (p && typeof p['catch'] === 'function') p['catch'](function () {});
     }
@@ -611,6 +660,7 @@
       var R = REC();
       // 신호음이 울리는 사이에 phase 가 끝났다면(force·강제전진) 마이크를 열지 않는다.
       cancelBeep();
+      cancelRetry();
       if (!R || !recording) { recording = false; rbox.classList.remove('is-recording'); return; }
       recording = false;
       rbox.classList.remove('is-recording');
@@ -660,10 +710,8 @@
 
       if (state.status === 'done') {
         setCaption('Your response time has ended.', '응답 시간이 종료되었습니다.');
-        setButton('Next', '다음', function () {
-          if (engine && typeof engine.next === 'function') engine.next('manual');
-        });
         persistCursor();
+        autoAdvance();
         return;
       }
 
@@ -765,6 +813,7 @@
           logEvent('record_interrupted', screen.id, { qid: qid });
         }
         state = { phases: phases, phaseIndex: phases.length, status: 'done' };
+        advanceMs = ADVANCE_MS_NOTICE;
         renderPhase();
         return;
       }
@@ -781,6 +830,8 @@
       disposed = true;
       stopAudio();
       cancelBeep();
+      cancelRetry();
+      cancelAdvance();
       var R = REC();
       if (R && R.isRecording()) { try { R.abort(); } catch (e) {} }
       recording = false;
