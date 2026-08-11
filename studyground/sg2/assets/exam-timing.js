@@ -41,6 +41,10 @@
         "timerFormat": "MM:SS",
         "onExpire": "autoAdvance",
         "audio": {"maxPlays": 1, "autoPlay": true, "replayAllowed": false},
+        // 사진·선택지가 한 화면에 있고 그 화면에서 mp3 가 재생된다. config/timing.toefl.json
+        // 과 반드시 같아야 한다 — sg2 는 오프라인으로도 돌아가므로 JSON 을 못 읽으면 이
+        // 내장본이 쓰인다. 여기 빠져 있으면 오프라인에서만 옛 분리 화면으로 되돌아간다.
+        "audioOnQuestionScreen": true,
         "questionCountSource": "content",
         "sectionSec": null,
         "modules": [
@@ -154,6 +158,10 @@
         "timerFormat": "MM:SS",
         "onExpire": "autoAdvance",
         "audio": {"maxPlays": 1, "autoPlay": true, "replayAllowed": false},
+        // IELTS 는 timerScope 가 section 이라 애초에 오디오/답변을 나누지 않는다.
+        // 값이 아니라 키의 존재가 계약이다 — 두 프로파일의 키 집합은 같아야 하고
+        // (Story 6.1 AC1), 그래야 한쪽에만 생긴 설정을 테스트가 잡아낸다.
+        "audioOnQuestionScreen": false,
         "questionCountSource": "content",
         "sectionSec": 1800,
         "modules": [

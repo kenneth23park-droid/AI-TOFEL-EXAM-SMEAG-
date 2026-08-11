@@ -43,6 +43,7 @@
         "autoPlay": true,
         "replayAllowed": false
       },
+      "audioOnQuestionScreen": false,
       "questionCountSource": "content",
       "sectionSec": 1800,
       "modules": [

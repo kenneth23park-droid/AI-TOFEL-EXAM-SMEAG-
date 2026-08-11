@@ -60,7 +60,31 @@ const ALL_LANGS = ['en-US', 'en-GB', 'en-AU', 'en-IN', 'ko-KR', 'ja-JP', 'zh-CN'
 const OA_VOICES = ['alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'nova', 'onyx', 'sage', 'shimmer', 'verse'];
 
 function env(n) { return process.env[n] || ''; }
-function googleKey() { return env('GOOGLE_TTS_API_KEY') || env('GOOGLE_API_KEY'); }
+
+/* 자격증명 해석.
+ *
+ * 키는 원래 서버 환경변수에만 뒀다. 정적 사이트라 프런트에 두면 그대로 공개되기
+ * 때문이다. 그 원칙은 그대로 두되, 환경변수가 없는 기기에서도 관리자가 자기 키를
+ * 붙여넣어 쓸 수 있게 요청 헤더를 하나 더 받는다.
+ *
+ *   x-sg-key      선택한 엔진의 API 키
+ *   x-sg-region   Azure 전용 리전
+ *
+ * 요청 키가 오면 그것을, 없으면 환경변수를 쓴다. 요청 키는 이 호출 안에서만 살고
+ * 어디에도 저장·기록하지 않는다. 로그에 남기지 말 것 — 그 순간 공유 자원이 된다.
+ *
+ * 전역이 아니라 인자로 넘기는 이유: 서버리스 런타임은 한 인스턴스에서 요청을 동시에
+ * 처리할 수 있다. 모듈 전역에 담아 두면 다른 관리자의 키로 합성될 수 있다.
+ */
+function credsFrom(req) {
+  const h = (n) => String((req && req.headers && req.headers[n]) || '').trim();
+  return { key: h('x-sg-key'), region: h('x-sg-region') };
+}
+function googleKey(C) { return (C && C.key) || env('GOOGLE_TTS_API_KEY') || env('GOOGLE_API_KEY'); }
+function xiKey(C) { return (C && C.key) || env('ELEVENLABS_API_KEY'); }
+function oaKey(C) { return (C && C.key) || env('OPENAI_API_KEY'); }
+function azKey(C) { return (C && C.key) || env('AZURE_TTS_KEY'); }
+function azRegion(C) { return (C && C.region) || env('AZURE_TTS_REGION'); }
 
 /* ── 엔진 정의 ─────────────────────────────────────────────
    models 는 화면의 "언어 모델" 드롭다운 값이다. Google/Azure 는 모델 계열이 목소리
@@ -72,7 +96,8 @@ const PROVIDERS = {
     free: '월 100만자 무료 티어 (WaveNet 100만자)',
     models: ['Neural2', 'Wavenet', 'Standard', 'Studio', 'Journey', 'Polyglot', 'Chirp3'],
     langs: ALL_LANGS,
-    ready: () => !!googleKey(),
+    ready: (C) => !!googleKey(C),
+    envVar: 'GOOGLE_TTS_API_KEY', acceptsKey: true,
     why: 'GOOGLE_TTS_API_KEY 미설정'
   },
   elevenlabs: {
@@ -81,7 +106,8 @@ const PROVIDERS = {
     models: ['eleven_multilingual_v2', 'eleven_flash_v2_5', 'eleven_turbo_v2_5', 'eleven_v3'],
     defaultModel: 'eleven_multilingual_v2',
     langs: [],                       // 다국어 모델이 언어를 자동 판별한다
-    ready: () => !!env('ELEVENLABS_API_KEY'),
+    ready: (C) => !!xiKey(C),
+    envVar: 'ELEVENLABS_API_KEY', acceptsKey: true,
     why: 'ELEVENLABS_API_KEY 미설정'
   },
   azure: {
@@ -89,7 +115,8 @@ const PROVIDERS = {
     free: '월 50만자 무료 티어 (F0)',
     models: ['Neural'],
     langs: ALL_LANGS,
-    ready: () => !!(env('AZURE_TTS_KEY') && env('AZURE_TTS_REGION')),
+    ready: (C) => !!(azKey(C) && azRegion(C)),
+    envVar: 'AZURE_TTS_KEY', acceptsKey: true, needsRegion: true,
     why: 'AZURE_TTS_KEY / AZURE_TTS_REGION 미설정'
   },
   openai: {
@@ -98,7 +125,8 @@ const PROVIDERS = {
     models: ['gpt-4o-mini-tts', 'tts-1', 'tts-1-hd'],
     defaultModel: 'gpt-4o-mini-tts',
     langs: [],
-    ready: () => !!env('OPENAI_API_KEY'),
+    ready: (C) => !!oaKey(C),
+    envVar: 'OPENAI_API_KEY', acceptsKey: true,
     why: 'OPENAI_API_KEY 미설정'
   },
   kokoro: {
@@ -156,9 +184,9 @@ async function fail(r) {
 
 /* ── 엔진별 합성 (모두 mp3 바이트를 돌려준다) ───────────── */
 
-async function synthGoogle(seg, o) {
+async function synthGoogle(seg, o, C) {
   const ssml = '<speak>' + xml(seg.text) + (o.gapMs > 0 ? '<break time="' + o.gapMs + 'ms"/>' : '') + '</speak>';
-  const r = await fetch(G_SYNTH + '?key=' + encodeURIComponent(googleKey()), {
+  const r = await fetch(G_SYNTH + '?key=' + encodeURIComponent(googleKey(C)), {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       input: { ssml },
@@ -172,18 +200,18 @@ async function synthGoogle(seg, o) {
   return Buffer.from(j.audioContent, 'base64');
 }
 
-async function synthEleven(seg, o) {
+async function synthEleven(seg, o, C) {
   const r = await fetch(XI_TTS + encodeURIComponent(seg.voice) + '?output_format=mp3_44100_128', {
     method: 'POST',
-    headers: { 'xi-api-key': env('ELEVENLABS_API_KEY'), 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+    headers: { 'xi-api-key': xiKey(C), 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
     body: JSON.stringify({ text: seg.text, model_id: o.model })
   });
   if (!r.ok) throw await fail(r);
   return Buffer.from(await r.arrayBuffer());
 }
 
-async function synthAzure(seg, o) {
-  const region = env('AZURE_TTS_REGION');
+async function synthAzure(seg, o, C) {
+  const region = azRegion(C);
   const lang = langOf(seg.voice, seg.lang || o.lang);
   const ssml =
     '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="' + lang + '">' +
@@ -194,7 +222,7 @@ async function synthAzure(seg, o) {
   const r = await fetch('https://' + region + '.tts.speech.microsoft.com/cognitiveservices/v1', {
     method: 'POST',
     headers: {
-      'Ocp-Apim-Subscription-Key': env('AZURE_TTS_KEY'),
+      'Ocp-Apim-Subscription-Key': azKey(C),
       'Content-Type': 'application/ssml+xml',
       'X-Microsoft-OutputFormat': 'audio-24khz-96kbitrate-mono-mp3',
       'User-Agent': 'smeag-studyground'
@@ -205,10 +233,10 @@ async function synthAzure(seg, o) {
   return Buffer.from(await r.arrayBuffer());
 }
 
-async function synthOpenAI(seg, o) {
+async function synthOpenAI(seg, o, C) {
   const r = await fetch(OA_TTS, {
     method: 'POST',
-    headers: { Authorization: 'Bearer ' + env('OPENAI_API_KEY'), 'Content-Type': 'application/json' },
+    headers: { Authorization: 'Bearer ' + oaKey(C), 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: o.model, voice: seg.voice, input: seg.text, response_format: 'mp3', speed: o.rate })
   });
   if (!r.ok) throw await fail(r);
@@ -220,10 +248,10 @@ const VOICE_OK = { google: RE.gVoice, elevenlabs: RE.xiVoice, azure: RE.azVoice,
 
 /* ── 엔진별 목소리 목록 ─────────────────────────────────── */
 
-async function voicesGoogle(langs) {
+async function voicesGoogle(langs, C) {
   const out = [], seen = new Set();
   for (const lc of langs) {
-    const r = await fetch(G_VOICES + '?key=' + encodeURIComponent(googleKey()) + '&languageCode=' + lc);
+    const r = await fetch(G_VOICES + '?key=' + encodeURIComponent(googleKey(C)) + '&languageCode=' + lc);
     if (!r.ok) continue;
     const j = await r.json();
     (j.voices || []).forEach((v) => {
@@ -238,8 +266,8 @@ async function voicesGoogle(langs) {
   }
   return out;
 }
-async function voicesEleven() {
-  const r = await fetch(XI_VOICES, { headers: { 'xi-api-key': env('ELEVENLABS_API_KEY') } });
+async function voicesEleven(C) {
+  const r = await fetch(XI_VOICES, { headers: { 'xi-api-key': xiKey(C) } });
   if (!r.ok) throw await fail(r);
   const j = await r.json();
   return (j.voices || []).map((v) => ({
@@ -247,10 +275,10 @@ async function voicesEleven() {
     gender: (v.labels && v.labels.gender) || '', family: (v.labels && v.labels.use_case) || v.category || ''
   }));
 }
-async function voicesAzure(langs) {
-  const region = env('AZURE_TTS_REGION');
+async function voicesAzure(langs, C) {
+  const region = azRegion(C);
   const r = await fetch('https://' + region + '.tts.speech.microsoft.com/cognitiveservices/voices/list',
-    { headers: { 'Ocp-Apim-Subscription-Key': env('AZURE_TTS_KEY') } });
+    { headers: { 'Ocp-Apim-Subscription-Key': azKey(C) } });
   if (!r.ok) throw await fail(r);
   const j = await r.json();
   return j.filter((v) => langs.indexOf(v.Locale) >= 0 && RE.azVoice.test(v.ShortName))
@@ -270,6 +298,7 @@ module.exports = async function handler(req, res) {
 
   // 어떤 엔진이 준비돼 있고, 각각 무슨 모델·언어를 고를 수 있는지.
   if (req.method === 'GET') {
+    const CRED = credsFrom(req);
     const url = new URL(req.url, 'http://x');
     const want = (url.searchParams.get('provider') || '').toLowerCase();
     const langs = (url.searchParams.get('lang') || DEFAULT_LANGS.join(','))
@@ -277,19 +306,23 @@ module.exports = async function handler(req, res) {
 
     const providers = Object.keys(PROVIDERS).map((id) => {
       const p = PROVIDERS[id];
+      // ready  : 지금 이 요청으로 합성 가능한가(서버 키 또는 방금 보낸 키)
+      // envReady: 서버 환경변수만으로 가능한가 — 화면이 "서버에 설정됨"과
+      //           "이 기기의 키로 동작 중"을 구분해 보여줄 수 있어야 한다.
       return { id, label: p.label, mp3: p.mp3, gap: !!p.gap, free: p.free, local: !!p.local,
                models: p.models, defaultModel: p.defaultModel || p.models[0], langs: p.langs,
-               ready: p.ready(), note: p.ready() ? '' : p.why };
+               acceptsKey: !!p.acceptsKey, envVar: p.envVar || '', needsRegion: !!p.needsRegion,
+               ready: p.ready(CRED), envReady: p.ready(null), note: p.ready(CRED) ? '' : p.why };
     });
 
     const voices = {};
-    const ask = want && PROVIDERS[want] ? [want] : Object.keys(PROVIDERS).filter((id) => PROVIDERS[id].ready());
+    const ask = want && PROVIDERS[want] ? [want] : Object.keys(PROVIDERS).filter((id) => PROVIDERS[id].ready(CRED));
     for (const id of ask) {
-      if (!PROVIDERS[id] || !PROVIDERS[id].ready()) continue;
+      if (!PROVIDERS[id] || !PROVIDERS[id].ready(CRED)) continue;
       try {
-        voices[id] = id === 'google' ? await voicesGoogle(langs)
-                   : id === 'elevenlabs' ? await voicesEleven()
-                   : id === 'azure' ? await voicesAzure(langs)
+        voices[id] = id === 'google' ? await voicesGoogle(langs, CRED)
+                   : id === 'elevenlabs' ? await voicesEleven(CRED)
+                   : id === 'azure' ? await voicesAzure(langs, CRED)
                    : voicesOpenAI();
       } catch (e) { voices[id] = []; }
     }
@@ -305,11 +338,12 @@ module.exports = async function handler(req, res) {
   try { body = await readBody(req); }
   catch (e) { return json(res, 400, { error: String(e.message || e) }); }
 
+  const CRED = credsFrom(req);
   const pid = String(body.provider || 'google').toLowerCase();
   const P = PROVIDERS[pid];
   if (!P) return json(res, 400, { error: 'Unknown provider: ' + pid });
   if (P.local) return json(res, 400, { error: P.label + ' runs locally — use tools/tts_kokoro.py, then upload the mp3.' });
-  if (!P.ready()) return json(res, 503, { error: P.label + ' is not configured on the server (' + P.why + ').' });
+  if (!P.ready(CRED)) return json(res, 503, { error: P.label + ' 키가 없다 (' + P.why + '). 서버 환경변수에 넣거나 화면에서 키를 붙여넣어라.' });
 
   const model = body.model && P.models.indexOf(String(body.model)) >= 0
     ? String(body.model) : (P.defaultModel || P.models[0]);
@@ -349,7 +383,7 @@ module.exports = async function handler(req, res) {
   try {
     // 세그먼트는 병렬로 합성하고 순서대로 이어 붙인다(함수 실행시간 제한 대비).
     const parts = await Promise.all(segments.map((seg, i) =>
-      SYNTH[pid](seg, Object.assign({}, opts, { gapMs: i === segments.length - 1 ? 0 : opts.gapMs }))));
+      SYNTH[pid](seg, Object.assign({}, opts, { gapMs: i === segments.length - 1 ? 0 : opts.gapMs }), CRED)));
     const mp3 = Buffer.concat(parts);
     return json(res, 200, {
       audio: mp3.toString('base64'), mime: 'audio/mpeg', bytes: mp3.length,

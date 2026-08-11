@@ -36,6 +36,17 @@
  *   L2 = perQuestionAudio 문항  3 + 블록오디오 블록 4 =  7   → 합 27
  * listening 51+27=78, 총계 95+27=122. 문항 수 120 은 불변(audio-play 는 문항을 안 담는다).
  *
+ * ── 그 분리를 다시 없앰 (2026-08-10, 79→52 / 123→96) ───────────────────────
+ * 발주처 요구로 사진과 선택지가 한 화면에 있고 그 화면에서 mp3 가 재생된다
+ * (config/timing.toefl.json 의 sections.listening.audioOnQuestionScreen:true).
+ * 위 27개 audio-play 화면이 사라져 listening 79→52, 총계 123→96 이 된다.
+ * 문항 수 120 은 여기서도 불변이다 — 사라진 화면이 문항을 담고 있지 않았기 때문이다.
+ *
+ * 합치면서 새로 지켜야 하는 성질이 하나 생겼다. 분리돼 있던 시절에는 오디오 화면에
+ * 타이머가 아예 없어(700s 프레임) 듣는 동안 답변 시간이 깎이지 않는 게 저절로 보장됐다.
+ * 한 화면이 된 뒤에는 컴파일러가 timerStartsOnAudioEnd 를 달아 명시적으로 보장한다.
+ * [1b] 가 검사하는 대상이 "분리됐는가" 에서 "합쳐졌고 시계가 미뤄지는가" 로 바뀐 이유다.
+ *
  * ── 결손 해소 이력 (2026-08-07) ────────────────────────────────────────
  * 이전 버전의 [7] 은 "audioMissing 블록 4개 / buildWarnings 4건"을 고정하고 있었다.
  * 근거는 Listening Module 2 의 Q4-15(4블록)에 대해 SET 9 SCRIPT.docx 가 문항 질문문만
@@ -88,20 +99,33 @@ console.log('\n[1] 화면 수 검산 (위 주석의 산술 유도)');
 var bySec = {};
 res.screens.forEach(function (s) { bySec[s.section] = (bySec[s.section] || 0) + 1; });
 // 2026-08-07: intro.microphone(Adjusting the Microphone) 추가 → 섹션·총계 +1.
-check('listening (47 + intro.volume + intro.microphone + directions + moduleEnd×2 + audio-play 27)', bySec.listening || 0, 79);
+// 2026-08-10: audioOnQuestionScreen:true 로 오디오 전용 화면 27개가 사라졌다(-27).
+//   사진과 선택지가 한 화면에 있고 그 화면에서 mp3 가 재생된다.
+//   근거: config/timing.toefl.json provenance "sections.listening.audioOnQuestionScreen".
+check('listening (47 + intro.volume + intro.microphone + directions + moduleEnd×2)', bySec.listening || 0, 52);
 check('speaking  (11 + hardware + directions + intro×2)',          bySec.speaking  || 0, 15);
 check('reading   (블록 9 + directions + moduleEnd×2)',              bySec.reading   || 0, 12);
 check('writing   (12 + directions + taskEnd×3 + review.submit)',   bySec.writing   || 0, 17);
-check('총 화면',                                                    res.screens.length, 123);
+check('총 화면',                                                    res.screens.length, 96);
 
-console.log('\n[1b] 오디오/답변 화면 분리 + 타이머 규칙 (SET 1 과 동일 계약)');
+console.log('\n[1b] 오디오가 문항 화면에서 재생된다 + 타이머 규칙');
+/* 2026-08-10 이전에는 오디오 전용 화면(blockKind 'audio-play')과 답변 화면이 분리돼
+   있었다. audioOnQuestionScreen:true 가 그 분리를 끄면서, 듣기와 답하기가 한 화면이 됐다.
+   여기서 검사할 것이 뒤바뀐다 — "분리됐는가" 가 아니라 "합쳐졌고, 합친 탓에 답변 시간이
+   깎이지 않는가" 다. 오디오가 도는 20~180초 동안 20초 시계가 함께 돌면 문항이 성립하지
+   않으므로, 오디오가 붙은 화면은 전부 timerStartsOnAudioEnd 를 달고 있어야 한다. */
 var play = res.screens.filter(function (s) { return s.blockKind === 'audio-play'; });
 var ansS = res.screens.filter(function (s) { return s.blockKind === 'audio-set'; });
-check('audio-play 화면 (L1 20 + L2 7)', play.length, 27);
-check('audio-set(답변) 화면', ansS.length, 47);
-check('audio-play 에 타이머 없음', play.filter(function (s) { return s.timer !== null; }).length, 0);
-check('audio-play 에 questionIds 없음', play.filter(function (s) { return s.questionIds; }).length, 0);
-check('audio-play 이 오디오를 갖는다', play.filter(function (s) { return s.audio && s.audio.src; }).length, 27);
+var withAudio = ansS.filter(function (s) { return s.audio && s.audio.src; });
+check('audio-play(오디오 전용) 화면 없음', play.length, 0);
+check('audio-set(문항) 화면', ansS.length, 47);
+check('오디오가 붙은 문항 화면 (L1 20 + L2 7)', withAudio.length, 27);
+check('오디오 붙은 화면은 답변 시계를 재생 종료로 미룬다',
+  withAudio.filter(function (s) { return s.timerStartsOnAudioEnd !== true; }).length, 0);
+check('오디오 없는 문항 화면에는 그 표시가 없다',
+  ansS.filter(function (s) { return !s.audio && s.timerStartsOnAudioEnd; }).length, 0);
+check('오디오 화면도 문항을 갖는다(합쳐졌으므로)',
+  withAudio.filter(function (s) { return !s.questionIds || !s.questionIds.length; }).length, 0);
 // 30 → 20: 최종수정사항.docx "given the 20 secs time limit" 이 녹화 실측 30초를 대체한다.
 check('답변 화면 타이머 {countdown,question,20} 위반', ansS.filter(function (s) {
   return !s.timer || s.timer.mode !== 'countdown' || s.timer.scope !== 'question' || s.timer.seconds !== 20;

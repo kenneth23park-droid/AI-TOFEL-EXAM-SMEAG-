@@ -350,15 +350,26 @@ var lsText = textOf(lsNode);
 ok('오디오 1회 안내 문구', lsText.indexOf('Audio plays once') >= 0);
 ok('재생 전 선택지 잠금', lsText.indexOf('choices unlock') >= 0);
 var lockedInputs = walk(lsNode, []).filter(function (x) { return x.tagName === 'INPUT' && x.type === 'radio'; });
-/* 2026-08-07 실측 반영: 오디오 재생 화면(blockKind 'audio-play')에는 선택지가 없다
+/* 2026-08-07 실측 반영: 오디오 재생 화면(blockKind 'audio-play')에는 선택지가 없었다
  * (docs/reference/screens/listening-audio-700s.png — 화자 사진과 제목만 있다).
- * 선택지 4개는 뒤따르는 답변 화면(blockKind 'audio-set')의 계약이다. */
-ok('오디오 화면에는 선택지 없음', lockedInputs.length === 0, String(lockedInputs.length));
-var answerScreen = audioSet[0];
+ *
+ * 2026-08-10 변경: audioOnQuestionScreen:true 로 그 분리가 사라졌다. 이제 사진·선택지가
+ * 한 화면에 있고 그 화면에서 mp3 가 재생된다. 그래서 "선택지가 없다" 가 아니라
+ * "선택지는 있되 재생이 끝날 때까지 잠겨 있다" 가 계약이다 — 들으면서 답을 고르면
+ * 리스닝이 아니라 읽기 문제가 된다. */
+ok('오디오 화면에도 선택지 4개', lockedInputs.length === 4, String(lockedInputs.length));
+ok('재생 중에는 선택지가 잠겨 있다',
+   lockedInputs.length > 0 && lockedInputs.every(function (x) { return x.disabled === true; }));
+/* 오디오가 붙지 않은 문항 화면을 고른다. audioSet[0] 은 블록 첫 문항이라 오디오를
+   갖고 있어 잠금 대상이다 — 잠금이 오디오 유무를 따르는지 보려면 없는 쪽을 봐야 한다. */
+var answerScreen = audioSet.filter(function (s) { return !(s.audio && s.audio.src); })[0] || audioSet[0];
 var ansInputs = walk(window.SG_LISTEN.renderListeningQuestion(answerScreen, ctx), [])
   .filter(function (x) { return x.tagName === 'INPUT' && x.type === 'radio'; });
 ok('답변 화면 선택지 4개', ansInputs.length === 4, String(ansInputs.length));
-ok('답변 화면 선택지는 즉시 활성', ansInputs.length > 0 && ansInputs.every(function (x) { return x.disabled === false; }));
+/* 오디오가 없는 문항(이 화면)은 잠글 이유가 없으므로 즉시 활성이어야 한다.
+ * 위의 '재생 중 잠금' 과 짝을 이뤄, 잠금이 오디오 유무에 따라 걸리는지 확인한다. */
+ok('오디오 없는 문항은 선택지가 즉시 활성',
+   ansInputs.length > 0 && ansInputs.every(function (x) { return x.disabled === false; }));
 ok('controls 속성 미사용(FR8)',
    walk(lsNode, []).filter(function (x) { return x.tagName === 'AUDIO' && x.attrs.controls; }).length === 0);
 

@@ -14,7 +14,46 @@
   'use strict';
 
   var TOKEN_KEY = 'sg2_tts_token';
+  var KEYS_KEY = 'sg2_tts_keys';     // { providerId: {key, region} }
   var ENDPOINT = 'api/tts';
+
+  /* 엔진 키 보관.
+   *
+   * 기본은 여전히 서버 환경변수다 — 정적 사이트라 프런트에 키를 심으면 그대로 공개된다.
+   * 다만 환경변수가 없는 기기에서도 관리자가 자기 키로 바로 쓸 수 있어야 해서, 이 기기의
+   * localStorage 에만 두고 요청 헤더로 한 번씩 실어 보낸다.
+   *
+   * 이 방식의 한계를 분명히 해 둔다: localStorage 는 같은 출처의 스크립트와 이 기기를
+   * 쓰는 사람이면 읽을 수 있다. 공용 PC 에 넣지 말고, 팀이 함께 쓸 키라면 서버
+   * 환경변수에 두는 편이 맞다. 화면에는 마스킹해서만 보여준다. */
+  function allKeys() {
+    try { return JSON.parse(localStorage.getItem(KEYS_KEY) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function keyOf(pid) { var e = allKeys()[pid]; return (e && e.key) || ''; }
+  function regionOf(pid) { var e = allKeys()[pid]; return (e && e.region) || ''; }
+  function saveKey(pid, key, region) {
+    var all = allKeys();
+    if (key) all[pid] = { key: String(key).trim(), region: String(region || '').trim() };
+    else delete all[pid];
+    try { localStorage.setItem(KEYS_KEY, JSON.stringify(all)); } catch (e) {}
+    catalogCache = null;            // ready 판정이 달라지므로 목록을 다시 받는다
+  }
+  /** 화면 표시용. 앞 4·뒤 4 만 남긴다 — 어느 키인지 알아볼 수는 있고, 새어 나가지는 않는다. */
+  function maskKey(k) {
+    k = String(k || '');
+    if (!k) return '';
+    if (k.length <= 10) return k.slice(0, 2) + '••••';
+    return k.slice(0, 4) + '••••••••' + k.slice(-4);
+  }
+  /** 선택한 엔진의 키만 실어 보낸다. 쓰지도 않을 다른 키까지 보낼 이유가 없다. */
+  function credHeaders(pid) {
+    var h = {};
+    if (!pid) return h;
+    var k = keyOf(pid); if (k) h['x-sg-key'] = k;
+    var r = regionOf(pid); if (r) h['x-sg-region'] = r;
+    return h;
+  }
 
   /* 서버 목록을 못 받았을 때 화면을 세우기 위한 최소 세트.
      tools/tts_google.py 로 SET 9 를 만들 때 쓴 12개와 같다. */
@@ -45,9 +84,12 @@
   function noFn(status) { return status === 404 || status === 405 || status === 501; }
 
   function post(payload) {
+    var h = { 'Content-Type': 'application/json', 'x-sg-token': token() };
+    var cred = credHeaders(payload && payload.provider);
+    for (var n in cred) if (cred.hasOwnProperty(n)) h[n] = cred[n];
     return fetch(ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-sg-token': token() },
+      headers: h,
       body: JSON.stringify(payload)
     }).then(function (r) {
       return r.text().then(function (t) {
@@ -85,6 +127,13 @@
     FALLBACK_VOICES: FALLBACK_VOICES,
 
     hasToken: function () { return !!token(); },
+
+    /* 엔진 키 — 화면이 쓰는 표면. 값 자체는 이 모듈 밖으로 원문 그대로 나가지 않는다. */
+    hasKey: function (pid) { return !!keyOf(pid); },
+    keyMask: function (pid) { return maskKey(keyOf(pid)); },
+    regionOf: function (pid) { return regionOf(pid); },
+    setKey: function (pid, key, region) { saveKey(pid, key, region); },
+    clearKey: function (pid) { saveKey(pid, '', ''); },
     setToken: function (t) {
       catalogCache = null;
       try { t ? localStorage.setItem(TOKEN_KEY, String(t).trim()) : localStorage.removeItem(TOKEN_KEY); }
@@ -126,11 +175,48 @@
                        family: v.family, label: label(v) };
             });
           });
+          /* 서버는 자기 환경변수만 보고 ready 를 매긴다. 이 기기에 붙여넣은 키는
+             서버가 모르므로 여기서 얹어 준다. 카탈로그 요청에 키를 실어 보내지 않는 건
+             의도적이다 — 목록을 받는 것뿐인데 키가 네트워크를 오갈 이유가 없다. */
+          (j.providers || []).forEach(function (p) {
+            if (p.envReady === undefined) p.envReady = p.ready;
+            if (!p.local && p.acceptsKey && !p.envReady && keyOf(p.id)) {
+              p.ready = true;
+              p.byLocalKey = true;
+              p.note = '';
+            }
+          });
           catalogCache = j;
           return j;
         })
         .catch(function () { return FALLBACK; });
     },
+    /** 로컬 키로만 열린 엔진의 목소리 목록을 그 키로 받아 카탈로그에 채워 넣는다.
+     *  서버가 카탈로그를 만들 때는 이 키를 몰라 voices[pid] 가 비어 있다. */
+    loadVoicesWithKey: function (cat, pid, langs) {
+      if (!cat || !pid || !keyOf(pid)) return Promise.resolve(cat);
+      if ((cat.voices && cat.voices[pid] || []).length) return Promise.resolve(cat);
+      var q = '?provider=' + encodeURIComponent(pid) +
+              (langs && langs.length ? '&lang=' + encodeURIComponent(langs.join(',')) : '');
+      var h = { 'x-sg-token': token() };
+      var cred = credHeaders(pid);
+      for (var n in cred) if (cred.hasOwnProperty(n)) h[n] = cred[n];
+      return fetch(ENDPOINT + q, { headers: h })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          var list = (j && j.voices && j.voices[pid]) || [];
+          if (list.length) {
+            cat.voices = cat.voices || {};
+            cat.voices[pid] = list.map(function (v) {
+              return { id: v.id || v.name, name: v.name, lang: v.lang, gender: v.gender,
+                       family: v.family, label: label(v) };
+            });
+          }
+          return cat;
+        })
+        .catch(function () { return cat; });
+    },
+
     /** 엔진+언어+모델에 맞는 목소리만 추린다.
      *  비면 조건을 단계적으로 푼다 — 모델 먼저, 그래도 없으면 언어까지.
      *  (언어를 끝까지 붙들면 "그 언어에 그 모델이 없다"는 이유로 빈 목록이 나온다.) */

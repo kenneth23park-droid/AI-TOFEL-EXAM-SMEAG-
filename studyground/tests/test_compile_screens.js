@@ -44,21 +44,24 @@ console.log('\n[1] 화면 수 검산 (architecture.md §4.3)');
 var bySec = {};
 res.screens.forEach(function (s) { bySec[s.section] = (bySec[s.section] || 0) + 1; });
 // 2026-08-07: 레퍼런스 test-nt 화면 'Adjusting the Microphone'(intro.microphone) 추가 → 섹션·총계 +1.
-check('listening (36 + intro.volume + intro.microphone + audio-play 19)', bySec.listening || 0, 57);
+// 2026-08-10: audioOnQuestionScreen:true — 오디오 전용 화면 19개 제거(57 → 38).
+check('listening (36 + intro.volume + intro.microphone)', bySec.listening || 0, 38);
 check('speaking',                      bySec.speaking  || 0, 15);
 check('reading',                       bySec.reading   || 0, 9);
 check('writing (16 + review.submit)',  bySec.writing   || 0, 17);
-check('총 화면',                        res.screens.length, 98);
+check('총 화면',                        res.screens.length, 79);
 
 console.log('\n[1b] 오디오/답변 화면 분리 + 타이머 부여 규칙 (실측)');
 var play = res.screens.filter(function (s) { return s.blockKind === 'audio-play'; });
 var ans = res.screens.filter(function (s) { return s.blockKind === 'audio-set'; });
-check('audio-play 화면', play.length, 19);
+check('audio-play(오디오 전용) 화면 없음', play.length, 0);
 check('audio-set(답변) 화면', ans.length, 33);
 check('audio-play 에 타이머 없음', play.filter(function (s) { return s.timer !== null; }).length, 0);
 check('audio-play 에 questionIds 없음', play.filter(function (s) { return s.questionIds; }).length, 0);
-check('audio-play 이 오디오를 갖는다', play.filter(function (s) { return s.audio && s.audio.src; }).length, 19);
-check('답변 화면에는 오디오 없음', ans.filter(function (s) { return s.audio; }).length, 0);
+check('오디오가 붙은 문항 화면', ans.filter(function (s) { return s.audio && s.audio.src; }).length, 19);
+// 합쳐진 뒤의 핵심 성질: 오디오가 도는 동안 20초 답변 시계가 함께 돌면 안 된다.
+check('오디오 붙은 화면은 답변 시계를 재생 종료로 미룬다',
+  ans.filter(function (s) { return s.audio && s.timerStartsOnAudioEnd !== true; }).length, 0);
 /* 답변 화면 타이머 = {countdown, question, 20}.
  * 녹화 실측은 30초였으나(Q29 884s→00:29), 발주처 확정 규격서
  * (_compare/TOEFL Test set up-최종수정사항.docx — "given the 20 secs time limit")가
