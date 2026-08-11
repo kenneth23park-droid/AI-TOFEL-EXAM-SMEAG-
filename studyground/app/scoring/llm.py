@@ -77,14 +77,21 @@ def _call_anthropic(system: str, prompt: str, max_tokens: int) -> tuple[str, dic
     }
 
 
-def _call_openai(system: str, prompt: str, max_tokens: int) -> tuple[str, dict]:
-    settings = get_settings()
+def _openai_compatible(
+    system: str, prompt: str, max_tokens: int, *, base_url: str, model: str, api_key: str
+) -> tuple[str, dict]:
+    """OpenAI 본사와 vLLM 이 같은 프로토콜을 쓴다 — 호출부는 하나면 된다."""
     try:
         from openai import OpenAI
     except ImportError as exc:
         raise RuntimeError("openai SDK is not installed") from exc
-    completion = OpenAI(api_key=settings.openai_api_key).chat.completions.create(
-        model=settings.openai_model,
+    client = OpenAI(
+        # SDK 는 빈 키를 거부한다. 자체 호스팅은 키를 검사하지 않으므로 자리채움을 준다.
+        api_key=api_key or "local-no-auth",
+        base_url=base_url or None,
+    )
+    completion = client.chat.completions.create(
+        model=model,
         max_tokens=max_tokens,
         messages=[
             {"role": "system", "content": system},
@@ -95,7 +102,7 @@ def _call_openai(system: str, prompt: str, max_tokens: int) -> tuple[str, dict]:
     cached = _int(getattr(getattr(u, "prompt_tokens_details", None), "cached_tokens", 0))
     prompt_tokens = _int(getattr(u, "prompt_tokens", 0))
     return completion.choices[0].message.content or "", {
-        "model": getattr(completion, "model", "") or settings.openai_model,
+        "model": getattr(completion, "model", "") or model,
         # OpenAI 의 prompt_tokens 는 캐시분을 포함한 총량이다. Anthropic 은 캐시분을
         # input_tokens 밖에 따로 싣는다 — 두 프로바이더의 의미를 여기서 맞춰 둔다.
         "input_tokens": max(prompt_tokens - cached, 0),
@@ -105,20 +112,89 @@ def _call_openai(system: str, prompt: str, max_tokens: int) -> tuple[str, dict]:
     }
 
 
+def _call_openai(system: str, prompt: str, max_tokens: int) -> tuple[str, dict]:
+    s = get_settings()
+    return _openai_compatible(
+        system, prompt, max_tokens,
+        base_url=s.openai_base_url, model=s.openai_model, api_key=s.openai_api_key,
+    )
+
+
 _CALLERS = {"anthropic": _call_anthropic, "openai": _call_openai}
 
 
 def _model_for(provider: str) -> str:
     """설정상의 모델 이름. 응답을 못 받은 실패 행에 쓴다."""
     settings = get_settings()
+    if provider in _ROUTES:
+        return _route_target(provider)[1]
     return settings.openai_model if provider == "openai" else settings.anthropic_model
+
+
+# ── 스킬별 라우팅 ─────────────────────────────────────────────────────────────
+#
+# Writing·Speaking 은 사람의 판단에 준하는 채점이라 큰 모델이 필요하다 → codex.
+# Reading·Listening 은 정답지로 채점이 이미 끝나 있고 LLM 은 리뷰 코멘트만 쓴다
+# → 캠퍼스 LAN 안의 작은 모델(Gemma 4 E2B)로 충분하고, 그게 훨씬 싸다.
+#
+# 둘 다 OpenAI 호환 엔드포인트라 호출부는 하나로 족하다. 모델 이름을 설정하지
+# 않으면 라우팅은 통째로 꺼지고 기존 프로바이더 체인이 그대로 쓰인다.
+
+_ROUTES = ("codex", "gemma")
+
+_SKILL_ROUTE = {
+    "writing": "codex",
+    "speaking": "codex",
+    "reading": "gemma",
+    "listening": "gemma",
+}
+
+
+def route_for(skill: str) -> str:
+    """스킬 이름 → 라우트. 모르는 스킬은 빈 문자열(=라우팅 없음)."""
+    return _SKILL_ROUTE.get((skill or "").strip().lower(), "")
+
+
+def _route_target(route: str) -> tuple[str, str, str]:
+    """(base_url, model, api_key). 모델이 비어 있으면 그 라우트는 꺼진 것이다."""
+    s = get_settings()
+    if route == "codex":
+        # 캠퍼스 주소를 물려받지 않는다 — Codex 는 호스팅 모델이고, 그 점이 이 분리의
+        # 요지다. 캠퍼스 안에서 돌리려면 CODEX_BASE_URL 을 명시적으로 준다.
+        return s.codex_base_url, s.codex_model, s.openai_api_key
+    if route == "gemma":
+        return s.gemma_base_url, s.gemma_model, s.openai_api_key
+    return "", "", ""
+
+
+def _route_enabled(route: str) -> bool:
+    base_url, model, api_key = _route_target(route)
+    if not model:
+        return False
+    # 본사 OpenAI 로 갈 거면 키가 있어야 하고, 자체 호스팅이면 없어도 된다.
+    return bool(base_url) or bool(api_key)
+
+
+def _call_route(route: str):
+    """이 라우트 전용 호출자. _CALLERS 와 같은 시그니처를 흉내낸다."""
+
+    def call(system: str, prompt: str, max_tokens: int) -> tuple[str, dict]:
+        base_url, model, api_key = _route_target(route)
+        return _openai_compatible(
+            system, prompt, max_tokens,
+            base_url=base_url, model=model, api_key=api_key,
+        )
+
+    return call
 
 
 def _elapsed_ms(started: float) -> int:
     return int((time.perf_counter() - started) * 1000)
 
 
-def complete(system: str, prompt: str, *, max_tokens: int, scope: str = "") -> tuple[str, str]:
+def complete(
+    system: str, prompt: str, *, max_tokens: int, scope: str = "", route: str = ""
+) -> tuple[str, str]:
     """(응답 텍스트, 실제로 답한 프로바이더). 전부 실패하면 마지막 예외를 올린다.
 
     빈 응답은 실패로 친다 — 다음 프로바이더에게 기회를 준다.
@@ -127,7 +203,15 @@ def complete(system: str, prompt: str, *, max_tokens: int, scope: str = "") -> t
     나간다 — 시도한 프로바이더마다 한 행씩, 성공이든 실패든. 폴백이 일어나면
     두 행이 남고, 그것이 개발자 화면의 폴백률이 된다.
     """
-    providers = get_settings().llm_providers
+    providers = list(get_settings().llm_providers)
+
+    # 라우트가 켜져 있으면 그 모델을 맨 앞에 세운다. 실패하면 기존 체인이 이어받는다 —
+    # 캠퍼스 GPU 가 죽었다고 채점이 통째로 멈추면 안 된다.
+    callers = dict(_CALLERS)
+    if route and _route_enabled(route):
+        callers[route] = _call_route(route)
+        providers = [route] + [p for p in providers if p != route]
+
     if not providers:
         raise RuntimeError("no LLM provider configured (ANTHROPIC_API_KEY / OPENAI_API_KEY)")
 
@@ -135,7 +219,7 @@ def complete(system: str, prompt: str, *, max_tokens: int, scope: str = "") -> t
     for name in providers:
         started = time.perf_counter()
         try:
-            text, meta = _CALLERS[name](system, prompt, max_tokens)
+            text, meta = callers[name](system, prompt, max_tokens)
             if not (text or "").strip():
                 raise ValueError(f"{name} returned an empty response")
         except Exception as exc:  # noqa: BLE001 — 다음 프로바이더로 넘긴다
@@ -299,7 +383,9 @@ def generate_rubric(
         f"Return ONLY a JSON object valid against this schema:\n{schema}"
     )
 
-    raw, provider = complete(system, prompt, max_tokens=2400, scope="rubric")
+    raw, provider = complete(
+        system, prompt, max_tokens=2400, scope="rubric", route=route_for(skill),
+    )
     return _parse_rubric(
         raw, skill=skill, is_band=is_band, max_score=max_score, allowed=criteria,
         provider=provider,

@@ -44,7 +44,17 @@ class Settings:
     anthropic_model: str
     openai_api_key: str
     openai_model: str
+    openai_base_url: str          # 비면 OpenAI 본사. 값이 있으면 그 주소(=캠퍼스 vLLM)
     llm_provider: str             # 'both' | 'anthropic' | 'openai' — 병행 시 앞에서부터 시도
+
+    # ── 스킬별 라우팅 (architecture: 산출형은 판단, 수용형은 코멘트) ──
+    # Writing·Speaking 은 사람의 판단에 준하는 채점이 필요하다 → Codex.
+    # Reading·Listening 은 정답지로 이미 채점이 끝나 있고 LLM 은 리뷰 코멘트만
+    # 쓴다 → 캠퍼스 안의 작은 모델(Gemma 4 E2B)로 충분하다.
+    codex_model: str
+    codex_base_url: str
+    gemma_model: str
+    gemma_base_url: str
     default_lang: str             # UI 기본은 영어
     seed_on_start: bool
     sqlite_path: Path
@@ -71,13 +81,24 @@ class Settings:
             "anthropic": ("anthropic",),
             "openai": ("openai",),
         }.get(self.llm_provider, ("anthropic", "openai"))
-        have = {"anthropic": bool(self.anthropic_api_key), "openai": bool(self.openai_api_key)}
+        have = {
+            "anthropic": bool(self.anthropic_api_key),
+            # 자체 호스팅(vLLM)은 인증이 없다 — base_url 자체가 "쓸 수 있다"는 신호다.
+            "openai": bool(self.openai_api_key) or bool(self.openai_base_url),
+        }
         return tuple(p for p in order if have[p])
 
     @property
     def llm_enabled(self) -> bool:
-        """Online (LLM) feedback is only attempted in cloud mode with a key."""
-        return self.is_cloud and bool(self.llm_providers)
+        """LLM 채점을 시도할 수 있는가.
+
+        원래는 cloud 모드 전용이었다. 캠퍼스 GPU 노드는 local 모드로 돌면서도
+        LAN 안의 vLLM 을 쓴다 — base_url 이 잡힌 경우만 예외로 연다.
+        인터넷 의존은 여전히 없다.
+        """
+        if not self.llm_providers:
+            return False
+        return self.is_cloud or bool(self.openai_base_url)
 
     @property
     def scoring_mode(self) -> str:
@@ -106,6 +127,8 @@ def get_settings() -> Settings:
     if provider not in ("both", "anthropic", "openai"):
         provider = "both"
 
+    openai_base_url = _env("OPENAI_BASE_URL", "").rstrip("/")
+
     profile = _env("DEFAULT_PROFILE", "toefl").lower()
     if profile not in ("toefl", "ielts"):
         profile = "toefl"
@@ -130,7 +153,15 @@ def get_settings() -> Settings:
         anthropic_model=_env("ANTHROPIC_MODEL", "claude-sonnet-5"),
         openai_api_key=_env("OPENAI_API_KEY"),
         openai_model=_env("OPENAI_MODEL", "gpt-4o"),
+        # 캠퍼스 vLLM: OPENAI_BASE_URL=http://127.0.0.1:8000/v1
+        openai_base_url=openai_base_url,
         llm_provider=provider,
+        # 기본값은 "라우팅 없음" — 값을 주지 않으면 기존 프로바이더 체인 그대로다.
+        codex_model=_env("CODEX_MODEL", ""),
+        codex_base_url=_env("CODEX_BASE_URL", "").rstrip("/"),
+        gemma_model=_env("GEMMA_MODEL", ""),
+        # 캠퍼스 노드에서는 vLLM 이 곧 Gemma 다 — 주소를 따로 주지 않으면 그걸 쓴다.
+        gemma_base_url=(_env("GEMMA_BASE_URL", "").rstrip("/") or openai_base_url),
         default_lang=_env("DEFAULT_LANG", "en"),
         seed_on_start=_env("SEED_ON_START", "1") not in ("0", "false", "no"),
         sqlite_path=sqlite_path,
