@@ -71,6 +71,31 @@ window.SG_RESULTS = (function () {
     return false;
   }
 
+  function isArray(v) { return Object.prototype.toString.call(v) === '[object Array]'; }
+
+  /* Build a Sentence(W1)의 정답은 '토큰 한 줄'이 아니라 '빈칸에 들어갈 토큰의 순서'다.
+   * 정답표(ANSWER_KEY)에는 이 문항이 아예 없고 슬롯 정의가 정본이라 거기서 꺼낸다.
+   * 이걸 안 하면 key 가 null 이 되어 주관식으로 빠지고, SET 9 는 만점을 맞아도
+   * 107 이 아니라 97 만 채점된다(라이팅이 통째로 0/0 이 되던 자리다). */
+  function blankTokens(q) {
+    if (!q || !isArray(q.slots)) return null;
+    var out = [], i;
+    for (i = 0; i < q.slots.length; i++) {
+      if (q.slots[i] && q.slots[i].t === 'b') out.push(q.slots[i].a);
+    }
+    return out.length ? out : null;
+  }
+
+  /* 빈칸을 하나라도 비웠거나 순서가 다르면 오답이다 — 부분점수는 없다.
+   * 비교는 norm() 이라 대소문자·앞뒤 공백만 무시한다(타일 'why' vs 슬롯 'Why'). */
+  function hitSequence(given, tokens) {
+    if (!isArray(given) || given.length !== tokens.length) return false;
+    for (var i = 0; i < tokens.length; i++) {
+      if (norm(given[i]) !== norm(tokens[i])) return false;
+    }
+    return true;
+  }
+
   /** answers: SG_STORE.answers() 모양 { qid: { v: ... } } 또는 { qid: value }. */
   function valueOf(a, qid) {
     var rec = a && a[qid];
@@ -90,7 +115,14 @@ window.SG_RESULTS = (function () {
       var qid = q.id;
       var key = keys.hasOwnProperty(qid) ? keys[qid] : q.answer;
       var given = valueOf(answers, qid);
-      var ok = hit(given, key);
+      var ok, seq = (key == null && q.kind === 'build') ? blankTokens(q) : null;
+      if (seq) {
+        ok = hitSequence(given, seq);
+        // 리뷰 화면의 '정답' 칸에는 빈칸 토막이 아니라 완성 문장을 보여 준다.
+        key = q.sentence || seq;
+      } else {
+        ok = hit(given, key);
+      }
       var sec = sectionEntry(all[i], qid);
 
       bySection[sec] = bySection[sec] || { score: 0, total: 0 };
