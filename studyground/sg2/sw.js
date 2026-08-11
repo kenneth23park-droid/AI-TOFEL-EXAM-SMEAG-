@@ -87,7 +87,9 @@
 // v32: 화자 사진 맞추기 2차 — M2 강의 두 개(8-11 Oliver · 12-15 Henry)와 스피킹 Task 2
 //      면접관까지 배역대로 바꿨다. 8-11 자리에는 남성 오디오에 여성 사진이, Task 2 에는
 //      남성 오디오에 여성 면접관 캡처가 들어가 있었다. set9.js 가 또 바뀌어 판올림한다.
-const VERSION = 'sg-v32';
+// v33: 제출하면 그 자리에서 채점한다 — exam-shell 이 AI 채점을 끝까지 기다리고
+//      네 영역 밴드를 제출 화면에 편다. sg-band.js 가 시험 셸에도 실린다.
+const VERSION = 'sg-v33';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -99,6 +101,8 @@ const SHELL_ASSETS = [
 
   // 채점 리뷰 — 제출 직후 오프라인에서도 자기 답안을 문항별로 볼 수 있어야 한다.
   'review.html', 'admin-results.html', 'assets/sg-results.js', 'assets/sg-comments.js',
+  // 밴드 환산 — 제출 화면이 채점 직후 네 영역 점수를 그 자리에서 편다.
+  'assets/sg-band.js',
 
   // 내부용 접근 게이트 — 오프라인 진입도 이 화면을 먼저 지난다.
   'gate.html', 'assets/gate.js', 'assets/audio-config.js',

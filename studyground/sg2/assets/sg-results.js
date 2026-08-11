@@ -10,7 +10,9 @@
  *   SG_RESULTS.local()                → 제출된 로컬 응시 [{ session, setCode, ... }]
  *   SG_RESULTS.list()                 → Promise<[결과]>  로컬 + 서버 병합(세션 기준 중복 제거)
  *   SG_RESULTS.get(session)           → Promise<결과|null>
- *   SG_RESULTS.push()                 → Promise<{ sent, failed }>  안 올라간 것만 올린다
+ *   SG_RESULTS.push(opts)             → Promise<{ sent, failed, scored }>  안 올라간 것만 올린다
+ *                                       opts.waitScore  AI 채점까지 기다린다(제출 직후 화면)
+ *                                       opts.onProgress (done, total) 채점 진행
  *   SG_RESULTS.listFor(ownerId)       → Promise<[결과]>  관리자/선생님 전용
  *   SG_RESULTS.listAll(opts)          → Promise<[결과+student]>  선생님/관리자 전용
  *   SG_RESULTS.detail(row)            → { score, total, percent, bySection, rows }  문항별 리뷰
@@ -18,6 +20,7 @@
  *   SG_RESULTS.productive(row)        → [{question_id, skill, task_kind, prompt, …}]
  *   SG_RESULTS.uploadRecordings(row)  → Promise<{sent,failed}>  녹음 → 비공개 버킷
  *   SG_RESULTS.aiScore(row, opts)     → Promise<채점 결과|null>  /api/score 호출
+ *                                       opts.onProgress(done, total) 로 진행을 알린다
  *   SG_RESULTS.bandOf(row)            → Promise<SG_BAND.of(...)>  밴드까지 한 번에
  *
  * 점수 두 벌에 대하여
@@ -169,7 +172,17 @@ window.SG_RESULTS = (function () {
           Authorization: 'Bearer ' + tok,
           'Content-Type': 'application/json'
         }, (init && init.headers) || {})
-      })).then(function (r) { return r.ok ? r.json().catch(function () { return null; }) : null; });
+      })).then(function (r) {
+        /* null 은 **실패**를 뜻한다(push() 가 이 값으로 올렸는지를 가른다). 쓰기는
+         * Prefer: return=minimal 로 보내므로 성공해도 본문이 비어 있다 — 그 자리에서
+         * json() 이 터져 null 이 되면, 잘 올라간 응시가 "안 올라갔다" 로 남아 제출
+         * 직후 채점이 통째로 건너뛰어진다. 빈 본문은 true(성공)로 돌린다. */
+        if (!r.ok) return null;
+        return r.text().then(function (t) {
+          if (!t) return true;
+          try { return JSON.parse(t); } catch (e) { return true; }
+        })['catch'](function () { return true; });
+      });
     }).catch(function () { return null; });        // 오프라인이면 조용히 로컬만
   }
 
@@ -399,6 +412,15 @@ window.SG_RESULTS = (function () {
     opts = opts || {};
     var list = opts.tasks || productive(row);
     if (!list.length || !window.SG_AUTH) return Promise.resolve(null);
+
+    /* 제출 직후 화면은 "몇 개 중 몇 개" 를 보여 준다. 채점은 묶음마다 수십 초라
+     * 진행이 보이지 않으면 멈춘 화면과 구분되지 않는다. */
+    function tell(done) {
+      if (typeof opts.onProgress !== 'function') return;
+      try { opts.onProgress(Math.min(done, list.length), list.length); } catch (e) {}
+    }
+    tell(0);
+
     return SG_AUTH.token().then(function (tok) {
       if (!tok) return null;
 
@@ -426,6 +448,7 @@ window.SG_RESULTS = (function () {
               merged.skipped = merged.skipped.concat(out.skipped || []);
               merged.provider = out.provider; merged.model = out.model; merged.owner = out.owner;
             }
+            tell(i + SCORE_BATCH);
             return send(i + SCORE_BATCH);
           })['catch'](function () { return merged; });   // 한 묶음이 끊겨도 앞의 결과는 남는다
       }
@@ -462,10 +485,11 @@ window.SG_RESULTS = (function () {
    * 녹음 업로드는 "아직 안 올라간 응시"뿐 아니라 **이미 올라간 응시**도 훑는다.
    * 시험장에서 회선이 끊겼던 응시는 결과 행만 올라가고 음성이 남았을 수 있고,
    * 그 경우 학생이 나중에 대시보드를 열기만 해도 밀린 녹음이 따라 올라가야 한다. */
-  function push() {
+  function push(opts) {
+    opts = opts || {};
     var u = window.SG_AUTH && SG_AUTH.user();
     var mine = local();
-    if (!u || !mine.length) return Promise.resolve({ sent: 0, failed: 0 });
+    if (!u || !mine.length) return Promise.resolve({ sent: 0, failed: 0, scored: null });
 
     return remote().then(function (rows) {
       var have = {};
@@ -494,20 +518,28 @@ window.SG_RESULTS = (function () {
           return have[r.session] || pushed.indexOf(r) >= 0;
         });
 
-        /* 녹음을 올린 뒤에 채점한다. 기다리는 것은 업로드까지고, 채점은 기다리지
-         * 않는다 — 채점은 몇십 초 걸리고 그동안 학생 화면이 멈출 이유가 없다.
-         * 결과는 sg_task_scores 에 쌓이고 다음 조회 때 밴드로 나타난다.
+        /* 녹음을 올린 뒤에 채점한다.
+         *
+         * 목록 화면(대시보드)은 채점을 기다리지 않는다 — 몇십 초 걸리는 일이고,
+         * 결과는 sg_task_scores 에 쌓여 다음 조회 때 밴드로 나타난다.
+         * 제출 직후 화면만 waitScore 로 끝까지 기다린다: 학생이 "제출했습니다" 만
+         * 보고 나가 버리면 채점을 건 탭이 닫혀 요청이 중간에 끊긴다. 그 자리에서
+         * 점수까지 보여 주려면 어차피 기다려야 하고, 기다리는 김에 끊기지도 않는다.
          * 실패해도 조용하다: 선생님이 확정하면 그만이고, 자동 채점은 그 초안일 뿐이다. */
+        var out = null;
         var jobs = landed.map(function (r) {
           return uploadRecordings(r).then(function (up) {
             var isNew = pushed.indexOf(r) >= 0;
             // 새 응시는 무조건, 예전 응시는 밀렸던 녹음이 방금 올라갔을 때만 채점을 건다.
-            if (isNew || up.sent) aiScore(r)['catch'](function () {});
+            if (!(isNew || up.sent)) return null;
+            var job = aiScore(r, { onProgress: opts.onProgress })['catch'](function () { return null; });
+            if (!opts.waitScore) return null;
+            return job.then(function (res) { if (res && !out) out = res; });
           })['catch'](function () {});
         });
 
         return Promise.all(jobs).then(function () {
-          return { sent: pushed.length, failed: todo.length - pushed.length };
+          return { sent: pushed.length, failed: todo.length - pushed.length, scored: out };
         });
       });
     });

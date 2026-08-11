@@ -100,9 +100,11 @@ window.SG_RUNTIME = (function () {
                   'assets/exam-render-speaking.js',
                   /* 관리자 전용 화면 이동·문항 편집 패널. 로그인 전에는 아무 것도 그리지 않는다. */
                   'assets/exam-admin-nav.js',
-                  /* 제출 직후 채점·결과 업로드용. 없으면 제출은 그대로 끝나고 리뷰만 안 뜬다. */
+                  /* 제출 직후 채점·결과 업로드용. 없으면 제출은 그대로 끝나고 리뷰만 안 뜬다.
+                     sg-band.js 는 그 채점 결과를 제출 화면에서 바로 밴드로 펴는 데 쓴다. */
                   'assets/sg-auth.js',
-                  'assets/sg-results.js'];
+                  'assets/sg-results.js',
+                  'assets/sg-band.js'];
 
   function loadOptional(list, done) {
     var i = 0;
@@ -656,6 +658,7 @@ window.SG_RUNTIME = (function () {
                   '<span data-ko>자동 채점 문항 기준입니다. 라이팅·스피킹은 AI 가 먼저 채점하고 선생님이 확정합니다.</span></p>'
               : '<p style="opacity:.7"><span data-en>Your answers are saved.</span><span data-ko>답안이 저장되었습니다.</span></p>') +
         '<p id="done-sync" style="opacity:.6;font-size:12px;margin:14px 0"></p>' +
+        '<div id="done-bands" hidden style="margin:18px auto 0;max-width:420px;text-align:left"></div>' +
         '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">' +
           '<a class="exam-btn primary" href="review.html?session=' + encodeURIComponent(session) + '">' +
             '<span data-en>Review my answers</span><span data-ko>내 답안 리뷰</span></a>' +
@@ -672,18 +675,78 @@ window.SG_RUNTIME = (function () {
       say('Saved on this device.', '이 기기에 저장되었습니다.');
       return;
     }
-    /* push() 는 답안 → 스피킹 녹음 → AI 채점을 이 순서로 건다. 녹음 업로드까지는
-       기다리므로(스피킹 15문항이면 몇 초) 그동안 무슨 일이 일어나는지 말해 준다.
-       채점 자체는 기다리지 않는다 — 결과는 성적 화면에서 밴드로 나타난다. */
+    /* push() 는 답안 → 스피킹 녹음 → AI 채점을 이 순서로 건다. 셋 다 여기서
+       끝까지 기다린다(waitScore). 예전에는 채점을 걸어만 두고 화면을 넘겼는데,
+       학생이 곧바로 창을 닫으면 그 요청이 끊겨 채점이 반만 되곤 했다. 지금은
+       제출 화면에 남아 진행(몇/몇)을 보여 주고, 끝나면 그 자리에서 밴드를 편다. */
     say('Uploading your answers and recordings…', '답안과 녹음을 올리는 중…');
-    SG_RESULTS.push().then(function (r) {
-      if (r && r.failed) say('Saved on this device. It will upload when you are online.',
-                             '이 기기에 저장했습니다. 온라인이 되면 올라갑니다.');
-      else say('Saved to your account. Writing and Speaking are being scored — check My results in a few minutes.',
-               '계정에 저장되었습니다. 라이팅·스피킹은 채점 중입니다 — 잠시 후 내 성적에서 확인하세요.');
+    SG_RESULTS.push({
+      waitScore: true,
+      onProgress: function (done, total) {
+        say('Scoring Writing and Speaking… ' + done + ' / ' + total,
+            '라이팅·스피킹 채점 중… ' + done + ' / ' + total);
+      }
+    }).then(function (r) {
+      if (r && r.failed) {
+        say('Saved on this device. It will upload when you are online.',
+            '이 기기에 저장했습니다. 온라인이 되면 올라갑니다.');
+        return null;
+      }
+      say('Saved to your account. Building your score report…',
+          '계정에 저장되었습니다. 성적을 정리하는 중…');
+      return showBands(session).then(function (b) {
+        // 밴드를 못 그린 경우에도 화면이 "정리하는 중" 에서 멈춰 있으면 안 된다.
+        if (!b) say('Saved to your account. Check My results in a few minutes.',
+                    '계정에 저장되었습니다. 잠시 후 내 성적에서 확인하세요.');
+      });
     }).catch(function () {
       say('Saved on this device.', '이 기기에 저장되었습니다.');
     });
+
+    /* 방금 채점된 W·S 까지 얹어 네 영역 밴드를 제출 화면에 바로 그린다.
+       채점이 하나도 안 됐으면(키 없음·녹음 없음 등) 아무 것도 그리지 않고
+       "잠시 후 내 성적에서" 로 돌아간다 — 빈 표를 보여 주는 것보다 낫다. */
+    function showBands(sess) {
+      var box = document.getElementById('done-bands');
+      if (!box || !window.SG_BAND) return Promise.resolve(null);
+      return SG_RESULTS.get(sess).then(function (row) {
+        if (!row) return null;
+        return SG_RESULTS.bandOf(row).then(function (b) {
+          if (!b || b.overall === null) return null;
+          var LABELS = { reading: 'Reading', listening: 'Listening',
+                         writing: 'Writing', speaking: 'Speaking' };
+          var html = '';
+          SG_BAND.SKILLS.forEach(function (skill) {
+            var s = (b.sections || {})[skill] || {};
+            var waiting = s.band === null || s.band === undefined;
+            html +=
+              '<div style="display:flex;justify-content:space-between;align-items:baseline;' +
+                'padding:7px 2px;border-bottom:1px solid rgba(128,128,128,.22)">' +
+                '<span style="font-size:14px">' + LABELS[skill] + '</span>' +
+                '<span style="font-weight:800;font-size:17px' + (waiting ? ';opacity:.45' : '') + '">' +
+                  SG_BAND.fmt(s.band) +
+                '</span>' +
+              '</div>';
+          });
+          html +=
+            '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 2px 0">' +
+              '<span style="font-size:14px;font-weight:700">Overall</span>' +
+              '<span style="font-weight:850;font-size:22px">' + SG_BAND.fmt(b.overall) +
+                (b.cefr ? ' <span style="font-size:12px;font-weight:600;opacity:.6">' + b.cefr + '</span>' : '') +
+              '</span>' +
+            '</div>';
+          box.innerHTML = html;
+          box.hidden = false;
+          if (b.draft) {
+            say('Scored. Writing and Speaking are AI drafts — a teacher confirms them later.',
+                '채점이 끝났습니다. 라이팅·스피킹은 AI 초안이며 선생님이 나중에 확정합니다.');
+          } else {
+            say('Scored.', '채점이 끝났습니다.');
+          }
+          return b;
+        });
+      })['catch'](function () { return null; });
+    }
   }
 
   function finishUp(session) {
