@@ -810,7 +810,7 @@
     });
   }
 
-  function playerInto(slot, src) {
+  function playerInto(slot, src, meta) {
     if (!slot || slot.querySelector('audio')) return;
     var a = document.createElement('audio');
     a.controls = true;
@@ -818,6 +818,24 @@
     a.style.cssText = 'margin-top:6px;width:230px;max-width:100%';
     a.src = src;
     slot.appendChild(a);
+    if (meta) {
+      var c = document.createElement('div');
+      c.className = 'muted';
+      c.style.cssText = 'font-size:11px;margin-top:2px';
+      c.textContent = meta;
+      slot.appendChild(c);
+    }
+  }
+
+  /* 재생기만 붙여 놓으면 "안 들린다" 가 무음인지 재생 문제인지 가려지지 않는다.
+   * 길이·용량과, 녹음 당시 관측한 입력 최대치를 같이 적는다. */
+  function mediaMeta(rec, blob) {
+    var bits = [];
+    if (rec && rec.durationMs > 0) bits.push(Math.round(rec.durationMs / 100) / 10 + 's');
+    if (blob && blob.size) bits.push(Math.round(blob.size / 1024) + ' KB');
+    if (rec && rec.silent === true) bits.push('no sound detected');
+    else if (rec && typeof rec.peak === 'number') bits.push('peak ' + Math.round(rec.peak * 100) + '%');
+    return bits.join(' · ');
   }
 
   /* 녹음은 두 군데에 있다. 응시한 기기의 IndexedDB 와, 제출 뒤 올라간 비공개 버킷.
@@ -833,7 +851,7 @@
         // 저장 형식은 {questionKey, blob, mime, …} 다. 아주 옛 기록은 Blob 자체였다.
         var blob = rec && rec.blob ? rec.blob : rec;
         if (err || !blob || !blob.size) return;
-        playerInto(slot, URL.createObjectURL(blob));
+        playerInto(slot, URL.createObjectURL(blob), mediaMeta(rec && rec.blob ? rec : null, blob));
       });
     });
   }

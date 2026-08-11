@@ -410,7 +410,7 @@ window.SG_REVIEW_SPEAKING = (function () {
    * 선생님에게는 조용히 재생기가 붙지 않는다 — 전사문은 그대로 보인다).
    * 기기 사본을 먼저 찾고, 없을 때만 버킷을 부른다.
    */
-  function playerInto(slot, src) {
+  function playerInto(slot, src, meta) {
     var a = document.createElement('audio');
     a.controls = true;
     a.preload = 'none';
@@ -418,9 +418,26 @@ window.SG_REVIEW_SPEAKING = (function () {
     a.src = src;
     slot.innerHTML = '';
     slot.appendChild(a);
+    if (meta) {
+      var c = document.createElement('div');
+      c.className = 'rs-recmeta muted';
+      c.textContent = meta;
+      slot.appendChild(c);
+    }
     if (window.SG_AUDIO && typeof window.SG_AUDIO.apply === 'function') {
       try { window.SG_AUDIO.apply(slot); } catch (e) {}
     }
+  }
+
+  /* 재생기만 놓여 있으면 "안 들린다" 가 무음인지 재생 문제인지 가려지지 않는다.
+   * 길이·용량과, 녹음 당시 관측한 입력 최대치를 한 줄로 적어 둔다. */
+  function recMeta(rec, blob) {
+    var bits = [];
+    if (rec && rec.durationMs > 0) bits.push(Math.round(rec.durationMs / 100) / 10 + 's');
+    if (blob && blob.size) bits.push(Math.round(blob.size / 1024) + ' KB');
+    if (rec && rec.silent === true) bits.push('no sound was detected while recording');
+    else if (rec && typeof rec.peak === 'number') bits.push('input peak ' + Math.round(rec.peak * 100) + '%');
+    return bits.join(' · ');
   }
   function say(slot, en, ko) {
     slot.innerHTML = '<span class="muted">' + bi(en, ko) + '</span>';
@@ -465,7 +482,7 @@ window.SG_REVIEW_SPEAKING = (function () {
       // 저장 형식은 {questionKey, blob, mime, …} 다. 아주 옛 기록은 Blob 자체였다.
       var blob = rec && rec.blob ? rec.blob : rec;
       if (err || !blob || !blob.size) { cloud(); return; }
-      playerInto(slot, URL.createObjectURL(blob));
+      playerInto(slot, URL.createObjectURL(blob), recMeta(rec && rec.blob ? rec : null, blob));
     });
   }
 

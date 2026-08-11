@@ -274,6 +274,8 @@
     var armedKeys = [];
     var recording = false;
     var recordFailed = false;
+    var recStartedAt = 0;        // 무음 경고를 언제부터 셀지 정하는 기준
+    var silentWarned = false;
     var beepTimer = null;        // 신호음이 울리는 동안만 살아 있다
     var pendingArm = null;       // 신호음이 끝나고 걸 응답 시계 {index, phase}
     var advanceTimer = null;     // 응답 종료 후 자동 전진까지의 짧은 대기
@@ -506,11 +508,29 @@
       else if (p.name === 'prep' && p.seconds > 0) prepTime.textContent = fmt(remainingOf(i), 'MM:SS');
     }
 
+    /* 마이크가 살아 있다는 증거는 이 띠 하나뿐이다 — 응시자는 자기 답을 되들을 수
+     * 없으므로(AC6), 말하는 동안 눈금이 움직이는 것을 보고 안심해야 한다.
+     * 눈금이 끝까지 잠자코 있으면 5초 뒤에 말로도 알린다. */
+    var SILENT_GRACE_MS = 5000;
+
     function pumpMeter() {
       if (disposed) return;
       var R = REC();
       var lv = (recording && R && typeof R.level === 'function') ? R.level() : 0;
       meterFill.style.width = Math.round(lv * 100) + '%';
+      meter.className = 'speaking-meter' +
+        (recording ? ' is-armed' : '') +
+        (lv > 0.06 ? ' is-live' : '');
+
+      if (recording && !silentWarned && !recordFailed && recStartedAt &&
+          R && typeof R.peak === 'function' &&
+          (Date.now() - recStartedAt) > SILENT_GRACE_MS &&
+          R.peak() < (R.SILENT_PEAK || 0.03)) {
+        silentWarned = true;
+        setBanner('No sound is reaching the microphone. Speak up, or check that the right input device is selected and not muted.',
+                  '마이크로 소리가 들어오지 않습니다. 더 크게 말하거나, 입력 장치가 맞는지·음소거는 아닌지 확인하세요.', 'error');
+        logEvent('record_silent', screen.id, { qid: qid });
+      }
       if (root.requestAnimationFrame) rafId = root.requestAnimationFrame(pumpMeter);
     }
 
@@ -650,6 +670,8 @@
         }
         cancelRetry();
         recording = true;
+        recStartedAt = Date.now();
+        silentWarned = false;
         rbox.classList.add('is-recording');
         logEvent('record_start', screen.id, { qid: qid, retried: retryLeft < RETRY_MAX });
       });
@@ -661,8 +683,9 @@
       // 신호음이 울리는 사이에 phase 가 끝났다면(force·강제전진) 마이크를 열지 않는다.
       cancelBeep();
       cancelRetry();
-      if (!R || !recording) { recording = false; rbox.classList.remove('is-recording'); return; }
+      if (!R || !recording) { recording = false; recStartedAt = 0; rbox.classList.remove('is-recording'); return; }
       recording = false;
+      recStartedAt = 0;
       rbox.classList.remove('is-recording');
       var p = R.stop(function (e, res) {
         if (e) {
@@ -674,7 +697,8 @@
           }
           return;
         }
-        logEvent('record_stop', screen.id, { qid: qid, ms: res.durationMs, mime: res.mime, saved: res.saved });
+        logEvent('record_stop', screen.id, { qid: qid, ms: res.durationMs, mime: res.mime,
+                                             saved: res.saved, peak: res.peak, silent: res.silent });
         if (!disposed) showPreview(res);
       });
       if (p && typeof p['catch'] === 'function') p['catch'](function () {});
@@ -683,8 +707,14 @@
     /* AC6 — 실제 시험처럼 자기 답을 다시 듣지 못한다. 녹음됐다는 사실만 알린다. */
     function showPreview(res) {
       while (review.firstChild) review.removeChild(review.firstChild);
-      review.appendChild(bi('p', 'Your response has been recorded. You cannot record again.',
-                               '응답이 녹음되었습니다. 다시 녹음할 수는 없습니다.'));
+      if (res && res.silent) {
+        // 파일은 남았지만 소리가 담기지 않았다. 나중에 "왜 안 들리지" 로 끝나지 않도록 지금 말한다.
+        review.appendChild(bi('p', 'The recording was saved, but almost no sound was picked up. Check your microphone before the next question.',
+                                 '녹음은 저장되었지만 소리가 거의 잡히지 않았습니다. 다음 문항 전에 마이크를 확인하세요.'));
+      } else {
+        review.appendChild(bi('p', 'Your response has been recorded. You cannot record again.',
+                                 '응답이 녹음되었습니다. 다시 녹음할 수는 없습니다.'));
+      }
       review.hidden = false;
     }
 

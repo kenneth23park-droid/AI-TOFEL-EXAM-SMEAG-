@@ -123,7 +123,13 @@
 //      함께 바뀌었다). 이 파일은 셸 자산이라 cache-first 다 — 판올림하지 않으면
 //      재방문 기기가 캐시된 옛 렌더러의 Next 를 계속 보고, 누르지 않는 한 시험이
 //      멈춰 선다. 그래서 판올림한다.
-const VERSION = 'sg-v40';
+// v41: 녹음이 소리를 담았는지 그 자리에서 보인다 — exam-recorder.js 가 녹음 내내 입력
+//      최대치를 재서 저장하고(peak·silent), exam-render-speaking.js 의 레벨 띠가 굵어지며
+//      5초 넘게 아무것도 안 들어오면 말로 알린다. 리뷰 화면(sg-review-speaking.js ·
+//      review.html)은 재생기 밑에 길이·용량·입력 최대치를 적는다. muted 트랙을 물고
+//      있던 스트림도 버리고 다시 연다 — 길이만 있고 소리는 없는 파일의 원인이었다.
+//      모두 셸 자산이라 판올림하지 않으면 재방문 기기가 옛 녹음기를 계속 쓴다.
+const VERSION = 'sg-v41';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

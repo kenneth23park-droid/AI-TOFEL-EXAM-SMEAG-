@@ -39,6 +39,12 @@
   var state = 'idle';       // idle|requesting|starting|recording|stopping|denied|unsupported
   var lastErr = null;
 
+  /* 녹음 한 건 동안 관측한 입력 최대치. 파일은 만들어졌는데 소리가 없는 경우를
+     사후에 구분하려면 이 값이 필요하다 — 길이·용량만으로는 무음을 알 수 없다. */
+  var peak = 0;
+  var peakTimer = null;
+  var SILENT_PEAK = 0.03;   // 이 아래로만 머물면 마이크가 아무것도 잡지 못한 것으로 본다
+
   var actx = null;          // AudioContext
   var analyser = null;
   var srcNode = null;
@@ -96,11 +102,13 @@
 
   function liveStream() {
     if (!stream) return null;
-    // 트랙이 죽은 스트림을 재사용하면 무음 파일이 나온다.
+    // 트랙이 죽었거나 입이 막힌 스트림을 재사용하면 길이만 있고 소리는 없는 파일이 나온다.
+    // muted 는 OS/다른 앱이 입력을 물고 있을 때 켜진다 — 이때는 스트림을 버리고 다시 연다.
     if (typeof stream.getAudioTracks === 'function') {
       var ts = stream.getAudioTracks();
       if (!ts.length) return null;
       if (ts[0].readyState === 'ended') return null;
+      if (ts[0].muted === true) { releaseStream(); return null; }
     }
     return stream;
   }
@@ -184,6 +192,25 @@
     } catch (e) { return 0; }
   }
 
+  /* 녹음 중 100ms 마다 입력을 훑어 최대치만 남긴다. UI 의 rAF 미터와 무관하게
+     돌아야 한다 — 탭이 뒤로 가면 rAF 는 멈추지만 녹음은 계속되기 때문이다. */
+  function startPeakWatch() {
+    stopPeakWatch();
+    peak = 0;
+    if (!root.setInterval) return;
+    peakTimer = root.setInterval(function () {
+      var lv = level();
+      if (lv > peak) peak = lv;
+    }, 100);
+  }
+
+  function stopPeakWatch() {
+    if (peakTimer !== null && root.clearInterval) { try { root.clearInterval(peakTimer); } catch (e) {} }
+    peakTimer = null;
+  }
+
+  function peakLevel() { return peak; }
+
   /* ── 녹음 ────────────────────────────────────────────────── */
 
   function _start(questionId, done) {
@@ -212,6 +239,7 @@
       catch (e4) { state = 'idle'; rec = null; done(err('recorder_start', 'MediaRecorder.start() failed.'), null); return; }
       startedAt = Date.now();
       state = 'recording';
+      startPeakWatch();
       done(null, { questionId: questionId, mime: curMime, startedAt: startedAt });
     });
   }
@@ -223,9 +251,12 @@
       return;
     }
     state = 'stopping';
+    stopPeakWatch();
     var qid = curQid;
     var mime = curMime;
     var dur = Date.now() - startedAt;
+    var pk = peak;
+    var silent = pk < SILENT_PEAK;
     var finished = false;
 
     function finish() {
@@ -243,18 +274,21 @@
         blob: blob,
         mime: mime || blob.type || '',
         durationMs: dur,
+        peak: pk,
+        silent: silent,
         recordedAt: Date.now()
       };
       var st = storeApi();
       if (!st || typeof st.putMedia !== 'function') {
-        done(null, { questionId: qid, blob: blob, mime: record.mime, durationMs: dur, saved: false, ref: null });
+        done(null, { questionId: qid, blob: blob, mime: record.mime, durationMs: dur,
+                     peak: pk, silent: silent, saved: false, ref: null });
         return;
       }
       st.putMedia(qid, record, function (e2, ref) {
         if (e2) warn('putMedia failed; keeping blob in memory only', e2);
         done(null, {
           questionId: qid, blob: blob, mime: record.mime, durationMs: dur,
-          saved: !e2, ref: ref || null
+          peak: pk, silent: silent, saved: !e2, ref: ref || null
         });
       });
     }
@@ -289,6 +323,7 @@
 
   /* 녹음 중이 아닐 때도 안전하게 부를 수 있는 취소(화면 이탈·dispose 용). */
   function abort() {
+    stopPeakWatch();
     if (state === 'recording' && rec) {
       try { rec.onstop = null; rec.stop(); } catch (e) {}
     }
@@ -327,6 +362,8 @@
     releaseStream: releaseStream,
     getAnalyser: getAnalyser,
     level: level,
+    peak: peakLevel,
+    SILENT_PEAK: SILENT_PEAK,
     start: start,
     stop: stop,
     abort: abort,
