@@ -203,6 +203,52 @@ ok('정지 표시가 남는다', audio.hasAttribute('data-sg-stopped'));
 audio.emit('error');
 ok('정지된 오디오의 error 는 무시된다', audio.paused === true);
 
+/* ── [C] 대화·강의형은 재생 중에도 4지 선택지를 누를 수 있다 ──
+ * 신고(2026-08-11): 대화 파트 첫 문항의 선택지가 클릭되지 않는다. 원인은 블록 오디오가
+ * 도는 동안 radio 를 disabled 로 걸어 둔 것이었다 — 대화는 1~3분이라 그 창이 길고,
+ * 같은 블록의 2번째 문항부터는 오디오가 없어 곧바로 눌렸다.
+ * 질문이 음성으로만 주어지는 Task 1(short-response)은 종전대로 잠긴 채여야 한다. */
+console.log('\n[C] 재생 중 선택지 클릭');
+
+function optState(scr) {
+  var saved = [];
+  var node = L.renderListeningQuestion(scr, {
+    engine: { answer: function (qid, v) { saved.push(qid + '=' + v); return true; } }
+  });
+  var box = walk(node, []).filter(function (n) { return String(n.className).indexOf('lst-opts') >= 0; })[0];
+  var radios = collect(node, 'input[type="radio"]');
+  return { node: node, box: box, radios: radios, saved: saved };
+}
+
+var convScr = qScreens.filter(function (s) { return s.questionIds[0] === 'L1-13' && s.audio; })[0];
+ok('L1-13 은 오디오를 든 화면', !!convScr, convScr && convScr.audio && convScr.audio.src);
+window.SG_STORE.patchMeta({ audioSpent: {} });   // 앞 절에서 소진 처리된 화면을 되돌린다
+var c = optState(convScr);
+check('대화형 선택지 disabled', c.radios.map(function (r) { return r.disabled; }), [false, false, false, false]);
+ok('대화형 선택지는 잠금 클래스가 없다', String(c.box.className).indexOf('is-locked') < 0, c.box.className);
+c.radios[2].checked = true;
+c.radios[2].onchange();   // 렌더러는 addEventListener 가 아니라 onchange 를 쓴다
+check('재생 중 클릭이 답으로 기록된다', c.saved, ['L1-13=2']);
+
+var shortScr = qScreens.filter(function (s) {
+  var hit = pack.findQuestion(s.questionIds[0]);
+  return s.audio && hit && hit.q && hit.q.layout === 'short-response';
+})[0];
+ok('short-response 화면 존재', !!shortScr, shortScr && shortScr.id);
+window.SG_STORE.patchMeta({ audioSpent: {} });
+var sr = optState(shortScr);
+check('short-response 는 재생 중 잠긴다', sr.radios.map(function (r) { return r.disabled; }), [true, true, true, true]);
+ok('잠긴 목록은 잠긴 것처럼 보인다', String(sr.box.className).indexOf('is-locked') >= 0, sr.box.className);
+
+// 재생이 끝나면 잠금이 풀리고 안내문이 사라진다.
+var srAudio = collect(sr.node, 'audio, video')[0];
+srAudio.emit('ended');
+check('종료 후 잠금 해제', sr.radios.map(function (r) { return r.disabled; }), [false, false, false, false]);
+ok('종료 후 잠금 클래스 제거', String(sr.box.className).indexOf('is-locked') < 0, sr.box.className);
+ok('종료 후 안내문 제거', walk(sr.node, []).filter(function (n) {
+  return String(n.className).indexOf('lst-waiting') >= 0;
+}).length === 0);
+
 console.log('');
 if (fails.length) {
   console.log('FAILED ' + fails.length + '건: ' + fails.join(' / '));

@@ -785,10 +785,23 @@
     /* 오디오. 이 화면에 audio 가 없으면(블록 2번째 이후 문항) 삽화만 유지한다. */
     var hasLiveAudio = false;
     var optsBox = null;
+    /* 재생 중 선택지를 잠글지. 문항이 **음성으로만** 주어지는 유형(Task 1 short-response:
+     * 성우가 질문을 읽고 화면에는 그림과 선택지만 있다)에서만 잠근다 — 질문을 듣기 전에
+     * 고르는 건 답이 아니라 찍기이기 때문이다.
+     *
+     * 반대로 대화·강의형(블록 오디오)은 질문이 화면에 인쇄되어 있다. 여기서 잠그면
+     * 1~3분짜리 대화가 끝날 때까지 "보이는데 눌리지 않는" 선택지가 남고, 실제로 그렇게
+     * 신고가 들어왔다(2026-08-11). 같은 블록의 2번째 문항부터는 오디오가 없어 곧바로
+     * 눌리므로 첫 문항만 유별나게 죽어 있던 셈이다. 답변 시계는 어차피 재생이 끝난 뒤
+     * 시작하고(timerStartsOnAudioEnd) 그 사이 답은 얼마든지 바꿀 수 있으므로,
+     * 대화·강의형은 들으면서 고를 수 있게 둔다. */
+    var lockDuringAudio = false;
+    var waitNote = null;   // 재생 중 안내문 — 끝나면 치운다
 
     if (screen.audio && screen.audio.src) {
       var key = spentKey(screen.id, screen.audio.src);
       hasLiveAudio = !isAudioSpent(key);
+      lockDuringAudio = hasLiveAudio && spokenQuestionOnly(block, q);
       var unit = makeAudioUnit({
         media: screen.audio,
         image: screen.image || null,
@@ -800,6 +813,7 @@
         onEnded: function () {
           if (optsBox) setChoicesEnabled(optsBox, true);
           if (qwrap) qwrap.className = 'lst-q';
+          if (waitNote && waitNote.parentNode) waitNote.parentNode.removeChild(waitNote);
           /* 답변 시계는 화면 진입이 아니라 여기서 시작한다(compile: timerStartsOnAudioEnd).
              엔진이 없거나 옛 버전이면 조용히 지나간다 — 그 경우 시계는 이미 진입 때 걸렸다. */
           var eng = ctx && ctx.engine;
@@ -820,8 +834,8 @@
       card.appendChild(illus);
     }
 
-    /* 문항 본문 — 오디오 재생 중에는 가려 둔다(AC1). */
-    var qwrap = el('div', hasLiveAudio ? 'lst-q is-waiting' : 'lst-q');
+    /* 문항 본문 — 질문이 음성으로만 주어지는 유형은 재생이 끝날 때까지 가려 둔다(AC1). */
+    var qwrap = el('div', lockDuringAudio ? 'lst-q is-waiting' : 'lst-q');
 
     if (q) {
       var pair = spokenQuestionOnly(block, q) ? null : promptPair(q);
@@ -834,8 +848,11 @@
       }
       if (q.choices && q.choices.length) {
         optsBox = isMultiQuestion(q)
-          ? multiChoiceList(q, screen, ctx, hasLiveAudio)
-          : choiceList(q, screen, ctx, hasLiveAudio);
+          ? multiChoiceList(q, screen, ctx, lockDuringAudio)
+          : choiceList(q, screen, ctx, lockDuringAudio);
+        /* 잠긴 동안에는 잠긴 것처럼 보여야 한다 — 종전에는 input.disabled 만 걸려
+         * 겉모습이 평소와 같았고, 누른 사람은 클릭이 씹혔다고 볼 수밖에 없었다. */
+        if (lockDuringAudio) setChoicesEnabled(optsBox, false);
         qwrap.appendChild(optsBox);
       } else {
         var na = bi('p', 'This question type is not supported here.', '이 문항 유형은 여기서 지원되지 않습니다.');
@@ -851,9 +868,13 @@
     }
 
     if (hasLiveAudio) {
-      var waiting = bi('p', 'Listen to the audio. The choices unlock when it ends.',
-        '오디오를 들으세요. 재생이 끝나면 선택지가 활성화됩니다.');
+      var waiting = lockDuringAudio
+        ? bi('p', 'Listen to the audio. The choices unlock when it ends.',
+             '오디오를 들으세요. 재생이 끝나면 선택지가 활성화됩니다.')
+        : bi('p', 'You can choose your answer while the audio plays. The answer time starts when it ends.',
+             '오디오가 재생되는 동안에도 답을 고를 수 있습니다. 답변 시간은 재생이 끝나면 시작합니다.');
       waiting.className = 'muted lst-waiting';
+      waitNote = waiting;
       qwrap.appendChild(waiting);
     }
 
