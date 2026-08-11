@@ -403,6 +403,9 @@ body.exam-body {
 
 /* ── 문항 영역 ──────────────────────────────────────────── */
 .lst-q.is-waiting { opacity: .5; }
+/* 대화·강의형: 재생이 끝날 때까지 문항·선택지를 감춘다(안내문만 남는다). */
+.lst-q.is-hidden > .lst-prompt,
+.lst-q.is-hidden > .lst-opts { display: none; }
 .lst-opts.is-locked { pointer-events: none; }
 .lst-opts.is-locked .opt { background: var(--cream-2); color: var(--muted); cursor: not-allowed; }
 .lst-waiting { font-size: 12.5px; margin-top: 8px; }
@@ -974,7 +977,15 @@ body.exam-body {
 .instr-mic-record.is-arming .instr-mic-record-label { font-size: 34px; letter-spacing: 0; }
 .instr-mic-record.is-recording { background: var(--brand); color: #fff; box-shadow: inset 0 0 0 1px var(--brand-ink);
   animation: micPulse 1.4s ease-in-out infinite; }
-.instr-mic-icon { width: 44px; height: 44px; fill: currentColor; }
+/* 스트림이 붙은 상태 — 아이콘이 살아 있음을 알린다(녹음 중과는 색이 다르다). */
+.instr-mic-record.is-live { background: var(--peach-2); color: var(--brand);
+  box-shadow: inset 0 0 0 2px var(--ok); animation: micLiveRing 1.8s ease-in-out infinite; }
+.instr-mic-record.is-live .instr-mic-icon { animation: micIconLive 1.6s ease-in-out infinite; }
+@keyframes micLiveRing { 0%, 100% { box-shadow: inset 0 0 0 2px var(--ok), 0 0 0 0 rgba(21,128,61,.28); }
+                         50%      { box-shadow: inset 0 0 0 2px var(--ok), 0 0 0 10px rgba(21,128,61,0); } }
+.instr-mic-icon { width: 44px; height: 44px; fill: currentColor; transform-origin: 50% 50%; }
+@keyframes micIconLive { 0%, 100% { opacity: .78; transform: scale(1); }
+                         50%      { opacity: 1;   transform: scale(1.08); } }
 .instr-mic-record-label {
   font-size: 13px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase;
 }
@@ -996,6 +1007,8 @@ body.exam-body {
 .instr-seg-cell.is-on.is-quiet { background: var(--warn); border-color: var(--warn); }
 .instr-seg-cell.is-on.is-good { background: var(--ok); border-color: var(--ok); }
 .instr-seg-cell.is-on.is-loud { background: var(--brand); border-color: var(--brand); }
+.instr-seg.is-active .instr-seg-cell { border-color: var(--muted); }
+.instr-seg-cell.is-peak { box-shadow: inset 0 0 0 2px var(--ink); }
 .instr-seg-labels {
   display: flex; justify-content: space-between; margin-top: 7px;
   font-size: 12.5px; color: var(--muted); font-weight: 650;

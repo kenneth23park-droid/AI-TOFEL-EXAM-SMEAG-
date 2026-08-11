@@ -1049,14 +1049,32 @@
     labels.appendChild(l1); labels.appendChild(l2); labels.appendChild(l3);
     box.appendChild(labels);
 
-    box.setLevel = function (v) {
-      var lvl = typeof v === 'number' && v > 0 ? v : 0;
-      var on = Math.min(MIC_SEGMENTS, Math.round(lvl * MIC_SEGMENTS));
+    var peakIdx = -1;
+    var live = 0;
+
+    function paint() {
+      var on = Math.min(MIC_SEGMENTS, Math.round(live * MIC_SEGMENTS));
       for (var k = 0; k < MIC_SEGMENTS; k++) {
         var zone = k < MIC_SEGMENTS * MIC_QUIET_PEAK ? 'is-quiet'
           : (k >= MIC_SEGMENTS * MIC_LOUD_PEAK ? 'is-loud' : 'is-good');
-        cells[k].className = 'instr-seg-cell' + (k < on ? ' is-on ' + zone : '');
+        cells[k].className = 'instr-seg-cell' + (k < on ? ' is-on ' + zone : '')
+          + (k === peakIdx ? ' is-peak' : '');
       }
+    }
+
+    box.setLevel = function (v) {
+      live = typeof v === 'number' && v > 0 ? v : 0;
+      paint();
+    };
+    /* 녹음이 끝난 뒤에도 미터는 계속 살아 있다 — 최고치는 눈금으로 남긴다. */
+    box.setPeak = function (v) {
+      var p = typeof v === 'number' && v > 0 ? v : 0;
+      peakIdx = p > 0 ? Math.min(MIC_SEGMENTS - 1, Math.round(p * MIC_SEGMENTS) - 1) : -1;
+      paint();
+    };
+    /* 스트림이 붙으면 미터가 살아 있음을 테두리로 알린다. */
+    box.setActive = function (on) {
+      strip.className = 'instr-seg' + (on ? ' is-active' : '');
     };
     box.setLevel(0);
     return box;
@@ -1168,6 +1186,7 @@
       try {
         var ac = new Ctx();
         state.audioCtx = ac;
+        meter.setActive(true);
         var analyser = ac.createAnalyser();
         analyser.fftSize = 1024;
         ac.createMediaStreamSource(stream).connect(analyser);
@@ -1179,12 +1198,9 @@
           for (var i = 0; i < buf.length; i++) { v = (buf[i] - 128) / 128; sum += v * v; }
           var rms = Math.sqrt(sum / buf.length);
           var lvl = Math.min(1, rms * 3.2);
-          if (state.phase === 'recording') {
-            if (lvl > state.peak) state.peak = lvl;
-            meter.setLevel(lvl);
-          } else {
-            meter.setLevel(0);
-          }
+          if (state.phase === 'recording' && lvl > state.peak) state.peak = lvl;
+          // 스트림이 살아 있는 동안에는 단계와 무관하게 계속 레벨을 그린다.
+          meter.setLevel(lvl);
           if (root.requestAnimationFrame) state.raf = root.requestAnimationFrame(loop);
         };
         loop();
@@ -1194,8 +1210,8 @@
     function finish() {
       state.phase = 'done';
       clearTick();
-      meter.setLevel(state.peak);
-      rec.className = 'instr-mic-record';
+      meter.setPeak(state.peak);
+      rec.className = 'instr-mic-record' + (state.stream ? ' is-live' : '');
       setRecLabel('RE-RECORD', '다시 녹음');
       rec.disabled = false;
       var verdict = micVerdict(state.peak);
@@ -1225,6 +1241,7 @@
     function runRecording() {
       state.phase = 'recording';
       state.peak = 0;
+      meter.setPeak(0);
       rec.className = 'instr-mic-record is-recording';
       rec.disabled = true;
       var left2 = MIC_RECORD_SEC;
@@ -1274,6 +1291,7 @@
         state.stream = live;
         state.adopted = true;
         startMeter(live);
+        rec.className = 'instr-mic-record is-live';
         then(live);
         return;
       }
@@ -1303,6 +1321,7 @@
         if (st && typeof st.pushEvent === 'function') st.pushEvent('mic_granted', screen.id, {});
         startMeter(stream);
         rec.disabled = false;
+        rec.className = 'instr-mic-record is-live';
         then(stream);
       })['catch'](function (err) {
         var name = err && err.name ? err.name : 'Error';
@@ -1328,6 +1347,19 @@
       if (state.phase === 'countdown' || state.phase === 'recording') return;
       ensureStream(function () { runCountdown(); });
     };
+
+    /* 화면에 들어오면 곧바로 마이크를 붙인다 — 아이콘이 살아나고 레벨 바가 바로 움직인다.
+     * 권한이 거부돼도 ensureStream 이 안내를 띄우고 Skip 으로 계속 갈 수 있다. */
+    function armOnMount() {
+      if (!state.alive || state.stream) return;
+      ensureStream(function () {
+        if (!state.alive || state.phase !== 'idle') return;
+        setStatus('Microphone is active — the bar moves as you speak. Select Record when you are ready.',
+          '마이크가 켜졌습니다 — 말하면 막대가 움직입니다. 준비되면 Record 를 선택하세요.', 'is-ok');
+      });
+    }
+    if (typeof root.setTimeout === 'function') root.setTimeout(armOnMount, 0);
+    else armOnMount();
 
     return wrap;
   }
