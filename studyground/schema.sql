@@ -211,6 +211,46 @@ update attempts set feedback_progress = 100 where feedback_progress = 0 and stat
 create unique index if not exists uq_qr_attempt_key
   on question_responses (attempt_id, question_key) where question_key <> '';
 
+-- === 0008 상태를 셋으로 가른 두 컬럼 (둘 다 가산형) ===
+-- rubric_scores.source        'teacher' 만 확정본이다. 응시의 완료 판정이 여기 걸린다.
+-- section_scores.provisional  점수는 나왔지만 확정은 아니라는 표시.
+-- 기존 행은 그대로 둔다: DEFAULT 가 채우는 값이 곧 "출처를 모르니 확정이 아니다"라는
+-- 사실이라 백필 UPDATE 가 필요 없다.
+alter table rubric_scores  add column if not exists source      varchar(16) not null default 'ai_draft';
+alter table section_scores add column if not exists provisional boolean     not null default false;
+alter table rubric_scores drop constraint if exists ck_rubric_source;
+alter table rubric_scores add  constraint ck_rubric_source check (source in ('ai_draft', 'teacher'));
+
+-- === 0009 LLM 호출 원장 ===
+-- 한 번의 API 호출이 한 행이다. 금액 집계는 언제나 행 단위이며 attempt_id 는 추적용
+-- 참고 컬럼이다 — 리포트를 다시 열면 그래프가 한 번 더 돌아 행이 여러 개 쌓이고,
+-- 그 사실 자체가 "재조회가 돈을 쓴다"는 관측값이다.
+--
+-- attempt_id 만 on delete set null 이다(다른 자식 테이블은 전부 cascade). 의도된
+-- 예외다: 응시 기록을 지운다고 이미 지출한 돈이 사라지지는 않으므로 회계 행은 남는다.
+--
+-- cost_micros 는 null 을 허용한다. null 은 "단가 미등록"이지 0원이 아니다 —
+-- 0 으로 접으면 "공짜로 썼다"가 되어 집계가 조용히 틀어진다(app/scoring/pricing.py).
+create table if not exists llm_usage (
+    id                 bigserial primary key,
+    attempt_id         integer     references attempts (id) on delete set null,
+    scope              varchar(32) not null default '',   -- feedback | rubric
+    provider           varchar(16) not null default '',   -- anthropic | openai
+    model              varchar(64) not null default '',
+    input_tokens       integer     not null default 0,
+    output_tokens      integer     not null default 0,
+    cache_read_tokens  integer     not null default 0,
+    cache_write_tokens integer     not null default 0,
+    cost_micros        bigint,                            -- 마이크로달러(1/1,000,000 USD)
+    price_version      varchar(32) not null default '',   -- 그때의 단가표 버전
+    latency_ms         integer     not null default 0,
+    ok                 boolean     not null default true,
+    error              text        not null default '',   -- 실패/폴백 사유
+    created_at         timestamp   not null default now()
+);
+create index if not exists ix_llm_usage_created    on llm_usage (created_at);
+create index if not exists ix_llm_usage_attempt_id on llm_usage (attempt_id);
+
 -- === app/migrations.py 의 원장 — SQL Editor 로 올린 DB 도 러너와 상태를 공유한다 ===
 create table if not exists schema_migrations (
     version    varchar(64) primary key,
@@ -223,5 +263,7 @@ insert into schema_migrations (version, applied_at) values
     ('0004_section_rubric_fields',    now()),
     ('0005_event_media_tables',       now()),
     ('0006_backfill_legacy_rows',     now()),
-    ('0007_qr_key_unique_index',      now())
+    ('0007_qr_key_unique_index',      now()),
+    ('0008_rubric_source_section_provisional', now()),
+    ('0009_llm_usage',                now())
 on conflict (version) do nothing;
