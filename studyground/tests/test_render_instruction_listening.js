@@ -341,7 +341,15 @@ ok('제목 Adjusting the Microphone', micText.indexOf('Adjusting the Microphone'
 ok('Record 안내 문구', micText.indexOf("Select the 'Record' button") >= 0);
 ok('낭독 지문', micText.indexOf('There are several reasons why I would prefer to live in a large city') >= 0);
 ok('레벨 미터 라벨', micText.indexOf('Too Quiet') >= 0 && micText.indexOf('Good') >= 0 && micText.indexOf('Too Loud') >= 0);
-ok('Skip microphone check', micText.indexOf('Skip microphone check') >= 0);
+/* 마이크 점검은 필수다 — 건너뛰기가 없다(2026-08-11 결정, exam-render-instruction.js
+ * renderMicAdjust 주석). 종전에는 우하단에 "Skip microphone check" 가 있었고 이 줄은
+ * 그것을 고정하고 있었다. 버튼이 사라졌는데 테스트가 남아 실패하고 있었다.
+ *
+ * 검사를 지우는 대신 반대 방향을 고정한다 — 지우면 버튼이 슬그머니 돌아와도 아무도
+ * 모른다. 소리가 잡힌 녹음을 끝내기 전에는 진행이 열리지 않는다는 본계약은
+ * tests/test_mic_required.js 가 따로 지킨다. */
+ok('마이크 점검을 건너뛸 수 없다', micText.indexOf('Skip microphone check') < 0 && micText.indexOf('건너뛰') < 0, micText.slice(0, 120));
+ok('대신 다시 시도만 열어 둔다', micText.indexOf('Try microphone again') >= 0);
 check('미터 칸 수', walk(micNode, []).filter(function (x) {
   return String(x.className).indexOf('instr-seg-cell') >= 0; }).length, 24);
 check('피크 판정 — 무음', window.SG_INSTRUCTION.micVerdict(0), 'silent');
@@ -354,7 +362,11 @@ var hwScreen = hw.filter(function (s) { return s.id === 'speaking.hardware'; })[
 var hwNode = window.SG_INSTRUCTION.renderHardwareCheck(hwScreen, ctx);
 var hwText = textOf(hwNode);
 ok('hardwareCheck 에 마이크 없음 안내', hwText.indexOf('cannot access a microphone') >= 0);
-ok('hardwareCheck 에 마이크 없이 계속', hwText.indexOf('Continue without microphone') >= 0);
+/* 마이크를 못 잡는 브라우저에서도 그냥 통과시키지 않는다(2026-08-11 결정).
+ * 종전의 "Continue without microphone" 은 사라졌다 — 마이크 없이 들어가면 스피킹
+ * 녹음이 통째로 비고, 그건 시험 뒤에야 드러난다. 대신 원인을 말하고 재시도를 연다. */
+ok('마이크 없이 계속할 수 없다', hwText.indexOf('Continue without microphone') < 0, hwText.slice(0, 120));
+ok('대신 어떻게 해야 하는지 말해 준다', hwText.indexOf('Chrome, Edge or Safari') >= 0);
 ok('hardwareCheck 에 스피커 테스트', hwText.indexOf('Play Test Sound') >= 0);
 
 /* listening 화면 — 소진 전/후 */
