@@ -269,6 +269,22 @@ check('speaking 문항 합계', rows[0].count + rows[1].count, 11);
 ok('directions 표에 응답시간(8–12s/45s)', spkText.indexOf('8\u201312 s') >= 0 && spkText.indexOf('45 s') >= 0);
 ok('directions 표에 유형 라벨', spkText.indexOf('Listen and Repeat') >= 0 && spkText.indexOf('Take an Interview') >= 0);
 
+/* 안내 방송 화면(speaking.intro.*)에는 진행 버튼이 없다 — 방송이 끝나면 저절로 넘어간다.
+   섹션 Directions(방송 없음)에는 그대로 버튼이 있어야 한다. 둘을 짝지어 고정한다. */
+function buttonsIn(node) {
+  return walk(node, []).filter(function (x) { return x.tagName === 'BUTTON'; });
+}
+ok('speaking.directions 에는 진행 버튼이 있다', buttonsIn(spkNode).length >= 1, String(buttonsIn(spkNode).length));
+var annScreens = instr.filter(function (s) { return window.SG_INSTRUCTION.isAnnouncement(s); });
+ok('안내 방송 화면 존재', annScreens.length >= 1, annScreens.map(function (s) { return s.id; }).join(', '));
+annScreens.forEach(function (s) {
+  var n = window.SG_INSTRUCTION.renderInstruction(s, ctx);
+  var btns = buttonsIn(n).filter(function (b) { return String(b.className).indexOf('lst-au-play') < 0; });
+  ok(s.id + ' 에 진행 버튼 없음', btns.length === 0, String(btns.length));
+  ok(s.id + ' 에 안내 오디오 있음',
+     walk(n, []).filter(function (x) { return x.tagName === 'AUDIO'; }).length === 1);
+});
+
 var me = mend.filter(function (s) { return s.section === 'listening' && s.module === 1; })[0];
 var meCopy = window.SG_INSTRUCTION.moduleEndCopy(me, ctx);
 /* 기대값 갱신 근거(2026-08, 담당 E): 녹화 프레임

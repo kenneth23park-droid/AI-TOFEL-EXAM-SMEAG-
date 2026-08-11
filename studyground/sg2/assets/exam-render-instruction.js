@@ -615,12 +615,39 @@
     };
   }
 
+  /* 안내 방송 화면인가 — 스피킹 Task 안내(speaking.intro.*)처럼 방송이 끝나면 스스로
+   * 다음 화면으로 넘어가는 화면이다. 이런 화면에는 진행 버튼을 두지 않는다
+   * (2026-08-11 발주처 요구). 버튼이 있으면 안내를 끝까지 듣지 않고 눌러 버리고,
+   * 실제 시험에도 안내 방송을 끊고 넘어가는 절차가 없다. */
+  function isAnnouncement(screen) {
+    return !!(screen && screen.screenType === 'instruction' && screen.section === 'speaking' &&
+              screen.audio && screen.audio.src);
+  }
+
+  /* 상단바의 진행 버튼은 exam-shell.js 가 화면 종류를 보고 감춘다(안내 방송 화면).
+     방송이 실패해 갈 곳이 없어지면 여기서 다시 꺼내 준다 — 셸에 이 한 가지를 되돌리는
+     API 를 새로 뚫는 것보다, 막다른 길을 여는 쪽이 이 화면의 책임에 가깝다. */
+  function restoreShellAdvance() {
+    if (!doc || typeof doc.getElementById !== 'function') return;
+    /* 엔진은 렌더를 먼저 하고 전이 콜백(=셸의 syncActions)을 나중에 부른다
+       (exam-engine.js:235-236). 렌더 도중 그대로 켜면 곧바로 다시 꺼지므로 한 틱 미룬다. */
+    var show = function () {
+      var b = doc.getElementById('btn-advance');
+      if (b) b.hidden = false;
+    };
+    if (root.setTimeout) root.setTimeout(show, 0); else show();
+  }
+
   /* Directions 화면의 introAudio(FR16) — 1회 재생. 소진 관리는 listening 렌더러의
-   * 공용 유닛(window.SG_LISTEN.makeAudioUnit)에 위임한다. 없으면 배지로 degrade. */
-  function introAudioNode(screen, ctx) {
+   * 공용 유닛(window.SG_LISTEN.makeAudioUnit)에 위임한다. 없으면 배지로 degrade.
+   *
+   * onStuck: 방송이 응시자를 다음 화면으로 데려다 주지 못했을 때 부른다(오디오 404·오프라인).
+   * 버튼 없는 화면이 막다른 길이 되지 않게 하는 유일한 출구다. */
+  function introAudioNode(screen, ctx, onStuck) {
     if (!screen.audio || !screen.audio.src) return null;
     var L = root.SG_LISTEN;
     if (L && typeof L.makeAudioUnit === 'function') {
+      var advance = autoAdvanceOnAnnouncement(screen, ctx);
       return L.makeAudioUnit({
         media: screen.audio,
         image: screen.image || null,
@@ -628,9 +655,13 @@
         captionEn: 'Directions — plays once',
         captionKo: '안내 음성 — 1회 재생',
         engine: ctx && ctx.engine,
-        onEnded: autoAdvanceOnAnnouncement(screen, ctx)
+        onEnded: function (reason) {
+          if (advance) advance(reason);
+          if (reason !== 'ended' && typeof onStuck === 'function') onStuck();
+        }
       });
     }
+    if (typeof onStuck === 'function') onStuck();
     var b = el('p', 'exam-badge');
     biInto(b, 'Audio unavailable', '오디오를 재생할 수 없습니다');
     return b;
@@ -667,8 +698,18 @@
       if (body) wrap.appendChild(body);
     }
 
-    var audioNode = introAudioNode(screen, ctx);
-    if (audioNode) wrap.appendChild(audioNode);
+    /* 안내 방송 화면은 버튼 없이 방송이 끝나면 스스로 넘어간다. 다만 방송이 응시자를
+       데려다 주지 못하는 경우(오디오 실패, 또는 새로고침으로 이미 1회 소진되어 재생 자체가
+       없는 경우)에는 화면이 막다른 길이 된다 — 그때만 상단바 진행 버튼을 되살린다. */
+    var announce = isAnnouncement(screen);
+    var audioNode = introAudioNode(screen, ctx, announce ? restoreShellAdvance : null);
+    if (audioNode) {
+      wrap.appendChild(audioNode);
+      if (announce) {
+        var st = typeof audioNode.getAttribute === 'function' ? audioNode.getAttribute('data-audio-state') : null;
+        if (st === 'spent' || st === 'done') restoreShellAdvance();
+      }
+    }
 
     if (isVolume) {
       wrap.appendChild(volumePanel());
@@ -682,9 +723,12 @@
       if (tbl) wrap.appendChild(tbl);
     }
 
-    var actions = el('div', 'instr-actions');
-    actions.appendChild(ctaNode(screen, ctx));
-    wrap.appendChild(actions);
+    // 안내 방송 화면에는 카드 안 버튼도 두지 않는다 — 진행은 방송이 끝나면 저절로 일어난다.
+    if (!announce) {
+      var actions = el('div', 'instr-actions');
+      actions.appendChild(ctaNode(screen, ctx));
+      wrap.appendChild(actions);
+    }
 
     // instruction 은 self-paced 다(AC2). 타이머가 남아 있으면 계약 위반이므로 로그만 남긴다.
     if (screen.timer) warn('instruction screen "' + screen.id + '" unexpectedly carries a timer');
@@ -1681,6 +1725,7 @@
     unitWords: unitWords,
     micVerdict: micVerdict,
     autoAdvanceOnAnnouncement: autoAdvanceOnAnnouncement,
+    isAnnouncement: isAnnouncement,
     MIC_SAMPLE_EN: MIC_SAMPLE_EN,
     // 렌더 함수(셀프테스트에서 직접 호출)
     renderInstruction: renderInstruction,

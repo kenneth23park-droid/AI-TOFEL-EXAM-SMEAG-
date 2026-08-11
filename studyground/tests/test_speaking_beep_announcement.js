@@ -53,7 +53,7 @@ ok('스피킹 안내 화면에는 붙는다', typeof onEnded, 'function');
 
 timers = [];
 onEnded('error');
-ok('오디오를 못 틀었으면 넘기지 않는다 (Begin 버튼을 남긴다)', timers.length, 0);
+ok('오디오를 못 틀었으면 넘기지 않는다 (상단바 진행 버튼이 되살아난다)', timers.length, 0);
 
 onEnded('ended');
 ok('방송이 끝나면 한 박자 뒤 넘긴다', timers.length, 1);
@@ -68,6 +68,20 @@ timers = [];
 lateEnded('ended');
 timers[0].fn();
 ok('화면이 이미 바뀌었으면 넘기지 않는다', late.calls, []);
+
+/* 안내 방송 화면에는 진행 버튼을 두지 않는다 — 카드 안 CTA 도, 상단바 버튼도.
+   exam-shell.js 의 syncActions 가 이 판정을 그대로 쓰므로, 여기가 정본이다. */
+console.log('\n[1c] 안내 방송 화면 판정 (= 진행 버튼을 감출 화면)');
+var IS = window.SG_INSTRUCTION.isAnnouncement;
+ok('스피킹 Task 안내(방송 있음)',
+   IS({ screenType: 'instruction', section: 'speaking', audio: { src: 's2-instructions.mp3' } }), true);
+ok('스피킹 섹션 Directions(방송 없음)',
+   IS({ screenType: 'instruction', section: 'speaking' }), false);
+ok('리스닝 안내는 방송이 있어도 아니다',
+   IS({ screenType: 'instruction', section: 'listening', audio: { src: 'a.mp3' } }), false);
+ok('문항 화면은 아니다',
+   IS({ screenType: 'speaking', section: 'speaking', audio: { src: 'a.mp3' } }), false);
+ok('빈 값에 터지지 않는다', IS(null), false);
 
 /* 렌더러가 부르는 것은 fake 가 아니라 진짜 엔진이다. 엔진이 'auto' 를 거절하면
    위의 [1] 이 전부 통과해도 화면은 그대로 서 있는다 — 실제로 한 번 밟은 함정이다. */

@@ -440,8 +440,22 @@ window.SG_RESULTS = (function () {
             force: !!opts.force,
             tasks: list.slice(i, i + SCORE_BATCH)
           })
-        }).then(function (r) { return r.ok ? r.json() : null; })
+        }).then(function (r) {
+          if (r.ok) return r.json();
+          /* 서버가 왜 거절했는지는 본문에 있다(키 미설정 503, 권한 401, …).
+             이걸 버리면 화면에는 "채점 중" 만 남고, 아무도 설정이 빠졌다는 걸 모른다. */
+          return r.json()['catch'](function () { return null; }).then(function (j) {
+            return { _fail: (j && j.error) || ('HTTP ' + r.status), _status: r.status };
+          });
+        })
           .then(function (out) {
+            if (out && out._fail) {
+              // 같은 이유로 남은 묶음도 다 거절당한다. 더 보내지 않고 이유를 들고 돌아간다.
+              if (!merged) merged = { session: row.session, scored: [], skipped: [] };
+              merged.error = out._fail;
+              merged.status = out._status;
+              return merged;
+            }
             if (out) {
               if (!merged) merged = { session: row.session, scored: [], skipped: [] };
               merged.scored = merged.scored.concat(out.scored || []);
@@ -450,7 +464,11 @@ window.SG_RESULTS = (function () {
             }
             tell(i + SCORE_BATCH);
             return send(i + SCORE_BATCH);
-          })['catch'](function () { return merged; });   // 한 묶음이 끊겨도 앞의 결과는 남는다
+          })['catch'](function (e) {           // 한 묶음이 끊겨도 앞의 결과는 남는다
+            if (!merged) merged = { session: row.session, scored: [], skipped: [] };
+            if (!merged.error) merged.error = String((e && e.message) || e);
+            return merged;
+          });
       }
 
       return send(0);

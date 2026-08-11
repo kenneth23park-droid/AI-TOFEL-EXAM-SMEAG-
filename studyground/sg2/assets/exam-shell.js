@@ -353,7 +353,13 @@ window.SG_RUNTIME = (function () {
     var showHelp = !terminal && !speakingLive;
     var showReview = (sec === 'reading') && (t === 'question');
     var showBack = (sec === 'reading') && (t === 'question');
-    var showAdvance = !speakingLive;
+    /* 스피킹 Task 안내 방송 화면(speaking.intro.*)에는 진행 버튼을 두지 않는다
+       (2026-08-11 발주처 요구). 방송이 끝나면 렌더러가 스스로 다음 화면으로 넘긴다 —
+       버튼이 있으면 안내를 끝까지 듣지 않고 눌러 버린다. 방송이 실패해 갈 곳이 없어지면
+       exam-render-instruction.js 가 이 버튼을 다시 꺼낸다. */
+    var I = window.SG_INSTRUCTION;
+    var announcement = !!(I && typeof I.isAnnouncement === 'function' && I.isAnnouncement(screen));
+    var showAdvance = !speakingLive && !announcement;
 
     function set(id, on) { var b = document.getElementById(id); if (b) b.hidden = !on; }
     set('btn-volume', showVolume);
@@ -717,10 +723,22 @@ window.SG_RUNTIME = (function () {
       }
       say('Saved to your account. Building your score report…',
           '계정에 저장되었습니다. 성적을 정리하는 중…');
+      /* 채점이 서버에서 거절당했으면(설정 누락·권한) 그렇게 말한다. "잠시 후 확인하세요"
+         라고 해 두면 학생은 몇 번이고 새로고침하고, 우리는 무엇이 고장났는지 모른다.
+         답안은 이미 올라갔으므로 잃은 것은 없다 — 늦어지는 것뿐이다. */
+      var why = r && r.scored && r.scored.error;
       return showBands(session).then(function (b) {
+        if (b) return;
         // 밴드를 못 그린 경우에도 화면이 "정리하는 중" 에서 멈춰 있으면 안 된다.
-        if (!b) say('Saved to your account. Check My results in a few minutes.',
-                    '계정에 저장되었습니다. 잠시 후 내 성적에서 확인하세요.');
+        if (why) {
+          say('Your answers are saved, but scoring is unavailable right now (' + why +
+                '). A teacher will score this test.',
+              '답안은 저장되었지만 지금 채점을 할 수 없습니다 (' + why +
+                '). 선생님이 채점합니다.');
+          return;
+        }
+        say('Saved to your account. Check My results in a few minutes.',
+            '계정에 저장되었습니다. 잠시 후 내 성적에서 확인하세요.');
       });
     }).catch(function () {
       say('Saved on this device.', '이 기기에 저장되었습니다.');
