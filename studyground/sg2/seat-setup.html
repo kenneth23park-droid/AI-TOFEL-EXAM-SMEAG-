@@ -116,8 +116,6 @@
       bits.push(ko() ? '배정된 시험 없음' : 'No test assigned');
     }
     if (Number(s.audioRate) !== 1) bits.push(s.audioRate + '×');
-    bits.push(s.lang === 'free' ? (ko() ? '언어: 학생 선택' : 'Language: student picks')
-                                : (ko() ? '언어 고정: ' : 'Language: ') + String(s.lang).toUpperCase());
     if (s.kiosk) bits.push(ko() ? '시험 전용' : 'Exam-only');
     document.getElementById('cfg').innerHTML = bits.map(function (b) {
       return '<span>' + esc(b) + '</span>';

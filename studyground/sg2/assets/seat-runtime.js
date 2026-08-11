@@ -3,8 +3,6 @@
  * assets/sg-seats.js 가 들고 있는 이 PC 의 좌석 설정(관리자가 admin-seats.html 에서
  * 지정한 것)을 읽어, 화면에 그대로 적용한다:
  *
- *   · 화면 언어 고정 — lang 이 en/ko 면 그 언어로 못박고 KO/EN 토글을 감춘다.
- *     app.js 가 언어를 읽기 전에 정해져야 하므로 이 파일을 app.js 보다 먼저 싣는다.
  *   · 시험 전용 모드 — 강의·연습·커뮤니티 메뉴를 숨겨 시험과 로그인만 남긴다.
  *   · 오디오 배속 — SG_AUDIO 가 있는 화면이면 좌석 값으로 전체 배속을 건다.
  *   · 좌석 배지 — [data-seat-badge] 자리에 "컴퓨터 12" 를 그린다.
@@ -23,16 +21,6 @@
   if (!S) return;
 
   var seat = S.forThisDevice();          // 각인 전이면 null
-
-  /* ── 언어 고정 ──────────────────────────────────────────────
-   * app.js 는 localStorage('sg2_lang') 를 읽어 화면을 그린다. 그 전에 값을 못박고,
-   * 토글은 CSS 로 지운다 — 시험 도중 언어가 바뀌면 지시문 해석이 흔들린다. */
-  function lockLang() {
-    if (!seat || (seat.lang !== 'en' && seat.lang !== 'ko')) return;
-    try { localStorage.setItem('sg2_lang', seat.lang); } catch (e) {}
-    document.documentElement.lang = seat.lang;
-    css('.lang{display:none!important}');
-  }
 
   /* ── 시험 전용 모드 ─────────────────────────────────────────
    * 학습·연습·커뮤니티로 새는 길을 막는다. 시험과 로그인만 남긴다. */
@@ -85,16 +73,11 @@
       hosts[i].hidden = false;
       hosts[i].innerHTML =
         '<span class="sg-seat-badge">◉ <span data-en>Computer ' + seat.no + '</span>' +
-        '<span data-ko>컴퓨터 ' + seat.no + '</span></span>' +
-        (seat.lang === 'en' || seat.lang === 'ko'
-          ? '<span class="sg-seat-lock">🔒 ' + seat.lang.toUpperCase() + '</span>' : '');
+        '<span data-ko>컴퓨터 ' + seat.no + '</span></span>';
     }
     css('.sg-seat-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--brand);' +
         'color:var(--brand-ink);background:var(--brand-soft);border-radius:999px;padding:5px 12px;' +
-        'font:800 12px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em}' +
-        '.sg-seat-lock{display:inline-flex;align-items:center;gap:4px;margin-left:6px;' +
-        'border:1px solid var(--line-2);border-radius:999px;padding:5px 10px;' +
-        'font:800 11px/1 ui-monospace,Menlo,monospace;color:var(--muted)}');
+        'font:800 12px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em}');
   }
 
   var RT = {
@@ -109,7 +92,6 @@
     refresh: function () { seat = S.forThisDevice(); return seat; }
   };
 
-  lockLang();
   kiosk();
 
   if (document.readyState === 'loading') {

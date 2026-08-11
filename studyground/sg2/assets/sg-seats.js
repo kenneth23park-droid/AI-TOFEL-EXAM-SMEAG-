@@ -44,7 +44,7 @@
       mode: 'local', course: 'toefl',
       setId: '', module: 'full', items: '',
       audioRate: 1, audioReplays: 1,
-      lang: 'en', kiosk: true,
+      kiosk: true,
       status: 'unbound', deviceId: '', updatedAt: ''
     };
   }
@@ -96,7 +96,7 @@
     if (!L) return;
     L.diff({
       before: before, after: after,
-      fields: ['mode', 'course', 'setId', 'module', 'items', 'audioRate', 'audioReplays', 'lang', 'kiosk'],
+      fields: ['mode', 'course', 'setId', 'module', 'items', 'audioRate', 'audioReplays', 'kiosk'],
       action: 'update', target: 'seat ' + seat, set: after.setId || before.setId || '',
       note: 'seat config'
     });

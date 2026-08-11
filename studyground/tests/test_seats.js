@@ -30,17 +30,17 @@ console.log('기본값');
 var all = S.all();
 ok(all.length === 30, '좌석 30개');
 ok(all[0].no === 1 && all[29].no === 30, '번호가 1..30 순서');
-ok(all.every(function (s) { return s.mode === 'local' && s.course === 'toefl' && s.lang === 'en'; }),
-   '기본값은 로컬 · TOEFL · EN');
+ok(all.every(function (s) { return s.mode === 'local' && s.course === 'toefl'; }),
+   '기본값은 로컬 · TOEFL');
 ok(all.every(function (s) { return s.setId === '' && s.status === 'unbound'; }), '처음엔 미배정');
 
 console.log('여러 좌석에 한꺼번에 적용');
-S.set([1, 2, 3], { setId: 'set9', mode: 'cloud', lang: 'ko', audioRate: 0.75, audioReplays: 0 });
+S.set([1, 2, 3], { setId: 'set9', mode: 'cloud', audioRate: 0.75, audioReplays: 0 });
 var s1 = S.get(1), s4 = S.get(4);
-ok(s1.setId === 'set9' && s1.mode === 'cloud' && s1.lang === 'ko', '고른 좌석에 값이 들어감');
+ok(s1.setId === 'set9' && s1.mode === 'cloud', '고른 좌석에 값이 들어감');
 ok(s1.audioRate === 0.75 && s1.audioReplays === 0, '배속·재생 횟수도 숫자로 보존');
 ok(s1.status === 'ready', '배정되면 status 가 ready 로');
-ok(s4.setId === '' && s4.lang === 'en', '고르지 않은 좌석은 그대로');
+ok(s4.setId === '', '고르지 않은 좌석은 그대로');
 ok(!!S.get(2).updatedAt, '적용 시각이 찍힘');
 
 console.log('일부 필드만 바꾸기');
@@ -49,7 +49,7 @@ ok(S.get(1).items === 'L3,7,9' && S.get(1).setId === 'set9', '나머지 필드�
 
 console.log('좌석 해제');
 S.reset([1]);
-ok(S.get(1).setId === '' && S.get(1).status === 'unbound' && S.get(1).lang === 'en', '처음 상태로 되돌아감');
+ok(S.get(1).setId === '' && S.get(1).status === 'unbound', '처음 상태로 되돌아감');
 ok(S.get(2).setId === 'set9', '옆 좌석은 건드리지 않음');
 
 console.log('각인');
@@ -64,7 +64,7 @@ var json = S.exportJson();
 S.reset([2, 3]);
 ok(S.get(2).setId === '', '되돌리기 전 상태 확인');
 S.importJson(json);
-ok(S.get(2).setId === 'set9' && S.get(2).lang === 'ko', '불러오면 값이 되살아남');
+ok(S.get(2).setId === 'set9', '불러오면 값이 되살아남');
 
 console.log('빠진 필드 메우기 (옛 저장본)');
 S.importJson(JSON.stringify({ version: 1, seats: [{ no: 5, setId: 'set1' }] }));

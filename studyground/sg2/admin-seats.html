@@ -50,8 +50,6 @@
   .seat .set { font-size:11px; line-height:1.35; color:var(--ink-2); }
   .seat .mode { margin-top:auto; font:800 9px/1 ui-monospace,Menlo,monospace; letter-spacing:.1em;
     text-transform:uppercase; color:var(--muted); }
-  .seat .lg { position:absolute; top:7px; right:7px; font:800 9px/1 ui-monospace,Menlo,monospace;
-    border:1px solid var(--line-2); border-radius:4px; padding:3px 4px; background:#fff; color:var(--muted); }
   .seat .mineflag { position:absolute; bottom:7px; right:7px; font-size:10px; }
 
   .legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; font-size:11.5px; color:var(--muted); }
@@ -103,8 +101,8 @@
     <span class="pill" style="margin-bottom:8px">Admin · Seats</span>
     <h1 style="font-size:clamp(25px,4vw,38px)"><span data-en>Set up every computer in the room</span><span data-ko>강의실 컴퓨터를 한 화면에서</span></h1>
     <p class="sub">
-      <span data-en>Pick one seat or several, then choose how that computer runs — offline or online, which course and test set, which questions, how fast the audio plays and in which language the screen appears. The student picks nothing.</span>
-      <span data-ko>좌석을 하나 또는 여러 개 고르고, 그 컴퓨터가 어떻게 돌지 정합니다 — 로컬이냐 인터넷이냐, 어느 코스·세트냐, 어느 문항이냐, 오디오 배속과 화면 언어까지. 학생은 아무것도 고르지 않습니다.</span>
+      <span data-en>Pick one seat or several, then choose how that computer runs — offline or online, which course and test set, which questions, and how fast the audio plays. The student picks nothing.</span>
+      <span data-ko>좌석을 하나 또는 여러 개 고르고, 그 컴퓨터가 어떻게 돌지 정합니다 — 로컬이냐 인터넷이냐, 어느 코스·세트냐, 어느 문항이냐, 오디오 배속까지. 학생은 아무것도 고르지 않습니다.</span>
     </p>
   </div>
 
@@ -162,13 +160,6 @@
         <div class="fld"><label><span data-en>Listening replays</span><span data-ko>듣기 재생 횟수</span></label>
           <div class="opts" data-f="audioReplays" id="fReplays"></div></div>
 
-        <div class="fld"><label><span data-en>Screen language</span><span data-ko>화면 언어</span></label>
-          <div class="opts" data-f="lang">
-            <button data-v="en">EN</button>
-            <button data-v="ko">KO</button>
-            <button data-v="free"><span data-en>Student picks</span><span data-ko>학생 선택</span></button>
-          </div></div>
-
         <div class="fld"><label><span data-en>Exam-only mode</span><span data-ko>시험 전용 모드</span></label>
           <div class="opts" data-f="kiosk">
             <button data-v="1"><span data-en>On</span><span data-ko>켜짐</span></button>
@@ -221,10 +212,7 @@
 
     var line = s.setId ? (s.setId.toUpperCase() + (s.items ? ' · ' + esc(s.items) : ' · ' + moduleLabel(s.module)))
                        : '<span data-en>Unassigned</span><span data-ko>미배정</span>';
-    var lang = s.lang === 'free' ? 'FREE' : String(s.lang || 'en').toUpperCase();
-
     return '<button type="button" class="' + cls + '" data-no="' + s.no + '">' +
-      '<span class="lg">' + lang + '</span>' +
       '<span class="no">' + ('0' + s.no).slice(-2) + '</span>' +
       '<span class="course">' + esc(course) + '</span>' +
       '<span class="set">' + line + '</span>' +
@@ -241,17 +229,15 @@
   function paintGrid() {
     $('grid').innerHTML = S.all().map(tile).join('');
     var all = S.all();
-    var by = { local: 0, cloud: 0, none: 0, ko: 0 };
+    var by = { local: 0, cloud: 0, none: 0 };
     all.forEach(function (s) {
       if (!s.setId) by.none++; else if (s.mode === 'cloud') by.cloud++; else by.local++;
-      if (s.lang === 'ko') by.ko++;
     });
     $('stats').innerHTML =
       '<div class="stat"><b>' + all.length + '</b><span data-en>seats</span><span data-ko>좌석</span></div>' +
       '<div class="stat"><b>' + by.local + '</b><span data-en>local</span><span data-ko>로컬</span></div>' +
       '<div class="stat"><b>' + by.cloud + '</b><span data-en>internet</span><span data-ko>인터넷</span></div>' +
-      '<div class="stat"><b>' + by.none + '</b><span data-en>unassigned</span><span data-ko>미배정</span></div>' +
-      '<div class="stat"><b>' + by.ko + '</b><span data-en>korean UI</span><span data-ko>한국어 화면</span></div>';
+      '<div class="stat"><b>' + by.none + '</b><span data-en>unassigned</span><span data-ko>미배정</span></div>';
   }
 
   /* ---- 인스펙터 ---- */
@@ -301,7 +287,7 @@
     // 여러 좌석을 골랐으면 첫 좌석 값을 초안으로 놓고, 손댄 항목만 전부에 적용한다.
     draft = { mode: first.mode, course: first.course, setId: first.setId, module: first.module,
               items: first.items, audioRate: first.audioRate, audioReplays: first.audioReplays,
-              lang: first.lang, kiosk: first.kiosk };
+              kiosk: first.kiosk };
 
     $('pTitle').textContent = sel.length === 1 ? ('SEAT ' + sel[0]) : (sel.length + ' SEATS');
     $('pStatus').textContent = sel.length === 1 ? (first.status || '') : '';
@@ -310,7 +296,6 @@
     paintOpts('course', draft.course);
     paintOpts('audioRate', draft.audioRate);
     paintOpts('audioReplays', draft.audioReplays);
-    paintOpts('lang', draft.lang);
     paintOpts('kiosk', draft.kiosk ? '1' : '0');
     paintSetOptions(draft.course);
     $('fSet').value = draft.setId || '';
