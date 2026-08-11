@@ -104,9 +104,19 @@
 //      관리자 아이디·비밀번호 칸을 세우고 admin-session.js 의 verify() 로 확인한다
 //      (세션은 만들지 않는다). exam.css 도 함께 바뀌므로, 캐시된 옛 셸이 남으면
 //      학생이 그냥 나갈 수 있다. 그래서 판올림한다.
-const VERSION = 'sg-v37';
+// v38: 미디어 캐시를 VERSION 에서 떼어 냈다. 여태 셸을 한 줄 고칠 때마다 미디어
+//      캐시까지 통째로 버려져, 학생 기기가 25 MB 를 처음부터 다시 받았다. 이제
+//      무엇이 바뀌었는지는 config/offline.set9.json 의 파일별 내용 해시가 가리고,
+//      offline-prep.js 가 바뀐 파일만 다시 받는다(음성을 다시 생성해도 url 은
+//      그대로라 주소만으로는 알 수 없다 — v4 가 VERSION 판올림으로 때우던 자리다).
+//      이 판올림 한 번은 옛 sg-media-sg-v37 을 버리므로 마지막 전량 재수신이 있다.
+//      config/offline.*.json 은 셸에 있어도 네트워크 우선으로 뺐다 — 목록까지
+//      cache-first 로 붙들면 기기가 옛 목록을 보고 "최신"이라 답해 업데이트가
+//      영영 도착하지 않는다. 오프라인이면 캐시된 목록으로 되돌아간다.
+const VERSION = 'sg-v38';
 const SHELL = 'sg-shell-' + VERSION;
-const MEDIA = 'sg-media-' + VERSION;
+// 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
+const MEDIA = 'sg-media-v2';
 
 const SHELL_ASSETS = [
   'index.html', 'npz.html', 'tests.html', 'dashboard.html', 'learning.html',
@@ -200,8 +210,29 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
+  // offline-prep.js 가 "바뀐 파일을 다시 받는" 요청에 붙이는 표식. 미디어 분기는
+  // cache-first 라, 이 표식이 없으면 갱신하러 보낸 요청조차 캐시에 있는 옛 파일로
+  // 되돌아온다 — 받아 와서 제자리에 옛 것을 도로 넣는 꼴이 된다. 그대로 통과시킨다.
+  if (req.headers.get('x-sg-refresh')) return;
+
   // 서버리스 함수(/api/*)는 캐시 대상이 아니다 — TTS 생성 결과가 굳어버리면 안 된다.
   if (url.pathname.startsWith('/api/') || url.pathname.endsWith('/api/tts')) return;
+
+  // 오프라인 목록은 "무엇이 바뀌었는지"를 알리는 쪽지다. 이것까지 cache-first 로
+  // 붙들면 업데이트가 영영 도착하지 않는다 — 기기는 옛 목록을 보고 "최신"이라 답한다.
+  // 네트워크를 먼저 보고, 안 되면(오프라인) 캐시된 목록으로 되돌아간다.
+  if (/\/config\/offline\.[^/]+\.json$/.test(url.pathname)) {
+    e.respondWith(
+      fetch(req).then((res) => {
+        if (res.ok && res.status === 200) {
+          const copy = res.clone();
+          caches.open(SHELL).then((c) => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      }).catch(() => caches.match(req))
+    );
+    return;
+  }
 
   // Media: cache-first, then network, then store for next time (supports range requests).
   if (isMedia(url)) {

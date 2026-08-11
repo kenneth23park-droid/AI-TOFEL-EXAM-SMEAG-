@@ -35,6 +35,38 @@ def test_every_listed_file_exists():
     assert not missing, f'목록에 있으나 실제로 없는 파일: {missing}'
 
 
+def test_every_file_carries_a_content_hash():
+    """해시가 없으면 같은 주소에 덮인 새 오디오를 기기가 알아채지 못한다."""
+    data = json.loads(MANIFEST.read_text(encoding='utf-8'))
+    assert len(data['rev']) >= 8
+    for f in data['files']:
+        assert len(f.get('h', '')) >= 8, f'해시 없음: {f["u"]}'
+
+
+def test_hashes_match_the_files_on_disk():
+    import hashlib
+    data = json.loads(MANIFEST.read_text(encoding='utf-8'))
+    for f in data['files']:
+        h = hashlib.sha256((SG2 / f['u']).read_bytes()).hexdigest()[:12]
+        assert h == f['h'], f'해시 불일치: {f["u"]} — 목록을 다시 만들어라'
+
+
+def test_rev_changes_when_a_file_changes():
+    """rev 하나로 '받을 것이 있는가'를 가르므로, 내용이 바뀌면 반드시 달라져야 한다."""
+    import hashlib
+    data = json.loads(MANIFEST.read_text(encoding='utf-8'))
+
+    def rev_of(files):
+        return hashlib.sha256(
+            ''.join(f['u'] + ':' + f['h'] for f in files).encode('utf-8')
+        ).hexdigest()[:12]
+
+    assert rev_of(data['files']) == data['rev']
+    tweaked = json.loads(MANIFEST.read_text(encoding='utf-8'))['files']
+    tweaked[0]['h'] = 'ffffffffffff'
+    assert rev_of(tweaked) != data['rev']
+
+
 def test_totals_are_consistent():
     data = json.loads(MANIFEST.read_text(encoding='utf-8'))
     assert data['count'] == len(data['files'])

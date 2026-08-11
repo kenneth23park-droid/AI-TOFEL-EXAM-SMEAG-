@@ -1,37 +1,53 @@
-/* SMEAG · StudyGround — 오프라인 사전 다운로드.
+/* SMEAG · StudyGround — 오프라인 사전 다운로드 · 자동 업데이트.
  *
- * 문제. 서비스워커는 셸(HTML·CSS·JS·문항 데이터)만 install 시점에 프리캐시하고,
- * 미디어는 재생 요청이 올 때 넣는다(sw.js 의 cache-first 미디어 분기). 12 MB 이던
- * 시절에는 맞는 절충이었지만, 학생은 시험 전에 리스닝 mp3 를 들어볼 이유가 없다.
- * 그래서 "학원 와이파이에서 설치 → 시험장에서 무음"이 된다.
+ * 문제 하나. 서비스워커는 셸(HTML·CSS·JS·문항 데이터)만 install 시점에 프리캐시하고,
+ * 미디어는 재생 요청이 올 때 넣는다(sw.js 의 cache-first 미디어 분기). 학생은 시험 전에
+ * 리스닝 mp3 를 들어볼 이유가 없으니, "학원 와이파이에서 설치 → 시험장에서 무음"이 된다.
  *
- * 해법. 페이지가 열리는 순간, 이 SET 이 쓰는 미디어(config/offline.<set>.json,
- * 91개 25 MB)가 캐시에 다 있는지 보고 없으면 알아서 받는다. 학생이 누를 버튼은 없다.
+ * 문제 둘. 오디오는 같은 주소에 새 파일로 덮이는 일이 잦다 — 음성을 다시 생성해도 url 은
+ * 그대로다. 캐시는 cache-first 라 주소만 봐서는 바뀐 줄을 모르고, 기기에는 옛 음성이
+ * 그대로 남는다. 출제자가 고친 오디오가 학생 귀에 닿지 않는다.
  *
- * 캐시 이름은 서비스워커에게 물어본다. sw.js 의 VERSION 은 문항이 바뀔 때마다 오르고
- * 옛 미디어 캐시는 activate 에서 지워지므로, 여기서 이름을 짐작해 쓰면 판올림 직후
- * 엉뚱한(이미 버려진) 캐시를 채우게 된다.
+ * 그래서 목록(config/offline.<set>.json)에 파일마다 내용 해시를 담고, 페이지가 열릴 때마다
+ * 온라인이면 목록을 새로 읽어 기기가 가진 것과 맞춰 본다.
+ *   · 없는 파일   → 받는다
+ *   · 해시가 다른 파일 → 그것만 다시 받는다 (전체 25 MB 가 아니라)
+ *   · 목록에서 빠진 파일 → 캐시에서 지운다
+ * 학생이 누를 버튼은 없다.
  *
- * 내려받기는 페이지 쪽에서 cache.put 으로 직접 넣는다. 서비스워커를 통과시키는(fetch)
- * 방식은 첫 방문처럼 아직 controller 가 없는 상태에서 조용히 캐시를 건너뛴다.
+ * 캐시 이름은 서비스워커에게 물어본다. 넣는 것도 페이지가 직접 cache.put 으로 한다 —
+ * 서비스워커를 통과시키는(fetch) 방식은 첫 방문처럼 아직 controller 가 없는 상태에서
+ * 조용히 캐시를 건너뛴다.
  */
 (function () {
   'use strict';
 
-  // 시험 화면은 예외다. 응시 중에 25 MB 를 끌어오면 지금 재생돼야 할 오디오와 회선을
+  // 시험 화면은 예외다. 응시 중에 파일을 끌어오면 지금 재생돼야 할 오디오와 회선을
   // 다툰다. 그쪽에서는 <script ... data-mode="check"> 로 불러 확인과 경고만 시킨다.
   var MODE = (document.currentScript && document.currentScript.dataset.mode) || 'auto';
 
   var MANIFEST = 'config/offline.set9.json';
   var CONCURRENCY = 4;          // 학원 회선을 다 먹지 않으면서 25 MB 를 몇 분 안에 끝내는 선.
-  var DONE_KEY = 'sg2_offline_done';
+  var REC_KEY = 'sg2_offline_have';   // { rev, have: { url: hash } }
 
   var state = {
     manifest: null,
-    total: 0, have: 0,
-    bytes: 0, haveBytes: 0,
+    total: 0, have: 0, bytes: 0, haveBytes: 0,
+    fresh: 0, stale: 0,          // 새로 받을 것 / 바뀌어서 다시 받을 것
     running: false, done: false, failed: 0,
+    update: false,               // 이번 작업이 "첫 준비"가 아니라 "업데이트"인가
   };
+
+  // ── 기기가 무엇을 가지고 있는지에 대한 기록 ──────────────────
+  // 캐시는 "있다/없다"만 답한다. 무엇을 받았는지(어느 판본인지)는 여기 적어 둔다.
+  function record() {
+    try { return JSON.parse(localStorage.getItem(REC_KEY) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function remember(rev, have) {
+    try { localStorage.setItem(REC_KEY, JSON.stringify({ rev: rev, have: have })); }
+    catch (e) {}
+  }
 
   // ── 서비스워커에게 캐시 이름 묻기 ──────────────────────────────
   function mediaCacheName() {
@@ -58,10 +74,13 @@
     return new URL(url, document.baseURI).href;
   }
 
-  // ── 현황 ────────────────────────────────────────────────────
-  function load() {
-    if (state.manifest) return Promise.resolve(state.manifest);
-    return fetch(absolute(MANIFEST), { cache: 'no-cache' })
+  // ── 목록 읽기 ───────────────────────────────────────────────
+  // 온라인이면 언제나 서버 것을 새로 읽는다. 이 한 번의 20 KB 요청이 "업데이트가
+  // 있는가"를 가른다. 오프라인이면 셸 캐시에 프리캐시된 판본으로 되돌아간다.
+  function load(force) {
+    if (state.manifest && !force) return Promise.resolve(state.manifest);
+    return fetch(absolute(MANIFEST), { cache: 'no-store' })
+      .catch(function () { return fetch(absolute(MANIFEST)); })   // 오프라인 → 캐시본
       .then(function (r) { if (!r.ok) throw new Error('manifest ' + r.status); return r.json(); })
       .then(function (m) {
         state.manifest = m;
@@ -71,24 +90,52 @@
       });
   }
 
-  function status() {
-    return load().then(function (m) {
+  // ── 무엇이 없고 무엇이 바뀌었는지 ───────────────────────────
+  function survey() {
+    return load(true).then(function (m) {
       return mediaCacheName().then(function (name) {
-        if (!name) return { supported: false, ready: false, have: 0, total: m.files.length };
+        if (!name) {
+          return { supported: false, ready: false, have: 0, total: m.files.length,
+                   fresh: m.files.length, stale: 0, todo: [], prune: [], manifest: m, cache: null };
+        }
+        var rec = record();
+        var known = rec.have || {};
         return caches.open(name).then(function (cache) {
-          return Promise.all(m.files.map(function (f) {
-            return cache.match(absolute(f.u)).then(function (hit) { return hit ? f.b : 0; });
-          })).then(function (sizes) {
-            var have = 0, haveBytes = 0;
-            sizes.forEach(function (b) { if (b) { have++; haveBytes += b; } });
-            state.have = have;
-            state.haveBytes = haveBytes;
-            state.done = have === m.files.length;
+          return cache.keys().then(function (keys) {
+            var inCache = {};
+            keys.forEach(function (req) { inCache[req.url] = true; });
+
+            var todo = [], have = 0, haveBytes = 0, fresh = 0, stale = 0;
+            var wanted = {};
+            m.files.forEach(function (f) {
+              var url = absolute(f.u);
+              wanted[url] = true;
+              if (!inCache[url]) { todo.push(f); fresh++; return; }
+              if (known[f.u] !== f.h) {
+                // 주소는 같은데 내용이 바뀌었다 — 캐시에 있는 건 옛 음성이다.
+                todo.push(f); stale++; return;
+              }
+              have++; haveBytes += f.b;
+            });
+
+            // 목록에서 빠진 파일 — 문항이 교체되면 옛 오디오가 캐시에 남는다.
+            var prune = keys.filter(function (req) {
+              return !wanted[req.url] && req.url.indexOf('/media/') !== -1;
+            });
+
+            state.have = have; state.haveBytes = haveBytes;
+            state.fresh = fresh; state.stale = stale;
+            state.done = todo.length === 0;
+            state.update = stale > 0 || (rec.rev && rec.rev !== m.rev && fresh < m.files.length);
+
             return {
-              supported: true, ready: state.done,
+              supported: true, ready: todo.length === 0,
               have: have, total: m.files.length,
               haveBytes: haveBytes, bytes: m.bytes,
+              fresh: fresh, stale: stale, prune: prune.length,
+              update: state.update, rev: m.rev, knownRev: rec.rev || null,
               label: m.label,
+              todo: todo, _prune: prune, manifest: m, cache: cache,
             };
           });
         });
@@ -96,53 +143,73 @@
     });
   }
 
+  function status() {
+    return survey().then(function (s) {
+      // 내부용 필드는 밖으로 내보내지 않는다.
+      return {
+        supported: s.supported, ready: s.ready, update: s.update,
+        have: s.have, total: s.total, haveBytes: s.haveBytes, bytes: s.bytes,
+        fresh: s.fresh, stale: s.stale, prune: s.prune,
+        rev: s.rev, knownRev: s.knownRev, label: s.label,
+      };
+    });
+  }
+
   // ── 내려받기 ────────────────────────────────────────────────
-  function download(onProgress) {
+  function sync(onProgress) {
     if (state.running) return Promise.resolve(null);
     state.running = true;
     state.failed = 0;
 
-    return load().then(function (m) {
-      return mediaCacheName().then(function (name) {
-        if (!name) throw new Error('no-sw');
-        return caches.open(name).then(function (cache) {
-          // 이미 있는 건 건너뛴다 — 중간에 끊겼다 다시 열어도 이어받는 효과가 난다.
-          return Promise.all(m.files.map(function (f) {
-            return cache.match(absolute(f.u)).then(function (hit) { return hit ? null : f; });
-          })).then(function (checked) {
-            var queue = checked.filter(Boolean);
-            state.have = m.files.length - queue.length;
-            state.haveBytes = m.bytes - queue.reduce(function (s, f) { return s + f.b; }, 0);
-            emit(onProgress);
+    return survey().then(function (s) {
+      if (!s.supported) throw new Error('no-sw');
+      var cache = s.cache, m = s.manifest;
+      var rec = record();
+      var have = rec.have || {};
 
-            var next = 0;
-            function worker() {
-              if (next >= queue.length) return Promise.resolve();
-              var f = queue[next++];
-              return fetch(absolute(f.u), { cache: 'no-store' })
-                .then(function (res) {
-                  if (!res.ok || res.status !== 200) throw new Error(res.status);
-                  return cache.put(absolute(f.u), res);
-                })
-                .then(function () {
-                  state.have++; state.haveBytes += f.b; emit(onProgress);
-                })
-                .catch(function () {
-                  state.failed++; emit(onProgress);
-                })
-                .then(worker);
-            }
+      // 목록에서 빠진 것부터 지운다 — 자리를 먼저 비워야 용량이 늘지 않는다.
+      return Promise.all(s._prune.map(function (req) {
+        return cache.delete(req).then(function () {
+          Object.keys(have).forEach(function (u) { if (absolute(u) === req.url) delete have[u]; });
+        });
+      })).then(function () {
+        var queue = s.todo.slice();
+        emit(onProgress);
 
-            var workers = [];
-            for (var i = 0; i < Math.min(CONCURRENCY, queue.length); i++) workers.push(worker());
-            return Promise.all(workers);
-          });
+        var next = 0;
+        function worker() {
+          if (next >= queue.length) return Promise.resolve();
+          var f = queue[next++];
+          // x-sg-refresh — 서비스워커의 미디어 cache-first 를 비켜 가라는 표식.
+          // 없으면 갱신하러 보낸 요청이 캐시의 옛 파일로 되돌아와, 옛 것을 제자리에
+          // 도로 넣게 된다(받기는 받았는데 내용은 그대로다).
+          return fetch(absolute(f.u), { cache: 'no-store', headers: { 'x-sg-refresh': '1' } })
+            .then(function (res) {
+              if (!res.ok || res.status !== 200) throw new Error(res.status);
+              return cache.put(absolute(f.u), res);
+            })
+            .then(function () {
+              have[f.u] = f.h;                       // 이 판본을 가졌다고 적는다
+              state.have++; state.haveBytes += f.b;
+              emit(onProgress);
+            })
+            .catch(function () {
+              state.failed++; emit(onProgress);
+            })
+            .then(worker);
+        }
+
+        var workers = [];
+        for (var i = 0; i < Math.min(CONCURRENCY, queue.length); i++) workers.push(worker());
+        return Promise.all(workers).then(function () {
+          state.done = state.failed === 0 && state.have === state.total;
+          // 전부 받았을 때만 rev 를 기록한다 — 반쪽짜리를 최신으로 적으면
+          // 다음 방문이 "받을 것 없음"으로 지나간다.
+          remember(state.done ? m.rev : (rec.rev || null), have);
         });
       });
     }).then(function () {
       state.running = false;
-      state.done = state.failed === 0 && state.have === state.total;
-      if (state.done) { try { localStorage.setItem(DONE_KEY, String(state.total)); } catch (e) {} }
       emit(onProgress);
       return state;
     }).catch(function (err) {
@@ -153,12 +220,17 @@
   }
 
   function emit(cb, err) {
-    if (cb) cb({
+    if (cb) cb(snapshot(err));
+  }
+
+  function snapshot(err) {
+    return {
       have: state.have, total: state.total,
       haveBytes: state.haveBytes, bytes: state.bytes,
+      fresh: state.fresh, stale: state.stale,
       running: state.running, done: state.done, failed: state.failed,
-      error: err || null,
-    });
+      update: state.update, error: err || null,
+    };
   }
 
   // ── 진행 표시 ───────────────────────────────────────────────
@@ -186,6 +258,7 @@
   }
 
   function mb(n) { return (n / 1e6).toFixed(1) + ' MB'; }
+  function bi(en, ko) { return '<span data-en>' + en + '</span><span data-ko>' + ko + '</span>'; }
 
   function paint(p) {
     var box = ui();
@@ -197,65 +270,79 @@
     var title = box.querySelector('.sg-prep-title');
     var sub = box.querySelector('.sg-prep-sub');
     var go = box.querySelector('.sg-prep-go');
+    var left = p.total - p.have;
 
     if (p.done) {
-      title.innerHTML = '<span data-en>Ready for offline</span><span data-ko>오프라인 준비 완료</span>';
-      sub.innerHTML = '<span data-en>All ' + p.total + ' audio files are on this device. Wi-Fi is no longer needed.</span>' +
-                      '<span data-ko>오디오 ' + p.total + '개가 이 기기에 있습니다. 이제 와이파이가 없어도 됩니다.</span>';
+      title.innerHTML = p.update
+        ? bi('Updated for offline', '오프라인 자료 업데이트 완료')
+        : bi('Ready for offline', '오프라인 준비 완료');
+      sub.innerHTML = bi(
+        'All ' + p.total + ' audio files are current on this device. Wi-Fi is no longer needed.',
+        '오디오 ' + p.total + '개가 최신 상태로 이 기기에 있습니다. 이제 와이파이가 없어도 됩니다.');
       go.hidden = true;
       setTimeout(hide, 4000);
       return;
     }
     if (p.running) {
-      title.innerHTML = '<span data-en>Preparing for offline</span><span data-ko>오프라인 준비 중</span>';
-      sub.innerHTML = '<span data-en>' + p.have + ' of ' + p.total + ' audio files · ' + mb(p.haveBytes) + ' of ' + mb(p.bytes) + '</span>' +
-                      '<span data-ko>오디오 ' + p.have + ' / ' + p.total + '개 · ' + mb(p.haveBytes) + ' / ' + mb(p.bytes) + '</span>';
+      title.innerHTML = p.update
+        ? bi('Updating offline files', '오프라인 자료 업데이트 중')
+        : bi('Preparing for offline', '오프라인 준비 중');
+      sub.innerHTML = bi(
+        p.have + ' of ' + p.total + ' audio files · ' + mb(p.haveBytes) + ' of ' + mb(p.bytes),
+        '오디오 ' + p.have + ' / ' + p.total + '개 · ' + mb(p.haveBytes) + ' / ' + mb(p.bytes));
       go.hidden = true;
       return;
     }
-    // 멈춰 있다 — 오프라인이거나, 데이터 절약 중이거나, 실패했다.
-    title.innerHTML = '<span data-en>Offline files not ready</span><span data-ko>오프라인 파일 미완료</span>';
-    sub.innerHTML = '<span data-en>' + (p.total - p.have) + ' audio files are missing. Listening will be silent without Wi-Fi.</span>' +
-                    '<span data-ko>오디오 ' + (p.total - p.have) + '개가 없습니다. 와이파이 없이는 리스닝이 무음입니다.</span>';
+
+    // 멈춰 있다 — 오프라인이거나, 데이터 절약 중이거나, 시험 화면이거나, 실패했다.
+    if (p.stale && !p.fresh) {
+      title.innerHTML = bi('Updated audio available', '수정된 오디오가 있습니다');
+      sub.innerHTML = bi(
+        p.stale + ' file' + (p.stale > 1 ? 's have' : ' has') + ' changed on the server. This device still has the old version.',
+        '서버에서 ' + p.stale + '개가 바뀌었습니다. 이 기기에는 아직 옛 파일이 있습니다.');
+    } else {
+      title.innerHTML = bi('Offline files not ready', '오프라인 파일 미완료');
+      sub.innerHTML = bi(
+        left + ' audio files are missing. Listening will be silent without Wi-Fi.',
+        '오디오 ' + left + '개가 없습니다. 와이파이 없이는 리스닝이 무음입니다.');
+    }
     go.hidden = false;
-    go.innerHTML = '<span data-en>Download now (' + mb(p.bytes - p.haveBytes) + ')</span>' +
-                   '<span data-ko>지금 받기 (' + mb(p.bytes - p.haveBytes) + ')</span>';
-    go.onclick = function () { download(paint).catch(function () {}); };
+    go.innerHTML = bi('Download now (' + mb(p.bytes - p.haveBytes) + ')',
+                      '지금 받기 (' + mb(p.bytes - p.haveBytes) + ')');
+    go.onclick = function () { sync(paint).catch(function () {}); };
   }
 
   function hide() { if (el) el.classList.remove('on'); }
 
   // ── 자동 실행 ───────────────────────────────────────────────
-  // 주소를 열면 그만이다. 없으면 받고, 있으면 아무 일도 일어나지 않는다.
+  // 주소를 열면 그만이다. 없으면 받고, 바뀌었으면 바뀐 것만 받고, 최신이면 아무 일도
+  // 일어나지 않는다.
   function auto() {
-    status().then(function (s) {
+    survey().then(function (s) {
       if (!s.supported) return;      // 서비스워커가 없으면 오프라인 자체가 성립하지 않는다.
-      if (s.ready) return;           // 이미 다 있다 — 화면에 아무것도 띄우지 않는다.
+      if (s.ready && !s.prune) return;   // 최신이다 — 화면에 아무것도 띄우지 않는다.
 
       // 시험 화면 — 받지는 않고, 무엇이 빠졌는지만 알린다. 감독관이 보고 판단할 몫이다.
       if (MODE === 'check') { paint(snapshot()); return; }
-
-      var conn = navigator.connection || {};
       if (!navigator.onLine) { paint(snapshot()); return; }
-      // 데이터 절약 모드·종량제 회선에서 25 MB 를 말없이 당기지 않는다. 버튼만 보여준다.
-      if (conn.saveData) { paint(snapshot()); return; }
+      // 데이터 절약 모드·종량제 회선에서 말없이 당기지 않는다. 버튼만 보여준다.
+      if ((navigator.connection || {}).saveData) { paint(snapshot()); return; }
 
-      download(paint).catch(function () { paint(snapshot()); });
+      sync(paint).catch(function () { paint(snapshot()); });
     }).catch(function () { /* 목록을 못 읽으면 조용히 넘어간다 */ });
   }
 
-  function snapshot() {
-    return {
-      have: state.have, total: state.total,
-      haveBytes: state.haveBytes, bytes: state.bytes,
-      running: state.running, done: state.done, failed: state.failed,
-    };
-  }
+  // 회선이 돌아오면 다시 본다 — 오프라인으로 열었다가 와이파이에 붙는 흔한 경우.
+  window.addEventListener('online', function () {
+    if (MODE === 'check' || state.running) return;
+    auto();
+  });
 
   window.SG_OFFLINE = {
     status: status,
-    download: function () { return download(paint); },
-    show: function () { return status().then(function () { paint(snapshot()); }); },
+    download: function () { return sync(paint); },
+    check: function () { return status(); },
+    show: function () { return survey().then(function () { paint(snapshot()); }); },
   };
 
   if (document.readyState === 'loading') {

@@ -1,376 +1,469 @@
 {
  "set": "SET9",
  "label": "NEW TOEFL SET 9",
+ "rev": "bf17ad624d41",
  "count": 92,
  "bytes": 24644163,
  "files": [
   {
    "u": "media/audio/set9/l1-q01.mp3",
-   "b": 30973
+   "b": 30973,
+   "h": "2327bb15583b"
   },
   {
    "u": "media/audio/set9/l1-q02.mp3",
-   "b": 35152
+   "b": 35152,
+   "h": "ce26ab4808ef"
   },
   {
    "u": "media/audio/set9/l1-q03.mp3",
-   "b": 61902
+   "b": 61902,
+   "h": "286ead190ea7"
   },
   {
    "u": "media/audio/set9/l1-q04.mp3",
-   "b": 39750
+   "b": 39750,
+   "h": "c42e65d68a40"
   },
   {
    "u": "media/audio/set9/l1-q05.mp3",
-   "b": 43511
+   "b": 43511,
+   "h": "9437f45e58c8"
   },
   {
    "u": "media/audio/set9/l1-q06.mp3",
-   "b": 38914
+   "b": 38914,
+   "h": "28ab6d99f436"
   },
   {
    "u": "media/audio/set9/l1-q07.mp3",
-   "b": 54378
+   "b": 54378,
+   "h": "57ab63145b4d"
   },
   {
    "u": "media/audio/set9/l1-q08.mp3",
-   "b": 35152
+   "b": 35152,
+   "h": "ab40ef292365"
   },
   {
    "u": "media/audio/set9/l1-q09.mp3",
-   "b": 54378
+   "b": 54378,
+   "h": "6c19d7f029d8"
   },
   {
    "u": "media/audio/set9/l1-q10.mp3",
-   "b": 43511
+   "b": 43511,
+   "h": "a1259aef6b18"
   },
   {
    "u": "media/audio/set9/l1-q11.mp3",
-   "b": 28465
+   "b": 28465,
+   "h": "707c87bf1978"
   },
   {
    "u": "media/audio/set9/l1-q12.mp3",
-   "b": 61902
+   "b": 61902,
+   "h": "df64a8c05f34"
   },
   {
    "u": "media/audio/set9/l1-q13-14.mp3",
-   "b": 321223
+   "b": 321223,
+   "h": "d4a3157b7fca"
   },
   {
    "u": "media/audio/set9/l1-q15-16.mp3",
-   "b": 344501
+   "b": 344501,
+   "h": "ddc4c0fc7bee"
   },
   {
    "u": "media/audio/set9/l1-q17-18.mp3",
-   "b": 336403
+   "b": 336403,
+   "h": "3d8b759d5896"
   },
   {
    "u": "media/audio/set9/l1-q19-20.mp3",
-   "b": 382058
+   "b": 382058,
+   "h": "7b5c755be48e"
   },
   {
    "u": "media/audio/set9/l1-q21-22.mp3",
-   "b": 461888
+   "b": 461888,
+   "h": "0e02305f3daf"
   },
   {
    "u": "media/audio/set9/l1-q23-24.mp3",
-   "b": 905343
+   "b": 905343,
+   "h": "08563396e489"
   },
   {
    "u": "media/audio/set9/l1-q25-28.mp3",
-   "b": 1277723
+   "b": 1277723,
+   "h": "d6015d1b5992"
   },
   {
    "u": "media/audio/set9/l1-q29-32.mp3",
-   "b": 1150831
+   "b": 1150831,
+   "h": "e644199f5ddc"
   },
   {
    "u": "media/audio/set9/l2-q01.mp3",
-   "b": 44347
+   "b": 44347,
+   "h": "5f867245651c"
   },
   {
    "u": "media/audio/set9/l2-q02.mp3",
-   "b": 35988
+   "b": 35988,
+   "h": "950cb034e0fd"
   },
   {
    "u": "media/audio/set9/l2-q03.mp3",
-   "b": 44347
+   "b": 44347,
+   "h": "9766bf721494"
   },
   {
    "u": "media/audio/set9/s1-instructions.mp3",
-   "b": 160958
+   "b": 160958,
+   "h": "e2d577c10323"
   },
   {
    "u": "media/audio/set9/s1-q1.mp3",
-   "b": 49363
+   "b": 49363,
+   "h": "700243a5f851"
   },
   {
    "u": "media/audio/set9/s1-q2.mp3",
-   "b": 44765
+   "b": 44765,
+   "h": "453ed0f0f8f9"
   },
   {
    "u": "media/audio/set9/s1-q3.mp3",
-   "b": 51453
+   "b": 51453,
+   "h": "6982908bcec3"
   },
   {
    "u": "media/audio/set9/s1-q4.mp3",
-   "b": 73186
+   "b": 73186,
+   "h": "d1adb029c7ea"
   },
   {
    "u": "media/audio/set9/s1-q5.mp3",
-   "b": 60648
+   "b": 60648,
+   "h": "85a9283d56d1"
   },
   {
    "u": "media/audio/set9/s1-q6.mp3",
-   "b": 84889
+   "b": 84889,
+   "h": "9e33d9be3926"
   },
   {
    "u": "media/audio/set9/s1-q7.mp3",
-   "b": 88651
+   "b": 88651,
+   "h": "d59cb3bf0a47"
   },
   {
    "u": "media/audio/set9/s2-instructions.mp3",
-   "b": 236608
+   "b": 236608,
+   "h": "40a9d19b6a20"
   },
   {
    "u": "media/audio/set9/s2-q1.mp3",
-   "b": 208187
+   "b": 208187,
+   "h": "7ccf22d3a367"
   },
   {
    "u": "media/audio/set9/s2-q2.mp3",
-   "b": 296795
+   "b": 296795,
+   "h": "e4900b235363"
   },
   {
    "u": "media/audio/set9/s2-q3.mp3",
-   "b": 140896
+   "b": 140896,
+   "h": "b47a1412e6f2"
   },
   {
    "u": "media/audio/set9/s2-q4.mp3",
-   "b": 100311
+   "b": 100311,
+   "h": "93a6173b500a"
   },
   {
    "u": "media/audio/set9/set9-L2-04-05.mp3",
-   "b": 941956
+   "b": 941956,
+   "h": "d1b58b232f59"
   },
   {
    "u": "media/audio/set9/set9-L2-06-07.mp3",
-   "b": 774397
+   "b": 774397,
+   "h": "88468848931c"
   },
   {
    "u": "media/audio/set9/set9-L2-08-11.mp3",
-   "b": 1769491
+   "b": 1769491,
+   "h": "5af04599d347"
   },
   {
    "u": "media/audio/set9/set9-L2-12-15.mp3",
-   "b": 1557252
+   "b": 1557252,
+   "h": "cabd0c5949d9"
   },
   {
    "u": "media/pictures/set9/l1-q1-12-speaker-a.webp",
-   "b": 38456
+   "b": 38456,
+   "h": "1b54f70ab655"
   },
   {
    "u": "media/pictures/set9/l1-q1-12-speaker-b.webp",
-   "b": 29154
+   "b": 29154,
+   "h": "f821d3ad532b"
   },
   {
    "u": "media/pictures/set9/l1-q1-12-speaker-c.webp",
-   "b": 49858
+   "b": 49858,
+   "h": "f113d0ee6310"
   },
   {
    "u": "media/pictures/set9/l1-q1-12-speaker-d.webp",
-   "b": 67288
+   "b": 67288,
+   "h": "afb252829de6"
   },
   {
    "u": "media/pictures/set9/l1-q1-12-speaker-e.webp",
-   "b": 67076
+   "b": 67076,
+   "h": "708d1ebec3f9"
   },
   {
    "u": "media/pictures/set9/l1-q1-12-speaker-f.webp",
-   "b": 34586
+   "b": 34586,
+   "h": "b2f10842b53e"
   },
   {
    "u": "media/pictures/set9/l2-q12-15-talk.webp",
-   "b": 49858
+   "b": 49858,
+   "h": "f113d0ee6310"
   },
   {
    "u": "media/pictures/set9/l2-q4-5-conversation.webp",
-   "b": 49380
+   "b": 49380,
+   "h": "522171776930"
   },
   {
    "u": "media/pictures/set9/l2-q6-7-conversation.webp",
-   "b": 27576
+   "b": 27576,
+   "h": "2817fd07b520"
   },
   {
    "u": "media/pictures/set9/l2-q8-11-talk.webp",
-   "b": 67076
+   "b": 67076,
+   "h": "708d1ebec3f9"
   },
   {
    "u": "media/pictures/set9/s-task1-repeat-1.png",
-   "b": 443515
+   "b": 443515,
+   "h": "4a790fcc350d"
   },
   {
    "u": "media/pictures/set9/s-task1-repeat-2.png",
-   "b": 453630
+   "b": 453630,
+   "h": "d50e9a8103f2"
   },
   {
    "u": "media/pictures/set9/s-task1-repeat-3.png",
-   "b": 456121
+   "b": 456121,
+   "h": "12d2746bbc49"
   },
   {
    "u": "media/pictures/set9/s-task1-repeat-4.png",
-   "b": 423254
+   "b": 423254,
+   "h": "aa40c96e631f"
   },
   {
    "u": "media/pictures/set9/s-task1-repeat-5.png",
-   "b": 441568
+   "b": 441568,
+   "h": "b97bce745579"
   },
   {
    "u": "media/pictures/set9/s-task1-repeat-6.png",
-   "b": 458631
+   "b": 458631,
+   "h": "2b032533f7eb"
   },
   {
    "u": "media/pictures/set9/s-task1-repeat-7.png",
-   "b": 477331
+   "b": 477331,
+   "h": "e4e5a784a50d"
   },
   {
    "u": "media/pictures/set9/s-task2-interviewer.webp",
-   "b": 67076
+   "b": 67076,
+   "h": "708d1ebec3f9"
   },
   {
    "u": "media/tts/set9-M1-ann-19-20.mp3",
-   "b": 394179
+   "b": 394179,
+   "h": "ff86f86b47a5"
   },
   {
    "u": "media/tts/set9-M1-ann-21-22.mp3",
-   "b": 442244
+   "b": 442244,
+   "h": "6a1be602d173"
   },
   {
    "u": "media/tts/set9-M1-ann-23-24.mp3",
-   "b": 940870
+   "b": 940870,
+   "h": "675062db1178"
   },
   {
    "u": "media/tts/set9-M1-ann-25-28.mp3",
-   "b": 2125366
+   "b": 2125366,
+   "h": "ce877cb88557"
   },
   {
    "u": "media/tts/set9-M1-ann-29-32.mp3",
-   "b": 1787237
+   "b": 1787237,
+   "h": "0037f67d0880"
   },
   {
    "u": "media/tts/set9-M1-conv-13-14.mp3",
-   "b": 329044
+   "b": 329044,
+   "h": "e734c6f370d9"
   },
   {
    "u": "media/tts/set9-M1-conv-15-16.mp3",
-   "b": 351541
+   "b": 351541,
+   "h": "c0a9a9c8e82e"
   },
   {
    "u": "media/tts/set9-M1-conv-17-18.mp3",
-   "b": 337390
+   "b": 337390,
+   "h": "d0a917f838bf"
   },
   {
    "u": "media/tts/set9-M1-sr-01.mp3",
-   "b": 33898
+   "b": 33898,
+   "h": "5d39e0014bb8"
   },
   {
    "u": "media/tts/set9-M1-sr-02.mp3",
-   "b": 35152
+   "b": 35152,
+   "h": "26b750accb89"
   },
   {
    "u": "media/tts/set9-M1-sr-03.mp3",
-   "b": 61902
+   "b": 61902,
+   "h": "959601c16013"
   },
   {
    "u": "media/tts/set9-M1-sr-04.mp3",
-   "b": 40586
+   "b": 40586,
+   "h": "b3f9adf3871b"
   },
   {
    "u": "media/tts/set9-M1-sr-05.mp3",
-   "b": 43511
+   "b": 43511,
+   "h": "3573ce17b342"
   },
   {
    "u": "media/tts/set9-M1-sr-06.mp3",
-   "b": 38078
+   "b": 38078,
+   "h": "8bd643ea1cb7"
   },
   {
    "u": "media/tts/set9-M1-sr-07.mp3",
-   "b": 53960
+   "b": 53960,
+   "h": "3acfbec91330"
   },
   {
    "u": "media/tts/set9-M1-sr-08.mp3",
-   "b": 38078
+   "b": 38078,
+   "h": "3de79de5a852"
   },
   {
    "u": "media/tts/set9-M1-sr-09.mp3",
-   "b": 56886
+   "b": 56886,
+   "h": "123efdded9ae"
   },
   {
    "u": "media/tts/set9-M1-sr-10.mp3",
-   "b": 43511
+   "b": 43511,
+   "h": "7248b9b0278e"
   },
   {
    "u": "media/tts/set9-M1-sr-11.mp3",
-   "b": 27629
+   "b": 27629,
+   "h": "2113ebcca786"
   },
   {
    "u": "media/tts/set9-M1-sr-12.mp3",
-   "b": 67753
+   "b": 67753,
+   "h": "7e4e2ca7643f"
   },
   {
    "u": "media/tts/set9-M2-interview-01.mp3",
-   "b": 128775
+   "b": 128775,
+   "h": "65569c7ba675"
   },
   {
    "u": "media/tts/set9-M2-interview-02.mp3",
-   "b": 272971
+   "b": 272971,
+   "h": "a8cea97ff35f"
   },
   {
    "u": "media/tts/set9-M2-interview-03.mp3",
-   "b": 115400
+   "b": 115400,
+   "h": "9d56de883e45"
   },
   {
    "u": "media/tts/set9-M2-interview-04.mp3",
-   "b": 131283
+   "b": 131283,
+   "h": "bef810b84d76"
   },
   {
    "u": "media/tts/set9-M2-repeat-01.mp3",
-   "b": 48527
+   "b": 48527,
+   "h": "ce5225093abd"
   },
   {
    "u": "media/tts/set9-M2-repeat-02.mp3",
-   "b": 44765
+   "b": 44765,
+   "h": "0a7c3da064fb"
   },
   {
    "u": "media/tts/set9-M2-repeat-03.mp3",
-   "b": 51453
+   "b": 51453,
+   "h": "30e282bb8bc1"
   },
   {
    "u": "media/tts/set9-M2-repeat-04.mp3",
-   "b": 78202
+   "b": 78202,
+   "h": "7fb2144b1959"
   },
   {
    "u": "media/tts/set9-M2-repeat-05.mp3",
-   "b": 56050
+   "b": 56050,
+   "h": "de4ee0c98993"
   },
   {
    "u": "media/tts/set9-M2-repeat-06.mp3",
-   "b": 84471
+   "b": 84471,
+   "h": "a10ee9313f44"
   },
   {
    "u": "media/tts/set9-M2-repeat-07.mp3",
-   "b": 82799
+   "b": 82799,
+   "h": "e4563265113d"
   },
   {
    "u": "media/tts/set9-M2-sr-01.mp3",
-   "b": 44347
+   "b": 44347,
+   "h": "9eb71618f67e"
   },
   {
    "u": "media/tts/set9-M2-sr-02.mp3",
-   "b": 38078
+   "b": 38078,
+   "h": "f948b3adf753"
   },
   {
    "u": "media/tts/set9-M2-sr-03.mp3",
-   "b": 44347
+   "b": 44347,
+   "h": "ee29cd982794"
   }
  ]
 }
