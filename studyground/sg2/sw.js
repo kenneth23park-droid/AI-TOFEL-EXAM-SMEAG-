@@ -100,7 +100,11 @@
 //      admin-teachers.html(선생님 계정 만들기 · 담당 배정)이 추가됐다. sg-auth.js ·
 //      admin-results.html · app.css 가 함께 바뀌어, 캐시된 옛 가입 폼이 남으면
 //      담당 없이 등록됐다가 서버가 되돌려보낸다. 그래서 판올림한다.
-const VERSION = 'sg-v36';
+// v37: 시험 중 Exit 은 관리자 승인이 있어야 열린다 — exam-shell.js 가 Exit 모달에
+//      관리자 아이디·비밀번호 칸을 세우고 admin-session.js 의 verify() 로 확인한다
+//      (세션은 만들지 않는다). exam.css 도 함께 바뀌므로, 캐시된 옛 셸이 남으면
+//      학생이 그냥 나갈 수 있다. 그래서 판올림한다.
+const VERSION = 'sg-v37';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
