@@ -22,7 +22,6 @@
       <a href="dashboard.html" class="on">📊 <span data-en>My MockTest</span><span data-ko>내 성적</span></a>
     </nav>
     <div class="nav-right">
-      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
       <a class="btn ghost sm" href="login.html"><span data-en>Login</span><span data-ko>로그인</span></a>
     </div>
   </div>
@@ -410,7 +409,9 @@
             bi('Generate', '생성') + '</button>'
         : '<span class="muted" style="font-size:12.5px">' +
             bi('No AI key is configured on the server yet.', '서버에 AI 키가 아직 설정되지 않았습니다.') + '</span>') +
-      '<span class="muted" id="ai-say" style="font-size:12px;margin-left:auto"></span>';
+      '<span class="muted" id="ai-say" style="font-size:12px;margin-left:auto"></span>' +
+      // AI 초안을 확정하기 직전이 "왜 이 점수인가"를 가장 많이 묻는 자리다.
+      '<a class="btn ghost sm" href="scoring-guide.html">' + bi('How we score', '채점 근거') + '</a>';
     bar.classList.remove('hide');
     if (!ready) return;
 

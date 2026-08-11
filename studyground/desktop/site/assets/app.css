@@ -274,9 +274,8 @@ h2.title { font-size: clamp(24px, 3vw, 34px); font-weight: 820; letter-spacing: 
 .mt-8 { margin-top: 8px; } .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; }
 .mt-40 { margin-top: 40px; } .mb-8 { margin-bottom: 8px; } .mb-24 { margin-bottom: 24px; }
 .muted { color: var(--muted); } .hide { display: none !important; }
-[data-ko] { display: none; }
-html[lang="ko"] [data-en] { display: none; }
-html[lang="ko"] [data-ko] { display: revert; }
+/* Korean copy is retired — the KO toggle is gone, so [data-ko] never shows. */
+[data-ko] { display: none !important; }
 
 /* responsive */
 @media (max-width: 940px) {

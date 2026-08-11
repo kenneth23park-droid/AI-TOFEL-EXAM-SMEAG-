@@ -34,7 +34,6 @@
   <div class="nav-in">
     <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Learn · Practice · Test · Repeat</small></span></a>
     <div class="nav-right" style="margin-left:auto">
-      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
       <a class="btn brand sm" href="signup.html"><span data-en>Sign Up Free</span><span data-ko>무료 가입</span></a>
     </div>
   </div>
@@ -127,9 +126,6 @@
   if (RT && RT.bound()) {
     seatLine();
     setInterval(function () { RT.refresh(); seatLine(); }, 20000);
-    document.addEventListener('click', function (e) {
-      if (e.target.closest('.lang button')) setTimeout(seatLine, 0);
-    });
   }
 
   function show(en, ko) {

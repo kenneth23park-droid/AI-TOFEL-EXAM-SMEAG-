@@ -44,7 +44,6 @@
   <div class="nav-in">
     <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Exam room setup</small></span></a>
     <div class="nav-right">
-      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
       <a class="btn ghost sm" href="admin-seats.html"><span data-en>Seat board</span><span data-ko>좌석 보드</span></a>
     </div>
   </div>
@@ -143,9 +142,6 @@
   document.getElementById('change').addEventListener('click', function () {
     S.bind(0);
     render();
-  });
-  document.addEventListener('click', function (e) {
-    if (e.target.closest('.lang button')) setTimeout(render, 0);   // 언어를 바꾸면 문구도 다시 그린다
   });
 
   render();
