@@ -13,8 +13,11 @@
  *
  * 노출 전역: window.SG_AUTH
  *   SG_AUTH.nextId(examDate)     → Promise<{student_id, used, free}>  빈 아이디 미리보기
- *   SG_AUTH.register({ name, examDate, studentId?, force? })
+ *   SG_AUTH.teachers()           → Promise<[{id, name, student_id}]>  가입 화면 드롭다운용
+ *   SG_AUTH.register({ name, email, examDate, teacherId, studentId?, force? })
  *                                → Promise<{user, student_id, password, exam_date}>
+ *   SG_AUTH.createTeacher({ name, login, password?, email?, role? })
+ *                                → Promise<{user, login, password}>  관리자만
  *   SG_AUTH.signIn(login, password)                      → Promise<user>
  *   SG_AUTH.signOut()            현재 기기의 세션만 지운다
  *   SG_AUTH.user()               로그인 상태면 프로필 객체, 아니면 null
@@ -82,8 +85,16 @@ window.SG_AUTH = (function () {
     return fn({ action: 'next_id', exam_date: examDate || '' });
   }
 
-  /* 가입 입력은 이름 + 이메일 + 시험일자. 아이디(smeag000~999)는 서버가 배정하고
-   * 비밀번호는 2222 로 통일돼 있어 학생이 정할 것이 없다.
+  /* 담당 선생님 목록. 가입 화면은 로그인 전이라 sg_profiles 를 직접 못 읽는다(RLS) —
+   * 서버가 이름만 추려서 내려 준다. 선생님이 하나도 없으면 빈 배열이다. */
+  function teachers() {
+    return fn({ action: 'teachers' }).then(function (j) { return (j && j.teachers) || []; });
+  }
+
+  /* 가입 입력은 이름 + 이메일 + 시험일자 + 담당 선생님. 아이디(smeag000~999)는 서버가
+   * 배정하고 비밀번호는 2222 로 통일돼 있어 학생이 정할 것이 없다.
+   * 담당 선생님은 그 학생의 답안을 누가 볼 수 있는지를 정한다 — 서버가 값을 확인해
+   * sg_profiles.teacher_id 에 박고, 그 뒤로는 RLS 가 열람 범위를 쥔다.
    * 같은 시험일에 같은 이메일은 409 email_taken_today 로 막힌다(force 로도 못 넘는다).
    * 같은 시험일에 같은 이름이 이미 있으면 409 same_name_today 로 되돌아온다 —
    * 화면이 팝업으로 묻고, 그대로 진행하려면 { force: true } 로 다시 부른다. */
@@ -93,11 +104,29 @@ window.SG_AUTH = (function () {
       name: o.name || '',
       email: o.email || '',
       exam_date: o.examDate || '',
+      teacher_id: o.teacherId || '',
       student_id: o.studentId || '',
       force: o.force === true
     }).then(function (j) {
       store(j);
-      return j;                     // { user, student_id, password, exam_date }
+      return j;                     // { user, student_id, password, exam_date, teacher }
+    });
+  }
+
+  /* 선생님 계정 만들기. 관리자만 통과한다 — 화면이 아니라 서버가 내 토큰을 되짚어
+   * role 을 다시 확인하므로, 이 함수를 콘솔에서 부른다고 되는 일이 아니다.
+   * 만들어진 계정의 로그인 아이디는 login (예: kevin) 그대로다. */
+  function createTeacher(o) {
+    return token().then(function (tok) {
+      return fn({
+        action: 'create_staff',
+        token: tok || '',
+        name: o.name || '',
+        login: o.login || '',
+        password: o.password || '',
+        email: o.email || '',
+        role: o.role || 'teacher'
+      });
     });
   }
 
@@ -142,7 +171,7 @@ window.SG_AUTH = (function () {
    * role 이 늦게 생겼거나, 관리자가 나중에 선생님으로 올렸을 수 있기 때문이다.
    * 그래서 필요할 때 서버 사본으로 한 번 채우고 로컬에 그대로 붙여 둔다.
    * 오프라인이면 들고 있던 값을 그대로 돌려준다 — 시험은 멈추지 않는다. */
-  var PROFILE_COLS = 'id,email,name,student_id,plan,role,is_admin,verified';
+  var PROFILE_COLS = 'id,email,name,student_id,plan,role,is_admin,verified,teacher_id';
   function profile(force) {
     var s = read();
     if (!s || !s.user) return Promise.resolve(null);
@@ -207,8 +236,22 @@ window.SG_AUTH = (function () {
 
   function onChange(f) { listeners.push(f); return function () { listeners = listeners.filter(function (x) { return x !== f; }); }; }
 
-  /* 헤더의 Login / Sign Up Free 버튼을, 로그인 상태면 이름 + 로그아웃으로 바꾼다.
+  /* 화면에 세울 로그인 아이디. 프로필의 student_id 가 정답이고, 그게 비어 있던
+   * 옛 계정은 이메일 앞자리에서 smeag### 를 줍는다. 선생님 계정은 아이디가 곧
+   * 이메일 앞자리(kevin@smeagstudyground.com → kevin)다. */
+  function loginLabel(u) {
+    if (!u) return '';
+    if (u.student_id) return u.student_id;
+    var mail = String(u.email || '').toLowerCase();
+    var m = /^(smeag\d{3})/.exec(mail);
+    return m ? m[1] : mail.split('@')[0] || mail;
+  }
+
+  /* 헤더의 Login / Sign Up Free 버튼을, 로그인 상태면 이름 + 아이디 + 로그아웃으로
+   * 바꾼다. 아이디까지 세우는 이유는 고사장 사고 하나 때문이다 — 앞사람이 로그아웃
+   * 하지 않은 자리에서 그대로 시험을 시작하면, 이름만 봐서는 아무도 못 알아챈다.
    * 페이지마다 같은 마크업이라 여기서 한 번에 처리한다. */
+  var idFetched = false;
   function paintNav() {
     var right = document.querySelector('.nav-right');
     if (!right) return;
@@ -239,7 +282,32 @@ window.SG_AUTH = (function () {
       });
       right.appendChild(chip);
     }
-    chip.querySelector('[data-role=who]').textContent = '👤 ' + (u.name || u.student_id || u.email);
+    /* 이름과 아이디를 각각 다른 span 에 넣는다 — 폰처럼 좁은 화면에서는 이름을 접고
+       아이디만 남기려면(app.css) 둘이 나뉘어 있어야 한다. */
+    var who = chip.querySelector('[data-role=who]');
+    var id = loginLabel(u);
+    who.textContent = '👤 ';
+    who.title = u.name && id ? u.name + ' · ' + id : (u.name || id);
+    if (u.name) {
+      var nm = document.createElement('span');
+      nm.className = 'nav-user-name';
+      nm.textContent = u.name;
+      who.appendChild(nm);
+    }
+    if (id) {
+      var tail = document.createElement('span');
+      tail.className = 'nav-user-id';
+      if (u.name) tail.innerHTML = '<i class="nav-user-sep">·</i> ';
+      tail.appendChild(document.createTextNode(id));
+      who.appendChild(tail);
+    }
+
+    /* 기기에 저장된 프로필에 student_id 가 없던 옛 세션은 서버 사본으로 한 번 채운다.
+       실패하면(오프라인) 이메일에서 주운 값이 그대로 남는다 — 자리는 비지 않는다. */
+    if (!u.student_id && !idFetched) {
+      idFetched = true;
+      profile(true).then(function (p) { if (p && p.student_id) paintNav(); }, function () {});
+    }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -249,7 +317,8 @@ window.SG_AUTH = (function () {
   onChange(paintNav);
 
   return {
-    nextId: nextId, register: register, signIn: signIn, signOut: signOut,
+    nextId: nextId, teachers: teachers, register: register,
+    createTeacher: createTeacher, signIn: signIn, signOut: signOut,
     user: user, profile: profile, role: role, isStaff: isStaff,
     token: token, require: require_, onChange: onChange,
     url: URL_, anonKey: ANON

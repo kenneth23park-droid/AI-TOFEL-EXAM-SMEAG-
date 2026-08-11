@@ -62,6 +62,12 @@
           <input id="email" type="email" name="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com" required>
           <div class="auth-hint"><span data-en>You can log in with this email too. One registration per email per test date.</span>
             <span data-ko>이 이메일로도 로그인할 수 있습니다. 같은 시험일에는 이메일당 한 번만 등록됩니다.</span></div></div>
+        <div class="field" id="teacher-field" hidden><label data-en>Your teacher</label><label data-ko>담당 선생님</label>
+          <select id="teacher" name="teacher">
+            <option value=""></option>
+          </select>
+          <div class="auth-hint"><span data-en>Your teacher marks your writing and speaking, and sees only their own students.</span>
+            <span data-ko>담당 선생님이 라이팅·스피킹을 채점하며, 자기 학생만 볼 수 있습니다.</span></div></div>
         <div class="field"><label data-en>Test date</label><label data-ko>시험응시 일자</label>
           <input id="date" type="date" name="exam-date" required>
           <div class="auth-hint" id="avail"></div></div>
@@ -85,6 +91,7 @@
         <div class="pw"><span data-en>Password</span><span data-ko>비밀번호</span>: <b id="out-pw"></b></div>
         <div class="muted" style="font-size:12px;margin-top:4px" id="out-mail"></div>
         <div class="muted" style="font-size:12px" id="out-date"></div>
+        <div class="muted" style="font-size:12px" id="out-teacher"></div>
         <div id="out-qr"></div>
         <div class="muted no-print" style="font-size:11px;margin-top:8px" id="qr-note"></div>
       </div>
@@ -122,6 +129,7 @@
   var f = document.getElementById('f'), go = document.getElementById('go'), err = document.getElementById('err');
   var nameEl = document.getElementById('name'), dateEl = document.getElementById('date');
   var emailEl = document.getElementById('email');
+  var teacherEl = document.getElementById('teacher'), teacherField = document.getElementById('teacher-field');
   var avail = document.getElementById('avail');
   var dup = document.getElementById('dup');
 
@@ -152,6 +160,25 @@
   dateEl.addEventListener('change', refreshAvail);
   refreshAvail();
 
+  /* 담당 선생님 목록. 선생님 계정이 아직 하나도 없는 학원(첫 설치 직후)에서는
+   * 칸 자체를 그리지 않는다 — 고를 것이 없는 필수 항목은 가입을 막을 뿐이다. */
+  function fillTeachers() {
+    SG_AUTH.teachers().then(function (list) {
+      if (!list.length) return;                      // hidden 그대로 둔다
+      teacherEl.innerHTML = '<option value="" disabled selected>Choose your teacher</option>' +
+        list.map(function (t) {
+          var label = String(t.name || t.student_id || '');
+          return '<option value="' + t.id + '">' +
+            label.replace(/[&<>"]/g, function (c) {
+              return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+            }) + '</option>';
+        }).join('');
+      teacherEl.required = true;
+      teacherField.hidden = false;
+    }).catch(function () { /* 오프라인이면 서버가 다시 묻는다 */ });
+  }
+  fillTeachers();
+
   function done(res) {
     document.getElementById('step-form').hidden = true;
     document.getElementById('step-done').hidden = false;
@@ -160,6 +187,8 @@
     document.getElementById('out-pw').textContent = res.password || '2222';
     document.getElementById('out-mail').textContent = res.email || emailEl.value.trim();
     document.getElementById('out-date').textContent = res.exam_date;
+    document.getElementById('out-teacher').textContent =
+      res.teacher && res.teacher.name ? 'Teacher: ' + res.teacher.name : '';
 
     // QR 은 로그인 화면이 그대로 읽는 형식이다: SG2|아이디|시험일자
     var payload = 'SG2|' + res.student_id + '|' + res.exam_date;
@@ -205,6 +234,7 @@
       name: nameEl.value.trim(),
       email: emailEl.value.trim(),
       examDate: dateEl.value,
+      teacherId: teacherField.hidden ? '' : teacherEl.value,
       force: force
     })
       .then(function (res) { go.disabled = false; done(res); })

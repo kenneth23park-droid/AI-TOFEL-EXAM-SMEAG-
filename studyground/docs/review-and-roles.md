@@ -5,7 +5,7 @@
 | 사람 | 문 | 보이는 범위 |
 | --- | --- | --- |
 | 학생 | `dashboard.html` → **Review** | 자기 응시만 |
-| 선생님 | `admin-results.html` | 모든 학생 |
+| 선생님 | `admin-results.html` | **자기에게 배정된 학생만** |
 | 관리자 | `admin-results.html` | 모든 학생 |
 
 문항별 화면은 셋 다 같은 `review.html` 이다.
@@ -27,12 +27,31 @@
 남아 제출물만 그대로 보여 준다. 스피킹 녹음은 그 기기의 IndexedDB 에만 있으므로,
 응시한 기기에서 리뷰를 열었을 때만 재생기가 붙는다.
 
-## 선생님 계정 만들기
+## 선생님 계정과 담당 학생
 
-권한의 정본은 `sg_profiles.role` (`student` | `teacher` | `admin`) 이고, 실제 방어선은
-Supabase RLS 의 `sg_is_staff()` 다. 화면에서 막는 건 안내일 뿐이다.
+권한의 정본은 `sg_profiles.role` (`student` | `teacher` | `admin`) 이고, **누구를 볼 수
+있는가**의 정본은 `sg_profiles.teacher_id` 다. 실제 방어선은 Supabase RLS 의
+`sg_can_see(owner)` — 본인이거나, 관리자이거나, 그 학생의 담당 선생님일 때만 행이 나온다.
+화면에서 막는 건 안내일 뿐이다(`supabase/teacher_scope.sql`).
 
-`role` 은 본인이 못 바꾼다. 승격은 service_role(Supabase SQL 편집기)에서만 한다.
+### 만들기 — `admin-teachers.html`
+
+관리자로 로그인해 **관리자 홈 → 선생님과 담당 학생**으로 들어간다.
+
+- **선생님 계정 만들기**: 이름 · 로그인 아이디 · 비밀번호. 아이디가 곧 로그인이다
+  (`kevin` → 로그인 화면에 `kevin`, 내부 이메일은 `kevin@smeagstudyground.com`).
+  계정 생성과 `role='teacher'` 승격을 Edge Function `sg-auth` 가 한 번에 한다 —
+  호출자가 정말 관리자인지 서버가 토큰으로 다시 확인하므로 화면을 속여도 소용없다.
+- **담당 배정 바꾸기**: 학생 표의 드롭다운. 비우면(`— none —`) 관리자만 보게 된다.
+
+### 가입 화면의 드롭다운
+
+`signup.html` 은 로그인 전이라 `sg_profiles` 를 못 읽는다. 선생님 목록은 Edge Function
+(`action: "teachers"`)이 이름만 추려서 내려 준다. 선생님 계정이 하나라도 있으면 학생은
+반드시 하나를 골라야 하고(서버도 `missing_teacher` 로 되돌린다), 하나도 없으면 그 칸을
+아예 그리지 않는다 — 고를 것이 없는 필수 항목은 가입을 막을 뿐이다.
+
+### SQL 로 직접 손보기
 
 ```sql
 -- 선생님으로 올리기
@@ -41,6 +60,9 @@ update public.sg_profiles set role = 'teacher' where email = '<선생님 이메�
 -- 관리자로 올리기
 update public.sg_profiles set role = 'admin', is_admin = true where email = '<이메일>';
 
+-- 담당 배정
+update public.sg_profiles set teacher_id = '<선생님 uuid>' where student_id = 'smeag007';
+
 -- 되돌리기
 update public.sg_profiles set role = 'student', is_admin = false where email = '<이메일>';
 ```
@@ -48,10 +70,16 @@ update public.sg_profiles set role = 'student', is_admin = false where email = '
 바꾼 뒤에는 그 사람이 한 번 로그아웃했다 들어오거나 대시보드를 새로 고쳐야 한다 —
 `SG_AUTH` 가 프로필을 기기에 캐시해 두기 때문이다(`SG_AUTH.profile(true)` 로 강제 갱신).
 
+> 담당이 비어 있는(`teacher_id is null`) 학생은 관리자에게만 보인다. 기존 학생들은
+> 전부 이 상태이므로, 첫 배포 뒤에 `admin-teachers.html` 에서 한 번 배정해야 한다.
+
 ## 관련 파일
 
 - `sg2/assets/sg-results.js` — 채점 · 목록 · 업로드
-- `sg2/assets/sg-auth.js` — `role()` · `isStaff()`
+- `sg2/assets/sg-auth.js` — `role()` · `isStaff()` · `teachers()` · `createTeacher()`
+- `sg2/admin-teachers.html` — 선생님 계정 · 담당 배정 (관리자 전용)
+- `supabase/teacher_scope.sql` — `teacher_id` · `sg_can_see()` · 정책
+- `supabase/functions/sg-auth/index.ts` — 가입 · 로그인 · 선생님 계정 생성
 - `sg2/review.html` · `sg2/admin-results.html` · `sg2/dashboard.html`
 - `sg2/assets/exam-shell.js` — 제출 직후 채점 · 업로드 · 리뷰 안내
 
@@ -63,7 +91,7 @@ update public.sg_profiles set role = 'student', is_admin = false where email = '
 - 대상은 `scope` + `question_id` 로 정한다 — `overall`(전체 총평) · 영역명(`reading` 등) ·
   `question`(문항별, `question_id` 필수).
 - 같은 대상·같은 출처는 한 벌뿐이다. 다시 쓰면 덮어쓴다(선생님은 고쳐 쓰고, AI 는 다시 돌린다).
-- RLS: 읽기는 답안지 주인 + staff, 쓰기·삭제는 staff 전용.
+- RLS: 읽기는 답안지 주인 + 그를 볼 수 있는 사람(`sg_can_see`), 쓰기·삭제는 그중 staff 만.
 - **학생 화면에는 편집 장치가 아예 그려지지 않는다** — 숨기는 게 아니라 DOM 에 넣지 않는다.
 
 ### AI 코멘트 (`/api/feedback`)

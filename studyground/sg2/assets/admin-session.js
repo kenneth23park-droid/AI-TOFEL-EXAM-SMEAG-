@@ -105,6 +105,15 @@
     return t ? 'set1' : '';
   }
 
+  /** 아이디·비밀번호가 맞는 계정. 없으면 null. 세션은 건드리지 않는다. */
+  function find(id, pw) {
+    var u = String(id || '').trim().toLowerCase(), p = String(pw || '');
+    for (var i = 0; i < ACCOUNTS.length; i++) {
+      if (ACCOUNTS[i].id === u && ACCOUNTS[i].pw === p) return ACCOUNTS[i];
+    }
+    return null;
+  }
+
   var API = {
     SETS: SETS,
     TTL_MS: TTL_MS,
@@ -135,15 +144,19 @@
     blockedByStudent: studentSignedIn,
 
     login: function (id, pw) {
-      var u = String(id || '').trim().toLowerCase(), p = String(pw || '');
-      for (var i = 0; i < ACCOUNTS.length; i++) {
-        var a = ACCOUNTS[i];
-        if (a.id === u && a.pw === p) {
-          save({ id: a.id, label: a.label, labelKo: a.labelKo, sets: a.sets.slice(), t: Date.now() });
-          return true;
-        }
-      }
-      return false;
+      var a = find(id, pw);
+      if (!a) return false;
+      save({ id: a.id, label: a.label, labelKo: a.labelKo, sets: a.sets.slice(), t: Date.now() });
+      return true;
+    },
+
+    /* 세션을 만들지 않고 계정만 확인한다 — 시험 중 Exit 승인처럼 "관리자가 그 자리에
+     * 있다"만 보고 싶을 때 쓴다. 학생 기기에 12시간짜리 관리자 세션을 남기지 않는다. */
+    verify: function (id, pw, setId) {
+      var a = find(id, pw);
+      if (!a) return null;
+      if (a.sets.indexOf('*') < 0 && setId && a.sets.indexOf(String(setId).toLowerCase()) < 0) return null;
+      return { id: a.id, label: a.label, labelKo: a.labelKo, sets: a.sets.slice() };
     },
     logout: function () { save(null); },
     onChange: function (fn) { if (typeof fn === 'function') listeners.push(fn); },

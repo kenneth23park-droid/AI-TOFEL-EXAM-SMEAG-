@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<!--
+  admin-teachers.html — 선생님 계정과 담당 학생.
+
+  두 가지를 한 화면에서 한다.
+    1) 선생님 계정 만들기 — 예전엔 Supabase SQL 편집기에서 role 을 손으로 올렸다.
+    2) 학생의 담당 선생님 배정·변경 — 가입 때 고른 값을 나중에 고칠 자리.
+
+  담당은 장식이 아니라 열람 범위다. sg_profiles.teacher_id 가 가리키는 선생님만
+  그 학생의 응시·녹음·코멘트를 볼 수 있다(RLS 의 sg_can_see, supabase/teacher_scope.sql).
+  그래서 이 화면 자체가 관리자 전용이고, 관리자가 아닌 계정은 표가 아예 비어 온다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/gate.js"></script>
+<title>Teachers · MockTest</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .two { display:grid; gap:16px; grid-template-columns:1fr; }
+  @media (min-width:900px) { .two { grid-template-columns:340px 1fr; align-items:start; } }
+  .msg { display:none; font-size:13px; font-weight:700; border-radius:10px; padding:10px 12px; margin-bottom:12px; }
+  .msg.on { display:block; }
+  .msg.bad { color:#b3261e; background:#fdeceb; border:1px solid #f5c6c2; }
+  .msg.ok  { color:#1f6f45; background:#e7f6ec; border:1px solid #bfe4cd; }
+  .rv-table select { padding:7px 10px; border:1px solid var(--line-2); border-radius:9px;
+    font-family:inherit; font-size:13px; background:#fff; max-width:190px; }
+  .made { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Admin</small></span></a>
+    <div class="nav-right">
+      <a class="btn ghost sm" href="admin.html"><span data-en>Admin home</span><span data-ko>관리자 홈</span></a>
+      <a class="btn ghost sm" href="admin-results.html"><span data-en>Results</span><span data-ko>응시 결과</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:60px">
+  <div class="page-h mt-24">
+    <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Teachers &amp; their students</span><span data-ko>선생님과 담당 학생</span></h1>
+    <p class="sub"><span data-en>A teacher sees only the students assigned to them — results, recordings and comments alike. Admins see everyone.</span>
+      <span data-ko>선생님은 자기에게 배정된 학생만 봅니다 — 성적도, 녹음도, 코멘트도. 관리자는 전부 봅니다.</span></p>
+  </div>
+
+  <div class="card mt-16 hide" id="notice"></div>
+
+  <div class="two mt-16 hide" id="body">
+
+    <!-- 왼쪽: 계정 만들기 -->
+    <section class="card">
+      <h2 style="font-size:16px;font-weight:850"><span data-en>New teacher account</span><span data-ko>선생님 계정 만들기</span></h2>
+      <p class="muted mt-8" style="font-size:12.5px"><span data-en>The teacher logs in with this ID — no email needed.</span>
+        <span data-ko>선생님은 이 아이디로 로그인합니다. 이메일은 필요 없습니다.</span></p>
+
+      <div class="msg bad" id="f-err"></div>
+      <div class="msg ok"  id="f-ok"></div>
+
+      <form id="f" class="mt-16" autocomplete="off">
+        <div class="field"><label data-en>Name</label><label data-ko>이름</label>
+          <input id="t-name" type="text" placeholder="Kevin Park" required></div>
+        <div class="field"><label data-en>Login ID</label><label data-ko>로그인 아이디</label>
+          <input id="t-login" type="text" autocapitalize="none" spellcheck="false" placeholder="kevin" required></div>
+        <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
+          <input id="t-pw" type="text" value="smeag2222" required></div>
+        <div class="field"><label data-en>Contact email (optional)</label><label data-ko>연락용 이메일 (선택)</label>
+          <input id="t-mail" type="email" autocapitalize="none" spellcheck="false" placeholder="kevin@smeag.com"></div>
+        <button class="btn brand block" id="go" type="submit"><span data-en>Create teacher</span><span data-ko>선생님 만들기</span></button>
+      </form>
+    </section>
+
+    <!-- 오른쪽: 명단 -->
+    <section>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:16px 18px 0"><h2 style="font-size:16px;font-weight:850">
+          <span data-en>Teachers</span><span data-ko>선생님</span></h2></div>
+        <div class="table-wrap" style="overflow-x:auto"><table class="rv-table cardify">
+          <thead><tr>
+            <th><span data-en>Name</span><span data-ko>이름</span></th>
+            <th><span data-en>Login ID</span><span data-ko>아이디</span></th>
+            <th style="text-align:right"><span data-en>Students</span><span data-ko>담당 학생</span></th>
+          </tr></thead>
+          <tbody id="t-rows"></tbody>
+        </table></div>
+      </div>
+
+      <div class="card mt-16" style="padding:0;overflow:hidden">
+        <div style="padding:16px 18px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <h2 style="font-size:16px;font-weight:850"><span data-en>Students</span><span data-ko>학생</span></h2>
+          <input id="q" placeholder="Name or student ID" style="flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:13.5px;background:var(--cream)">
+          <span class="muted" style="font-size:12.5px" id="s-count"></span>
+        </div>
+        <div class="table-wrap" style="overflow-x:auto"><table class="rv-table cardify">
+          <thead><tr>
+            <th><span data-en>Student</span><span data-ko>학생</span></th>
+            <th><span data-en>Email</span><span data-ko>이메일</span></th>
+            <th><span data-en>Teacher</span><span data-ko>담당 선생님</span></th>
+          </tr></thead>
+          <tbody id="s-rows"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap foot-in">
+  <small class="muted">© SMEAG MockTest · Teachers</small>
+</div></footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var TEACHERS = [], STUDENTS = [];
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function bi(en, ko) { return '<span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span>'; }
+  function notice(en, ko) {
+    $('notice').innerHTML = '<p>' + bi(en, ko) + '</p>';
+    $('notice').classList.remove('hide');
+  }
+  function say(el, text) {
+    el.textContent = text || '';
+    el.classList.toggle('on', !!text);
+  }
+
+  /* PostgREST 직통. 권한은 토큰이 쥐고 있다 — 관리자가 아니면 빈 배열이 온다. */
+  function rest(path, init) {
+    return SG_AUTH.token().then(function (tok) {
+      if (!tok) return null;
+      init = init || {};
+      var headers = { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' };
+      for (var k in (init.headers || {})) headers[k] = init.headers[k];
+      return fetch(SG_AUTH.url + '/rest/v1/' + path, {
+        method: init.method || 'GET', headers: headers, body: init.body
+      }).then(function (r) {
+        if (!r.ok) return null;
+        return r.text().then(function (t) {
+          if (!t) return true;
+          try { return JSON.parse(t); } catch (e) { return true; }
+        });
+      });
+    });
+  }
+
+  function roleOf(p) { return p.role || (p.is_admin ? 'admin' : 'student'); }
+
+  function paintTeachers() {
+    var mine = {};
+    STUDENTS.forEach(function (s) { if (s.teacher_id) mine[s.teacher_id] = (mine[s.teacher_id] || 0) + 1; });
+    $('t-rows').innerHTML = TEACHERS.length ? TEACHERS.map(function (t) {
+      return '<tr>' +
+        '<td class="card-title"><b>' + esc(t.name || '—') + '</b></td>' +
+        '<td ' + SG_LABEL('Login ID', '아이디') + '><span class="made">' + esc(t.student_id || '—') + '</span></td>' +
+        '<td style="text-align:right" ' + SG_LABEL('Students', '담당 학생') + '>' + (mine[t.id] || 0) + '</td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="3" class="muted" style="padding:20px;text-align:center">' +
+      bi('No teacher accounts yet.', '아직 선생님 계정이 없습니다.') + '</td></tr>';
+  }
+
+  function options(sel) {
+    return '<option value="">' + '— none —' + '</option>' + TEACHERS.map(function (t) {
+      return '<option value="' + t.id + '"' + (t.id === sel ? ' selected' : '') + '>' + esc(t.name || t.student_id) + '</option>';
+    }).join('');
+  }
+
+  function paintStudents() {
+    var q = ($('q').value || '').trim().toLowerCase();
+    var list = STUDENTS.filter(function (s) {
+      if (!q) return true;
+      return ((s.name || '') + ' ' + (s.student_id || '') + ' ' + (s.email || '')).toLowerCase().indexOf(q) >= 0;
+    });
+    $('s-count').textContent = list.length + ' / ' + STUDENTS.length;
+    $('s-rows').innerHTML = list.length ? list.map(function (s) {
+      return '<tr>' +
+        '<td class="card-title"><b>' + esc(s.name || '—') + '</b>' +
+          (s.student_id ? '<div class="muted" style="font-size:12px">' + esc(s.student_id) + '</div>' : '') + '</td>' +
+        '<td ' + SG_LABEL('Email', '이메일') + '><span class="muted" style="font-size:12.5px">' + esc(s.email || '—') + '</span></td>' +
+        '<td ' + SG_LABEL('Teacher', '담당 선생님') + '><select data-id="' + s.id + '">' + options(s.teacher_id) + '</select></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="3" class="muted" style="padding:20px;text-align:center">' +
+      bi('No students match.', '해당하는 학생이 없습니다.') + '</td></tr>';
+
+    Array.prototype.forEach.call($('s-rows').querySelectorAll('select'), function (sel) {
+      sel.addEventListener('change', function () { assign(sel); });
+    });
+  }
+
+  /* 담당 변경은 한 줄 PATCH 다. 실패하면 고른 값을 되돌린다 — 화면만 바뀌고 서버는
+     그대로인 상태가 제일 위험하다(그 선생님은 계속 못 본다). */
+  function assign(sel) {
+    var id = sel.getAttribute('data-id'), val = sel.value;
+    var row = STUDENTS.filter(function (s) { return s.id === id; })[0];
+    var before = row ? row.teacher_id : null;
+    sel.disabled = true;
+    rest('sg_profiles?id=eq.' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({ teacher_id: val || null })
+    }).then(function (ok) {
+      sel.disabled = false;
+      if (!ok) { sel.value = before || ''; say($('f-err'), 'Could not change the teacher.'); return; }
+      if (row) row.teacher_id = val || null;
+      say($('f-err'), '');
+      paintTeachers();
+    });
+  }
+
+  function load() {
+    return rest('sg_profiles?select=id,name,student_id,email,role,is_admin,teacher_id&order=name.asc&limit=2000')
+      .then(function (rows) {
+        rows = rows || [];
+        TEACHERS = rows.filter(function (p) { return roleOf(p) === 'teacher'; });
+        STUDENTS = rows.filter(function (p) { return roleOf(p) === 'student'; });
+        paintTeachers();
+        paintStudents();
+        $('body').classList.remove('hide');
+      });
+  }
+
+  function create(e) {
+    e.preventDefault();
+    say($('f-err'), ''); say($('f-ok'), '');
+    $('go').disabled = true;
+    SG_AUTH.createTeacher({
+      name: $('t-name').value.trim(),
+      login: $('t-login').value.trim().toLowerCase(),
+      password: $('t-pw').value,
+      email: $('t-mail').value.trim()
+    }).then(function (res) {
+      $('go').disabled = false;
+      say($('f-ok'), res.login + ' created · password ' + res.password);
+      $('t-name').value = ''; $('t-login').value = ''; $('t-mail').value = '';
+      return load();
+    }).catch(function (err) {
+      $('go').disabled = false;
+      say($('f-err'), err.message || 'Could not create the account.');
+    });
+  }
+
+  function boot() {
+    $('f').addEventListener('submit', create);
+    $('q').oninput = paintStudents;
+    if (!window.SG_AUTH || !SG_AUTH.user()) { SG_AUTH.require(); return; }
+    SG_AUTH.role().then(function (role) {
+      if (role !== 'admin') {
+        notice('This page is for administrators.', '이 화면은 관리자 전용입니다.');
+        return;
+      }
+      load().catch(function () { notice('Could not load the roster.', '명단을 불러오지 못했습니다.'); });
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

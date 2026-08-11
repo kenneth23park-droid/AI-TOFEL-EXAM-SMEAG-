@@ -273,6 +273,30 @@ window.SG_RUNTIME = (function () {
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
+  /* ── 관리자 검수 모드 ──────────────────────────────────────
+     관리자로 로그인해 있으면(assets/admin-session.js — 'admin' 은 모든 SET) 상단바의
+     Back·Next 를 섹션과 화면 종류에 상관없이 늘 세워 둔다. 스피킹 녹음 화면과 안내
+     방송 화면처럼 학생에게는 진행 버튼이 없는 자리에서도 앞뒤로 넘겨 봐야 모든 섹션을
+     끝까지 검수할 수 있기 때문이다. 학생 화면은 로그인 전과 완전히 같다 — can() 이
+     거짓이면 아래 분기는 하나도 돌지 않는다. */
+  function adminOn() {
+    var A = window.SG_ADMIN;
+    return !!(A && typeof A.can === 'function' && A.can(SET_ID));
+  }
+
+  /* 화면 사이의 역방향 이동은 학생에게 없다(Story 1.4 AC3). 관리자만 엔진의
+     adminJumpTo 로 앞 화면에 되돌아간다. */
+  function adminStep(delta) {
+    if (!machine || !adminOn()) return false;
+    if (typeof machine.adminJumpTo !== 'function') return false;
+    if (!machine.adminJumpTo(machine.currentIndex() + delta, 'admin_jump')) return false;
+    machine.syncHash();
+    if (window.SG_EXAM_ADMIN && window.SG_EXAM_ADMIN.paint) {
+      try { window.SG_EXAM_ADMIN.paint(); } catch (e) {}
+    }
+    return true;
+  }
+
   /* 서브바를 띄우는 화면 종류. moduleEnd/review/hardwareCheck 는 진행표시가 없다. */
   function hasSubbar(screen) {
     if (!screen) return false;
@@ -361,6 +385,10 @@ window.SG_RUNTIME = (function () {
     var announcement = !!(I && typeof I.isAnnouncement === 'function' && I.isAnnouncement(screen));
     var showAdvance = !speakingLive && !announcement;
 
+    /* 관리자 검수 모드 — 섹션·화면 종류를 가리지 않고 Back·Next 를 세운다. */
+    var admin = adminOn();
+    if (admin) { showBack = true; showAdvance = true; }
+
     function set(id, on) { var b = document.getElementById(id); if (b) b.hidden = !on; }
     set('btn-volume', showVolume);
     set('btn-help', showHelp);
@@ -368,14 +396,18 @@ window.SG_RUNTIME = (function () {
     set('btn-back', showBack);
     set('btn-advance', showAdvance);
 
-    /* Back — 화면 사이의 역방향 이동은 여전히 없다(상태머신에 API 가 없다).
-       열리는 것은 "같은 화면 안의 앞 문항" 뿐이다: 리딩은 지문 한 편의 문항을
-       하나씩 보여 주므로 그 안에서는 되돌아갈 수 있어야 한다. 첫 문항에서는 비활성. */
+    /* Back — 학생에게 열리는 것은 "같은 화면 안의 앞 문항" 뿐이다: 리딩은 지문 한 편의
+       문항을 하나씩 보여 주므로 그 안에서는 되돌아갈 수 있어야 한다. 첫 문항에서는 비활성.
+       관리자는 화면 자체를 되돌릴 수 있으므로 첫 화면에서만 비활성이다. */
     var back = document.getElementById('btn-back');
     if (back) {
       var nav0 = screenNav();
-      back.disabled = !(nav0 && typeof nav0.canPrev === 'function' && nav0.canPrev());
+      var inScreen = !!(nav0 && typeof nav0.canPrev === 'function' && nav0.canPrev());
+      back.disabled = !inScreen && !(admin && machine && machine.currentIndex() > 0);
+      back.classList.toggle('is-admin', admin && !inScreen);
     }
+    var adv = document.getElementById('btn-advance');
+    if (adv) adv.classList.toggle('is-admin', admin && (speakingLive || announcement));
 
     /* Review 는 화면 단위 플래그다 — 화면이 바뀌면 눌린 상태를 다시 읽어 온다. */
     var rev = document.getElementById('btn-review');
@@ -557,15 +589,74 @@ window.SG_RUNTIME = (function () {
     }
   }
 
-  /* Exit Test → 확인 후 상태를 저장하고 시험 목록으로 돌아간다. 진행은 재개 가능하게 남는다. */
+  /* Exit Test → 관리자 승인이 있어야 나간다. 학생 혼자서는 시험을 못 뜨고, 감독하는
+     선생님이 관리자 아이디·비밀번호를 넣어야 답안을 저장하고 시험 목록으로 돌아간다.
+     확인만 하고 관리자 세션은 만들지 않는다(SG_ADMIN.verify) — 학생 기기에 권한을
+     남기면 그 뒤로 문항 편집 패널까지 열리기 때문이다. 진행은 재개 가능하게 남는다. */
   function bindExit() {
-    document.getElementById('btn-exit').onclick = function () { openModal('modal-exit'); };
-    document.getElementById('btn-exit-confirm').onclick = function () {
+    var modal = document.getElementById('modal-exit');
+    var confirmBtn = document.getElementById('btn-exit-confirm');
+    var gate = buildExitGate(modal, confirmBtn);
+
+    document.getElementById('btn-exit').onclick = function () {
+      gate.reset();
+      openModal('modal-exit');
+      gate.focus();
+    };
+    confirmBtn.onclick = function () {
+      var who = gate.check();
+      if (!who) return;                       // 틀리면 모달에 그대로 머문다.
       try {
         STORE.flushAnswers();
-        STORE.pushEvent('exit_test', machine && machine.current() ? machine.current().id : '', {});
+        STORE.pushEvent('exit_test', machine && machine.current() ? machine.current().id : '',
+          { approved_by: who.id });
       } catch (e) {}
       window.location.href = BASE + 'tests.html';
+    };
+  }
+
+  /* Exit 모달에 관리자 아이디·비밀번호 칸을 붙인다. 마크업은 시험 페이지마다 같아서
+     HTML 을 여섯 벌 고치는 대신 여기서 한 번에 그린다. */
+  function buildExitGate(modal, confirmBtn) {
+    var card = modal.querySelector('.exam-modal-card');
+    var actions = modal.querySelector('.exam-modal-actions');
+    var box = document.createElement('div');
+    box.className = 'exam-exit-auth';
+    box.innerHTML =
+      '<p class="exam-exit-err" id="exit-admin-err" hidden>Wrong admin ID or password.</p>' +
+      '<label>Admin ID' +
+        '<input type="text" id="exit-admin-id" autocomplete="off" autocapitalize="none"' +
+        ' autocorrect="off" spellcheck="false"></label>' +
+      '<label>Password' +
+        '<input type="password" id="exit-admin-pw" autocomplete="off"></label>';
+    card.insertBefore(box, actions);
+
+    var idEl = box.querySelector('#exit-admin-id');
+    var pwEl = box.querySelector('#exit-admin-pw');
+    var errEl = box.querySelector('#exit-admin-err');
+    box.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); confirmBtn.click(); }
+    });
+
+    // 안내 문구도 "누구든 나갈 수 있다"에서 "관리자가 열어 준다"로 바꾼다.
+    var note = card.querySelector('p');
+    if (note) {
+      note.innerHTML = '<span data-en>An administrator must approve this exit. ' +
+        'Your answers and remaining time are saved — this session can be resumed later.</span>';
+    }
+
+    return {
+      reset: function () {
+        idEl.value = ''; pwEl.value = ''; errEl.hidden = true;
+      },
+      focus: function () { setTimeout(function () { idEl.focus(); }, 30); },
+      /** 맞으면 계정 객체, 아니면 null(오류 문구를 켠다). */
+      check: function () {
+        var A = window.SG_ADMIN;
+        var who = A && A.verify ? A.verify(idEl.value, pwEl.value) : null;
+        if (!who) { errEl.hidden = false; pwEl.value = ''; pwEl.focus(); return null; }
+        return who;
+      }
     };
   }
 
@@ -873,14 +964,18 @@ window.SG_RUNTIME = (function () {
          마지막 문항이면 next() 가 false 라 그대로 다음 화면(=다음 지문)으로 간다. */
       var nav = screenNav();
       if (nav && typeof nav.next === 'function' && nav.next()) return;
-      machine.next('manual');
+      /* 스피킹 녹음·안내 방송 화면에서는 학생용 next() 가 렌더러 흐름과 얽혀 있다.
+         관리자가 누른 것이라면 그 흐름을 기다리지 않고 다음 화면으로 건너뛴다. */
+      if (machine.next('manual')) return;
+      adminStep(1);
     };
 
     var backBtn = document.getElementById('btn-back');
     if (backBtn) {
       backBtn.onclick = function () {
         var nav = screenNav();
-        if (nav && typeof nav.prev === 'function') nav.prev();
+        if (nav && typeof nav.canPrev === 'function' && nav.canPrev()) { nav.prev(); return; }
+        adminStep(-1);
       };
     }
 
@@ -894,6 +989,14 @@ window.SG_RUNTIME = (function () {
     /* 관리자 패널 — 파일이 없거나 관리자 로그인이 없으면 아무 일도 하지 않는다. */
     if (window.SG_EXAM_ADMIN && typeof window.SG_EXAM_ADMIN.mount === 'function') {
       try { window.SG_EXAM_ADMIN.mount({ set: SET_ID, runtime: window.SG_RUNTIME }); } catch (e) {}
+    }
+
+    /* 시험 도중에 ⚙(Ctrl+Alt+A)로 로그인하거나 로그아웃해도 상단바가 즉시 따라간다. */
+    if (window.SG_ADMIN && typeof window.SG_ADMIN.onChange === 'function') {
+      window.SG_ADMIN.onChange(function () {
+        var sc = machine && machine.current();
+        if (sc) syncActions(sc);
+      });
     }
   }
 

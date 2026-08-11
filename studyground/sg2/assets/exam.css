@@ -83,6 +83,9 @@ body.exam-body {
 .exam-btn.primary { background: #fff; color: var(--ink); font-weight: 750; }
 .exam-btn.primary:hover { background: #f4f4fb; }
 .exam-btn.danger { background: #fff; color: var(--ink); }
+/* 학생 화면에는 없고 관리자에게만 서 있는 Back·Next — 검수용이라는 표시로 초록 테두리를
+   두른다. 실수로 학생 흐름과 헷갈리지 않게 하려는 것뿐, 동작은 같다(exam-shell.js). */
+.exam-btn.is-admin { box-shadow: inset 0 0 0 2px #2f6f4f; }
 /* Review 는 눌린 상태가 보여야 한다(플래그 토글). */
 .exam-btn.is-on { background: var(--ink); color: #fff; }
 .exam-btn.is-on:hover { background: var(--ink); }
@@ -236,6 +239,21 @@ body.exam-body {
 .exam-modal-card h2 { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
 .exam-modal-card p { font-size: 14px; color: var(--ink-2); margin-bottom: 18px; }
 .exam-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Exit 은 관리자 승인이 있어야 열린다 — 모달 안의 아이디·비밀번호 칸. */
+.exam-exit-auth label {
+  display: block; font-size: 12px; font-weight: 750; color: var(--ink-2); margin-bottom: 11px;
+}
+.exam-exit-auth input {
+  display: block; width: 100%; margin-top: 5px; font: inherit; font-size: 14px;
+  padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: #fff; color: inherit;
+}
+.exam-exit-auth input:focus { outline: none; border-color: var(--brand); }
+.exam-modal-card .exam-exit-err {
+  font-size: 12.5px; font-weight: 700; color: #b3261e; background: #fdeceb;
+  border: 1px solid #f5c6c2; border-radius: 10px; padding: 9px 12px; margin-bottom: 12px;
+}
+.exam-exit-err[hidden] { display: none; }
 .exam-modal .exam-btn { border: 1px solid var(--line-2); }
 .exam-modal .exam-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
 

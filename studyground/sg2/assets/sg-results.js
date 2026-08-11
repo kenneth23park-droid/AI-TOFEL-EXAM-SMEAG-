@@ -214,7 +214,7 @@ window.SG_RESULTS = (function () {
       var ids = [], seen = {};
       rows.forEach(function (r) { if (r.owner && !seen[r.owner]) { seen[r.owner] = true; ids.push(r.owner); } });
       if (!ids.length) return rows;
-      return rest('sg_profiles?select=id,name,student_id,email,role&id=in.(' + ids.join(',') + ')')
+      return rest('sg_profiles?select=id,name,student_id,email,role,teacher_id&id=in.(' + ids.join(',') + ')')
         .then(function (people) {
           var by = {};
           (people || []).forEach(function (p) { by[p.id] = p; });

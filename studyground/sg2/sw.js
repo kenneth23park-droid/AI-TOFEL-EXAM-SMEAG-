@@ -92,7 +92,10 @@
 // v34: 영역별 문항 리뷰 모듈 — review.html 이 리스닝(assets/sg-review-listening.js)과
 //      라이팅(assets/sg-review-writing.js)을 표 대신 문항 카드로 편다. 제출 직후
 //      오프라인에서도 열려야 하므로 둘 다 셸에 넣고 VERSION 을 올린다.
-const VERSION = 'sg-v34';
+// v35: 헤더가 "지금 누구로 들어와 있는지"를 말한다 — 계정 칩에 이름과 함께 로그인
+//      아이디(smeag000)가 서고, 로그인 상태에서 남아 있던 Login/Sign Up 버튼이
+//      제대로 접힌다. assets/sg-auth.js · assets/app.css 가 바뀌어 판올림한다.
+const VERSION = 'sg-v35';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 

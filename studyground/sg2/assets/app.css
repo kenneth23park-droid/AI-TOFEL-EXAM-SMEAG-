@@ -81,6 +81,25 @@ button { font-family: inherit; cursor: pointer; }
 /* 관리자 화면끼리 오가는 링크(admin*.html)는 예외 — 학생 메뉴만 줄이려던 규칙이라,
    관리자 헤더까지 지우면 화면 사이에 길이 없어진다. */
 .nav-right a:not([href="tests.html"]):not([href="login.html"]):not([href^="admin"]) { display: none; }
+
+/* 로그인하면 sg-auth.js 가 Login·Sign Up 을 hidden 으로 접는데, .btn 의
+   display:inline-flex 가 브라우저 기본 [hidden] 규칙을 이겨서 그대로 남아 있었다.
+   로그인한 사람 옆에 "로그인" 버튼이 서 있으면 누가 들어와 있는지가 흐려진다. */
+.nav-right [hidden] { display: none !important; }
+
+/* 헤더의 계정 칩 — 이름 옆에 로그인 아이디(smeag000)를 함께 세운다. 고사장에서
+   앞사람 계정 그대로 시험을 시작하는 사고는, 아이디가 눈에 보이면 그 자리에서 걸린다.
+   메뉴 축소 규칙(위)이 dashboard.html 링크를 지우는 바람에 이 칩까지 같이 사라졌었다 —
+   누구로 들어와 있는지는 줄일 대상이 아니라 늘 보여야 하는 것이라 예외로 둔다. */
+.nav-right a[data-role="who"] { display: inline-flex !important; white-space: nowrap; }
+.nav-user-id { color: var(--muted); font-weight: 700; }
+.nav-user-sep { font-style: normal; margin: 0 3px; }
+/* 폰에서는 이름까지 넣으면 한 글자씩 접혀 읽히지 않는다. 자리를 다투면 이름을 접고
+   아이디만 남긴다 — 계정을 가려내는 건 결국 아이디 쪽이다. */
+@media (max-width: 560px) {
+  .nav-user-name, .nav-user-sep { display: none; }
+  .nav-user-id { color: var(--ink); }
+}
 .lang {
   display: inline-flex; border: 1px solid var(--line-2); border-radius: 999px; overflow: hidden;
   font-size: 12px; font-weight: 700;
@@ -275,9 +294,9 @@ h2.title { font-size: clamp(24px, 3vw, 34px); font-weight: 820; letter-spacing: 
 .auth-card .sub { color: var(--muted); font-size: 13.5px; margin: 6px 0 22px; }
 .field { margin-bottom: 14px; }
 .field label { display: block; font-size: 12px; font-weight: 750; color: var(--ink-2); margin-bottom: 6px; }
-.field input { width: 100%; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 11px;
-  font-size: 14px; font-family: inherit; background: var(--cream); }
-.field input:focus { outline: none; border-color: var(--brand); background: #fff; }
+.field input, .field select { width: 100%; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 11px;
+  font-size: 14px; font-family: inherit; background: var(--cream); color: inherit; }
+.field input:focus, .field select:focus { outline: none; border-color: var(--brand); background: #fff; }
 .auth-alt { text-align: center; font-size: 13px; color: var(--muted); margin-top: 18px; }
 .auth-alt a { color: var(--brand); font-weight: 750; }
 .divider { display: flex; align-items: center; gap: 12px; color: var(--dim); font-size: 12px; margin: 18px 0; }

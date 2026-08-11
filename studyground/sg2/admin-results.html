@@ -52,6 +52,7 @@
       <thead><tr>
         <th><span data-en>Date</span><span data-ko>날짜</span></th>
         <th><span data-en>Student</span><span data-ko>학생</span></th>
+        <th class="col-teacher hide"><span data-en>Teacher</span><span data-ko>담당 선생님</span></th>
         <th><span data-en>Test</span><span data-ko>시험</span></th>
         <th><span data-en>Section bands</span><span data-ko>영역별 밴드</span></th>
         <th style="text-align:right"><span data-en>Overall</span><span data-ko>종합</span></th>
@@ -74,14 +75,20 @@
 /* 선생님·관리자용 전체 응시 목록. 한 줄이 한 응시이고, 리뷰 버튼이 그 응시의
  * 문항별 채점(review.html)으로 간다.
  *
- * 권한의 정본은 Supabase RLS(sg_is_staff) 다 — 학생이 이 주소를 직접 열어도
- * 서버가 자기 것 말고는 돌려주지 않는다. 아래 role 확인은 안내 문구용이다. */
+ * 권한의 정본은 Supabase RLS(sg_can_see) 다 — 학생이 이 주소를 직접 열어도, 선생님이
+ * 남의 반을 보려 해도, 서버가 행을 돌려주지 않는다. 아래 role 확인은 안내 문구용이다.
+ *
+ * 그래서 이 표의 길이는 보는 사람마다 다르다. 선생님에게는 자기 학생만, 관리자에게는
+ * 전부. 담당 선생님 열은 관리자에게만 뜬다 — 선생님 화면에서는 전부 자기 이름이라
+ * 한 칸이 통째로 같은 값을 반복하게 된다. */
 (function () {
   'use strict';
 
   var $ = function (id) { return document.getElementById(id); };
   var LAB = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
   var ALL = [];
+  var ROLE = '';
+  var TEACHERS = {};                 // uuid → 이름. 관리자일 때만 채운다.
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -98,6 +105,10 @@
   }
   function nameOf(r) { return (r.student && (r.student.name || r.student.email)) || '—'; }
   function idOf(r) { return (r.student && r.student.student_id) || ''; }
+  function teacherOf(r) {
+    var t = r.student && r.student.teacher_id;
+    return (t && TEACHERS[t]) || (t ? '—' : '');
+  }
 
   /* session → W·S 채점 행. load() 가 한 번만 읽어 채운다. */
   var TASKS = {};
@@ -133,6 +144,9 @@
         '<td ' + SG_LABEL('Date', '날짜') + '>' + when(r.submitted_at) + '</td>' +
         '<td class="card-title"><b>' + esc(nameOf(r)) + '</b>' +
           (idOf(r) ? '<div class="muted" style="font-size:12px">' + esc(idOf(r)) + '</div>' : '') + '</td>' +
+        (ROLE === 'admin'
+          ? '<td class="col-teacher" ' + SG_LABEL('Teacher', '담당 선생님') + '>' + esc(teacherOf(r) || '—') + '</td>'
+          : '') +
         '<td ' + SG_LABEL('Test', '시험') + '><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
         '<td ' + SG_LABEL('Sections', '영역') + '><span class="chips" style="margin:0">' + chips(r) + '</span></td>' +
         '<td class="score" ' + SG_LABEL('Overall', '종합') + '>' +
@@ -140,7 +154,7 @@
         '<td class="card-actions"><a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) +
           '&owner=' + encodeURIComponent(r.owner) + '">' + bi('Review', '리뷰') + '</a></td>' +
       '</tr>';
-    }).join('') : '<tr><td colspan="6" class="muted" style="padding:24px;text-align:center">' +
+    }).join('') : '<tr><td colspan="' + (ROLE === 'admin' ? 7 : 6) + '" class="muted" style="padding:24px;text-align:center">' +
       bi('No results match.', '해당하는 응시가 없습니다.') + '</td></tr>';
   }
 
@@ -158,14 +172,14 @@
     /* 밴드를 앞에 두고 원점수를 뒤에 둔다 — 성적표의 눈금이 밴드이기 때문이다.
        확정 전(AI 초안)이면 band_status 가 draft 다. 그 열이 없으면 스프레드시트에서
        초안과 확정 점수가 구분 없이 섞인다. */
-    var head = ['submitted_at', 'name', 'student_id', 'set',
+    var head = ['submitted_at', 'name', 'student_id', 'teacher', 'set',
                 'band_overall', 'band_reading', 'band_listening', 'band_writing', 'band_speaking',
                 'band_status', 'cefr', 'auto_correct', 'auto_total', 'session'];
     var lines = [head.join(',')];
     shown().forEach(function (r) {
       var v = viewOf(r);
       function b(s) { return v.sections[s].band === null ? '' : SG_BAND.fmt(v.sections[s].band); }
-      lines.push([r.submitted_at || '', nameOf(r), idOf(r), r.set_code || '',
+      lines.push([r.submitted_at || '', nameOf(r), idOf(r), teacherOf(r), r.set_code || '',
                   v.overall === null ? '' : SG_BAND.fmt(v.overall),
                   b('reading'), b('listening'), b('writing'), b('speaking'),
                   v.draft ? 'draft' : (v.pending.length ? 'incomplete' : 'final'),
@@ -204,6 +218,19 @@
     });
   }
 
+  /* 담당 선생님 이름표. 관리자 토큰이라야 다른 사람 프로필이 읽힌다 — 선생님은
+     이 질의를 부르지도 않는다(자기 학생만 보이므로 열 자체가 없다). */
+  function teacherNames() {
+    return SG_AUTH.token().then(function (tok) {
+      if (!tok) return;
+      return fetch(SG_AUTH.url + '/rest/v1/sg_profiles?role=eq.teacher&select=id,name', {
+        headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok }
+      }).then(function (r) { return r.ok ? r.json() : []; }).then(function (rows) {
+        (rows || []).forEach(function (t) { TEACHERS[t.id] = t.name || ''; });
+      });
+    }).catch(function () {});
+  }
+
   function boot() {
     $('csv').onclick = csv;
     if (!window.SG_AUTH || !SG_AUTH.user()) {
@@ -211,12 +238,23 @@
       return;
     }
     SG_AUTH.role().then(function (role) {
+      ROLE = role;
       $('who').textContent = role;
       if (role !== 'teacher' && role !== 'admin') {
         notice('This page is for teachers and administrators.', '이 화면은 선생님·관리자 전용입니다.');
         return;
       }
-      load();
+      if (role === 'teacher') {
+        notice('You see the students assigned to you. Ask an administrator to change an assignment.',
+               '배정된 담당 학생만 보입니다. 담당 변경은 관리자에게 요청하세요.');
+        load();
+        return;
+      }
+      // 관리자만 담당 선생님 열을 얻는다. 이름을 못 읽어도 목록은 그대로 뜬다.
+      Array.prototype.forEach.call(document.querySelectorAll('.col-teacher'), function (el) {
+        el.classList.remove('hide');
+      });
+      teacherNames().then(load, load);
     });
   }
 
