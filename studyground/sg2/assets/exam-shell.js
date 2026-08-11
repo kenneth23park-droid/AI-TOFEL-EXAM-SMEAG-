@@ -649,11 +649,15 @@ window.SG_RUNTIME = (function () {
       : '';
 
     mount.innerHTML =
-      '<div class="exam-done" style="max-width:640px;margin:64px auto;text-align:center">' +
+      /* 좌우 여백은 밴드 표 때문에 있다 — 폭이 좁으면 점수 칸이 화면 끝에 붙어
+         Overall 옆의 CEFR 이 잘린다(390px 에서 확인). */
+      '<div class="exam-done" style="max-width:640px;margin:64px auto;padding:0 18px;text-align:center">' +
         '<h2 style="font-size:26px;margin:0 0 10px">' +
           '<span data-en>Your test has been submitted.</span><span data-ko>제출이 완료되었습니다.</span></h2>' +
         (line ? '<p style="font-size:34px;font-weight:850;margin:18px 0">' + line + '</p>' +
-                '<p style="opacity:.7;font-size:13px;margin:0 0 6px">' +
+                /* 밴드가 나오면 이 줄은 지운다 — 아래에 네 영역 점수가 그려지고 나면
+                   "자동 채점 문항 기준" 은 방금 그린 표와 어긋나 보인다. */
+                '<p id="done-auto-note" style="opacity:.7;font-size:13px;margin:0 0 6px">' +
                   '<span data-en>Auto-scored questions only. Writing and Speaking are scored by AI first, then confirmed by a teacher.</span>' +
                   '<span data-ko>자동 채점 문항 기준입니다. 라이팅·스피킹은 AI 가 먼저 채점하고 선생님이 확정합니다.</span></p>'
               : '<p style="opacity:.7"><span data-en>Your answers are saved.</span><span data-ko>답안이 저장되었습니다.</span></p>') +
@@ -737,6 +741,8 @@ window.SG_RUNTIME = (function () {
             '</div>';
           box.innerHTML = html;
           box.hidden = false;
+          var auto = document.getElementById('done-auto-note');
+          if (auto) auto.hidden = true;
           if (b.draft) {
             say('Scored. Writing and Speaking are AI drafts — a teacher confirms them later.',
                 '채점이 끝났습니다. 라이팅·스피킹은 AI 초안이며 선생님이 나중에 확정합니다.');
