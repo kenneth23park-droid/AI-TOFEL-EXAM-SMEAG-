@@ -3,7 +3,17 @@
   admin-audio-files.html — 오디오 파일 점검 전용 관리자 화면.
 
   admin-audio.html 이 "무엇으로 바꿀까"(교체)라면 이 화면은 "지금 파일이 멀쩡한가"만 본다.
-  문항 내용·선택지·정답은 일부러 보여주지 않는다 — 파일 존재·용량·길이·형식·교체 상태만.
+  문항 내용·선택지·정답은 일부러 보여주지 않는다 — 파일 존재·용량·길이·형식·교체 상태와
+  "대본대로 읽혔나"까지.
+
+  검사는 두 단계로 나뉜다.
+    파일 검사   존재·용량·재생 길이. 값싸고, 무음 시험이 나가는 사고를 막는다.
+    대본 대조   그 파일이 대본대로 읽혔나. assets/audio-script-check.js 의 공용 규칙으로
+                받아쓰기 대조 · 길이 모델 · 받아쓰기 신선도(해시)를 함께 본다.
+                한 클립을 펼쳐 단어별로 보려면 admin-audio-sync.html 로 간다.
+
+  줄마다 체크박스가 있고, 하나라도 고르면 모든 검사·CSV 가 고른 것만 대상으로 한다.
+  아무것도 안 고르면 지금 필터에 보이는 전부가 대상이다.
 
   SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
 -->
@@ -50,6 +60,21 @@
   .tagx.idle { background:var(--cream-2); color:var(--muted); }
   .tagx.url { background:#e2eef6; color:#2f6f9f; }
   .tagx.file { background:#efe7fb; color:#6b3fbe; }
+  .tagx.warn { background:#fdf3e2; color:#96590c; }
+  .stat.warn b { color:#96590c; }
+
+  /* 선택 열 — 체크박스는 줄 어디를 눌러도 켜지도록 셀 전체를 라벨로 쓴다. */
+  .selcell { width:34px; padding-left:4px !important; }
+  .selcell input { width:16px; height:16px; accent-color:var(--brand); cursor:pointer; }
+  table.files tr.picked td { background:#fff6f2; }
+
+  /* 대본 미리보기 — 대조에서 어긋난 낱말에 형광. sync 화면과 같은 색을 쓴다. */
+  .scriptbox { margin-top:8px; max-height:132px; overflow:auto; font-size:12.5px; line-height:1.65;
+    white-space:pre-wrap; background:var(--cream-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  .scriptbox mark.miss { background:#ffef9f; color:inherit; }
+  .scriptbox mark.extra { background:#ffd9d5; color:inherit; }
+  .scriptbox .lbl { display:block; font-size:10.5px; font-weight:800; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
   .playbtn { font:inherit; font-size:12px; font-weight:750; padding:6px 11px; border-radius:8px; cursor:pointer;
     border:1px solid var(--line-2); background:var(--paper,#fff); color:var(--ink); }
   .playbtn.on { background:var(--brand); border-color:var(--brand); color:#fff; }
@@ -86,8 +111,8 @@
   <div class="page-h" style="padding-top:26px">
     <span class="pill" style="margin-bottom:8px">Admin · Audio file check</span>
     <h1 style="font-size:clamp(26px,4vw,40px)"><span data-en>Audio files</span><span data-ko>오디오 파일 점검</span></h1>
-    <p class="sub"><span data-en>Every audio slot in the loaded sets — path, file size, duration and whether it is currently replaced. Read-only: nothing here changes a question.</span>
-      <span data-ko>불러온 SET 의 모든 오디오 슬롯 — 경로 · 용량 · 재생 길이 · 교체 여부만 봅니다. 이 화면에서는 문항이 바뀌지 않습니다.</span></p>
+    <p class="sub"><span data-en>Every audio slot in the loaded sets — path, file size, duration, whether it is currently replaced, and whether it was read the way the script says. Read-only: nothing here changes a question.</span>
+      <span data-ko>불러온 SET 의 모든 오디오 슬롯 — 경로 · 용량 · 재생 길이 · 교체 여부 · 대본대로 읽혔는지만 봅니다. 이 화면에서는 문항이 바뀌지 않습니다.</span></p>
   </div>
 
   <div class="bar">
@@ -96,9 +121,18 @@
       <button data-stat="all" class="on"><span data-en>All</span><span data-ko>전체</span></button>
       <button data-stat="bad"><span data-en>Problems</span><span data-ko>문제</span></button>
       <button data-stat="ovr"><span data-en>Replaced</span><span data-ko>교체됨</span></button>
+      <button data-stat="mismatch"><span data-en>Script off</span><span data-ko>대본 불일치</span></button>
+      <button data-stat="noscript"><span data-en>No script</span><span data-ko>대본 없음</span></button>
+    </span>
+    <span class="seg" id="selseg">
+      <button data-sel="any" class="on"><span data-en>Any</span><span data-ko>선택 무관</span></button>
+      <button data-sel="on"><span data-en>Selected</span><span data-ko>선택됨</span></button>
+      <button data-sel="off"><span data-en>Unselected</span><span data-ko>미선택</span></button>
     </span>
     <input type="search" id="q" placeholder="Filter by title or path…">
-    <button class="btn brand sm" id="checkBtn"><span data-en>Check all files</span><span data-ko>전체 파일 검사</span></button>
+    <button class="btn brand sm" id="checkBtn"></button>
+    <button class="btn brand sm" id="scriptBtn"></button>
+    <button class="btn ghost sm" id="pickBtn"><span data-en>Select all</span><span data-ko>전체 선택</span></button>
     <button class="btn ghost sm" id="csvBtn"><span data-en>Export CSV</span><span data-ko>CSV 내보내기</span></button>
     <span class="prog" id="prog"></span>
   </div>
@@ -108,11 +142,13 @@
   <div class="table-scroll">
   <table class="files cardify">
     <thead><tr>
+      <th class="selcell"><input type="checkbox" id="pickAll" title="Select every row in view"></th>
       <th><span data-en>Item</span><span data-ko>항목</span></th>
       <th><span data-en>File</span><span data-ko>파일</span></th>
       <th class="num"><span data-en>Size</span><span data-ko>용량</span></th>
       <th class="num"><span data-en>Length</span><span data-ko>길이</span></th>
       <th><span data-en>Status</span><span data-ko>상태</span></th>
+      <th><span data-en>Script</span><span data-ko>대본</span></th>
       <th></th>
     </tr></thead>
     <tbody id="rows"></tbody>
@@ -122,6 +158,7 @@
   <div class="player">
     <div class="fpath" id="nowpath"><span data-en>No clip selected.</span><span data-ko>선택된 클립이 없습니다.</span></div>
     <audio id="player" controls preload="none"></audio>
+    <div class="scriptbox" id="nowscript" hidden></div>
   </div>
 </main>
 
@@ -137,6 +174,7 @@
 <script src="assets/exam-media.js"></script>
 <script src="assets/audio-index.js"></script>
 <script src="assets/audio-config.js"></script>
+<script src="assets/audio-script-check.js"></script>
 <script src="assets/admin-session.js"></script>
 <script src="assets/sg-auth.js"></script>
 <script src="assets/admin-log.js"></script>
@@ -152,7 +190,20 @@
   function kb(n){ if (n==null) return '—'; return n>=1048576 ? (n/1048576).toFixed(1)+' MB' : Math.round(n/1024)+' KB'; }
   function mmss(s){ if (s==null || !isFinite(s)) return '—'; s=Math.round(s); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
 
-  var ROWS = [], filterSet = wantSet || 'all', filterStat = 'all', filterQ = '';
+  var SC = window.SG_SCRIPT_CHECK;
+  var ROWS = [], filterSet = wantSet || 'all', filterStat = 'all', filterSel = 'any', filterQ = '';
+
+  /* 선택은 줄 번호가 아니라 클립 신원으로 기억한다 — 필터를 바꾸면 줄 순서가 바뀐다. */
+  var SEL = {};
+  function rowKey(r) { return r.item.path + '|' + (r.item.qid || r.item.title); }
+  function isSel(r) { return !!SEL[rowKey(r)]; }
+  function selCount() { return ROWS.filter(isSel).length; }
+  /** 검사·CSV 의 대상. 고른 게 있으면 "보이는 것 중 고른 것", 없으면 보이는 전부. */
+  function scope() {
+    var v = visible();
+    var picked = v.filter(isSel);
+    return picked.length ? picked : (selCount() ? [] : v);
+  }
 
   /* ── 파일 프로브 ────────────────────────────────────────────
      HEAD → (막히면) 1바이트 Range GET 순으로 존재·용량을 확인하고,
@@ -203,6 +254,25 @@
     });
   }
 
+  /* ── 대본 대조 ─────────────────────────────────────────────
+     "파일이 있나"에서 "그 파일이 대본대로 읽혔나"로 한 걸음 더 간다. 판정 규칙은
+     assets/audio-script-check.js 에 있고 admin-audio-sync.html 과 공유한다.
+
+     길이가 있어야 길이 모델을 돌릴 수 있으므로, 아직 안 잰 줄은 파일 검사를 먼저 한다.
+     받아쓰기 신선도(해시)는 파일을 통째로 받아야 해서 여기서만 한다 — 목록 전체를 걸면
+     20MB 를 받으므로, 급할 때는 몇 줄만 골라 돌리라고 화면에 적어 둔다. */
+  function scriptCheck(row) {
+    var pre = row.dur == null && row.state !== 'bad' ? probe(row) : Promise.resolve();
+    return pre.then(function () {
+      row.sstate = 'checking'; paint();
+      return SC.check(row.item.path, row.dur, { url: SG_AUDIO.resolve(row.item.path) });
+    }).then(function (res) {
+      row.script = res;
+      row.sstate = res.verdict;
+      paint();
+    }).catch(function () { row.sstate = 'idle'; paint(); });
+  }
+
   function pool(list, n, run) {
     var i = 0, active = 0;
     return new Promise(function (done) {
@@ -222,7 +292,10 @@
     ROWS = [];
     SG_AUDIO_INDEX.groups().forEach(function (g) {
       g.items.forEach(function (it) {
-        ROWS.push({ item: it, group: g.label, state: 'idle', note: '', size: null, dur: null });
+        ROWS.push({ item: it, group: g.label, state: 'idle', note: '', size: null, dur: null,
+                    // sstate: 대본 대조 상태. 'idle' 은 아직 안 돌린 것이고,
+                    // 'noscript' 는 돌릴 대본 자체가 없는 것 — 둘을 섞으면 안 된다.
+                    sstate: SC.forPath(it.path) ? 'idle' : 'noscript', script: null });
       });
     });
     var sets = ['all'].concat(SG_AUDIO_INDEX.groups().map(function (g) { return g.set; })
@@ -239,6 +312,10 @@
       var ov = SG_AUDIO.info(r.item.path).mode !== 'default';
       if (filterStat === 'bad' && r.state !== 'bad') return false;
       if (filterStat === 'ovr' && !ov) return false;
+      if (filterStat === 'mismatch' && r.sstate !== 'bad' && r.sstate !== 'warn') return false;
+      if (filterStat === 'noscript' && r.sstate !== 'noscript') return false;
+      if (filterSel === 'on' && !isSel(r)) return false;
+      if (filterSel === 'off' && isSel(r)) return false;
       if (filterQ && (r.item.title + ' ' + r.item.path + ' ' + r.group).toLowerCase().indexOf(filterQ) < 0) return false;
       return true;
     });
@@ -249,6 +326,22 @@
     if (r.state === 'bad') return '<span class="tagx bad">Missing</span>';
     if (r.state === 'checking') return '<span class="tagx idle">…</span>';
     return '<span class="tagx idle">Not checked</span>';
+  }
+  /* 화면 글은 EN 이 기본이고 KO 는 CSS 가 고른다(app.js 의 언어 토글). 줄을 코드에서
+     그리므로 두 언어를 같이 심어 둔다 — 언어를 바꿔도 다시 그리지 않아도 되게. */
+  function T(en, ko) { return '<span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span>'; }
+
+  /** 대본 열 — 대조 결과 한 줄. 숫자는 ASR 일치율, 없으면 길이 비율을 보여준다. */
+  function scriptTag(r) {
+    if (r.sstate === 'noscript') return '<span class="tagx idle">' + T('No script', '대본 없음') + '</span>';
+    if (r.sstate === 'checking') return '<span class="tagx idle">…</span>';
+    if (r.sstate === 'idle') return '<span class="tagx idle">' + T('Not compared', '대조 전') + '</span>';
+    var s = r.script || {}, cls = r.sstate === 'ok' ? 'ok' : (r.sstate === 'bad' ? 'bad' : 'warn');
+    var label = s.ratio != null ? Math.round(s.ratio * 100) + '% match'
+              : (s.durRatio != null ? 'length ' + s.durRatio.toFixed(2) + '×' : '—');
+    var extra = s.stale ? ' <span class="tagx warn">' + T('ASR stale', '받아쓰기 옛 파일') + '</span>' : '';
+    return '<span class="tagx ' + cls + '">' + esc(label) + '</span>' + extra +
+      (s.notes && s.notes.length ? '<div class="fmeta">' + esc(s.notes.join(' · ')) + '</div>' : '');
   }
   function overrideTag(r) {
     var i = SG_AUDIO.info(r.item.path);
@@ -261,7 +354,9 @@
     var list = visible();
     document.getElementById('rows').innerHTML = list.map(function (r, i) {
       var idx = ROWS.indexOf(r);
-      return '<tr data-i="' + idx + '">' +
+      return '<tr data-i="' + idx + '"' + (isSel(r) ? ' class="picked"' : '') + '>' +
+        '<td class="selcell" ' + SG_LABEL('Select', '선택') + '>' +
+          '<input type="checkbox" data-act="sel"' + (isSel(r) ? ' checked' : '') + '></td>' +
         '<td class="card-title"><div class="ftitle">' + esc(r.item.title) + '</div>' +
           '<div class="fmeta">' + esc(r.item.set.toUpperCase() + ' · ' + (r.item.sectionLabel || '') +
             (r.item.block ? ' · ' + r.item.block : '')) + '</div></td>' +
@@ -270,36 +365,86 @@
         '<td class="num" ' + SG_LABEL('Size', '용량') + '>' + kb(r.size) + '</td>' +
         '<td class="num" ' + SG_LABEL('Length', '길이') + '>' + mmss(r.dur) + '</td>' +
         '<td ' + SG_LABEL('Status', '상태') + '><span class="tagrow">' + statusTag(r) + overrideTag(r) + '</span></td>' +
+        '<td ' + SG_LABEL('Script', '대본') + '>' + scriptTag(r) + '</td>' +
         '<td class="num card-actions"><button class="playbtn" data-act="play">▶</button> ' +
-          '<button class="playbtn" data-act="check">⟳</button></td>' +
+          '<button class="playbtn" data-act="check">⟳</button> ' +
+          '<button class="playbtn" data-act="scheck" title="Compare with the script">≡</button></td>' +
       '</tr>';
-    }).join('') || '<tr><td colspan="6" class="fmeta" style="padding:18px 9px">No files match this filter.</td></tr>';
+    }).join('') || '<tr><td colspan="8" class="fmeta" style="padding:18px 9px">No files match this filter.</td></tr>';
 
-    var scope = ROWS.filter(function (r) { return filterSet === 'all' || r.item.set === filterSet; });
-    var ok = scope.filter(function (r) { return r.state === 'ok'; }).length;
-    var bad = scope.filter(function (r) { return r.state === 'bad'; }).length;
-    var ovr = scope.filter(function (r) { return SG_AUDIO.info(r.item.path).mode !== 'default'; }).length;
-    var bytes = scope.reduce(function (n, r) { return n + (r.size || 0); }, 0);
+    var sc = ROWS.filter(function (r) { return filterSet === 'all' || r.item.set === filterSet; });
+    var ok = sc.filter(function (r) { return r.state === 'ok'; }).length;
+    var bad = sc.filter(function (r) { return r.state === 'bad'; }).length;
+    var ovr = sc.filter(function (r) { return SG_AUDIO.info(r.item.path).mode !== 'default'; }).length;
+    var sok = sc.filter(function (r) { return r.sstate === 'ok'; }).length;
+    var soff = sc.filter(function (r) { return r.sstate === 'bad' || r.sstate === 'warn'; }).length;
+    var snone = sc.filter(function (r) { return r.sstate === 'noscript'; }).length;
+    var bytes = sc.reduce(function (n, r) { return n + (r.size || 0); }, 0);
     document.getElementById('stats').innerHTML =
-      '<div class="stat"><b>' + scope.length + '</b><span data-en>clips</span><span data-ko>클립</span></div>' +
+      '<div class="stat"><b>' + sc.length + '</b><span data-en>clips</span><span data-ko>클립</span></div>' +
       '<div class="stat ok"><b>' + ok + '</b><span data-en>playable</span><span data-ko>정상</span></div>' +
       '<div class="stat bad"><b>' + bad + '</b><span data-en>problems</span><span data-ko>문제</span></div>' +
       '<div class="stat ovr"><b>' + ovr + '</b><span data-en>replaced</span><span data-ko>교체됨</span></div>' +
+      '<div class="stat ok"><b>' + sok + '</b><span data-en>script ok</span><span data-ko>대본 일치</span></div>' +
+      '<div class="stat warn"><b>' + soff + '</b><span data-en>script off</span><span data-ko>대본 불일치</span></div>' +
+      '<div class="stat"><b>' + snone + '</b><span data-en>no script</span><span data-ko>대본 없음</span></div>' +
       '<div class="stat"><b>' + (bytes ? kb(bytes) : '—') + '</b><span data-en>total size</span><span data-ko>총 용량</span></div>';
+
+    refreshBar(list);
+  }
+
+  /** 표는 그대로 두고 버튼 이름·머리 체크박스만 고친다.
+   *  체크박스를 하나 누를 때마다 표를 다시 그리면 방금 누른 그 체크박스가 사라져서
+   *  연달아 고를 수가 없다 — 그래서 선택은 여기까지만 손댄다. */
+  function refreshBar(list) {
+    list = list || visible();
+    // 검사 버튼은 지금 대상이 몇 줄인지 자기 이름에 적는다 — 고른 게 있으면 그것만 돈다.
+    var n = scope().length, picked = selCount();
+    var suffix = ' (' + n + ')';
+    document.getElementById('checkBtn').innerHTML = picked
+      ? T('Check selected', '선택 파일 검사') + suffix : T('Check all files', '전체 파일 검사') + suffix;
+    document.getElementById('scriptBtn').innerHTML = picked
+      ? T('Script match · selected', '대본 대조 · 선택') + suffix : T('Script match', '대본 대조') + suffix;
+    document.getElementById('pickBtn').innerHTML = picked
+      ? T('Clear selection', '선택 해제') + ' (' + picked + ')' : T('Select all in view', '보이는 것 전체 선택');
+    var all = document.getElementById('pickAll');
+    all.checked = list.length > 0 && list.every(isSel);
+    all.indeterminate = !all.checked && list.some(isSel);
   }
 
   /* ── 이벤트 ────────────────────────────────────────────── */
   document.getElementById('rows').addEventListener('click', function (e) {
     var b = e.target.closest('[data-act]'); if (!b) return;
     var r = ROWS[+e.target.closest('tr').getAttribute('data-i')];
-    if (b.getAttribute('data-act') === 'check') { probe(r); return; }
+    var act = b.getAttribute('data-act');
+    if (act === 'sel') {
+      if (b.checked) SEL[rowKey(r)] = true; else delete SEL[rowKey(r)];
+      e.target.closest('tr').classList.toggle('picked', b.checked);
+      // 선택 필터가 켜져 있으면 방금 고른 줄이 목록에서 빠져야 하므로 그때만 다시 그린다.
+      if (filterSel !== 'any') paint(); else refreshBar();
+      return;
+    }
+    if (act === 'check') { probe(r); return; }
+    if (act === 'scheck') { scriptCheck(r); return; }
     var p = document.getElementById('player');
     p.src = SG_AUDIO.resolve(r.item.path);
     document.getElementById('nowpath').textContent = decodeURI(r.item.path);
+    showScript(r);
     p.play().catch(function () {});
     document.querySelectorAll('.playbtn.on').forEach(function (x) { x.classList.remove('on'); });
     b.classList.add('on');
   });
+
+  /* 재생하는 클립의 대본을 플레이어 밑에 편다 — 귀로 듣고 눈으로 따라가라고.
+     대조를 이미 돌렸으면 어긋난 낱말에 형광이 남아 있다(노랑=대본에만, 빨강=음성에만). */
+  function showScript(r) {
+    var box = document.getElementById('nowscript');
+    var rec = SC.forPath(r.item.path);
+    if (!rec || !rec.text) { box.hidden = true; box.innerHTML = ''; return; }
+    var cmp = (r.script && r.script.cmp) || SC.compare(rec);
+    box.hidden = false;
+    box.innerHTML = '<span class="lbl">' + T('Script', '대본') + '</span>' + cmp.scriptHtml;
+  }
   document.getElementById('setseg').addEventListener('click', function (e) {
     var b = e.target.closest('[data-set]'); if (!b) return;
     filterSet = b.getAttribute('data-set');
@@ -312,22 +457,57 @@
     this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
     paint();
   });
+  document.getElementById('selseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sel]'); if (!b) return;
+    filterSel = b.getAttribute('data-sel');
+    this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    paint();
+  });
+  document.getElementById('pickAll').addEventListener('change', function () {
+    var on = this.checked;
+    visible().forEach(function (r) { if (on) SEL[rowKey(r)] = true; else delete SEL[rowKey(r)]; });
+    paint();
+  });
+  document.getElementById('pickBtn').addEventListener('click', function () {
+    if (selCount()) SEL = {};
+    else visible().forEach(function (r) { SEL[rowKey(r)] = true; });
+    paint();
+  });
   document.getElementById('q').addEventListener('input', function () {
     filterQ = this.value.trim().toLowerCase(); paint();
   });
+
+  /** 검사 버튼 둘이 같은 뼈대를 쓴다 — 대상 고르기 · 동시 4개 · 진행 표시 · 끝나면 해제. */
+  function runOn(btnId, label, fn) {
+    var btn = document.getElementById(btnId), prog = document.getElementById('prog');
+    var list = scope(), n = 0;
+    if (!list.length) { prog.textContent = 'Nothing in scope'; return; }
+    btn.disabled = true;
+    pool(list, 4, function (r) {
+      return fn(r).then(function () { prog.textContent = (++n) + ' / ' + list.length; });
+    }).then(function () { prog.textContent = label + ' ' + list.length; btn.disabled = false; paint(); });
+  }
   document.getElementById('checkBtn').addEventListener('click', function () {
-    var list = visible(), n = 0;
-    var prog = document.getElementById('prog');
-    this.disabled = true;
-    pool(list, 4, function (r) { return probe(r).then(function () { prog.textContent = (++n) + ' / ' + list.length; }); })
-      .then(function () { prog.textContent = 'Checked ' + list.length; document.getElementById('checkBtn').disabled = false; });
+    runOn('checkBtn', 'Checked', probe);
+  });
+  document.getElementById('scriptBtn').addEventListener('click', function () {
+    // 대본이 없는 줄은 애초에 돌릴 게 없다 — 대상에서 빼고 파일도 받지 않는다.
+    runOn('scriptBtn', 'Compared', function (r) {
+      return r.sstate === 'noscript' ? Promise.resolve() : scriptCheck(r);
+    });
   });
   document.getElementById('csvBtn').addEventListener('click', function () {
-    var head = ['set', 'section', 'module', 'title', 'path', 'override', 'status', 'bytes', 'seconds', 'note'];
-    var lines = [head.join(',')].concat(visible().map(function (r) {
-      var i = SG_AUDIO.info(r.item.path);
+    var head = ['set', 'section', 'module', 'title', 'path', 'override', 'status', 'bytes', 'seconds', 'note',
+                'selected', 'scriptState', 'asrMatch', 'expectedSeconds', 'durationRatio', 'asrStale', 'scriptNote'];
+    var lines = [head.join(',')].concat(scope().map(function (r) {
+      var i = SG_AUDIO.info(r.item.path), s = r.script || {};
       return [r.item.set, r.item.section, r.item.module, r.item.title, decodeURI(r.item.path),
-              i.mode, r.state, r.size == null ? '' : r.size, r.dur == null ? '' : Math.round(r.dur), r.note]
+              i.mode, r.state, r.size == null ? '' : r.size, r.dur == null ? '' : Math.round(r.dur), r.note,
+              isSel(r) ? 'yes' : 'no', r.sstate,
+              s.ratio == null ? '' : Math.round(s.ratio * 1000) / 1000,
+              s.expected == null ? '' : Math.round(s.expected * 10) / 10,
+              s.durRatio == null ? '' : Math.round(s.durRatio * 100) / 100,
+              s.stale ? 'yes' : '', (s.notes || []).join(' · ')]
         .map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(',');
     }));
     var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
@@ -339,7 +519,14 @@
   function open() {
     document.getElementById('gate').hidden = true;
     document.getElementById('main').hidden = false;
-    SG_AUDIO.ready().then(function () { build(); paint(); });
+    // 대본 인덱스가 먼저 있어야 줄마다 "대본 없음"인지 "대조 전"인지 정할 수 있다.
+    SG_AUDIO.ready()
+      .then(function () {
+        return Promise.all(SG_AUDIO_INDEX.groups().map(function (g) { return g.set; })
+          .filter(function (v, i, a) { return a.indexOf(v) === i; })
+          .map(function (s) { return SC.load(s); }));
+      })
+      .then(function () { build(); paint(); });
   }
   document.getElementById('signin').addEventListener('click', function () { A.openLogin(wantSet, open); });
   if (A.can(wantSet)) open(); else A.openLogin(wantSet, open);

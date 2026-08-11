@@ -73,7 +73,10 @@
 //      assets/seat-runtime.js(화면 언어 고정 · 시험 전용 모드 · 오디오 배속 · 좌석 배지).
 //      login.html 은 배정된 시험으로 곧장 들어가고, exam-runtime.html · tests.html 의
 //      <script> 목록이 바뀌었다.
-const VERSION = 'sg-v28';
+// v29: 대본 대조 규칙을 공용 모듈로 뺐다 — assets/audio-script-check.js 를 프리캐시에
+//      넣고, 이제 admin-audio-files.html · admin-audio-sync.html 둘 다 이 파일을 부른다.
+//      두 화면의 <script> 목록이 바뀌었으므로 VERSION 을 올려 셸 캐시를 새로 채운다.
+const VERSION = 'sg-v29';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -91,7 +94,7 @@ const SHELL_ASSETS = [
 
   // SET 별 관리자 계층 — 오프라인 수업 중에도 로그인·문항 교체가 되어야 한다.
   'assets/admin-session.js', 'assets/admin-entry.js', 'assets/tts-client.js',
-  'assets/question-config.js', 'assets/audio-index.js',
+  'assets/question-config.js', 'assets/audio-index.js', 'assets/audio-script-check.js',
 
   // 회원 세션 — 온라인에서 로그인해 둔 상태를 오프라인에서도 헤더가 그려야 한다.
   'assets/sg-auth.js',

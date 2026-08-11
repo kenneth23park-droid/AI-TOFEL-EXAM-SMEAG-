@@ -191,6 +191,7 @@
 
 <script src="assets/set9-audio.js"></script>
 <script src="assets/audio-config.js"></script>
+<script src="assets/audio-script-check.js"></script>
 <script src="assets/admin-session.js"></script>
 <script src="assets/sg-auth.js"></script>
 <script src="assets/admin-log.js"></script>
@@ -251,125 +252,13 @@
 
   /* ── 단어 대조 ────────────────────────────────────────────
      비교는 소문자·문장부호를 뗀 토큰으로 하고, 화면에는 원문 그대로 쓴다.
-     LCS(최장공통부분수열)로 짝을 지어, 짝을 못 찾은 토큰만 형광이 된다. */
-  /* 대본은 숫자를 말로 적고("four hundred", "fourteenth"), 받아쓰기는 들은 대로
-     숫자를 쓴다("400", "14th"). 같은 소리인데 불일치로 세면, 시각·호실·가격이 몰린
-     클립 — 즉 가장 정확히 읽혔는지 확인하고 싶은 클립 — 일수록 점수가 부당하게 낮게
-     나온다. qa/stt_loopback.py 의 _expand_numerals 와 같은 규칙으로 숫자를 말로 편다.
-     규칙이 두 벌로 갈리면 화면과 WER 게이트가 서로 다른 답을 내므로 반드시 같이 고칠 것. */
-  var _ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
-    'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
-    'seventeen', 'eighteen', 'nineteen'];
-  var _TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-  var _ORD_KEY = { '1st': 'first', '2nd': 'second', '3rd': 'third', '5th': 'fifth',
-    '8th': 'eighth', '9th': 'ninth', '12th': 'twelfth' };
-  var _ORD_TAIL = { one: 'first', two: 'second', three: 'third', five: 'fifth',
-    eight: 'eighth', nine: 'ninth', twelve: 'twelfth' };
+     LCS(최장공통부분수열)로 짝을 지어, 짝을 못 찾은 토큰만 형광이 된다.
 
-  function intToWords(n) {
-    if (n < 20) return [_ONES[n]];
-    if (n < 100) return [_TENS[Math.floor(n / 10)]].concat(n % 10 ? [_ONES[n % 10]] : []);
-    if (n < 1000) return [_ONES[Math.floor(n / 100)], 'hundred'].concat(n % 100 ? intToWords(n % 100) : []);
-    if (n < 1000000) return intToWords(Math.floor(n / 1000)).concat(['thousand'], n % 1000 ? intToWords(n % 1000) : []);
-    return [String(n)];
-  }
-  /** 토큰 하나를 비교용 낱말 배열로. 숫자가 아니면 자기 자신 하나. */
-  function expandKey(key) {
-    if (_ORD_KEY[key]) return [_ORD_KEY[key]];
-    var m = /^(\d+)(st|nd|rd|th)$/.exec(key);
-    if (m) {
-      var w = intToWords(parseInt(m[1], 10)), last = w[w.length - 1];
-      var suffix = _ORD_TAIL[last] || (/y$/.test(last) ? last.slice(0, -1) + 'ieth' : last + 'th');
-      return w.slice(0, -1).concat([suffix]);
-    }
-    if (/^\d{1,6}$/.test(key)) return intToWords(parseInt(key, 10));
-    return [key];
-  }
-  function tokenize(text) {
-    var out = [], re = /[A-Za-z0-9']+/g, m;
-    while ((m = re.exec(text))) {
-      var key = m[0].toLowerCase().replace(/'/g, '');
-      out.push({ raw: m[0], at: m.index, keys: expandKey(key) });
-    }
-    return out;
-  }
-  /** 대조는 펼친 낱말 단위로 한다. 형광은 원문 토큰 좌표로 칠해야 하므로
-   *  낱말마다 원래 토큰 번호(ti)를 달고 다닌다. */
-  function toUnits(toks) {
-    var u = [];
-    toks.forEach(function (t, i) {
-      t.keys.forEach(function (k) { u.push({ key: k, ti: i }); });
-    });
-    return u;
-  }
-  function lcsPairs(a, b) {
-    var n = a.length, m = b.length;
-    if (!n || !m) return { pairs: [], same: 0 };
-    // 메모리 보호: 아주 긴 텍스트는 앞부분만 맞춘다. 최장 클립(set9-L2-08-11)이
-    // 대본 437단어이고 숫자를 펴면 그보다 늘어나므로, 잘림이 실제로 걸리지 않도록
-    // 여유를 둔다. dp 는 LIM² × 2바이트라 1600 이면 약 5 MB.
-    var LIM = 1600;
-    if (n > LIM) { a = a.slice(0, LIM); n = LIM; }
-    if (m > LIM) { b = b.slice(0, LIM); m = LIM; }
-    var dp = [], i, j;
-    for (i = 0; i <= n; i++) dp.push(new Uint16Array(m + 1));
-    for (i = n - 1; i >= 0; i--) {
-      for (j = m - 1; j >= 0; j--) {
-        dp[i][j] = a[i].key === b[j].key ? dp[i + 1][j + 1] + 1
-                 : Math.max(dp[i + 1][j], dp[i][j + 1]);
-      }
-    }
-    var pairs = [];
-    i = 0; j = 0;
-    while (i < n && j < m) {
-      if (a[i].key === b[j].key) { pairs.push([i, j]); i++; j++; }
-      else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
-      else j++;
-    }
-    return { pairs: pairs, same: pairs.length };
-  }
-  /** 원문의 [from,to) 구간을 "형광 처리할 토큰 인덱스 집합"과 함께 HTML 로.
-   *  구간을 받는 이유: 문장별 표시와 전체 통계가 같은 한 번의 대조 결과를 쓰게 하려고 —
-   *  문장마다 다시 맞추면 같은 단어가 여러 문장에 중복으로 매칭돼 숫자가 어긋난다. */
-  function paint(text, toks, badSet, cls, from, to) {
-    from = from || 0;
-    to = to == null ? text.length : to;
-    var out = '', cur = from;
-    toks.forEach(function (t, i) {
-      if (t.at < from || t.at >= to) return;
-      out += esc(text.slice(cur, t.at));
-      out += badSet[i] ? '<mark class="' + cls + '">' + esc(t.raw) + '</mark>' : esc(t.raw);
-      cur = t.at + t.raw.length;
-    });
-    return out + esc(text.slice(cur, to));
-  }
-  function compare(item) {
-    var st = tokenize(item.text || ''), sa = tokenize(item.asr || '');
-    if (!item.asr || !sa.length) {
-      return { ratio: null, toks: st, miss: {}, scriptHtml: esc(item.text || ''), asrHtml: '' };
-    }
-    var us = toUnits(st), ua = toUnits(sa);
-    var r = lcsPairs(us, ua);
-    // 낱말 단위 매칭을 원래 토큰으로 되접는다. "400"↔"four hundred" 처럼 한 토큰이 여러
-    // 낱말로 펴진 경우, 낱말이 전부 맞아야 그 토큰을 맞은 것으로 센다 — 절반만 맞은
-    // 숫자를 초록으로 칠하면 화면이 실제보다 관대해진다.
-    var hitS = {}, hitA = {};
-    r.pairs.forEach(function (p) {
-      hitS[us[p[0]].ti] = (hitS[us[p[0]].ti] || 0) + 1;
-      hitA[ua[p[1]].ti] = (hitA[ua[p[1]].ti] || 0) + 1;
-    });
-    var missS = {}, extraA = {}, k;
-    for (k = 0; k < st.length; k++) if ((hitS[k] || 0) < st[k].keys.length) missS[k] = 1;
-    for (k = 0; k < sa.length; k++) if ((hitA[k] || 0) < sa[k].keys.length) extraA[k] = 1;
-    return {
-      ratio: (2 * r.same) / (us.length + ua.length),
-      missing: Object.keys(missS).length,
-      extra: Object.keys(extraA).length,
-      toks: st, miss: missS,
-      scriptHtml: paint(item.text, st, missS, 'miss'),
-      asrHtml: paint(item.asr, sa, extraA, 'extra')
-    };
-  }
+     규칙 본체(숫자 펴기·토크나이즈·LCS·형광 칠하기)는 assets/audio-script-check.js 에 있다.
+     admin-audio-files.html 의 표 판정도 같은 함수를 쓴다 — 두 벌로 갈리면 같은 파일에
+     두 화면이 다른 점수를 낸다. */
+  var SC = window.SG_SCRIPT_CHECK;
+  var tokenize = SC.tokenize, paint = SC.paint, compare = SC.compare;
 
   /* ── 문장 나누기 + 재생 위치 추정 ─────────────────────────
      문장별 정확한 타임코드는 없다. 글자 수 비례로 나눈 "추정" 구간이며,
@@ -434,13 +323,8 @@
       });
   }
 
-  function band(it) {
-    var r = it.cmp.ratio;
-    if (r == null) return 'none';
-    if (r >= 0.97) return 'ok';
-    if (r >= 0.85) return 'warn';
-    return 'bad';
-  }
+  /* 밴드 경계도 공용 규칙을 쓴다 — assets/audio-script-check.js 의 TH.asrOk/asrWarn. */
+  function band(it) { return SC.asrBand(it.cmp.ratio); }
   function visible() {
     return ITEMS.filter(function (it) {
       if (filt === 'bad' && band(it) !== 'bad' && band(it) !== 'warn') return false;
