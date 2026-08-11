@@ -680,7 +680,7 @@
               "answer": 1,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q01.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-a.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-b.webp"
             },
             {
               "id": "L1-2",
@@ -696,7 +696,7 @@
               "answer": 0,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q02.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-b.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-a.webp"
             },
             {
               "id": "L1-3",
@@ -712,7 +712,7 @@
               "answer": 2,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q03.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-d.webp"
             },
             {
               "id": "L1-4",
@@ -728,7 +728,7 @@
               "answer": 3,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q04.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-d.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
             },
             {
               "id": "L1-5",
@@ -744,7 +744,7 @@
               "answer": 1,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q05.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-e.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-d.webp"
             },
             {
               "id": "L1-6",
@@ -760,7 +760,7 @@
               "answer": 0,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q06.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-b.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-e.webp"
             },
             {
               "id": "L1-7",
@@ -776,7 +776,7 @@
               "answer": 2,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q07.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-d.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-b.webp"
             },
             {
               "id": "L1-8",
@@ -792,7 +792,7 @@
               "answer": 3,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q08.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-a.webp"
             },
             {
               "id": "L1-9",
@@ -808,7 +808,7 @@
               "answer": 1,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q09.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-d.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-f.webp"
             },
             {
               "id": "L1-10",
@@ -824,7 +824,7 @@
               "answer": 0,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q10.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-e.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
             },
             {
               "id": "L1-11",
@@ -856,7 +856,7 @@
               "answer": 3,
               "layout": "short-response",
               "audio": "media/audio/set9/l1-q12.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-e.webp"
             }
           ],
           "perQuestionAudio": true
@@ -1211,7 +1211,7 @@
               "answer": 2,
               "layout": "short-response",
               "audio": "media/audio/set9/l2-q01.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-e.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-b.webp"
             },
             {
               "id": "L2-2",
@@ -1227,7 +1227,7 @@
               "answer": 0,
               "layout": "short-response",
               "audio": "media/audio/set9/l2-q02.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-c.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-f.webp"
             },
             {
               "id": "L2-3",
@@ -1243,7 +1243,7 @@
               "answer": 0,
               "layout": "short-response",
               "audio": "media/audio/set9/l2-q03.mp3",
-              "image": "media/pictures/set9/l1-q1-12-speaker-b.webp"
+              "image": "media/pictures/set9/l1-q1-12-speaker-d.webp"
             }
           ],
           "perQuestionAudio": true

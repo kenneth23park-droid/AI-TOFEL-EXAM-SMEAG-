@@ -106,8 +106,26 @@ def resolve_audio(ref, where):
 # 남는 인물(데님셔츠·안경)로 돌려 5명을 채웠다. 그 인물은 L2 12-15 강의 화자와 겹치는데,
 # 고해상도 원본이 8장뿐이라 9자리 중 한 번의 재사용은 피할 수 없다. 같은 블록 안이 아니라
 # 모듈이 다른 두 자리로 밀어 둔 것이다.
-L1_Q1_12_IMAGES = ['a', 'b', 'c', 'd', 'e', 'b', 'd', 'c', 'd', 'e', 'b', 'c']
-L2_Q1_3_IMAGES = ['e', 'c', 'b']
+#
+# ── 목소리 성별과 사진 성별 맞추기 (2026-08-11) ─────────────────────────────
+# docx 가 넘겨준 앵커 순서를 그대로 쓰면 사진은 docx 편집자가 아무렇게나 붙인 것이라
+# TTS 배역(config/set9-voice-casting.json)의 성별과 어긋난다 — 실제로 M1 Q1-6 과
+# M2 Q1-2 가 남녀가 뒤바뀐 채 나가고 있었다(Q2 는 남성 Liam 목소리에 여성 사진).
+# 짧은 응답 문항은 사진 한 장이 곧 화자이므로, 이제 배역표의 gender 를 기준으로 배정한다.
+#
+# 얼굴 → 성별 (파일 실물 기준. tests/test_speaker_images.py 의 SET9_FACE_GENDER 와 같아야 한다)
+#   a 남 · 20대 아시아계        b 여 · 20대 아시아계
+#   c 남 · 30~40대 백인(민머리)  d 여 · 40대 백인
+#   e 남 · 30대 흑인(안경)       f 여 · 40대 흑인  ← 2026-08-11 추가(여성 얼굴이 둘뿐이었다)
+#
+# 화자 캐릭터 → 얼굴 (한 캐릭터는 세트 내내 같은 얼굴. 이웃한 두 문항은 다른 얼굴)
+#   Ava·Zoe·Lily → b   Mia·Alice·Ivy → d   Emma → f
+#   Liam·Noah → a      Mason·Ethan → c     Henry·Oliver → e
+#
+# M1 Q1-12 화자: Ava Liam Mia Mason Alice Henry Lily Noah Emma Ethan Zoe Oliver
+# M2 Q1-3  화자: Ava Emma Ivy
+L1_Q1_12_IMAGES = ['b', 'a', 'd', 'c', 'd', 'e', 'b', 'a', 'f', 'c', 'b', 'e']
+L2_Q1_3_IMAGES = ['b', 'f', 'd']
 PIC_EXT = '.webp'
 L2_BLOCK_IMAGES = {
     'Questions 4-5': 'l2-q4-5-conversation' + PIC_EXT,

@@ -2,7 +2,8 @@
 
 실행:  python3 studyground/tests/test_speaker_images.py
 
-set1.js 는 문항마다 화자 삽화(image)를 손으로 지정한다(SPEAKER_BY_ITEM 및 블록별 image).
+set1.js·set9.js 는 문항마다 화자 삽화(image)를 손으로 지정한다
+(set1: SPEAKER_BY_ITEM 및 블록별 image · set9: tools/build_set9.py 의 L1_Q1_12_IMAGES 표).
 mp3 를 교체하면 경로는 그대로라 아무 오류 없이 로드되고 사진만 조용히 틀려지므로,
 여기서 오디오를 직접 측정해 삽화의 성별과 대조한다.
 
@@ -14,8 +15,10 @@ mp3 를 교체하면 경로는 그대로라 아무 오류 없이 로드되고 �
 
 전제
   numpy 와 ffmpeg 가 필요하다. 없으면 SKIP 하고 종료코드 0 (검증을 못 했다고 크게 출력).
-  삽화 파일명이 판정 기준이다 — 'Single male*' / 'Single female*' / 'Academic, Single female'.
-  2인 삽화('2 People' / '2 Persons')는 대화문이라 성별 단정이 무의미해 건너뛴다.
+  SET 1 은 삽화 파일명이 판정 기준이다 — 'Single male*' / 'Single female*' / 'Academic, Single female'.
+  SET 9 는 파일명이 speaker-a..f 라 이름만으로는 알 수 없어 아래 SET9_FACE_GENDER 표로 판정한다.
+  2인 삽화('2 People' / '2 Persons')와 SET 9 의 장면 삽화(대화·강의)는 성별 단정이
+  무의미해 건너뛴다.
 """
 
 from __future__ import annotations
@@ -46,12 +49,12 @@ DUMP_JS = r"""
 global.window = global;
 require(process.argv[1]);
 var out = [];
-window.SMEAG_SET1.sections.find(function (s) { return s.id === 'listening'; })
+window[process.argv[2]].sections.find(function (s) { return s.id === 'listening'; })
   .modules.forEach(function (m) {
     m.blocks.forEach(function (b) {
-      if (b.audio) out.push({ id: b.heading || m.id, audio: b.audio, image: b.image || '' });
+      if (b.audio) out.push({ id: b.heading || m.id, audio: b.audio, image: b.image || '', level: 'block' });
       (b.questions || []).forEach(function (q) {
-        if (q.audio) out.push({ id: q.id, audio: q.audio, image: q.image || '' });
+        if (q.audio) out.push({ id: q.id, audio: q.audio, image: q.image || '', level: 'question' });
       });
     });
   });
@@ -59,12 +62,24 @@ process.stdout.write(JSON.stringify(out));
 """
 
 
-def listening_pairs():
+def listening_pairs(asset: str, global_name: str):
     proc = subprocess.run(
-        ["node", "-e", DUMP_JS, str(SG2 / "assets" / "set1.js")],
+        ["node", "-e", DUMP_JS, str(SG2 / "assets" / asset), global_name],
         capture_output=True, text=True, check=True,
     )
     return json.loads(proc.stdout)
+
+
+# SET 9 는 삽화 파일명(speaker-a..f)이 성별을 말해 주지 않는다. 사진 실물을 보고 적은 표이며,
+# tools/build_set9.py 의 배정 주석과 짝을 이룬다. 사진을 갈아 끼우면 여기도 고칠 것.
+SET9_FACE_GENDER = {
+    "l1-q1-12-speaker-a.webp": "male",     # 20대 아시아계
+    "l1-q1-12-speaker-b.webp": "female",   # 20대 아시아계
+    "l1-q1-12-speaker-c.webp": "male",     # 30~40대 백인(민머리)
+    "l1-q1-12-speaker-d.webp": "female",   # 40대 백인
+    "l1-q1-12-speaker-e.webp": "male",     # 30대 흑인(안경)
+    "l1-q1-12-speaker-f.webp": "female",   # 40대 흑인
+}
 
 
 def local_path(asset: str) -> Path:
@@ -77,6 +92,10 @@ def local_path(asset: str) -> Path:
 
 def image_gender(image: str):
     name = Path(image).name.lower()
+    if name in SET9_FACE_GENDER:
+        return SET9_FACE_GENDER[name]
+    if "/set9/" in image.replace("\\", "/"):
+        return "duo"      # 대화·강의 장면 삽화 — 인물이 여럿이라 판정 대상이 아니다
     if "2 people" in name or "2 persons" in name:
         return "duo"
     if "female" in name:
@@ -129,18 +148,10 @@ def audio_gender(p20: float):
 
 
 # ── 검증 ──────────────────────────────────────────────────────────────────────
-def main() -> int:
-    if shutil.which("ffmpeg") is None:
-        print("SKIP: ffmpeg 이 없어 화자 정합을 검증하지 못했습니다 (brew install ffmpeg).")
-        return 0
-    try:
-        import numpy  # noqa: F401
-    except ImportError:
-        print("SKIP: numpy 가 없어 화자 정합을 검증하지 못했습니다 (pip install numpy).")
-        return 0
-
-    pairs = listening_pairs()
-    print("\n[화자 삽화 ↔ 오디오 음성] 대상 %d개" % len(pairs))
+def check_set(set_name: str, asset: str, global_name: str):
+    """한 세트를 검증하고 (대상 수, 실패 id 들, 건너뛴 수) 를 돌려준다."""
+    pairs = listening_pairs(asset, global_name)
+    print("\n[%s 화자 삽화 ↔ 오디오 음성] 대상 %d개" % (set_name, len(pairs)))
 
     fails, skipped = [], 0
     for pair in pairs:
@@ -152,6 +163,12 @@ def main() -> int:
             fails.append(pair["id"])
             continue
         if not pair["image"]:
+            # 문항 단위 오디오는 사진 한 장이 곧 화자다 — 빠지면 화면이 비므로 실패로 본다.
+            # 블록(대화·공지·강의)은 원본 문항지에 삽화가 없는 자리가 있어 건너뛴다.
+            if pair.get("level") == "block":
+                print("  skip " + label + " — 삽화 없는 블록(원본에 삽화 없음)")
+                skipped += 1
+                continue
             print("  FAIL " + label + " — 삽화 미지정")
             fails.append(pair["id"])
             continue
@@ -166,7 +183,7 @@ def main() -> int:
             fails.append(pair["id"])
             continue
         if want == "duo":
-            print("  skip " + label + " — 2인 대화 삽화")
+            print("  skip " + label + " — 여러 인물이 나오는 장면 삽화")
             skipped += 1
             continue
 
@@ -183,14 +200,39 @@ def main() -> int:
                   % (MALE_MAX_P20, FEMALE_MIN_P20))
             fails.append(pair["id"])
         elif got != want:
-            print("  FAIL " + label + " — " + detail + " → 음성=" + got + " · 삽화를 바꾸거나 SPEAKER_BY_ITEM 을 갱신할 것")
+            print("  FAIL " + label + " — " + detail + " → 음성=" + got +
+                  " · 삽화를 바꾸거나 배정표(set1: SPEAKER_BY_ITEM · set9: build_set9.py 의 "
+                  "L1_Q1_12_IMAGES/L2_Q1_3_IMAGES)를 갱신할 것")
             fails.append(pair["id"])
         else:
             print("  ok   " + label + " — " + detail)
 
-    print("\n%d 통과 · %d 건너뜀 · %d 실패" % (len(pairs) - len(fails) - skipped, skipped, len(fails)))
-    if fails:
-        print("불일치: " + ", ".join(fails))
+    print("  → %d 통과 · %d 건너뜀 · %d 실패" % (len(pairs) - len(fails) - skipped, skipped, len(fails)))
+    return len(pairs), fails, skipped
+
+
+def main() -> int:
+    if shutil.which("ffmpeg") is None:
+        print("SKIP: ffmpeg 이 없어 화자 정합을 검증하지 못했습니다 (brew install ffmpeg).")
+        return 0
+    try:
+        import numpy  # noqa: F401
+    except ImportError:
+        print("SKIP: numpy 가 없어 화자 정합을 검증하지 못했습니다 (pip install numpy).")
+        return 0
+
+    total, all_fails, total_skipped = 0, [], 0
+    for set_name, asset, global_name in (("SET 1", "set1.js", "SMEAG_SET1"),
+                                         ("SET 9", "set9.js", "SMEAG_SET9")):
+        n, fails, skipped = check_set(set_name, asset, global_name)
+        total += n
+        all_fails += ["%s %s" % (set_name, f) for f in fails]
+        total_skipped += skipped
+
+    print("\n합계 %d 통과 · %d 건너뜀 · %d 실패"
+          % (total - len(all_fails) - total_skipped, total_skipped, len(all_fails)))
+    if all_fails:
+        print("불일치: " + ", ".join(all_fails))
         return 1
     return 0
 

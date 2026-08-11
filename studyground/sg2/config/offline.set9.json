@@ -1,8 +1,8 @@
 {
  "set": "SET9",
  "label": "NEW TOEFL SET 9",
- "count": 91,
- "bytes": 24807547,
+ "count": 92,
+ "bytes": 24842133,
  "files": [
   {
    "u": "media/audio/set9/l1-q01.mp3",
@@ -183,6 +183,10 @@
   {
    "u": "media/pictures/set9/l1-q1-12-speaker-e.webp",
    "b": 67076
+  },
+  {
+   "u": "media/pictures/set9/l1-q1-12-speaker-f.webp",
+   "b": 34586
   },
   {
    "u": "media/pictures/set9/l2-q12-15-talk.webp",

@@ -80,7 +80,11 @@
 //      받고, login.html 은 아이디뿐 아니라 등록한 이메일로도 들어간다. admin-qr.html
 //      카드에 이메일이 함께 찍힌다. 세 화면 모두 셸이라 VERSION 을 올려야 재방문
 //      기기가 이메일 칸 없는 옛 폼을 계속 보지 않는다.
-const VERSION = 'sg-v30';
+// v31: SET 9 짧은응답 화자 사진을 목소리 성별에 맞춰 다시 배정했다(assets/set9.js).
+//      셸에 든 set9.js 가 바뀌었으므로 VERSION 을 올려야 재방문 기기가 남녀가
+//      뒤바뀐 옛 배정을 계속 보지 않는다. 여성 얼굴 한 장(speaker-f)이 늘어
+//      config/offline.set9.json 도 92개로 갱신되었다.
+const VERSION = 'sg-v31';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
