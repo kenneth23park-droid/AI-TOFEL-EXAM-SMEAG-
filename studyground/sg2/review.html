@@ -222,9 +222,16 @@
             det.score + '/' + det.total + ' ' + bi('auto-scored items', '자동채점 문항') +
             ' · ' + when(res.submitted_at) + '</div>' +
           (v && v.draft
-            ? '<div class="muted" style="font-size:12px;margin-top:4px">✎ ' +
+            ? '<div class="muted" style="font-size:12px;margin-top:4px">' +
+                /* 선생님에게는 이 연필이 버튼이다 — 채점(초안)과 코멘트는 따로 만들어지므로
+                   초안만 있고 AI 리뷰는 아직 없는 답안지가 흔하다. 그 자리에서 부른다. */
+                (STAFF
+                  ? '<button type="button" id="ai-ask" class="rv-ask"' +
+                      ' title="Request an AI review" aria-label="Request an AI review">✎</button> '
+                  : '✎ ') +
                 bi('Includes an AI draft a teacher has not confirmed yet.',
-                   '교사가 아직 확정하지 않은 AI 초안이 포함되어 있습니다.') + '</div>'
+                   '교사가 아직 확정하지 않은 AI 초안이 포함되어 있습니다.') +
+                (STAFF ? ' <span id="ai-ask-say"></span>' : '') + '</div>'
             : '') +
         '</div>' +
         (who ? '<div style="margin-left:auto;text-align:right">' +
@@ -232,6 +239,71 @@
           '<div class="muted" style="font-size:12px">' + esc(who.student_id || '') + '</div></div>' : '') +
       '</div>';
     show('summary');
+
+    var ask = $('ai-ask');
+    if (ask) ask.onclick = function () { askAiReview(ask, $('ai-ask-say')); };
+  }
+
+  /* 연필에서 부르는 AI 리뷰 — 모델·언어는 선생님 줄에서 고른 것을 그대로 쓰고,
+   * 아직 그 줄이 그려지기 전이면 서버가 준 기본 모델로 간다. */
+  function askAiReview(btn, say) {
+    if (!RES || !DET) return;
+    if (say) say.textContent = '…';
+    if (btn) btn.disabled = true;
+    /* 모델 목록이 아직 안 왔을 수 있다(요약이 먼저 그려진다). 기다렸다가 고른다 —
+       안 기다리면 "키가 없습니다"라고 잘못 말하게 된다. */
+    (PROVIDERS_P || Promise.resolve()).then(function () {
+      var sel = $('ai-model'), provider = '', model = '';
+      if (sel && sel.value) {
+        var pick = String(sel.value).split('::');
+        provider = pick[0]; model = pick[1];
+      } else {
+        var p = PROVIDERS.filter(function (x) { return x.ready; })[0];
+        if (!p) {
+          if (say) say.textContent = 'No AI key is configured on the server yet.';
+          if (btn) btn.disabled = false;
+          return;
+        }
+        provider = p.id; model = p.default;
+      }
+      runAiComments(provider, model, ($('ai-lang') && $('ai-lang').value) || 'en', btn, say);
+    });
+  }
+
+  /* 코멘트 생성 한 번 — 생성한 뒤 sg_comments 에 영역별·문항별로 저장하고 다시 그린다.
+   * 부르는 자리가 둘(선생님 줄의 Generate, 요약의 연필)이라 여기 한 군데에 둔다. */
+  function runAiComments(provider, model, lang, btn, say) {
+    if (say) say.textContent = '…';
+    if (btn) btn.disabled = true;
+    return SG_COMMENTS.generate({
+      provider: provider, model: model, lang: lang,
+      attempt: SG_COMMENTS.attemptFor(RES, DET)
+    }).then(function (out) {
+      var jobs = [];
+      (out.sections || []).forEach(function (s) {
+        if (!s || !s.scope) return;
+        jobs.push(SG_COMMENTS.save({
+          owner: OWNER_ID, session: SESSION, scope: s.scope, question_id: '',
+          source: 'ai', model: out.model, lang: out.lang,
+          body: s.summary || '', strengths: s.strengths || [], improvements: s.improvements || []
+        }));
+      });
+      (out.questions || []).forEach(function (q) {
+        if (!q || !q.question_id) return;
+        jobs.push(SG_COMMENTS.save({
+          owner: OWNER_ID, session: SESSION, scope: 'question', question_id: q.question_id,
+          source: 'ai', model: out.model, lang: out.lang, body: q.body || ''
+        }));
+      });
+      return Promise.all(jobs).then(function () {
+        if (say) say.textContent = '';
+        if (btn) btn.disabled = false;
+        reloadComments();
+      });
+    })['catch'](function (e) {
+      if (say) say.textContent = String(e.message || e);
+      if (btn) btn.disabled = false;
+    });
   }
 
   function paintSections(det) {
@@ -431,7 +503,7 @@
   /* ── 코멘트 (선생님 · AI) ─────────────────────────────────
    * 학생은 읽기만 한다 — 편집 장치는 STAFF 일 때만 DOM 에 들어간다.
    * 화면에서 감추는 게 아니라 아예 그리지 않는다. */
-  var CMT = [], STAFF = false, ME = null, OWNER_ID = '', PROVIDERS = [];
+  var CMT = [], STAFF = false, ME = null, OWNER_ID = '', PROVIDERS = [], PROVIDERS_P = null;
 
   function commentsFor(scope, qid) {
     return CMT.filter(function (c) {
@@ -566,39 +638,7 @@
 
     $('ai-go').onclick = function () {
       var pick = String($('ai-model').value || '').split('::');
-      var lang = $('ai-lang').value;
-      var say = $('ai-say');
-      say.textContent = '…';
-      $('ai-go').disabled = true;
-      SG_COMMENTS.generate({
-        provider: pick[0], model: pick[1], lang: lang,
-        attempt: SG_COMMENTS.attemptFor(res, det)
-      }).then(function (out) {
-        var jobs = [];
-        (out.sections || []).forEach(function (s) {
-          if (!s || !s.scope) return;
-          jobs.push(SG_COMMENTS.save({
-            owner: OWNER_ID, session: SESSION, scope: s.scope, question_id: '',
-            source: 'ai', model: out.model, lang: out.lang,
-            body: s.summary || '', strengths: s.strengths || [], improvements: s.improvements || []
-          }));
-        });
-        (out.questions || []).forEach(function (q) {
-          if (!q || !q.question_id) return;
-          jobs.push(SG_COMMENTS.save({
-            owner: OWNER_ID, session: SESSION, scope: 'question', question_id: q.question_id,
-            source: 'ai', model: out.model, lang: out.lang, body: q.body || ''
-          }));
-        });
-        return Promise.all(jobs).then(function () {
-          say.textContent = '';
-          $('ai-go').disabled = false;
-          reloadComments();
-        });
-      }).catch(function (e) {
-        say.textContent = String(e.message || e);
-        $('ai-go').disabled = false;
-      });
+      runAiComments(pick[0], pick[1], $('ai-lang').value, $('ai-go'), $('ai-say'));
     };
   }
 
@@ -910,10 +950,10 @@
     if (!OWNER_ID || !window.SG_COMMENTS) return;
     reloadComments();
     if (!STAFF) return;
-    SG_COMMENTS.providers().then(function (list) {
+    PROVIDERS_P = SG_COMMENTS.providers().then(function (list) {
       PROVIDERS = list || [];
       paintStaffBar(res, det);
-    });
+    })['catch'](function () { PROVIDERS = []; });
   }
 
   function boot() {

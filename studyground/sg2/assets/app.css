@@ -311,6 +311,13 @@ h2.title { font-size: clamp(24px, 3vw, 34px); font-weight: 820; letter-spacing: 
 .rv-bar { height: 6px; border-radius: 999px; background: var(--cream-2); overflow: hidden; margin-top: 8px; }
 .rv-bar i { display: block; height: 100%; background: var(--brand); }
 
+/* 초안 표시(✎)는 선생님 화면에서만 버튼이 된다 — 누르면 그 자리에서 AI 리뷰를 부른다.
+   글자 크기는 옆 문장과 같게 두고, 누를 수 있다는 신호는 테두리와 커서로만 준다. */
+.rv-ask { font: inherit; line-height: 1; cursor: pointer; padding: 1px 6px; margin: 0;
+  border: 1px solid var(--line-2); border-radius: 999px; background: #fff; color: var(--brand); }
+.rv-ask:hover { background: var(--cream); }
+.rv-ask:disabled { opacity: .5; cursor: default; }
+
 .rv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .rv-table th, .rv-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 .rv-table th { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
