@@ -53,8 +53,8 @@
         <th><span data-en>Date</span><span data-ko>날짜</span></th>
         <th><span data-en>Student</span><span data-ko>학생</span></th>
         <th><span data-en>Test</span><span data-ko>시험</span></th>
-        <th><span data-en>Sections</span><span data-ko>영역</span></th>
-        <th style="text-align:right"><span data-en>Score</span><span data-ko>점수</span></th>
+        <th><span data-en>Section bands</span><span data-ko>영역별 밴드</span></th>
+        <th style="text-align:right"><span data-en>Overall</span><span data-ko>종합</span></th>
         <th style="width:110px"></th>
       </tr></thead>
       <tbody id="rows"></tbody>
@@ -68,6 +68,7 @@
 
 <script src="assets/app.js"></script>
 <script src="assets/sg-auth.js"></script>
+<script src="assets/sg-band.js"></script>
 <script src="assets/sg-results.js"></script>
 <script>
 /* 선생님·관리자용 전체 응시 목록. 한 줄이 한 응시이고, 리뷰 버튼이 그 응시의
@@ -98,12 +99,18 @@
   function nameOf(r) { return (r.student && (r.student.name || r.student.email)) || '—'; }
   function idOf(r) { return (r.student && r.student.student_id) || ''; }
 
+  /* session → W·S 채점 행. load() 가 한 번만 읽어 채운다. */
+  var TASKS = {};
+  function viewOf(r) { return SG_BAND.of(r, TASKS[r.session] || []); }
+
   function chips(r) {
-    var by = r.by_section || {};
-    return Object.keys(LAB).filter(function (s) { return by[s]; }).map(function (s) {
-      var v = by[s];
-      return '<span class="chip">' + LAB[s] + ' ' + (v.total ? v.score + '/' + v.total : '—') + '</span>';
-    }).join(' ') || '<span class="muted">—</span>';
+    var v = viewOf(r);
+    return Object.keys(LAB).map(function (s) {
+      var sec = v.sections[s];
+      var band = sec && sec.band !== null ? SG_BAND.fmt(sec.band) : '—';
+      // ✎ = AI 초안(교사 확정 전). 선생님이 손볼 곳을 한눈에 찾는 표시다.
+      return '<span class="chip">' + LAB[s] + ' ' + band + (sec && sec.status === 'draft' ? ' ✎' : '') + '</span>';
+    }).join(' ');
   }
 
   function shown() {
@@ -118,7 +125,9 @@
 
   function paint() {
     var list = shown();
-    $('count').textContent = list.length + ' / ' + ALL.length;
+    var waiting = list.filter(function (r) { return viewOf(r).draft; }).length;
+    $('count').textContent = list.length + ' / ' + ALL.length +
+      (waiting ? '  ·  ✎ ' + waiting + ' awaiting confirmation' : '');
     $('rows').innerHTML = list.length ? list.map(function (r) {
       return '<tr>' +
         '<td ' + SG_LABEL('Date', '날짜') + '>' + when(r.submitted_at) + '</td>' +
@@ -126,7 +135,8 @@
           (idOf(r) ? '<div class="muted" style="font-size:12px">' + esc(idOf(r)) + '</div>' : '') + '</td>' +
         '<td ' + SG_LABEL('Test', '시험') + '><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
         '<td ' + SG_LABEL('Sections', '영역') + '><span class="chips" style="margin:0">' + chips(r) + '</span></td>' +
-        '<td class="score" ' + SG_LABEL('Score', '점수') + '>' + r.score + ' / ' + r.total + '</td>' +
+        '<td class="score" ' + SG_LABEL('Overall', '종합') + '>' +
+          (viewOf(r).overall === null ? '—' : 'Band ' + SG_BAND.fmt(viewOf(r).overall)) + '</td>' +
         '<td class="card-actions"><a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) +
           '&owner=' + encodeURIComponent(r.owner) + '">' + bi('Review', '리뷰') + '</a></td>' +
       '</tr>';
@@ -145,12 +155,22 @@
   }
 
   function csv() {
-    var head = ['submitted_at', 'name', 'student_id', 'set', 'score', 'total', 'percent', 'session'];
+    /* 밴드를 앞에 두고 원점수를 뒤에 둔다 — 성적표의 눈금이 밴드이기 때문이다.
+       확정 전(AI 초안)이면 band_status 가 draft 다. 그 열이 없으면 스프레드시트에서
+       초안과 확정 점수가 구분 없이 섞인다. */
+    var head = ['submitted_at', 'name', 'student_id', 'set',
+                'band_overall', 'band_reading', 'band_listening', 'band_writing', 'band_speaking',
+                'band_status', 'cefr', 'auto_correct', 'auto_total', 'session'];
     var lines = [head.join(',')];
     shown().forEach(function (r) {
+      var v = viewOf(r);
+      function b(s) { return v.sections[s].band === null ? '' : SG_BAND.fmt(v.sections[s].band); }
       lines.push([r.submitted_at || '', nameOf(r), idOf(r), r.set_code || '',
-                  r.score, r.total, r.percent, r.session]
-        .map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','));
+                  v.overall === null ? '' : SG_BAND.fmt(v.overall),
+                  b('reading'), b('listening'), b('writing'), b('speaking'),
+                  v.draft ? 'draft' : (v.pending.length ? 'incomplete' : 'final'),
+                  v.cefr, r.score, r.total, r.session]
+        .map(function (v2) { return '"' + String(v2).replace(/"/g, '""') + '"'; }).join(','));
     });
     var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
     var a = document.createElement('a');
@@ -160,7 +180,14 @@
   }
 
   function load() {
-    SG_RESULTS.listAll().then(function (rows) {
+    /* 응시 목록과 W·S 채점을 각각 한 번씩만 읽는다. 채점 조회가 실패해도 목록은
+       그린다 — 그때는 W·S 가 '아직 채점 전' 으로 보이고 리뷰에서 확인하면 된다. */
+    Promise.all([
+      SG_RESULTS.listAll(),
+      SG_RESULTS.tasks().catch(function () { return []; })
+    ]).then(function (out) {
+      var rows = out[0];
+      TASKS = SG_RESULTS.tasksBySession(out[1]);
       ALL = rows || [];
       if (!ALL.length) {
         notice('No submitted test has been uploaded yet.', '아직 올라온 응시 결과가 없습니다.');

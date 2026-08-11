@@ -97,6 +97,23 @@ POST /api/attempts/{id}/rescore?lang=en&mode=auto|offline|online
 3. Deploy — `vercel.json` routes everything to `api/index.py`, which serves the
    identical FastAPI app.
 
+### sg2 (static app) serverless functions
+
+`sg2/api/*.js` are separate from the FastAPI app. Environment variables on that
+Vercel project:
+
+| Variable | Used by | Without it |
+|---|---|---|
+| `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | `/api/feedback`, `/api/score` | that provider is not offered |
+| `SUPABASE_SERVICE_ROLE_KEY` | `/api/score` | **AI scoring returns 503** — students may only read `sg_task_scores`, never write it, so drafts are written server-side |
+| `OPENAI_API_KEY` | speech-to-text for Speaking | Speaking is skipped as `no_transcript` (never scored 0) |
+| `ANTHROPIC_MODEL` / `OPENAI_MODEL` | both | the newest plain-named model is picked automatically |
+
+`/api/score` grades Writing and Speaking against the official ETS scoring guides
+(0–5 per task) and stores the draft in `sg_task_scores`. A teacher confirms it on
+`review.html`; a confirmed row is never overwritten by re-scoring. The 1–6 band is
+worked out from those scores at display time — see `docs/scoring-rationale.md` §6-1.
+
 ## Verify
 
 ```bash

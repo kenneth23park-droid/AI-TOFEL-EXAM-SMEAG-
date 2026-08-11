@@ -25,15 +25,22 @@ if (a < 0 || b < 0 || b < a) {
   process.exit(1);
 }
 
-/* 페이지에서 REPORT 가 기대는 최소한의 이웃만 세워 준다. */
+/* 페이지에서 REPORT 가 기대는 최소한의 이웃만 세워 준다.
+ *
+ * BAND 는 페이지의 최상위 모듈이고 TASKS 는 화면 IIFE 의 변수다. REPORT 는 둘 다
+ * 본다 — 성적표에 TOEFL 1~6 밴드를 함께 싣기 때문이다. 여기서는 sg-band.js 를
+ * 그대로 끌어와 스텁으로 세운다(밴드 계산이 두 벌이 되지 않게).
+ */
+var SG_BAND = require(path.join(__dirname, '..', 'sg2', 'assets', 'sg-band.js'));
 var STUB = [
   "var CFG = { reportUrl: 'https://report.test/' };",
   "var LAB = { reading: ['Reading','읽기'], listening: ['Listening','듣기'],",
   "            writing: ['Writing','쓰기'], speaking: ['Speaking','말하기'] };",
-  "function when(iso) { return String(iso).slice(0, 10); }"
+  "function when(iso) { return String(iso).slice(0, 10); }",
+  "var BAND = __BAND, TASKS = {};"
 ].join('\n');
 
-var REPORT = new Function(STUB + src.slice(a, b) + '\nreturn REPORT;')();
+var REPORT = new Function('__BAND', STUB + src.slice(a, b) + '\nreturn REPORT;')(SG_BAND);
 
 var fails = 0;
 function ok(cond, msg) {
@@ -97,6 +104,24 @@ eq(p.grade, '', '반쪽 총점에 등급을 매기지 않는다');
 ok(p.warnings.length === 1 && /Writing/.test(p.warnings[0]) && /Speaking/.test(p.warnings[0]),
    '빠진 영역을 경고로 알린다');
 
+console.log('TOEFL 1~6 밴드 (ETS 2026 눈금) — 옛 눈금과 병기한다');
+var band6 = REPORT.build(row('SET9', {
+  reading: { score: 40, total: 50 }, listening: { score: 40, total: 47 },
+  writing: { score: 0, total: 0 }, speaking: { score: 0, total: 0 }
+}), ME);
+eq(band6.scale, 'toefl6', '어느 눈금으로 보고하는지 함께 넘긴다');
+eq(band6.band.sections.map(function (s) { return s.band; }), [5, 5.5, null, null],
+   'R 40/50 → 5.0 · L 40/47 → 5.5 · 채점 전은 null');
+eq(band6.band.overall, 5.5, '종합은 채점된 영역의 평균 (5.0+5.5)/2 = 5.25 → 5.5');
+eq(band6.band.cefr, 'C1', 'CEFR');
+eq(band6.band.pending, ['writing', 'speaking'], '채점 전 영역을 알린다');
+eq(band6.band.draft, false, '확정 전 AI 초안이 없으면 draft 아님');
+ok(band6.total !== null && band6.total !== undefined,
+   '옛 0~120 값은 그대로 남는다 (전환기 병기) → ' + band6.total);
+
+var bi2 = REPORT.build(row('IELTS-SAMPLE', { reading: { score: 30, total: 40 } }), ME);
+eq(bi2.band, null, 'IELTS 응시에는 TOEFL 밴드를 붙이지 않는다');
+
 console.log('전달 통로 (URL 조각)');
 var opened = null;
 global.window = { open: function (u) { opened = u; } };
@@ -111,12 +136,15 @@ eq(back.profile, 'toefl', '프로파일도 함께 건너간다');
 
 /* reportUrl 이 비면 아무 창도 열지 않는다 — 조회·CSV 만 쓰는 배포를 위한 안전장치. */
 var before = opened;
-new Function("var CFG = { reportUrl: '' };" +
-  "var LAB = { reading: ['Reading','읽기'] };" +
+new Function('__BAND',
+  "var CFG = { reportUrl: '' };" +
+  "var LAB = { reading: ['Reading','읽기'], listening: ['Listening','듣기']," +
+  "            writing: ['Writing','쓰기'], speaking: ['Speaking','말하기'] };" +
   "function when(s){ return String(s).slice(0,10); }" +
+  "var BAND = __BAND, TASKS = {};" +
   src.slice(a, b) +
   "REPORT.open({ set_code: 'SET9', submitted_at: '2026-08-10T00:00:00Z'," +
-  "  by_section: { reading: { score: 1, total: 2 } } }, {});")();
+  "  by_section: { reading: { score: 1, total: 2 } } }, {});")(SG_BAND);
 ok(opened === before, 'reportUrl 이 비어 있으면 열지 않는다');
 
 console.log(fails ? '\nFAILED: ' + fails : '\nALL OK');

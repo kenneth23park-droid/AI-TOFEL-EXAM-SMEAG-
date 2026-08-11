@@ -10,11 +10,10 @@
  *   (1) 진짜 로그인인지 auth/v1/user 로 확인하고 (2) sg_profiles.role 이 teacher·admin
  *   인지 본다. 학생 토큰으로는 401 이다. 서비스 키는 쓰지 않는다.
  *
- * 프로바이더 — 키가 있는 쪽만 목록에 나온다.
- *   openai      OPENAI_API_KEY      (OPENAI_MODEL 이 기본값)
- *   anthropic   ANTHROPIC_API_KEY   (ANTHROPIC_MODEL 이 기본값)
- * 모델은 화면에서 고른다. 목록은 프로바이더의 /models 를 실제로 물어보고, 못 물어보면
- * 아래 FALLBACK 로 떨어진다 — 새 모델이 나와도 이 파일을 고칠 필요가 없다.
+ * 프로바이더 목록·모델 고르기·JSON 파싱은 _llm.js 에 있다(/api/score 와 공유).
+ * 이 파일에 남은 것은 "무엇을 물어볼지" 하나뿐이다.
+ *
+ * 점수는 여기서 나오지 않는다. 코멘트만 쓴다 — 채점은 /api/score 의 몫이다.
  *
  * 계약
  *   GET  /api/feedback            헤더 Authorization: Bearer <supabase access token>
@@ -23,84 +22,7 @@
  *        → { scope 별 코멘트 } — 아래 SCHEMA 참고
  */
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://qrmidnmlethqvdbmnyun.supabase.co';
-const SUPABASE_ANON = process.env.SUPABASE_ANON_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybWlkbm1sZXRocXZkYm1ueXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg3NzQsImV4cCI6MjEwMTMxNDc3NH0.U2cprYXkpIS_1tSAiEjCFuHAztZRwIIK6DYCCowgxg4';
-
-function env(name) {
-  const v = process.env[name];
-  return v && String(v).trim() ? String(v).trim() : '';
-}
-
-/* 목록을 못 받아왔을 때만 쓰는 최소 후보. 실제 목록은 프로바이더에게 묻는다. */
-const FALLBACK = {
-  openai: ['gpt-4o', 'gpt-4o-mini'],
-  anthropic: ['claude-sonnet-5', 'claude-haiku-4-5-20251001']
-};
-
-const PROVIDERS = {
-  openai: {
-    label: 'OpenAI',
-    key: () => env('OPENAI_API_KEY'),
-    def: () => env('OPENAI_MODEL') || 'gpt-4o',
-    async models(key) {
-      const r = await fetch('https://api.openai.com/v1/models', {
-        headers: { Authorization: 'Bearer ' + key }
-      });
-      if (!r.ok) throw new Error('models ' + r.status);
-      const j = await r.json();
-      return (j.data || [])
-        .map((m) => m.id)
-        // 글을 쓰는 모델만 남긴다 — 임베딩·이미지·음성은 코멘트를 못 쓴다.
-        .filter((id) => /^(gpt-|o[0-9])/.test(id) && !/(audio|realtime|transcribe|tts|image|search|embed)/.test(id))
-        .sort()
-        .reverse();   // 새 모델이 위로 — 고르는 사람이 먼저 보는 게 최신이어야 한다.
-    },
-    async chat(key, model, system, user) {
-      const r = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-          response_format: { type: 'json_object' }
-        })
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error((j.error && j.error.message) || 'OpenAI ' + r.status);
-      return j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-    }
-  },
-  anthropic: {
-    label: 'Anthropic (Claude)',
-    key: () => env('ANTHROPIC_API_KEY'),
-    def: () => env('ANTHROPIC_MODEL') || 'claude-sonnet-5',
-    async models(key) {
-      const r = await fetch('https://api.anthropic.com/v1/models?limit=100', {
-        headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' }
-      });
-      if (!r.ok) throw new Error('models ' + r.status);
-      const j = await r.json();
-      return (j.data || []).map((m) => m.id).sort();
-    },
-    async chat(key, model, system, user) {
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model,
-          max_tokens: 2000,
-          system,
-          messages: [{ role: 'user', content: user }]
-        })
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error((j.error && j.error.message) || 'Anthropic ' + r.status);
-      const part = (j.content || []).find((c) => c.type === 'text');
-      return part && part.text;
-    }
-  }
-};
+const LLM = require('./_llm.js');
 
 /* 프롬프트 — studyground/app/scoring/llm.py 와 같은 성격의 보고서를 쓴다.
  * 점수를 지어내지 말 것, 받은 숫자를 그대로 인용할 것. */
@@ -119,118 +41,28 @@ Rules:
 - Every scope in "sections" appears exactly once, in that order.
 - 1-2 sentences per summary; 1-2 short strings each for strengths and improvements.
 - For a section with no auto-score (writing, speaking), comment on the submitted answer itself.
+- Scores you are given are TOEFL 1-6 band scores (1.0 lowest, 6.0 highest, 0.5 steps).
+  Quote them as bands ("Band 4.5"), never as percentages or /30 scores.
 - "questions": only for items given in wrong_questions and open_answers, at most 25 entries,
   each keyed by the exact question_id you were given. Skip the rest.`;
 
-function json(res, status, body) {
-  res.statusCode = status;
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-store');
-  res.end(JSON.stringify(body));
-}
-
-/** 호출자가 선생님·관리자인지 확인한다. 아니면 null. */
-async function staffOf(req) {
-  const auth = req.headers.authorization || '';
-  const tok = auth.replace(/^Bearer\s+/i, '').trim();
-  if (!tok) return null;
-  const head = { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + tok };
-
-  const who = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: head });
-  if (!who.ok) return null;
-  const user = await who.json().catch(() => null);
-  if (!user || !user.id) return null;
-
-  // RLS 는 본인 프로필을 읽게 해 준다 — 서비스 키가 필요 없는 이유다.
-  const pr = await fetch(
-    SUPABASE_URL + '/rest/v1/sg_profiles?select=role,is_admin,name&id=eq.' + encodeURIComponent(user.id),
-    { headers: head }
-  );
-  if (!pr.ok) return null;
-  const rows = await pr.json().catch(() => []);
-  const p = rows && rows[0];
-  const role = (p && p.role) || (p && p.is_admin ? 'admin' : 'student');
-  if (role !== 'teacher' && role !== 'admin') return null;
-  return { id: user.id, name: (p && p.name) || '', role };
-}
-
-/* 환경변수로 모델을 못 박지 않았을 때의 기본값. 목록에서 "이름에 군더더기가 없는"
- * 최신 세대를 고른다 — gpt-5.5 는 되고 gpt-5.5-pro·-codex·-2026-04-23 은 안 된다.
- * 날짜·용도가 붙은 이름은 선생님이 직접 고를 때만 쓴다. */
-function pickDefault(id, models) {
-  if (id === 'openai') {
-    var best = null, bestV = -1;
-    models.forEach(function (m) {
-      var hit = /^gpt-(\d+(?:\.\d+)?)$/.exec(m);
-      if (!hit) return;
-      var v = parseFloat(hit[1]);
-      if (v > bestV) { bestV = v; best = m; }
-    });
-    return best;
-  }
-  if (id === 'anthropic') {
-    var pref = models.filter(function (m) { return /sonnet/.test(m); });
-    return pref[0] || null;
-  }
-  return null;
-}
-
-async function listProviders() {
-  const out = [];
-  for (const id of Object.keys(PROVIDERS)) {
-    const P = PROVIDERS[id];
-    const key = P.key();
-    if (!key) {
-      out.push({ id, label: P.label, ready: false, why: id.toUpperCase() + '_API_KEY is not set on the server.', models: [], default: '' });
-      continue;
-    }
-    let models = [];
-    try { models = await P.models(key); } catch (e) { models = []; }
-    if (!models.length) models = FALLBACK[id] || [];
-    const def = env(id.toUpperCase() + '_MODEL') || pickDefault(id, models) || P.def();
-    if (def && models.indexOf(def) < 0) models.unshift(def);
-    out.push({ id, label: P.label, ready: true, why: '', models, default: def || models[0] || '' });
-  }
-  return out;
-}
-
-/** 모델이 ```json 울타리를 씌워 보내도 받아낸다. */
-function parseJSON(text) {
-  const s = String(text || '').trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
-  try { return JSON.parse(s); } catch (e) {}
-  const a = s.indexOf('{'), b = s.lastIndexOf('}');
-  if (a >= 0 && b > a) { try { return JSON.parse(s.slice(a, b + 1)); } catch (e2) {} }
-  return null;
-}
-
-async function readBody(req) {
-  if (req.body && typeof req.body === 'object') return req.body;
-  const chunks = [];
-  for await (const c of req) chunks.push(c);
-  const raw = Buffer.concat(chunks).toString('utf8');
-  try { return raw ? JSON.parse(raw) : {}; } catch (e) { return null; }
-}
-
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'authorization, content-type');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  if (req.method === 'OPTIONS') { res.statusCode = 204; res.end(); return; }
+  if (LLM.cors(req, res)) return;
 
-  const staff = await staffOf(req);
-  if (!staff) return json(res, 401, { error: 'Teacher or administrator sign-in is required.' });
+  const staff = await LLM.staffOf(req);
+  if (!staff) return LLM.json(res, 401, { error: 'Teacher or administrator sign-in is required.' });
 
-  if (req.method === 'GET') return json(res, 200, { providers: await listProviders() });
-  if (req.method !== 'POST') return json(res, 405, { error: 'GET or POST only.' });
+  if (req.method === 'GET') return LLM.json(res, 200, { providers: await LLM.listProviders() });
+  if (req.method !== 'POST') return LLM.json(res, 405, { error: 'GET or POST only.' });
 
-  const body = await readBody(req);
-  if (!body) return json(res, 400, { error: 'Malformed JSON body.' });
+  const body = await LLM.readBody(req);
+  if (!body) return LLM.json(res, 400, { error: 'Malformed JSON body.' });
 
-  const id = String(body.provider || '') || (env('OPENAI_API_KEY') ? 'openai' : 'anthropic');
-  const P = PROVIDERS[id];
-  if (!P) return json(res, 400, { error: 'Unknown provider "' + id + '".' });
+  const picked = LLM.resolve(body.provider);
+  if (!picked) return LLM.json(res, 400, { error: 'Unknown provider "' + (body.provider || '') + '".' });
+  const { id, P } = picked;
   const key = P.key();
-  if (!key) return json(res, 503, { error: P.label + ' is not configured on the server.' });
+  if (!key) return LLM.json(res, 503, { error: P.label + ' is not configured on the server.' });
 
   const model = String(body.model || '').trim() || P.def();
   const lang = body.lang === 'ko' ? 'ko' : 'en';
@@ -240,17 +72,18 @@ module.exports = async function handler(req, res) {
     (lang === 'ko' ? 'Write every comment in Korean.\n' : 'Write every comment in English.\n') +
     SCHEMA + '\n\nScored attempt:\n' + JSON.stringify(attempt);
 
-  let text;
+  let out;
   try {
-    text = await P.chat(key, model, SYSTEM, user);
+    out = await P.chat(key, model, SYSTEM, user);
   } catch (e) {
-    return json(res, 502, { error: String(e.message || e) });
+    return LLM.json(res, 502, { error: String(e.message || e) });
   }
-  const parsed = parseJSON(text);
-  if (!parsed) return json(res, 502, { error: 'The model did not return usable JSON.' });
+  const parsed = LLM.parseJSON(out && out.text);
+  if (!parsed) return LLM.json(res, 502, { error: 'The model did not return usable JSON.' });
 
-  return json(res, 200, {
+  return LLM.json(res, 200, {
     provider: id, model, lang,
+    usage: (out && out.usage) || {},
     sections: Array.isArray(parsed.sections) ? parsed.sections : [],
     questions: Array.isArray(parsed.questions) ? parsed.questions : []
   });

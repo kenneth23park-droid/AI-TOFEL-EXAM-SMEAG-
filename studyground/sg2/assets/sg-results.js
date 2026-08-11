@@ -14,6 +14,17 @@
  *   SG_RESULTS.listFor(ownerId)       → Promise<[결과]>  관리자/선생님 전용
  *   SG_RESULTS.listAll(opts)          → Promise<[결과+student]>  선생님/관리자 전용
  *   SG_RESULTS.detail(row)            → { score, total, percent, bySection, rows }  문항별 리뷰
+ *   SG_RESULTS.tasks(session, owner)  → Promise<[sg_task_scores 행]>  W·S 채점
+ *   SG_RESULTS.productive(row)        → [{question_id, skill, task_kind, prompt, …}]
+ *   SG_RESULTS.uploadRecordings(row)  → Promise<{sent,failed}>  녹음 → 비공개 버킷
+ *   SG_RESULTS.aiScore(row, opts)     → Promise<채점 결과|null>  /api/score 호출
+ *   SG_RESULTS.bandOf(row)            → Promise<SG_BAND.of(...)>  밴드까지 한 번에
+ *
+ * 점수 두 벌에 대하여
+ *   객관식(R·L)은 이 파일이 브라우저에서 채점한다 — 시험은 무네트워크에서도 끝나야
+ *   하기 때문이다. 산출형(W·S)은 채점 기준이 글의 질이라 규칙으로 매길 수 없어서
+ *   서버(/api/score)가 ETS 루브릭으로 0~5 를 매기고 sg_task_scores 에 남긴다.
+ *   두 벌을 1~6 밴드라는 한 눈금으로 합치는 일은 sg-band.js 가 한다.
  */
 window.SG_RESULTS = (function () {
   'use strict';
@@ -162,7 +173,7 @@ window.SG_RESULTS = (function () {
     }).catch(function () { return null; });        // 오프라인이면 조용히 로컬만
   }
 
-  var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers';
+  var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers,scale';
 
   function remote() {
     var u = window.SG_AUTH && SG_AUTH.user();
@@ -200,6 +211,214 @@ window.SG_RESULTS = (function () {
     });
   }
 
+  /* ── 산출형(Writing·Speaking) 채점 ──────────────────────────
+   *
+   * 객관식과 갈라지는 지점이다. 여기서 다루는 문항은 정답표로 O/X 를 낼 수 없어서
+   * ETS 루브릭으로 0~5 를 매겨야 하고, 그 판단은 서버(/api/score)가 한다.
+   */
+
+  /* AI 채점 대상인 과제 종류. 팩의 kind 를 그대로 쓴다.
+   * 'build'(Build a Sentence)는 여기 없다 — 정답표가 있는 자동채점 문항이다. */
+  var PRODUCTIVE = {
+    email: 'writing', discussion: 'writing',
+    repeat: 'speaking', interview: 'speaking'
+  };
+
+  /**
+   * 이 응시에서 AI 가 채점해야 할 과제 목록.
+   *
+   * 스피킹도 그대로 목록에 오른다. 전사문은 여기서 만들지 않는다 — 녹음을 버킷에
+   * 올려 두면 서버가 내려받아 옮겨 적는다(uploadRecordings → /api/score).
+   * 녹음이 없거나 서버에 STT 키가 없으면 서버가 'no_transcript' 로 건너뛴다.
+   */
+  function productive(row) {
+    var p = pack(row && row.set_code), out = [];
+    if (!p) return out;
+    var all = typeof p.allQuestions === 'function' ? p.allQuestions() : [];
+    for (var i = 0; i < all.length; i++) {
+      var q = all[i].q || all[i];
+      var skill = PRODUCTIVE[q.kind];
+      if (!skill) continue;
+      out.push({
+        question_id: q.id,
+        skill: skill,
+        task_kind: q.kind,
+        // 문제문은 채점 근거가 아니라 맥락이다. 서버는 답안을 DB 에서 직접 읽는다.
+        prompt: String(q.prompt || q.situation || q.subject || ''),
+        reference: String(q.reference || q.script || '')
+      });
+    }
+    return out;
+  }
+
+  /**
+   * W·S 채점 행. session 을 주면 그 응시만, 비우면 (RLS 가 허락하는) 전부.
+   * 목록 화면이 응시마다 한 번씩 묻지 않도록 "전부" 를 허용한다 — 대시보드에서
+   * 응시 20건이면 요청도 20번이 되던 자리다.
+   */
+  function tasks(session, ownerId) {
+    var q = 'sg_task_scores?select=session,question_id,skill,task_kind,ai_score,ai_rubric,' +
+            'ai_model,ai_error,transcript,transcript_model,media_path,' +
+            'teacher_score,teacher_note,confirmed_at&order=question_id';
+    if (session) q += '&session=eq.' + encodeURIComponent(session);
+    if (ownerId) q += '&owner=eq.' + encodeURIComponent(ownerId);
+    return rest(q).then(function (rows) { return rows || []; });
+  }
+
+  /** session → 채점 행[] 로 묶는다. 목록 화면이 한 번만 묻고 나눠 쓰기 위한 것. */
+  function tasksBySession(rows) {
+    var by = {};
+    (rows || []).forEach(function (r) {
+      if (!r || !r.session) return;
+      (by[r.session] = by[r.session] || []).push(r);
+    });
+    return by;
+  }
+
+  /* ── 스피킹 녹음 올리기 ────────────────────────────────────
+   *
+   * 녹음은 응시 기기의 IndexedDB 에만 있다. 그 상태로는 스피킹을 채점할 수 없고
+   * (서버가 음성을 볼 수 없다) 다른 기기에서 다시 들을 수도 없다. 제출이 끝나면
+   * 비공개 버킷 toefl-recordings 로 올린다 — 경로는
+   *   {user_id}/{session}/{question_id}.{ext}
+   * 이고, 버킷 정책이 첫 칸(user_id)을 auth.uid() 와 대조해 남의 자리에 못 쓰게 막는다.
+   * 원본은 90일 뒤 지운다(운영 결정) — 그때까지 서버가 전사문을 떠 두면 채점 근거는 남는다.
+   */
+  var BUCKET = 'toefl-recordings';
+
+  function extOf(mime) {
+    var m = String(mime || '').toLowerCase();
+    if (m.indexOf('webm') >= 0) return 'webm';
+    if (m.indexOf('ogg') >= 0) return 'ogg';
+    if (m.indexOf('mp4') >= 0 || m.indexOf('m4a') >= 0 || m.indexOf('aac') >= 0) return 'm4a';
+    if (m.indexOf('wav') >= 0) return 'wav';
+    if (m.indexOf('mpeg') >= 0 || m.indexOf('mp3') >= 0) return 'mp3';
+    return 'webm';
+  }
+
+  /* 이미 올린 문항. 다시 올려도 x-upsert 로 덮일 뿐이지만, 응시 하나에 스피킹이
+   * 15문항이라 대시보드를 열 때마다 15번씩 다시 올리는 건 그냥 낭비다. */
+  function upKey(session) { return 'sg2_media_up::' + session; }
+  function uploaded(session) { return readJSON(upKey(session), []) || []; }
+  function markUploaded(session, qid) {
+    var list = uploaded(session);
+    if (list.indexOf(qid) < 0) list.push(qid);
+    try { localStorage.setItem(upKey(session), JSON.stringify(list)); } catch (e) {}
+  }
+
+  /** answers 에서 이 기기에 녹음이 남아 있는 문항 id. */
+  function recordedQids(answers) {
+    var out = [], k;
+    for (k in answers) {
+      if (!answers.hasOwnProperty(k)) continue;
+      var rec = answers[k];
+      var media = rec && typeof rec === 'object' ? (rec.media || rec.v) : rec;
+      if (typeof media === 'string' && media.indexOf('idb:') === 0) out.push(k);
+    }
+    return out;
+  }
+
+  function mediaOf(qid) {
+    return new Promise(function (resolve) {
+      if (!window.SG_STORE || typeof SG_STORE.getMedia !== 'function') { resolve(null); return; }
+      SG_STORE.getMedia(qid, function (err, rec) {
+        if (err || !rec) { resolve(null); return; }
+        // 저장 형식은 {questionKey, blob, mime, …} 다. 아주 옛 기록은 Blob 자체였다.
+        resolve(rec.blob ? rec : { blob: rec, mime: (rec && rec.type) || '' });
+      });
+    });
+  }
+
+  /**
+   * 한 응시의 녹음을 올린다. 실패해도 시험 기록은 기기에 그대로 남으므로 조용하다.
+   * @returns Promise<{sent:number, failed:number}>
+   */
+  function uploadRecordings(row) {
+    var u = window.SG_AUTH && SG_AUTH.user();
+    if (!u || !row || !row.session || !window.SG_STORE) return Promise.resolve({ sent: 0, failed: 0 });
+
+    var done = uploaded(row.session);
+    var todo = recordedQids(row.answers || {}).filter(function (q) { return done.indexOf(q) < 0; });
+    if (!todo.length) return Promise.resolve({ sent: 0, failed: 0 });
+
+    /* 다른 세션의 녹음을 읽으려면 스토어를 그 세션으로 열어야 한다. 열어 둔 세션이
+     * 있으면 끝나고 되돌린다 — 대시보드에서 이걸 부른 뒤 진행 중인 시험의 스토어가
+     * 엉뚱한 세션을 가리키면 안 된다. makeActive:false 로 '활성 세션' 표시는 건드리지 않는다. */
+    var was = typeof SG_STORE.current === 'function' ? SG_STORE.current() : null;
+    try { SG_STORE.open(row.session, false); } catch (e) { return Promise.resolve({ sent: 0, failed: 0 }); }
+
+    return SG_AUTH.token().then(function (tok) {
+      if (!tok) return { sent: 0, failed: todo.length };
+      var sent = 0, failed = 0;
+
+      function one(i) {
+        if (i >= todo.length) return Promise.resolve();
+        var qid = todo[i];
+        return mediaOf(qid).then(function (rec) {
+          if (!rec || !rec.blob || !rec.blob.size) return null;   // 녹음 실패 문항(NOT SUBMIT)
+          var mime = rec.mime || rec.blob.type || 'audio/webm';
+          var path = [u.id, row.session, qid + '.' + extOf(mime)]
+            .map(encodeURIComponent).join('/');
+          return fetch(SG_AUTH.url + '/storage/v1/object/' + BUCKET + '/' + path, {
+            method: 'POST',
+            headers: {
+              apikey: SG_AUTH.anonKey,
+              Authorization: 'Bearer ' + tok,
+              'Content-Type': mime,
+              'x-upsert': 'true'
+            },
+            body: rec.blob
+          }).then(function (r) {
+            if (r.ok) { sent += 1; markUploaded(row.session, qid); }
+            else failed += 1;
+          })['catch'](function () { failed += 1; });
+        })['catch'](function () { failed += 1; })
+          .then(function () { return one(i + 1); });   // 한 번에 하나씩 — 시험장 회선을 막지 않는다
+      }
+
+      return one(0).then(function () { return { sent: sent, failed: failed }; });
+    })['catch'](function () {
+      return { sent: 0, failed: todo.length };
+    }).then(function (out) {
+      if (was && was !== row.session) { try { SG_STORE.open(was, false); } catch (e) {} }
+      return out;
+    });
+  }
+
+  /**
+   * 서버에 AI 채점을 요청한다. 실패는 조용히 null 이다 — 채점이 안 됐다고 해서
+   * 학생의 성적 화면이 멈추거나 에러를 띄울 이유는 없다(선생님이 확정하면 그만이다).
+   */
+  function aiScore(row, opts) {
+    opts = opts || {};
+    var list = opts.tasks || productive(row);
+    if (!list.length || !window.SG_AUTH) return Promise.resolve(null);
+    return SG_AUTH.token().then(function (tok) {
+      if (!tok) return null;
+      return fetch('/api/score', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session: row.session,
+          owner: opts.owner || undefined,
+          provider: opts.provider || undefined,
+          model: opts.model || undefined,
+          lang: opts.lang || undefined,
+          force: !!opts.force,
+          tasks: list
+        })
+      }).then(function (r) { return r.ok ? r.json() : null; });
+    }).catch(function () { return null; });
+  }
+
+  /** 응시 한 건 → 밴드까지 계산된 화면용 객체. SG_BAND 가 없으면 null. */
+  function bandOf(row, ownerId) {
+    if (!row || !window.SG_BAND) return Promise.resolve(null);
+    return tasks(row.session, ownerId || row.owner)
+      .then(function (rows) { return SG_BAND.of(row, rows); })
+      .catch(function () { return SG_BAND.of(row, []); });
+  }
+
   /** 저장된 응시 한 건을 문항별 리뷰로 편다. 로컬 기록이면 채점 결과를 그대로 쓴다. */
   function detail(row) {
     if (!row) return null;
@@ -210,7 +429,16 @@ window.SG_RESULTS = (function () {
     return score(pack(row.set_code), row.answers || {});
   }
 
-  /** 아직 서버에 없는 로컬 응시를 올린다. 로그인 + 네트워크가 있을 때만 실제로 돈다. */
+  /** 아직 서버에 없는 로컬 응시를 올린다. 로그인 + 네트워크가 있을 때만 실제로 돈다.
+   *
+   * 순서가 중요하다: 응시 행 → 녹음 → 채점.
+   *   - 응시 행이 먼저다. 서버는 sg_results.answers 에서 채점할 글을 직접 읽는다.
+   *   - 녹음이 그다음이다. 버킷에 음성이 없으면 스피킹은 'no_transcript' 로 빠진다.
+   *   - 채점이 마지막이다. 앞의 둘이 끝나야 W·S 가 한 번에 채점된다.
+   *
+   * 녹음 업로드는 "아직 안 올라간 응시"뿐 아니라 **이미 올라간 응시**도 훑는다.
+   * 시험장에서 회선이 끊겼던 응시는 결과 행만 올라가고 음성이 남았을 수 있고,
+   * 그 경우 학생이 나중에 대시보드를 열기만 해도 밀린 녹음이 따라 올라가야 한다. */
   function push() {
     var u = window.SG_AUTH && SG_AUTH.user();
     var mine = local();
@@ -220,22 +448,44 @@ window.SG_RESULTS = (function () {
       var have = {};
       (rows || []).forEach(function (r) { have[r.session] = true; });
       var todo = mine.filter(function (r) { return !have[r.session]; });
-      if (!todo.length) return { sent: 0, failed: 0 };
 
-      var body = todo.map(function (r) {
-        return {
-          owner: u.id, session: r.session, set_code: r.set_code, mode: r.mode,
-          started_at: r.started_at, submitted_at: r.submitted_at,
-          score: r.score, total: r.total, percent: r.percent,
-          by_section: r.by_section, answers: r.answers
-        };
-      });
-      return rest('sg_results?on_conflict=owner,session', {
-        method: 'POST',
-        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify(body)
-      }).then(function (res) {
-        return res === null ? { sent: 0, failed: todo.length } : { sent: todo.length, failed: 0 };
+      var wrote = todo.length
+        ? rest('sg_results?on_conflict=owner,session', {
+            method: 'POST',
+            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+            body: JSON.stringify(todo.map(function (r) {
+              return {
+                owner: u.id, session: r.session, set_code: r.set_code, mode: r.mode,
+                started_at: r.started_at, submitted_at: r.submitted_at,
+                score: r.score, total: r.total, percent: r.percent,
+                by_section: r.by_section, answers: r.answers
+              };
+            }))
+          })
+        : Promise.resolve(true);
+
+      return wrote.then(function (res) {
+        var pushed = (res === null) ? [] : todo;
+        // 서버에 행이 있는 응시만 채점 대상이다 — 없는 응시를 채점하면 404 다.
+        var landed = mine.filter(function (r) {
+          return have[r.session] || pushed.indexOf(r) >= 0;
+        });
+
+        /* 녹음을 올린 뒤에 채점한다. 기다리는 것은 업로드까지고, 채점은 기다리지
+         * 않는다 — 채점은 몇십 초 걸리고 그동안 학생 화면이 멈출 이유가 없다.
+         * 결과는 sg_task_scores 에 쌓이고 다음 조회 때 밴드로 나타난다.
+         * 실패해도 조용하다: 선생님이 확정하면 그만이고, 자동 채점은 그 초안일 뿐이다. */
+        var jobs = landed.map(function (r) {
+          return uploadRecordings(r).then(function (up) {
+            var isNew = pushed.indexOf(r) >= 0;
+            // 새 응시는 무조건, 예전 응시는 밀렸던 녹음이 방금 올라갔을 때만 채점을 건다.
+            if (isNew || up.sent) aiScore(r)['catch'](function () {});
+          })['catch'](function () {});
+        });
+
+        return Promise.all(jobs).then(function () {
+          return { sent: pushed.length, failed: todo.length - pushed.length };
+        });
       });
     });
   }
@@ -269,6 +519,9 @@ window.SG_RESULTS = (function () {
   return {
     sectionOf: sectionOf, label: LABEL, pack: pack, score: score, detail: detail,
     local: local, remote: remote, list: list, get: get, push: push,
-    listFor: listFor, listAll: listAll
+    listFor: listFor, listAll: listAll,
+    productive: productive, tasks: tasks, tasksBySession: tasksBySession,
+    aiScore: aiScore, bandOf: bandOf,
+    uploadRecordings: uploadRecordings, recordedQids: recordedQids, extOf: extOf
   };
 })();

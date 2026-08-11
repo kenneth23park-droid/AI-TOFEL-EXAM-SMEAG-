@@ -48,7 +48,10 @@
     <a class="btn brand sm" href="admin-results.html" style="margin-left:auto"><span data-en>All students' results</span><span data-ko>전체 학생 결과</span></a>
   </div>
 
-  <!-- 영역별 최고 정답률 (자동 채점 영역만) -->
+  <!-- 최고 성적의 TOEFL 밴드 (1.0~6.0, ETS 2026 눈금) -->
+  <div class="card mt-16 hide" id="bandcard"></div>
+
+  <!-- 영역별 최고 밴드 -->
   <div class="grid cols-4 mt-16" id="bests"></div>
 
   <!-- CTA when empty -->
@@ -69,8 +72,8 @@
         <thead><tr>
           <th><span data-en>Date</span><span data-ko>날짜</span></th>
           <th><span data-en>Test</span><span data-ko>시험</span></th>
-          <th><span data-en>Sections</span><span data-ko>영역</span></th>
-          <th style="text-align:right"><span data-en>Score</span><span data-ko>점수</span></th>
+          <th><span data-en>Section bands</span><span data-ko>영역별 밴드</span></th>
+          <th style="text-align:right"><span data-en>Overall</span><span data-ko>종합</span></th>
           <th style="width:110px"></th>
         </tr></thead>
         <tbody id="rows"></tbody>
@@ -90,6 +93,7 @@
      문항별 점수를 다시 세려면 콘텐츠 팩이 필요하다. -->
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
+<script src="assets/sg-band.js"></script>
 <script src="assets/sg-results.js"></script>
 <script>
 /* 내 성적 — 실제 응시 기록만 그린다. 예시 데이터는 두지 않는다.
@@ -131,19 +135,67 @@
     }
   }
 
-  /* 영역별 최고 정답률. 라이팅·스피킹은 자동 채점이 없으니 응시 횟수만 센다. */
-  function paintBests(list) {
-    var best = {}, taken = {};
+  /* 응시 한 건 → 밴드 관점(SG_BAND.of). 채점 행은 미리 받아 둔 것을 나눠 쓴다. */
+  function viewOf(r, byS) { return SG_BAND.of(r, (byS && byS[r.session]) || []); }
+
+  /* 영역이 왜 비어 있는지 한 마디로 말해 준다. 빈칸만 두면 0점으로 읽힌다. */
+  function why(status) {
+    if (status === 'draft') return bi('AI draft · awaiting teacher', 'AI 초안 · 교사 확정 대기');
+    if (status === 'final') return bi('teacher-confirmed', '교사 확정');
+    if (status === 'scored') return bi('auto-scored', '자동 채점');
+    return bi('not scored yet', '아직 채점 전');
+  }
+
+  /* 종합 밴드 = 채점된 영역들의 평균(ETS 규칙). 최고 성적 한 건을 크게 보여 준다. */
+  function paintBand(list, byS) {
+    var best = null;
     list.forEach(function (r) {
-      var by = r.by_section || {};
+      var v = viewOf(r, byS);
+      if (v.overall === null) return;
+      if (!best || v.overall > best.view.overall) best = { row: r, view: v };
+    });
+    if (!best) { $('bandcard').classList.add('hide'); return; }
+
+    var v = best.view;
+    var note = v.pending.length
+      ? bi(v.pending.map(function (s) { return LAB[s][0]; }).join(' · ') +
+             ' not scored yet — excluded from the average',
+           v.pending.map(function (s) { return LAB[s][1]; }).join(' · ') +
+             ' 은 아직 채점 전이라 평균에서 빠졌습니다')
+      : bi('Average of all four sections', '네 영역의 평균');
+
+    $('bandcard').innerHTML =
+      '<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">' +
+        '<div>' +
+          '<div class="muted" style="font-size:12px">' +
+            bi('Best overall band · TOEFL 1–6', '최고 종합 밴드 · TOEFL 1–6') + '</div>' +
+          '<div style="font-size:44px;font-weight:850;color:var(--brand);line-height:1.1">' +
+            esc(SG_BAND.fmt(v.overall)) +
+            '<span style="font-size:15px;font-weight:700;color:var(--muted)"> / 6.0</span></div>' +
+        '</div>' +
+        '<div style="font-size:13px">' +
+          (v.cefr ? '<div><b>CEFR ' + esc(v.cefr) + '</b></div>' : '') +
+          '<div class="muted">' + note + '</div>' +
+          (v.draft ? '<div class="muted">' +
+            bi('Includes an AI draft that a teacher has not confirmed yet.',
+               '아직 교사가 확정하지 않은 AI 초안이 포함되어 있습니다.') + '</div>' : '') +
+        '</div>' +
+        '<a class="btn ghost sm" style="margin-left:auto" href="review.html?session=' +
+          encodeURIComponent(best.row.session) + '">' + bi('Review', '리뷰') + '</a>' +
+      '</div>';
+    $('bandcard').classList.remove('hide');
+  }
+
+  /* 영역별 최고 밴드. 정답률(%)이 아니라 밴드를 보여 준다 — 성적표의 눈금과 같아야
+     학생이 두 숫자를 견주지 않는다. */
+  function paintBests(list, byS) {
+    var best = {}, status = {};
+    list.forEach(function (r) {
+      var v = viewOf(r, byS);
       Object.keys(LAB).forEach(function (sec) {
-        var s = by[sec];
-        if (!s) return;
-        taken[sec] = (taken[sec] || 0) + 1;
-        if (s.total) {
-          var pct = Math.round(s.score / s.total * 100);
-          if (best[sec] == null || pct > best[sec]) best[sec] = pct;
-        }
+        var s = v.sections[sec];
+        if (!s || s.band === null) return;
+        if (best[sec] == null || s.band > best[sec]) { best[sec] = s.band; status[sec] = s.status; }
       });
     });
     $('bests').innerHTML = Object.keys(LAB).map(function (sec) {
@@ -151,31 +203,31 @@
       return '<div class="card">' +
         '<div class="muted" style="font-size:12px">' + bi(LAB[sec][0], LAB[sec][1]) + '</div>' +
         '<div style="font-size:30px;font-weight:850;color:var(--brand)">' +
-          (has ? best[sec] + '<span style="font-size:16px">%</span>' : '—') + '</div>' +
-        '<div class="muted" style="font-size:12px">' +
-          (has ? bi('best accuracy', '최고 정답률')
-               : taken[sec] ? bi('teacher-scored', '선생님 채점')
-                            : bi('not taken yet', '아직 응시 없음')) + '</div>' +
+          (has ? esc(SG_BAND.fmt(best[sec])) +
+                 '<span style="font-size:16px;color:var(--muted)"> / 6.0</span>' : '—') + '</div>' +
+        '<div class="muted" style="font-size:12px">' + why(has ? status[sec] : '') + '</div>' +
       '</div>';
     }).join('');
   }
 
-  function sectionChips(r) {
-    var by = r.by_section || {};
-    return Object.keys(LAB).filter(function (s) { return by[s]; }).map(function (s) {
-      var v = by[s];
-      return '<span class="chip">' + esc(LAB[s][0]) + ' ' +
-        (v.total ? v.score + '/' + v.total : '—') + '</span>';
-    }).join(' ') || '<span class="muted">—</span>';
+  function sectionChips(v) {
+    return Object.keys(LAB).map(function (s) {
+      var sec = v.sections[s];
+      var band = sec && sec.band !== null ? SG_BAND.fmt(sec.band) : '—';
+      var mark = sec && sec.status === 'draft' ? ' ✎' : '';   // ✎ = AI 초안, 확정 전
+      return '<span class="chip">' + esc(LAB[s][0]) + ' ' + esc(band + mark) + '</span>';
+    }).join(' ');
   }
 
-  function paintRows(list) {
+  function paintRows(list, byS) {
     $('rows').innerHTML = list.map(function (r) {
+      var v = viewOf(r, byS);
       return '<tr>' +
         '<td>' + when(r.submitted_at) + '</td>' +
         '<td><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
-        '<td><span class="chips" style="margin:0">' + sectionChips(r) + '</span></td>' +
-        '<td style="text-align:right;font-weight:800">' + r.score + ' / ' + r.total + '</td>' +
+        '<td><span class="chips" style="margin:0">' + sectionChips(v) + '</span></td>' +
+        '<td style="text-align:right;font-weight:800">' +
+          (v.overall === null ? '—' : 'Band ' + esc(SG_BAND.fmt(v.overall))) + '</td>' +
         '<td><a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) + '">' +
           bi('Review', '리뷰') + '</a></td>' +
       '</tr>';
@@ -187,13 +239,20 @@
     // 이 기기에 남아 있고 아직 안 올라간 응시가 있으면 조용히 올린다.
     if (window.SG_RESULTS && SG_AUTH.user()) { SG_RESULTS.push().catch(function () {}); }
 
-    SG_RESULTS.list().then(function (list) {
-      paintBests(list);
+    /* 응시 목록과 W·S 채점을 각각 한 번씩만 읽는다(응시마다 묻지 않는다).
+       채점 조회가 실패해도 목록은 그려야 하므로 빈 배열로 받아 넘긴다. */
+    Promise.all([
+      SG_RESULTS.list(),
+      SG_RESULTS.tasks().catch(function () { return []; })
+    ]).then(function (out) {
+      var list = out[0], byS = SG_RESULTS.tasksBySession(out[1]);
+      paintBand(list, byS);
+      paintBests(list, byS);
       if (!list.length) { $('empty').classList.remove('hide'); return; }
-      paintRows(list);
+      paintRows(list, byS);
       $('recent').classList.remove('hide');
     }).catch(function () {
-      paintBests([]);
+      paintBests([], {});
       $('empty').classList.remove('hide');
     });
   }

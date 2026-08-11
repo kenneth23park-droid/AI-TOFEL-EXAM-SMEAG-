@@ -423,6 +423,133 @@ var GRADE = (function () {
 })();
 
 /* ─────────────────────────────────────────────────────────────
+   TOEFL 1~6 밴드 — sg2/assets/sg-band.js 의 사본
+   ─────────────────────────────────────────────────────────────
+   ETS 는 2026-01 부터 네 영역과 종합을 1.0~6.0(0.5 단위)로 보고한다. 종합은 옛
+   스케일처럼 합이 아니라 **평균**이다.
+
+   두 단계를 지나며 근거의 등급이 다르다.
+     1) 원점수 → 0~30 환산   ⚠️가설(검증필요). 정답률 비례.
+     2) 0~30 → 1~6 밴드      ✅ETS 공식 표.
+
+   ⚠️ 이 표는 세 곳에 있다 — 여기 · sg2/assets/sg-band.js ·
+   app/scoring/toefl6_band_table.json. 고칠 때는 셋을 함께 고칠 것.
+   studyground/tests/test_band_table.js 가 어긋나면 실패한다.
+   ───────────────────────────────────────────────────────────── */
+var BAND = (function () {
+  /* 출처: ETS, TOEFL iBT Score Scale Update (2026-08-11 확인)
+     https://www.ets.org/toefl/institutions/ibt/score-scale-update.html
+     각 행은 [해당 밴드의 하한, 밴드]. 높은 구간부터 훑는다. */
+  var TOEFL6 = {
+    reading:   [[29,6],[27,5.5],[24,5],[22,4.5],[18,4],[12,3.5],[6,3],[4,2.5],[3,2],[2,1.5],[0,1]],
+    listening: [[28,6],[26,5.5],[22,5],[20,4.5],[17,4],[13,3.5],[9,3],[6,2.5],[4,2],[2,1.5],[0,1]],
+    writing:   [[29,6],[27,5.5],[24,5],[21,4.5],[17,4],[15,3.5],[13,3],[11,2.5],[7,2],[3,1.5],[0,1]],
+    speaking:  [[28,6],[27,5.5],[25,5],[23,4.5],[20,4],[18,3.5],[16,3],[13,2.5],[10,2],[5,1.5],[0,1]]
+  };
+  var CEFR6 = { '6.0':'C2','5.5':'C1','5.0':'C1','4.5':'B2','4.0':'B2','3.5':'B1',
+                '3.0':'B1','2.5':'A2','2.0':'A2','1.5':'A1','1.0':'A1' };
+  var SCALED_MAX = 30, TASK_MAX = 5;
+  var SKILLS = ['reading', 'listening', 'writing', 'speaking'];
+
+  function halfUp(x) { return Math.floor(Number(x) + 0.5); }
+  function toHalf(x) { return Math.floor(Number(x) * 2 + 0.5) / 2; }
+  function num(v) { return typeof v === 'number' && isFinite(v); }
+
+  /** ⚠️가설(검증필요) — 정답률을 그대로 0~30 으로 편다. */
+  function scaledFromRaw(correct, total) {
+    var t = Number(total) || 0;
+    if (!t) return 0;
+    var ratio = Number(correct) / t;
+    if (!(ratio > 0)) ratio = 0;
+    if (ratio > 1) ratio = 1;
+    return halfUp(ratio * SCALED_MAX);
+  }
+
+  /** 0~30 → 밴드. 바닥은 1.0 이다(ETS 표에서 0점도 밴드 1). */
+  function bandForScaled(scaled, skill) {
+    var rows = TOEFL6[String(skill || '').toLowerCase()];
+    var n = num(Number(scaled)) ? Number(scaled) : 0;
+    if (!rows) return toHalf(1 + Math.max(0, Math.min(1, n / SCALED_MAX)) * 5);
+    for (var i = 0; i < rows.length; i++) if (n >= rows[i][0]) return rows[i][1];
+    return rows[rows.length - 1][1];
+  }
+
+  /** 문항이 0 개면 밴드 1 이 아니라 null 이다 — 채점 전과 전부 오답은 다른 말이다. */
+  function sectionBand(correct, total, skill) {
+    if (!(Number(total) > 0)) return null;
+    return bandForScaled(scaledFromRaw(correct, total), skill);
+  }
+
+  /** 산출형: 과제 점수(0~5) 목록 → 밴드. */
+  function taskBand(tasks, skill) {
+    var got = 0, top = 0, n = 0;
+    (tasks || []).forEach(function (t) {
+      if (!t || !num(Number(t.score))) return;
+      got += Number(t.score); top += TASK_MAX; n += 1;
+    });
+    if (!n || top <= 0) return null;
+    return bandForScaled(halfUp(Math.max(0, Math.min(1, got / top)) * SCALED_MAX), skill);
+  }
+
+  /** 종합 = 채점된 영역 밴드의 평균, 0.5 단위(.25 는 올림). */
+  function overall(bands) {
+    var sum = 0, n = 0;
+    SKILLS.forEach(function (s) {
+      if (bands[s] === null || bands[s] === undefined || !num(Number(bands[s]))) return;
+      sum += Number(bands[s]); n += 1;
+    });
+    return n ? toHalf(sum / n) : null;
+  }
+
+  function fmt(b) { return (b === null || b === undefined || !num(Number(b))) ? '—' : Number(b).toFixed(1); }
+  function cefr(b) { return CEFR6[fmt(b)] || ''; }
+
+  /** 응시 한 건 + W·S 채점 행 → 화면이 그릴 전부. sg-band.js 의 of() 와 같은 모양. */
+  function of(r, taskRows) {
+    r = r || {};
+    var by = r.by_section || {}, byTask = { writing: [], speaking: [] };
+    (taskRows || []).forEach(function (t) {
+      var skill = String((t && t.skill) || '').toLowerCase();
+      if (!byTask[skill]) return;
+      var score = (t.teacher_score === null || t.teacher_score === undefined) ? t.ai_score : t.teacher_score;
+      if (score === null || score === undefined || score === '') return;
+      byTask[skill].push({ score: Number(score), confirmed: !!t.confirmed_at });
+    });
+
+    var sections = {}, bands = {}, pending = [], draft = false;
+    SKILLS.forEach(function (s) {
+      var band = null, status = 'pending', detail = null;
+      if (s === 'writing' || s === 'speaking') {
+        var list = byTask[s];
+        band = taskBand(list, s);
+        if (band !== null) {
+          var ok = list.filter(function (t) { return t.confirmed; }).length;
+          status = ok === list.length ? 'final' : 'draft';
+          if (status === 'draft') draft = true;
+        }
+      } else if (by[s]) {
+        band = sectionBand(by[s].score, by[s].total, s);
+        if (band !== null) {
+          status = 'scored';
+          detail = { correct: Number(by[s].score) || 0, total: Number(by[s].total) || 0,
+                     scaled: scaledFromRaw(by[s].score, by[s].total) };
+        }
+      }
+      if (band === null) pending.push(s); else bands[s] = band;
+      sections[s] = { band: band, status: status, detail: detail };
+    });
+
+    var total = overall(bands);
+    return { sections: sections, overall: total, cefr: total === null ? '' : cefr(total),
+             pending: pending, draft: draft };
+  }
+
+  return { SKILLS: SKILLS, TOEFL6: TOEFL6, scaledFromRaw: scaledFromRaw,
+           bandForScaled: bandForScaled, sectionBand: sectionBand, taskBand: taskBand,
+           overall: overall, fmt: fmt, cefr: cefr, of: of };
+})();
+
+/* ─────────────────────────────────────────────────────────────
    화면
    ───────────────────────────────────────────────────────────── */
 (function () {
@@ -462,28 +589,38 @@ var GRADE = (function () {
     return '<div class="card stat"><div class="lab">' + bi(lab, labKo) + '</div><b>' + val + '</b>' +
       (sub ? '<div class="muted" style="font-size:12px">' + sub + '</div>' : '') + '</div>';
   }
+  /* session → W·S 채점 행. load() 가 한 번만 읽어 채운다. */
+  var TASKS = {};
+  function viewOf(r) { return BAND.of(r, TASKS[r.session] || []); }
+
   function paintStats() {
     var n = ALL.length;
-    var pcts = ALL.map(function (r) { return Number(r.percent) || 0; });
-    var avg = n ? Math.round(pcts.reduce(function (a, b) { return a + b; }, 0) / n * 10) / 10 : 0;
-    var best = n ? Math.max.apply(null, pcts) : 0;
+    /* 평균·최고를 밴드로 낸다. 정답률(%)과 밴드를 한 화면에 나란히 두면 학생이
+       어느 쪽이 자기 성적인지 알 수 없다 — 성적표의 눈금은 밴드 하나다.
+       아직 채점이 안 끝난 응시(종합 없음)는 평균에서 빠진다. */
+    var bands = ALL.map(function (r) { return viewOf(r).overall; })
+                   .filter(function (b) { return b !== null; });
+    var avg = bands.length
+      ? BAND.fmt(Math.floor(bands.reduce(function (a, b) { return a + b; }, 0) / bands.length * 2 + 0.5) / 2)
+      : '—';
+    var best = bands.length ? BAND.fmt(Math.max.apply(null, bands)) : '—';
     var last = n ? when(ALL[0].submitted_at) : '—';
     $('stats').innerHTML =
       stat('Tests taken', '응시 횟수', n) +
-      stat('Average', '평균', avg + '%') +
-      stat('Best', '최고', best + '%') +
+      stat('Average band', '평균 밴드', avg) +
+      stat('Best band', '최고 밴드', best,
+           bands.length ? 'CEFR ' + esc(BAND.cefr(Math.max.apply(null, bands))) : '') +
       stat('Latest', '최근 응시', '<span style="font-size:19px">' + last + '</span>');
   }
 
   function chips(r) {
-    var by = r.by_section || {};
-    var out = ['reading', 'listening', 'writing', 'speaking'].filter(function (s) { return by[s]; })
-      .map(function (s) {
-        var v = by[s];
-        return '<span class="chip">' + bi(LAB[s][0], LAB[s][1]) + ' ' +
-          (v.total ? v.score + '/' + v.total : '—') + '</span>';
-      }).join(' ');
-    return out || '<span class="muted">—</span>';
+    var v = viewOf(r);
+    return BAND.SKILLS.map(function (s) {
+      var sec = v.sections[s];
+      // ✎ = AI 초안(선생님 확정 전). 확정된 점수와 섞이지 않게 표시한다.
+      return '<span class="chip">' + bi(LAB[s][0], LAB[s][1]) + ' ' +
+        BAND.fmt(sec.band) + (sec.status === 'draft' ? ' ✎' : '') + '</span>';
+    }).join(' ');
   }
 
   /* ── 목록 ── */
@@ -499,8 +636,10 @@ var GRADE = (function () {
         '<td>' + when(r.submitted_at, true) + '</td>' +
         '<td><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
         '<td>' + chips(r) + '</td>' +
-        '<td class="right" style="font-weight:800;white-space:nowrap">' + r.score + ' / ' + r.total +
-          '<div class="muted" style="font-weight:600;font-size:12px">' + (r.percent || 0) + '%</div></td>' +
+        '<td class="right" style="font-weight:800;white-space:nowrap">' +
+          (viewOf(r).overall === null ? '—' : 'Band ' + BAND.fmt(viewOf(r).overall)) +
+          '<div class="muted" style="font-weight:600;font-size:12px">' +
+            (viewOf(r).cefr || (r.score + '/' + r.total)) + '</div></td>' +
         '<td class="no-print"><button class="btn sm" data-open="' + esc(r.session) + '">' +
           bi('Review', '리뷰') + '</button></td>' +
       '</tr>';
@@ -530,13 +669,22 @@ var GRADE = (function () {
 
     $('detail').classList.remove('hide');
     $('detail-h').innerHTML = esc(r.set_code || '') + ' · ' + when(r.submitted_at, true);
+    var vw = viewOf(r);
     $('detail-stats').innerHTML =
-      stat('Score', '점수', r.score + ' <span style="font-size:16px;color:var(--muted)">/ ' + r.total + '</span>') +
-      ['reading', 'listening', 'writing', 'speaking'].map(function (s) {
-        var v = (r.by_section || {})[s];
-        if (!v) return '';
-        return stat(LAB[s][0], LAB[s][1], v.total ? v.score + ' <span style="font-size:16px;color:var(--muted)">/ ' + v.total + '</span>'
-          : '<span style="font-size:17px">' + bi('Teacher-scored', '선생님 채점') + '</span>');
+      stat('Overall band', '종합 밴드',
+           vw.overall === null ? '—' : BAND.fmt(vw.overall) +
+             ' <span style="font-size:16px;color:var(--muted)">/ 6.0</span>',
+           vw.cefr ? 'CEFR ' + esc(vw.cefr) : '') +
+      BAND.SKILLS.map(function (s) {
+        var sec = vw.sections[s];
+        var sub = sec.status === 'draft' ? bi('AI draft · awaiting teacher', 'AI 초안 · 교사 확정 대기')
+                : sec.status === 'final' ? bi('teacher-confirmed', '교사 확정')
+                : sec.status === 'scored' ? (sec.detail.correct + '/' + sec.detail.total)
+                : bi('not scored yet', '아직 채점 전');
+        return stat(LAB[s][0], LAB[s][1],
+          sec.band === null ? '<span style="font-size:17px;color:var(--muted)">—</span>'
+            : BAND.fmt(sec.band) + ' <span style="font-size:16px;color:var(--muted)">/ 6.0</span>',
+          sub);
       }).join('');
 
     $('detail-rows').innerHTML = '<tr><td colspan="5" class="muted" style="padding:20px">' +
@@ -638,8 +786,14 @@ var GRADE = (function () {
         warnings.push(missing.join(' · ') + ' 영역은 아직 점수가 없어 총점에서 빠졌습니다.');
       }
 
+      /* TOEFL 1~6 밴드 (ETS, 2026-01~). 옛 /30·/120 값은 그대로 두고 **덧붙인다** —
+         전환기(2026~2028)에는 두 눈금을 병기하는 것이 ETS 의 규칙이고, 리포트
+         생성기가 아직 밴드를 모를 수도 있기 때문이다(모르면 이 칸을 무시한다). */
+      var bandView = ielts ? null : BAND.of(r, (TASKS && TASKS[r.session]) || []);
+
       return {
         profile: ielts ? 'ielts' : 'toefl',
+        scale: ielts ? 'ielts9' : (r.scale || 'toefl6'),
         set_code: r.set_code || '',
         student: {
           name: (me && me.name) || (me && me.student_id) || '',
@@ -649,6 +803,18 @@ var GRADE = (function () {
         scores: scores,
         average: average,
         total: total,
+        band: bandView ? {
+          overall: bandView.overall,
+          cefr: bandView.cefr,
+          sections: BAND.SKILLS.map(function (s) {
+            return { skill: LAB[s][0], band: bandView.sections[s].band,
+                     status: bandView.sections[s].status };
+          }),
+          /* draft = 아직 선생님이 확정하지 않은 AI 초안이 섞여 있다. 성적표에
+             그대로 인쇄되면 확정 점수처럼 읽히므로 생성기가 표시해야 한다. */
+          draft: bandView.draft,
+          pending: bandView.pending
+        } : null,
         /* 영역이 빠진 채 매긴 등급은 실제보다 낮게 보인다 — 아예 비워 둔다. */
         grade: (total === null || missing.length) ? ''
           : (ielts ? 'Band ' + total.toFixed(1) : cefrFor(total)),
@@ -683,15 +849,21 @@ var GRADE = (function () {
   }
   function cell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
   function csvList() {
-    var head = ['submitted_at', 'name', 'student_id', 'test', 'score', 'total', 'percent',
-                'reading', 'listening', 'writing', 'speaking', 'session'];
+    /* 밴드가 앞, 원점수가 뒤다 — 성적표의 눈금이 밴드이기 때문이다. band_status 가
+       draft 이면 아직 선생님이 확정하지 않은 AI 초안이 섞여 있다는 뜻이다. */
+    var head = ['submitted_at', 'name', 'student_id', 'test',
+                'band_overall', 'cefr', 'band_reading', 'band_listening',
+                'band_writing', 'band_speaking', 'band_status',
+                'auto_correct', 'auto_total', 'session'];
     var lines = [head.join(',')];
     shown().forEach(function (r) {
-      var by = r.by_section || {};
-      function sec(s) { return by[s] ? by[s].score + '/' + by[s].total : ''; }
+      var v = viewOf(r);
+      function b(s) { return v.sections[s].band === null ? '' : BAND.fmt(v.sections[s].band); }
       lines.push([r.submitted_at, (ME && ME.name) || '', (ME && ME.student_id) || '', r.set_code,
-                  r.score, r.total, r.percent, sec('reading'), sec('listening'),
-                  sec('writing'), sec('speaking'), r.session].map(cell).join(','));
+                  v.overall === null ? '' : BAND.fmt(v.overall), v.cefr,
+                  b('reading'), b('listening'), b('writing'), b('speaking'),
+                  v.draft ? 'draft' : (v.pending.length ? 'incomplete' : 'final'),
+                  r.score, r.total, r.session].map(cell).join(','));
     });
     save('smeag-toefl-scores.csv', lines.join('\r\n'));
   }
@@ -714,11 +886,24 @@ var GRADE = (function () {
   }
 
   /* ── 데이터 ── */
-  var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers';
+  var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers,scale';
+  var TASK_SELECT = 'session,question_id,skill,task_kind,ai_score,teacher_score,confirmed_at';
   function load() {
     var u = AUTH.user();
-    return AUTH.rest('sg_results?select=' + SELECT + '&owner=eq.' + u.id + '&order=submitted_at.desc')
-      .then(function (rows) {
+    /* 응시와 W·S 채점을 함께 읽는다. 밴드는 둘이 다 있어야 완성된다.
+       채점 조회가 실패해도 목록은 그린다 — 그때 W·S 는 '아직 채점 전' 으로 남는다. */
+    return Promise.all([
+      AUTH.rest('sg_results?select=' + SELECT + '&owner=eq.' + u.id + '&order=submitted_at.desc'),
+      AUTH.rest('sg_task_scores?select=' + TASK_SELECT + '&owner=eq.' + u.id)
+        .catch(function () { return []; })
+    ])
+      .then(function (out) {
+        var rows = out[0];
+        TASKS = {};
+        (out[1] || []).forEach(function (t) {
+          if (!t || !t.session) return;
+          (TASKS[t.session] = TASKS[t.session] || []).push(t);
+        });
         ALL = rows || [];
         paintStats();
         if (!ALL.length) {

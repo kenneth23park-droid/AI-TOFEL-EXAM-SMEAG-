@@ -28,7 +28,10 @@ sg2 응시 → 로컬 채점 → Supabase sg_results  ←── scores.html (본
 ```
 
 - 테이블: `sg_results` (owner, session, set_code, submitted_at, score, total, percent,
-  by_section, answers), 프로필은 `sg_profiles`.
+  by_section, answers, scale), 프로필은 `sg_profiles`.
+- Writing·Speaking 채점은 `sg_task_scores` 에 과제 하나당 한 행으로 있다
+  (`ai_score` 초안 / `teacher_score`·`confirmed_at` 확정, 둘 다 ETS 루브릭 0~5).
+  이 페이지는 두 테이블을 함께 읽어 **TOEFL 1~6 밴드**를 만든다.
 - 학생이 남의 성적을 못 보는 경계는 이 페이지가 아니라 **서버의 RLS** 다. 화면 코드를
   고쳐도 서버가 자기 행 말고는 돌려주지 않는다.
 - 로그인은 sg2 와 같은 Edge Function `sg-auth` 를 쓴다 — 학번(`smeag###`) 또는 이메일.
@@ -56,9 +59,12 @@ sg2 번들도 지금은 같은 상태다. 정답을 감추려면 `showAnswerKey:
 거기서 그래프·형식·교사 코멘트를 골라 Word·PDF·Excel 을 내려받는다.
 
 - **환산은 이 페이지가 한다.** `sg_results` 에는 원점수(맞은 개수)만 있으므로
-  `REPORT` 모듈이 시험 눈금으로 바꾼다 — TOEFL 영역 /30·총점 /120·CEFR,
-  IELTS 는 밴드. 규칙은 `app/scoring/scale.py` 와 짝이고, IELTS 밴드표는
-  `app/scoring/ielts_band_table.json` 의 **사본**이다(⚠️ 실측 표로 바꿀 땐 두 곳 함께).
+  `REPORT` 모듈이 시험 눈금으로 바꾼다 — TOEFL 은 **1~6 밴드**(`band` 필드)와
+  전환기 병기용 영역 /30·총점 /120·CEFR, IELTS 는 IELTS 밴드. 규칙은
+  `app/scoring/scale.py` 와 짝이고, 두 밴드표(`ielts_band_table.json`,
+  `toefl6_band_table.json`)의 **사본**이 이 파일 안에 있다(⚠️ 고칠 땐 함께).
+  TOEFL 1~6 표는 `sg2/assets/sg-band.js` 에도 같은 사본이 있으며, 세 벌이 어긋나면
+  `studyground/tests/test_band_table.js` 가 실패한다.
 - 시험 구분은 `set_code` 로 한다 — `IELTS` 로 시작하면 IELTS, 아니면 TOEFL.
 - 아직 채점되지 않은 영역(선생님 채점 대기)은 점수 칸을 비우고 총점에서 빼며,
   그 경우 등급은 매기지 않는다(낮게 보이는 것을 막는다).

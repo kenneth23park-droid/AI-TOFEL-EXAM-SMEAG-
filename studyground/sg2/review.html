@@ -47,6 +47,9 @@
   <!-- 영역별 -->
   <div class="grid cols-4 mt-16 hide" id="sections"></div>
 
+  <!-- Writing·Speaking 과제별 채점. 학생에게는 읽기 전용, 선생님에게는 확정 장치. -->
+  <div class="card mt-16 hide" id="taskscores"></div>
+
   <!-- 선생님·관리자 전용 줄. 학생 화면에는 아예 그려지지 않는다. -->
   <div class="card mt-16 hide" id="staffbar" data-staff-only
        style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"></div>
@@ -72,8 +75,8 @@
   </div>
 
   <p class="muted mt-16" style="font-size:12px">
-    <span data-en>Writing and Speaking are not auto-scored. Your submitted answer is shown as it is, for a teacher to review.</span>
-    <span data-ko>라이팅·스피킹은 자동 채점 대상이 아닙니다. 제출한 답안을 그대로 보여 주며, 채점은 선생님이 합니다.</span>
+    <span data-en>Writing and Speaking are scored by AI against the official ETS scoring guide, then confirmed by a teacher. Speaking is transcribed from your recording before it is scored.</span>
+    <span data-ko>라이팅·스피킹은 ETS 공식 채점 가이드로 AI 가 먼저 채점하고 선생님이 확정합니다. 스피킹은 녹음을 글로 옮긴 뒤 채점합니다.</span>
   </p>
 </main>
 
@@ -87,6 +90,7 @@
 <!-- 문항 본문과 정답은 콘텐츠 팩에 있다. 리뷰는 이 둘이 있어야 성립한다. -->
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
+<script src="assets/sg-band.js"></script>
 <script src="assets/sg-results.js"></script>
 <script src="assets/sg-comments.js"></script>
 <script>
@@ -154,6 +158,9 @@
   }
 
   var PACK = null;
+  /* SG_BAND.of() 의 결과 — 이 응시의 영역별·종합 밴드. render() 가 채운다.
+     null 이면 아직 못 읽었다는 뜻이고, 화면은 밴드 대신 '—' 를 그린다. */
+  var VIEW = null;
   function hitOf(qid) {
     if (!PACK || typeof PACK.findQuestion !== 'function') return null;
     return PACK.findQuestion(qid);
@@ -179,15 +186,30 @@
     return row.ok === null && typeof row.given === 'string' && row.given.length > 80;
   }
 
+  /* 성적표의 눈금은 TOEFL 1~6 밴드다(ETS, 2026-01~). 맞은 개수는 근거로만 남긴다 —
+   * 두 숫자를 나란히 크게 놓으면 학생이 어느 쪽이 자기 점수인지 알 수 없다. */
   function paintSummary(res, det, who) {
-    var pct = det.total ? Math.round(det.score / det.total * 1000) / 10 : 0;
+    var v = VIEW || (window.SG_BAND ? SG_BAND.of(res, []) : null);
+    var band = v && v.overall !== null ? SG_BAND.fmt(v.overall) : null;
+
     $('summary').innerHTML =
       '<div class="rv-head">' +
         '<div>' +
           '<div class="muted" style="font-size:12px">' + esc(res.set_code || '') +
             (res.mode ? ' · ' + esc(res.mode) : '') + '</div>' +
-          '<div class="rv-big">' + det.score + ' <span style="font-size:20px;color:var(--muted)">/ ' + det.total + '</span></div>' +
-          '<div class="muted" style="font-size:13px">' + pct + '% · ' + when(res.submitted_at) + '</div>' +
+          '<div class="rv-big">' +
+            (band ? 'Band ' + esc(band) + ' <span style="font-size:20px;color:var(--muted)">/ 6.0</span>'
+                  : '<span style="font-size:22px;color:var(--muted)">' +
+                      bi('Not scored yet', '아직 채점 전') + '</span>') + '</div>' +
+          '<div class="muted" style="font-size:13px">' +
+            (v && v.cefr ? 'CEFR ' + esc(v.cefr) + ' · ' : '') +
+            det.score + '/' + det.total + ' ' + bi('auto-scored items', '자동채점 문항') +
+            ' · ' + when(res.submitted_at) + '</div>' +
+          (v && v.draft
+            ? '<div class="muted" style="font-size:12px;margin-top:4px">✎ ' +
+                bi('Includes an AI draft a teacher has not confirmed yet.',
+                   '교사가 아직 확정하지 않은 AI 초안이 포함되어 있습니다.') + '</div>'
+            : '') +
         '</div>' +
         (who ? '<div style="margin-left:auto;text-align:right">' +
           '<div style="font-weight:800">' + esc(who.name || who.email || '') + '</div>' +
@@ -198,20 +220,37 @@
 
   function paintSections(det) {
     var order = ['reading', 'listening', 'writing', 'speaking'], html = '';
+    var v = VIEW;
     order.forEach(function (sec) {
-      var s = det.bySection && det.bySection[sec];
-      var has = s && s.total;
-      var pct = has ? Math.round(s.score / s.total * 100) : 0;
+      var s = v && v.sections[sec];
+      var band = s && s.band !== null ? s.band : null;
+      var d = (s && s.detail) || null;
+      /* 막대는 밴드를 1~6 구간에서 채운다. 밴드 1 이 바닥이라 (band-1)/5 다. */
+      var pct = band === null ? 0 : Math.round((band - 1) / 5 * 100);
+
+      var foot;
+      if (band === null) {
+        foot = '<div class="muted" style="font-size:11px;margin-top:4px">' +
+          bi('not scored yet', '아직 채점 전') + '</div>';
+      } else if (s.status === 'draft') {
+        foot = '<div class="muted" style="font-size:11px;margin-top:4px">✎ ' +
+          bi('AI draft · awaiting teacher', 'AI 초안 · 교사 확정 대기') + '</div>';
+      } else if (s.status === 'final') {
+        foot = '<div class="muted" style="font-size:11px;margin-top:4px">' +
+          bi('teacher-confirmed', '교사 확정') + '</div>';
+      } else {
+        foot = '<div class="muted" style="font-size:11px;margin-top:4px">' +
+          (d ? d.correct + '/' + d.total + ' → ' + d.scaled + '/30' : '') + '</div>';
+      }
+
       html += '<div class="card">' +
         '<div class="muted" style="font-size:12px">' + bi(LAB[sec][0], LAB[sec][1]) + '</div>' +
-        (has
-          ? '<div style="font-size:28px;font-weight:850;color:var(--brand)">' + s.score +
-              '<span style="font-size:15px;color:var(--muted)"> / ' + s.total + '</span></div>' +
-            '<div class="rv-bar"><i style="width:' + pct + '%"></i></div>'
-          : '<div style="font-size:15px;font-weight:750;margin-top:6px">' +
-              bi('Teacher-scored', '선생님 채점') + '</div>' +
-            '<div class="muted" style="font-size:11px;margin-top:4px">' +
-              bi('not auto-scored', '자동 채점 없음') + '</div>') +
+        (band === null
+          ? '<div style="font-size:22px;font-weight:750;margin-top:6px;color:var(--muted)">—</div>'
+          : '<div style="font-size:28px;font-weight:850;color:var(--brand)">' + esc(SG_BAND.fmt(band)) +
+              '<span style="font-size:15px;color:var(--muted)"> / 6.0</span></div>' +
+            '<div class="rv-bar"><i style="width:' + pct + '%"></i></div>') +
+        foot +
         '</div>';
     });
     $('sections').innerHTML = html;
@@ -453,7 +492,193 @@
     };
   }
 
-  var DET = null, RES = null;
+  /* ── Writing·Speaking 과제별 채점 (ETS 루브릭 0~5) ─────────────────────────
+   *
+   * 이 카드가 하는 일은 둘이다.
+   *   학생에게 — AI 가 왜 그 점수를 줬는지 보여 준다. 확정 전이면 초안이라고 말한다.
+   *   선생님에게 — 점수를 고치고 **확정**하게 한다. 확정한 순간부터 그 점수가
+   *                학생 성적표의 근거이고, 자동 재채점도 그 행을 건드리지 않는다.
+   *
+   * 점수는 0~5 정수다(ETS 공식 산출형 루브릭). 1~6 밴드로 펴는 일은 sg-band.js 가
+   * 한다 — 선생님이 밴드를 직접 입력하지 않는 이유다. 밴드를 손으로 적게 하면
+   * 대응표가 바뀌는 날 손으로 적은 값만 남아 어긋난다.
+   */
+  var TASKS = [];        // sg_task_scores 행
+
+  function taskCard(t, editable) {
+    var qid = t.question_id;
+    var ai = (t.ai_score === null || t.ai_score === undefined) ? null : Number(t.ai_score);
+    var mine = (t.teacher_score === null || t.teacher_score === undefined) ? null : Number(t.teacher_score);
+    var final = mine !== null ? mine : ai;
+    var rub = t.ai_rubric || {};
+    var crit = rub.criteria || [];
+
+    var head = '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">' +
+      '<b>' + esc(qid) + '</b>' +
+      '<span class="chip">' + esc(t.task_kind || t.skill) + '</span>' +
+      (t.confirmed_at
+        ? '<span class="chip">' + bi('confirmed', '확정') + '</span>'
+        : '<span class="chip">✎ ' + bi('AI draft', 'AI 초안') + '</span>') +
+      '<span style="margin-left:auto;font-weight:850;font-size:20px;color:var(--brand)">' +
+        (final === null ? '—' : final + ' / 5') + '</span>' +
+    '</div>';
+
+    var body = '';
+    if (t.ai_error) {
+      body += '<div class="muted" style="font-size:12.5px;margin-top:6px">' +
+        bi('AI scoring failed: ', 'AI 채점 실패: ') + esc(t.ai_error) + '</div>';
+    }
+    /* 스피킹은 "무슨 말을 했는지"가 채점의 입력이다. 점수만 보여 주고 전사문을 감추면
+       학생도 선생님도 그 점수가 맞는지 판단할 방법이 없다 — 잘못 들린 한 단어 때문에
+       점수가 깎였는지 여기서만 알 수 있다. 그래서 채점 근거 바로 위에 놓는다. */
+    if (t.skill === 'speaking') {
+      body += '<div style="margin-top:8px">' +
+        '<div class="muted" style="font-size:11.5px;font-weight:800">' +
+          bi('What we heard', '전사문') +
+          (t.transcript_model ? ' · ' + esc(t.transcript_model) : '') + '</div>' +
+        (t.transcript
+          ? '<div style="font-size:13px;margin-top:3px">' + esc(t.transcript) + '</div>'
+          : '<div class="muted" style="font-size:12.5px;margin-top:3px">' +
+              bi('Not transcribed yet.', '아직 전사되지 않았습니다.') + '</div>') +
+        (t.media_path ? '<div data-cloudplay="' + esc(t.media_path) + '"></div>' : '') +
+      '</div>';
+    }
+    if (rub.summary) {
+      body += '<div style="font-size:13.5px;margin-top:8px">' + esc(rub.summary) + '</div>';
+    }
+    if (crit.length) {
+      body += '<ul class="muted" style="font-size:12.5px;margin:8px 0 0 18px">' +
+        crit.map(function (c) {
+          return '<li><b>' + esc(c.criterion) + '</b> — ' + esc(c.comment || '') + '</li>';
+        }).join('') + '</ul>';
+    }
+    if (ai !== null && mine !== null && mine !== ai) {
+      body += '<div class="muted" style="font-size:12px;margin-top:6px">' +
+        bi('AI said ' + ai + ' / 5; the teacher changed it to ' + mine + ' / 5.',
+           'AI 는 ' + ai + ' / 5 로 봤고, 선생님이 ' + mine + ' / 5 로 고쳤습니다.') + '</div>';
+    }
+    if (t.teacher_note) {
+      body += '<div style="font-size:13px;margin-top:6px"><b>' + bi('Teacher', '선생님') + '</b> — ' +
+        esc(t.teacher_note) + '</div>';
+    }
+    if (t.ai_model) {
+      body += '<div class="muted" style="font-size:11px;margin-top:6px">' + esc(t.ai_model) + '</div>';
+    }
+
+    var edit = '';
+    if (editable) {
+      edit = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">' +
+        '<label class="muted" style="font-size:12px">' + bi('Score 0–5', '점수 0–5') + '</label>' +
+        '<input type="number" min="0" max="5" step="1" data-qid="' + esc(qid) + '" class="ts-score" ' +
+          'value="' + (final === null ? '' : final) + '" ' +
+          'style="width:72px;padding:8px;border:1px solid var(--line-2);border-radius:9px;font:inherit">' +
+        '<input type="text" data-qid="' + esc(qid) + '" class="ts-note" placeholder="' +
+          'Note for the student" value="' + esc(t.teacher_note || '') + '" ' +
+          'style="flex:1;min-width:180px;padding:8px;border:1px solid var(--line-2);border-radius:9px;font:inherit">' +
+        '<button class="btn brand sm ts-save" data-qid="' + esc(qid) + '">' +
+          bi('Confirm', '확정') + '</button>' +
+      '</div>';
+    }
+
+    return '<div style="padding:12px 0;border-top:1px solid var(--line-2)">' + head + body + edit + '</div>';
+  }
+
+  function paintTasks() {
+    var list = TASKS || [];
+    var editable = !!STAFF;
+    if (!list.length) {
+      /* 아직 채점 행이 없다. 이 세트에 W·S 과제가 있는데 비어 있다면 "없다"가 아니라
+         "아직"이다 — 제출 직후 몇십 초는 정상적으로 이 상태다. 카드를 감춰 버리면
+         학생은 라이팅·스피킹이 채점되지 않는 줄 안다. */
+      var pending = SG_RESULTS.productive(RES || {}).length;
+      if (!pending) { $('taskscores').classList.add('hide'); return; }
+      $('taskscores').innerHTML =
+        '<b>' + bi('Writing & Speaking tasks', '라이팅 · 스피킹 과제') + '</b>' +
+        '<div class="muted" style="font-size:12.5px;margin-top:6px">' +
+          bi('Being scored — this usually takes a minute after you submit. Reload this page to check.',
+             '채점 중입니다 — 제출 후 보통 1분쯤 걸립니다. 새로고침해서 확인하세요.') + '</div>' +
+        (editable ? '<div style="margin-top:10px"><button class="btn ghost sm" id="rescore">' +
+          bi('Run AI scoring now', '지금 AI 채점') + '</button></div>' : '');
+      $('taskscores').classList.remove('hide');
+      if (editable) wireTaskEditors();
+      return;
+    }
+    $('taskscores').innerHTML =
+      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' +
+        '<b>' + bi('Writing & Speaking tasks', '라이팅 · 스피킹 과제') + '</b>' +
+        '<span class="muted" style="font-size:12px">' +
+          bi('Scored 0–5 on the official ETS scoring guide. Section bands are worked out from these.',
+             'ETS 공식 채점 가이드 0–5 로 채점합니다. 영역 밴드는 이 점수에서 나옵니다.') + '</span>' +
+        (editable ? '<button class="btn ghost sm" id="rescore" style="margin-left:auto">' +
+          bi('Re-run AI scoring', 'AI 재채점') + '</button>' : '') +
+      '</div>' +
+      list.map(function (t) { return taskCard(t, editable); }).join('');
+    $('taskscores').classList.remove('hide');
+    wireCloudPlayback();
+    if (editable) wireTaskEditors();
+  }
+
+  /** 확정 저장. 교사 칸만 쓴다 — AI 가 뭐라 했는지는 그대로 남는다. */
+  function saveTask(qid, score, note, btn) {
+    if (!window.SG_AUTH) return;
+    var body = {
+      teacher_score: score === '' ? null : Number(score),
+      teacher_note: note || '',
+      confirmed_at: new Date().toISOString()
+    };
+    btn.disabled = true;
+    SG_AUTH.token().then(function (tok) {
+      return fetch(SG_AUTH.url + '/rest/v1/sg_task_scores?owner=eq.' +
+          encodeURIComponent(OWNER_ID) + '&session=eq.' + encodeURIComponent(SESSION) +
+          '&question_id=eq.' + encodeURIComponent(qid), {
+        method: 'PATCH',
+        headers: {
+          apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok,
+          'Content-Type': 'application/json', Prefer: 'return=minimal'
+        },
+        body: JSON.stringify(body)
+      });
+    }).then(function (r) {
+      btn.disabled = false;
+      if (!r || !r.ok) { alert('Could not save the score.'); return; }
+      reloadTasks();
+    }).catch(function () { btn.disabled = false; alert('Could not save the score.'); });
+  }
+
+  function wireTaskEditors() {
+    var saves = $('taskscores').querySelectorAll('.ts-save');
+    Array.prototype.forEach.call(saves, function (btn) {
+      btn.onclick = function () {
+        var qid = btn.getAttribute('data-qid');
+        var box = $('taskscores');
+        var score = box.querySelector('.ts-score[data-qid="' + qid + '"]').value;
+        var note = box.querySelector('.ts-note[data-qid="' + qid + '"]').value;
+        saveTask(qid, score, note, btn);
+      };
+    });
+    var re = document.getElementById('rescore');
+    if (re) re.onclick = function () {
+      re.disabled = true;
+      /* force: 이미 매겨진 초안도 다시 매긴다. 교사가 확정한 행은 서버가 건너뛴다. */
+      SG_RESULTS.aiScore(RES, { owner: OWNER_ID, force: true }).then(function (out) {
+        re.disabled = false;
+        if (!out) { alert('AI scoring is not available right now.'); return; }
+        reloadTasks();
+      }).catch(function () { re.disabled = false; });
+    };
+  }
+
+  function reloadTasks() {
+    return SG_RESULTS.tasks(SESSION, OWNER_ID).then(function (rows) {
+      TASKS = rows || [];
+      VIEW = SG_BAND.of(RES, TASKS);
+      paintSummary(RES, DET, WHO);
+      paintSections(DET);
+      paintTasks();
+    }).catch(function () {});
+  }
+
+  var DET = null, RES = null, WHO = null;
   function reloadComments() {
     return SG_COMMENTS.list(OWNER_ID, SESSION).then(function (rows) {
       CMT = rows || [];
@@ -462,22 +687,58 @@
     });
   }
 
-  /* 녹음은 그 기기의 IndexedDB 에만 있다. 응시한 기기에서 열었을 때만 재생이 붙고,
-   * 다른 기기에서는 "녹음 제출됨" 글만 남는다. */
+  function playerInto(slot, src) {
+    if (!slot || slot.querySelector('audio')) return;
+    var a = document.createElement('audio');
+    a.controls = true;
+    a.preload = 'none';
+    a.style.cssText = 'margin-top:6px;width:230px;max-width:100%';
+    a.src = src;
+    slot.appendChild(a);
+  }
+
+  /* 녹음은 두 군데에 있다. 응시한 기기의 IndexedDB 와, 제출 뒤 올라간 비공개 버킷.
+   * 앞의 것은 그 기기에서만 열리고, 뒤의 것은 어느 기기에서나 열린다(서명 URL).
+   * 문항 표에는 응시 기기의 사본을 붙인다 — 네트워크 없이도 들리기 때문이다. */
   function wirePlayback() {
     var S = window.SG_STORE;
     if (!S || typeof S.getMedia !== 'function' || !SESSION) return;
-    try { S.open(SESSION); } catch (e) { return; }
+    /* 진행 중인 다른 시험의 '활성 세션' 표시를 건드리지 않는다. */
+    try { S.open(SESSION, false); } catch (e) { return; }
     Array.prototype.forEach.call(document.querySelectorAll('[data-play]'), function (slot) {
-      S.getMedia(slot.getAttribute('data-play'), function (err, blob) {
-        if (err || !blob) return;
-        var a = document.createElement('audio');
-        a.controls = true;
-        a.style.cssText = 'margin-top:6px;width:230px';
-        a.src = URL.createObjectURL(blob);
-        slot.appendChild(a);
+      S.getMedia(slot.getAttribute('data-play'), function (err, rec) {
+        // 저장 형식은 {questionKey, blob, mime, …} 다. 아주 옛 기록은 Blob 자체였다.
+        var blob = rec && rec.blob ? rec.blob : rec;
+        if (err || !blob || !blob.size) return;
+        playerInto(slot, URL.createObjectURL(blob));
       });
     });
+  }
+
+  /* 과제 채점 카드의 녹음은 버킷에서 온다 — 선생님이 다른 기기에서 열어도 들려야 한다.
+   * 버킷은 비공개라 서명 URL 을 하나씩 받는다. 정책상 자기 폴더만 서명할 수 있으므로
+   * 남의 응시를 보는 선생님에게는 조용히 재생기가 붙지 않는다(글은 그대로 보인다). */
+  function wireCloudPlayback() {
+    var slots = document.querySelectorAll('[data-cloudplay]');
+    if (!slots.length || !window.SG_AUTH) return;
+    SG_AUTH.token().then(function (tok) {
+      if (!tok) return;
+      Array.prototype.forEach.call(slots, function (slot) {
+        if (slot.dataset.wired) return;
+        slot.dataset.wired = '1';
+        var path = slot.getAttribute('data-cloudplay');
+        fetch(SG_AUTH.url + '/storage/v1/object/sign/toefl-recordings/' +
+              path.split('/').map(encodeURIComponent).join('/'), {
+          method: 'POST',
+          headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok,
+                     'Content-Type': 'application/json' },
+          body: JSON.stringify({ expiresIn: 3600 })
+        }).then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (j) {
+            if (j && j.signedURL) playerInto(slot, SG_AUTH.url + '/storage/v1' + j.signedURL);
+          })['catch'](function () {});
+      });
+    })['catch'](function () {});
   }
 
   function render(res, who) {
@@ -489,10 +750,17 @@
       return;
     }
     ALL = det.rows;
-    RES = res; DET = det;
+    RES = res; DET = det; WHO = who;
     OWNER_ID = OWNER || res.owner || (ME && ME.id) || '';
+
+    /* 밴드는 W·S 채점(sg_task_scores)까지 읽어야 완성된다. 못 읽어도 화면은 그린다 —
+       그때는 R·L 만으로 종합이 나오고, W·S 는 '아직 채점 전'으로 남는다.
+       먼저 R·L 만으로 그려 두는 것은 빈 화면을 보여주지 않기 위해서다. */
+    VIEW = window.SG_BAND ? SG_BAND.of(res, []) : null;
     paintSummary(res, det, who);
     paintSections(det);
+    if (window.SG_BAND && OWNER_ID) reloadTasks();
+
     paintTabs();
     show('table-card');
     paintRows();
