@@ -417,6 +417,11 @@
     }
 
     if (block.introAudio) {
+      /* 안내 방송은 화면이 열리면 스스로 흐른다(2026-08-11) — 실제 시험에서 응시자가
+       * 재생을 누르는 절차는 없다. 브라우저가 자동재생을 막으면 렌더러가 'Play audio'
+       * 버튼 하나로 폴백하고, 방송이 끝나면 엔진이 첫 문항으로 넘긴다. */
+      var introAudio = mediaOf(block.introAudio, 1, ctx.warnings, ctx.sectionId + '/' + ctx.moduleId + '/intro');
+      if (introAudio) introAudio.autoplay = true;
       out.push(window.SG_TYPES.makeScreen({
         id: ctx.sectionId + '.intro.' + ctx.moduleId,
         screenType: 'instruction',
@@ -426,7 +431,7 @@
         blockKind: block.kind,
         timer: null,
         advance: 'manual', // introAudioSelfPaced:true — 안내 오디오를 듣고 응시자가 시작한다
-        audio: mediaOf(block.introAudio, 1, ctx.warnings, ctx.sectionId + '/' + ctx.moduleId + '/intro'),
+        audio: introAudio,
         copy: {
           titleEn: block.heading || (ctx.moduleLabel + ' Directions'),
           titleKo: ctx.moduleLabel + ' 안내',

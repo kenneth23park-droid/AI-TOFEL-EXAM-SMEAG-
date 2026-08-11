@@ -851,7 +851,6 @@ body.exam-body {
   padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff;
   font-size: 13px; color: var(--ink-2);
 }
-.speaking-preview { width: 100%; max-width: 380px; }
 
 @media (prefers-reduced-motion: reduce) {
   .response-box.is-recording { animation: none; }

@@ -619,19 +619,11 @@
       if (p && typeof p['catch'] === 'function') p['catch'](function () {});
     }
 
-    /* AC6 — 미리듣기는 제공하되 재녹음은 불가(timing.allowRerecord 기본 false). */
+    /* AC6 — 실제 시험처럼 자기 답을 다시 듣지 못한다. 녹음됐다는 사실만 알린다. */
     function showPreview(res) {
       while (review.firstChild) review.removeChild(review.firstChild);
       review.appendChild(bi('p', 'Your response has been recorded. You cannot record again.',
                                '응답이 녹음되었습니다. 다시 녹음할 수는 없습니다.'));
-      if (res && res.blob && root.URL && root.URL.createObjectURL) {
-        var a = doc.createElement('audio');
-        a.controls = true;
-        a.className = 'speaking-preview';
-        try { a.src = root.URL.createObjectURL(res.blob); } catch (e) {}
-        a.volume = volume();
-        review.appendChild(a);
-      }
       review.hidden = false;
     }
 
