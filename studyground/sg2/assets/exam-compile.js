@@ -138,6 +138,9 @@
 
   /* --- 타이머 -------------------------------------------------------------- */
 
+  // scope 폭 — 작을수록 좁다. exam-clock.js 의 SCOPE_RANK 와 같은 순서다(§3.5).
+  var RANK = { question: 0, screen: 1, task: 2, module: 3, section: 4 };
+
   /* 한 문제 화면에 걸리는 clock 들을 좁은 scope → 넓은 scope 순으로 만든다(§3.5).
    * timer(표시용) = clocks[0], 나머지는 timers[] 로 넘겨 엔진의 clocks 맵이 공존시킨다. */
   function buildClocks(cfg, secCfg, unit) {
@@ -151,18 +154,27 @@
       out.push({ mode: 'countdown', scope: 'question', seconds: perQ, format: fmt, onExpire: onExpire, visible: true });
     }
     if (unit && isNum(unit.allocatedSec)) {
-      out.push({ mode: 'countdown', scope: 'module', seconds: unit.allocatedSec, format: fmt, onExpire: onExpire, visible: true, sharedDeadline: true });
+      out.push({ mode: 'countdown', scope: 'module', seconds: unit.allocatedSec, format: fmt, onExpire: onExpire, visible: false, sharedDeadline: true });
     }
     if (unit && isNum(unit.perTaskSec)) {
-      out.push({ mode: 'countdown', scope: 'task', seconds: unit.perTaskSec, format: fmt, onExpire: onExpire, visible: true, sharedDeadline: true });
+      out.push({ mode: 'countdown', scope: 'task', seconds: unit.perTaskSec, format: fmt, onExpire: onExpire, visible: false, sharedDeadline: true });
     }
     if (isNum(secCfg.sectionSec)) {
-      /* 섹션 시계는 더 좁은 시계가 있을 때만 숨긴다.
-       * TOEFL reading 은 module 시계가 있으므로 종전과 같이 visible:false 다(회귀 없음).
-       * IELTS reading/listening 은 섹션 시계가 유일하므로 이것이 표시 시계가 된다
-       *  — Reading 3지문 60분 단일 카운트다운(§6). */
-      out.push({ mode: 'countdown', scope: 'section', seconds: secCfg.sectionSec, format: fmt, onExpire: onExpire, visible: out.length === 0, sharedDeadline: true });
+      out.push({ mode: 'countdown', scope: 'section', seconds: secCfg.sectionSec, format: fmt, onExpire: onExpire, visible: false, sharedDeadline: true });
     }
+
+    /* 서브바에는 가장 좁은 시계 하나만 띄운다(발주처 요구 2026-08-11 —
+     * "전체 남은 시간 말고 답할 시간만"). 넓은 시계는 visible:false 로 남아 만료·
+     * autoAdvance 는 그대로 동작하되 숫자만 사라진다.
+     *  · TOEFL listening(question) — 모듈 상한 30분이 서브바에서 사라진다. 오디오가
+     *    도는 동안에는 문항 시계가 아직 arm 되지 않아 서브바 우측이 빈다.
+     *  · TOEFL speaking(task) / reading(module) / IELTS(section) — 유일한 시계가
+     *    그대로 표시 시계가 된다(회귀 없음). */
+    var narrow = null;
+    for (var i = 0; i < out.length; i++) {
+      if (narrow === null || RANK[out[i].scope] < RANK[narrow.scope]) narrow = out[i];
+    }
+    if (narrow) narrow.visible = true;
     return out;
   }
 

@@ -622,9 +622,6 @@ window.SG_SELFTEST = (function () {
     T.eq('audio-set 화면 수', aset.length, 33);
 
     // 재생 잔여시간 표기 — 상단 pill(MM:SS)과 구분되는 M:SS
-    T.eq('fmtRemain(83)', L.fmtRemain(83), '1:23');
-    T.eq('fmtRemain(0)', L.fmtRemain(0), '0:00');
-    T.eq('fmtRemain(-4) clamp', L.fmtRemain(-4), '0:00');
 
     // FR29 — 한국어 하드코딩 prompt 를 EN 우선으로
     var pair = L.promptPair({ prompt: '오디오를 듣고 가장 알맞은 응답을 고르세요.', layout: 'short-response' });
@@ -646,7 +643,7 @@ window.SG_SELFTEST = (function () {
       T.ok('Question n of N 표시', textOf(sNode).indexOf('Question 1 of ' + shortS.progress.total) >= 0);
       T.eq('progress.total(콘텐츠 산출)', shortS.progress.total, 33);
       T.ok('화자 일러스트', !!sNode.querySelector('img.lst-au-speaker'));
-      T.ok('재생 잔여시간 카운터', !!sNode.querySelector('.lst-au-count'));
+      T.ok('재생 잔여시간 미표시', !sNode.querySelector('.lst-au-count'));
       var au = sNode.querySelector('audio');
       T.ok('audio 엘리먼트 존재(미소진)', !!au);
       T.ok('<audio controls> 미사용(FR8)', !!au && !au.hasAttribute('controls'));
@@ -664,6 +661,19 @@ window.SG_SELFTEST = (function () {
       var h2 = window.SMEAG_SET1.findQuestion(aset[b].questionIds[0]);
       if (aset[b].audio && h2 && h2.q && h2.q.layout !== 'short-response') { blockS = aset[b]; break; }
     }
+    /* 대화·강의형: 재생이 끝나기 전에는 문항·선택지를 감춘다(2026-08-11). */
+    var liveBox = T.caseBox(blockS.id + ' · 재생 중 문항 숨김');
+    var liveNode = T.renderInto(liveBox, L.renderListeningQuestion, blockS, ctx);
+    if (liveNode) {
+      var lq = liveNode.querySelector('.lst-q');
+      T.ok('문항 영역 숨김(is-hidden)', !!lq && String(lq.className).indexOf('is-hidden') >= 0, lq ? lq.className : 'none');
+      var li = liveNode.querySelectorAll('input[type="radio"]');
+      var liveOpen = false;
+      for (var lk = 0; lk < li.length; lk++) { if (!li[lk].disabled) liveOpen = true; }
+      T.ok('숨긴 선택지 잠금', !liveOpen);
+      T.ok('재생 중 안내문', textOf(liveNode).indexOf('The question will appear when it ends') >= 0);
+    }
+
     var key = L.spentKey(blockS.id, blockS.audio.src);
     T.eq('소진 전', L.isAudioSpent(key), false);
     L.markAudioSpent(key);
