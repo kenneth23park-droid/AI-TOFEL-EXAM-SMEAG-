@@ -315,6 +315,32 @@
     return out;
   }
 
+  /**
+   * 팩 단위와 대본 단위를 합친다. 그냥 concat 하면 안 된다.
+   *
+   * 대본 조각(config/_*_fragments/*_script.json)은 **팩에 텍스트가 없을 때 그것을
+   * 채워 주려고** 있는 파일이다. 그런데 팩이 그 문장을 이미 들고 있으면(예: 스피킹
+   * 지시문이 record-set 블록에도, speaking_script.json 에도 있다) 같은 원본이 단위
+   * 두 개가 되고, 검사기는 그 둘을 "완전히 동일한 문항"이라며 high 로 올린다.
+   * 실제로 그렇게 걸렸다 — SET9 S1/S2 intro 2건.
+   *
+   * 겹침이 아니라 같은 것을 두 번 센 것이므로, 같은 SET 안에서 팩이 이미 담고 있는
+   * 문장은 대본 쪽 단위를 버린다. 팩 쪽을 남기는 이유는 그쪽이 문항 id 를 들고 있어
+   * "이 문항 열기"가 동작하기 때문이다.
+   */
+  function mergeUnits(packUnits, scriptUnits) {
+    var have = {};
+    packUnits.forEach(function (u) {
+      var n = normalize(u.bodyLines.join('\n'));
+      if (n) have[u.where.set + ' ' + n] = 1;
+    });
+    var kept = (scriptUnits || []).filter(function (u) {
+      var n = normalize(u.bodyLines.join('\n'));
+      return !n || !have[u.where.set + ' ' + n];
+    });
+    return packUnits.concat(kept);
+  }
+
   /* ══════════════ 3. 군집 → 틀 유도 → payload 확정 ═════════════════════════ */
 
   /** 원문 줄 기준 군집화. 틀 df 를 군집 수로 세기 위한 사전 단계다(위 설명 참조).
@@ -605,6 +631,6 @@
     harvest: harvest, lines: lines, payloadLinesFor: payloadLinesFor,
     unitsFromPack: unitsFromPack, unitsFromScriptRows: unitsFromScriptRows,
     clusterUnits: clusterUnits, finalizeUnits: finalizeUnits, compare: compare,
-    unitOut: unitOut, analyze: analyze, allowMap: allowMap
+    unitOut: unitOut, analyze: analyze, allowMap: allowMap, mergeUnits: mergeUnits
   };
 });

@@ -41,10 +41,10 @@ function loadAll() {
     var p = CLI.loadPack(f);
     codes.push(p.code);
     var sc = CLI.scriptRows(p.code || '');
-    units = units.concat(
+    units = units.concat(SG_DUP.mergeUnits(
       SG_DUP.unitsFromPack(p),
       SG_DUP.unitsFromScriptRows(p.code || '', sc.rows, sc.sources.join(' '))
-    );
+    ));
   });
   return { units: units, codes: codes };
 }
@@ -141,6 +141,26 @@ ok(stock.length >= 5, '"Listen to the question…" 정형 발문이 틀로 제�
 
 var clozeHint = finalized.filter(function (u) { return u.qkind === 'blank'; });
 ok(clozeHint.length === 0, 'cloze 빈칸은 문항 단위를 만들지 않는다 (힌트 "th" 오탐 방지)');
+
+/* 대본 조각과 팩이 같은 문장을 들고 있을 때 — 겹침이 아니라 같은 것을 두 번 센 것이다.
+ * 실제로 SET9 S1/S2 intro 가 이렇게 high 로 올라온 적이 있다(팩의 record-set 블록에도,
+ * speaking_script.json 에도 같은 지시문이 있었다). mergeUnits 가 이걸 막는다. */
+var set9Pack = null;
+CLI.discoverPacks().forEach(function (f) {
+  var p = CLI.loadPack(f);
+  if (String(p.code).replace(/\s+/g, '').toUpperCase() === 'SET9') set9Pack = p;
+});
+var packOnly = SG_DUP.unitsFromPack(set9Pack);
+var scriptOnly = (function () {
+  var sc = CLI.scriptRows('SET9');
+  return SG_DUP.unitsFromScriptRows('SET9', sc.rows, '');
+})();
+var merged = SG_DUP.mergeUnits(packOnly, scriptOnly);
+var dropped = packOnly.length + scriptOnly.length - merged.length;
+ok(merged.length < packOnly.length + scriptOnly.length,
+   '팩이 이미 담고 있는 대본 문장은 중복 단위로 세지 않는다 (' + dropped + '개 제외)');
+ok(SG_DUP.analyze(merged.slice(), { allow: {} }).counts.high === 0,
+   'SET9 안에서 팩↔대본 자기 겹침이 나지 않는다');
 
 /* ══════════════ [2] 함정 팩 — 탐지력 ═════════════════════════════════════ */
 console.log('\n[2] 함정 팩 — 재활용 수법을 심으면 high 가 나는가');

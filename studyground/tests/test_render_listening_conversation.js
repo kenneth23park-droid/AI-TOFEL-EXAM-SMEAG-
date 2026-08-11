@@ -203,12 +203,28 @@ ok('정지 표시가 남는다', audio.hasAttribute('data-sg-stopped'));
 audio.emit('error');
 ok('정지된 오디오의 error 는 무시된다', audio.paused === true);
 
-/* ── [C] 대화·강의형은 재생 중에도 4지 선택지를 누를 수 있다 ──
- * 신고(2026-08-11): 대화 파트 첫 문항의 선택지가 클릭되지 않는다. 원인은 블록 오디오가
- * 도는 동안 radio 를 disabled 로 걸어 둔 것이었다 — 대화는 1~3분이라 그 창이 길고,
- * 같은 블록의 2번째 문항부터는 오디오가 없어 곧바로 눌렸다.
- * 질문이 음성으로만 주어지는 Task 1(short-response)은 종전대로 잠긴 채여야 한다. */
-console.log('\n[C] 재생 중 선택지 클릭');
+/* ── [C] 재생 중 문항·선택지를 어떻게 다루는가 ──
+ *
+ * 두 유형이 서로 다르게 굴어야 하고, 그 차이가 이 절의 전부다.
+ *
+ *   대화·강의형(블록 오디오)   재생 중 문항·선택지를 **감춘다**(lst-q is-hidden).
+ *                              실제 시험과 같다 — 대화가 도는 동안에는 그림만 보이고
+ *                              재생이 끝나야 문항이 나타난다. 잠근 채로 보여주면
+ *                              대화를 듣기 전에 지문을 읽어 버린다.
+ *   short-response(Task 1)     재생 중 **잠그되 보여준다**(lst-opts is-locked).
+ *                              질문이 음성으로만 주어지므로 선택지는 계속 보여야 하고,
+ *                              듣기 전에 고르는 건 답이 아니라 찍기이므로 잠근다.
+ *
+ * 어느 쪽이든 감춰지거나 잠긴 동안 키보드로도 잡히면 안 되므로 radio 는 disabled 다.
+ *
+ * ── 기대값 갱신 (2026-08-11) ───────────────────────────────────────────────
+ * 이전 판의 이 절은 "대화형은 재생 중에도 누를 수 있다"(radio disabled=false ·
+ * is-locked 없음)를 고정하고 있었다. c6944a1 의 결정이었고, 그때 근거는 "대화가
+ * 1~3분이라 잠금 창이 너무 길다" 였다. 그 뒤 689c891 에서 결정이 바뀌었다 —
+ * 잠그는 대신 **감추고**, 답변 시계는 재생이 끝난 뒤 시작한다(timerStartsOnAudioEnd).
+ * 잠금 창이 길다는 문제는 시계를 미루는 쪽으로 풀렸으므로 누르게 할 이유가 없어졌다.
+ * 렌더러만 바뀌고 이 테스트가 남아 실패하고 있었다. */
+console.log('\n[C] 재생 중 문항·선택지 노출');
 
 function optState(scr) {
   var saved = [];
@@ -216,19 +232,26 @@ function optState(scr) {
     engine: { answer: function (qid, v) { saved.push(qid + '=' + v); return true; } }
   });
   var box = walk(node, []).filter(function (n) { return String(n.className).indexOf('lst-opts') >= 0; })[0];
+  var qwrap = walk(node, []).filter(function (n) { return String(n.className).indexOf('lst-q') >= 0; })[0];
   var radios = collect(node, 'input[type="radio"]');
-  return { node: node, box: box, radios: radios, saved: saved };
+  return { node: node, box: box, qwrap: qwrap, radios: radios, saved: saved };
 }
 
 var convScr = qScreens.filter(function (s) { return s.questionIds[0] === 'L1-13' && s.audio; })[0];
 ok('L1-13 은 오디오를 든 화면', !!convScr, convScr && convScr.audio && convScr.audio.src);
 window.SG_STORE.patchMeta({ audioSpent: {} });   // 앞 절에서 소진 처리된 화면을 되돌린다
 var c = optState(convScr);
-check('대화형 선택지 disabled', c.radios.map(function (r) { return r.disabled; }), [false, false, false, false]);
-ok('대화형 선택지는 잠금 클래스가 없다', String(c.box.className).indexOf('is-locked') < 0, c.box.className);
+ok('대화형은 재생 중 문항이 감춰진다', String(c.qwrap.className).indexOf('is-hidden') >= 0, c.qwrap.className);
+check('감춰진 선택지는 키보드로도 잡히지 않는다', c.radios.map(function (r) { return r.disabled; }), [true, true, true, true]);
+
+/* 감춰 두기만 하고 재생이 끝나도 안 나타나면 답을 할 수 없다 — 여기가 진짜 계약이다. */
+var cAudio = collect(c.node, 'audio, video')[0];
+cAudio.emit('ended');
+ok('종료 후 문항이 나타난다', String(c.qwrap.className).indexOf('is-hidden') < 0, c.qwrap.className);
+check('종료 후 선택지가 열린다', c.radios.map(function (r) { return r.disabled; }), [false, false, false, false]);
 c.radios[2].checked = true;
 c.radios[2].onchange();   // 렌더러는 addEventListener 가 아니라 onchange 를 쓴다
-check('재생 중 클릭이 답으로 기록된다', c.saved, ['L1-13=2']);
+check('열린 뒤 클릭이 답으로 기록된다', c.saved, ['L1-13=2']);
 
 var shortScr = qScreens.filter(function (s) {
   var hit = pack.findQuestion(s.questionIds[0]);

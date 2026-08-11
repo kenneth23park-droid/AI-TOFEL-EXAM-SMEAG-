@@ -122,7 +122,9 @@ function main() {
       scripts: fromScript.length,
       isCandidate: !!candidate && path.resolve(path.join(ROOT, p.__file)) === path.resolve(candidate)
     });
-    units = units.concat(fromPack, fromScript);
+    /* concat 이 아니라 mergeUnits — 대본 조각이 팩에 이미 있는 문장을 다시 들고 오면
+     * 같은 원본이 단위 두 개가 되어 "완전히 동일한 문항"으로 걸린다(코어 주석 참조). */
+    units = units.concat(SG_DUP.mergeUnits(fromPack, fromScript));
   });
 
   var allowFile = path.join(SG2, 'config', 'dup-allowlist.json');
