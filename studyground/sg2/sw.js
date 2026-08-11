@@ -113,7 +113,12 @@
 //      config/offline.*.json 은 셸에 있어도 네트워크 우선으로 뺐다 — 목록까지
 //      cache-first 로 붙들면 기기가 옛 목록을 보고 "최신"이라 답해 업데이트가
 //      영영 도착하지 않는다. 오프라인이면 캐시된 목록으로 되돌아간다.
-const VERSION = 'sg-v38';
+// v39: 스피킹도 문항 카드로 편다 — assets/sg-review-speaking.js 가 왼쪽에 들려준 것
+//      (그림·원문·오디오)을, 오른쪽에 말한 것(녹음·전사)과 채점 근거를 세우고, 복창은
+//      원문과 낱말 단위로 대조해 빠뜨림·덧붙임·바꿔 말함까지 보여 준다. set9.js 의
+//      스피킹 문항에 들려준 문장(script)이 실렸다 — 이 값이 복창 채점의 원문이므로,
+//      캐시된 옛 팩이 남으면 원문 없이 중앙값으로 채점되던 동작이 계속된다.
+const VERSION = 'sg-v39';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -127,6 +132,7 @@ const SHELL_ASSETS = [
   // 채점 리뷰 — 제출 직후 오프라인에서도 자기 답안을 문항별로 볼 수 있어야 한다.
   'review.html', 'admin-results.html', 'assets/sg-results.js', 'assets/sg-comments.js',
   'assets/sg-review-listening.js', 'assets/sg-review-writing.js',
+  'assets/sg-review-speaking.js',
   // 밴드 환산 — 제출 화면이 채점 직후 네 영역 점수를 그 자리에서 편다.
   'assets/sg-band.js',
 

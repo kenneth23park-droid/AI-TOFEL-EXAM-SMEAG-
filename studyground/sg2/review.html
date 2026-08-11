@@ -32,8 +32,6 @@
   <div class="page-h mt-24" style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
     <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Answer review</span><span data-ko>채점 리뷰</span></h1>
     <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
-      <!-- 스피킹은 표 한 칸에 들어가지 않는다 — 원문·오디오·녹음·전사를 나란히 놓는 화면으로 보낸다. -->
-      <a class="btn ghost sm hide" id="speaking">🎤 <span data-en>Speaking review</span><span data-ko>스피킹 리뷰</span></a>
       <button class="btn ghost sm" id="print" type="button"><span data-en>Print</span><span data-ko>인쇄</span></button>
       <a class="btn ghost sm" id="back" href="dashboard.html">
         <span data-en>Back to my results</span><span data-ko>내 성적으로</span></a>
@@ -67,6 +65,9 @@
 
   <!-- 라이팅도 표에 들어가지 않는다 — 과제문·문장 틀·단어 은행이 있어야 문제가 된다. -->
   <div class="card hide" id="write-card" style="padding:0;overflow:hidden"></div>
+
+  <!-- 스피킹의 답은 소리다. 표 한 칸에 넣을 수 있는 건 '녹음 제출됨' 뿐이라 카드로 편다. -->
+  <div class="card hide" id="speak-card" style="padding:0;overflow:hidden"></div>
 
   <!-- 문항별 -->
   <div class="card hide" id="table-card" style="padding:0;overflow:hidden">
@@ -107,6 +108,7 @@
 <script src="assets/sg-comments.js"></script>
 <script src="assets/sg-review-listening.js"></script>
 <script src="assets/sg-review-writing.js"></script>
+<script src="assets/sg-review-speaking.js"></script>
 <script>
 /* 한 회차의 채점 결과를 문항별로 편다.
  *   review.html?session=<세션 id>              내 응시 (로컬 기록 또는 서버 사본)
@@ -348,19 +350,44 @@
     return true;
   }
 
+  /* 스피킹 탭도 표를 쓰지 않는다. 답이 소리라서, 표에는 "녹음 제출됨" 밖에 못 적는다 —
+   * 그 한 줄로는 아무도 점수를 이해할 수 없다. 왼쪽에 들려준 것(그림·원문·오디오)을,
+   * 오른쪽에 말한 것(녹음·전사)과 채점 근거를 세운다. 복창은 원문과 낱말 단위로 대조해
+   * 무엇을 빠뜨리고 무엇을 덧붙였는지까지 편다. */
+  var SPEAK = null;
+
+  function paintSpeaking() {
+    var el = $('speak-card');
+    if (!window.SG_REVIEW_SPEAKING) { el.classList.add('hide'); return false; }
+    el.classList.remove('hide');
+    if (SPEAK) { SPEAK.repaint(); return true; }
+    SPEAK = SG_REVIEW_SPEAKING.mount(el, {
+      pack: PACK, rows: ALL, tasks: TASKS, session: SESSION,
+      extraFor: function (qid) {
+        var notes = commentsFor('question', qid);
+        if (!notes.length && !STAFF) return '';
+        return '<div class="mt-16">' + notes.map(cardOf).join('') +
+               (STAFF ? editorFor('question', qid, notes) : '') + '</div>';
+      },
+      onPaint: function () { wireEditors(); }
+    });
+    return true;
+  }
+
+  /* 표를 쓰지 않는 영역들. 탭 하나가 켜지면 나머지는 반드시 꺼진다. */
+  var CARDS = { listening: 'listen-card', writing: 'write-card', speaking: 'speak-card' };
+
+  function hideCards(except) {
+    for (var k in CARDS) {
+      if (CARDS.hasOwnProperty(k) && k !== except) $(CARDS[k]).classList.add('hide');
+    }
+  }
+
   function paintRows() {
-    if (filter === 'listening' && paintListening()) {
-      $('write-card').classList.add('hide');
-      $('table-card').classList.add('hide');
-      return;
-    }
-    if (filter === 'writing' && paintWriting()) {
-      $('listen-card').classList.add('hide');
-      $('table-card').classList.add('hide');
-      return;
-    }
-    $('write-card').classList.add('hide');
-    $('listen-card').classList.add('hide');
+    if (filter === 'listening' && paintListening()) { hideCards('listening'); $('table-card').classList.add('hide'); return; }
+    if (filter === 'writing' && paintWriting()) { hideCards('writing'); $('table-card').classList.add('hide'); return; }
+    if (filter === 'speaking' && paintSpeaking()) { hideCards('speaking'); $('table-card').classList.add('hide'); return; }
+    hideCards('');
     $('table-card').classList.remove('hide');
     var list = ALL.filter(function (r) {
       if (filter === 'all') return true;
@@ -770,6 +797,7 @@
       paintTasks();
       // 라이팅 리뷰의 0~5 점수와 루브릭이 이 응답에서 온다. 보던 자리는 지킨다.
       if (WRITE) WRITE.setTasks(TASKS);
+      if (SPEAK) SPEAK.setTasks(TASKS);
     }).catch(function () {});
   }
 
@@ -847,13 +875,6 @@
     ALL = det.rows;
     RES = res; DET = det; WHO = who;
     OWNER_ID = OWNER || res.owner || (ME && ME.id) || '';
-
-    /* 스피킹이 있는 세트에서만 문을 연다 — 없는 세트에서 눌러 봐야 빈 화면이다. */
-    if (ALL.some(function (r) { return r.section === 'speaking'; })) {
-      $('speaking').href = 'review-speaking.html?session=' + encodeURIComponent(SESSION) +
-        (OWNER ? '&owner=' + encodeURIComponent(OWNER) : '');
-      $('speaking').classList.remove('hide');
-    }
 
     /* 밴드는 W·S 채점(sg_task_scores)까지 읽어야 완성된다. 못 읽어도 화면은 그린다 —
        그때는 R·L 만으로 종합이 나오고, W·S 는 '아직 채점 전'으로 남는다.
