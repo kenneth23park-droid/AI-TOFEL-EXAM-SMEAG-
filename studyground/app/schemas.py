@@ -145,6 +145,9 @@ class RescoreResponse(BaseModel):
     # 이번 호출이 저장한 루브릭 행 수와, 덮지 않고 지켜 낸 교사 확정 행 수(가산 필드).
     rubrics_saved: int = 0
     rubrics_kept_teacher: int = 0
+    # 이번 호출이 실제로 태운 LLM 호출 수와 금액(마이크로달러). 오프라인 모드면 0.
+    llm_calls: int = 0
+    llm_cost_micros: int = 0
 
 
 # ── runtime API (architecture.md §7.1 — Stories 3.2 / 3.3 / 3.5) ──────────

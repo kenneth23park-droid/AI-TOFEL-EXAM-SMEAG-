@@ -41,6 +41,7 @@ NAV: tuple[tuple[str, str, str, str], ...] = (
     ("speaking", "/admin/speaking", "SPEAKING ANSWERS", "스피킹 답안"),
     ("statistics", "/admin/statistics", "Exam Statistics", "시험 통계"),
     ("rankings", "/admin/rankings", "Rankings by Grade", "등급별 순위"),
+    ("usage", "/admin/usage", "AI Usage & Cost", "AI 사용량·비용"),
 )
 
 # EN default, KO toggle (P3). Keys mirror the observed back-office wording.
@@ -216,11 +217,12 @@ router = APIRouter(include_in_schema=False)
 
 
 # Imported after the helpers above exist — the submodules import them from here.
-from app.routers.admin import answers, speaking, stats  # noqa: E402
+from app.routers.admin import answers, speaking, stats, usage  # noqa: E402
 
 pages_router.include_router(answers.router)
 pages_router.include_router(speaking.router)
 pages_router.include_router(stats.router)
+pages_router.include_router(usage.router)
 api_router.include_router(answers.api)
 api_router.include_router(speaking.api)
 
@@ -261,7 +263,7 @@ def _coming_soon(active: str):
 
 
 for _key, _path, _en, _ko in NAV:
-    if _key in ("dashboard", "answers", "speaking", "statistics", "rankings"):
+    if _key in ("dashboard", "answers", "speaking", "statistics", "rankings", "usage"):
         continue
     pages_router.add_api_route(_path.replace("/admin", "", 1), _coming_soon(_key), methods=["GET"])
 

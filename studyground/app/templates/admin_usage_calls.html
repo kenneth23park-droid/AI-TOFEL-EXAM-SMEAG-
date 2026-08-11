@@ -1,0 +1,92 @@
+{% extends "admin_base.html" %}
+
+{# 개발자 화면 — 돈이 아니라 "왜 느린가 / 왜 폴백했나". 실패 행도 원장에 남으므로
+   폴백률이 여기서 바로 읽힌다(llm_provider='both' 는 앞이 죽으면 뒤가 이어받는다). #}
+
+{% block headright %}
+<a class="btn ghost" href="/admin/usage?lang={{ lang }}">{{ at('usage.viewCosts') }}</a>
+{% endblock %}
+
+{% block content %}
+<form class="card search-form" method="get" action="/admin/usage/calls">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label>
+    <span>{{ at('answers.dateFrom') }}</span>
+    <input type="date" name="date_from" value="{{ q.date_from }}">
+  </label>
+  <label>
+    <span>{{ at('answers.dateTo') }}</span>
+    <input type="date" name="date_to" value="{{ q.date_to }}">
+  </label>
+  <label class="check">
+    <input type="checkbox" name="only_failed" value="1" {% if q.only_failed %}checked{% endif %}>
+    <span>{{ at('usage.onlyFailed') }}</span>
+  </label>
+  <button class="btn" type="submit">{{ at('stats.apply') }}</button>
+  <a class="btn ghost" href="/admin/usage/calls?lang={{ lang }}">{{ at('answers.reset') }}</a>
+</form>
+
+<section class="tile-row">
+  <div class="card tile">
+    <span class="tile-k">{{ at('usage.p95') }}</span>
+    <b class="tile-v">{{ p95_ms }}ms</b>
+  </div>
+  <div class="card tile">
+    <span class="tile-k">{{ at('usage.failRate') }}</span>
+    <b class="tile-v">{{ fail_rate }}%</b>
+  </div>
+  <div class="card tile">
+    <span class="tile-k">{{ at('usage.failed') }}</span>
+    <b class="tile-v">{{ totals.failed_calls }}</b>
+  </div>
+  <div class="card tile">
+    <span class="tile-k">{{ at('usage.calls') }}</span>
+    <b class="tile-v">{{ totals.calls }}</b>
+  </div>
+</section>
+
+{% if not rows %}
+<section class="card coming-soon">
+  <p class="sub">{{ at('usage.empty') }}</p>
+</section>
+{% else %}
+<section class="card">
+  <table class="grid">
+    <thead>
+      <tr>
+        <th>{{ at('usage.when') }}</th>
+        <th>{{ at('usage.attempt') }}</th>
+        <th>{{ at('usage.scope') }}</th>
+        <th>{{ at('usage.provider') }}</th>
+        <th>{{ at('usage.model') }}</th>
+        <th>{{ at('usage.tokens') }}</th>
+        <th>{{ at('usage.latency') }}</th>
+        <th>{{ at('usage.cost') }}</th>
+        <th>{{ at('usage.status') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M:%S') if r.created_at else '—' }}</td>
+        <td class="num">{{ r.attempt_id or '—' }}</td>
+        <td>{{ r.scope or '—' }}</td>
+        <td>{{ r.provider or '—' }}</td>
+        <td>{{ r.model or '—' }}</td>
+        <td class="num">{{ "{:,}".format(r.input_tokens) }} / {{ "{:,}".format(r.output_tokens) }}</td>
+        <td class="num">{{ r.latency_ms }}ms</td>
+        <td class="num">{{ usd(r.cost_micros) }}</td>
+        <td>
+          {% if r.ok %}
+            <span class="chip">{{ at('usage.ok') }}</span>
+          {% else %}
+            <span class="chip warn" title="{{ r.error }}">{{ at('usage.error') }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}

@@ -8,6 +8,7 @@ touches `db.query()` itself). Status transitions exist in exactly one function,
 from __future__ import annotations
 
 import json
+import logging
 import random
 from datetime import date, datetime
 from typing import Any, Iterable, Sequence
@@ -24,6 +25,7 @@ from app.models import (
     Attempt,
     AttemptEvent,
     Exam,
+    LlmUsage,
     MediaAsset,
     QuestionResponse,
     RubricScore,
@@ -41,6 +43,8 @@ from app.scoring.answer_key import SKILLS, AnswerPack, pack_for, pack_for_attemp
 # ⚠️ 가설(검증필요, PRD OQ-9): the live system may want every question to carry
 # feedback, so the scope is a switch rather than a hard-coded query.
 FEEDBACK_SCOPE = "productive_only"      # "productive_only" | "all_questions"
+
+log = logging.getLogger("studyground.crud_write")
 
 PRODUCTIVE_QTYPES = ("WRITING", "SPEAKING")
 
@@ -754,6 +758,47 @@ def mark_submitted(db: Session, attempt: Attempt, *, client_finished_at: datetim
     return attempt
 
 
+
+# ── LLM 사용량 원장 (호출 단위) ─────────────────────────────────────────────
+
+
+def save_llm_usage(db: Session, attempt_id: int | None, records) -> int:
+    """usage 수집기가 모은 호출들을 원장에 적는다. 저장한 행 수를 돌려준다.
+
+    **호출 한 번이 한 행이다.** 한 응시를 여러 번 재채점하면 행이 여러 개 쌓이고,
+    그게 맞다 — 재채점이 실제로 돈을 쓰기 때문이다. 집계는 언제나 행 단위로 하며
+    attempt_id 는 추적용 참고 컬럼이다(models.LlmUsage 참고).
+
+    계측 저장이 실패해도 채점/피드백은 살아야 한다(B7/F12): 예외는 삼키고 0 을 돌려준다.
+    """
+    rows = list(records or [])
+    if not rows:
+        return 0
+    try:
+        for r in rows:
+            db.add(LlmUsage(
+                attempt_id=attempt_id,
+                scope=r.scope or "",
+                provider=r.provider or "",
+                model=r.model or "",
+                input_tokens=int(r.input_tokens or 0),
+                output_tokens=int(r.output_tokens or 0),
+                cache_read_tokens=int(r.cache_read_tokens or 0),
+                cache_write_tokens=int(r.cache_write_tokens or 0),
+                cost_micros=r.cost_micros,          # None = 단가 미등록. 0 으로 접지 않는다.
+                price_version=r.price_version or "",
+                latency_ms=int(r.latency_ms or 0),
+                ok=bool(r.ok),
+                error=(r.error or "")[:2000],
+            ))
+        db.commit()
+        return len(rows)
+    except Exception as exc:  # noqa: BLE001 — 계측 저장이 본 기능을 막지 않는다
+        log.warning("LLM 사용량 저장 실패 (%s건): %s", len(rows), exc)
+        db.rollback()
+        return 0
+
+
 __all__ = [
     "FEEDBACK_SCOPE",
     "SECTION_AUTO",
@@ -777,6 +822,7 @@ __all__ = [
     "set_status",
     "teacher_confirmed_skills",
     "upsert_answers",
+    "save_llm_usage",
     "upsert_rubric_rows",
     "upsert_section_score",
 ]

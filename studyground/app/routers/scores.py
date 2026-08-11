@@ -21,6 +21,7 @@ from app.schemas import (
 )
 from app.scoring import graph as scoring_graph
 from app.scoring import nodes as scoring_nodes
+from app.scoring import usage as scoring_usage
 
 log = logging.getLogger("studyground.scores")
 
@@ -107,11 +108,18 @@ async def rescore(
     # nodes.py 는 이 스트림의 파일이 아니다. 대신 graph.py 의 공개 API 두 개를 그대로
     # 쓴다 — 아래 두 줄이 graph.run() 의 본문과 글자 그대로 같다.
     state = {"detail": detail, "lang": lang, "requested_mode": mode}
-    result = scoring_graph.get_graph().invoke(state)
+    # 이 블록 안에서 일어난 LLM 호출이 전부 collected 에 모인다. 온라인 모드에서만
+    # 실제 호출이 있고, 오프라인(규칙 기반)에서는 비어 있다 — 그때는 원장도 안 늘어난다.
+    with scoring_usage.collecting() as collected:
+        result = scoring_graph.get_graph().invoke(state)
     bundle = scoring_nodes.to_bundle(result, attempt.id)
 
     rows = crud.save_feedback(db, attempt, bundle)
     saved = _persist_rubrics(db, attempt, result.get("rubrics") or [])
+    # 채점 결과를 먼저 확정하고 나서 원장을 적는다 — 계측 저장이 실패해도
+    # 점수·피드백은 이미 커밋돼 있어야 한다.
+    usage_rows = crud_write.save_llm_usage(db, attempt.id, collected.records)
+    usage_totals = scoring_usage.totals(collected.records)
 
     return RescoreResponse(
         attempt_id=attempt_id,
@@ -121,6 +129,8 @@ async def rescore(
         feedback=rows,
         rubrics_saved=saved.get("written", 0),
         rubrics_kept_teacher=saved.get("kept_teacher", 0),
+        llm_calls=usage_rows,
+        llm_cost_micros=usage_totals.get("cost_micros", 0),
     )
 
 

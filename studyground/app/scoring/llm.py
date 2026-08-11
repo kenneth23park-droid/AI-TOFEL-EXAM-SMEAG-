@@ -12,10 +12,12 @@ from __future__ import annotations
 import json
 import logging
 import os
+import time
 from pathlib import Path
 
 from app.config import PROJECT_DIR, get_settings
 from app.schemas import FeedbackItem
+from app.scoring import usage
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +44,15 @@ Every scope must appear exactly once. 1-2 sentences per summary,
 # 두 SDK 의 차이는 여기서만 흡수한다. 위쪽 로직은 (system, prompt) → text 만 안다.
 # import 는 함수 안에서 한다 — 한쪽 SDK 가 설치돼 있지 않아도 다른 쪽은 그대로 돈다.
 
-def _call_anthropic(system: str, prompt: str, max_tokens: int) -> str:
+def _int(value) -> int:
+    """SDK 가 None 을 주거나 필드를 아예 안 실어 보내도 0 으로 접는다."""
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _call_anthropic(system: str, prompt: str, max_tokens: int) -> tuple[str, dict]:
     settings = get_settings()
     try:
         from anthropic import Anthropic
@@ -54,10 +64,20 @@ def _call_anthropic(system: str, prompt: str, max_tokens: int) -> str:
         system=system,
         messages=[{"role": "user", "content": prompt}],
     )
-    return "".join(b.text for b in message.content if getattr(b, "type", "") == "text")
+    text = "".join(b.text for b in message.content if getattr(b, "type", "") == "text")
+    u = getattr(message, "usage", None)
+    return text, {
+        # 설정값이 아니라 **응답이 밝힌 모델**을 쓴다 — 별칭이나 스냅샷으로 해석됐을
+        # 수 있고, 단가는 실제로 답한 모델을 따라야 한다.
+        "model": getattr(message, "model", "") or settings.anthropic_model,
+        "input_tokens": _int(getattr(u, "input_tokens", 0)),
+        "output_tokens": _int(getattr(u, "output_tokens", 0)),
+        "cache_read_tokens": _int(getattr(u, "cache_read_input_tokens", 0)),
+        "cache_write_tokens": _int(getattr(u, "cache_creation_input_tokens", 0)),
+    }
 
 
-def _call_openai(system: str, prompt: str, max_tokens: int) -> str:
+def _call_openai(system: str, prompt: str, max_tokens: int) -> tuple[str, dict]:
     settings = get_settings()
     try:
         from openai import OpenAI
@@ -71,16 +91,41 @@ def _call_openai(system: str, prompt: str, max_tokens: int) -> str:
             {"role": "user", "content": prompt},
         ],
     )
-    return completion.choices[0].message.content or ""
+    u = getattr(completion, "usage", None)
+    cached = _int(getattr(getattr(u, "prompt_tokens_details", None), "cached_tokens", 0))
+    prompt_tokens = _int(getattr(u, "prompt_tokens", 0))
+    return completion.choices[0].message.content or "", {
+        "model": getattr(completion, "model", "") or settings.openai_model,
+        # OpenAI 의 prompt_tokens 는 캐시분을 포함한 총량이다. Anthropic 은 캐시분을
+        # input_tokens 밖에 따로 싣는다 — 두 프로바이더의 의미를 여기서 맞춰 둔다.
+        "input_tokens": max(prompt_tokens - cached, 0),
+        "output_tokens": _int(getattr(u, "completion_tokens", 0)),
+        "cache_read_tokens": cached,
+        "cache_write_tokens": 0,
+    }
 
 
 _CALLERS = {"anthropic": _call_anthropic, "openai": _call_openai}
 
 
-def complete(system: str, prompt: str, *, max_tokens: int) -> tuple[str, str]:
+def _model_for(provider: str) -> str:
+    """설정상의 모델 이름. 응답을 못 받은 실패 행에 쓴다."""
+    settings = get_settings()
+    return settings.openai_model if provider == "openai" else settings.anthropic_model
+
+
+def _elapsed_ms(started: float) -> int:
+    return int((time.perf_counter() - started) * 1000)
+
+
+def complete(system: str, prompt: str, *, max_tokens: int, scope: str = "") -> tuple[str, str]:
     """(응답 텍스트, 실제로 답한 프로바이더). 전부 실패하면 마지막 예외를 올린다.
 
     빈 응답은 실패로 친다 — 다음 프로바이더에게 기회를 준다.
+
+    반환 계약은 그대로다(호출부 무변경). 사용량은 반환값이 아니라 usage 수집기로
+    나간다 — 시도한 프로바이더마다 한 행씩, 성공이든 실패든. 폴백이 일어나면
+    두 행이 남고, 그것이 개발자 화면의 폴백률이 된다.
     """
     providers = get_settings().llm_providers
     if not providers:
@@ -88,14 +133,30 @@ def complete(system: str, prompt: str, *, max_tokens: int) -> tuple[str, str]:
 
     last: Exception | None = None
     for name in providers:
+        started = time.perf_counter()
         try:
-            text = _CALLERS[name](system, prompt, max_tokens)
+            text, meta = _CALLERS[name](system, prompt, max_tokens)
             if not (text or "").strip():
                 raise ValueError(f"{name} returned an empty response")
-            return text, name
         except Exception as exc:  # noqa: BLE001 — 다음 프로바이더로 넘긴다
             log.warning("LLM provider %s failed: %s", name, exc)
+            # 실패도 원장에 남긴다. 응답을 받다 끊겼다면 토큰은 이미 태워졌고,
+            # 그렇지 않더라도 폴백이 얼마나 잦은지는 그 자체로 알아야 할 값이다.
+            usage.record(
+                scope=scope, provider=name, model=_model_for(name),
+                latency_ms=_elapsed_ms(started), ok=False, error=f"{type(exc).__name__}: {exc}",
+            )
             last = exc
+            continue
+        usage.record(
+            scope=scope, provider=name, model=meta.get("model", ""),
+            input_tokens=meta.get("input_tokens", 0),
+            output_tokens=meta.get("output_tokens", 0),
+            cache_read_tokens=meta.get("cache_read_tokens", 0),
+            cache_write_tokens=meta.get("cache_write_tokens", 0),
+            latency_ms=_elapsed_ms(started), ok=True,
+        )
+        return text, name
     raise RuntimeError(f"all LLM providers failed ({', '.join(providers)}): {last}") from last
 
 
@@ -106,7 +167,7 @@ def generate(analysis: dict, lang: str = "en") -> list[FeedbackItem]:
         f"Scored attempt:\n{json.dumps(analysis, ensure_ascii=False, indent=2)}\n\n"
         f"{_SCHEMA_HINT}"
     )
-    text, _provider = complete(_SYSTEM, prompt, max_tokens=1600)
+    text, _provider = complete(_SYSTEM, prompt, max_tokens=1600, scope="feedback")
     return _parse(text)
 
 
@@ -227,7 +288,7 @@ def generate_rubric(
         f"Return ONLY a JSON object valid against this schema:\n{schema}"
     )
 
-    raw, provider = complete(system, prompt, max_tokens=2400)
+    raw, provider = complete(system, prompt, max_tokens=2400, scope="rubric")
     return _parse_rubric(
         raw, skill=skill, is_band=is_band, max_score=max_score, allowed=criteria,
         provider=provider,

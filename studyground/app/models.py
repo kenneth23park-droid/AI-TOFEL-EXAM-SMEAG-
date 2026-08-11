@@ -346,6 +346,50 @@ class MediaAsset(Base):
     attempt: Mapped[Attempt] = relationship(back_populates="media_assets")
 
 
+class LlmUsage(Base):
+    """LLM 호출 원장 — 한 번의 API 호출이 한 행이다.
+
+    **집계 단위는 호출이지 응시가 아니다.** 리포트를 다시 열 때마다 채점 그래프가
+    한 번 더 돌기 때문에, 한 응시에 여러 행이 붙는 것이 정상이다. 그 사실 자체가
+    "재조회가 돈을 쓴다"는 관측값이라 원장에 남긴다 — attempt_id 는 추적용 참고
+    컬럼이고, 금액 집계는 언제나 행 단위로 한다.
+
+    attempt_id 가 nullable + ON DELETE SET NULL 인 것도 같은 이유다. 응시 기록을
+    지운다고 이미 지출한 돈이 사라지지는 않는다. 학생 데이터가 삭제돼도 회계는
+    남아야 하므로 CASCADE 를 쓰지 않는다(이 저장소에서 유일한 예외다).
+
+    cost_micros 는 마이크로달러 정수이며 **NULL 이 될 수 있다** — 단가를 모르는
+    모델/프로바이더라는 뜻이고, 0 원이라는 뜻이 아니다(app/scoring/pricing.py).
+    price_version 을 함께 박아 두어, 나중에 단가표를 고쳐도 과거 행이 소급
+    변조되지 않는다.
+    """
+
+    __tablename__ = "llm_usage"
+    __table_args__ = (Index("ix_llm_usage_created", "created_at"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    # 회계 기록이므로 응시가 지워져도 살아남는다 — CASCADE 가 아니라 SET NULL.
+    attempt_id: Mapped[int | None] = mapped_column(
+        ForeignKey("attempts.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    # feedback (리포트 서술) | rubric (산출형 채점) | 그 외 호출 지점 이름
+    scope: Mapped[str] = mapped_column(String(32), default="")
+    provider: Mapped[str] = mapped_column(String(16), default="")   # anthropic | openai
+    model: Mapped[str] = mapped_column(String(64), default="")
+    input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    cache_read_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    cache_write_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    # 마이크로달러(1/1,000,000 USD). NULL = 단가 미등록, 0 = 실제로 0원.
+    cost_micros: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    price_version: Mapped[str] = mapped_column(String(32), default="")
+    latency_ms: Mapped[int] = mapped_column(Integer, default=0)
+    ok: Mapped[bool] = mapped_column(Boolean, default=True)
+    # 실패했거나 폴백으로 넘어간 이유. 성공 호출은 빈 문자열.
+    error: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 # ── CEFR banding — total /120 → grade shown on the list and the report ──
 _CEFR_BANDS = ((102, "C1"), (90, "B2+"), (78, "B2"), (66, "B1+"), (54, "B1"), (36, "A2"), (0, "A1"))
 

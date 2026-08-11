@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
+from datetime import time as dtime
 
-from sqlalchemy import case, func, select
+from sqlalchemy import String, case, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
     AiFeedback,
     Attempt,
     Exam,
+    LlmUsage,
     MediaAsset,
     QuestionResponse,
     RubricScore,
@@ -435,6 +437,114 @@ def rankings(db: Session, *, grade: str | None = None, limit: int = 500, **filte
     return rows
 
 
+
+# ── LLM 사용량 집계 (호출 단위) ─────────────────────────────────────────────
+# 어드민은 돈을, 개발자는 토큰과 실패를 본다. 두 화면이 같은 원장을 다르게 자른다.
+
+
+def _usage_window(date_from: date | None, date_to: date | None):
+    conds = []
+    if date_from:
+        conds.append(LlmUsage.created_at >= datetime.combine(date_from, dtime.min))
+    if date_to:
+        conds.append(LlmUsage.created_at <= datetime.combine(date_to, dtime.max))
+    return conds
+
+
+def llm_usage_totals(db: Session, *, date_from=None, date_to=None) -> dict:
+    """기간 합계. cost_micros IS NULL(단가 미등록)은 금액에서 빼고 따로 센다."""
+    conds = _usage_window(date_from, date_to)
+    row = db.execute(
+        select(
+            func.count(LlmUsage.id),
+            func.coalesce(func.sum(LlmUsage.input_tokens), 0),
+            func.coalesce(func.sum(LlmUsage.output_tokens), 0),
+            func.coalesce(func.sum(LlmUsage.cache_read_tokens), 0),
+            func.coalesce(func.sum(LlmUsage.cache_write_tokens), 0),
+            func.coalesce(func.sum(LlmUsage.cost_micros), 0),
+            func.sum(case((LlmUsage.cost_micros.is_(None), 1), else_=0)),
+            func.sum(case((LlmUsage.ok.is_(False), 1), else_=0)),
+            func.count(func.distinct(LlmUsage.attempt_id)),
+        ).where(*conds)
+    ).one()
+    calls = int(row[0] or 0)
+    attempts = int(row[8] or 0)
+    cost = int(row[5] or 0)
+    return {
+        "calls": calls,
+        "input_tokens": int(row[1] or 0),
+        "output_tokens": int(row[2] or 0),
+        "cache_read_tokens": int(row[3] or 0),
+        "cache_write_tokens": int(row[4] or 0),
+        "cost_micros": cost,
+        "unpriced_calls": int(row[6] or 0),
+        "failed_calls": int(row[7] or 0),
+        "attempts": attempts,
+        # 어드민이 실제로 쓰는 숫자 — 학생 수를 곱하면 예산이 나온다.
+        "cost_per_attempt_micros": (cost // attempts) if attempts else 0,
+    }
+
+
+def llm_usage_by(db: Session, column, *, date_from=None, date_to=None, limit: int = 50) -> list[dict]:
+    """모델별 / 프로바이더별 / scope 별 절단면. column 은 LlmUsage 의 컬럼이다."""
+    conds = _usage_window(date_from, date_to)
+    rows = db.execute(
+        select(
+            column,
+            func.count(LlmUsage.id),
+            func.coalesce(func.sum(LlmUsage.input_tokens), 0),
+            func.coalesce(func.sum(LlmUsage.output_tokens), 0),
+            func.coalesce(func.sum(LlmUsage.cost_micros), 0),
+            func.sum(case((LlmUsage.cost_micros.is_(None), 1), else_=0)),
+            func.sum(case((LlmUsage.ok.is_(False), 1), else_=0)),
+        ).where(*conds).group_by(column).order_by(func.coalesce(func.sum(LlmUsage.cost_micros), 0).desc()).limit(limit)
+    ).all()
+    return [
+        {
+            "key": r[0] or "—", "calls": int(r[1] or 0),
+            "input_tokens": int(r[2] or 0), "output_tokens": int(r[3] or 0),
+            "cost_micros": int(r[4] or 0), "unpriced_calls": int(r[5] or 0),
+            "failed_calls": int(r[6] or 0),
+        }
+        for r in rows
+    ]
+
+
+def llm_usage_daily(db: Session, *, date_from=None, date_to=None, limit: int = 60) -> list[dict]:
+    """일별 추이. 날짜 문자열로 묶어 SQLite/Postgres 모두에서 같은 결과를 낸다."""
+    conds = _usage_window(date_from, date_to)
+    day = func.substr(func.cast(LlmUsage.created_at, String(32)), 1, 10)
+    rows = db.execute(
+        select(day, func.count(LlmUsage.id), func.coalesce(func.sum(LlmUsage.cost_micros), 0))
+        .where(*conds).group_by(day).order_by(day.desc()).limit(limit)
+    ).all()
+    return [{"day": r[0], "calls": int(r[1] or 0), "cost_micros": int(r[2] or 0)} for r in reversed(rows)]
+
+
+def llm_usage_calls(db: Session, *, date_from=None, date_to=None, only_failed: bool = False,
+                    limit: int = 200) -> list[LlmUsage]:
+    """개발자 화면의 원장. 최신순."""
+    conds = _usage_window(date_from, date_to)
+    if only_failed:
+        conds.append(LlmUsage.ok.is_(False))
+    return list(db.execute(
+        select(LlmUsage).where(*conds).order_by(LlmUsage.id.desc()).limit(limit)
+    ).scalars())
+
+
+def llm_latency_percentile(db: Session, pct: float = 0.95, *, date_from=None, date_to=None) -> int:
+    """p95 지연. 윈도우 함수 없이 정렬 후 인덱싱한다 — 원장 규모에서 충분하다."""
+    conds = _usage_window(date_from, date_to)
+    conds.append(LlmUsage.ok.is_(True))
+    values = list(db.execute(
+        select(LlmUsage.latency_ms).where(*conds).order_by(LlmUsage.latency_ms)
+    ).scalars())
+    if not values:
+        return 0
+    idx = min(int(len(values) * pct), len(values) - 1)
+    return int(values[idx])
+
+
 __all__ = [
     "ADMIN_PAGE_SIZE",
     "AiFeedback",
@@ -462,6 +572,11 @@ __all__ = [
     "recalc_totals",
     "save_feedback",
     "save_question_feedback",
+    "llm_latency_percentile",
+    "llm_usage_by",
+    "llm_usage_calls",
+    "llm_usage_daily",
+    "llm_usage_totals",
     "search_attempts",
     "speaking_attempts",
     "to_detail",

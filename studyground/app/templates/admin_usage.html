@@ -1,0 +1,117 @@
+{% extends "admin_base.html" %}
+
+{# 어드민 화면 — 돈. 총액보다 '응시 1건당 단가'가 위에 온다: 학생 수를 곱하면
+   그대로 예산이 되는 값이기 때문이다. 차트는 인라인 CSS 막대로만 그린다(CDN 금지). #}
+
+{% block headright %}
+<a class="btn ghost" href="/admin/usage/calls?lang={{ lang }}">{{ at('usage.viewCalls') }}</a>
+{% endblock %}
+
+{% block content %}
+<form class="card search-form" method="get" action="/admin/usage">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label>
+    <span>{{ at('answers.dateFrom') }}</span>
+    <input type="date" name="date_from" value="{{ q.date_from }}">
+  </label>
+  <label>
+    <span>{{ at('answers.dateTo') }}</span>
+    <input type="date" name="date_to" value="{{ q.date_to }}">
+  </label>
+  <button class="btn" type="submit">{{ at('stats.apply') }}</button>
+  <a class="btn ghost" href="/admin/usage?lang={{ lang }}">{{ at('answers.reset') }}</a>
+</form>
+
+<p class="sub">{{ at('usage.intro') }}</p>
+
+{% if not totals.calls %}
+<section class="card coming-soon">
+  <p class="sub">{{ at('usage.empty') }}</p>
+</section>
+{% else %}
+
+<section class="tile-row">
+  <div class="card tile">
+    <span class="tile-k">{{ at('usage.perAttempt') }}</span>
+    <b class="tile-v">{{ usd(totals.cost_per_attempt_micros) }}</b>
+  </div>
+  <div class="card tile">
+    <span class="tile-k">{{ at('usage.spend') }}</span>
+    <b class="tile-v">{{ usd(totals.cost_micros) }}</b>
+  </div>
+  <div class="card tile">
+    <span class="tile-k">{{ at('usage.calls') }}</span>
+    <b class="tile-v">{{ totals.calls }}</b>
+  </div>
+  <div class="card tile">
+    <span class="tile-k">{{ at('usage.attempts') }}</span>
+    <b class="tile-v">{{ totals.attempts }}</b>
+  </div>
+</section>
+
+{% if totals.unpriced_calls %}
+<section class="card">
+  <span class="chip">{{ at('usage.unpriced') }}</span>
+  <p class="sub">{{ at('usage.unpricedNote', n=totals.unpriced_calls) }}</p>
+</section>
+{% endif %}
+
+<section class="card">
+  <h2 class="card-title">{{ at('usage.daily') }}</h2>
+  <table class="grid">
+    <thead>
+      <tr><th>{{ at('detail.year') }}</th><th>{{ at('usage.calls') }}</th>
+          <th>{{ at('usage.cost') }}</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for d in daily %}
+      <tr>
+        <td>{{ d.day }}</td>
+        <td class="num">{{ d.calls }}</td>
+        <td class="num">{{ usd(d.cost_micros) }}</td>
+        <td style="width:50%">
+          <span class="bar" style="display:block;height:10px;border-radius:2px;
+                background:var(--accent,#2c6650);
+                width:{{ (d.cost_micros * 100 // daily_peak) if daily_peak else 0 }}%"></span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% for title, rows in [(at('usage.byModel'), by_model),
+                       (at('usage.byProvider'), by_provider),
+                       (at('usage.byScope'), by_scope)] %}
+<section class="card">
+  <h2 class="card-title">{{ title }}</h2>
+  <table class="grid">
+    <thead>
+      <tr>
+        <th>{{ at('usage.model') if title == at('usage.byModel') else at('usage.scope') }}</th>
+        <th>{{ at('usage.calls') }}</th>
+        <th>{{ at('usage.inputTokens') }}</th>
+        <th>{{ at('usage.outputTokens') }}</th>
+        <th>{{ at('usage.cost') }}</th>
+        <th>{{ at('usage.unpriced') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.key }}</td>
+        <td class="num">{{ r.calls }}</td>
+        <td class="num">{{ "{:,}".format(r.input_tokens) }}</td>
+        <td class="num">{{ "{:,}".format(r.output_tokens) }}</td>
+        <td class="num">{{ usd(r.cost_micros) }}</td>
+        <td class="num">{{ r.unpriced_calls or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endfor %}
+
+<p class="sub">{{ at('usage.priceVersion') }}: {{ price_version }}</p>
+{% endif %}
+{% endblock %}

@@ -251,6 +251,59 @@ STEPS: list[tuple[str, list[tuple]]] = [
             check("rubric_scores", "ck_rubric_source", "source IN ('ai_draft','teacher')"),
         ],
     ),
+    (
+        # LLM 호출 원장. 한 번의 API 호출이 한 행이고, 금액 집계는 행 단위로 한다.
+        # attempt_id 는 ON DELETE SET NULL 이다 — 이 저장소에서 attempts 를 참조하는
+        # 유일한 비-CASCADE 테이블이며, 의도된 것이다: 응시 기록을 지운다고 이미
+        # 지출한 돈이 사라지지는 않으므로 회계 행은 남겨야 한다.
+        # cost_micros 는 NULL 을 허용한다 — "단가 미등록"이지 0원이 아니다.
+        "0009_llm_usage",
+        [
+            create_table(
+                "llm_usage",
+                """
+                CREATE TABLE llm_usage (
+                  id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                  attempt_id         INTEGER NULL REFERENCES attempts (id) ON DELETE SET NULL,
+                  scope              VARCHAR(32)  NOT NULL DEFAULT '',
+                  provider           VARCHAR(16)  NOT NULL DEFAULT '',
+                  model              VARCHAR(64)  NOT NULL DEFAULT '',
+                  input_tokens       INTEGER NOT NULL DEFAULT 0,
+                  output_tokens      INTEGER NOT NULL DEFAULT 0,
+                  cache_read_tokens  INTEGER NOT NULL DEFAULT 0,
+                  cache_write_tokens INTEGER NOT NULL DEFAULT 0,
+                  cost_micros        INTEGER NULL,
+                  price_version      VARCHAR(32)  NOT NULL DEFAULT '',
+                  latency_ms         INTEGER NOT NULL DEFAULT 0,
+                  ok                 BOOLEAN NOT NULL DEFAULT 1,
+                  error              TEXT NOT NULL DEFAULT '',
+                  created_at         DATETIME NOT NULL
+                )
+                """,
+                """
+                CREATE TABLE llm_usage (
+                  id                 BIGSERIAL PRIMARY KEY,
+                  attempt_id         INTEGER NULL REFERENCES attempts (id) ON DELETE SET NULL,
+                  scope              VARCHAR(32)  NOT NULL DEFAULT '',
+                  provider           VARCHAR(16)  NOT NULL DEFAULT '',
+                  model              VARCHAR(64)  NOT NULL DEFAULT '',
+                  input_tokens       INTEGER NOT NULL DEFAULT 0,
+                  output_tokens      INTEGER NOT NULL DEFAULT 0,
+                  cache_read_tokens  INTEGER NOT NULL DEFAULT 0,
+                  cache_write_tokens INTEGER NOT NULL DEFAULT 0,
+                  cost_micros        BIGINT  NULL,
+                  price_version      VARCHAR(32)  NOT NULL DEFAULT '',
+                  latency_ms         INTEGER NOT NULL DEFAULT 0,
+                  ok                 BOOLEAN NOT NULL DEFAULT true,
+                  error              TEXT NOT NULL DEFAULT '',
+                  created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+                )
+                """,
+            ),
+            sql("CREATE INDEX IF NOT EXISTS ix_llm_usage_created ON llm_usage (created_at)"),
+            sql("CREATE INDEX IF NOT EXISTS ix_llm_usage_attempt_id ON llm_usage (attempt_id)"),
+        ],
+    ),
 ]
 
 
