@@ -117,6 +117,13 @@
 
   function spentKey(screenId, src) { return String(screenId || '') + '|' + String(src || ''); }
 
+  /* 화면이 바뀔 때 SG_RENDER.stopMedia() 가 찍고 가는 표시.
+   * 이 표시가 있으면 "일시정지 후 재개" 규칙도, ended/error 후속 처리도 하지 않는다 —
+   * 떠난 화면의 오디오가 되살아나거나 다음 화면을 한 칸 더 넘기는 것을 막는다. */
+  function isStopped(audio) {
+    return !!(audio && audio.hasAttribute && audio.hasAttribute('data-sg-stopped'));
+  }
+
   /* FR29 — 한국어 하드코딩 prompt 를 EN 기본 / KO 토글로 분리한다. */
   function promptPair(q) {
     var raw = (q && q.prompt) || '';
@@ -351,12 +358,17 @@
       }
     });
     // 일시정지 후 재개는 허용하지 않는다 — 실제 시험은 멈추지 않는다.
+    // 단, 화면 전환으로 멈춘 것이면 되살리지 않는다.
     audio.addEventListener('pause', function () {
-      if (finished) return;
+      if (finished || isStopped(audio)) return;
       if (started && !audio.ended) { var p = audio.play(); if (p && p['catch']) p['catch'](function () {}); }
     });
-    audio.addEventListener('ended', function () { finish('ended'); });
-    audio.addEventListener('error', function () { warn('audio load failed: ' + media.src); finish('error'); });
+    audio.addEventListener('ended', function () { if (!isStopped(audio)) finish('ended'); });
+    audio.addEventListener('error', function () {
+      if (isStopped(audio)) return;
+      warn('audio load failed: ' + media.src);
+      finish('error');
+    });
 
     playBtn.onclick = function () {
       var p = audio.play();
@@ -540,11 +552,15 @@
       }
     });
     audio.addEventListener('pause', function () {
-      if (finished) return;
+      if (finished || isStopped(audio)) return;
       if (started && !audio.ended) { var p = audio.play(); if (p && p['catch']) p['catch'](function () {}); }
     });
-    audio.addEventListener('ended', function () { finish('ended'); });
-    audio.addEventListener('error', function () { warn('audio load failed: ' + media.src); finish('error'); });
+    audio.addEventListener('ended', function () { if (!isStopped(audio)) finish('ended'); });
+    audio.addEventListener('error', function () {
+      if (isStopped(audio)) return;   // 화면을 떠나며 끊긴 것 — 다음 화면으로 또 넘기지 않는다
+      warn('audio load failed: ' + media.src);
+      finish('error');
+    });
 
     playBtn.onclick = function () {
       var p = audio.play();
@@ -758,7 +774,12 @@
      * 오디오가 이 화면에서 재생되는 TOEFL 구성(timerStartsOnAudioEnd)도 같은 2열을 쓴다:
      * 왼쪽 사진 아래에 재생 카운터가 붙고, 오른쪽에 문항·선택지가 그대로 보인다.
      * 들으면서 답하는 프로필(IELTS)만 종전 qcard(오디오 스테이지 위 · 문항 아래)를 유지한다. */
-    var splitLayout = !onScreenAudio || !!screen.timerStartsOnAudioEnd;
+    /* 2열은 왼쪽 칸에 넣을 것이 있을 때만 쓴다. 사진도 오디오도 없는 화면에 2열을 걸면
+     * 왼쪽 400px 이 통째로 비고 선택지만 오른쪽으로 밀린다 — 콘텐츠에 삽화가 빠진
+     * 블록에서 실제로 그랬다. 그런 화면은 한 열로 되돌린다. */
+    var hasImage = !!(screen.image && screen.image.src);
+    var splitLayout = (!onScreenAudio || !!screen.timerStartsOnAudioEnd) && (hasImage || onScreenAudio);
+    if (!hasImage) warn('listening screen without illustration: ' + screen.id);
     var card = el('section', splitLayout ? 'lst-card lst-split' : 'qcard lst-card');
 
     /* 오디오. 이 화면에 audio 가 없으면(블록 2번째 이후 문항) 삽화만 유지한다. */
