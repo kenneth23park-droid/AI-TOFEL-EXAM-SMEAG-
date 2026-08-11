@@ -65,6 +65,9 @@
   <!-- 리스닝은 표가 아니라 문항 카드로 편다 — 다시 들어야 복기가 되기 때문이다. -->
   <div class="card hide" id="listen-card" style="padding:0;overflow:hidden"></div>
 
+  <!-- 라이팅도 표에 들어가지 않는다 — 과제문·문장 틀·단어 은행이 있어야 문제가 된다. -->
+  <div class="card hide" id="write-card" style="padding:0;overflow:hidden"></div>
+
   <!-- 문항별 -->
   <div class="card hide" id="table-card" style="padding:0;overflow:hidden">
     <div class="table-wrap" style="overflow-x:auto"><table class="rv-table">
@@ -103,6 +106,7 @@
 <script src="assets/sg-results.js"></script>
 <script src="assets/sg-comments.js"></script>
 <script src="assets/sg-review-listening.js"></script>
+<script src="assets/sg-review-writing.js"></script>
 <script>
 /* 한 회차의 채점 결과를 문항별로 편다.
  *   review.html?session=<세션 id>              내 응시 (로컬 기록 또는 서버 사본)
@@ -267,15 +271,23 @@
     show('sections');
   }
 
-  var ALL = [], filter = 'all';
+  /* ?sec=listening 처럼 열어 둔 탭을 주소로 지정할 수 있다 — 성적표에서 "리스닝 다시 듣기"로
+   * 바로 건너오기 위해서다. 없는 영역을 적었으면 조용히 전체로 돌아간다. */
+  var ALL = [], filter = (function () {
+    var s = String(qs.get('sec') || '').toLowerCase();
+    return (s === 'wrong' || LAB[s]) ? s : 'all';
+  })();
 
   function paintTabs() {
     var secs = [], seen = {};
     ALL.forEach(function (r) { if (!seen[r.section]) { seen[r.section] = true; secs.push(r.section); } });
-    var html = '<button data-sec="all" class="on">' + bi('All', '전체') + '</button>' +
-               '<button data-sec="wrong">' + bi('Wrong only', '틀린 것만') + '</button>';
+    if (filter !== 'all' && filter !== 'wrong' && !seen[filter]) filter = 'all';
+    var html = '<button data-sec="all"' + (filter === 'all' ? ' class="on"' : '') + '>' + bi('All', '전체') + '</button>' +
+               '<button data-sec="wrong"' + (filter === 'wrong' ? ' class="on"' : '') + '>' +
+                 bi('Wrong only', '틀린 것만') + '</button>';
     secs.forEach(function (s) {
-      html += '<button data-sec="' + s + '">' + bi(LAB[s] ? LAB[s][0] : s, LAB[s] ? LAB[s][1] : s) + '</button>';
+      html += '<button data-sec="' + s + '"' + (filter === s ? ' class="on"' : '') + '>' +
+        bi(LAB[s] ? LAB[s][0] : s, LAB[s] ? LAB[s][1] : s) + '</button>';
     });
     $('tabs').innerHTML = html;
     $('tabs').onclick = function (e) {
@@ -312,11 +324,42 @@
     return true;
   }
 
+  /* ── 라이팅 리뷰 ──────────────────────────────────────────
+   * 라이팅 탭도 표를 쓰지 않는다. Build a Sentence 는 상대의 말·문장 틀·단어 은행이
+   * 있어야 문제가 되고, 이메일·토론은 상황문과 요구사항이 곧 채점 기준이다. 표 한 칸에
+   * 들어가지 않는 것들이라, 왼쪽에 과제를 통째로 다시 펴고 오른쪽에 답과 점수를 세운다. */
+  var WRITE = null;
+
+  function paintWriting() {
+    var el = $('write-card');
+    if (!window.SG_REVIEW_WRITING) { el.classList.add('hide'); return false; }
+    el.classList.remove('hide');
+    if (WRITE) { WRITE.repaint(); return true; }
+    WRITE = SG_REVIEW_WRITING.mount(el, {
+      pack: PACK, rows: ALL, tasks: TASKS,
+      extraFor: function (qid) {
+        var notes = commentsFor('question', qid);
+        if (!notes.length && !STAFF) return '';
+        return '<div class="mt-16">' + notes.map(cardOf).join('') +
+               (STAFF ? editorFor('question', qid, notes) : '') + '</div>';
+      },
+      onPaint: function () { wireEditors(); }
+    });
+    return true;
+  }
+
   function paintRows() {
     if (filter === 'listening' && paintListening()) {
+      $('write-card').classList.add('hide');
       $('table-card').classList.add('hide');
       return;
     }
+    if (filter === 'writing' && paintWriting()) {
+      $('listen-card').classList.add('hide');
+      $('table-card').classList.add('hide');
+      return;
+    }
+    $('write-card').classList.add('hide');
     $('listen-card').classList.add('hide');
     $('table-card').classList.remove('hide');
     var list = ALL.filter(function (r) {
@@ -715,6 +758,8 @@
       paintSummary(RES, DET, WHO);
       paintSections(DET);
       paintTasks();
+      // 라이팅 리뷰의 0~5 점수와 루브릭이 이 응답에서 온다. 보던 자리는 지킨다.
+      if (WRITE) WRITE.setTasks(TASKS);
     }).catch(function () {});
   }
 
@@ -792,6 +837,13 @@
     ALL = det.rows;
     RES = res; DET = det; WHO = who;
     OWNER_ID = OWNER || res.owner || (ME && ME.id) || '';
+
+    /* 스피킹이 있는 세트에서만 문을 연다 — 없는 세트에서 눌러 봐야 빈 화면이다. */
+    if (ALL.some(function (r) { return r.section === 'speaking'; })) {
+      $('speaking').href = 'review-speaking.html?session=' + encodeURIComponent(SESSION) +
+        (OWNER ? '&owner=' + encodeURIComponent(OWNER) : '');
+      $('speaking').classList.remove('hide');
+    }
 
     /* 밴드는 W·S 채점(sg_task_scores)까지 읽어야 완성된다. 못 읽어도 화면은 그린다 —
        그때는 R·L 만으로 종합이 나오고, W·S 는 '아직 채점 전'으로 남는다.

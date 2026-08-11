@@ -189,6 +189,17 @@ window.SG_REVIEW_LISTENING = (function () {
       '<div>' + esc(rec.text) + '</div></details>';
   }
 
+  /* 단답 응답형의 prompt 는 지시문을 거의 그대로 되뇐다("Listen to the question and
+   * select the best response."). 두 줄로 겹쳐 놓으면 학생은 어느 쪽이 문제인지 헷갈린다. */
+  function sameAsInstruction(it) {
+    var p = String((it.q && it.q.prompt) || '');
+    if (!p) return true;
+    var ins = String(it.group.instruction || '');
+    function n(s) { return s.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim(); }
+    var a = n(p), b = n(ins);
+    return !!a && !!b && (a === b || b.indexOf(a) === 0 || a.indexOf(b) === 0);
+  }
+
   function paneHtml(it, scripts, extra) {
     var src = media(it.audio);
     var left =
@@ -205,8 +216,7 @@ window.SG_REVIEW_LISTENING = (function () {
         '<div class="lr-kind">' + bi(it.group.label, it.group.labelKo) +
           (it.group.heading ? ' · ' + esc(it.group.heading) : '') + '</div>' +
         (it.group.instruction ? '<p class="lr-ins">' + esc(it.group.instruction) + '</p>' : '') +
-        (it.q && it.q.prompt && it.q.prompt !== it.group.instruction
-          ? '<p class="lr-q">' + esc(it.q.prompt) + '</p>' : '') +
+        (sameAsInstruction(it) ? '' : '<p class="lr-q">' + esc(it.q.prompt) + '</p>') +
         choicesHtml(it) +
         verdictHtml(it) +
         (extra || '') +
