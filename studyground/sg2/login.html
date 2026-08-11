@@ -66,9 +66,7 @@
       <button class="btn brand block lg" id="go" type="submit"><span data-en>Log in</span><span data-ko>로그인</span></button>
     </form>
     <div class="divider"><span data-en>or</span><span data-ko>또는</span></div>
-    <a class="btn ghost block" id="guest" href="tests.html"><span data-en>Continue as guest</span><span data-ko>게스트로 계속</span></a>
-    <div class="auth-alt"><span data-en>New to MockTest?</span><span data-ko>MockTest가 처음이신가요?</span>
-      <a href="signup.html"><span data-en>Sign up free</span><span data-ko>무료 가입</span></a></div>
+    <a class="btn ghost block" id="signup" href="signup.html"><span data-en>Sign up free</span><span data-ko>무료 가입</span></a>
     <div class="seat-assigned" id="seatAssigned" hidden></div>
   </div>
 </div>
@@ -135,7 +133,6 @@
   }
 
   if (window.SG_AUTH && SG_AUTH.user()) location.replace(landing());
-  document.getElementById('guest').setAttribute('href', landing());
 
   function enter(id, pw, examDate) {
     err.classList.remove('on');
