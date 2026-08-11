@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seed a sample attempt · MockTest (dev)</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Learn · Practice · Test · Repeat</small></span></a>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:60px;max-width:820px">
+
+  <div class="page-h mt-24">
+    <h1 style="font-size:26px">Seed a sample attempt</h1>
+    <p class="muted mt-8" style="font-size:13.5px">
+      개발용 도구. 한 회차를 <b>거의 다 푼 상태</b>로 이 기기에 심어 두고,
+      모듈마다 마지막 문항 하나씩만 비워 둔다. 그 다음 <b>이어서 응시(Resume)</b> 로 들어가
+      남은 문항만 답하고 제출하면 채점·AI 리뷰까지 한 번에 확인할 수 있다.
+      심는 곳은 이 브라우저의 로컬 저장소이므로, 제출해서 서버로 올라가기 전까지는
+      다른 기기에 아무 영향이 없다.
+    </p>
+  </div>
+
+  <div class="card mt-16" id="who-card">
+    <div class="lr-lab">Signed in as</div>
+    <p id="who" class="muted">확인 중…</p>
+    <p class="muted mt-8" style="font-size:12.5px">
+      채점과 AI 리뷰는 제출한 응시가 서버로 올라가야 돈다. 시드를 심기 전에
+      <b>smeag000</b> 으로 로그인해 두는 편이 좋다 — 로그인하지 않으면 기기에만 남는다.
+    </p>
+    <p class="mt-8"><a class="btn ghost sm" href="login.html">Go to login</a></p>
+  </div>
+
+  <div class="card mt-16">
+    <div class="lr-lab">What gets seeded</div>
+    <table class="rv-table" style="margin-top:8px">
+      <thead><tr><th>Set</th><th>Left blank (one per module)</th><th>Everything else</th></tr></thead>
+      <tbody><tr>
+        <td><b>SET 9</b><br><small class="muted">TOEFL · full test</small></td>
+        <td id="skip-list"><span class="muted">계산 중…</span></td>
+        <td>
+          객관식·빈칸은 정답률 <b id="acc-label">80%</b> 로 채움<br>
+          Writing W1 은 타일 순서까지 채움<br>
+          Speaking 은 아래 음성으로 녹음이 들어감
+        </td>
+      </tr></tbody>
+    </table>
+
+    <div class="mt-16" style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end">
+      <label style="font-size:13px">
+        <span class="lr-lab">Accuracy</span>
+        <input type="range" id="acc" min="40" max="100" step="5" value="80" style="width:200px">
+      </label>
+      <label style="font-size:13px">
+        <span class="lr-lab">Speaking audio</span><br>
+        <select id="voice-mode" class="wr-textarea" style="height:38px;padding:6px 10px;min-width:260px">
+          <option value="tts">TTS 로 생성 (/api/tts)</option>
+          <option value="prompt">문항 오디오를 그대로 재사용</option>
+          <option value="none">녹음 없이 (NOT SUBMIT 으로 남김)</option>
+        </select>
+      </label>
+      <label style="font-size:13px">
+        <span class="lr-lab">Resume 진입점</span><br>
+        <select id="cursor-at" class="wr-textarea" style="height:38px;padding:6px 10px;min-width:260px">
+          <option value="first">처음 비운 문항부터 (전 구간)</option>
+          <option value="speaking">Speaking 부터</option>
+          <option value="writing">Writing 부터</option>
+        </select>
+      </label>
+    </div>
+    <p class="muted mt-8" style="font-size:12px">
+      커서는 하나뿐이라 이어받는 자리도 하나다. 앞자리를 건너뛰면 그 구간에 비워 둔 문항은
+      무응답으로 남는다 — 채점·AI 리뷰만 볼 때는 <b>Speaking 부터</b> 가 가장 빠르다
+      (스피킹 1문항 + 라이팅 3문항만 답하면 제출까지 간다).
+    </p>
+    <p class="muted mt-8" style="font-size:12px">
+      TTS 는 관리자 토큰이나 엔진 키가 이 기기에 있어야 돈다(admin-audio.html 에서 설정).
+      쓸 수 없으면 문항 오디오 재사용으로 자동으로 내려간다 — 복창 문항은 원문 낭독이라
+      그대로 "완벽한 복창" 샘플이 되고, 인터뷰 문항은 질문 음성이 답 자리에 들어간다.
+    </p>
+
+    <div class="mt-16" style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn brand" id="go" type="button">샘플 심기</button>
+      <button class="btn ghost" id="wipe" type="button">이 기기의 진행 중 세션 지우기</button>
+    </div>
+  </div>
+
+  <div class="card mt-16 hide" id="log-card">
+    <div class="lr-lab">Progress</div>
+    <pre id="log" style="font-size:12px;line-height:1.6;white-space:pre-wrap;margin-top:8px"></pre>
+    <div class="mt-16 hide" id="done" style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn brand" id="go-exam" href="exam-runtime.html?mode=exam&profile=toefl&set=set9">이어서 응시하기 →</a>
+      <a class="btn ghost" id="go-review" href="#">리뷰 화면 열기</a>
+    </div>
+  </div>
+</main>
+
+<script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script src="assets/exam-store.js"></script>
+<script src="assets/set9.js"></script>
+<script src="assets/exam-types.js"></script>
+<script src="assets/exam-media.js"></script>
+<script src="assets/exam-timing.js"></script>
+<script src="assets/exam-compile.js"></script>
+<script src="assets/seed-attempt.js"></script>
+<script src="assets/tts-client.js"></script>
+<script>
+/* 샘플 응시 시드 (개발용).
+ *
+ * 시험 셸을 거치지 않고 localStorage·IndexedDB 에 "거의 다 푼 응시" 를 직접 심는다.
+ * 셸이 이 세션을 이어받을 수 있어야 하므로 두 가지를 지킨다.
+ *
+ *  1) meta 에 contentHash·timingHash 를 적지 않는다. canResume() 은 저장된 해시가
+ *     있을 때만 대조하므로, 비워 두면 셸이 그때 계산한 값과 다툴 일이 없다. 시드가
+ *     셸의 해시 계산을 베껴 쓰면 셸이 바뀔 때마다 조용히 어긋난다 — 베끼지 않는다.
+ *  2) clocks 를 심지 않는다. 시계는 화면에 들어갈 때 armClock() 이 처음 한 번 만든다.
+ *     빈 채로 두면 이어받는 화면부터 제 시간이 새로 주어진다(시드는 시간 검증용이 아니다).
+ *
+ * 화면 id 는 컴파일러가 정본이므로 여기서도 같은 컴파일러를 돌려 얻는다.
+ */
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var PACK = window.SMEAG_SET9;
+  var SCREENS = null;
+  var SESSION = null;
+
+  function log(msg) {
+    $('log-card').classList.remove('hide');
+    $('log').textContent += msg + '\n';
+    $('log').scrollTop = $('log').scrollHeight;
+  }
+
+  /* ── 누구로 들어와 있나 ──────────────────────────────────── */
+
+  function paintWho() {
+    var el = $('who');
+    if (!window.SG_AUTH) { el.textContent = '로그인 모듈이 없습니다 — 기기에만 남습니다.'; return; }
+    var u = SG_AUTH.user && SG_AUTH.user();
+    if (!u) { el.innerHTML = '<b>로그인하지 않음</b> — 제출해도 서버로 올라가지 않아 AI 채점이 돌지 않습니다.'; return; }
+    el.innerHTML = '<b>' + (u.email || u.id || '?') + '</b>';
+  }
+
+  /* ── 컴파일 ──────────────────────────────────────────────── */
+
+  function compile() {
+    return fetch('config/timing.toefl.json').then(function (r) { return r.json(); })
+      .then(function (t) {
+        var out = window.SG_COMPILE.compileScreens(PACK, t, { profile: 'toefl' });
+        SCREENS = (out && out.screens) || [];
+        return SCREENS;
+      });
+  }
+
+  /* ── 스피킹 녹음 ─────────────────────────────────────────── */
+
+  /* 인터뷰 답변은 대본이 없다(질문만 있다). 채점이 볼 만한 길이·짜임의 답을 여기 둔다 —
+     45초 응답 시간에 맞춘 100단어 안팎이고, 일부러 완벽하지 않게 썼다. */
+  var INTERVIEW = {
+    'set9-S2-q01': 'I usually go running about three times a week, mostly in the evening near my apartment. ' +
+      'My older brother is the one who got me into it. He runs almost every day, even in winter, ' +
+      'and he kept telling me it clears his head after work. At first I could only run for ten minutes ' +
+      'without stopping, but now I can do about five kilometers. I also play badminton with my friends ' +
+      'on weekends when we can book a court. I think I prefer running because I can do it alone and ' +
+      'I do not have to wait for anyone else to be free.',
+    'set9-S2-q02': 'I would rather invite them to exercise together, at least in the beginning. ' +
+      'When someone is starting from nothing, the hardest part is not the exercise itself, it is going ' +
+      'out the door the first few times. If a friend is waiting for you, you feel a little responsible, ' +
+      'so you go even on the days you do not want to. Also you can talk while you walk or run, so it ' +
+      'feels more like meeting a friend than doing a workout. Later, once it becomes a habit, ' +
+      'I think they can continue alone if they prefer.',
+    'set9-S2-q03': 'The biggest problem is time, or at least people believe it is time. ' +
+      'If someone works late and comes home tired, exercising feels like one more task. ' +
+      'Another difficulty is that results come very slowly. You train for three weeks and you look ' +
+      'almost the same, so you lose motivation and stop. Cost can matter too, because gym memberships ' +
+      'are expensive in my city. And some people feel embarrassed at the gym when everyone around them ' +
+      'looks fit and they are the only beginner. That feeling alone stops a lot of people from going back.'
+  };
+
+  var VOICE = null;      // { provider, model, lang, voice } — catalog 에서 정해진다
+
+  function pickVoice() {
+    if (!window.SG_TTS_GEN) return Promise.resolve(null);
+    return SG_TTS_GEN.catalog(['en-US']).then(function (cat) {
+      var ps = (cat && cat.providers) || [];
+      var ready = null;
+      for (var i = 0; i < ps.length; i++) if (ps[i].ready) { ready = ps[i]; break; }
+      if (!ready) return null;
+      var vs = (cat.voices && cat.voices[ready.id]) || [];
+      if (!vs.length) return null;
+      return { provider: ready.id, model: ready.defaultModel || (ready.models || [])[0] || '',
+               lang: 'en-US', voice: vs[0].id, label: vs[0].label || vs[0].id };
+    }).catch(function () { return null; });
+  }
+
+  function ttsBlob(text) {
+    return SG_TTS_GEN.generate({
+      provider: VOICE.provider, model: VOICE.model, lang: VOICE.lang,
+      segments: [{ text: text, voice: VOICE.voice }], gapMs: 0, rate: 1, pitch: 0,
+      filename: 'seed'
+    }).then(function (r) { return r.blob; });
+  }
+
+  function promptBlob(q) {
+    var src = q.audio || '';
+    if (!src) return Promise.resolve(null);
+    if (window.SG_MEDIA && typeof SG_MEDIA.resolveMedia === 'function') {
+      try { src = SG_MEDIA.resolveMedia(src) || src; } catch (e) {}
+    }
+    return fetch(src).then(function (r) { return r.ok ? r.blob() : null; }).catch(function () { return null; });
+  }
+
+  /* 재생 길이는 blob 을 실제로 물려 봐야 안다. 못 재면 응답 시간의 8할로 적어 둔다 —
+     리뷰 캡션에 쓰는 값이라 정확할 필요는 없지만 0 이면 "빈 녹음" 처럼 읽힌다. */
+  function durationOf(blob, fallbackSec) {
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('audio');
+      var done = false;
+      function finish(ms) { if (done) return; done = true; URL.revokeObjectURL(url); resolve(ms); }
+      a.preload = 'metadata';
+      a.onloadedmetadata = function () {
+        finish(isFinite(a.duration) && a.duration > 0 ? Math.round(a.duration * 1000)
+                                                      : Math.round(fallbackSec * 800));
+      };
+      a.onerror = function () { finish(Math.round(fallbackSec * 800)); };
+      window.setTimeout(function () { finish(Math.round(fallbackSec * 800)); }, 4000);
+      a.src = url;
+    });
+  }
+
+  function putRecording(qid, blob, respondSec) {
+    return durationOf(blob, respondSec || 20).then(function (ms) {
+      return new Promise(function (resolve) {
+        SG_STORE.putMedia(qid, {
+          questionKey: qid, blob: blob, mime: blob.type || 'audio/mpeg',
+          durationMs: ms, peak: 0.42, silent: false, recordedAt: Date.now()
+        }, function (err) { resolve(!err); });
+      });
+    });
+  }
+
+  /* ── 심기 ────────────────────────────────────────────────── */
+
+  function seed() {
+    var PLAN = SG_SEED.plan(PACK, SCREENS, {
+      accuracy: Number($('acc').value) / 100,
+      cursorAt: $('cursor-at').value
+    });
+    var mode = $('voice-mode').value;
+
+    SESSION = SG_STORE.offlineSessionId();
+    SG_STORE.open(SESSION);                       // 활성 세션으로 삼는다 — 셸이 이걸 이어받는다
+    SG_STORE.saveMeta({
+      session: SESSION, examCode: 'SET9', setCode: 'SET9', studentNo: '',
+      startedAt: Date.now() - 25 * 60 * 1000,
+      profile: 'toefl', mode: 'exam',
+      screenCount: SCREENS.length, submittedAt: null, serverSession: null
+      // contentHash·timingHash 는 일부러 비운다 (위 주석 1)
+    });
+    log('세션 ' + SESSION);
+    log('비워 둘 문항: ' + PLAN.skip.map(function (x) { return x.module + '/' + x.qid; }).join(', '));
+
+    for (var qid in PLAN.answers) {
+      if (!PLAN.answers.hasOwnProperty(qid)) continue;
+      SG_STORE.upsertAnswer(qid, PLAN.answers[qid], { seeded: true });
+    }
+    SG_STORE.flushAnswers();
+    log('답 채움: ' + PLAN.counts.answered + '문항 (오답 ' + PLAN.counts.wrong + ') · 비움 ' + PLAN.counts.blank);
+
+    var spoken = PLAN.spoken;
+    if (mode === 'none' || !spoken.length) {
+      log('스피킹 녹음: 건너뜀 (' + spoken.length + '문항이 NOT SUBMIT 으로 남습니다)');
+      return finish();
+    }
+
+    /* 스피킹은 한 건씩 순서대로 만든다. TTS 는 외부 API 라 동시에 던지면
+       쉽게 429 를 받는다 — 열 건 남짓이라 줄 세워도 오래 걸리지 않는다. */
+    log('스피킹 녹음 ' + spoken.length + '건 생성 중…');
+    return (mode === 'tts' ? pickVoice() : Promise.resolve(null)).then(function (v) {
+      VOICE = v;
+      if (mode === 'tts' && !VOICE) log('  · TTS 를 쓸 수 없어 문항 오디오 재사용으로 내려갑니다');
+      else if (VOICE) log('  · 목소리: ' + VOICE.provider + ' / ' + VOICE.label);
+
+      var at = 0;
+      function next() {
+        if (at >= spoken.length) return Promise.resolve();
+        var it = spoken[at++];
+        var text = it.kind === 'repeat' ? (it.script || '') : (INTERVIEW[it.qid] || '');
+        var get;
+        if (VOICE && text) get = ttsBlob(text).catch(function (e) { log('  · ' + it.qid + ' TTS 실패(' + e.message + ') → 문항 오디오'); return promptBlob(it); });
+        else get = promptBlob(it);
+        return get.then(function (blob) {
+          if (!blob || !blob.size) { log('  · ' + it.qid + ' 실패 — 녹음 없이 남깁니다'); return next(); }
+          return putRecording(it.qid, blob, it.respondSec).then(function (ok) {
+            log('  · ' + it.qid + ' ' + (ok ? '저장됨' : '저장 실패') + ' (' + Math.round(blob.size / 1024) + ' KB)');
+            return next();
+          });
+        });
+      }
+      return next();
+    }).then(finish);
+
+    function finish() {
+      var idx = PLAN.cursor ? PLAN.cursor.screenIndex : 0;
+      SG_STORE.saveCursor(SCREENS[idx].id, idx, 0);
+      SG_STORE.pushEvent('seeded', SCREENS[idx].id, { blanks: PLAN.counts.blank, by: '_seed.html' });
+      log('커서: 화면 ' + idx + ' / ' + SCREENS.length + ' (' + SCREENS[idx].id + ')');
+      log('완료. "이어서 응시하기" 로 들어가 Resume 을 고르세요.');
+      $('go-review').href = 'review.html?session=' + encodeURIComponent(SESSION);
+      $('done').classList.remove('hide');
+      return true;
+    }
+  }
+
+  /* ── 진행 중 세션 지우기 ─────────────────────────────────── */
+
+  function wipe() {
+    var killed = 0;
+    try {
+      for (var i = localStorage.length - 1; i >= 0; i--) {
+        var k = localStorage.key(i);
+        if (!k) continue;
+        var m = /^sg2_attempt::(.+)::meta$/.exec(k);
+        if (!m) continue;
+        var meta = JSON.parse(localStorage.getItem(k) || '{}');
+        if (meta && meta.submittedAt) continue;          // 제출된 응시는 성적 기록이라 건드리지 않는다
+        SG_STORE.open(m[1], false);
+        SG_STORE.dropSession(m[1]);
+        killed++;
+      }
+      localStorage.removeItem('sg2_attempt_active');
+    } catch (e) {}
+    log('진행 중 세션 ' + killed + '건을 지웠습니다 (제출된 응시는 그대로).');
+  }
+
+  /* ── 배선 ────────────────────────────────────────────────── */
+
+  paintWho();
+  if (window.SG_AUTH && SG_AUTH.onChange) SG_AUTH.onChange(paintWho);
+
+  $('acc').oninput = function () { $('acc-label').textContent = $('acc').value + '%'; };
+
+  compile().then(function () {
+    var lasts = SG_SEED.lastOfEachModule(SCREENS);
+    $('skip-list').innerHTML = lasts.map(function (x) {
+      return '<b>' + x.module + '</b> · ' + x.qid;
+    }).join('<br>');
+    log('SET 9 컴파일: 화면 ' + SCREENS.length + ' · 문항 ' + PACK.allQuestions().length);
+  }).catch(function (e) {
+    log('컴파일 실패: ' + e.message);
+  });
+
+  $('go').onclick = function () {
+    if (!SCREENS) { log('아직 컴파일 전입니다.'); return; }
+    $('go').disabled = true;
+    $('log').textContent = '';
+    Promise.resolve().then(seed).catch(function (e) {
+      log('실패: ' + (e && e.message ? e.message : e));
+    }).then(function () { $('go').disabled = false; });
+  };
+
+  $('wipe').onclick = wipe;
+})();
+</script>
+</body>
+</html>
