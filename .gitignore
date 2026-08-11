@@ -41,3 +41,6 @@ studyground/sg2/media/audio/_set9_backup_say/
 
 # Claude Code 개인 설정 (옵시디언 볼트 경로 등 로컬 전용)
 .claude/settings.local.json
+
+# ── Supabase 백업 (tools/backup_supabase.py 가 받는 실데이터 · 학생 개인정보) ──
+studyground/backups/

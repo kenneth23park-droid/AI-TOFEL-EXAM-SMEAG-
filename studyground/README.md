@@ -114,6 +114,22 @@ Vercel project:
 `review.html`; a confirmed row is never overwritten by re-scoring. The 1–6 band is
 worked out from those scores at display time — see `docs/scoring-rationale.md` §6-1.
 
+### Backups
+
+The free plan gives 500 MB of database and 1 GB of storage. `tools/backup_supabase.py`
+downloads everything to this machine once **DB + Storage passes 400 MB**, well before
+either limit bites:
+
+```bash
+python3 tools/backup_supabase.py --check    # usage only
+python3 tools/backup_supabase.py            # backs up only if over the threshold
+```
+
+Needs `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`, and `supabase/usage.sql` applied
+once. Tables land as JSONL, recordings as the original files, with a `manifest.json`
+carrying sizes and sha256. Backing up never deletes anything — freeing space is the
+separate, opt-in `--prune-recordings 90`. See `docs/backup.md`.
+
 ## Verify
 
 ```bash
