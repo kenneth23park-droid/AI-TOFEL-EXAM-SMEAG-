@@ -39,6 +39,9 @@
   .tagx { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
   .tagx.ovr { background:var(--peach,#fde5da); color:var(--brand-ink,#a8331a); }
   .tagx.sec { background:var(--cream-2); color:var(--muted); }
+  /* 안내 방송 줄 — 문항이 아니라 Task 의 머리말이라는 걸 왼쪽 띠 하나로 구분한다. */
+  .tagx.dir { background:#dbe7f7; color:#20416b; }
+  .qrow.is-intro { border-left:4px solid #4b7bc4; }
   .shell-go { flex:none; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:999px;
     border:1px solid var(--line-2); background:var(--paper,#fff); color:var(--brand); text-decoration:none; }
   .shell-go:hover { background:var(--brand); border-color:var(--brand); color:#fff; }
@@ -267,13 +270,24 @@
   function packGlobal(id){ return PACK_GLOBAL[id] || ('SMEAG_' + String(id||'').toUpperCase()); }
   function pack(){ return window[packGlobal(setId)] || null; }
 
-  /** 화면에 그릴 문항 목록 — 팩 순서를 그대로 따른다. */
+  /** 화면에 그릴 목록 — 팩 순서를 그대로 따른다.
+   *  안내 방송(introAudio)이 붙은 블록은 그 블록의 첫 문항 앞에 한 줄을 세운다.
+   *  시험에서도 첫 문항 앞에 안내 화면이 서므로 순서가 같다. */
   function items() {
     var out = [], p = pack();
     if (!p) return out;
     (p.sections||[]).forEach(function (sec) {
       (sec.modules||[]).forEach(function (mod) {
         (mod.blocks||[]).forEach(function (block) {
+          if (block.introAudio) {
+            var iid = Q.introId(setId, mod.id);
+            out.push({
+              intro: true, sec: sec, mod: mod, block: block,
+              /* 아래 편집·저장 코드가 문항과 같은 모양을 기대하므로 얇은 대역을 세운다.
+                 팩이 바뀌면 render() 가 이 목록을 다시 만들므로 값이 묵지 않는다. */
+              q: { id: iid, audio: block.introAudio, script: block.script || '' }
+            });
+          }
           (block.questions||[]).forEach(function (q) {
             out.push({ q:q, sec:sec, mod:mod, block:block });
           });
@@ -358,11 +372,14 @@
   /** 이 문항이 실린 시험 화면 주소. 화면 id 를 몰라도 되도록 `?goq=` 로 문항 id 를 넘긴다
    *  — exam-shell.js 가 questionIds 로 화면을 찾아 거기서 시작한다. */
   function shellUrl(it) {
-    return 'exam-runtime.html?set=' + encodeURIComponent(setId) +
+    var base = 'exam-runtime.html?set=' + encodeURIComponent(setId) +
       '&testId=' + encodeURIComponent(setId.toUpperCase()) +
       '&section=' + encodeURIComponent(it.sec.id) +
-      '&sessionId=admin-preview' +
-      '&mode=section&goq=' + encodeURIComponent(it.q.id);
+      '&sessionId=admin-preview&mode=section';
+    /* 안내 방송 화면에는 문항이 없어 goq 로 찾을 수 없다 — 화면 id 를 직접 짚는다.
+       id 의 정본은 exam-compile.js 의 record-set 분기(sectionId + '.intro.' + moduleId). */
+    if (it.intro) return base + '#screen=' + encodeURIComponent(it.sec.id + '.intro.' + it.mod.id);
+    return base + '&goq=' + encodeURIComponent(it.q.id);
   }
 
   /* 클로즈 지문 — {{n}} 자리를 그 번호의 정답 단어로 채우고, 지금 고치는 빈칸만 강조한다.
@@ -396,7 +413,83 @@
     return q.prompt || (q.choices || [])[0] || '';
   }
 
+  /* 음원 칸 + 대본→음성 패널. 문항과 안내 방송이 똑같이 쓴다 —
+     둘 다 "경로 하나, 대본 하나, 그 대본으로 만든 mp3 하나" 라는 구조가 같다. */
+  function mediaPanel(it, q, eff, ph) {
+    return '<div class="fld"><label><span data-en>Audio path</span><span data-ko>오디오 경로</span></label>' +
+      '<input type="text" data-f="audio" value="' + esc(q.audio || '') + '" placeholder="' + esc(ph) + '">' +
+      (eff ? '<audio controls preload="none" src="' + esc(eff) + '"></audio>' : '') +
+      '<div class="qacts"><label class="btn ghost sm file-btn"><span data-en>Upload replacement clip</span><span data-ko>대체 음원 업로드</span>' +
+        '<input type="file" accept="audio/*" data-f="audiofile"></label>' +
+        '<button class="btn ghost sm" data-act="audioreset" type="button"><span data-en>Clear clip override</span><span data-ko>음원 덮어쓰기 해제</span></button></div>' +
+    '</div>' +
+    /* 스크립트 → 음성. 키는 서버에만 있고 여기서는 /api/tts 를 부른다. */
+    '<div class="fld gen">' +
+      '<label>🎙 <span data-en>Generate the audio from a script</span><span data-ko>스크립트로 음성 생성</span></label>' +
+      '<p class="muted" style="font-size:11.5px;line-height:1.55;margin:0 0 7px">' +
+        '<span data-en>One line per turn — write <b>Speaker 1: …</b> to split speakers; each gets its own voice. Runs on the deployed site only (the API key lives on the server).</span>' +
+        '<span data-ko>한 줄에 한 대사 — <b>Speaker 1: …</b> 형식으로 쓰면 화자별로 다른 목소리가 배정됩니다. API 키가 서버에 있으므로 배포된 사이트에서만 동작합니다.</span></p>' +
+      '<textarea rows="4" data-f="script" placeholder="Speaker 1: Where is the student lounge?&#10;Speaker 2: It&#39;s on the second floor, near the elevators.">' +
+        esc(scriptFor(it)) + '</textarea>' +
+      /* 엔진 · 언어 · 모델 — mp3 를 그대로 내주는 엔진만 서버가 싣는다. */
+      '<div class="engines">' +
+        '<label class="mini"><span data-en>engine</span><span data-ko>엔진</span>' +
+          '<select data-f="provider"></select></label>' +
+        '<label class="mini"><span data-en>language</span><span data-ko>언어</span>' +
+          '<select data-f="lang"></select></label>' +
+        '<label class="mini"><span data-en>voice model</span><span data-ko>보이스 모델</span>' +
+          '<select data-f="model"></select></label>' +
+        '<span class="engnote"></span>' +
+      '</div>' +
+      '<div class="keyrow" data-role="keyrow"></div>' +
+      '<div class="voices" data-role="voices"></div>' +
+      '<div class="qacts">' +
+        '<label class="mini"><span data-en>gap ms</span><span data-ko>간격 ms</span>' +
+          '<input type="number" data-f="gap" value="400" min="0" max="2000" step="50"></label>' +
+        '<label class="mini"><span data-en>rate</span><span data-ko>속도</span>' +
+          '<input type="number" data-f="rate" value="1" min="0.5" max="1.5" step="0.05"></label>' +
+        '<button class="btn brand sm" data-act="gen" type="button">🎙 <span data-en>Generate</span><span data-ko>생성</span></button>' +
+        '<span class="genmsg"></span>' +
+      '</div>' +
+      '<div class="genout"></div>' +
+    '</div>';
+  }
+
+  /** 안내 방송 한 줄 — 그 Task 의 첫 문항 앞에 선다.
+   *  고치는 것은 둘뿐이다: 화면에 적히고 음성으로도 나가는 지시문(대본), 그리고 그 음원. */
+  function introRowHtml(it, i) {
+    var q = it.q, ovr = Q.isOverridden(setId, q.id);
+    var orig = it.block.__sgOrigIntro || {};
+    var eff = q.audio ? SG_AUDIO.resolve(audioPath(q.audio)) : '';
+    var text = scriptFor(it);
+    return '<div class="qrow is-intro' + (ovr ? ' is-ovr' : '') + '" data-i="' + i + '" data-search="' +
+        esc(((q.id || '') + ' ' + text + ' directions instructions').toLowerCase()) + '"' +
+        ' data-sec="' + esc(it.sec.id) + '" data-ovr="' + (ovr?1:0) + '">' +
+      '<div class="qhead"><b>' + esc(q.id) + '</b>' +
+        '<span class="tagx sec">' + esc(it.sec.label || it.sec.id) + ' · ' + esc(it.mod.label || it.mod.id) + '</span>' +
+        '<span class="tagx dir"><span data-en>Directions</span><span data-ko>안내 방송</span></span>' +
+        (ovr ? '<span class="tagx ovr"><span data-en>Replaced</span><span data-ko>교체됨</span></span>' : '') +
+        '<span class="qtxt">' + esc(text) + '</span>' +
+        '<a class="shell-go" href="' + esc(shellUrl(it)) + '" target="_blank" rel="noopener"' +
+          ' title="Open in the exam shell">▶ <span data-en>Exam screen</span><span data-ko>시험 화면</span></a>' +
+        '</div>' +
+      '<div class="qbody">' +
+        '<p class="muted" style="font-size:11.5px;line-height:1.6;margin:0 0 11px">' +
+          '<span data-en>This plays by itself before the first question of this task, and the same words stand on the screen while it plays. Editing the script below changes both.</span>' +
+          '<span data-ko>이 Task 의 첫 문항 앞에서 저절로 재생되며, 같은 문장이 화면에도 적힙니다. 아래 대본을 고치면 화면 문구가 함께 바뀝니다.</span></p>' +
+        mediaPanel(it, q, eff, 'media/audio/set9/s1-instructions.mp3') +
+        '<div class="qacts">' +
+          '<button class="btn brand sm" data-act="save" type="button"><span data-en>Save replacement</span><span data-ko>교체 저장</span></button>' +
+          (ovr ? '<button class="btn ghost sm" data-act="revert" type="button"><span data-en>Revert to original</span><span data-ko>원문으로 되돌리기</span></button>' : '') +
+        '</div>' +
+        (ovr ? '<div class="orig"><b>Original</b>\n' + esc((orig.script || '') +
+            (orig.introAudio ? '\n' + orig.introAudio : '')) + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
   function rowHtml(it, i) {
+    if (it.intro) return introRowHtml(it, i);
     var q = it.q, orig = q.__sgOrig || {}, ovr = Q.isOverridden(setId, q.id);
     var choices = q.choices || [];
     var eff = q.audio ? SG_AUDIO.resolve(audioPath(q.audio)) : '';
@@ -448,43 +541,7 @@
         '</div>' +
         /* 음원·TTS·이미지는 소리로 푸는 문항(리스닝·스피킹)에만 붙인다. */
         (hasAudio ?
-        '<div class="fld"><label><span data-en>Audio path</span><span data-ko>오디오 경로</span></label>' +
-          '<input type="text" data-f="audio" value="' + esc(q.audio || '') + '" placeholder="media/audio/set9/l1-q01.mp3">' +
-          (eff ? '<audio controls preload="none" src="' + esc(eff) + '"></audio>' : '') +
-          '<div class="qacts"><label class="btn ghost sm file-btn"><span data-en>Upload replacement clip</span><span data-ko>대체 음원 업로드</span>' +
-            '<input type="file" accept="audio/*" data-f="audiofile"></label>' +
-            '<button class="btn ghost sm" data-act="audioreset" type="button"><span data-en>Clear clip override</span><span data-ko>음원 덮어쓰기 해제</span></button></div>' +
-        '</div>' +
-        /* 스크립트 → 음성. 키는 서버에만 있고 여기서는 /api/tts 를 부른다. */
-        '<div class="fld gen">' +
-          '<label>🎙 <span data-en>Generate the audio from a script</span><span data-ko>스크립트로 음성 생성</span></label>' +
-          '<p class="muted" style="font-size:11.5px;line-height:1.55;margin:0 0 7px">' +
-            '<span data-en>One line per turn — write <b>Speaker 1: …</b> to split speakers; each gets its own voice. Runs on the deployed site only (the API key lives on the server).</span>' +
-            '<span data-ko>한 줄에 한 대사 — <b>Speaker 1: …</b> 형식으로 쓰면 화자별로 다른 목소리가 배정됩니다. API 키가 서버에 있으므로 배포된 사이트에서만 동작합니다.</span></p>' +
-          '<textarea rows="4" data-f="script" placeholder="Speaker 1: Where is the student lounge?&#10;Speaker 2: It&#39;s on the second floor, near the elevators.">' +
-            esc(scriptFor(it)) + '</textarea>' +
-          /* 엔진 · 언어 · 모델 — mp3 를 그대로 내주는 엔진만 서버가 싣는다. */
-          '<div class="engines">' +
-            '<label class="mini"><span data-en>engine</span><span data-ko>엔진</span>' +
-              '<select data-f="provider"></select></label>' +
-            '<label class="mini"><span data-en>language</span><span data-ko>언어</span>' +
-              '<select data-f="lang"></select></label>' +
-            '<label class="mini"><span data-en>voice model</span><span data-ko>보이스 모델</span>' +
-              '<select data-f="model"></select></label>' +
-            '<span class="engnote"></span>' +
-          '</div>' +
-          '<div class="keyrow" data-role="keyrow"></div>' +
-          '<div class="voices" data-role="voices"></div>' +
-          '<div class="qacts">' +
-            '<label class="mini"><span data-en>gap ms</span><span data-ko>간격 ms</span>' +
-              '<input type="number" data-f="gap" value="400" min="0" max="2000" step="50"></label>' +
-            '<label class="mini"><span data-en>rate</span><span data-ko>속도</span>' +
-              '<input type="number" data-f="rate" value="1" min="0.5" max="1.5" step="0.05"></label>' +
-            '<button class="btn brand sm" data-act="gen" type="button">🎙 <span data-en>Generate</span><span data-ko>생성</span></button>' +
-            '<span class="genmsg"></span>' +
-          '</div>' +
-          '<div class="genout"></div>' +
-        '</div>' +
+        mediaPanel(it, q, eff, 'media/audio/set9/l1-q01.mp3') +
         '<div class="fld"><label><span data-en>Image path</span><span data-ko>이미지 경로</span></label>' +
           '<input type="text" data-f="image" value="' + esc(q.image || '') + '"></div>'
         : '') +
@@ -508,8 +565,10 @@
     host.innerHTML = LIST.map(rowHtml).join('') ||
       '<p class="muted"><span data-en>This set is not loaded on this page.</span><span data-ko>이 SET 이 로드되지 않았습니다.</span></p>';
     applyFilter();
+    var nq = LIST.filter(function (it) { return !it.intro; }).length;
+    var ni = LIST.length - nq;
     document.getElementById('count').textContent =
-      Q.count(setId) + ' replaced · ' + LIST.length + ' questions';
+      Q.count(setId) + ' replaced · ' + nq + ' questions' + (ni ? ' · ' + ni + ' directions' : '');
     var secs = [];
     LIST.forEach(function (it) { if (secs.indexOf(it.sec.id) < 0) secs.push(it.sec.id); });
     document.getElementById('secseg').innerHTML =
@@ -548,6 +607,20 @@
     var tl = row.querySelector('[data-f=timeLimitSec]');
     if (tl) { var v = parseInt(tl.value, 10); out.timeLimitSec = isFinite(v) && v > 0 ? v : null; }
     return out;
+  }
+
+  /* 안내 방송은 고칠 곳이 대본과 음원 둘뿐이다. 문항과 마찬가지로 원본과 같은 값은
+     저장하지 않는다 — 되돌리기가 언제나 팩의 원문을 되살리도록. */
+  function diffIntro(it, row) {
+    var o = it.block.__sgOrigIntro || {};
+    var ta = row.querySelector('[data-f=script]');
+    var au = row.querySelector('[data-f=audio]');
+    var script = ta ? ta.value.trim() : '';
+    var audio = au ? au.value.trim() : '';
+    return {
+      script: (!script || script === String(o.script || '').trim()) ? null : script,
+      introAudio: (!audio || audio === o.introAudio) ? null : audio
+    };
   }
 
   /* 원본과 같은 값은 저장하지 않는다 — 되돌리기가 항상 원문을 되살리도록. */
@@ -806,12 +879,14 @@
     var row = act.closest('.qrow'), it = LIST[+row.getAttribute('data-i')], q = it.q;
     var a = act.getAttribute('data-act');
     if (a === 'save') {
-      Q.set(setId, q.id, diffAgainstOriginal(q, readRow(row)));
+      Q.set(setId, q.id, it.intro ? diffIntro(it, row) : diffAgainstOriginal(q, readRow(row)));
       toast('Saved · ' + q.id);
       render();
     } else if (a === 'revert') {
       Q.reset(setId, q.id);
-      SG_AUDIO.reset(audioPath(q.__sgOrig ? q.__sgOrig.audio : q.audio));
+      var origAudio = it.intro ? (it.block.__sgOrigIntro || {}).introAudio
+                               : (q.__sgOrig ? q.__sgOrig.audio : q.audio);
+      SG_AUDIO.reset(audioPath(origAudio || q.audio));
       toast('Reverted · ' + q.id);
       render();
     } else if (a === 'audioreset') {

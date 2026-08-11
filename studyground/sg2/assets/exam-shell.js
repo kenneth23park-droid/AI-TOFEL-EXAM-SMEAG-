@@ -617,9 +617,11 @@ window.SG_RUNTIME = (function () {
         STORE.open(session);
         CLOCK.attachStore(STORE);
 
-        /* `?goq=` 는 "이 문항 화면을 지금 열어라"는 관리자 진입이다 — 이어보기보다 우선한다. */
+        /* `?goq=` · `#screen=` 은 "이 화면을 지금 열어라"는 관리자 진입이다 — 이어보기보다 우선한다.
+           안내 방송 화면에는 문항이 없어 goq 로는 짚을 수 없어서 `#screen=` 으로 들어온다. */
         var can = STORE.canResume(contentHash, timingHash);
-        var resumable = (session === active) && !query('goq') && can.ok && !!STORE.cursor();
+        var resumable = (session === active) && !query('goq') && !url.screenId &&
+                        can.ok && !!STORE.cursor();
 
         /* 이어볼 수 없는 활성 세션은 재사용하지 않고 새 세션을 연다.
            세트·응시 범위가 달라진 경우(전체 → 리딩만 등) 화면 id 는 그대로라서,

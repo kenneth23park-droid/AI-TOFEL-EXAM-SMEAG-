@@ -24,6 +24,12 @@
      sentence 는 insert 문항이 끼워 넣을 문장. */
   var FIELDS = ['prompt', 'choices', 'answer', 'hint', 'sentence',
                 'audio', 'image', 'note', 'timeLimitSec'];
+  /* 문항이 아니라 "블록의 머리"에 붙는 것 — 각 Task 첫 문항 앞에서 흐르는 안내 방송이다.
+     script 는 화면에 적히는 지시문이자 음성을 다시 만들 때 쓰는 대본이고,
+     introAudio 는 그 방송 음원의 경로다. 문항 override 와 같은 저장소를 쓰되
+     대상 id 만 다르다 — 'set9-S1-intro' 처럼 블록(모듈)마다 하나씩. */
+  var INTRO_FIELDS = ['script', 'introAudio'];
+  var ALL_FIELDS = FIELDS.concat(INTRO_FIELDS);
 
   var data = {};            // "set::qid" -> patch
   var packs = [];           // 이미 적용한 팩들 [{pack, setId}] — 변경 시 재적용
@@ -51,6 +57,33 @@
         });
       });
     });
+  }
+
+  /* 안내 방송을 가진 블록만 순회한다. id 는 SET 과 모듈에서 만든다 —
+     콘텐츠 팩에 적혀 있지 않아도 늘 같은 이름이 나오도록. */
+  function introId(setId, modId) {
+    return String(setId || '').toLowerCase() + '-' + String(modId || '') + '-intro';
+  }
+  function eachIntro(pack, setId, fn) {
+    if (!pack || !pack.sections) return;
+    pack.sections.forEach(function (sec) {
+      (sec.modules || []).forEach(function (mod) {
+        (mod.blocks || []).forEach(function (block) {
+          if (!block || !block.introAudio) return;
+          fn(introId(setId, mod.id), block, mod, sec);
+        });
+      });
+    });
+  }
+
+  function snapshotIntro(block) {
+    if (block.__sgOrigIntro) return block.__sgOrigIntro;
+    var o = {};
+    INTRO_FIELDS.forEach(function (f) { o[f] = block[f]; });
+    try {
+      Object.defineProperty(block, '__sgOrigIntro', { value: o, enumerable: false, writable: false });
+    } catch (e) { block.__sgOrigIntro = o; }
+    return o;
   }
 
   function snapshot(q) {
@@ -87,11 +120,25 @@
     });
     // 되돌려진 문항의 표시 플래그 정리
     eachQuestion(pack, function (q) { if (!data[k(setId, q.id)]) delete q.__sgOverridden; });
+    // 안내 방송도 같은 방식으로 — 원본 복원 뒤 패치를 얹는다(멱등).
+    eachIntro(pack, setId, function (id, block) {
+      var orig = snapshotIntro(block);
+      INTRO_FIELDS.forEach(function (f) { block[f] = orig[f]; });
+      var patch = data[k(setId, id)];
+      if (!patch) { delete block.__sgOverridden; return; }
+      INTRO_FIELDS.forEach(function (f) {
+        if (patch[f] === undefined || patch[f] === null) return;
+        block[f] = patch[f];
+      });
+      block.__sgOverridden = true;
+      n++;
+    });
     return n;
   }
 
   var API = {
     FIELDS: FIELDS,
+    INTRO_FIELDS: INTRO_FIELDS,
 
     get: function (setId, qid) { return data[k(setId, qid)] || null; },
     isOverridden: function (setId, qid) { return !!data[k(setId, qid)]; },
@@ -106,7 +153,7 @@
       var keys = API.list(setId).sort();
       return keys.map(function (key) {
         var p = data[key] || {};
-        return key + '@' + (p.t || 0) + '#' + FIELDS.filter(function (f) { return p[f] !== undefined; }).join('.');
+        return key + '@' + (p.t || 0) + '#' + ALL_FIELDS.filter(function (f) { return p[f] !== undefined; }).join('.');
       }).join('|');
     },
 
@@ -114,19 +161,19 @@
     set: function (setId, qid, patch) {
       var key = k(setId, qid), cur = data[key] || {};
       var had = !!data[key], prev = {};
-      FIELDS.forEach(function (f) { prev[f] = cur[f]; });
-      FIELDS.forEach(function (f) {
+      ALL_FIELDS.forEach(function (f) { prev[f] = cur[f]; });
+      ALL_FIELDS.forEach(function (f) {
         if (patch[f] === undefined) return;
         if (patch[f] === null || patch[f] === '') delete cur[f];
         else cur[f] = (f === 'choices' && Array.isArray(patch[f])) ? patch[f].slice() : patch[f];
       });
-      var live = FIELDS.some(function (f) { return cur[f] !== undefined; });
+      var live = ALL_FIELDS.some(function (f) { return cur[f] !== undefined; });
       if (live) { cur.t = Date.now(); data[key] = cur; } else { delete data[key]; }
       save(); emit();
       // 개발자가 나중에 읽을 수 있게 바뀐 필드만 한 줄씩 남긴다(admin-log.html).
       if (window.SG_LOG) {
-        var next = {}; FIELDS.forEach(function (f) { next[f] = live ? cur[f] : undefined; });
-        SG_LOG.diff({ set: setId, target: qid, fields: FIELDS, before: prev, after: next,
+        var next = {}; ALL_FIELDS.forEach(function (f) { next[f] = live ? cur[f] : undefined; });
+        SG_LOG.diff({ set: setId, target: qid, fields: ALL_FIELDS, before: prev, after: next,
                       action: had ? (live ? 'update' : 'delete') : 'create' });
       }
       return live;
@@ -174,6 +221,8 @@
       return applyPack(pack, setId);
     },
     eachQuestion: eachQuestion,
+    eachIntro: eachIntro,
+    introId: introId,
     onChange: function (fn) { if (typeof fn === 'function') listeners.push(fn); },
 
     /** 아직 로드되지 않은 콘텐츠 팩까지 잡는다.
