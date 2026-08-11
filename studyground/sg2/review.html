@@ -19,7 +19,7 @@
     <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Learn · Practice · Test · Repeat</small></span></a>
     <nav class="nav-center">
       <a href="tests.html">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
-      <a href="dashboard.html" class="on">📊 <span data-en>My MockTest</span><span data-ko>내 성적</span></a>
+      <a href="dashboard.html" class="on">📊 <span data-en>My Result</span><span data-ko>내 성적</span></a>
     </nav>
     <div class="nav-right">
       <a class="btn ghost sm" href="login.html"><span data-en>Login</span><span data-ko>로그인</span></a>
@@ -32,6 +32,8 @@
   <div class="page-h mt-24" style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
     <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Answer review</span><span data-ko>채점 리뷰</span></h1>
     <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+      <!-- 스피킹은 표 한 칸에 들어가지 않는다 — 원문·오디오·녹음·전사를 나란히 놓는 화면으로 보낸다. -->
+      <a class="btn ghost sm hide" id="speaking">🎤 <span data-en>Speaking review</span><span data-ko>스피킹 리뷰</span></a>
       <button class="btn ghost sm" id="print" type="button"><span data-en>Print</span><span data-ko>인쇄</span></button>
       <a class="btn ghost sm" id="back" href="dashboard.html">
         <span data-en>Back to my results</span><span data-ko>내 성적으로</span></a>
@@ -59,6 +61,9 @@
 
   <!-- 영역 필터 -->
   <div class="rv-tabs hide" id="tabs"></div>
+
+  <!-- 리스닝은 표가 아니라 문항 카드로 편다 — 다시 들어야 복기가 되기 때문이다. -->
+  <div class="card hide" id="listen-card" style="padding:0;overflow:hidden"></div>
 
   <!-- 문항별 -->
   <div class="card hide" id="table-card" style="padding:0;overflow:hidden">
@@ -90,9 +95,14 @@
 <!-- 문항 본문과 정답은 콘텐츠 팩에 있다. 리뷰는 이 둘이 있어야 성립한다. -->
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
+<script src="assets/exam-media.js"></script>
+<!-- 선생님이 갈아 끼운 음원·배속을 리뷰에서도 그대로 듣는다(스크립트만 얹으면 걸린다). -->
+<script src="assets/audio-config.js"></script>
+<script src="assets/audio-script-check.js"></script>
 <script src="assets/sg-band.js"></script>
 <script src="assets/sg-results.js"></script>
 <script src="assets/sg-comments.js"></script>
+<script src="assets/sg-review-listening.js"></script>
 <script>
 /* 한 회차의 채점 결과를 문항별로 편다.
  *   review.html?session=<세션 id>              내 응시 (로컬 기록 또는 서버 사본)
@@ -278,7 +288,37 @@
     show('tabs');
   }
 
+  /* ── 리스닝 리뷰 ──────────────────────────────────────────
+   * 표는 "무엇을 골랐나"까지만 말한다. 리스닝에서 학생이 다시 만나야 하는 것은
+   * 들었던 클립이라, 리스닝 탭에서는 표 대신 문항 카드(오디오 + 보기 + 정오)를 편다.
+   * 코멘트는 여기서도 같은 자리에 붙는다 — 문항 하나에 대한 말은 한 벌이어야 한다. */
+  var LISTEN = null;
+
+  function paintListening() {
+    var el = $('listen-card');
+    if (!window.SG_REVIEW_LISTENING) { el.classList.add('hide'); return false; }
+    el.classList.remove('hide');
+    if (LISTEN) { LISTEN.repaint(); return true; }
+    LISTEN = SG_REVIEW_LISTENING.mount(el, {
+      pack: PACK, rows: ALL, setCode: RES && RES.set_code,
+      extraFor: function (qid) {
+        var notes = commentsFor('question', qid);
+        if (!notes.length && !STAFF) return '';
+        return '<div class="mt-16">' + notes.map(cardOf).join('') +
+               (STAFF ? editorFor('question', qid, notes) : '') + '</div>';
+      },
+      onPaint: function () { wireEditors(); }
+    });
+    return true;
+  }
+
   function paintRows() {
+    if (filter === 'listening' && paintListening()) {
+      $('table-card').classList.add('hide');
+      return;
+    }
+    $('listen-card').classList.add('hide');
+    $('table-card').classList.remove('hide');
     var list = ALL.filter(function (r) {
       if (filter === 'all') return true;
       if (filter === 'wrong') return r.ok === false;

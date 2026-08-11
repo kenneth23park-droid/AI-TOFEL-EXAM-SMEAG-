@@ -208,6 +208,33 @@ def load_authored_scripts():
 AUTHORED_SCRIPTS = load_authored_scripts()
 
 
+def load_speaking_script():
+    """문항 id -> 들려주는 문장. 출처는 오디오 대본 하나뿐이다.
+
+    tools/gen_answer_key_set9.js 가 서버 채점표(app/scoring/answer_key_set9.py)를 만들 때
+    쓰는 파일과 **같은 파일**이다. 브라우저 팩에도 같은 값을 실어야 두 채점 경로가
+    같은 원문을 본다 — sg2/api/score.js 는 클라이언트가 보낸 reference 로만 복창을
+    대조하므로(RUBRIC.isRepeat && task.reference), 팩에 원문이 없으면 잘 따라 말한
+    답도 '원문 없음' 으로 중앙값 처리된다. 리뷰 화면의 Reference text 도 여기서 온다.
+    """
+    path = os.path.join(FRAG, 'speaking_script.json')
+    if not os.path.exists(path):
+        warnings.append('speaking script missing: config/_set9_fragments/speaking_script.json; '
+                        'speaking questions will carry no script field')
+        return {}
+    with open(path, 'r', encoding='utf-8') as f:
+        raw = json.load(f)
+    out = {}
+    for line in raw.get('lines') or []:
+        text = str(line.get('text') or '').strip()
+        if line.get('id') and text:
+            out[line['id']] = text
+    return out
+
+
+SPEAKING_SCRIPT = load_speaking_script()
+
+
 def attach_script(blk, ref, where):
     """블록의 (리졸브 전) audio ref 로 집필 지문을 찾아 붙인다."""
     stem = os.path.basename(ref)
@@ -557,6 +584,9 @@ def wire_speaking(sec):
         for blk in mod['blocks']:
             where0 = 'speaking/' + mod['id']
             if blk.get('introAudio'):
+                intro = SPEAKING_SCRIPT.get('set9-' + mod['id'] + '-intro')
+                if intro:
+                    blk['script'] = intro
                 got = resolve_audio(blk['introAudio'], where0 + '/intro')
                 if got:
                     blk['introAudio'] = got
@@ -564,6 +594,14 @@ def wire_speaking(sec):
                     del blk['introAudio']
             qs = blk.get('questions') or []
             for i, q in enumerate(qs):
+                # 들려주는 문장. 복창은 이 값이 채점의 원문이고(sg-results.productive →
+                # api/score.js), 인터뷰는 면접관이 던진 질문이라 리뷰 화면의 문제문이 된다.
+                line = SPEAKING_SCRIPT.get(q['id'])
+                if line:
+                    q['script'] = line
+                elif q.get('kind') == 'repeat':
+                    warnings.append('no script line for repeat question ' + q['id'] +
+                                    '; it will be scored without a reference sentence')
                 if q.get('audio'):
                     got = resolve_audio(q['audio'], where0 + '/' + q['id'])
                     if got:

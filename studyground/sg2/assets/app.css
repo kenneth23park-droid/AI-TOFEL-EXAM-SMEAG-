@@ -312,6 +312,83 @@ tr.is-wrong td { background: rgba(232,72,31,.045); }
   border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 750; }
 .rv-tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 
+/* ── 리스닝 채점 리뷰 (review.html · sg-review-listening.js) ─────────
+   리스닝은 표로 못 본다 — 다시 들어야 무엇을 놓쳤는지 알기 때문이다.
+   왼쪽에 소리(삽화·오디오·대본), 오른쪽에 보기와 정오. 색은 표와 같은 셋뿐이다. */
+.lr { padding: 16px 18px 20px; }
+.lr-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lr-mods { display: flex; gap: 6px; flex-wrap: wrap; }
+.lr-mods button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line-2);
+  background: #fff; color: var(--ink-2); border-radius: 999px; padding: 6px 13px;
+  font-size: 12.5px; font-weight: 750; }
+.lr-mods button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.lr-count { font-size: 11px; font-weight: 800; padding: 1px 7px; border-radius: 999px;
+  background: var(--cream-2); color: var(--ink-2); }
+.lr-count.bad { background: var(--brand-soft); color: var(--brand-ink); }
+.lr-mods button.on .lr-count { background: rgba(255,255,255,.18); color: #fff; }
+.lr-nav { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.lr-pos { font-size: 12.5px; font-weight: 750; color: var(--muted); }
+.lr-nav button[disabled] { opacity: .4; cursor: default; }
+
+.lr-strip { display: flex; gap: 0; flex-wrap: wrap; margin-top: 14px;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--cream); overflow: hidden; }
+.lr-grp { padding: 9px 13px; border-right: 1px solid var(--line); }
+.lr-grp:last-child { border-right: 0; }
+.lr-grp-lab { font-size: 11px; font-weight: 800; color: var(--muted); text-align: center; }
+.lr-dots { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; max-width: 210px; }
+.lr-dot { width: 26px; height: 26px; border-radius: 999px; border: 1px solid transparent;
+  font-size: 11.5px; font-weight: 800; }
+.lr-dot.ok { background: var(--ok-soft); color: var(--ok); }
+.lr-dot.no { background: var(--brand-soft); color: var(--brand-ink); }
+.lr-dot.na { background: var(--cream-2); color: var(--dim); }
+.lr-dot.now { border-color: var(--ink); box-shadow: 0 0 0 2px rgba(23,21,15,.12); }
+
+.lr-pane { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr); gap: 22px; margin-top: 16px; }
+.lr-left { border-right: 1px solid var(--line); padding-right: 20px; }
+.lr-img { width: 100%; max-width: 320px; border-radius: 12px; border: 1px solid var(--line); }
+.lr-audio { width: 100%; margin-top: 12px; }
+.lr-script { margin-top: 12px; font-size: 13px; color: var(--ink-2); }
+.lr-script summary { font-size: 12px; font-weight: 800; color: var(--muted); cursor: pointer; }
+.lr-script div { margin-top: 8px; white-space: pre-wrap; background: var(--cream);
+  border-radius: 11px; padding: 11px 13px; }
+
+.lr-kind { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .04em;
+  padding: 3px 9px; border-radius: 999px; background: var(--cream-2); color: var(--ink-2); }
+.lr-ins { font-size: 14px; color: var(--ink-2); margin-top: 10px; }
+.lr-q { font-size: 16px; font-weight: 750; margin-top: 8px; }
+.lr-choices { margin-top: 12px; display: grid; gap: 8px; }
+.lr-ch { display: flex; align-items: center; gap: 10px; padding: 11px 13px;
+  border: 1px solid var(--line); border-radius: 12px; font-size: 14px; background: #fff; }
+.lr-ch.key { border-color: var(--ok); background: var(--ok-soft); }
+.lr-ch.pick { border-color: var(--brand); background: var(--brand-soft); }
+.lr-ltr { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+  border-radius: 999px; background: var(--cream-2); font-size: 12px; font-weight: 850; flex: none; }
+.lr-ch.key .lr-ltr { background: var(--ok); color: #fff; }
+.lr-ch.pick .lr-ltr { background: var(--brand); color: #fff; }
+.lr-ch-t { flex: 1; }
+.lr-tag { font-size: 11px; font-weight: 800; white-space: nowrap; }
+.lr-tag.ok { color: var(--ok); }
+.lr-tag.no { color: var(--brand-ink); }
+
+.lr-verdict { margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--cream); font-size: 13.5px; }
+.lr-verdict.ok { border-color: var(--ok); background: var(--ok-soft); }
+.lr-verdict.no { border-color: var(--peach-2); background: var(--brand-soft); }
+.lr-vr { display: flex; gap: 12px; }
+.lr-vr span { min-width: 96px; color: var(--muted); }
+.lr-vl { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-weight: 800; }
+.lr-open { font-size: 13.5px; margin-top: 12px; }
+.lr-lab { font-size: 11px; font-weight: 800; color: var(--muted); margin-top: 8px; }
+.is-ok { color: var(--ok); }
+.is-no { color: var(--brand-ink); }
+.lr-empty { padding: 28px; text-align: center; font-size: 13.5px; }
+
+@media (max-width: 820px) {
+  .lr-pane { grid-template-columns: 1fr; }
+  .lr-left { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+  .lr-nav { margin-left: 0; }
+}
+
 /* ── 코멘트 (선생님 · AI) ─────────────────────────────────────
    같은 자리에 나란히 놓되 출처는 한눈에 갈린다 — 선생님은 산호색, AI 는 회색. */
 .cm { border-left: 3px solid var(--line-2); padding: 10px 0 10px 12px; margin-top: 10px; }

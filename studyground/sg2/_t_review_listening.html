@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리스닝 리뷰 — 눈으로 보기(임시)</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<main class="wrap" style="padding:24px 0">
+  <div class="card" id="listen-card" style="padding:0;overflow:hidden"></div>
+</main>
+<script src="assets/app.js"></script>
+<script src="assets/exam-media.js"></script>
+<script src="assets/set9.js"></script>
+<script src="assets/audio-script-check.js"></script>
+<script src="assets/sg-review-listening.js"></script>
+<script>
+(function () {
+  var P = window.SMEAG_SET9, rows = [];
+  P.sections.forEach(function (sec) {
+    if (sec.id !== 'listening') return;
+    sec.modules.forEach(function (m) { m.blocks.forEach(function (b) {
+      (b.questions || []).forEach(function (q) {
+        var key = P.answerKey[q.id] != null ? P.answerKey[q.id] : q.answer;
+        var given = q.no % 3 === 0 ? String((Number(key) + 1) % 4) : String(key);
+        if (q.no === 9) given = '';
+        rows.push({ qid: q.id, no: q.no, section: 'listening', given: given, key: key,
+                    ok: given === '' ? false : Number(given) === Number(key) });
+      });
+    }); });
+  });
+  SG_REVIEW_LISTENING.mount(document.getElementById('listen-card'),
+    { pack: P, rows: rows, setCode: 'SET9' });
+})();
+</script>
+</body>
+</html>

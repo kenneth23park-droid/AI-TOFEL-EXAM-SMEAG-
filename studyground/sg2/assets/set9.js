@@ -2250,6 +2250,7 @@
               "audio": "media/audio/set9/s1-q1.mp3",
               "prepSec": 3,
               "respondSec": 20,
+              "script": "Is this your first time in our cafeteria?",
               "image": "media/pictures/set9/s-task1-repeat-1.png"
             },
             {
@@ -2259,6 +2260,7 @@
               "audio": "media/audio/set9/s1-q2.mp3",
               "prepSec": 3,
               "respondSec": 20,
+              "script": "You can find today’s menu on the board?",
               "image": "media/pictures/set9/s-task1-repeat-2.png"
             },
             {
@@ -2268,6 +2270,7 @@
               "audio": "media/audio/set9/s1-q3.mp3",
               "prepSec": 3,
               "respondSec": 20,
+              "script": "The hot food station is on the left side.",
               "image": "media/pictures/set9/s-task1-repeat-3.png"
             },
             {
@@ -2277,6 +2280,7 @@
               "audio": "media/audio/set9/s1-q4.mp3",
               "prepSec": 3,
               "respondSec": 20,
+              "script": "We offer a variety of meals, snacks, and drinks every day.",
               "image": "media/pictures/set9/s-task1-repeat-4.png"
             },
             {
@@ -2286,6 +2290,7 @@
               "audio": "media/audio/set9/s1-q5.mp3",
               "prepSec": 3,
               "respondSec": 20,
+              "script": "You can pay with cash or your student ID card.",
               "image": "media/pictures/set9/s-task1-repeat-5.png"
             },
             {
@@ -2295,6 +2300,7 @@
               "audio": "media/audio/set9/s1-q6.mp3",
               "prepSec": 3,
               "respondSec": 20,
+              "script": "Please remember to return your tray to the collection area when finished.",
               "image": "media/pictures/set9/s-task1-repeat-6.png"
             },
             {
@@ -2304,9 +2310,11 @@
               "audio": "media/audio/set9/s1-q7.mp3",
               "prepSec": 3,
               "respondSec": 20,
+              "script": "If you have any food allergies, please let the staff know before ordering.",
               "image": "media/pictures/set9/s-task1-repeat-7.png"
             }
-          ]
+          ],
+          "script": "Instructions: You are being trained to help student at the university cafeteria, listen to your trainer, and repeat what she says. Repeat only once."
         }
       ]
     },
@@ -2329,6 +2337,7 @@
               "audio": "media/audio/set9/s2-q1.mp3",
               "prepSec": 3,
               "respondSec": 45,
+              "script": "Thank you for speaking with me today. I’d like to ask you some questions about exercise. What kind of exercise do you or someone you know typically do, such as running, swimming, or going to a gym? Why?",
               "image": "media/pictures/set9/s-task2-interviewer.webp"
             },
             {
@@ -2338,6 +2347,7 @@
               "audio": "media/audio/set9/s2-q2.mp3",
               "prepSec": 3,
               "respondSec": 45,
+              "script": "I see. If you wanted to encourage a friend who doesn’t exercise to become more active, would you prefer to invite them to exercise together with you, or would you prefer to share information about the benefits and let them decide on their own? Why?",
               "image": "media/pictures/set9/s-task2-interviewer.webp"
             },
             {
@@ -2347,6 +2357,7 @@
               "audio": "media/audio/set9/s2-q3.mp3",
               "prepSec": 3,
               "respondSec": 45,
+              "script": "Interesting. What are some things that might make it difficult for someone to start and maintain a regular exercise routine?",
               "image": "media/pictures/set9/s-task2-interviewer.webp"
             },
             {
@@ -2356,9 +2367,11 @@
               "audio": "media/audio/set9/s2-q4.mp3",
               "prepSec": 3,
               "respondSec": 45,
+              "script": "Good points. Lastly, what do you think are the most effective ways to help someone stay motivated to exercise over a long period of time?",
               "image": "media/pictures/set9/s-task2-interviewer.webp"
             }
-          ]
+          ],
+          "script": "Instructions: You have volunteered for a research study on Exercise and Physical activity. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
         }
       ]
     }
