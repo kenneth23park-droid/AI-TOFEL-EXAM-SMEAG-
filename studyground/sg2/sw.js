@@ -95,7 +95,12 @@
 // v35: 헤더가 "지금 누구로 들어와 있는지"를 말한다 — 계정 칩에 이름과 함께 로그인
 //      아이디(smeag000)가 서고, 로그인 상태에서 남아 있던 Login/Sign Up 버튼이
 //      제대로 접힌다. assets/sg-auth.js · assets/app.css 가 바뀌어 판올림한다.
-const VERSION = 'sg-v35';
+// v36: 선생님은 자기 학생만 본다 — sg_profiles.teacher_id 와 RLS 의 sg_can_see() 가
+//      열람 범위를 쥔다. signup.html 에 담당 선생님 드롭다운이 생겼고, 관리자용
+//      admin-teachers.html(선생님 계정 만들기 · 담당 배정)이 추가됐다. sg-auth.js ·
+//      admin-results.html · app.css 가 함께 바뀌어, 캐시된 옛 가입 폼이 남으면
+//      담당 없이 등록됐다가 서버가 되돌려보낸다. 그래서 판올림한다.
+const VERSION = 'sg-v36';
 const SHELL = 'sg-shell-' + VERSION;
 const MEDIA = 'sg-media-' + VERSION;
 
@@ -125,7 +130,7 @@ const SHELL_ASSETS = [
   'assets/sg-qr.js', 'admin-qr.html',
 
   // 관리자 홈과 좌석 관리 — 시험장에서 회선이 없어도 좌석을 다시 짤 수 있어야 한다.
-  'admin.html', 'admin-seats.html', 'assets/sg-seats.js',
+  'admin.html', 'admin-seats.html', 'assets/sg-seats.js', 'admin-teachers.html',
   'seat-setup.html', 'assets/seat-runtime.js',
 
   // 오프라인 사전 다운로드 — 목록 자체가 캐시에 있어야, 두 번째 방문이 오프라인이어도
