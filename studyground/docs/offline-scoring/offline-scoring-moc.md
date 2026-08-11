@@ -17,6 +17,7 @@ updated: 2026-08-11
 | [[scoring-options]] | 인터넷도 AI도 없을 때 채점을 어떻게 하나 — 네 가지 길 |
 | [[campus-architecture]] | 서버를 세운다는 게 무슨 뜻인가 · 30대의 답안이 Supabase까지 닿는 경로 |
 | [[onprem-gpu-roi]] | GPU를 사는 게 경제적으로 맞나 (결론: 비용 논리로는 아니다) |
+| [[deploy-api-and-admin]] | `/api/attempts` 와 `/admin/usage` 를 라이브에 올리는 절차 — **아직 배포 안 됨** |
 
 ## 현재 상태
 

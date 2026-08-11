@@ -15,12 +15,15 @@ own files; `admin_render()` injects them as `at('key')` next to the shared `t()`
 from __future__ import annotations
 
 from datetime import date
+import base64
+import secrets
 from urllib.parse import urlencode
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app import crud
+from app.config import get_settings
 from app.db import get_db
 from app.templating import render, resolve_lang
 
@@ -265,8 +268,65 @@ def keep_query(request: Request, **overrides) -> str:
     return ("?" + urlencode(params)) if params else ""
 
 
-pages_router = APIRouter(prefix="/admin", tags=["admin"], include_in_schema=False)
-api_router = APIRouter(prefix="/api/admin", tags=["admin"], include_in_schema=False)
+# ── 접근 통제 ────────────────────────────────────────────────────────────────
+#
+# ADMIN_COOKIE 는 인증이 아니다 — 오디오 스트림용 표식일 뿐이고, 백오피스 자신이
+# 발급한다. 그 위에 진짜 문을 하나 세운다. 이 화면들은 학생 답안·녹음·학생별
+# 비용을 그대로 보여주므로, 주소를 아는 사람에게 전부 열려 있으면 안 된다.
+#
+# 자격증명이 없을 때의 처신이 핵심이다. 열어 두는 쪽으로 기울면 배포 사고가
+# 곧바로 유출이 된다. 그래서 닫는 쪽으로 기운다:
+#
+#   cloud  + 자격증명 없음 → 503. 공개 URL 에 무인증 백오피스를 띄우지 않는다.
+#   local  + 자격증명 없음 → 루프백에서만. 교실 LAN 의 학생 PC 30대는 서버의
+#                            LAN 주소로 /admin 에 닿을 수 있는데, 그건 막아야 한다.
+#                            선생님 본인 화면(127.0.0.1)은 그대로 열린다.
+#   자격증명 있음          → 어느 모드든 HTTP Basic 을 통과해야 한다.
+
+_LOOPBACK = {"127.0.0.1", "::1", "localhost"}
+
+
+def _unauthorized() -> HTTPException:
+    # WWW-Authenticate 가 있어야 브라우저가 로그인 창을 띄운다.
+    return HTTPException(401, "Admin login required.", headers={"WWW-Authenticate": 'Basic realm="MockTest Admin"'})
+
+
+async def require_admin(request: Request) -> None:
+    settings = get_settings()
+    user, password = settings.admin_user, settings.admin_password
+
+    if not (user and password):
+        if settings.is_cloud:
+            raise HTTPException(
+                503,
+                "Admin is disabled: set ADMIN_USER and ADMIN_PASSWORD. "
+                "Refusing to serve the back office without a login.",
+            )
+        host = (request.client.host if request.client else "") or ""
+        if host not in _LOOPBACK:
+            raise HTTPException(403, "Admin is loopback-only until ADMIN_USER/ADMIN_PASSWORD are set.")
+        return
+
+    header = request.headers.get("authorization", "")
+    scheme, _, encoded = header.partition(" ")
+    if scheme.lower() != "basic" or not encoded:
+        raise _unauthorized()
+    try:
+        given_user, _, given_password = base64.b64decode(encoded).decode("utf-8").partition(":")
+    except (ValueError, UnicodeDecodeError):
+        raise _unauthorized() from None
+
+    # 두 비교를 모두 돌린다 — 아이디가 틀렸을 때 일찍 빠져나가면 그 차이가 시간으로 샌다.
+    ok_user = secrets.compare_digest(given_user, user)
+    ok_password = secrets.compare_digest(given_password, password)
+    if not (ok_user and ok_password):
+        raise _unauthorized()
+
+
+_GUARD = [Depends(require_admin)]
+
+pages_router = APIRouter(prefix="/admin", tags=["admin"], include_in_schema=False, dependencies=_GUARD)
+api_router = APIRouter(prefix="/api/admin", tags=["admin"], include_in_schema=False, dependencies=_GUARD)
 router = APIRouter(include_in_schema=False)
 
 
@@ -325,4 +385,4 @@ router.include_router(pages_router)
 router.include_router(api_router)
 
 __all__ = ["ADMIN_COOKIE", "NAV", "STRINGS", "admin_render", "admin_t", "api_router",
-           "is_admin", "keep_query", "pages_router", "parse_date", "router"]
+           "is_admin", "keep_query", "pages_router", "parse_date", "require_admin", "router"]

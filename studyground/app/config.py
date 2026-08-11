@@ -62,6 +62,11 @@ class Settings:
     max_media_bytes: int          # per-upload ceiling for a Speaking recording
     default_profile: str          # 'toefl' | 'ielts' — seeds attempts.profile/scale
 
+    # 관리자 백오피스 자격증명. 비어 있으면 cloud 모드에서는 /admin 을 아예 닫고
+    # (공개 URL 에 무인증 백오피스를 띄우지 않는다), local 모드에서는 루프백에서만 연다.
+    admin_user: str
+    admin_password: str
+
     @property
     def is_local(self) -> bool:
         return self.app_mode == "local"
@@ -168,4 +173,6 @@ def get_settings() -> Settings:
         media_root=media_root,
         max_media_bytes=max_media_bytes,
         default_profile=profile,
+        admin_user=_env("ADMIN_USER", ""),
+        admin_password=_env("ADMIN_PASSWORD", ""),
     )
