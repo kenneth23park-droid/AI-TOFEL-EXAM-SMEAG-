@@ -252,6 +252,10 @@ h2.title { font-size: clamp(24px, 3vw, 34px); font-weight: 820; letter-spacing: 
 .testcard .code { width: 66px; height: 66px; border-radius: 14px; background: var(--peach);
   display: grid; place-items: center; font-weight: 850; color: var(--brand-ink); font-size: 15px; flex: none; }
 .testcard .body { flex: 1; }
+/* 이미 응시한 세트 — 아이콘 색을 초록으로 바꿔 목록에서 한눈에 갈린다. */
+.testcard.done { border-color: #bfe3cb; }
+.testcard.done .code { background: var(--ok-soft); color: var(--ok); }
+.chip.done { background: var(--ok-soft); color: var(--ok); }
 .testcard h4 { font-size: 16px; font-weight: 780; }
 .testcard p { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
 /* 응시 범위 선택 — 전체 과정 옆에 놓이는 영역별 진입 줄. */

@@ -700,7 +700,8 @@ window.SG_RUNTIME = (function () {
     var meta = STORE.meta();
     if (!meta || !meta.session) {
       STORE.saveMeta({
-        session: session, examCode: url.testId, studentNo: '', startedAt: Date.now(),
+        session: session, examCode: url.testId, setCode: SET_ID.toUpperCase(),
+        studentNo: '', startedAt: Date.now(),
         profile: url.profile, mode: url.mode, contentHash: contentHash, timingHash: timingHash,
         screenCount: screens.length, submittedAt: null, serverSession: null
       });
@@ -709,6 +710,9 @@ window.SG_RUNTIME = (function () {
     // mode 는 저장값이 이긴다(Story 1.8 AC5).
     var mode = meta.mode || url.mode;
     STORE.patchMeta({ screenCount: screens.length, mode: mode });
+    // 어느 세트를 봤는지는 기록에 남아야 한다 — 모의고사 목록이 "응시함"을 이걸로 가린다.
+    // 이미 적혀 있으면 건드리지 않는다(옛 응시를 이어보는 중일 수 있다).
+    if (!meta.setCode) STORE.patchMeta({ setCode: SET_ID.toUpperCase() });
 
     machine = EXAM.create(screens, { mode: mode });
     SG_RENDER.setMount(document.getElementById('screen-mount'));

@@ -38,7 +38,7 @@
   </div>
 
   <!-- featured SET 1 -->
-  <div class="promo peach mt-16" style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap">
+  <div class="promo peach mt-16" data-set="SET1" style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap">
     <div>
       <span class="tag new">FREE</span> <span class="tag soft">SET 1</span>
       <h3 class="mt-8"><span data-en>NEW TOEFL SET 1 — Full Mock Test</span><span data-ko>NEW TOEFL SET 1 — 전체 모의고사</span></h3>
@@ -76,14 +76,14 @@
   <section class="section" style="padding:10px 0 40px">
     <h2 class="title mb-24"><span data-en>Mock test library</span><span data-ko>모의고사 라이브러리</span></h2>
     <div class="grid" style="gap:12px">
-      <div class="testcard"><div class="code">01</div><div class="body"><h4>NEW TOEFL SET 1</h4><p data-en>Full 4-section mock · real SET 1 audio</p><p data-ko>4영역 전체 모의고사 · SET 1 실제 오디오</p>
+      <div class="testcard" data-set="SET1"><div class="code">01</div><div class="body"><h4>NEW TOEFL SET 1</h4><p data-en>Full 4-section mock · real SET 1 audio</p><p data-ko>4영역 전체 모의고사 · SET 1 실제 오디오</p>
         <div class="scope"><span class="scope-lab"><span data-en>One section</span><span data-ko>한 영역만</span></span>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=reading&amp;profile=toefl"><span data-en>Reading</span><span data-ko>리딩</span></a>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=listening&amp;profile=toefl"><span data-en>Listening</span><span data-ko>리스닝</span></a>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=speaking&amp;profile=toefl"><span data-en>Speaking</span><span data-ko>스피킹</span></a>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=writing&amp;profile=toefl"><span data-en>Writing</span><span data-ko>라이팅</span></a>
         </div></div><a class="btn brand" href="exam-runtime.html?mode=exam&amp;profile=toefl"><span data-en>Full test</span><span data-ko>전체 과정</span></a></div>
-      <div class="testcard"><div class="code">09</div><div class="body"><h4>NEW TOEFL SET 9</h4><p data-en>Full 4-section mock · 120 questions (R 50 · L 47 · W 12 · S 11)</p><p data-ko>4영역 전체 모의고사 · 120문항 (리딩 50 · 리스닝 47 · 라이팅 12 · 스피킹 11)</p><div class="chips"><span class="chip">🔊 34 audio clips</span><span class="chip">12 voices · US/GB/AU</span></div>
+      <div class="testcard" data-set="SET9"><div class="code">09</div><div class="body"><h4>NEW TOEFL SET 9</h4><p data-en>Full 4-section mock · 120 questions (R 50 · L 47 · W 12 · S 11)</p><p data-ko>4영역 전체 모의고사 · 120문항 (리딩 50 · 리스닝 47 · 라이팅 12 · 스피킹 11)</p><div class="chips"><span class="chip">🔊 34 audio clips</span><span class="chip">12 voices · US/GB/AU</span></div>
         <div class="scope"><span class="scope-lab"><span data-en>One section</span><span data-ko>한 영역만</span></span>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=reading&amp;profile=toefl&amp;set=set9"><span data-en>Reading</span><span data-ko>리딩</span></a>
           <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=listening&amp;profile=toefl&amp;set=set9"><span data-en>Listening</span><span data-ko>리스닝</span></a>
@@ -112,6 +112,69 @@
 <script src="assets/seat-runtime.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/sg-auth.js"></script>
+<!-- 이미 응시한 세트 표시 — 기기에 남은 응시 기록(+로그인했으면 서버 사본)만 읽는다. -->
+<script src="assets/sg-results.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* 응시한 세트는 목록에서 색을 바꿔 준다. 같은 세트를 또 열어 시간을 버리는 일이
+     가장 흔한 실수라서, 카드 아이콘 색 하나로 갈리게 한다. 응시 기록이 없거나
+     조회가 실패하면 아무 표시도 하지 않는다 — 목록 자체는 늘 보여야 한다. */
+  function when(iso) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d)) return '';
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+
+  function mark(el, iso, count) {
+    if (el.querySelector('.chip.done')) return;          // 같은 세트 카드가 둘일 때 두 번 찍지 않는다
+    el.classList.add('done');
+    var chip = document.createElement('span');
+    chip.className = 'chip done';
+    var date = when(iso);
+    chip.innerHTML = '<span data-en>✓ Taken' + (date ? ' · ' + date : '') +
+        (count > 1 ? ' · ' + count + '×' : '') + '</span>' +
+      '<span data-ko>✓ 응시함' + (date ? ' · ' + date : '') +
+        (count > 1 ? ' · ' + count + '회' : '') + '</span>';
+    var host = el.querySelector('.chips');
+    if (!host) {
+      host = document.createElement('div');
+      host.className = 'chips';
+      (el.querySelector('.body') || el.firstElementChild || el).appendChild(host);
+    }
+    host.insertBefore(chip, host.firstChild);
+
+    // 다시 보러 온 사람에게 "전체 과정"은 재응시다.
+    var again = el.querySelector('a.btn.brand');
+    if (again) {
+      again.innerHTML = '<span data-en>Retake</span><span data-ko>다시 응시</span>';
+    }
+  }
+
+  function boot() {
+    var cards = document.querySelectorAll('[data-set]');
+    if (!cards.length || !window.SG_RESULTS) return;
+    SG_RESULTS.list().then(function (list) {
+      var last = {}, seen = {};
+      (list || []).forEach(function (r) {
+        var code = String(r.set_code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!code) return;
+        seen[code] = (seen[code] || 0) + 1;
+        if (!last[code] || r.submitted_at > last[code]) last[code] = r.submitted_at;  // 목록은 최신순이지만 기대지 않는다
+      });
+      Array.prototype.forEach.call(cards, function (el) {
+        var code = String(el.getAttribute('data-set') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (seen[code]) mark(el, last[code], seen[code]);
+      });
+    }).catch(function () {});
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
 <script src="assets/offline-prep.js"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
