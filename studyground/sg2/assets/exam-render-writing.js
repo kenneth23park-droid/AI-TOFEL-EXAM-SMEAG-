@@ -695,6 +695,17 @@
     return node;
   }
 
+  /* 작성창 붙여넣기 차단 — Ctrl/Cmd+V, 우클릭 붙여넣기, 드래그&드롭, 미들클릭 붙여넣기까지
+   * 모두 취소한다. 답안은 학생이 직접 타이핑한 글이어야 한다. */
+  function noPaste(node) {
+    var kill = function (e) { if (e && e.preventDefault) e.preventDefault(); return false; };
+    on(node, 'paste', kill);
+    on(node, 'drop', kill);
+    on(node, 'dragover', kill);
+    on(node, 'contextmenu', kill);
+    return node;
+  }
+
   /* ── 작성창 툴바 (단어수 표시 토글) ──────────────────────────────────────
    * Cut/Paste/Undo/Redo 버튼은 두지 않는다 — 편집은 키보드 단축키로만. */
 
@@ -778,6 +789,7 @@
         ta.setAttribute('rows', '12');
         ta.setAttribute('spellcheck', 'false');
         ta.placeholder = isEmail ? 'Type your email here…' : 'Type your response here…';
+        noPaste(ta);
 
         /* 응답 패널 머리 — 스크린샷 규격: "Your Response:" 아래에 To/Subject 가 오고
            그 다음 줄이 편집 툴바다. 이메일 과제에서만 To/Subject 를 보여준다. */
