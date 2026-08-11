@@ -118,7 +118,12 @@
 //      원문과 낱말 단위로 대조해 빠뜨림·덧붙임·바꿔 말함까지 보여 준다. set9.js 의
 //      스피킹 문항에 들려준 문장(script)이 실렸다 — 이 값이 복창 채점의 원문이므로,
 //      캐시된 옛 팩이 남으면 원문 없이 중앙값으로 채점되던 동작이 계속된다.
-const VERSION = 'sg-v39';
+// v40: 스피킹은 응답 시간이 끝나면 스스로 넘어간다 — assets/exam-render-speaking.js 가
+//      종료 안내만 띄운 채 Next 를 세우지 않고 다음 화면으로 간다(마이크 감시 문구도
+//      함께 바뀌었다). 이 파일은 셸 자산이라 cache-first 다 — 판올림하지 않으면
+//      재방문 기기가 캐시된 옛 렌더러의 Next 를 계속 보고, 누르지 않는 한 시험이
+//      멈춰 선다. 그래서 판올림한다.
+const VERSION = 'sg-v40';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
