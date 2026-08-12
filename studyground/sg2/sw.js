@@ -195,7 +195,19 @@
 //      W1 의 문항 10개 사이만 오간다. Next 는 그 자리에 그대로 서서 다시 앞으로 나온다.
 //      assets/exam-shell.js 한 파일이 바뀌므로, 캐시된 옛 셸이 남은 기기는 라이팅에서
 //      Back 을 계속 못 본다.
-const VERSION = 'sg-v57';
+// v58: 답안이 실시간으로 두 곳에 남는다 — 브라우저 로컬 DB(IndexedDB)와 Supabase.
+//      화면이 넘어갈 때마다 스냅샷(체크포인트)을 남겨, 정전으로 꺼진 뒤 다시 켜면
+//      '꺼지기 직전 · 2스텝 전 · 3스텝 전 · 이 코스 처음부터 · 전체 다시' 를 고른다.
+//      새 파일 넷(exam-localdb.js · exam-cloud.js · exam-resume.js · exam-live-boot.js)이
+//      셸에 들어오고 exam-store.js · exam-shell.js · exam-runtime.html 이 함께 바뀌므로,
+//      캐시된 옛 사본이 남은 기기는 정전 뒤에도 옛 '이어서 응시' 두 칸만 본다.
+// v59: 제출하고 인터넷이 있으면 리뷰까지 그 자리에서 나온다 — 총평·틀린 문항 해설에
+//      더해 "무엇을 어떻게 공부하나"(학습 계획)가 함께 쓰여 sg_comments 에 남는다.
+//      리뷰를 부르는 것이 선생님만이 아니게 되어(학생 본인·제출 화면) 저장은 서버가
+//      한다(api/feedback.js + service_role). assets/sg-comments.js · exam-shell.js ·
+//      review.html 이 함께 바뀌므로, 캐시된 옛 사본이 남은 기기는 예전 계약(attempt
+//      본문을 보내고 브라우저가 저장)으로 계속 호출해 401 만 받는다.
+const VERSION = 'sg-v59';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -258,7 +270,12 @@ const SHELL_ASSETS = [
   'assets/exam-render.js', 'assets/exam-engine.js', 'assets/exam-recorder.js',
   'assets/exam-render-instruction.js', 'assets/exam-render-listening.js',
   'assets/exam-render-reading.js', 'assets/exam-render-writing.js',
-  'assets/exam-render-speaking.js', 'assets/exam-sync.js',
+  'assets/exam-render-speaking.js', 'assets/exam-sync.js', 'assets/exam-sync-boot.js',
+
+  // 실시간 저장과 정전 복구 — 전원이 끊긴 뒤 다시 켰을 때 되감기 화면이 떠야 하므로
+  // 이 네 파일은 오프라인에서도 반드시 캐시에 있어야 한다.
+  'assets/exam-localdb.js', 'assets/exam-cloud.js', 'assets/exam-resume.js',
+  'assets/exam-live-boot.js',
 
   // Timing profiles — exam-timing.js falls back to an inline default if these are
   // missing, but precaching them keeps offline timings identical to online ones.

@@ -101,10 +101,13 @@ window.SG_RUNTIME = (function () {
                   /* 관리자 전용 화면 이동·문항 편집 패널. 로그인 전에는 아무 것도 그리지 않는다. */
                   'assets/exam-admin-nav.js',
                   /* 제출 직후 채점·결과 업로드용. 없으면 제출은 그대로 끝나고 리뷰만 안 뜬다.
-                     sg-band.js 는 그 채점 결과를 제출 화면에서 바로 밴드로 펴는 데 쓴다. */
+                     sg-band.js 는 그 채점 결과를 제출 화면에서 바로 밴드로 펴는 데 쓴다.
+                     sg-comments.js 는 그 자리에서 AI 리뷰·학습 계획까지 부른다 — 학생이
+                     리뷰 화면을 열었을 때 이미 준비돼 있게. */
                   'assets/sg-auth.js',
                   'assets/sg-results.js',
-                  'assets/sg-band.js'];
+                  'assets/sg-band.js',
+                  'assets/sg-comments.js'];
 
   function loadOptional(list, done) {
     var i = 0;
@@ -724,6 +727,103 @@ window.SG_RUNTIME = (function () {
     }, 10000);
   }
 
+  /* ── 정전 복구 선택지 ───────────────────────────────────────
+   * 전원이 끊기면 "저장하고 나갈" 기회가 없다. 그래서 화면이 넘어갈 때마다 남겨 둔
+   * 체크포인트(exam-resume.js)를 꺼내 어디로 돌아갈지 학생이 고르게 한다.
+   *
+   *   꺼지기 직전 · 2스텝 전 · 3스텝 전 · 이 코스 처음부터 · 전체 다시
+   *
+   * 체크포인트가 모자란 줄은 내지 않는다 — 없는 자리를 눌러 같은 화면으로 돌아오면
+   * 학생은 버튼이 고장 났다고 읽는다. 체크포인트가 하나도 없는 옛 세션이면
+   * 커서만 가진 '이어서 응시' 한 줄로 떨어진다. */
+
+  function resumeChoiceButton(label, labelKo, primary, onclick) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'exam-btn' + (primary ? ' primary' : '');
+    var en = document.createElement('span'); en.setAttribute('data-en', ''); en.textContent = label;
+    var ko = document.createElement('span'); ko.setAttribute('data-ko', ''); ko.textContent = labelKo;
+    b.appendChild(en); b.appendChild(ko);
+    b.onclick = onclick;
+    return b;
+  }
+
+  function buildResumeChoices(url, session, contentHash, timingHash, section) {
+    var box = document.getElementById('resume-choices');
+    if (!box) return;
+    box.innerHTML = '';
+
+    function render(cps) {
+      var R = window.SG_RESUME;
+      var opts = R ? R.optionsFor(cps, { section: sectionOfLast(cps) || section }) : [];
+      if (!R || !cps.length) {
+        // 체크포인트가 없는 세션 — 옛 동작 그대로 커서에서 이어 붙인다.
+        opts = [{ kind: 'cursor', label: 'Resume', labelKo: '이어서 응시' },
+                { kind: 'fresh', label: 'Start the whole test over', labelKo: '전체 다시' }];
+      }
+      // [data-ko] 는 app.css 가 숨긴다 — 화면은 영어 한 벌이다.
+      for (var i = 0; i < opts.length; i++) box.appendChild(choiceFor(opts[i], i === 0, cps));
+    }
+
+    function sectionOfLast(cps) {
+      return cps.length ? (cps[cps.length - 1].section || '') : '';
+    }
+
+    /* 되감기와 다시 시작은 지우는 동작이다 — 누른 뒤에는 되돌릴 수 없다.
+       지우기 직전의 한 벌을 로컬 DB 백업본에 먼저 적고, 그다음에 손을 댄다.
+       백업이 늦거나 IndexedDB 가 없으면 1.5초 뒤 그냥 진행한다 — 시험을 세우지 않는다. */
+    function archiveThen(reason, go) {
+      var R = window.SG_RESUME;
+      if (!R || typeof R.backup !== 'function') { go(); return; }
+      var fired = false;
+      function once() { if (fired) return; fired = true; go(); }
+      try { R.backup(STORE, reason, once); } catch (e) { once(); return; }
+      window.setTimeout(once, 1500);
+    }
+
+    function choiceFor(opt, primary, cps) {
+      return resumeChoiceButton(opt.label, opt.labelKo, primary, function () {
+        closeModal('modal-resume');
+        var R = window.SG_RESUME;
+
+        if (opt.kind === 'fresh') {
+          // 세션을 통째로 버린다 — 백업본을 뜬 뒤에만 지운다.
+          archiveThen('restart_all', function () {
+            STORE.dropSession(session);
+            if (window.SG_LDB) { try { SG_LDB.dropSession(session); } catch (e) {} }
+            var fresh = STORE.offlineSessionId();
+            STORE.open(fresh);
+            if (window.SG_LIVE) { try { SG_LIVE.rebind(fresh); } catch (e2) {} }
+            startRun(url, fresh, contentHash, timingHash, false, section);
+          });
+          return;
+        }
+        if (opt.kind === 'course') {
+          // 백업본은 applyCourseRestart 안에서 지우기 직전에 뜬다(SG_RESUME.backup).
+          if (R) R.applyCourseRestart(STORE, screens, opt.section);
+          startRun(url, session, contentHash, timingHash, true, section);
+          return;
+        }
+        if (opt.kind === 'cursor') {
+          // 지우지 않는다 — 커서 그대로 이어 붙일 뿐이라 백업할 것이 없다.
+          startRun(url, session, contentHash, timingHash, true, section);
+          return;
+        }
+        /* last · back — 고른 체크포인트의 답안·시계·커서를 도로 심고 그 화면에서 연다.
+           지금 답안은 applyCheckpoint 안에서 백업본으로 먼저 떠 둔다. */
+        var cp = R ? R.pick(cps, opt) : null;
+        if (cp && R) R.applyCheckpoint(STORE, cp, CLOCK.now());
+        startRun(url, session, contentHash, timingHash, true, section);
+      });
+    }
+
+    if (window.SG_LDB && typeof SG_LDB.checkpoints === 'function') {
+      SG_LDB.checkpoints(session, function (err, list) { render(list || []); });
+    } else {
+      render([]);
+    }
+  }
+
   /* ── 부팅 ───────────────────────────────────────────────── */
 
   /* 한 영역만 치는 진입(mode=section)도 학생이 그대로 연다 — 관리자 승인 칸은 없앴다.
@@ -779,14 +879,7 @@ window.SG_RUNTIME = (function () {
 
         if (resumable) {
           openModal('modal-resume');
-          document.getElementById('btn-resume').onclick = function () { closeModal('modal-resume'); startRun(url, session, contentHash, timingHash, true, section); };
-          document.getElementById('btn-restart').onclick = function () {
-            closeModal('modal-resume');
-            STORE.dropSession(session);
-            var fresh = STORE.offlineSessionId();
-            STORE.open(fresh);
-            startRun(url, fresh, contentHash, timingHash, false, section);
-          };
+          buildResumeChoices(url, session, contentHash, timingHash, section);
         } else {
           startRun(url, session, contentHash, timingHash, false, section);
         }
@@ -963,7 +1056,7 @@ window.SG_RUNTIME = (function () {
          답안은 이미 올라갔으므로 잃은 것은 없다 — 늦어지는 것뿐이다. */
       var why = r && r.scored && r.scored.error;
       return showBands(session).then(function (b) {
-        if (b) return;
+        if (b) return askReview(session);
         // 밴드를 못 그린 경우에도 화면이 "정리하는 중" 에서 멈춰 있으면 안 된다.
         if (why) {
           say('Your answers are saved, but scoring is unavailable right now (' + why +
@@ -1024,6 +1117,37 @@ window.SG_RUNTIME = (function () {
           return b;
         });
       })['catch'](function () { return null; });
+    }
+
+    /* 채점이 끝났으면 그 자리에서 리뷰까지 받아 둔다 — 총평·틀린 문항 해설·학습 계획.
+     *
+     * 왜 여기서 부르나
+     *   리뷰는 모델 호출 한 번이라 몇십 초 걸린다. 학생이 'Review my answers' 를 누른
+     *   뒤에 시작하면 그 화면은 빈 카드로 몇십 초를 서 있다. 제출 화면은 어차피
+     *   채점을 기다리며 서 있는 자리이므로, 기다리는 김에 여기서 끝낸다.
+     *   리뷰 화면(review.html)에도 같은 요청이 있지만, 서버가 이미 있는 리뷰는
+     *   다시 쓰지 않으므로 두 번 사지 않는다.
+     *
+     *   실패해도 조용하다. 점수는 이미 나와 있고, 잃은 것은 설명뿐이다 —
+     *   리뷰 화면을 열 때 다시 부른다. */
+    function askReview(sess) {
+      if (!window.SG_COMMENTS || !scored || !scored.rows) return Promise.resolve(null);
+      say('Scored. Writing your review and study plan…',
+          '채점이 끝났습니다. 리뷰와 학습 계획을 쓰는 중…');
+      return SG_COMMENTS.generate({
+        session: sess,
+        lang: document.documentElement.lang === 'ko' ? 'ko' : 'en',
+        questions: SG_COMMENTS.questionsFor(scored)
+      }).then(function (out) {
+        if (!out || out.skipped === 'not_scored_yet') return null;
+        say('Your review and study plan are ready.', '리뷰와 학습 계획이 준비되었습니다.');
+        return out;
+      })['catch'](function () {
+        /* 리뷰만 실패했다. 점수는 이미 화면에 있으므로 그 사실을 지우지 않는다. */
+        say('Scored. Your review will be ready shortly.',
+            '채점이 끝났습니다. 리뷰는 잠시 뒤에 준비됩니다.');
+        return null;
+      });
     }
   }
 

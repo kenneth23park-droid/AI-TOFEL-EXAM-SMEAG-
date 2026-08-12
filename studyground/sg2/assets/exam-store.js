@@ -58,6 +58,22 @@
   var session = null;
   var cache = {};                 // 파싱 결과 캐시 (읽기 폭주 방지)
   var answerTimer = null;
+  var writeCbs = [];              // 쓰기 관찰자 (로컬 DB·클라우드 미러링)
+
+  /* 쓰기 알림. 이 파일은 여전히 전역에 의존하지 않는다 — 미러링을 붙이는 쪽
+     (exam-live-boot.js)이 여기에 등록한다. 콜백이 터져도 저장은 이미 끝나 있다. */
+  function onWrite(fn) {
+    if (typeof fn === 'function') writeCbs.push(fn);
+    return function () {
+      for (var i = 0; i < writeCbs.length; i++) { if (writeCbs[i] === fn) { writeCbs.splice(i, 1); return; } }
+    };
+  }
+
+  function notifyWrite(type, detail) {
+    for (var i = 0; i < writeCbs.length; i++) {
+      try { writeCbs[i]({ type: type, session: session, detail: detail || {} }); } catch (e) {}
+    }
+  }
 
   function key(part) { return PREFIX + session + '::' + part; }
 
@@ -141,16 +157,18 @@
   function cursor() { return readJSON(key('cursor'), null); }
 
   function saveCursor(screenId, screenIndex, phaseIndex) {
-    writeJSON(key('cursor'), {
+    var c = {
       screenId: screenId,
       screenIndex: screenIndex,
       phaseIndex: phaseIndex || 0,
       updatedAt: Date.now()
-    });
+    };
+    writeJSON(key('cursor'), c);
+    notifyWrite('cursor', c);
   }
 
   function clocks() { return readJSON(key('clocks'), {}); }
-  function saveClocks(m) { writeJSON(key('clocks'), m || {}); }
+  function saveClocks(m) { writeJSON(key('clocks'), m || {}); notifyWrite('clocks', m || {}); }
 
   /* ── 답안 (§5.3) ─────────────────────────────────────────── */
 
@@ -158,7 +176,9 @@
 
   function flushAnswers() {
     if (answerTimer !== null) { (root.clearTimeout || clearTimeout)(answerTimer); answerTimer = null; }
-    writeJSON(key('answers'), answers());
+    var a = answers();
+    writeJSON(key('answers'), a);
+    notifyWrite('answers', a);
   }
 
   /* upsert. 캐시에는 즉시 반영하고 디스크 기록만 debounce 한다 —
@@ -171,9 +191,14 @@
     if (extra) { for (var k in extra) { if (extra.hasOwnProperty(k)) rec[k] = extra[k]; } }
     a[qid] = rec;
     cache[key('answers')] = a;
-    if (answerTimer === null) {
+    /* 정전은 예고가 없다 — 클릭 한 번으로 끝나는 답(객관식·드래그)은 debounce 없이
+       그 자리에서 디스크로 내린다. 긴 글(Writing)만 200ms 로 모은다. */
+    if (typeof value !== 'string' || value.length <= 64) {
+      flushAnswers();
+    } else if (answerTimer === null) {
       answerTimer = (root.setTimeout || setTimeout)(function () { answerTimer = null; flushAnswers(); }, ANSWER_DEBOUNCE_MS);
     }
+    notifyWrite('answer', { qid: qid, rec: rec });
     return rec;
   }
 
@@ -360,6 +385,17 @@
     return out;
   }
 
+  /* 한 세션의 키만 추린 스냅샷. 되감기·다시시작 직전 백업본(SG_LDB.arch)이 이것을
+     통째로 안고 간다 — 그래야 잘못 누른 학생의 답안을 손으로 되살릴 수 있다. */
+  function serializeSession(s) {
+    var target = s || session, out = {}, all = backend.allKeys(), i, k;
+    for (i = 0; i < all.length; i++) {
+      k = all[i];
+      if (k.indexOf(PREFIX + target + '::') === 0) out[k] = backend.getItem(k);
+    }
+    return out;
+  }
+
   // 새 백엔드에 스냅샷을 심고 캐시를 버린다 = 새로고침과 동일한 상태.
   function restore(snapshot) {
     var b = memoryBackend(), k;
@@ -396,9 +432,11 @@
     outbox: outbox, enqueue: enqueue, dropFromOutbox: dropFromOutbox, clearOutbox: clearOutbox,
     // 미디어
     putMedia: putMedia, getMedia: getMedia,
+    // 관찰
+    onWrite: onWrite,
     // 순수
     hashString: hashString, findScreenIndex: findScreenIndex, planResume: planResume,
-    canResume: canResume, serialize: serialize, restore: restore
+    canResume: canResume, serialize: serialize, serializeSession: serializeSession, restore: restore
   };
 
   root.SG_STORE = api;

@@ -248,6 +248,11 @@ body.exam-body {
 .exam-modal-card p { font-size: 14px; color: var(--ink-2); margin-bottom: 18px; }
 .exam-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
+/* 정전 복구 선택지는 최대 다섯 줄이라 가로로 세우면 좁은 화면에서 글자가 깨진다.
+   한 줄에 하나씩, 위에서부터 "가까운 지점 → 먼 지점" 순으로 내려간다. */
+#resume-choices { flex-direction: column; align-items: stretch; gap: 7px; }
+#resume-choices .exam-btn { width: 100%; justify-content: center; text-align: center; }
+
 /* Exit 은 관리자 승인이 있어야 열린다 — 모달 안의 아이디·비밀번호 칸. */
 .exam-exit-auth label {
   display: block; font-size: 12px; font-weight: 750; color: var(--ink-2); margin-bottom: 11px;

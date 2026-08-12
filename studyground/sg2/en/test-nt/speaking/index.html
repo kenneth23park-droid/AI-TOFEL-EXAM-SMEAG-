@@ -158,17 +158,11 @@
   <div class="exam-modal-card">
     <h2><span data-en>Resume your test?</span><span data-ko>시험을 이어서 볼까요?</span></h2>
     <p id="resume-note">
-      <span data-en>An unfinished session was found on this device. Time spent while you were away has already been counted.</span>
-      <span data-ko>이 기기에 완료되지 않은 세션이 있습니다. 자리를 비운 동안의 시간도 이미 소모된 것으로 계산됩니다.</span>
+      <span data-en>An unfinished session was found on this device. Pick where to go back to — the time lost while the power was out is given back.</span>
+      <span data-ko>이 기기에 완료되지 않은 세션이 있습니다. 돌아갈 지점을 고르세요 — 전원이 꺼져 있던 동안의 시간은 돌려드립니다.</span>
     </p>
-    <div class="exam-modal-actions">
-      <button type="button" class="exam-btn" id="btn-restart">
-        <span data-en>Start new</span><span data-ko>새로 시작</span>
-      </button>
-      <button type="button" class="exam-btn primary" id="btn-resume">
-        <span data-en>Resume</span><span data-ko>이어서 응시</span>
-      </button>
-    </div>
+    <!-- 되감기 선택지는 남아 있는 체크포인트 수에 따라 셸이 채운다(exam-shell.js). -->
+    <div class="exam-modal-actions" id="resume-choices"></div>
   </div>
 </div>
 
@@ -185,6 +179,10 @@
 <script src="assets/admin-entry.js"></script>
 <script src="assets/exam-clock.js"></script>
 <script src="assets/exam-store.js"></script>
+<!-- 실시간 저장: 로컬 DB(IndexedDB) · Supabase · 정전 복구 체크포인트 -->
+<script src="assets/exam-localdb.js"></script>
+<script src="assets/exam-cloud.js"></script>
+<script src="assets/exam-resume.js"></script>
 <script src="assets/exam-render.js"></script>
 <script src="assets/exam-engine.js"></script>
 <script>
@@ -199,6 +197,7 @@ window.SG_ROUTE = {
      서버가 없으면 조용히 로컬 저장만 하고 시험은 그대로 진행된다. -->
 <script src="assets/exam-sync.js"></script>
 <script src="assets/exam-sync-boot.js"></script>
+<script src="assets/exam-live-boot.js"></script>
 <script src="assets/offline-prep.js" data-mode="check"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
