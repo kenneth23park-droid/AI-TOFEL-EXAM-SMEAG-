@@ -602,9 +602,16 @@ body.exam-body {
   display: inline; padding: 0 4px; border: none; background: transparent;
   color: var(--brand); font-size: 13px; font-weight: 800; cursor: pointer;
 }
-.rd-marker .rd-marker-dot { padding: 0 3px; border-radius: 4px; background: var(--brand-soft); }
-.rd-marker:hover .rd-marker-dot { background: var(--brand); color: #fff; }
-.rd-marker.is-chosen .rd-marker-dot { background: var(--brand); color: #fff; }
+/* 글자 배지 — 본문 줄 사이에서 동그라미 하나로 선다. 줄 높이를 밀지 않도록
+   지름을 글자보다 살짝만 키운다. */
+.rd-marker .rd-marker-dot {
+  display: inline-block; width: 20px; height: 20px; line-height: 19px;
+  text-align: center; border-radius: 50%; font-size: 12px; font-weight: 850;
+  vertical-align: -4px; background: var(--brand-soft); color: var(--brand-ink);
+  border: 1px solid var(--peach-2);
+}
+.rd-marker:hover .rd-marker-dot { background: var(--brand); color: #fff; border-color: var(--brand); }
+.rd-marker.is-chosen .rd-marker-dot { background: var(--brand); color: #fff; border-color: var(--brand); }
 .rd-marker .rd-marker-preview { color: var(--ink-2); font-weight: 600; font-style: italic; }
 .rd-insert-sentence { font-style: italic; margin-bottom: 10px; }
 

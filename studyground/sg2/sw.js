@@ -187,7 +187,7 @@
 //      모듈의 앞 지문(그 마지막 문항)으로 돌아간다. 앞 모듈로는 못 넘어간다.
 //      exam-engine.js · exam-shell.js · exam-render-reading.js 가 함께 바뀌므로,
 //      캐시된 옛 엔진이 남으면 첫 문항에서 Back 이 계속 죽어 있다.
-const VERSION = 'sg-v54';
+const VERSION = 'sg-v55';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

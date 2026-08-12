@@ -422,8 +422,10 @@
         var mk = el('button', 'rd-marker');
         mk.type = 'button';
         mk.setAttribute('data-marker', letter);
-        mk.title = 'Insert the sentence here';
-        mk.appendChild(textEl('span', 'rd-marker-dot', '■'));
+        // 지시문이 "Look at the four letters (A, B, C, and D)" 라 마커는 글자를 그대로 세운다.
+        mk.title = 'Insert the sentence at position ' + letter;
+        mk.setAttribute('aria-label', 'Insert the sentence at position ' + letter);
+        mk.appendChild(textEl('span', 'rd-marker-dot', letter));
         var prev = el('span', 'rd-marker-preview');
         prev.textContent = '';
         mk.appendChild(prev);
