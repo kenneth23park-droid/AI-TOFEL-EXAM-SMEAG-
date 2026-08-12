@@ -34,6 +34,14 @@ jobs:
       - name: 겹침 검사 (배포 차단)
         run: node studyground/tools/dup_check.js
 
+      # 올라가는 version.json 을 올라가는 sw.js 로 방금 만든 것으로 만든다.
+      # 이 쪽지 하나로 내려받은 사본(USB 번들 · 데스크톱 앱)이 자기가 낡았는지를
+      # 판단한다. 커밋된 파일을 그대로 올리면 언젠가 낡고, 낡은 쪽지는 사본에게
+      # "최신입니다"라고 답한다 — 알림을 만들어 놓고 침묵시키는 셈이다.
+      # (pre-commit 훅도 같은 일을 하지만 --no-verify 로 우회된다. 여기는 못 지나간다.)
+      - name: 판 번호 새로 새기기
+        run: python3 studyground/sg2/tools/build_version.py
+
       - name: Install Vercel CLI
         run: npm install -g vercel@54
 

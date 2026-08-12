@@ -146,7 +146,12 @@
 //      이유는 거의 늘 지문 안에 있어, 표 한 줄("내 답 C / 정답 A")로는 복기가 되지
 //      않던 자리다. review.html · app.css 도 함께 바뀌었으므로, 캐시된 옛 셸이 남으면
 //      그 기기만 리딩 탭에서 표를 계속 본다. 그래서 판올림한다.
-const VERSION = 'sg-v45';
+// v46: 내려받은 사본이 자기가 낡은 줄을 안다 — assets/build-version.js(사본의 판
+//      번호)와 assets/sg-update-check.js(라이브의 /version.json 과 대조)를 넣고,
+//      index.html · tests.html 의 <script> 목록이 바뀌었다. 웹 사본에서는 검사기가
+//      채널을 보고 그대로 물러난다(그 일은 이 서비스워커가 이미 한다). 캐시된 옛
+//      셸이 남으면 그 기기만 판올림 알림 없는 화면을 계속 본다.
+const VERSION = 'sg-v46';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -187,6 +192,10 @@ const SHELL_ASSETS = [
 
   // 전체화면 자동 진입 · 화면 맞춤 — 오프라인 시험장에서도 첫 화면부터 적용돼야 한다.
   'assets/sg-fullscreen.js',
+
+  // 판올림 확인 — 사본이 지니고 다니는 판 번호와, 그것을 라이브와 대조하는 검사기.
+  // 검사기는 오프라인이면 조용히 물러나므로 프리캐시해도 시험장에서 걸리지 않는다.
+  'assets/build-version.js', 'assets/sg-update-check.js',
 
   'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',
@@ -251,6 +260,11 @@ self.addEventListener('fetch', (e) => {
   // cache-first 라, 이 표식이 없으면 갱신하러 보낸 요청조차 캐시에 있는 옛 파일로
   // 되돌아온다 — 받아 와서 제자리에 옛 것을 도로 넣는 꼴이 된다. 그대로 통과시킨다.
   if (req.headers.get('x-sg-refresh')) return;
+
+  // "지금 라이브는 몇 판인가"를 묻는 쪽지는 캐시를 지나지 않는다. 한 번이라도
+  // 캐시에 담기면 그 뒤로는 캐시가 답하고, 그 답은 언제나 "최신"이다 —
+  // 판올림 알림을 만들어 놓고 스스로 침묵시키는 셈이 된다.
+  if (url.pathname.endsWith('/version.json')) return;
 
   // 서버리스 함수(/api/*)는 캐시 대상이 아니다 — TTS 생성 결과가 굳어버리면 안 된다.
   if (url.pathname.startsWith('/api/') || url.pathname.endsWith('/api/tts')) return;

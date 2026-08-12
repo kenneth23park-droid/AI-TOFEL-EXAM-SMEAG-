@@ -760,3 +760,11 @@ tr.rv-cmt td { border-bottom: 1px solid var(--line); padding-top: 0; }
   .sg-prep-dot { animation: none; }
   .sg-prep-track i { transition: none; }
 }
+
+/* ── 판올림 알림 (assets/sg-update-check.js) ────────────────────
+   사전 다운로드 알림과 같은 카드를 쓴다 — 같은 자리에 같은 모양으로 뜨는 편이
+   학생에게 하나의 목소리로 들린다. 다른 점은 둘뿐이다: 진행 막대가 없고,
+   재촉하지 않으므로 점이 깜빡이지 않는다. */
+.sg-update .sg-prep-dot { background: var(--brand); animation: none; }
+.sg-update .sg-prep-sub { margin-top: 9px; }
+.sg-update .sg-prep-go { display: block; text-align: center; text-decoration: none; }

@@ -32,12 +32,16 @@
 
 3. GitHub → Actions 에서 `check sg2` 가 도는지 확인한다.
 
-`deploy-sg2.yml` 은 **기존 파일에 단계 하나를 더한 것**이다(겹침 검사 → 실패 시 배포 중단).
-그 사이 원본이 바뀌었다면 그대로 덮어쓰지 말고 아래 단계만 옮겨 붙일 것:
+`deploy-sg2.yml` 은 **기존 파일에 단계 둘을 더한 것**이다(겹침 검사 → 실패 시 배포 중단,
+그리고 판 번호 다시 새기기). 그 사이 원본이 바뀌었다면 그대로 덮어쓰지 말고 아래
+단계만 옮겨 붙일 것:
 
 ```yaml
       - name: 겹침 검사 (배포 차단)
         run: node studyground/tools/dup_check.js
+
+      - name: 판 번호 새로 새기기
+        run: python3 studyground/sg2/tools/build_version.py
 ```
 
 ## 무엇을 하는 워크플로인가

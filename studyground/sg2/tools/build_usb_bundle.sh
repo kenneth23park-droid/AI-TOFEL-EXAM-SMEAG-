@@ -23,6 +23,14 @@ cd "$SG2/.."
 # 목록을 먼저 최신으로 맞춘다 — 문항이 바뀐 채로 USB 를 구우면 무음이 된다.
 python3 "$SG2/tools/build_offline_manifest.py"
 
+# 이 번들이 몇 판인지 새겨 넣는다. 이것이 없으면 받은 사본은 자기가 낡은 줄을
+# 영영 모른다 — v25 번들이 v45 라이브와 함께 굴러다닌 것이 그래서였다.
+# 굽고 나면 web 채널로 되돌린다. 작업 트리에 bundle 도장이 남으면, 그 다음 배포에서
+# 웹 방문자에게까지 "새 버전이 있습니다"가 뜬다.
+restore_stamp() { python3 "$SG2/tools/build_version.py" --channel web >/dev/null; }
+trap restore_stamp EXIT
+python3 "$SG2/tools/build_version.py" --channel bundle
+
 zip -r -q "$OUT" "$(basename "$SG2")" \
   -x '*/media/tts/_backup_*/*' \
   -x '*/media/tts/_segments*/*' \
