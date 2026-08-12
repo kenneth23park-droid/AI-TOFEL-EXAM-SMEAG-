@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="assets/gate.js"></script>
+
+<!-- ── 수험생 계정에게 이 랜딩은 없다 ────────────────────────────────────
+     학생이 보는 건 홍보 문구·요금제가 아니라 지금 치를 시험 하나(SET 9)다.
+     로그인해 있는 동안 이 페이지로 들어오면(주소 직접 입력·게이트 기본 행선지·
+     로고 클릭) 본문이 그려지기 전에 모의고사 목록으로 보낸다 — 그 목록은
+     학생에게 SET 9 한 벌만 남긴다(tests.html). 선생님·관리자와 비로그인
+     방문자는 그대로 본다. 판정은 admin-session.js 의 studentSignedIn() 과 같다. -->
+<script>
+(function () {
+  'use strict';
+  try {
+    var s = JSON.parse(localStorage.getItem('sg2_auth_v1') || 'null');
+    var u = s && s.user;
+    if (!u) return;
+    var r = u.role || (u.is_admin ? 'admin' : 'student');   // role 이 없던 옛 계정은 학생으로 본다
+    if (r !== 'teacher' && r !== 'admin') location.replace('tests.html');
+  } catch (e) { /* 프라이빗 모드 — 아래 sg-auth 재확인이 맡는다 */ }
+})();
+</script>
 <title>SMEAG · MockTest — Your New TOEFL Partner</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
@@ -239,6 +258,22 @@
 <script src="assets/app.js"></script>
 <script src="assets/sg-fullscreen.js"></script>
 <script src="assets/sg-auth.js"></script>
+<script>
+/* 머리에서 내린 판정은 기기에 저장된 프로필만 보고 한 것이라, 서버 사본으로 되짚는다.
+   프라이빗 모드처럼 저장소가 막힌 기기, 그리고 이 페이지를 열어 둔 채 학생 계정으로
+   로그인하는 경우를 여기서 잡는다. 선생님·관리자면 그대로 둔다. */
+(function () {
+  'use strict';
+  var A = window.SG_AUTH;
+  if (!A) return;
+  function sync() {
+    if (!A.user()) return;
+    A.isStaff().then(function (staff) { if (!staff) location.replace('tests.html'); }, function () {});
+  }
+  A.onChange(sync);
+  sync();
+})();
+</script>
 <script src="assets/offline-prep.js"></script>
 <script src="assets/build-version.js"></script>
 <script src="assets/sg-update-check.js"></script>
