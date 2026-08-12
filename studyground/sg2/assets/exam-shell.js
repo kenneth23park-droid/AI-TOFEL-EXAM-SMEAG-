@@ -772,11 +772,63 @@ window.SG_RUNTIME = (function () {
     });
   }
 
+  /* ── 다시 응시 ─────────────────────────────────────────────
+   * 끝낸 시험에서 곧바로 다시 들어가는 문. 전체 한 벌과 네 영역을 나란히 두고,
+   * 영역 순서는 시험을 치르는 순서다(Reading · Listening · Speaking · Writing).
+   *
+   * URL 계약은 tests.html 과 같은 것을 쓴다 — 전체는 `mode=exam`, 한 영역은
+   * `mode=section&section=`. 세션을 여기서 손대지 않는 이유는 셸이 이미 그 일을
+   * 하기 때문이다: 제출된 세션은 canResume 이 'submitted' 로 막으므로 boot() 가
+   * 새 세션을 연다. 방금 친 응시 기록은 지워지지 않고 남는다(리뷰·성적이 그것을 읽는다).
+   *
+   * 링크는 상대경로 그대로다. 라우트 페이지(en/test-nt/{section}/)에는 <base> 가
+   * 있어 sg2 루트로 풀린다 — 위의 review.html 링크와 같은 이유로 BASE 를 붙이지 않는다. */
+  var RETAKE_SECTIONS = [
+    { id: 'reading', label: 'Reading' },
+    { id: 'listening', label: 'Listening' },
+    { id: 'speaking', label: 'Speaking' },
+    { id: 'writing', label: 'Writing' }
+  ];
+
+  function retakeUrl(section) {
+    var qs = ['profile=' + encodeURIComponent(query('profile') || query('exam') || 'toefl')];
+    /* 세트는 URL 로 준 값이 아니라 이 페이지가 실제로 실은 팩을 넘긴다 — set9.html 처럼
+       쿼리 없이 들어온 응시도 같은 세트로 다시 쳐야 한다. */
+    qs.push('set=' + encodeURIComponent(SET_ID));
+    var testId = query('testId');
+    if (testId) qs.push('testId=' + encodeURIComponent(testId));
+    if (section) qs.push('mode=section', 'section=' + section);
+    else qs.push('mode=exam');
+    return 'exam-runtime.html?' + qs.join('&');
+  }
+
+  function retakeHtml() {
+    var secs = '';
+    RETAKE_SECTIONS.forEach(function (s) {
+      secs += '<a class="exam-btn sec" href="' + retakeUrl(s.id) + '">' + s.label + '</a>';
+    });
+    return '' +
+      '<div class="exam-retake" id="done-retake" hidden>' +
+        '<div class="exam-retake-title">' +
+          '<span data-en>Take it again</span><span data-ko>다시 응시</span></div>' +
+        '<div class="exam-retake-row">' +
+          '<a class="exam-btn primary" href="' + retakeUrl(null) + '">' +
+            '<span data-en>Full test</span><span data-ko>전체 과정</span></a>' +
+        '</div>' +
+        '<div class="exam-retake-row">' +
+          '<span class="exam-retake-lab">' +
+            '<span data-en>Or one section</span><span data-ko>또는 한 영역만</span></span>' +
+          secs +
+        '</div>' +
+      '</div>';
+  }
+
   /* ── 제출 직후 ──────────────────────────────────────────────
-   * 셸이 하는 일은 셋이다. (1) 로컬 기록에 제출 시각을 박는다 — 이게 없으면
+   * 셸이 하는 일은 넷이다. (1) 로컬 기록에 제출 시각을 박는다 — 이게 없으면
    * 성적표(sg-results.js)가 이 응시를 "아직 시험 중"으로 보고 건너뛴다.
    * (2) 로그인해 있으면 채점 결과 사본을 Supabase 로 올린다. (3) 리뷰로 가는
-   * 문을 그린다. 셋 다 실패해도 응시 기록 자체는 기기에 그대로 남는다. */
+   * 문을 그린다. (4) 다시 응시하는 문을 연다 — 단, 업로드·채점이 끝난 뒤에.
+   * 넷 다 실패해도 응시 기록 자체는 기기에 그대로 남는다. */
   function finishScreen(session) {
     var mount = document.getElementById('screen-mount');
     if (!mount) return;
@@ -816,7 +868,16 @@ window.SG_RUNTIME = (function () {
           '<a class="exam-btn" href="dashboard.html">' +
             '<span data-en>My results</span><span data-ko>내 성적</span></a>' +
         '</div>' +
+        retakeHtml() +
       '</div>';
+
+    /* 다시 응시하는 문은 업로드·채점이 끝난 뒤에 연다. 열어 두면 학생이 진행 중에
+       그 링크를 눌러 페이지를 떠나고, 그러면 아직 안 끝난 채점 요청이 끊긴다 —
+       waitScore 로 이 화면에 붙잡아 두는 것과 같은 이유다. */
+    function openRetake() {
+      var box = document.getElementById('done-retake');
+      if (box) box.hidden = false;
+    }
 
     var note = document.getElementById('done-sync');
     function say(en, ko) {
@@ -824,6 +885,7 @@ window.SG_RUNTIME = (function () {
     }
     if (!window.SG_RESULTS || !window.SG_AUTH || !SG_AUTH.user()) {
       say('Saved on this device.', '이 기기에 저장되었습니다.');
+      openRetake();
       return;
     }
     /* push() 는 답안 → 스피킹 녹음 → AI 채점을 이 순서로 건다. 셋 다 여기서
@@ -864,7 +926,7 @@ window.SG_RUNTIME = (function () {
       });
     }).catch(function () {
       say('Saved on this device.', '이 기기에 저장되었습니다.');
-    });
+    }).then(openRetake, openRetake);
 
     /* 방금 채점된 W·S 까지 얹어 네 영역 밴드를 제출 화면에 바로 그린다.
        채점이 하나도 안 됐으면(키 없음·녹음 없음 등) 아무 것도 그리지 않고

@@ -276,6 +276,26 @@ body.exam-body {
 
 /* 언어 토글은 app.css 의 .lang 규칙을 그대로 쓴다(재정의하지 않음). */
 
+/* ── 제출 완료 화면 ──────────────────────────────────────
+   본문 배경은 흰색이라(--exam-bg) 상단바용 흰 알약은 여기서 보이지 않는다.
+   .instr-card 가 같은 이유로 하는 것처럼 색을 뒤집는다. */
+.exam-done .exam-btn { background: var(--exam-accent-soft); color: var(--ink); }
+.exam-done .exam-btn:hover { background: #e3e6fb; }
+.exam-done .exam-btn.primary { background: var(--exam-response); color: #fff; }
+.exam-done .exam-btn.primary:hover { filter: brightness(1.05); background: var(--exam-response); }
+
+/* 다시 응시 — 전체 한 벌은 알약 하나, 네 영역은 그 아래 한 줄.
+   채점·업로드가 끝나기 전에는 통째로 숨어 있다(exam-shell.js). */
+.exam-retake { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 20px; }
+.exam-retake[hidden] { display: none; }
+.exam-retake-title { font-size: 15px; font-weight: 800; margin-bottom: 12px; }
+.exam-retake-row {
+  display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;
+}
+.exam-retake-row + .exam-retake-row { margin-top: 12px; }
+.exam-retake-lab { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.exam-retake .sec { padding: 7px 13px; font-size: 13px; }
+
 @media (max-width: 720px) {
   .exam-topbar { height: auto; padding: 8px 12px; flex-wrap: wrap; }
   .exam-actions { flex: 1 1 100%; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
