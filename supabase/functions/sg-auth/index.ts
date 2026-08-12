@@ -4,8 +4,10 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  *
  * 등록의 주요 키: 학생아이디 · 이메일 · 이름  (+ 시험응시 일자 · 담당 선생님)
  *  • 입력받는 건 이름 + 이메일 + 시험일자 + 담당 선생님. 아이디는 서버가 배정한다.
- *  • 아이디는 해당 시험일의 smeag001 ~ smeag999 중 가장 빠른 빈 번호.
- *    000 은 쓰지 않는다 — 배부 카드에서 "번호 없음"으로 읽히던 자리다.
+ *  • 아이디는 해당 시험일의 smeag000 ~ smeag999 중 가장 빠른 빈 번호.
+ *    구글 시트에서 한 칸씩 내려 채우듯 서버가 순서대로 배정한다 — 사람이 번호를
+ *    고르는 자리는 없고, 같은 날 같은 번호는 DB 의 unique(student_id, exam_date)
+ *    가 막는다. 번호가 겹치면 그 자리는 건너뛰고 다음 빈 번호로 간다.
  *  • 비밀번호는 전부 2222.
  *  • 키는 (student_id, exam_date) — 같은 날 중복 불가, 다른 날 재사용 가능.
  *  • 같은 시험일에 같은 이메일/이름이 이미 있으면 팝업으로 알리고 다시 만들게
@@ -37,14 +39,14 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const PW = "2222";
 const STAFF_PW = "smeag2222";
 const DOMAIN = "smeagstudyground.com";
-const ID_RE = /^smeag(?!000)\d{3}$/;        // 배정 가능한 학생아이디 (001~999)
-const ID_SHAPE_RE = /^smeag\d{3}$/;         // 학생아이디로 "보이는" 모양 — 직원 아이디 금지용
+/* 학생아이디는 이 한 가지 모양뿐이다 — 배정도, 로그인도, 직원 아이디 금지도 같은 자. */
+const ID_RE = /^smeag\d{3}$/;
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /* 선생님·관리자 아이디. PostgREST 질의에 그대로 들어가므로 화이트리스트로 좁힌다. */
 const STAFF_LOGIN_RE = /^[a-z0-9][a-z0-9._-]{1,31}$/;
-/* 배정 범위는 smeag001 ~ smeag999 — 한 시험일에 999 자리. */
-const MIN_ID = 1;
+/* 배정 범위는 smeag000 ~ smeag999 — 한 시험일에 1000 자리. */
+const MIN_ID = 0;
 const MAX_ID = 999;
 const ID_COUNT = MAX_ID - MIN_ID + 1;
 
@@ -153,7 +155,7 @@ async function handleRegister(b: Record<string, unknown>) {
     return fail(400, "invalid_email", "Enter a valid email address.", "올바른 이메일 주소를 입력하세요.");
   }
   if (wanted && !ID_RE.test(wanted)) {
-    return fail(400, "bad_id", "The ID must be smeag001 – smeag999.", "아이디는 smeag001 ~ smeag999 형식이어야 합니다.");
+    return fail(400, "bad_id", "The ID must be smeag000 – smeag999.", "아이디는 smeag000 ~ smeag999 형식이어야 합니다.");
   }
 
   /* 담당 선생님. 선생님 계정이 하나라도 있으면 반드시 고른다 — 담당이 비면
@@ -306,8 +308,8 @@ async function handleSignin(b: Record<string, unknown>) {
   const bad = () => fail(401, "bad_credentials", "Wrong ID or password.", "아이디 또는 비밀번호가 올바르지 않습니다.");
   let target = login;
 
-  if (ID_SHAPE_RE.test(login)) {
-    // 1) 학생아이디. 로그인은 모양만 본다 — 예전에 배정된 smeag000 계정도 들어와야 한다.
+  if (ID_RE.test(login)) {
+    // 1) 학생아이디 — 그 아이디가 어느 시험일 계정인지부터 되짚는다.
     const acc = await resolveAccount(`student_id=eq.${login}`, b.exam_date);
     if (!acc) return bad();
     target = authEmail(acc.student_id, acc.exam_date);
@@ -358,9 +360,9 @@ async function handleCreateStaff(b: Record<string, unknown>) {
   const role = b.role === "admin" ? "admin" : "teacher";
 
   if (!name) return fail(400, "missing_name", "Enter the teacher's name.", "선생님 이름을 입력하세요.");
-  if (!STAFF_LOGIN_RE.test(login) || ID_SHAPE_RE.test(login)) {
-    return fail(400, "bad_login", "The ID must be 2–32 letters/digits and must not look like smeag001.",
-      "아이디는 영문·숫자 2~32자여야 하며 smeag001 형식은 쓸 수 없습니다.");
+  if (!STAFF_LOGIN_RE.test(login) || ID_RE.test(login)) {
+    return fail(400, "bad_login", "The ID must be 2–32 letters/digits and must not look like smeag000.",
+      "아이디는 영문·숫자 2~32자여야 하며 smeag000 형식은 쓸 수 없습니다.");
   }
   if (password.length < 4) {
     return fail(400, "weak_password", "The password must be at least 4 characters.", "비밀번호는 4자 이상이어야 합니다.");
