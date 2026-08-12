@@ -627,6 +627,8 @@
       canPrev: function () { return cur > 0; },
       next: function () { return cur + 1 < qs.length ? api.showQuestion(cur + 1) : false; },
       prev: function () { return cur > 0 ? api.showQuestion(cur - 1) : false; },
+      /* 앞 화면에서 Back 으로 들어왔을 때 셸이 부른다 — 마지막 문항부터 편다. */
+      toLast: function () { return api.showQuestion(qs.length - 1); },
       /* 서브바 표시 — 화면이 "31-35 of 50" 이어도 지금 보이는 건 한 문항이다. */
       progress: function () {
         var q = qs[cur], total = screen && screen.progress ? screen.progress.total : 0;

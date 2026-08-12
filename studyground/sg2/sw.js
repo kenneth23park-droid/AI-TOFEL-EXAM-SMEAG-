@@ -183,7 +183,11 @@
 // v53: 공용 접속 게이트(gate.html · assets/gate.js)를 걷어냈다. 모든 셸 HTML 의
 //      <head> 에서 그 한 줄이 빠졌고 두 파일도 사라졌다. 판올림하지 않으면 재방문
 //      기기가 캐시된 옛 <head> 를 계속 읽어 없어진 게이트로 되돌아간다.
-const VERSION = 'sg-v53';
+// v54: 리딩 Back 이 모듈 전체로 열렸다 — 지문 화면의 첫 문항에서 Back 을 누르면 같은
+//      모듈의 앞 지문(그 마지막 문항)으로 돌아간다. 앞 모듈로는 못 넘어간다.
+//      exam-engine.js · exam-shell.js · exam-render-reading.js 가 함께 바뀌므로,
+//      캐시된 옛 엔진이 남으면 첫 문항에서 Back 이 계속 죽어 있다.
+const VERSION = 'sg-v54';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

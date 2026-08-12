@@ -237,7 +237,7 @@
       emit('screen', { screen: sc, index: idx });
     }
 
-    /* 전진 전용. 역방향 이동 API 는 의도적으로 존재하지 않는다(Story 1.4 AC3). */
+    /* 전진 전용. 역방향은 아래 back() 하나뿐이고, 같은 모듈 안에서만 열린다. */
     function goTo(nextIdx, reason) {
       if (destroyed) return false;
       if (nextIdx <= idx) return false;
@@ -246,6 +246,37 @@
       releaseScreenClocks(prev);
       idx = nextIdx;
       enter(prev ? prev.id : null, reason || 'manual');
+      return true;
+    }
+
+    /* 학생용 역방향 이동 — 리딩 한 모듈 안에서만 열린다.
+       실측 규칙: "You may move between questions within a module while time remains."
+       같은 섹션·같은 moduleId 의 문항 화면끼리만 오갈 수 있고, 앞 모듈로는 못 넘어간다 —
+       그 모듈의 시계는 이미 닫혔기 때문이다. 화면 사이에 moduleEnd/안내 화면이 끼어 있으면
+       moduleId 가 달라지거나 screenType 이 question 이 아니므로 자연히 막힌다. */
+    function backable(a, b) {
+      if (!a || !b) return false;
+      if (a.screenType !== 'question' || b.screenType !== 'question') return false;
+      if (!a.allowBack || !b.allowBack) return false;
+      if (a.section !== b.section) return false;
+      var m = String(a.moduleId || '');
+      return m !== '' && m === String(b.moduleId || '');
+    }
+
+    function canBack() {
+      if (destroyed || state !== 'in_progress') return false;
+      if (idx <= 0) return false;
+      return backable(current(), list[idx - 1]);
+    }
+
+    function back(reason) {
+      if (!canBack()) return false;
+      var prev = current();
+      releaseScreenClocks(prev);
+      releaseScreenClocks(list[idx - 1]);
+      idx -= 1;
+      log('back', { to: list[idx].id });
+      enter(prev ? prev.id : null, reason || 'back');
       return true;
     }
 
@@ -434,7 +465,8 @@
     var machine = {
       current: current, currentIndex: currentIndex, screens: function () { return list; },
       status: status, mode: function () { return mode; },
-      start: start, next: next, answer: answer, audioEnded: audioEnded, phaseNext: phaseNext,
+      start: start, next: next, back: back, canBack: canBack,
+      answer: answer, audioEnded: audioEnded, phaseNext: phaseNext,
       startDeferredClocks: startDeferredClocks,
       phaseIndex: function () { return phaseIndex; },
       markSubmitted: markSubmitted, snapshot: snapshot, restoreTo: restoreTo,

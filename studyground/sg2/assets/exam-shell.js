@@ -409,15 +409,17 @@ window.SG_RUNTIME = (function () {
     set('btn-back', showBack);
     set('btn-advance', showAdvance);
 
-    /* Back — 학생에게 열리는 것은 "같은 화면 안의 앞 문항" 뿐이다: 리딩은 지문 한 편의
-       문항을 하나씩 보여 주므로 그 안에서는 되돌아갈 수 있어야 한다. 첫 문항에서는 비활성.
-       관리자는 화면 자체를 되돌릴 수 있으므로 첫 화면에서만 비활성이다. */
+    /* Back — 학생에게 열리는 범위는 "같은 모듈 안의 앞 문항"이다: 화면 안에서는 문항을
+       하나씩 되돌리고, 화면 첫 문항에서는 같은 모듈의 앞 지문 화면(그 마지막 문항)으로
+       넘어간다. 앞 모듈로는 못 간다 — 그 모듈의 시간은 이미 닫혔다.
+       관리자는 화면 자체를 자유로이 되돌릴 수 있으므로 첫 화면에서만 비활성이다. */
     var back = document.getElementById('btn-back');
     if (back) {
       var nav0 = screenNav();
       var inScreen = !!(nav0 && typeof nav0.canPrev === 'function' && nav0.canPrev());
-      back.disabled = !inScreen && !(admin && machine && machine.currentIndex() > 0);
-      back.classList.toggle('is-admin', admin && !inScreen);
+      var crossScreen = !!(machine && typeof machine.canBack === 'function' && machine.canBack());
+      back.disabled = !inScreen && !crossScreen && !(admin && machine && machine.currentIndex() > 0);
+      back.classList.toggle('is-admin', admin && !inScreen && !crossScreen);
     }
     /* Next — 오디오가 도는 동안에는 비활성. 감추지 않고 회색으로 남겨 둔다: 사라졌다
        다시 나타나면 눌러도 되는 자리인지 학생이 헷갈린다. 관리자 검수는 통과시킨다. */
@@ -1187,6 +1189,15 @@ window.SG_RUNTIME = (function () {
       backBtn.onclick = function () {
         var nav = screenNav();
         if (nav && typeof nav.canPrev === 'function' && nav.canPrev()) { nav.prev(); return; }
+        /* 화면의 첫 문항이면 같은 모듈의 앞 화면으로 — 그 화면의 마지막 문항을 펴 준다.
+           앞으로 갈 때 첫 문항에서 시작하는 것과 대칭이다. */
+        if (machine && typeof machine.back === 'function' && machine.back('manual')) {
+          machine.syncHash();
+          var landed = screenNav();
+          if (landed && typeof landed.toLast === 'function') landed.toLast();
+          else if (window.SG_RUNTIME && window.SG_RUNTIME.syncNav) window.SG_RUNTIME.syncNav();
+          return;
+        }
         adminStep(-1);
       };
     }
