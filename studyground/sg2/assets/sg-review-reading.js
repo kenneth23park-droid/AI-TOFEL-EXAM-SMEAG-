@@ -137,21 +137,53 @@ window.SG_REVIEW_READING = (function () {
 
   /* ── 왼쪽: 읽은 것 ────────────────────────────────────────── */
 
-  /* C-Test 문단. 지금 보고 있는 빈칸만 짚어 준다 — 열 칸을 한꺼번에 물들이면
-     어느 칸 이야기를 하는 화면인지 알 수 없다. 정오는 오른쪽 판정이 말한다. */
+  /* 채워진 빈칸 하나. 리뷰의 문단은 시험지의 복사본이 아니다 — 열 칸이 전부 □ 로
+     남아 있으면 학생은 자기가 채운 글자로 이 문단이 어떻게 읽혔는지 다시 볼 수 없고,
+     복기는 오른쪽 판정 상자 한 칸에 갇힌다. 채운 것을 제자리에 되돌려 놓는다.
+       맞은 칸  — 채운 낱말 (어간 뒤 내가 쓴 글자에 밑줄)
+       틀린 칸  — 채운 낱말에 줄을 긋고 정답을 옆에 세운다
+       빈 칸    — □ 를 남긴다. 몇 글자였는지가 지워지면 오답의 이유가 반이 지워진다.
+     지금 보고 있는 칸만 따로 짚어 준다(now). */
+  function fillHtml(it, on) {
+    var q = it.q || {};
+    var stem = stemOf(q);
+    var given = (it.given === '' || it.given == null) ? '' : String(it.given);
+    var key = (it.key === '' || it.key == null) ? '' : String(it.key);
+    var right = key ? '<i class="rr-key">' + esc(key) + '</i>' : '';
+    var body;
+
+    if (!given) {
+      body = esc(stem) + esc(boxes(missingCount(q))) + right;
+    } else {
+      /* 어간은 시험지가 준 것이고 그 뒤가 학생이 채운 글자다. 밑줄로 갈라 두면
+         "무엇을 내가 썼는가" 가 문단 안에서도 보인다. 어간으로 시작하지 않는 답
+         (자유 입력 · 어간을 지우고 쓴 답)은 통째로 내가 쓴 것으로 본다.
+         틀린 낱말에는 밑줄을 긋지 않는다 — 취소선과 겹치면 둘 다 안 읽힌다. */
+      var head = given.toLowerCase().indexOf(stem.toLowerCase()) === 0 ? stem.length : 0;
+      body = it.ok === false
+        ? '<s>' + esc(given) + '</s>' + right
+        : esc(given.slice(0, head)) + '<u>' + esc(given.slice(head)) + '</u>';
+    }
+
+    return '<span class="rr-blank' + (on ? ' now' : '') + ' ' + markOf(it) + '">' +
+      body + '</span>';
+  }
+
+  /* C-Test 문단 — 블록의 빈칸 전부를 채점 결과로 채운다. 그래서 문항 목록은
+     팩의 questions 가 아니라 채점 행이 얹힌 group.items 를 본다. */
   function clozeHtml(it) {
     var blk = it.block || {};
     var byNo = {};
-    (blk.questions || []).forEach(function (q) { byNo[String(q.no)] = q; });
+    (((it.group && it.group.items) || [])).forEach(function (x) {
+      if (x && x.q && x.q.no != null) byNo[String(x.q.no)] = x;
+    });
 
     var body = clozeTokens(blk.template || '').map(function (t) {
       if (t.text !== undefined) return esc(t.text);
-      var q = byNo[t.token];
-      if (!q) return '<span class="rr-blank">' + esc(boxes(0)) + '</span>';
-      var on = (q.id === it.qid);
+      var x = byNo[t.token];
+      if (!x) return '<span class="rr-blank na">' + esc(boxes(0)) + '</span>';
       return '<sup class="rr-bno">' + esc(t.token) + '</sup>' +
-        '<span class="rr-blank' + (on ? ' now' : '') + '">' +
-          esc(stemOf(q)) + esc(boxes(missingCount(q))) + '</span>';
+        fillHtml(x, x.qid === it.qid);
     }).join('');
 
     return '<div class="rr-passage rr-cloze">' + body + '</div>';

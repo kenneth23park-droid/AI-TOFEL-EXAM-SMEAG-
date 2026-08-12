@@ -66,12 +66,30 @@ ok(labels[labels.length - 1] === 'Academic Passage',
 var cloze = RR.html(M, { m: 0, q: 0 });
 var q1 = M[0].items[0];
 ok(cloze.indexOf('rr-cloze') >= 0, 'B: C-Test 문단이 왼쪽에 없다');
-ok(cloze.indexOf('>' + RR.esc(RR.stemOf(q1.q)) + '□') >= 0,
-   'B: 어간 뒤에 빠진 글자만큼의 네모가 서야 한다');
 ok(RR.missingCount(q1.q) === String(q1.q.answer).length - String(q1.q.hint).length,
    'B: 네모 개수는 정답 글자수 - 어간 글자수다');
 ok(/rr-blank now/.test(cloze), 'B: 지금 보는 빈칸이 짚어지지 않았다');
 ok((cloze.match(/rr-blank now/g) || []).length === 1, 'B: 짚어지는 빈칸은 하나뿐이어야 한다');
+
+/* 문단의 빈칸은 채점 결과로 채워진다 — 시험지의 □ 를 그대로 두면 학생은 자기가
+   채운 글자로 문단이 어떻게 읽혔는지 다시 볼 수 없다.
+     2번(맞음)   → 채운 낱말이 문단에 들어가고 초록(ok)
+     1번(틀림)   → 채운 낱말에 줄이 가고 정답이 옆에 선다
+     R1-3(무응답) → □ 가 남고 정답만 붙는다 */
+var it1 = M[0].items[0], it2 = M[0].items[1], it3 = M[0].items[2];
+ok(cloze.indexOf('<u>' + RR.esc(String(it2.given).slice(String(it2.q.hint).length)) + '</u>') >= 0,
+   'B: 맞은 빈칸에 내가 채운 글자가 밑줄로 서지 않았다');
+ok(/rr-blank(?: now)? ok/.test(cloze), 'B: 맞은 빈칸이 초록으로 갈리지 않았다');
+ok(cloze.indexOf('<s>') >= 0 && /rr-blank now no/.test(cloze),
+   'B: 틀린 빈칸에 줄이 가지 않았다');
+ok(cloze.indexOf('rr-key">' + RR.esc(String(it1.key))) >= 0,
+   'B: 틀린 빈칸 옆에 정답이 서지 않았다');
+ok(cloze.indexOf('>' + RR.esc(RR.stemOf(it3.q)) + '□') >= 0,
+   'B: 무응답 빈칸에는 어간 뒤 네모가 남아야 한다');
+ok(cloze.indexOf('rr-key">' + RR.esc(String(it3.key))) >= 0,
+   'B: 무응답 빈칸 옆에 정답이 서지 않았다');
+/* 채운 글자가 문단에 들어가도 자릿수 정보는 오른쪽 빈칸 모양(rr-cue)이 지킨다 */
+ok(cloze.indexOf('rr-cue') >= 0, 'B: 오른쪽에 빈칸 모양이 서지 않았다');
 
 var passage = RR.html(M, { m: 0, q: 34 });          // 31-35 학술 지문의 마지막 문항
 ok(passage.indexOf('rr-title') >= 0, 'B: 지문 제목이 없다');
