@@ -227,12 +227,16 @@ function applyLang(){
 }
 
 /* ---- data ---- */
-let ROWS=[], KEYS={}, PROFILE=null, current="home";
+let ROWS=[], KEYS={}, KEYS_LOCKED=false, PROFILE=null, current="home";
 const fmtDate=(s)=>s.replace("T"," ").slice(0,19);
 
 async function boot(){
+  /* 정답지(sg_answer_keys)는 2026-08 부터 staff 전용이다 — anon 키로는 빈 배열이 온다.
+     이 복제본은 익명으로 읽으므로 '정답' 칸이 비어 있는 게 정상이다. O/X 는 응시 행에
+     저장된 채점 결과라 그대로 나온다. */
   const [st,keys]=await Promise.all([api("sg_students?select=*"),api("sg_answer_keys?select=level,answers")]);
   PROFILE=st[0]; (keys||[]).forEach(k=>KEYS[k.level]=k.answers.c.split("|"));
+  KEYS_LOCKED=!(keys&&keys.length);
   // profile UI
   document.getElementById("uname").textContent=PROFILE.english_name;
   document.getElementById("uname2").textContent=PROFILE.english_name;
@@ -302,6 +306,9 @@ document.getElementById("scoreBody").addEventListener("click",e=>{
   det.innerHTML=`<td colspan="5"><div class="detail-inner">
     <div class="dh">IELTS ACADEMIC TEST / Listening / ${level} / LISTENING ${t.detailTail}</div>
     ${resp?"":`<p style="color:#a06">${t.noResp}</p>`}
+    ${KEYS_LOCKED?`<p style="color:#8a8aa0;font-size:12.5px">${lang==='en'
+      ?'Answer keys are staff-only — the “Correct” column is blank here.'
+      :'정답지는 staff 전용입니다 — 이 화면의 ‘정답’ 칸은 비어 있습니다.'}</p>`:""}
     <table class="qtable"><thead><tr><th>${t.qno}</th><th>${t.yourAns}</th><th>${t.correct}</th><th>${t.result}</th></tr></thead>
     <tbody>${body}</tbody></table></div></td>`;
   tr.after(det);

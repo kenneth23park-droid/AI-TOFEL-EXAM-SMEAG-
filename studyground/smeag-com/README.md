@@ -46,20 +46,52 @@ sg2 응시 → 로컬 채점 → Supabase sg_results  ←── scores.html (본
 | 키 | 뜻 |
 |---|---|
 | `url` / `anon` | Supabase 프로젝트 주소와 공개(anon) 키 |
-| `packBase` | sg2 콘텐츠 팩(`set1.js`, `set9.js`)이 있는 주소. 지금은 `https://smeag-studyground.vercel.app/assets/` 로 **채워져 있다**(문항별 정답까지 그린다). 비우면 점수·영역별 요약과 '내 답'까지만 나온다 |
-| `packs` | 세트 코드 → 팩 파일 이름 |
-| `showAnswerKey` | `false` 로 두면 정답 열을 감추고 O/X 만 보여준다 |
+| `reviewFn` | 문항·정답을 내려주는 Edge Function 이름(`sg-review`). 이 화면은 정답을 스스로 들고 있지 않다 |
+| `showAnswerKey` | `false` 로 두면 정답 열을 감추고 O/X 만 보여준다. ⚠️ 화면의 예의일 뿐 경계가 아니다 — 진짜 경계는 아래의 열람 기한이다 |
 | `reportUrl` | 성적 보고서(Word·PDF·Excel) 생성기 주소. **비워 두면 '성적 보고서' 버튼이 아예 안 나온다** |
 
-⚠️ `packBase` 가 채워져 있으므로 그 주소의 팩 파일에 담긴 **정답이 학생 브라우저로
-내려간다**(sg2 번들도 지금은 같은 상태다). 즉 학생은 리뷰 화면에서 SET1·SET9 의
-정답 전체를 볼 수 있고, 마음먹으면 파일째 받을 수도 있다 — 다음 응시자와 같은
-세트를 쓰는 동안에는 이 점을 알고 열어야 한다. 정답을 감추려면 `showAnswerKey: false`
-만으로는 부족하고(팩 파일 자체에 답이 있다) `packBase` 를 비우거나, 채점 결과를
-서버에서 내려주는 쪽으로 바꿔야 한다.
+## 리뷰 열람 기한 (문항·정답)
 
-지금 살아 있는 팩은 둘뿐이고 실제 응시 기록도 그 둘이다 — `SET9`, `SET1`.
-세트를 새로 만들면 `CFG.packs` 에 한 줄을 더해야 그 응시의 문항 리뷰가 열린다.
+**점수는 계속 보인다. 문항과 정답에만 기한이 있다.**
+
+```
+기한 = max(응시일, 교사 리뷰일) + 7일        교사 리뷰가 없으면 응시일 기준
+지나면 → 서버가 문항을 주지 않는다 (questions: [])
+다시 보려면 → 관리자가 그 응시를 7일 열어 준다
+```
+
+경계는 화면이 아니라 서버다. 문항과 정답은 `sg_set_questions` 에 있고 그 표에는
+**RLS 정책이 하나도 없다** — service_role 말고는 아무도 읽지 못한다. 학생 화면은
+Edge Function `sg-review` 에게 물어야 하고, 그 함수가 셋을 확인한 뒤에만 내려준다.
+
+1. 이 응시를 볼 자격 — 학생의 토큰으로 `sg_results` 를 읽어 본다(판정은 RLS 의 `sg_can_see`)
+2. 기한 — `sg_review_status()`
+3. 관리자 해제 — `sg_review_grants` 의 살아 있는 행
+
+선생님·관리자는 기한과 무관하게 본다(채점하려면 봐야 한다).
+
+- SQL: [`../supabase/review_window.sql`](../supabase/review_window.sql)
+- 함수: [`../../supabase/functions/sg-review/index.ts`](../../supabase/functions/sg-review/index.ts)
+- 관리자 조작: sg2 `admin-results.html` 의 **Review window** 열 — `7일 열기` · `지금 닫기`
+- 판정: `studyground/tests/test_review_window.js`
+
+### 세트를 새로 만들면
+
+문항과 정답을 잠긴 표에 올려야 그 세트의 리뷰가 열린다.
+
+```
+SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… \
+  node studyground/tools/load_set_questions.js SET10
+```
+
+⚠️ service_role 키는 서버에만 둔다. 키 없이 SQL 만 보려면 `--print`.
+
+### ⚠️ 아직 남은 구멍
+
+시험 앱(sg2)의 팩 파일 `assets/set9.js` 에는 **여전히 정답이 들어 있고**, 그 파일은
+공개 주소로 받을 수 있다. 오프라인 채점이 그 파일에 기대고 있어서 이 작업만으로는
+닫히지 않는다. 닫으려면 팩에서 정답을 떼어내고 채점을 서버로 옮기거나, 팩 자체를
+인증 뒤로 넣어야 한다 — 둘 다 sg2 의 오프라인 동작을 건드리는 별도 작업이다.
 
 ## 성적 보고서 연동
 

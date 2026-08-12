@@ -164,6 +164,18 @@ tr.row-bad{background:var(--bad-soft)}
 .sec-card .go{margin-left:auto}
 .sec-body{flex-basis:100%;border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
 
+/* 닫힌 리뷰 — 점수는 그대로 두고 문항 자리만 이 안내로 바뀐다. */
+.locked{background:var(--cream-2);border:1px solid var(--line-2);border-radius:14px;
+  padding:18px 20px;margin:14px 0}
+.locked b{display:flex;align-items:center;gap:7px;font-size:15px;letter-spacing:-.01em}
+.locked p{margin-top:7px;font-size:13.5px;color:var(--muted)}
+.rev-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  padding:12px 18px;margin-top:16px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.rev-note.shut{background:var(--cream-2);border-color:var(--line-2)}
+.rev-note svg{opacity:.55}
+.rev-note .when{color:var(--muted);font-weight:700}
+
 .qtable td{text-align:left}
 .qtable th{text-align:left}
 .qtable th.right,.qtable td.right{text-align:right}
@@ -344,17 +356,17 @@ var CFG = {
   url: 'https://qrmidnmlethqvdbmnyun.supabase.co',
   anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybWlkbm1sZXRocXZkYm1ueXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg3NzQsImV4cCI6MjEwMTMxNDc3NH0.U2cprYXkpIS_1tSAiEjCFuHAztZRwIIK6DYCCowgxg4',
 
-  /* 문항별 리뷰(문제 지문·정답)를 그리려면 sg2 의 콘텐츠 팩이 필요하다.
-     비워 두면 이 화면은 점수·영역별 요약과 '내 답'까지만 보여준다.
+  /* 문항과 정답은 이 화면이 들고 있지 않다. Edge Function `sg-review` 에게
+     물어야 하고, 그 함수가 소유·기한·관리자 해제를 확인한 뒤에만 내려준다.
+     기한이 지나면 questions 는 빈 배열로 온다 — 화면이 감추는 것이 아니라
+     서버가 주지 않는다. 규칙은 supabase/review_window.sql 에 있다.
 
-     ⚠️ 여기를 채우면 그 주소의 팩에 담긴 **정답이 학생 브라우저로 내려간다**
-     (sg2 번들도 지금은 같은 상태다). showAnswerKey: false 로는 못 막는다 —
-     팩 파일 자체에 답이 들어 있다. 정답을 감추려면 이 칸을 비우거나, 채점
-     결과를 서버에서 내려주는 쪽으로 바꿔야 한다. */
-  packBase: 'https://smeag-studyground.vercel.app/assets/',
-  packs: { SET1: 'set1.js', SET9: 'set9.js' },
+     예전에는 여기 packBase 에 공개 팩 주소를 적었다. 그 길은 닫았다 —
+     주소를 아는 학생이 화면과 무관하게 정답을 통째로 받을 수 있었기 때문이다. */
+  reviewFn: 'sg-review',
 
-  /* 학생용 문항별 정답 공개 여부. false 면 정답 열을 감추고 O/X 만 남긴다. */
+  /* 학생용 문항별 정답 공개 여부. false 면 정답 열을 감추고 O/X 만 남긴다.
+     ⚠️ 이건 화면의 예의이지 경계가 아니다. 진짜 경계는 sg-review 의 기한이다. */
   showAnswerKey: true,
 
   /* 성적 보고서(Word·PDF·Excel) 생성기 주소. 비워 두면 '성적 보고서' 버튼이
@@ -459,12 +471,34 @@ var AUTH = (function () {
     }).catch(function () { return null; });
   }
 
-  return { signIn: signIn, signOut: signOut, token: token, user: user, profile: profile, rest: rest };
+  /* Edge Function 호출. rest() 와 달리 실패를 삼키지 않는다 — 리뷰가 닫힌 것과
+     서버에 못 닿은 것은 학생에게 다른 말이어야 하기 때문이다. */
+  function fn(name, body) {
+    return token().then(function (tok) {
+      if (!tok) throw new Error('signed out');
+      return fetch(CFG.url + '/functions/v1/' + name, {
+        method: 'POST',
+        headers: { apikey: CFG.anon, Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {})
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok) { var e = new Error(j.message || ('HTTP ' + r.status)); e.code = j.error; throw e; }
+          return j;
+        });
+      });
+    });
+  }
+
+  return { signIn: signIn, signOut: signOut, token: token, user: user, profile: profile,
+           rest: rest, fn: fn };
 })();
 
 /* ─────────────────────────────────────────────────────────────
-   채점 — 저장된 답안 + 콘텐츠 팩으로 문항별 결과를 다시 편다.
+   채점 — 저장된 답안 + 서버가 내려준 문항으로 문항별 결과를 다시 편다.
    sg2 의 assets/sg-results.js 와 같은 규칙을 쓴다(대소문자·공백·끝 마침표 무시).
+
+   문항과 정답은 sg-review 가 준다. 기한이 지나면 빈 배열이 오고, 그때 이 화면은
+   '내 답' 조차 문항에 붙이지 못한다 — 붙일 문항이 없기 때문이다.
    ───────────────────────────────────────────────────────────── */
 var GRADE = (function () {
   var SECTION = { R: 'reading', L: 'listening', S: 'speaking', W: 'writing' };
@@ -480,62 +514,35 @@ var GRADE = (function () {
     return false;
   }
   function sectionOf(qid) { return SECTION[String(qid).charAt(0).toUpperCase()] || 'other'; }
-  function sectionEntry(entry, qid) {
-    var name = entry && entry.section && (entry.section.id || entry.section.name);
-    name = String(name || '').toLowerCase();
-    return KNOWN[name] ? name : sectionOf(qid);
-  }
   function valueOf(a, qid) {
     var rec = a && a[qid];
     if (rec == null) return '';
     return (typeof rec === 'object' && 'v' in rec) ? rec.v : rec;
   }
 
-  /* 팩이 있으면 문항별로 펼치고, 없으면 저장된 답안만 줄 세운다. */
-  function rows(pack, answers) {
-    var out = [], k;
-    if (pack) {
-      var all = typeof pack.allQuestions === 'function' ? pack.allQuestions() : [];
-      var keys = pack.answerKey || {};
-      for (var i = 0; i < all.length; i++) {
-        var q = all[i].q || all[i];
-        var key = keys.hasOwnProperty(q.id) ? keys[q.id] : q.answer;
-        out.push({
-          qid: q.id, no: q.no || (i + 1), section: sectionEntry(all[i], q.id),
-          prompt: q.prompt || q.text || q.question || '',
-          given: valueOf(answers, q.id), key: key, ok: hit(valueOf(answers, q.id), key)
-        });
-      }
-      return out;
-    }
-    var n = 0;
-    for (k in answers) {
-      if (!answers.hasOwnProperty(k)) continue;
-      out.push({ qid: k, no: ++n, section: sectionOf(k), prompt: '',
-                 given: valueOf(answers, k), key: null, ok: null });
-    }
-    return out;
-  }
-
-  /* 팩은 필요할 때 한 번만 받아 온다(SET 당 100KB 안팎). */
-  var loaded = {};
-  function pack(setCode) {
-    var code = String(setCode || '').toUpperCase();
-    var have = window['SMEAG_' + code];
-    if (have) return Promise.resolve(have);
-    if (!CFG.packBase || !CFG.packs[code]) return Promise.resolve(null);
-    if (loaded[code]) return loaded[code];
-    loaded[code] = new Promise(function (done) {
-      var s = document.createElement('script');
-      s.src = CFG.packBase.replace(/\/?$/, '/') + CFG.packs[code];
-      s.onload = function () { done(window['SMEAG_' + code] || null); };
-      s.onerror = function () { done(null); };
-      document.head.appendChild(s);
+  /**
+   * 서버가 준 문항 + 저장된 답안 → 화면이 그릴 행.
+   * @param questions sg-review 의 questions (기한이 지났으면 빈 배열)
+   * @param answers   sg_results.answers
+   */
+  function rows(questions, answers) {
+    return (questions || []).map(function (q, i) {
+      var qid = q.question_id;
+      var key = (q.answer === undefined) ? null : q.answer;
+      var name = String(q.section || '').toLowerCase();
+      return {
+        qid: qid,
+        no: q.ord || q.no || (i + 1),
+        section: KNOWN[name] ? name : sectionOf(qid),
+        prompt: q.prompt || '',
+        given: valueOf(answers, qid),
+        key: key,
+        ok: hit(valueOf(answers, qid), key)
+      };
     });
-    return loaded[code];
   }
 
-  return { rows: rows, pack: pack, sectionOf: sectionOf };
+  return { rows: rows, sectionOf: sectionOf };
 })();
 
 /* ─────────────────────────────────────────────────────────────
@@ -699,7 +706,9 @@ var BAND = (function () {
     listening: '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>',
     writing: '<path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/>',
     speaking: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/>',
-    summary: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>'
+    summary: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+    lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
   };
   function icon(name, size) {
     return '<svg width="' + (size || 17) + '" height="' + (size || 17) + '" viewBox="0 0 24 24" fill="none" ' +
@@ -868,14 +877,29 @@ var BAND = (function () {
     $('f-set').innerHTML = opts;
   }
 
-  /* ── 리뷰 ────────────────────────────────────────────── */
-  var ROWS = {};                               // session → 문항 행(팩을 한 번만 편다)
+  /* ── 리뷰 ──────────────────────────────────────────────
+     문항과 정답은 서버에게 물어야 한다. 응시 한 건당 한 번만 묻고 붙들어 둔다.
+     돌아오는 것은 세 가지다.
+       open  … 기한이 남았거나 관리자가 열어 준 상태. rows 가 채워져 온다.
+       닫힘  … rows 가 비어 있다. 화면이 감춘 게 아니라 서버가 주지 않은 것이다.
+       error … 서버에 못 닿았다. 위 둘과 섞어 보이면 학생이 오해한다. */
+  var ROWS = {};                               // session → { open, until, rows, ... }
   function questions(r) {
     if (ROWS[r.session]) return Promise.resolve(ROWS[r.session]);
-    return GRADE.pack(r.set_code).then(function (pk) {
-      var out = { pack: pk, rows: GRADE.rows(pk, r.answers || {}) };
+    return AUTH.fn(CFG.reviewFn, { session: r.session }).then(function (j) {
+      var out = {
+        open: j.open === true,
+        until: j.until || null,
+        grantedUntil: j.granted_until || null,
+        unlocked: j.unlocked === true,
+        staff: j.staff === true,
+        rows: GRADE.rows(j.questions || [], r.answers || {})
+      };
       ROWS[r.session] = out;
       return out;
+    }, function (err) {
+      /* 붙들어 두지 않는다 — 네트워크가 돌아오면 다시 물어야 한다. */
+      return { open: false, error: err.message || 'error', rows: [], until: null };
     });
   }
   function rateOf(sec) {
@@ -926,9 +950,36 @@ var BAND = (function () {
       }).join('');
   }
 
+  /** 리뷰가 언제까지 열려 있는지 한 줄. 학생이 먼저 알아야 할 사실이다. */
+  function paintWindow(r) {
+    var host = $('rev-window');
+    host.innerHTML = '';
+    questions(r).then(function (q) {
+      if (route().session !== r.session) return;      // 그 사이 다른 응시로 옮겨 갔다
+      if (q.error) { host.innerHTML = ''; return; }   // 오류는 문항 자리에서 말한다
+      if (!q.open) {
+        host.className = 'rev-note shut no-print';
+        host.innerHTML = icon('lock', 15) +
+          bi('Questions and answers closed on ', '문항과 정답은 ') +
+          '<span class="when">' + when(q.until) + '</span>' +
+          bi(' — ask an administrator to reopen.', ' 에 닫혔습니다 — 관리자에게 요청하세요.');
+        return;
+      }
+      host.className = 'rev-note no-print';
+      host.innerHTML = icon('clock', 15) +
+        (q.unlocked
+          ? bi('Reopened by an administrator until ', '관리자가 다시 열어 둔 기한: ') +
+            '<span class="when">' + when(q.grantedUntil) + '</span>'
+          : bi('Questions and answers stay open until ', '문항과 정답은 ') +
+            '<span class="when">' + when(q.until) + '</span>' +
+            bi('', ' 까지 볼 수 있습니다')) +
+        (q.staff ? ' <span class="chip">staff</span>' : '');
+    });
+  }
+
   function paintSummary(r) {
     var v = viewOf(r);
-    $('rev-body').innerHTML = BAND.SKILLS.map(function (s) {
+    $('rev-body').innerHTML = '<div id="rev-window"></div>' + BAND.SKILLS.map(function (s) {
       var sec = v.sections[s];
       var raw = rawOf(sec, s);
       return '<div class="sec-card" data-sec="' + s + '">' +
@@ -944,6 +995,8 @@ var BAND = (function () {
         '<div class="sec-body hide" id="body-' + s + '"></div>' +
       '</div>';
     }).join('');
+
+    paintWindow(r);
 
     [].forEach.call($('rev-body').querySelectorAll('[data-go]'), function (b) {
       b.onclick = function () { goTab(r, b.getAttribute('data-go')); };
@@ -987,18 +1040,37 @@ var BAND = (function () {
     });
   }
 
+  /** 닫힌 리뷰·오류에 붙일 안내. 둘은 다른 말이라 문구도 다르다. */
+  function lockNote(q) {
+    if (q.error) {
+      return '<div class="locked"><b>' + bi('Could not reach the server.', '서버에 닿지 못했습니다.') + '</b>' +
+        '<p>' + bi('Your scores above are from your last visit. Try again in a moment.',
+                   '위의 점수는 지난번에 받아 둔 값입니다. 잠시 뒤 다시 시도하세요.') + '</p></div>';
+    }
+    return '<div class="locked">' +
+      '<b>' + icon('lock', 15) + ' ' + bi('Questions and answers are closed', '문항과 정답은 닫혔습니다') + '</b>' +
+      '<p>' + bi('Review stays open for one week after your teacher goes over the test' +
+                 (q.until ? ' — this one closed on ' + when(q.until) + '.' : '.'),
+                 '리뷰는 선생님과 리뷰한 뒤 1주일 동안만 열려 있습니다' +
+                 (q.until ? ' — 이 응시는 ' + when(q.until) + ' 에 닫혔습니다.' : '.')) + '</p>' +
+      '<p>' + bi('Your scores stay here. To see the questions again, ask an administrator to reopen this test.',
+                 '점수는 그대로 남습니다. 문항을 다시 보려면 관리자에게 열어 달라고 요청하세요.') + '</p>' +
+      '</div>';
+  }
+
   /** 문항 표. limit 을 주면 앞에서 그만큼만 보여주고 나머지는 숫자로 알린다. */
   function qTable(q, section, limit) {
+    if (!q.open) return lockNote(q);
     var rows = q.rows.filter(function (x) { return x.section === section; });
-    var keyed = !!q.pack && CFG.showAnswerKey;
+    var keyed = CFG.showAnswerKey && rows.some(function (x) { return x.key !== null; });
     if (!rows.length) {
       return '<p class="muted" style="padding:14px 0;font-size:13.5px">' +
         bi('No saved answers for this section.', '이 영역에는 저장된 답안이 없습니다.') + '</p>';
     }
     var use = limit ? rows.slice(0, limit) : rows;
-    var note = !q.pack ? '<p class="muted" style="padding:12px 0;font-size:13px">' +
-      bi('Question text and correct answers are not available on this page — your saved answers are shown.',
-         '이 화면에는 문제 지문과 정답이 없습니다 — 저장된 내 답만 보여줍니다.') + '</p>' : '';
+    var note = q.unlocked ? '<p class="muted" style="padding:12px 0;font-size:13px">' +
+      bi('Reopened by an administrator until ' + when(q.grantedUntil) + '.',
+         '관리자가 ' + when(q.grantedUntil) + ' 까지 다시 열어 두었습니다.') + '</p>' : '';
     return note + '<div class="table-wrap"><table class="qtable"><thead><tr>' +
         '<th style="width:52px">#</th>' +
         '<th>' + bi('Question', '문항') + '</th>' +
@@ -1227,7 +1299,14 @@ var BAND = (function () {
     if (!OPEN) return;
     var r = OPEN;
     questions(r).then(function (q) {
-      var keyed = !!q.pack && CFG.showAnswerKey;
+      /* 리뷰가 닫혔으면 내려받을 문항도 없다 — CSV 는 화면의 우회로가 아니다. */
+      if (!q.open || !q.rows.length) {
+        alert(q.error
+          ? 'Could not reach the server. Try again in a moment.'
+          : 'Questions and answers for this test are closed. Ask an administrator to reopen it.');
+        return;
+      }
+      var keyed = CFG.showAnswerKey && q.rows.some(function (x) { return x.key !== null; });
       var head = ['no', 'question_id', 'section', 'your_answer'].concat(keyed ? ['correct_answer'] : []).concat(['result']);
       var lines = [head.join(',')];
       q.rows.forEach(function (x, i) {
