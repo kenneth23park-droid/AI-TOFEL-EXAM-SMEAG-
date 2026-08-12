@@ -151,7 +151,10 @@
 //      index.html · tests.html 의 <script> 목록이 바뀌었다. 웹 사본에서는 검사기가
 //      채널을 보고 그대로 물러난다(그 일은 이 서비스워커가 이미 한다). 캐시된 옛
 //      셸이 남으면 그 기기만 판올림 알림 없는 화면을 계속 본다.
-const VERSION = 'sg-v46';
+// v47: 시험이 끝난 자리에서 다시 친다 — 제출 화면에 전체 한 벌과 네 영역 버튼이 서고,
+//      그 문은 관리자 승인이 있어야 열린다(assets/exam-shell.js · assets/exam.css).
+//      캐시된 옛 셸이 남으면 그 기기만 끝난 화면에서 리뷰·성적 두 개만 계속 본다.
+const VERSION = 'sg-v47';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

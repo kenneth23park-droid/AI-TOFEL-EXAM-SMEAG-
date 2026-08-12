@@ -782,8 +782,14 @@ window.SG_RUNTIME = (function () {
    * 하기 때문이다: 제출된 세션은 canResume 이 'submitted' 로 막으므로 boot() 가
    * 새 세션을 연다. 방금 친 응시 기록은 지워지지 않고 남는다(리뷰·성적이 그것을 읽는다).
    *
-   * 링크는 상대경로 그대로다. 라우트 페이지(en/test-nt/{section}/)에는 <base> 가
-   * 있어 sg2 루트로 풀린다 — 위의 review.html 링크와 같은 이유로 BASE 를 붙이지 않는다. */
+   * 주소는 상대경로 그대로다. 라우트 페이지(en/test-nt/{section}/)에는 <base> 가
+   * 있어 sg2 루트로 풀린다 — 위의 review.html 링크와 같은 이유로 BASE 를 붙이지 않는다.
+   *
+   * 다시 응시는 관리자 승인이 있어야 열린다. 학생이 혼자 다시 치면 같은 세트를 두 번
+   * 본 성적이 섞이고, 시험장에서는 남은 시간을 학생이 정하게 된다. Exit 과 같은 문을
+   * 쓴다 — 감독하는 선생님이 그 자리에서 아이디·비밀번호를 넣고(SG_ADMIN.verify),
+   * 확인만 하지 관리자 세션은 만들지 않는다(학생 기기에 권한을 남기지 않는다).
+   * 그래서 버튼은 <a> 가 아니라 <button> 이다 — 주소가 손에 잡히면 문이 아니게 된다. */
   var RETAKE_SECTIONS = [
     { id: 'reading', label: 'Reading' },
     { id: 'listening', label: 'Listening' },
@@ -806,22 +812,101 @@ window.SG_RUNTIME = (function () {
   function retakeHtml() {
     var secs = '';
     RETAKE_SECTIONS.forEach(function (s) {
-      secs += '<a class="exam-btn sec" href="' + retakeUrl(s.id) + '">' + s.label + '</a>';
+      secs += '<button type="button" class="exam-btn sec" data-retake="' + retakeUrl(s.id) +
+              '" data-retake-what="' + s.label + ' — one section">' + s.label + '</button>';
     });
     return '' +
       '<div class="exam-retake" id="done-retake" hidden>' +
         '<div class="exam-retake-title">' +
           '<span data-en>Take it again</span><span data-ko>다시 응시</span></div>' +
         '<div class="exam-retake-row">' +
-          '<a class="exam-btn primary" href="' + retakeUrl(null) + '">' +
-            '<span data-en>Full test</span><span data-ko>전체 과정</span></a>' +
+          '<button type="button" class="exam-btn primary" data-retake="' + retakeUrl(null) +
+              '" data-retake-what="Full test">' +
+            '<span data-en>Full test</span><span data-ko>전체 과정</span></button>' +
         '</div>' +
         '<div class="exam-retake-row">' +
           '<span class="exam-retake-lab">' +
             '<span data-en>Or one section</span><span data-ko>또는 한 영역만</span></span>' +
           secs +
         '</div>' +
+        /* 관리자 승인 칸 — 버튼을 누르면 펴진다. 마크업을 여섯 벌의 시험 HTML 에
+           넣는 대신 여기서 한 번에 그린다(buildExitGate 와 같은 이유). */
+        '<div class="exam-retake-gate exam-exit-auth" id="done-retake-gate" hidden>' +
+          '<p class="exam-retake-note">' +
+            '<span data-en>An administrator must approve a retake.</span>' +
+            '<span data-ko>다시 응시하려면 관리자 승인이 필요합니다.</span> ' +
+            '<b id="done-retake-what"></b></p>' +
+          '<p class="exam-exit-err" id="done-retake-err" hidden>Wrong admin ID or password.</p>' +
+          '<label>Admin ID' +
+            '<input type="text" id="done-retake-id" autocomplete="off" autocapitalize="none"' +
+            ' autocorrect="off" spellcheck="false"></label>' +
+          '<label>Password' +
+            '<input type="password" id="done-retake-pw" autocomplete="off"></label>' +
+          '<div class="exam-retake-row">' +
+            '<button type="button" class="exam-btn primary" id="done-retake-go">' +
+              '<span data-en>Start</span><span data-ko>시작</span></button>' +
+            '<button type="button" class="exam-btn" id="done-retake-cancel">' +
+              '<span data-en>Cancel</span><span data-ko>취소</span></button>' +
+          '</div>' +
+        '</div>' +
       '</div>';
+  }
+
+  /* 버튼 → 승인 칸 → 이동. 승인 없이는 아무 데도 가지 않는다.
+   * setId 는 넘기지 않는다 — Exit 승인과 같이 "관리자가 그 자리에 있다" 만 본다.
+   * 업로드로 만든 세트는 SET 목록에 없어서, 세트로 좁히면 그 시험만 아무도 못 연다. */
+  function bindRetake(session) {
+    var box = document.getElementById('done-retake');
+    if (!box) return;
+    var gate = document.getElementById('done-retake-gate');
+    var what = document.getElementById('done-retake-what');
+    var err = document.getElementById('done-retake-err');
+    var idEl = document.getElementById('done-retake-id');
+    var pwEl = document.getElementById('done-retake-pw');
+    var target = '';
+
+    function closeGate() {
+      gate.hidden = true;
+      err.hidden = true;
+      idEl.value = ''; pwEl.value = '';
+      target = '';
+    }
+
+    var buttons = box.querySelectorAll('[data-retake]');
+    for (var i = 0; i < buttons.length; i++) {
+      (function (btn) {
+        btn.onclick = function () {
+          target = btn.getAttribute('data-retake');
+          what.textContent = btn.getAttribute('data-retake-what') || '';
+          err.hidden = true;
+          idEl.value = ''; pwEl.value = '';
+          gate.hidden = false;
+          setTimeout(function () { idEl.focus(); }, 30);
+        };
+      }(buttons[i]));
+    }
+
+    document.getElementById('done-retake-cancel').onclick = closeGate;
+    document.getElementById('done-retake-go').onclick = function () {
+      if (!target) return;
+      var A = window.SG_ADMIN;
+      var who = A && A.verify ? A.verify(idEl.value, pwEl.value) : null;
+      /* 확인 수단이 없으면 열지 않는다 — 관리자 스크립트가 안 실려도 문이 열리면
+         승인은 이름뿐이다(Exit 승인과 같은 판단). */
+      if (!who) { err.hidden = false; pwEl.value = ''; pwEl.focus(); return; }
+      /* 누가 열어 줬는지는 방금 끝난 응시 기록에 남는다 — 같은 세트를 두 번 친
+         성적이 나중에 나왔을 때, 그것이 승인된 재응시인지 여기서 알 수 있다. */
+      try {
+        STORE.pushEvent('retake', session || '', { approved_by: who.id, to: target });
+        STORE.flushAnswers();
+      } catch (e) {}
+      window.location.href = target;
+    };
+
+    gate.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('done-retake-go').click(); }
+      if (e.key === 'Escape') { e.preventDefault(); closeGate(); }
+    });
   }
 
   /* ── 제출 직후 ──────────────────────────────────────────────
@@ -879,6 +964,7 @@ window.SG_RUNTIME = (function () {
       var box = document.getElementById('done-retake');
       if (box) box.hidden = false;
     }
+    bindRetake(session);
 
     var note = document.getElementById('done-sync');
     function say(en, ko) {
