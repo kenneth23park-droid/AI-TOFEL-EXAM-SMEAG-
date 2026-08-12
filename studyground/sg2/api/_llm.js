@@ -11,6 +11,15 @@
  * chat() 은 본문뿐 아니라 **토큰 사용량**도 돌려준다. 돈이 나가는 호출이라 얼마나
  * 썼는지 남기지 않으면 모델을 바꿀 때 근거가 없다(app/scoring/pricing.py 와 같은
  * 취지). 금액 환산은 여기서 하지 않는다 — 단가표는 파이썬 쪽 한 곳에만 둔다.
+ *
+ *   chat(key, model, system, user, opts) -> { text, usage:{in,out}, truncated }
+ *   opts.maxTokens  Anthropic 의 상한(기본 2000). 코멘트·채점은 그 안에서 끝나지만
+ *                   /api/generate 의 강의 대본은 그 배가 든다. OpenAI 는 상한을
+ *                   보내지 않는다 — 모델마다 받는 필드 이름이 달라서, 안 보내는 쪽이
+ *                   새 모델이 나올 때마다 고치지 않아도 된다.
+ *   truncated       상한에 걸려 잘렸다. 잘린 JSON 은 파싱만 실패하고 이유는 안 남아서,
+ *                   호출자가 "모델이 이상한 걸 줬다" 와 "길이가 모자랐다" 를 구분하려면
+ *                   이 값이 필요하다.
  */
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://qrmidnmlethqvdbmnyun.supabase.co';
@@ -46,7 +55,7 @@ const PROVIDERS = {
         .sort()
         .reverse();   // 새 모델이 위로 — 고르는 사람이 먼저 보는 게 최신이어야 한다.
     },
-    async chat(key, model, system, user) {
+    async chat(key, model, system, user, opts) {
       const r = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
@@ -59,9 +68,11 @@ const PROVIDERS = {
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error((j.error && j.error.message) || 'OpenAI ' + r.status);
       const u = j.usage || {};
+      const c0 = (j.choices && j.choices[0]) || {};
       return {
-        text: j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content,
-        usage: { in: u.prompt_tokens || 0, out: u.completion_tokens || 0 }
+        text: c0.message && c0.message.content,
+        usage: { in: u.prompt_tokens || 0, out: u.completion_tokens || 0 },
+        truncated: c0.finish_reason === 'length'
       };
     }
   },
@@ -77,13 +88,13 @@ const PROVIDERS = {
       const j = await r.json();
       return (j.data || []).map((m) => m.id).sort();
     },
-    async chat(key, model, system, user) {
+    async chat(key, model, system, user, opts) {
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model,
-          max_tokens: 2000,
+          max_tokens: (opts && opts.maxTokens) || 2000,
           system,
           messages: [{ role: 'user', content: user }]
         })
@@ -94,7 +105,8 @@ const PROVIDERS = {
       const u = j.usage || {};
       return {
         text: part && part.text,
-        usage: { in: u.input_tokens || 0, out: u.output_tokens || 0 }
+        usage: { in: u.input_tokens || 0, out: u.output_tokens || 0 },
+        truncated: j.stop_reason === 'max_tokens'
       };
     }
   }

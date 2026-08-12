@@ -1,0 +1,479 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "toefl-essentials",
+  "label": "New TOEFL",
+  "derivedFrom": "SET9",
+  "note": "구조만 담는다. 지문·문항 내용은 여기 없다 — AI 가 이 빈 칸을 채운다.",
+  "sections": [
+    {
+      "id": "reading",
+      "label": "Reading",
+      "labelKo": "리딩",
+      "timeLimitSec": 2100,
+      "modules": [
+        {
+          "id": "R1",
+          "label": "Reading Module 1",
+          "blocks": [
+            {
+              "kind": "cloze",
+              "instruction": "Fill in the blank.",
+              "questions": 10,
+              "questionKinds": {
+                "blank": 10
+              },
+              "templateWords": {
+                "min": 40,
+                "max": 60
+              }
+            },
+            {
+              "kind": "cloze",
+              "instruction": "Fill in the blank.",
+              "questions": 10,
+              "questionKinds": {
+                "blank": 10
+              },
+              "templateWords": {
+                "min": 60,
+                "max": 80
+              }
+            },
+            {
+              "kind": "passage",
+              "instruction": "Read a webpage.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "paragraphs": 7,
+              "passageWords": {
+                "min": 70,
+                "max": 110
+              },
+              "choices": 4
+            },
+            {
+              "kind": "passage",
+              "instruction": "Read an email.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "paragraphs": 7,
+              "passageWords": {
+                "min": 50,
+                "max": 70
+              },
+              "choices": 4
+            },
+            {
+              "kind": "passage",
+              "instruction": "Read a notice.",
+              "questions": 3,
+              "questionKinds": {
+                "mcq": 3
+              },
+              "paragraphs": 23,
+              "passageWords": {
+                "min": 190,
+                "max": 290
+              },
+              "choices": 4
+            },
+            {
+              "kind": "passage",
+              "instruction": "Read a notice.",
+              "questions": 3,
+              "questionKinds": {
+                "mcq": 3
+              },
+              "paragraphs": 14,
+              "passageWords": {
+                "min": 140,
+                "max": 200
+              },
+              "choices": 4
+            },
+            {
+              "kind": "passage",
+              "instruction": "Read a passage.",
+              "questions": 5,
+              "questionKinds": {
+                "mcq": 5
+              },
+              "paragraphs": 3,
+              "passageWords": {
+                "min": 160,
+                "max": 240
+              },
+              "choices": 4
+            }
+          ]
+        },
+        {
+          "id": "R2",
+          "label": "Reading Module 2",
+          "blocks": [
+            {
+              "kind": "cloze",
+              "instruction": "Fill in the blank.",
+              "questions": 10,
+              "questionKinds": {
+                "blank": 10
+              },
+              "templateWords": {
+                "min": 60,
+                "max": 80
+              }
+            },
+            {
+              "kind": "passage",
+              "instruction": "Read a passage.",
+              "questions": 5,
+              "questionKinds": {
+                "mcq": 4,
+                "insert": 1
+              },
+              "paragraphs": 5,
+              "passageWords": {
+                "min": 170,
+                "max": 250
+              },
+              "choices": 4
+            }
+          ]
+        }
+      ],
+      "questions": 50
+    },
+    {
+      "id": "listening",
+      "label": "Listening",
+      "labelKo": "리스닝",
+      "timeLimitSec": null,
+      "modules": [
+        {
+          "id": "L1",
+          "label": "Listening Module 1",
+          "blocks": [
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to the question and select the best response from the choices.",
+              "questions": 12,
+              "questionKinds": {
+                "mcq": 12
+              },
+              "perQuestionAudio": true,
+              "choices": 4
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a conversation.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "image": true,
+              "choices": 4,
+              "scriptWords": {
+                "min": 210,
+                "max": 310
+              },
+              "scriptWordsFrom": "same instruction and question count"
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a conversation.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "image": true,
+              "choices": 4,
+              "scriptWords": {
+                "min": 210,
+                "max": 310
+              },
+              "scriptWordsFrom": "same instruction and question count"
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a conversation.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "image": true,
+              "choices": 4,
+              "scriptWords": {
+                "min": 210,
+                "max": 310
+              },
+              "scriptWordsFrom": "same instruction and question count"
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to an announcement.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "image": true,
+              "choices": 4,
+              "scriptWords": {
+                "min": 210,
+                "max": 310
+              },
+              "scriptWordsFrom": "same question count"
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to an announcement.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "image": true,
+              "choices": 4,
+              "scriptWords": {
+                "min": 210,
+                "max": 310
+              },
+              "scriptWordsFrom": "same question count"
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to an announcement.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "image": true,
+              "choices": 4,
+              "scriptWords": {
+                "min": 210,
+                "max": 310
+              },
+              "scriptWordsFrom": "same question count"
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a talk.",
+              "questions": 4,
+              "questionKinds": {
+                "mcq": 4
+              },
+              "image": true,
+              "choices": 4,
+              "scriptWords": {
+                "min": 350,
+                "max": 530
+              },
+              "scriptWordsFrom": "same instruction and question count"
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a talk.",
+              "questions": 4,
+              "questionKinds": {
+                "mcq": 4
+              },
+              "image": true,
+              "choices": 4,
+              "scriptWords": {
+                "min": 350,
+                "max": 530
+              },
+              "scriptWordsFrom": "same instruction and question count"
+            }
+          ]
+        },
+        {
+          "id": "L2",
+          "label": "Listening Module 2",
+          "blocks": [
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to the question and select the best response from the choices.",
+              "questions": 3,
+              "questionKinds": {
+                "mcq": 3
+              },
+              "perQuestionAudio": true,
+              "choices": 4
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a conversation.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "scriptWords": {
+                "min": 210,
+                "max": 310
+              },
+              "image": true,
+              "choices": 4
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a conversation.",
+              "questions": 2,
+              "questionKinds": {
+                "mcq": 2
+              },
+              "scriptWords": {
+                "min": 210,
+                "max": 310
+              },
+              "image": true,
+              "choices": 4
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a talk.",
+              "questions": 4,
+              "questionKinds": {
+                "mcq": 4
+              },
+              "scriptWords": {
+                "min": 350,
+                "max": 530
+              },
+              "image": true,
+              "choices": 4
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a talk.",
+              "questions": 4,
+              "questionKinds": {
+                "mcq": 4
+              },
+              "scriptWords": {
+                "min": 360,
+                "max": 540
+              },
+              "image": true,
+              "choices": 4
+            }
+          ]
+        }
+      ],
+      "questions": 47
+    },
+    {
+      "id": "speaking",
+      "label": "Speaking",
+      "labelKo": "스피킹",
+      "timeLimitSec": null,
+      "modules": [
+        {
+          "id": "S1",
+          "label": "Task 1 · Listen and Repeat",
+          "blocks": [
+            {
+              "kind": "record-set",
+              "instruction": "Listen and Repeat",
+              "questions": 7,
+              "questionKinds": {
+                "repeat": 7
+              },
+              "scriptWords": {
+                "min": 10,
+                "max": 20
+              },
+              "perQuestionAudio": true,
+              "introScript": true,
+              "prepSec": 3,
+              "respondSec": 20
+            }
+          ]
+        },
+        {
+          "id": "S2",
+          "label": "Task 2 · Interview",
+          "blocks": [
+            {
+              "kind": "record-set",
+              "instruction": "Answer the interviewer’s questions.",
+              "questions": 4,
+              "questionKinds": {
+                "interview": 4
+              },
+              "scriptWords": {
+                "min": 20,
+                "max": 40
+              },
+              "perQuestionAudio": true,
+              "introScript": true,
+              "prepSec": 3,
+              "respondSec": 45
+            }
+          ]
+        }
+      ],
+      "questions": 11
+    },
+    {
+      "id": "writing",
+      "label": "Writing",
+      "labelKo": "라이팅",
+      "timeLimitSec": null,
+      "modules": [
+        {
+          "id": "W1",
+          "label": "Build a Sentence",
+          "blocks": [
+            {
+              "kind": "build-set",
+              "instruction": "Make an appropriate sentence.",
+              "questions": 10,
+              "questionKinds": {
+                "build": 10
+              },
+              "slots": {
+                "min": 10,
+                "max": 20
+              }
+            }
+          ]
+        },
+        {
+          "id": "W2",
+          "label": "Write an Email",
+          "blocks": [
+            {
+              "kind": "free-write",
+              "instruction": "",
+              "questions": 1,
+              "questionKinds": {
+                "email": 1
+              },
+              "minWords": 80
+            }
+          ]
+        },
+        {
+          "id": "W3",
+          "label": "Write for an Academic Discussion",
+          "blocks": [
+            {
+              "kind": "free-write",
+              "instruction": "",
+              "questions": 1,
+              "questionKinds": {
+                "discussion": 1
+              },
+              "minWords": 100
+            }
+          ]
+        }
+      ],
+      "questions": 12
+    }
+  ],
+  "questions": 120
+}
