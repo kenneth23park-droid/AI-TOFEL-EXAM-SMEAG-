@@ -125,13 +125,40 @@ window.SG_FS = (function () {
     var mod = e.ctrlKey || e.metaKey;
     var stop =
       k === 'F11' || k === 'F12' || k === 'ContextMenu' ||
-      (mod && e.shiftKey && /^[ijc]$/i.test(k)) ||        // 개발자 도구
+      (mod && e.shiftKey && /^[ijcw]$/i.test(k)) ||       // 개발자 도구, 창 통째로 닫기
       (mod && /^[rwntpsuo]$/i.test(k)) ||                 // 새로고침·닫기·새 창·인쇄·저장·소스
+      (e.altKey && k === 'F4') ||                         // 윈도우 창 닫기
       (e.altKey && (k === 'ArrowLeft' || k === 'ArrowRight'));   // 뒤로·앞으로
     if (stop) { e.preventDefault(); e.stopPropagation(); }
   }
 
   function onContext(e) { if (locked()) e.preventDefault(); }
+
+  /* ── 창 닫기 막기 ──────────────────────────────────────────
+   * 창 오른쪽 위의 X 는 운영체제 것이라 웹이 지울 수 없다. 웹이 할 수 있는 건 하나,
+   * 닫으려는 순간에 브라우저가 "정말 나가시겠습니까" 를 띄우게 만드는 것뿐이다.
+   * 그래서 시험이 도는 동안에만 그 문을 세운다(hold(true) — exam-shell 이 켠다).
+   * 시험 목록·대시보드처럼 학생이 오가는 화면에서는 켜지 않는다.
+   *
+   * 우리 코드가 스스로 페이지를 옮길 때(Exit 승인, 재응시)는 물어볼 이유가 없다.
+   * 그 자리에서 allow() 를 부르면 이번 한 번만 조용히 지나간다.
+   */
+  var holding = false;
+  var allowOnce = false;
+
+  function onBeforeUnload(e) {
+    if (!holding || allowOnce) { allowOnce = false; return; }
+    if (!armed()) return;                 // 감독관이 풀어 준 뒤에는 붙잡지 않는다
+    e.preventDefault();
+    e.returnValue = '';                   // 옛 브라우저는 이 값이 있어야 묻는다
+    return '';
+  }
+
+  /** 시험이 도는 동안 창 닫기·새로고침을 브라우저 확인창으로 한 번 붙잡는다. */
+  function hold(on2) { holding = on2 !== false; }
+
+  /** 우리가 옮기는 이번 한 번은 묻지 않는다. 옮기기 직전에 부른다. */
+  function allow() { allowOnce = true; }
 
   /* ── 덮개 ──────────────────────────────────────────────── */
 
@@ -290,6 +317,7 @@ window.SG_FS = (function () {
     document.addEventListener('contextmenu', onContext, true);
     document.addEventListener('fullscreenchange', guard);
     document.addEventListener('webkitfullscreenchange', guard);
+    window.addEventListener('beforeunload', onBeforeUnload);
     guard();
   }
 
@@ -368,6 +396,7 @@ window.SG_FS = (function () {
     on: on, enter: enter, exit: exit,
     arm: arm, armed: armed, armAndEnter: armAndEnter, release: release,
     locked: locked, requestExit: requestExit, guard: guard,
+    hold: hold, allow: allow, holding: function () { return holding; },
     fit: fit, refit: refit, zoom: function () { return zoom; }
   };
 })();

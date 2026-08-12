@@ -641,6 +641,7 @@ window.SG_RUNTIME = (function () {
         STORE.pushEvent('exit_test', machine && machine.current() ? machine.current().id : '',
           { approved_by: who.id });
       } catch (e) {}
+      if (window.SG_FS) SG_FS.allow();        // 승인받고 나가는 길이다 — 다시 묻지 않는다
       window.location.href = BASE + 'tests.html';
     };
   }
@@ -688,6 +689,14 @@ window.SG_RUNTIME = (function () {
         return who;
       }
     };
+  }
+
+  /* 시험이 도는 동안에는 창을 못 닫는다. 창 오른쪽 위의 X 는 운영체제 것이라 지울 수
+     없고, 웹이 할 수 있는 건 그것을 눌렀을 때 브라우저가 한 번 되묻게 만드는 것뿐이다.
+     그 문을 여기서 연다 — 시험 화면에서만, 학생 세션일 때만(SG_FS.armed 안에서 판단).
+     Exit 은 그대로 감독관 승인으로 나간다. */
+  function holdWindow() {
+    if (window.SG_FS && typeof SG_FS.hold === 'function') SG_FS.hold(true);
   }
 
   function bindLifecycle() {
@@ -900,6 +909,7 @@ window.SG_RUNTIME = (function () {
         STORE.pushEvent('retake', session || '', { approved_by: who.id, to: target });
         STORE.flushAnswers();
       } catch (e) {}
+      if (window.SG_FS) SG_FS.allow();        // 승인받은 재응시다 — 다시 묻지 않는다
       window.location.href = target;
     };
 
@@ -1164,6 +1174,7 @@ window.SG_RUNTIME = (function () {
     bindSubbar(session);
     bindExit();
     bindLifecycle();
+    holdWindow();
     machine.installHistoryGuard();
     machine.start(startIndex);
 
