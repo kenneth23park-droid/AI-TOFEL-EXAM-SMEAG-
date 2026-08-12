@@ -56,6 +56,9 @@
   <!-- 코멘트 — 전체 총평과 영역 총평 -->
   <div class="card mt-16 hide" id="feedback"></div>
 
+  <!-- 학습 계획 — 이 성적에서 나온 "그래서 무엇을 하나". 총평 바로 다음 자리다. -->
+  <div class="card mt-16 hide" id="plan"></div>
+
   <!-- 영역 필터 -->
   <div class="rv-tabs hide" id="tabs"></div>
 
@@ -274,40 +277,65 @@
     });
   }
 
-  /* 코멘트 생성 한 번 — 생성한 뒤 sg_comments 에 영역별·문항별로 저장하고 다시 그린다.
-   * 부르는 자리가 둘(선생님 줄의 Generate, 요약의 연필)이라 여기 한 군데에 둔다. */
+  /* 리뷰 생성 한 번 — 총평·문항별 코멘트·학습 계획이 한 번에 나온다.
+   *
+   * 저장은 서버가 한다. 예전에는 여기서 sg_comments 에 한 줄씩 넣었는데, 학생은
+   * 그 표에 쓸 수 없어서(RLS) 선생님이 눌러 줄 때까지 학생 화면에는 점수만 남았다.
+   * 지금은 /api/feedback 이 service_role 로 쓰고, 우리는 다시 읽어 그린다.
+   *
+   * 부르는 자리가 셋(선생님 줄의 Generate, 요약의 연필, 학생 화면의 자동 요청)이라
+   * 여기 한 군데에 둔다. */
   function runAiComments(provider, model, lang, btn, say) {
+    if (!RES || !DET) return Promise.resolve();
     if (say) say.textContent = '…';
     if (btn) btn.disabled = true;
     return SG_COMMENTS.generate({
-      provider: provider, model: model, lang: lang,
-      attempt: SG_COMMENTS.attemptFor(RES, DET)
+      session: SESSION,
+      owner: OWNER || undefined,
+      provider: provider || undefined,
+      model: model || undefined,
+      lang: lang,
+      // 다시 쓰는 것(force)은 선생님이 누른 때뿐이다. 학생의 자동 요청은 없을 때만 쓴다.
+      force: !!(STAFF && btn),
+      questions: SG_COMMENTS.questionsFor(DET)
     }).then(function (out) {
-      var jobs = [];
-      (out.sections || []).forEach(function (s) {
-        if (!s || !s.scope) return;
-        jobs.push(SG_COMMENTS.save({
-          owner: OWNER_ID, session: SESSION, scope: s.scope, question_id: '',
-          source: 'ai', model: out.model, lang: out.lang,
-          body: s.summary || '', strengths: s.strengths || [], improvements: s.improvements || []
-        }));
-      });
-      (out.questions || []).forEach(function (q) {
-        if (!q || !q.question_id) return;
-        jobs.push(SG_COMMENTS.save({
-          owner: OWNER_ID, session: SESSION, scope: 'question', question_id: q.question_id,
-          source: 'ai', model: out.model, lang: out.lang, body: q.body || ''
-        }));
-      });
-      return Promise.all(jobs).then(function () {
-        if (say) say.textContent = '';
-        if (btn) btn.disabled = false;
-        reloadComments();
-      });
+      /* 저장이 실패했으면(예: 아직 ai_review_plan.sql 을 안 돌린 DB) 조용히 넘기지
+         않는다 — 다시 읽어 봐야 아무 것도 없고, 아무도 이유를 모른다. */
+      if (say) say.textContent = (out && out.saveError) ? out.saveError : '';
+      if (btn) btn.disabled = false;
+      return reloadComments();
     })['catch'](function (e) {
       if (say) say.textContent = String(e.message || e);
       if (btn) btn.disabled = false;
     });
+  }
+
+  /* 학생 화면에서 리뷰가 아직 없으면 여기서 한 번 부른다.
+   *
+   * 제출 직후라면 응시 기기가 이미 불렀다(exam-shell.js). 하지만 오프라인 시험장에서
+   * 치른 응시는 그 자리에서 부를 수 없었고, 그런 답안지가 리뷰 화면에 오면 점수만
+   * 있고 "왜" 가 없다. 온라인이 된 그 순간이 부를 자리다.
+   * 서버가 이미 리뷰가 있으면 모델을 부르지 않고 돌아오므로, 헛돈은 들지 않는다. */
+  var ASKED = false, TASKS_READY = false;
+  function autoReview() {
+    if (ASKED || STAFF || !RES || !DET) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    if (OWNER && ME && OWNER !== ME.id) return;             // 남의 답안지는 부르지 않는다
+    if (!OWNER_ID || !window.SG_AUTH || !SG_AUTH.user()) return;
+    if (CMT.some(function (c) { return c.source === 'ai'; })) return;
+    // 아직 아무것도 채점되지 않았으면 쓸 말이 없다. 채점이 끝나면 다시 들른다.
+    if (!TASKS_READY || !VIEW || VIEW.overall === null) return;
+
+    /* 이 세트에 라이팅·스피킹이 있는데 아직 채점 행이 없다면 채점 중이다(보통 1분).
+       그때 리뷰를 쓰면 W·S 를 통째로 빼놓은 리뷰가 최종본으로 남는다. 30분이 지나도
+       행이 없으면 자동 채점이 아예 돌지 않은 것이니, 있는 것만으로 쓴다. */
+    if (!TASKS.length && SG_RESULTS.productive(RES).length) {
+      var age = RES.submitted_at ? (Date.now() - new Date(RES.submitted_at)) : 0;
+      if (age < 30 * 60 * 1000) return;
+    }
+
+    ASKED = true;
+    runAiComments('', '', document.documentElement.lang === 'ko' ? 'ko' : 'en', null, null);
   }
 
   function paintSections(det) {
@@ -620,7 +648,11 @@
 
   function paintFeedback(det) {
     var order = ['overall', 'reading', 'listening', 'writing', 'speaking'];
-    var any = CMT.some(function (c) { return c.scope !== 'question'; });
+    /* 'plan' 은 아래 자기 카드에 그려진다. 여기서 세면 계획만 있고 총평이 없는
+       답안지에 "아직 코멘트가 없습니다" 다섯 줄짜리 빈 카드가 선다. */
+    var any = CMT.some(function (c) {
+      return c.scope !== 'question' && c.scope !== 'plan';
+    });
     if (!any && !STAFF) { $('feedback').classList.add('hide'); return; }
 
     var html = '<h2 style="font-size:19px;font-weight:820">' +
@@ -640,6 +672,100 @@
     $('feedback').innerHTML = html;
     show('feedback');
     wireEditors();
+  }
+
+  /* ── 학습 계획 ────────────────────────────────────────────
+   *
+   * 총평은 "무엇이 어땠는지" 를 말하고, 여기는 "그래서 무엇을 하는지" 를 말한다.
+   * 둘을 한 카드에 섞으면 계획이 총평의 끝문장처럼 읽히고, 학생은 읽고 나가 버린다.
+   *
+   * 전문은 sg_comments.data(jsonb)에 있다. 그 칸이 없는 DB 라면 body 와
+   * improvements 만 남으므로, 최소한 요약과 할 일 목록은 그려진다. */
+  function paintPlan() {
+    var plan = commentsFor('plan', '')[0];
+    if (!plan) { $('plan').classList.add('hide'); return; }
+    var d = plan.data || {};
+
+    var html = '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">' +
+      '<h2 style="font-size:19px;font-weight:820">' +
+        bi('What to study next', '앞으로의 학습 계획') + '</h2>' +
+      '<span class="cm-badge">AI</span>' +
+      (plan.model ? '<span class="muted" style="font-size:11px">' + esc(plan.model) + '</span>' : '') +
+    '</div>';
+
+    if (plan.body) {
+      html += '<p style="font-size:14px;margin-top:8px">' + esc(plan.body) + '</p>';
+    }
+
+    /* 어디를 먼저 손보나. 약한 영역부터 나오고, 목표 밴드가 붙는다. */
+    if (d.focus && d.focus.length) {
+      html += '<div class="mt-16"><div style="font-size:13px;font-weight:800">' +
+        bi('Focus', '집중할 영역') + '</div>' +
+        '<div class="grid cols-3 mt-8">' +
+        d.focus.slice(0, 3).map(function (f) {
+          if (!f) return '';
+          return '<div class="card" style="padding:12px">' +
+            '<div style="font-weight:800;font-size:13.5px">' + esc(f.skill || '') + '</div>' +
+            (f.target ? '<div style="color:var(--brand);font-weight:850;font-size:16px;margin-top:2px">' +
+                          esc(f.target) + '</div>' : '') +
+            (f.why ? '<div class="muted" style="font-size:12.5px;margin-top:4px">' +
+                       esc(f.why) + '</div>' : '') +
+          '</div>';
+        }).join('') + '</div></div>';
+    }
+
+    /* 무엇을 어떻게. "더 공부하세요" 가 아니라 한 번에 몇 분, 얼마나 자주까지 적힌다. */
+    if (d.study && d.study.length) {
+      html += '<div class="mt-16"><div style="font-size:13px;font-weight:800">' +
+        bi('Drills', '학습 과제') + '</div><ul class="cm-list" style="margin-top:6px">' +
+        d.study.slice(0, 6).map(function (s) {
+          if (!s) return '';
+          var meta = [];
+          if (s.minutes) meta.push(esc(s.minutes) + ' min');
+          if (s.how_often) meta.push(esc(s.how_often));
+          return '<li><b>' + esc(s.title || '') + '</b>' +
+            (meta.length ? ' <span class="muted" style="font-size:11.5px">· ' +
+                             meta.join(' · ') + '</span>' : '') +
+            (s.detail ? '<div style="font-size:13px;margin-top:2px">' + esc(s.detail) + '</div>' : '') +
+          '</li>';
+        }).join('') + '</ul></div>';
+    }
+
+    /* 2주치 일정. 계획이 언제 끝나는지 보이지 않으면 계획이 아니라 조언이다. */
+    if (d.weeks && d.weeks.length) {
+      html += '<div class="mt-16"><div style="font-size:13px;font-weight:800">' +
+        bi('Next two weeks', '2주 일정') + '</div>' +
+        d.weeks.slice(0, 4).map(function (w) {
+          if (!w) return '';
+          return '<div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--line-2)">' +
+            '<div style="font-size:12.5px;font-weight:800">' +
+              bi('Week ' + (w.week || ''), (w.week || '') + '주차') +
+              (w.goal ? ' <span style="font-weight:600">— ' + esc(w.goal) + '</span>' : '') + '</div>' +
+            ((w.tasks && w.tasks.length)
+              ? '<ul class="cm-list">' + w.tasks.slice(0, 4).map(function (t) {
+                  return '<li>' + esc(t) + '</li>';
+                }).join('') + '</ul>'
+              : '') +
+          '</div>';
+        }).join('') + '</div>';
+    }
+
+    if (d.next_test) {
+      html += '<div class="mt-16" style="padding-top:12px;border-top:1px solid var(--line)">' +
+        '<div style="font-size:13px;font-weight:800">' +
+          bi('On the next mock test', '다음 모의고사에서는') + '</div>' +
+        '<div style="font-size:13.5px;margin-top:4px">' + esc(d.next_test) + '</div></div>';
+    }
+
+    /* data 칸이 없어 계획이 요약뿐인 경우 — 저장해 둔 할 일 목록이라도 편다. */
+    if (!d.study && !d.weeks && plan.improvements && plan.improvements.length) {
+      html += '<ul class="cm-list mt-8">' + plan.improvements.map(function (x) {
+        return '<li>' + esc(x) + '</li>';
+      }).join('') + '</ul>';
+    }
+
+    $('plan').innerHTML = html;
+    show('plan');
   }
 
   /* 선생님·관리자 줄 — AI 코멘트 생성기. 모델은 여기서 고른다. */
@@ -867,6 +993,7 @@
   function reloadTasks() {
     return SG_RESULTS.tasks(SESSION, OWNER_ID).then(function (rows) {
       TASKS = rows || [];
+      TASKS_READY = true;
       VIEW = SG_BAND.of(RES, TASKS);
       paintSummary(RES, DET, WHO);
       paintSections(DET);
@@ -874,6 +1001,9 @@
       // 라이팅 리뷰의 0~5 점수와 루브릭이 이 응답에서 온다. 보던 자리는 지킨다.
       if (WRITE) WRITE.setTasks(TASKS);
       if (SPEAK) SPEAK.setTasks(TASKS);
+      /* 리뷰는 W·S 채점까지 읽은 뒤에 부른다 — 그 전에 부르면 라이팅·스피킹에 대해
+         "아직 채점 전" 이라고만 적힌 리뷰가 저장되고, 그게 최종본으로 남는다. */
+      autoReview();
     }).catch(function () {});
   }
 
@@ -882,7 +1012,9 @@
     return SG_COMMENTS.list(OWNER_ID, SESSION).then(function (rows) {
       CMT = rows || [];
       paintFeedback(DET);
+      paintPlan();
       paintRows();
+      autoReview();
     });
   }
 

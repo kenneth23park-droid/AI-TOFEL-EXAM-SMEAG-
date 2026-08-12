@@ -2,26 +2,35 @@
  *
  * 선생님이 손으로 쓴 코멘트와 AI 가 만든 코멘트가 같은 표(sg_comments)에 함께 산다.
  * 학생 화면에서는 한자리에 나란히 보여야 하고, 출처는 source 로만 갈리기 때문이다.
- * 읽기는 답안지 주인과 선생님·관리자 둘 다, 쓰기는 선생님·관리자만 — 정본은 RLS 다.
+ * 읽기는 답안지 주인과 선생님·관리자 둘 다, 손으로 쓰기는 선생님·관리자만 — 정본은 RLS 다.
+ * AI 리뷰는 이 파일이 저장하지 않는다. 서버(/api/feedback)가 service_role 로 쓴다 —
+ * 학생도 자기 리뷰를 부를 수 있어야 하는데, 학생 토큰으로는 이 표에 못 쓰기 때문이다.
  *
  * 대상(scope · question_id)
  *   { scope:'overall',  question_id:'' }        전체 총평
  *   { scope:'reading',  question_id:'' }        영역 총평
  *   { scope:'question', question_id:'R1-7' }    문항별
+ *   { scope:'plan',     question_id:'' }        학습 계획 — 전문은 data 칸(jsonb)
  *
  * 노출 전역: window.SG_COMMENTS
  *   SG_COMMENTS.list(owner, session)   → Promise<[코멘트]>
- *   SG_COMMENTS.save(row)              → Promise<코멘트|null>  같은 대상이면 덮어쓴다
+ *   SG_COMMENTS.save(row)              → Promise<코멘트|null>  선생님이 손으로 쓴 것
  *   SG_COMMENTS.remove(id)             → Promise<boolean>
  *   SG_COMMENTS.providers()            → Promise<[{id,label,ready,why,models,default}]>
- *   SG_COMMENTS.generate(payload)      → Promise<{sections,questions,provider,model}>
- *   SG_COMMENTS.attemptFor(result, detail)  AI 에 보낼 채점 요약을 만든다(신원은 빼고)
+ *   SG_COMMENTS.generate(opts)         → Promise<{sections,questions,plan,saved,…}>
+ *                                        AI 리뷰 한 벌. 서버가 쓰고 서버가 저장한다.
+ *   SG_COMMENTS.questionsFor(detail)   서버에 보낼 문항 메타데이터(내 답은 빼고)
  */
 window.SG_COMMENTS = (function () {
   'use strict';
 
-  var SELECT = 'id,owner,session,question_id,scope,source,author,author_name,model,lang,' +
-               'body,strengths,improvements,created_at,updated_at';
+  var BASE = 'id,owner,session,question_id,scope,source,author,author_name,model,lang,' +
+             'body,strengths,improvements,created_at,updated_at';
+  /* data 는 학습 계획이 사는 칸이다(supabase/ai_review_plan.sql). 아직 그 SQL 을
+     돌리지 않은 DB 에서는 이 칸을 고르는 순간 PostgREST 가 400 을 내고 코멘트가
+     통째로 사라진다 — 없으면 없는 대로 예전 칸만 읽는다. */
+  var SELECT = BASE + ',data';
+  var HAS_DATA = true;
 
   function merge() {
     var out = {}, i, k;
@@ -51,11 +60,17 @@ window.SG_COMMENTS = (function () {
 
   function list(owner, session) {
     if (!owner || !session) return Promise.resolve([]);
-    return rest('sg_comments?select=' + SELECT +
-                '&owner=eq.' + encodeURIComponent(owner) +
-                '&session=eq.' + encodeURIComponent(session) +
-                '&order=updated_at.desc')
-      .then(function (rows) { return rows || []; });
+    var tail = '&owner=eq.' + encodeURIComponent(owner) +
+               '&session=eq.' + encodeURIComponent(session) +
+               '&order=updated_at.desc';
+    return rest('sg_comments?select=' + (HAS_DATA ? SELECT : BASE) + tail)
+      .then(function (rows) {
+        if (rows || !HAS_DATA) return rows || [];
+        // data 칸이 없는 DB 였다. 한 번만 알아채고 그 뒤로는 묻지 않는다.
+        HAS_DATA = false;
+        return rest('sg_comments?select=' + BASE + tail)
+          .then(function (again) { return again || []; });
+      });
   }
 
   /** 같은 대상(owner·session·source·scope·question_id)이면 덮어쓴다. */
@@ -113,49 +128,51 @@ window.SG_COMMENTS = (function () {
       .catch(function () { return []; });
   }
 
-  function generate(payload) { return api('POST', payload); }
+  /**
+   * AI 리뷰 한 벌을 만든다. 점수·답안은 서버가 DB 에서 직접 읽고, 저장까지 서버가
+   * 한다 — 여기서 넘기는 것은 "어느 응시인지"와 문항 메타데이터뿐이다.
+   *
+   * @param opts { session, questions, owner?, provider?, model?, lang?, force? }
+   */
+  function generate(opts) {
+    opts = opts || {};
+    return api('POST', {
+      session: opts.session,
+      owner: opts.owner || undefined,
+      provider: opts.provider || undefined,
+      model: opts.model || undefined,
+      lang: opts.lang || undefined,
+      force: !!opts.force,
+      questions: opts.questions || []
+    });
+  }
 
-  /* AI 에게 보낼 채점 요약. 이름·학번·이메일은 넣지 않는다 — 코멘트를 쓰는 데
-   * 필요 없고, 필요 없는 것을 밖으로 내보내지 않는 게 기본이다.
-   * 틀린 문항과 서술형 답안만 실어 보낸다(맞은 문항 90개는 할 말이 없다).
+  /* 서버에 보낼 문항 메타데이터. 여기서 나가는 것은 **문항 쪽 사실**이다 —
+   * 어느 문항인지, 무엇을 물었는지, 정답이 무엇인지, 맞았는지. 학생이 무엇이라
+   * 답했는지는 보내지 않는다: 서버가 sg_results.answers 에서 직접 읽는다(위조 방지).
    *
    * Build a Sentence 는 빼고 보낸다 — 정답표대로 어순을 맞추는 문항이라 리뷰 화면이
    * 이미 빈칸마다 맞고 틀림과 정답을 나란히 보여 준다. AI 가 여기에 덧붙일 말은
-   * 정답을 다시 읽어 주는 것뿐이고, 채점(sg_task_scores)에서도 이미 빠져 있다. */
-  function attemptFor(result, detail) {
-    var wrong = [], open = [];
-    (detail.rows || []).forEach(function (r) {
+   * 정답을 다시 읽어 주는 것뿐이고, 채점(sg_task_scores)에서도 이미 빠져 있다.
+   *
+   * 맞은 문항도 보내지 않는다 — 할 말이 없고, 100문항이 프롬프트를 채울 뿐이다. */
+  function questionsFor(detail) {
+    var out = [];
+    ((detail && detail.rows) || []).forEach(function (r) {
       if (r.kind === 'build') return;
-      if (r.ok === false && wrong.length < 40) {
-        wrong.push({
-          question_id: r.qid, no: r.no, section: r.section, kind: r.kind,
-          prompt: String(r.prompt || '').slice(0, 200),
-          given: String(r.given == null ? '' : r.given).slice(0, 200),
-          correct: String(r.key == null ? '' : r.key).slice(0, 200)
-        });
-      } else if (r.ok === null && typeof r.given === 'string' &&
-                 r.given && r.given.indexOf('idb:') !== 0 && open.length < 10) {
-        open.push({
-          question_id: r.qid, section: r.section, kind: r.kind,
-          prompt: String(r.prompt || '').slice(0, 300),
-          answer: r.given.slice(0, 3000)
-        });
-      }
+      if (r.ok !== false && r.ok !== null) return;      // 맞은 문항은 뺀다
+      out.push({
+        question_id: r.qid, no: r.no, section: r.section, kind: r.kind,
+        prompt: String(r.prompt || '').slice(0, 300),
+        correct: String(r.key == null ? '' : r.key).slice(0, 200),
+        ok: r.ok
+      });
     });
-    return {
-      set_code: result.set_code || '',
-      submitted_at: result.submitted_at || '',
-      score: detail.score, total: detail.total,
-      percent: detail.total ? Math.round(detail.score / detail.total * 1000) / 10 : 0,
-      by_section: detail.bySection || {},
-      note: 'writing and speaking are not auto-scored; comment on the submitted answers themselves',
-      wrong_questions: wrong,
-      open_answers: open
-    };
+    return out;
   }
 
   return {
     list: list, save: save, remove: remove,
-    providers: providers, generate: generate, attemptFor: attemptFor
+    providers: providers, generate: generate, questionsFor: questionsFor
   };
 })();

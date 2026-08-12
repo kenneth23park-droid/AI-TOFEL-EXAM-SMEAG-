@@ -6,10 +6,13 @@
  *   채점(sg_task_scores)에서도 이미 빠져 있으니 코멘트만 혼자 남으면 안 된다.
  *
  * 두 자리를 함께 지킨다
- *   1. 보내지 않는다 — attemptFor 의 wrong_questions 에 build 가 없어야 한다.
- *      /api/feedback 은 "wrong_questions 와 open_answers 에 있는 것만" 코멘트한다.
+ *   1. 보내지 않는다 — questionsFor 가 서버에 넘기는 목록에 build 가 없어야 한다.
+ *      /api/feedback 은 "받은 문항 목록에 있는 것만" 코멘트한다.
  *   2. 그리지 않는다 — 예전에 저장된 AI 초안이 남아 있어도 BAS 칸에는 접는다.
  *      선생님이 직접 쓴 코멘트는 그대로 남는다.
+ *
+ * 겸사겸사 하나 더: 이 목록에는 **내 답이 실리지 않는다**. 채점 근거가 되는 글은
+ * 언제나 서버가 sg_results.answers 에서 직접 읽는다(/api/score 와 같은 규칙).
  *
  * 실행: node studyground/tests/test_ai_review_skips_build.js
  */
@@ -31,8 +34,8 @@ var SRC = path.join(__dirname, '..', 'sg2', 'assets', 'sg-comments.js');
 global.window = {};
 require(SRC);
 var SG_COMMENTS = global.window.SG_COMMENTS;
-ok(SG_COMMENTS && typeof SG_COMMENTS.attemptFor === 'function',
-   'A: SG_COMMENTS.attemptFor 가 있어야 한다');
+ok(SG_COMMENTS && typeof SG_COMMENTS.questionsFor === 'function',
+   'A: SG_COMMENTS.questionsFor 가 있어야 한다');
 
 var DET = {
   score: 2, total: 4,
@@ -48,13 +51,14 @@ var DET = {
       prompt: 'Write an email', given: 'Dear professor, '.repeat(10), ok: null }
   ]
 };
-var att = SG_COMMENTS.attemptFor({ set_code: 'SET 9', submitted_at: '' }, DET);
-var wrongIds = att.wrong_questions.map(function (q) { return q.question_id; });
+var sent = SG_COMMENTS.questionsFor(DET);
+var ids = sent.map(function (q) { return q.question_id; });
 
-ok(wrongIds.indexOf('W1-3') < 0, 'B: Build a Sentence 오답은 AI 에 보내지 않는다');
-ok(wrongIds.indexOf('R1-3') >= 0, 'C: 다른 오답은 그대로 보낸다');
-ok(att.open_answers.some(function (q) { return q.question_id === 'W2-1'; }),
-   'D: 서술형 답안은 그대로 보낸다');
+ok(ids.indexOf('W1-3') < 0, 'B: Build a Sentence 오답은 AI 에 보내지 않는다');
+ok(ids.indexOf('R1-3') >= 0, 'C: 다른 오답은 그대로 보낸다');
+ok(ids.indexOf('W2-1') >= 0, 'D: 서술형 문항도 그대로 보낸다(코멘트 대상이다)');
+ok(sent.every(function (q) { return !('given' in q) && !('answer' in q); }),
+   'D2: 학생의 답은 보내지 않는다 — 서버가 DB 에서 직접 읽는다');
 
 /* ── 2. 그리지 않는다 ─────────────────────────────────────────────────── */
 
