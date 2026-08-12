@@ -82,6 +82,14 @@ body.exam-body {
 /* primary(Next/Continue)도 관찰값은 동일한 흰 알약이다 — 색 대비를 만들지 않는다. */
 .exam-btn.primary { background: #fff; color: var(--ink); font-weight: 750; }
 .exam-btn.primary:hover { background: #f4f4fb; }
+/* 오디오가 끝나기 전의 Next — 자리는 지키되 눌리지 않는 것이 보여야 한다.
+   .primary 의 흰 알약이 위의 :disabled 를 덮으므로 여기서 따로 끈다. */
+.exam-btn.primary:disabled,
+.exam-btn.is-audio-locked,
+.exam-btn.is-audio-locked:hover {
+  background: transparent; color: rgba(255, 255, 255, .55);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28); cursor: not-allowed;
+}
 .exam-btn.danger { background: #fff; color: var(--ink); }
 /* 학생 화면에는 없고 관리자에게만 서 있는 Back·Next — 검수용이라는 표시로 초록 테두리를
    두른다. 실수로 학생 흐름과 헷갈리지 않게 하려는 것뿐, 동작은 같다(exam-shell.js). */

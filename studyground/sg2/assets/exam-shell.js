@@ -267,6 +267,19 @@ window.SG_RUNTIME = (function () {
     return nav;
   }
 
+  /* ── 오디오 재생 중 Next 잠금 ──────────────────────────────
+     리스닝은 질문 오디오가 끝나기 전에 다음으로 넘어갈 수 없다 — 넘기면 그 문항의
+     음성을 영영 못 듣는다(재생은 1회뿐). 리스닝 렌더러(exam-render-listening.js)가
+     재생을 시작할 때 window.SG_AUDIO_GATE 를 올리고, 끝나면 done 을 세운 뒤
+     SG_RUNTIME.syncNav() 로 여기를 다시 부른다. SG_SCREEN_NAV 와 같은 이유로
+     화면 id 가 지금 화면과 같을 때만 인정한다 — 떠난 화면의 잠금이 남지 않게. */
+  function audioLocked() {
+    var g = window.SG_AUDIO_GATE;
+    var sc = machine && machine.current();
+    if (!g || !sc || g.screenId !== sc.id) return false;
+    return !g.done;
+  }
+
   function sectionLabel(section) {
     var s = String(section || '');
     if (!s) return '';
@@ -406,8 +419,17 @@ window.SG_RUNTIME = (function () {
       back.disabled = !inScreen && !(admin && machine && machine.currentIndex() > 0);
       back.classList.toggle('is-admin', admin && !inScreen);
     }
+    /* Next — 오디오가 도는 동안에는 비활성. 감추지 않고 회색으로 남겨 둔다: 사라졌다
+       다시 나타나면 눌러도 되는 자리인지 학생이 헷갈린다. 관리자 검수는 통과시킨다. */
     var adv = document.getElementById('btn-advance');
-    if (adv) adv.classList.toggle('is-admin', admin && (speakingLive || announcement));
+    if (adv) {
+      adv.classList.toggle('is-admin', admin && (speakingLive || announcement));
+      var gated = !admin && audioLocked();
+      adv.disabled = gated;
+      adv.classList.toggle('is-audio-locked', gated);
+      if (gated) adv.setAttribute('title', 'Available when the audio ends');
+      else adv.removeAttribute('title');
+    }
 
     /* Review 는 화면 단위 플래그다 — 화면이 바뀌면 눌린 상태를 다시 읽어 온다. */
     var rev = document.getElementById('btn-review');
@@ -967,6 +989,9 @@ window.SG_RUNTIME = (function () {
 
     document.getElementById('btn-advance').onclick = function () {
       if (machine.status() === 'submitting' || machine.status() === 'submitted') return;
+      /* 오디오가 끝나기 전에는 넘기지 않는다. disabled 로도 막히지만 키보드 단축키나
+         프로그램 호출(F12)로 들어오는 클릭까지 여기서 한 번 더 막는다. */
+      if (!adminOn() && audioLocked()) return;
       /* 화면 안에 아직 안 본 문항이 남았으면 화면을 넘기지 않는다 — 다음 문항을 편다.
          마지막 문항이면 next() 가 false 라 그대로 다음 화면(=다음 지문)으로 간다. */
       var nav = screenNav();

@@ -116,6 +116,27 @@
     return !!(audio && audio.hasAttribute && audio.hasAttribute('data-sg-stopped'));
   }
 
+  /* ── Next 잠금 ─────────────────────────────────────────────
+   * 오디오가 도는 동안 상단바 Next 를 잠근다 — 재생은 1회뿐이라 여기서 넘어가면
+   * 그 문항의 음성을 다시는 못 듣는다. 셸(exam-shell.js audioLocked)이 이 전역을
+   * 보고 버튼 상태를 정하므로, 올린 뒤·내린 뒤 모두 syncNav() 로 다시 칠하게 한다.
+   * 화면 id 를 같이 실어 떠난 화면의 잠금이 다음 화면에 남지 않게 한다. */
+  function syncShellNav() {
+    var R = root.SG_RUNTIME;
+    if (R && typeof R.syncNav === 'function') { try { R.syncNav(); } catch (e) { warn('syncNav threw', e); } }
+  }
+
+  function lockAdvance(screenId) {
+    root.SG_AUDIO_GATE = { screenId: String(screenId || ''), done: false };
+    syncShellNav();
+  }
+
+  function unlockAdvance(screenId) {
+    var g = root.SG_AUDIO_GATE;
+    if (g && g.screenId === String(screenId || '')) g.done = true;
+    syncShellNav();
+  }
+
   /* FR29 — 한국어 하드코딩 prompt 를 EN 기본 / KO 토글로 분리한다. */
   function promptPair(q) {
     var raw = (q && q.prompt) || '';
@@ -494,6 +515,7 @@
     wrap.appendChild(playBtn);
 
     var started = false, finished = false, maxT = 0;
+    lockAdvance(screen.id);
 
     function advance() {
       var eng = ctx && ctx.engine;
@@ -516,6 +538,7 @@
       try { audio.removeAttribute('src'); audio.load(); } catch (e2) {}
       if (audio.parentNode) audio.parentNode.removeChild(audio);
       if (playBtn.parentNode) playBtn.parentNode.removeChild(playBtn);
+      unlockAdvance(screen.id);
       advance();   // advance:'auto' → 답변 화면으로
     }
 
@@ -788,6 +811,9 @@
       /* 들으면서 답하는 프로필(IELTS: timerStartsOnAudioEnd 없음)은 예외 — 거기서는
        * 문항을 읽으며 듣는 것이 시험 형식이다. */
       hideDuringAudio = hasLiveAudio && !lockDuringAudio && !!screen.timerStartsOnAudioEnd;
+      /* 재생이 끝날 때까지 Next 를 잠근다. 들으면서 답하는 프로필(IELTS)도 마찬가지다 —
+       * 답을 미리 골라 둘 수는 있어도 오디오를 남긴 채 화면을 넘길 수는 없다. */
+      if (hasLiveAudio) lockAdvance(screen.id);
       var unit = makeAudioUnit({
         media: screen.audio,
         image: screen.image || null,
@@ -797,6 +823,7 @@
         captionKo: '오디오는 1회만 재생됩니다',
         engine: ctx && ctx.engine,
         onEnded: function () {
+          unlockAdvance(screen.id);
           if (optsBox) setChoicesEnabled(optsBox, true);
           if (qwrap) qwrap.className = 'lst-q';   // is-waiting / is-hidden 해제 → 문항 등장
           if (waitNote && waitNote.parentNode) waitNote.parentNode.removeChild(waitNote);
@@ -956,6 +983,9 @@
     selectHintPair: selectHintPair,
     capPolicy: function () { return CAP_POLICY; },
     spentKey: spentKey,
+    // Next 잠금(오디오 재생 중) — 셸의 audioLocked() 가 읽는 전역을 세운다
+    lockAdvance: lockAdvance,
+    unlockAdvance: unlockAdvance,
     promptPair: promptPair,
     progressPair: progressPair,
     KO_PROMPT_EN: KO_PROMPT_EN,
