@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <!--
-  admin-teachers.html — 선생님 계정과 담당 학생.
+  admin-teachers.html — 선생님 계정.
 
-  두 가지를 한 화면에서 한다.
-    1) 선생님 계정 만들기 — 예전엔 Supabase SQL 편집기에서 role 을 손으로 올렸다.
-    2) 학생의 담당 선생님 배정·변경 — 가입 때 고른 값을 나중에 고칠 자리.
+  하는 일은 하나다: 선생님 계정 만들기. 예전엔 Supabase SQL 편집기에서 role 을
+  손으로 올렸다. 옆의 명단은 만들어진 계정과 각자 담당 학생 수를 보여 줄 뿐이다.
 
+  담당 배정은 여기서 하지 않는다 — 학생이 가입할 때 고른 값이 그대로 간다.
   담당은 장식이 아니라 열람 범위다. sg_profiles.teacher_id 가 가리키는 선생님만
   그 학생의 응시·녹음·코멘트를 볼 수 있다(RLS 의 sg_can_see, supabase/teacher_scope.sql).
   그래서 이 화면 자체가 관리자 전용이고, 관리자가 아닌 계정은 표가 아예 비어 온다.
@@ -28,8 +28,6 @@
   .msg.on { display:block; }
   .msg.bad { color:#b3261e; background:#fdeceb; border:1px solid #f5c6c2; }
   .msg.ok  { color:#1f6f45; background:#e7f6ec; border:1px solid #bfe4cd; }
-  .rv-table select { padding:7px 10px; border:1px solid var(--line-2); border-radius:9px;
-    font-family:inherit; font-size:13px; background:#fff; max-width:190px; }
   .made { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; }
 </style>
 </head>
@@ -47,7 +45,7 @@
 
 <main class="wrap" style="padding-bottom:60px">
   <div class="page-h mt-24">
-    <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Teachers &amp; their students</span><span data-ko>선생님과 담당 학생</span></h1>
+    <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Teachers</span><span data-ko>선생님</span></h1>
     <p class="sub"><span data-en>A teacher sees only the students assigned to them — results, recordings and comments alike. Admins see everyone.</span>
       <span data-ko>선생님은 자기에게 배정된 학생만 봅니다 — 성적도, 녹음도, 코멘트도. 관리자는 전부 봅니다.</span></p>
   </div>
@@ -90,22 +88,6 @@
             <th style="text-align:right"><span data-en>Students</span><span data-ko>담당 학생</span></th>
           </tr></thead>
           <tbody id="t-rows"></tbody>
-        </table></div>
-      </div>
-
-      <div class="card mt-16" style="padding:0;overflow:hidden">
-        <div style="padding:16px 18px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <h2 style="font-size:16px;font-weight:850"><span data-en>Students</span><span data-ko>학생</span></h2>
-          <input id="q" placeholder="Name or student ID" style="flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:13.5px;background:var(--cream)">
-          <span class="muted" style="font-size:12.5px" id="s-count"></span>
-        </div>
-        <div class="table-wrap" style="overflow-x:auto"><table class="rv-table cardify">
-          <thead><tr>
-            <th><span data-en>Student</span><span data-ko>학생</span></th>
-            <th><span data-en>Email</span><span data-ko>이메일</span></th>
-            <th><span data-en>Teacher</span><span data-ko>담당 선생님</span></th>
-          </tr></thead>
-          <tbody id="s-rows"></tbody>
         </table></div>
       </div>
     </section>
@@ -175,54 +157,7 @@
       bi('No teacher accounts yet.', '아직 선생님 계정이 없습니다.') + '</td></tr>';
   }
 
-  function options(sel) {
-    return '<option value="">' + '— none —' + '</option>' + TEACHERS.map(function (t) {
-      return '<option value="' + t.id + '"' + (t.id === sel ? ' selected' : '') + '>' + esc(t.name || t.student_id) + '</option>';
-    }).join('');
-  }
-
-  function paintStudents() {
-    var q = ($('q').value || '').trim().toLowerCase();
-    var list = STUDENTS.filter(function (s) {
-      if (!q) return true;
-      return ((s.name || '') + ' ' + (s.student_id || '') + ' ' + (s.email || '')).toLowerCase().indexOf(q) >= 0;
-    });
-    $('s-count').textContent = list.length + ' / ' + STUDENTS.length;
-    $('s-rows').innerHTML = list.length ? list.map(function (s) {
-      return '<tr>' +
-        '<td class="card-title"><b>' + esc(s.name || '—') + '</b>' +
-          (s.student_id ? '<div class="muted" style="font-size:12px">' + esc(s.student_id) + '</div>' : '') + '</td>' +
-        '<td ' + SG_LABEL('Email', '이메일') + '><span class="muted" style="font-size:12.5px">' + esc(s.email || '—') + '</span></td>' +
-        '<td ' + SG_LABEL('Teacher', '담당 선생님') + '><select data-id="' + s.id + '">' + options(s.teacher_id) + '</select></td>' +
-      '</tr>';
-    }).join('') : '<tr><td colspan="3" class="muted" style="padding:20px;text-align:center">' +
-      bi('No students match.', '해당하는 학생이 없습니다.') + '</td></tr>';
-
-    Array.prototype.forEach.call($('s-rows').querySelectorAll('select'), function (sel) {
-      sel.addEventListener('change', function () { assign(sel); });
-    });
-  }
-
-  /* 담당 변경은 한 줄 PATCH 다. 실패하면 고른 값을 되돌린다 — 화면만 바뀌고 서버는
-     그대로인 상태가 제일 위험하다(그 선생님은 계속 못 본다). */
-  function assign(sel) {
-    var id = sel.getAttribute('data-id'), val = sel.value;
-    var row = STUDENTS.filter(function (s) { return s.id === id; })[0];
-    var before = row ? row.teacher_id : null;
-    sel.disabled = true;
-    rest('sg_profiles?id=eq.' + encodeURIComponent(id), {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ teacher_id: val || null })
-    }).then(function (ok) {
-      sel.disabled = false;
-      if (!ok) { sel.value = before || ''; say($('f-err'), 'Could not change the teacher.'); return; }
-      if (row) row.teacher_id = val || null;
-      say($('f-err'), '');
-      paintTeachers();
-    });
-  }
-
+  /* 학생 행은 그리지 않는다 — 담당 학생 수를 세는 데만 쓴다. */
   function load() {
     return rest('sg_profiles?select=id,name,student_id,email,role,is_admin,teacher_id&order=name.asc&limit=2000')
       .then(function (rows) {
@@ -230,7 +165,6 @@
         TEACHERS = rows.filter(function (p) { return roleOf(p) === 'teacher'; });
         STUDENTS = rows.filter(function (p) { return roleOf(p) === 'student'; });
         paintTeachers();
-        paintStudents();
         $('body').classList.remove('hide');
       });
   }
@@ -257,7 +191,6 @@
 
   function boot() {
     $('f').addEventListener('submit', create);
-    $('q').oninput = paintStudents;
     if (!window.SG_AUTH || !SG_AUTH.user()) { SG_AUTH.require(); return; }
     SG_AUTH.role().then(function (role) {
       if (role !== 'admin') {
