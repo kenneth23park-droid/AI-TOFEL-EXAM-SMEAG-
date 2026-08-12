@@ -742,6 +742,12 @@
     else if (P.defaultModel) ms.value = P.defaultModel;
     note.innerHTML = esc('mp3 ' + P.mp3 + (P.free ? ' · ' + P.free : '') +
       (P.gap ? '' : ' · gap not supported')) + (P.ready ? '' : ' · <b>' + esc(P.note || '') + '</b>');
+    /* 계정 목소리 목록을 못 받았을 때. 합성 자체는 되므로 화면은 SET 9 배역표로 서고,
+       왜 내 계정 목소리가 안 보이는지만 여기 적는다(대개 키의 voices_read 권한). */
+    if (P.ready && CAT.voicesError && !((CAT.voices && CAT.voices[P.id]) || []).length) {
+      note.innerHTML += ' · <b>' + esc('목소리 목록 없음: ' + CAT.voicesError) +
+        '</b> — SET 9 배역표 13인으로 진행합니다.';
+    }
   }
   /** 엔진의 키 상태를 한 줄로. 값은 절대 원문으로 그리지 않는다 — 마스킹만 보여준다. */
   function paintKeyRow(row) {

@@ -163,7 +163,13 @@ module.exports = async function handler(req, res) {
     const out = { providers: [p], voices: {}, langs: [] };
     if (ready) {
       try { out.voices[PROVIDER_ID] = await voices(CRED); }
-      catch (e) { out.voices[PROVIDER_ID] = []; }
+      catch (e) {
+        /* 목록을 못 받아도 합성은 되는 경우가 있다 — 키에 voices_read 권한만 없는 것이
+           대표적이다. 그때 화면은 SET 9 배역표 13인으로 서므로 일은 되지만, 이유를
+           말해 주지 않으면 "내 계정 목소리가 왜 안 보이지" 로 끝난다. */
+        out.voices[PROVIDER_ID] = [];
+        out.voicesError = String(e.message || e);
+      }
     }
     return json(res, 200, out);
   }

@@ -95,6 +95,19 @@ function post(body, headers) {
   check('그 키로 부른다', seen[0].init.headers['xi-api-key'], 'sk_local');
   check('목소리는 voice_id 로 온다', r.body.voices.elevenlabs[0].id, VOICE);
 
+  /* 목소리 목록만 막힌 키(voices_read 권한 없음)는 흔하다. 합성은 되므로 화면은
+     SET 9 배역표로 서야 하고, 왜 계정 목소리가 안 보이는지는 말해 줘야 한다. */
+  global.fetch = function () {
+    return Promise.resolve({ ok: false, status: 401, text: function () {
+      return Promise.resolve(JSON.stringify({ detail: { message: 'missing the permission voices_read' } }));
+    } });
+  };
+  r = await call({ headers: { 'x-sg-token': TOKEN, 'x-sg-key': 'sk_scoped' } });
+  check('목록이 막혀도 200', r.status, 200);
+  check('그래도 ready 는 유지', r.body.providers[0].ready, true);
+  check('목소리는 빈 목록', r.body.voices.elevenlabs, []);
+  check('이유를 함께 싣는다', /voices_read/.test(r.body.voicesError || ''), true);
+
   /* 합성: 다른 엔진 이름은 거절한다. */
   process.env.ELEVENLABS_API_KEY = 'sk_server';
   stubFetch('tts');
