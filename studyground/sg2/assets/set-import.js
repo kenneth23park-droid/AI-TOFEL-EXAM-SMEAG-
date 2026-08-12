@@ -18,6 +18,10 @@
  *     answers:   <SG_DOCX.read 결과>|null  // 정답지
  *   }) -> { pack, gates:[{level,scope,message}], stats }
  *
+ *   SG_SET_IMPORT.finalize(sections, opt) -> 같은 것
+ *   조립의 뒷부분(정답표 수확·검산·통계·팩 모양)만 따로 부를 수 있다. AI 로 지은 세트
+ *   (set-generate.js)가 문서에서 온 세트와 **같은 팩·같은 검산**을 타게 하려고 뗐다.
+ *
  * 정답지는 자동 번호 목록이라 번호가 본문에 없다 — 순서가 곧 번호다.
  * ES5 문법만 쓴다(빌드 단계 없음).
  */
@@ -28,7 +32,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var SECTION_ORDER = ['reading', 'listening', 'writing', 'speaking'];
+  var SECTION_ORDER = ['reading', 'listening', 'speaking', 'writing'];
   var CHOICE_LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
   /* ------------------------------------------------------------ 유틸 */
@@ -102,7 +106,7 @@
       }
     });
 
-    var out = { reading: [], listening: [], writing: [], speaking: [] };
+    var out = { reading: [], listening: [], speaking: [], writing: [] };
     if (!marks.length) { out.reading = paras.slice(); return out; }
 
     /* 첫 마크 앞부분은 그 마크가 reading 이면 흡수, 아니면 reading 구간으로 둔다. */
@@ -612,10 +616,10 @@
    * 정답지는 섹션/모듈 머리글 + 자동번호 목록이다. 번호가 본문에 없으므로 순서가 번호다.
    * 목록이 이어지는 도중에 'Writing' 같은 섹션 이름이 목록 항목으로 들어오는 경우가 있어
    * (SET 9 LISTENING MODULE 2), 목록 항목도 머리글 후보로 본다.
-   * @return {{ reading:{1:[…],2:[…]}, listening:{…}, writing:[…], speaking:[…] }}
+   * @return {{ reading:{1:[…],2:[…]}, listening:{…}, speaking:[…], writing:[…] }}
    */
   function parseAnswerKey(paras) {
-    var out = { reading: {}, listening: {}, writing: {}, speaking: {} };
+    var out = { reading: {}, listening: {}, speaking: {}, writing: {} };
     var section = null, moduleNo = 1;
 
     function bucket() {
@@ -748,7 +752,7 @@
     var sModules = parseSpeaking(split.speaking, codeSlug, picsRel, audioRel, 1, scripts.speaking);
     var speaking = { id: 'speaking', label: 'Speaking', labelKo: '스피킹', timeLimitSec: null, modules: sModules };
 
-    var sections = [reading, listening, writing, speaking];
+    var sections = [reading, listening, speaking, writing];
 
     sections.forEach(function (sec) {
       if (!sec.modules.length) gate('stop', sec.id, sec.label + ' 섹션을 찾지 못했습니다 — 문서에 "' + sec.label.toUpperCase() + ' SECTION" 머리글이 있는지 확인해 주세요.');
@@ -895,6 +899,54 @@
       gate('warn', 'answers', unmatched.length + '개 문항에 정답이 붙지 않았습니다: ' + unmatched.slice(0, 8).join(', ') + (unmatched.length > 8 ? ' 외' : ''));
     }
 
+    return finalize(sections, {
+      code: code,
+      codeSlug: codeSlug,
+      gates: gates,
+      answerKey: answerKey,
+      sources: input.sources || null,
+      mediaCount: input.questions.media ? Object.keys(input.questions.media).length : 0,
+      source: 'set-import'
+    });
+  }
+
+  /* ------------------------------------------------------------ 마무리
+   *
+   * 조립의 뒷부분 — 정답표 수확 · 검산 · 그림 경로 · 통계 · 요약 · 팩 모양 — 을 따로
+   * 뗀 것은 **문서에서 온 세트와 AI 가 지은 세트가 같은 팩이어야 하기 때문**이다.
+   * 두 벌로 두면 한쪽에만 검산이 붙는 날이 오고, 그때 두 세트는 겉보기에만 같아진다.
+   * 앞부분(무엇을 읽어 문항을 만드나)만 서로 다르다.
+   *
+   *   finalize(sections, { code, codeSlug, gates, answerKey?, sources?, mediaCount?, source })
+   *     -> { pack, gates, stats }
+   *
+   * answerKey 를 넘기지 않아도 된다 — 문항에 이미 붙어 있는 answer 를 여기서 걷는다.
+   */
+  function finalize(sections, opt) {
+    var code = String(opt.code || 'SET ?').trim();
+    var codeSlug = opt.codeSlug || slug(code) || 'set';
+    var audioRel = 'media/audio/' + codeSlug + '/';
+    var picsRel = 'media/pictures/' + codeSlug + '/';
+    var gates = opt.gates || [];
+    function gate(level, scope, message) { gates.push({ level: level, scope: scope, message: message }); }
+
+    /* ---- 정답표 수확 ----
+       문서 경로는 정답지를 붙이며 이미 채워 두었고, AI 경로는 문항에 정답이 처음부터
+       박혀 있다. 어느 쪽이든 "문항에 붙어 있는 것"이 정답표의 유일한 출처다 —
+       팩과 정답표가 어긋나는 길을 아예 막는다. */
+    var answerKey = opt.answerKey || {};
+    sections.forEach(function (sec) {
+      sec.modules.forEach(function (mod) {
+        mod.blocks.forEach(function (blk) {
+          (blk.questions || []).forEach(function (q) {
+            if (answerKey[q.id] !== undefined) return;
+            if (q.answer !== undefined && q.answer !== null && q.answer !== '') answerKey[q.id] = q.answer;
+            else if (q.answerSentence) answerKey[q.id] = q.answerSentence;
+          });
+        });
+      });
+    });
+
     /* ---- 선택지 개수 검산 ---- */
     var thin = [];
     sections.forEach(function (sec) {
@@ -943,7 +995,7 @@
       stats.total += n;
     });
     stats.answered = Object.keys(answerKey).length;
-    stats.media = input.questions.media ? Object.keys(input.questions.media).length : 0;
+    stats.media = opt.mediaCount || 0;
 
     if (!stats.total) gate('stop', 'questions', '문항을 하나도 찾지 못했습니다 — 문서 서식이 예상과 다릅니다.');
 
@@ -982,8 +1034,9 @@
         stop: gates.filter(function (g) { return g.level === 'stop'; }).length,
         warn: gates.filter(function (g) { return g.level === 'warn'; }).length
       },
-      sources: input.sources || null
+      sources: opt.sources || null
     };
+    if (opt.origin) summary.origin = opt.origin;
 
     var pack = {
       code: codeSlug.toUpperCase(),
@@ -995,7 +1048,7 @@
       gates: gates,
       summary: summary,
       importedAt: null,
-      source: 'set-import'
+      source: opt.source || 'set-import'
     };
 
     return { pack: pack, gates: gates, stats: stats };
@@ -1028,6 +1081,7 @@
 
   return {
     build: build,
+    finalize: finalize,       /* set-generate.js 가 같은 조립·검산을 타려고 부른다 */
     withHelpers: withHelpers,
     SECTION_ORDER: SECTION_ORDER,
     /* 테스트용 */
