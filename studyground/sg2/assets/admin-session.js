@@ -220,6 +220,15 @@
       var pw = modal.querySelector('[name=sga-pw]').value;
       var want = modal.dataset.set || '';
       var signedIn = API.login(id, pw);
+
+      /* 학생 계정이 남아 있으면 그 자리를 비워 준다 — 비밀번호를 맞힌 사람은
+       * 선생님이니, "학생이 로그인해 있어서 안 된다"고 되돌려보내는 대신
+       * 학생 세션을 끊고 들여보낸다. 학생 기기에 관리자 세션을 남기지 않으려던
+       * 원래 뜻은 그대로다(학생은 비밀번호를 모른다). */
+      if (signedIn && studentSignedIn() && window.SG_AUTH && window.SG_AUTH.signOut) {
+        window.SG_AUTH.signOut();
+      }
+
       if (!signedIn || studentSignedIn() || (want && !API.can(want))) {
         // 로그인 자체는 됐지만 이 SET 권한이 없는 계정이면 세션을 남기지 않는다.
         // 실패한 입력 때문에 이미 유효한 세션까지 끊기지는 않게 한다.
