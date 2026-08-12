@@ -9,6 +9,10 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  *    고르는 자리는 없고, 같은 날 같은 번호는 DB 의 unique(student_id, exam_date)
  *    가 막는다. 번호가 겹치면 그 자리는 건너뛰고 다음 빈 번호로 간다.
  *  • 비밀번호는 전부 2222.
+ *  • 이름·이메일·담당 선생님은 비워도 된다 — 학생 수만 넣고 자리를 먼저 뽑는 대량 발급
+ *    (admin-students.html)이 그렇게 쓴다. 비면 배정된 아이디가 이름이 되고,
+ *    이메일은 합성 로그인 주소가 그대로 들어간다. 그 주소는 (아이디, 시험일)
+ *    으로 만들어지므로 자리 이메일끼리 겹칠 수 없다.
  *  • 키는 (student_id, exam_date) — 같은 날 중복 불가, 다른 날 재사용 가능.
  *  • 같은 시험일에 같은 이메일/이름이 이미 있으면 팝업으로 알리고 다시 만들게
  *    한다. 그대로 진행하려면 force: true.
@@ -150,36 +154,36 @@ async function handleRegister(b: Record<string, unknown>) {
   const teacherId = String(b.teacher_id ?? "").trim();
   const force = b.force === true;
 
-  if (!name) return fail(400, "missing_name", "Enter the student's name.", "이름을 입력하세요.");
-  if (!EMAIL_RE.test(email)) {
+  /* 이름과 이메일은 비어 있어도 통과한다 — 적었다면 모양은 본다. 빈 칸을 무엇으로
+     채울지는 아이디가 정해진 뒤에 claim() 이 결정한다. */
+  if (email && !EMAIL_RE.test(email)) {
     return fail(400, "invalid_email", "Enter a valid email address.", "올바른 이메일 주소를 입력하세요.");
   }
   if (wanted && !ID_RE.test(wanted)) {
     return fail(400, "bad_id", "The ID must be smeag000 – smeag999.", "아이디는 smeag000 ~ smeag999 형식이어야 합니다.");
   }
 
-  /* 담당 선생님. 선생님 계정이 하나라도 있으면 반드시 고른다 — 담당이 비면
-     그 학생의 답안을 열 수 있는 사람이 관리자뿐이라 채점이 멈춘다. */
-  const teachers = await teacherList();
+  /* 담당 선생님도 선택이다. 고르면 그 값이 정말 선생님 계정인지 확인하고, 비우면
+     담당 없이 등록된다 — 그 학생의 답안은 관리자만 열 수 있고, 나중에
+     sg_profiles.teacher_id 를 채우면 그때부터 그 선생님이 본다. */
   let teacher: { id: string; name: string } | null = null;
   if (teacherId) {
     if (!UUID_RE.test(teacherId)) {
       return fail(400, "bad_teacher", "Pick your teacher from the list.", "담당 선생님을 목록에서 고르세요.");
     }
-    teacher = teachers.find((t: { id: string }) => t.id === teacherId) ?? null;
+    teacher = (await teacherList()).find((t: { id: string }) => t.id === teacherId) ?? null;
     if (!teacher) {
       return fail(400, "unknown_teacher", "That teacher no longer exists. Pick again.", "그 선생님 계정이 없습니다. 다시 고르세요.");
     }
-  } else if (teachers.length) {
-    return fail(400, "missing_teacher", "Choose your teacher.", "담당 선생님을 선택하세요.");
   }
 
   // 같은 시험일에 같은 이메일은 중복 등록이 거의 확실하다 — 이건 force 에도 막는다.
-  const dupMail = await admin(
-    `/rest/v1/sg_exam_accounts?exam_date=eq.${date}&email=eq.${encodeURIComponent(email)}` +
-      `&select=student_id,name&limit=1`,
-  );
-  const mailRows = await dupMail.json().catch(() => []);
+  const mailRows = email
+    ? await (await admin(
+        `/rest/v1/sg_exam_accounts?exam_date=eq.${date}&email=eq.${encodeURIComponent(email)}` +
+          `&select=student_id,name&limit=1`,
+      )).json().catch(() => [])
+    : [];
   if (Array.isArray(mailRows) && mailRows.length) {
     return fail(
       409, "email_taken_today",
@@ -190,7 +194,7 @@ async function handleRegister(b: Record<string, unknown>) {
   }
 
   // 이름만 같은 경우는 동명이인일 수 있다 — 묻기만 하고 force 로 넘어간다.
-  if (!force) {
+  if (name && !force) {
     const same = await admin(
       `/rest/v1/sg_exam_accounts?exam_date=eq.${date}&name=eq.${encodeURIComponent(name)}` +
         `&select=student_id&order=created_at.desc&limit=1`,
@@ -206,7 +210,7 @@ async function handleRegister(b: Record<string, unknown>) {
     }
   }
 
-  let got: { user: { id: string }; login: string } | null = null;
+  let got: { user: { id: string }; login: string; name: string; email: string } | null = null;
   let assigned = "";
   const mine = teacher ? teacher.id : "";
 
@@ -235,24 +239,30 @@ async function handleRegister(b: Record<string, unknown>) {
   const s = await issueSession(got.login, PW);
   if (!s.ok) {
     return fail(500, "session_failed", "Registered, but automatic login failed. Please log in.", "등록은 됐지만 자동 로그인에 실패했습니다. 로그인해 주세요.",
-      { student_id: assigned, password: PW, exam_date: date, email: email });
+      { student_id: assigned, password: PW, exam_date: date, email: got.email, name: got.name });
   }
   const prof = await profileOf(got.user.id);
   return json({
     session: s.body,
-    user: prof ?? { id: got.user.id, name, student_id: assigned },
+    user: prof ?? { id: got.user.id, name: got.name, student_id: assigned },
     student_id: assigned,
     password: PW,
     exam_date: date,
-    email: email,
-    name: name,
+    email: got.email,
+    name: got.name,
     teacher: teacher ? { id: teacher.id, name: teacher.name } : null,
   });
 }
 
-/** 계정 생성 + 등록 행 삽입. 이미 나간 아이디면 null 을 돌려 재시도하게 한다. */
-async function claim(studentId: string, date: string, name: string, email: string, teacherId: string) {
+/** 계정 생성 + 등록 행 삽입. 이미 나간 아이디면 null 을 돌려 재시도하게 한다.
+ *
+ * 빈 칸은 여기서 채운다 — 아이디가 정해진 자리라서다. 이름이 없으면 아이디가
+ * 이름이 되고(명단이 빈 줄로 보이지 않게), 이메일이 없으면 합성 로그인 주소를
+ * 그대로 쓴다. 그 주소는 아이디+시험일로 만들어져 자리끼리 겹칠 수 없다. */
+async function claim(studentId: string, date: string, rawName: string, rawEmail: string, teacherId: string) {
   const login = authEmail(studentId, date);
+  const name = rawName || studentId;
+  const email = rawEmail || login;
   const created = await admin("/auth/v1/admin/users", {
     method: "POST",
     body: JSON.stringify({
@@ -280,7 +290,7 @@ async function claim(studentId: string, date: string, name: string, email: strin
     await admin(`/auth/v1/admin/users/${user.id}`, { method: "DELETE" });
     return null;
   }
-  return { user, login };
+  return { user, login, name, email };
 }
 
 /** 아이디나 이메일이 여러 시험일에 걸쳐 있을 때 어느 계정으로 들여보낼지.

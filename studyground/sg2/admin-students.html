@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<!--
+  admin-students.html — 학생 계정 대량 발급.
+
+  한 명씩 만드는 자리는 signup.html 이다(학생이 자기 손으로 이름·이메일을 적는다).
+  이 화면은 반대쪽이다: 시험일 하루치 자리를 관리자가 미리 뽑는다. 학생 수만 넣으면
+  그만큼 줄이 생기고 아이디가 smeag000 부터 하나씩 붙는다. 이름·이메일은 엑셀에서
+  그대로 붙여넣거나, 비워 둔 채로 만들어도 된다 — 비면 아이디가 이름이 되고 이메일은
+  합성 로그인 주소가 들어간다(서버의 claim()).
+
+  번호는 화면이 정하지 않는다. 표의 아이디 칸은 미리보기일 뿐이고, 실제 번호는 만들 때
+  서버가 그 시험일의 가장 빠른 빈 자리로 준다. 그래서 다른 사람이 옆에서 동시에
+  등록하고 있어도 번호가 겹치지 않는다 — 겹치면 DB 의 unique(student_id, exam_date)
+  가 막고 서버가 다음 번호로 넘어간다.
+
+  줄은 하나씩 순서대로 만든다. 한꺼번에 던지면 어느 줄이 실패했는지 알 수 없고,
+  실패한 줄만 다시 만들 수도 없다. 그래서 실패한 줄은 표에 그대로 남고, 다시 누르면
+  성공한 줄은 건드리지 않고 남은 줄만 이어서 만든다.
+
+  keepSession: true 가 중요하다. register 는 원래 만든 계정으로 로그인해 버려서,
+  그대로 쓰면 두 번째 줄에서 관리자 세션이 학생 세션으로 덮인다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register students · MockTest</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .bar { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+  .bar .field { margin:0; }
+  .bar .field.sm { width:120px; }
+  .msg { display:none; font-size:13px; font-weight:700; border-radius:10px; padding:10px 12px; margin-bottom:12px; }
+  .msg.on { display:block; }
+  .msg.bad { color:#b3261e; background:#fdeceb; border:1px solid #f5c6c2; }
+  .msg.ok  { color:#1f6f45; background:#e7f6ec; border:1px solid #bfe4cd; }
+  .note { font-size:12.5px; color:var(--dim); }
+
+  /* 시트. 칸 하나가 곧 input 이라 표 안에서 타이핑·붙여넣기가 그대로 된다. */
+  .sheet { width:100%; border-collapse:separate; border-spacing:0; font-size:13.5px; }
+  .sheet th { font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;
+              letter-spacing:.06em; text-align:left; padding:8px 10px; background:var(--cream);
+              border-bottom:1px solid var(--line-2); position:sticky; top:0; z-index:1; }
+  .sheet td { padding:0; border-bottom:1px solid var(--line); border-right:1px solid var(--line); }
+  .sheet td:last-child { border-right:0; }
+  .sheet input { width:100%; border:0; background:transparent; padding:9px 10px; font:inherit;
+                 color:var(--ink); border-radius:0; }
+  .sheet input:focus { outline:2px solid var(--brand); outline-offset:-2px; background:#fff; }
+  .sheet .n  { width:44px; text-align:right; padding:9px 10px; color:var(--dim); font-size:12px;
+               background:var(--cream); }
+  .sheet .id { width:130px; padding:9px 10px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+               font-weight:800; }
+  .sheet .id.preview { color:var(--dim); font-weight:600; }
+  .sheet .st { width:210px; padding:9px 10px; font-size:12.5px; }
+  .sheet .x  { width:34px; text-align:center; }
+  .sheet .x button { border:0; background:transparent; color:var(--dim); cursor:pointer;
+                     font-size:15px; line-height:1; padding:8px 6px; }
+  .sheet .x button:hover { color:#b3261e; }
+  .sheet tr.done td { background:#f6fbf7; }
+  .sheet tr.fail td { background:#fdf3f2; }
+  .sheet tr.busy td { background:#fff7e0; }
+  .pw { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:800; }
+  .ok-t { color:#1f6f45; font-weight:750; }
+  .bad-t { color:#b3261e; font-weight:750; }
+  .scroll { max-height:62vh; overflow:auto; border:1px solid var(--line-2); border-radius:12px; }
+  .acts { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .acts .grow { margin-left:auto; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Admin</small></span></a>
+    <div class="nav-right">
+      <a class="btn ghost sm" href="admin.html">Admin home</a>
+      <a class="btn ghost sm" href="admin-teachers.html">Teachers</a>
+      <a class="btn ghost sm" href="admin-qr.html">QR cards</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:60px">
+  <div class="page-h mt-24">
+    <h1 style="font-size:clamp(24px,3.4vw,36px)">Register students</h1>
+    <p class="sub">Type how many students sit that day and the IDs fill themselves in — smeag000, smeag001, smeag002 …
+      Name, email and teacher are optional: type them in, paste a column straight from Excel, or leave them blank.</p>
+  </div>
+
+  <div class="card mt-16 hide" id="notice"></div>
+
+  <div class="hide" id="body">
+
+    <section class="card mt-16">
+      <div class="bar">
+        <div class="field" style="min-width:170px"><label for="date">Test date</label>
+          <input id="date" type="date"></div>
+        <div class="field" style="min-width:200px" id="teacher-field"><label for="teacher">Teacher (optional)</label>
+          <select id="teacher"></select></div>
+        <div class="field sm"><label for="howmany">Students</label>
+          <input id="howmany" type="number" min="1" max="200" step="1" value="10"></div>
+        <button class="btn brand" id="build" type="button">Fill the sheet</button>
+        <button class="btn ghost" id="add" type="button">+ 1 row</button>
+        <div class="note grow" id="avail" style="margin-left:auto"></div>
+      </div>
+      <p class="note mt-8" id="hint"></p>
+    </section>
+
+    <section class="card mt-16">
+      <div class="msg bad" id="err"></div>
+      <div class="msg ok" id="ok"></div>
+
+      <div class="acts">
+        <button class="btn brand" id="go" type="button">Create accounts</button>
+        <button class="btn ghost hide" id="stop" type="button">Stop</button>
+        <button class="btn ghost" id="csv" type="button" disabled>Download CSV</button>
+        <a class="btn ghost" id="cards" href="admin-qr.html">Print QR cards →</a>
+        <div class="note grow" id="prog"></div>
+      </div>
+
+      <div class="scroll mt-16">
+        <table class="sheet">
+          <thead><tr>
+            <th class="n">#</th>
+            <th class="id">ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th class="st">Status</th>
+            <th class="x"></th>
+          </tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap foot-in">
+  <small class="muted">© SMEAG MockTest · Admin</small>
+</div></footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var MAX_ROWS = 200;          // 한 번에 만드는 상한. 그 이상은 나눠서 돌린다.
+  var DOMAIN = 'smeagstudyground.com';
+
+  /* 한 줄 = { name, email, state, id, pw, msg }.
+     state: 'todo' | 'busy' | 'ok' | 'fail'. 'ok' 인 줄은 다시 만들지 않는다. */
+  var rows = [];
+  var start = 0;               // 미리보기의 시작 번호 — 서버가 알려준 첫 빈 자리.
+  var teachers = [];
+  var running = false, halt = false;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function say(el, text, on) {
+    el.textContent = text || '';
+    el.classList.toggle('on', on === undefined ? !!text : !!on);
+  }
+  function pad3(n) { return 'smeag' + String(n).padStart(3, '0'); }
+  function two(n) { return (n < 10 ? '0' : '') + n; }
+  function todayStr() { var d = new Date(); return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()); }
+
+  /* 아직 안 만든 줄의 아이디는 미리보기다. 서버가 알려준 첫 빈 번호에서 세어 붙인다 —
+     그 사이를 다른 사람이 채워 가면 실제 배정은 뒤로 밀린다. 그래서 회색으로 둔다. */
+  function previewId(i) {
+    var seen = 0;
+    for (var k = 0; k < i; k++) if (rows[k].state !== 'ok') seen++;
+    return pad3(start + seen);
+  }
+
+  function render() {
+    $('rows').innerHTML = rows.map(function (r, i) {
+      var done = r.state === 'ok', busy = r.state === 'busy', fail = r.state === 'fail';
+      var cls = done ? 'done' : (fail ? 'fail' : (busy ? 'busy' : ''));
+      var id = done ? r.id : previewId(i);
+      var st = done ? '<span class="ok-t">✓ created</span> · <span class="pw">' + esc(r.pw) + '</span>'
+             : busy ? 'creating…'
+             : fail ? '<span class="bad-t">✕ ' + esc(r.msg) + '</span>'
+             : '';
+      var ro = (done || busy) ? ' readonly' : '';
+      return '<tr class="' + cls + '">' +
+        '<td class="n">' + (i + 1) + '</td>' +
+        '<td class="id' + (done ? '' : ' preview') + '">' + esc(id) + '</td>' +
+        '<td><input data-r="' + i + '" data-f="name" value="' + esc(r.name) + '" placeholder="Kim Minsu"' + ro + '></td>' +
+        '<td><input data-r="' + i + '" data-f="email" value="' + esc(r.email) + '" placeholder="optional"' +
+             ' autocapitalize="none" spellcheck="false"' + ro + '></td>' +
+        '<td class="st">' + st + '</td>' +
+        '<td class="x">' + (done || busy ? '' : '<button type="button" data-del="' + i + '" title="Remove row">✕</button>') + '</td>' +
+      '</tr>';
+    }).join('');
+    countdown();
+  }
+
+  function countdown() {
+    var left = rows.filter(function (r) { return r.state !== 'ok'; }).length;
+    $('go').textContent = left ? 'Create ' + left + ' account' + (left === 1 ? '' : 's') : 'Create accounts';
+    $('go').disabled = running || !left;
+    $('csv').disabled = !rows.some(function (r) { return r.state === 'ok'; });
+  }
+
+  function addRows(n) {
+    for (var i = 0; i < n && rows.length < MAX_ROWS; i++) rows.push({ name: '', email: '', state: 'todo' });
+  }
+
+  /* 그 날짜의 첫 빈 번호와 남은 자리. 미리보기의 기준점이다. */
+  function refreshAvail() {
+    var d = $('date').value;
+    if (!d) return Promise.resolve();
+    return SG_AUTH.nextId(d).then(function (r) {
+      var m = /^smeag(\d{3})$/.exec(r.student_id || '');
+      start = m ? parseInt(m[1], 10) : 0;
+      $('avail').textContent = r.student_id
+        ? 'Next ID ' + r.student_id + ' · ' + r.free + ' of 1000 free on ' + r.exam_date
+        : 'All 1000 IDs are used on ' + r.exam_date;
+      $('cards').href = 'admin-qr.html?date=' + encodeURIComponent(d);
+      render();
+    }).catch(function () { $('avail').textContent = ''; });
+  }
+
+  function teacherId() {
+    return teachers.length ? $('teacher').value : '';
+  }
+
+  /* ── 시트 입력 ─────────────────────────────────────────────── */
+
+  function onInput(e) {
+    var el = e.target;
+    if (!el.dataset || el.dataset.r === undefined) return;
+    rows[+el.dataset.r][el.dataset.f] = el.value;
+  }
+
+  /* 엑셀에서 두 열을 긁어 오면 탭으로 붙어 온다. 붙여넣은 자리에서부터 오른쪽·아래로
+     채우고, 줄이 모자라면 그만큼 늘린다 — 시트에서 하던 동작 그대로. */
+  function onPaste(e) {
+    var el = e.target;
+    if (!el.dataset || el.dataset.r === undefined) return;
+    var text = (e.clipboardData || window.clipboardData).getData('text');
+    if (!text || text.indexOf('\t') < 0 && text.indexOf('\n') < 0) return;   // 한 칸 붙여넣기는 그냥 둔다
+    e.preventDefault();
+
+    var lines = text.replace(/\r/g, '').replace(/\n+$/, '').split('\n');
+    var FIELDS = ['name', 'email'];
+    var r0 = +el.dataset.r, c0 = FIELDS.indexOf(el.dataset.f);
+    var capped = false;
+
+    lines.forEach(function (line, li) {
+      var r = r0 + li;
+      if (r >= MAX_ROWS) { capped = true; return; }
+      while (rows.length <= r) rows.push({ name: '', email: '', state: 'todo' });
+      if (rows[r].state === 'ok' || rows[r].state === 'busy') return;
+      line.split('\t').forEach(function (cell, ci) {
+        var f = FIELDS[c0 + ci];
+        if (f) rows[r][f] = cell.trim();
+      });
+    });
+
+    render();
+    say($('err'), capped ? 'Pasted up to ' + MAX_ROWS + ' rows — run the rest as a second batch.' : '', capped);
+    var next = $('rows').querySelector('input[data-r="' + Math.min(r0 + lines.length - 1, rows.length - 1) + '"][data-f="' + el.dataset.f + '"]');
+    if (next) next.focus();
+  }
+
+  /* Enter 는 아래 칸으로. 마지막 줄에서 누르면 줄이 하나 생긴다 — 명단을 이어 치는 손이
+     마우스로 돌아가지 않게. */
+  function onKey(e) {
+    var el = e.target;
+    if (!el.dataset || el.dataset.r === undefined) return;
+    var dir = e.key === 'Enter' || e.key === 'ArrowDown' ? 1 : (e.key === 'ArrowUp' ? -1 : 0);
+    if (!dir) return;
+    e.preventDefault();
+    var r = +el.dataset.r + dir;
+    if (r >= rows.length && dir > 0) { addRows(1); render(); }
+    if (r < 0) return;
+    var next = $('rows').querySelector('input[data-r="' + r + '"][data-f="' + el.dataset.f + '"]');
+    if (next) { next.focus(); next.select(); }
+  }
+
+  function onClick(e) {
+    var b = e.target.closest ? e.target.closest('button[data-del]') : null;
+    if (!b) return;
+    rows.splice(+b.dataset.del, 1);
+    render();
+  }
+
+  /* ── 만들기 ────────────────────────────────────────────────── */
+
+  function createOne(i) {
+    var r = rows[i];
+    r.state = 'busy';
+    render();
+    return SG_AUTH.register({
+      name: r.name.trim(),
+      email: r.email.trim(),
+      examDate: $('date').value,
+      teacherId: teacherId(),
+      force: true,             // 동명이인은 묻지 않는다 — 명단을 보고 넣는 자리다.
+      keepSession: true        // 관리자 세션을 학생 세션으로 덮지 않는다.
+    }).then(function (res) {
+      r.state = 'ok';
+      r.id = res.student_id;
+      r.pw = res.password;
+      r.name = res.name || r.name;
+      r.email = res.email || r.email;
+    }).catch(function (e) {
+      r.state = 'fail';
+      r.msg = e.message || 'Could not create';
+    });
+  }
+
+  function run() {
+    if (running) return;
+    say($('err'), ''); say($('ok'), '');
+    if (!$('date').value) { say($('err'), 'Pick the test date first.'); return; }
+
+    var todo = [];
+    rows.forEach(function (r, i) { if (r.state !== 'ok') todo.push(i); });
+    if (!todo.length) return;
+
+    running = true; halt = false;
+    $('stop').classList.remove('hide');
+    countdown();
+
+    var at = 0, madeIds = [], failed = 0;
+    function step() {
+      if (halt || at >= todo.length) return finish(madeIds, failed, at < todo.length);
+      var i = todo[at++];
+      $('prog').textContent = 'Creating ' + at + ' / ' + todo.length + '…';
+      return createOne(i).then(function () {
+        if (rows[i].state === 'ok') madeIds.push(rows[i].id); else failed++;
+        return step();
+      });
+    }
+    step();
+  }
+
+  function finish(made, failed, stopped) {
+    running = false;
+    $('stop').classList.add('hide');
+    $('prog').textContent = '';
+    render();
+
+    var msg = made.length
+      ? made.length + ' account' + (made.length === 1 ? '' : 's') + ' created' +
+        (made.length > 1 ? ' · ' + made[0] + ' – ' + made[made.length - 1] : ' · ' + made[0])
+      : '';
+    say($('ok'), msg);
+    say($('err'), stopped ? 'Stopped. The rows left keep their place — press Create again to continue.'
+        : (failed ? failed + ' row' + (failed === 1 ? '' : 's') + ' failed — the reason is on each row.' : ''));
+    refreshAvail();
+  }
+
+  /* 만든 줄만 내려받는다 — 아이디·비밀번호를 인쇄물이나 시트로 옮겨 붙이는 자리. */
+  function csv() {
+    var date = $('date').value;
+    var t = teachers.filter(function (x) { return x.id === teacherId(); })[0];
+    var lines = [['student_id', 'password', 'name', 'email', 'exam_date', 'teacher'].join(',')];
+    rows.forEach(function (r) {
+      if (r.state !== 'ok') return;
+      lines.push([r.id, r.pw, r.name, r.email, date, (t && t.name) || ''].map(function (v) {
+        v = String(v == null ? '' : v);
+        return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+      }).join(','));
+    });
+    var url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
+    var a = document.createElement('a');
+    a.href = url; a.download = 'smeag-students-' + date + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* ── 뜨기 ──────────────────────────────────────────────────── */
+
+  function notice(text) {
+    $('notice').innerHTML = '<p>' + esc(text) + '</p>';
+    $('notice').classList.remove('hide');
+  }
+
+  function boot() {
+    $('date').value = todayStr();
+    $('hint').textContent =
+      'Name, email and teacher are all optional. Blank name → the ID becomes the name. ' +
+      'Blank email → a placeholder (smeag000.' + todayStr().replace(/-/g, '') + '@' + DOMAIN + '). ' +
+      'No teacher → only admins can open those answers until you assign one. ' +
+      'Password is 2222 for everyone. Paste a Name/Email block from Excel anywhere in the sheet.';
+
+    $('build').addEventListener('click', function () {
+      var n = Math.max(1, Math.min(MAX_ROWS, parseInt($('howmany').value, 10) || 0));
+      rows = rows.filter(function (r) { return r.state === 'ok'; });   // 이미 만든 줄은 남긴다
+      addRows(n);
+      render();
+      say($('err'), rows.length >= MAX_ROWS ? 'The sheet holds ' + MAX_ROWS + ' rows at a time.' : '');
+    });
+    $('add').addEventListener('click', function () { addRows(1); render(); });
+    $('go').addEventListener('click', run);
+    $('stop').addEventListener('click', function () { halt = true; });
+    $('csv').addEventListener('click', csv);
+    $('date').addEventListener('change', refreshAvail);
+    $('rows').addEventListener('input', onInput);
+    $('rows').addEventListener('paste', onPaste);
+    $('rows').addEventListener('keydown', onKey);
+    $('rows').addEventListener('click', onClick);
+
+    if (!window.SG_AUTH || !SG_AUTH.user()) { SG_AUTH.require(); return; }
+    SG_AUTH.role().then(function (role) {
+      if (role !== 'admin') { notice('This page is for administrators.'); return; }
+      return SG_AUTH.teachers().then(function (list) {
+        teachers = list || [];
+        /* 담당은 선택이다. 비워 두면 그 학생 답안은 관리자만 보고, 나중에 담당을
+           채우면 그때부터 그 선생님이 본다. */
+        $('teacher').innerHTML = '<option value="">— not assigned —</option>' +
+          teachers.map(function (t) {
+            return '<option value="' + esc(t.id) + '">' + esc(t.name || t.student_id) + '</option>';
+          }).join('');
+        $('teacher-field').hidden = !teachers.length;
+        addRows(10);
+        $('body').classList.remove('hide');
+        return refreshAvail();
+      });
+    }).catch(function () { notice('Could not load this page. Reload and try again.'); });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

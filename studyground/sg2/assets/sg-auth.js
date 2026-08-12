@@ -14,7 +14,7 @@
  * 노출 전역: window.SG_AUTH
  *   SG_AUTH.nextId(examDate)     → Promise<{student_id, used, free}>  빈 아이디 미리보기
  *   SG_AUTH.teachers()           → Promise<[{id, name, student_id}]>  가입 화면 드롭다운용
- *   SG_AUTH.register({ name, email, examDate, teacherId, studentId?, force? })
+ *   SG_AUTH.register({ name, email, examDate, teacherId, studentId?, force?, keepSession? })
  *                                → Promise<{user, student_id, password, exam_date}>
  *   SG_AUTH.createTeacher({ name, login, password?, email?, role? })
  *                                → Promise<{user, login, password}>  관리자만
@@ -97,7 +97,12 @@ window.SG_AUTH = (function () {
    * sg_profiles.teacher_id 에 박고, 그 뒤로는 RLS 가 열람 범위를 쥔다.
    * 같은 시험일에 같은 이메일은 409 email_taken_today 로 막힌다(force 로도 못 넘는다).
    * 같은 시험일에 같은 이름이 이미 있으면 409 same_name_today 로 되돌아온다 —
-   * 화면이 팝업으로 묻고, 그대로 진행하려면 { force: true } 로 다시 부른다. */
+   * 화면이 팝업으로 묻고, 그대로 진행하려면 { force: true } 로 다시 부른다.
+   *
+   * 기본값은 "만든 계정으로 로그인"이다 — 학생이 자기 손으로 가입하는 자리라서다.
+   * 관리자가 여러 명을 연달아 만드는 자리(admin-students.html)에서는 그러면 안 된다.
+   * 만들 때마다 관리자 세션이 학생 세션으로 덮여 두 번째 줄에서 권한을 잃는다.
+   * { keepSession: true } 는 응답을 저장하지 않고 그대로 돌려준다. */
   function register(o) {
     return fn({
       action: 'register',
@@ -108,7 +113,7 @@ window.SG_AUTH = (function () {
       student_id: o.studentId || '',
       force: o.force === true
     }).then(function (j) {
-      store(j);
+      if (o.keepSession !== true) store(j);
       return j;                     // { user, student_id, password, exam_date, teacher }
     });
   }
