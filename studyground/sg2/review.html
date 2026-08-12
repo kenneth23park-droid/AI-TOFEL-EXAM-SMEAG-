@@ -60,6 +60,9 @@
   <!-- 영역 필터 -->
   <div class="rv-tabs hide" id="tabs"></div>
 
+  <!-- 리딩도 표에 들어가지 않는다 — 틀린 이유는 거의 늘 지문 안에 있다. -->
+  <div class="card hide" id="read-card" style="padding:0;overflow:hidden"></div>
+
   <!-- 리스닝은 표가 아니라 문항 카드로 편다 — 다시 들어야 복기가 되기 때문이다. -->
   <div class="card hide" id="listen-card" style="padding:0;overflow:hidden"></div>
 
@@ -107,6 +110,7 @@
 <script src="assets/sg-band.js"></script>
 <script src="assets/sg-results.js"></script>
 <script src="assets/sg-comments.js"></script>
+<script src="assets/sg-review-reading.js"></script>
 <script src="assets/sg-review-listening.js"></script>
 <script src="assets/sg-review-writing.js"></script>
 <script src="assets/sg-review-speaking.js"></script>
@@ -375,6 +379,31 @@
     show('tabs');
   }
 
+  /* ── 리딩 리뷰 ────────────────────────────────────────────
+   * 리딩 탭도 표를 쓰지 않는다. 표는 "무엇을 골랐나"까지만 말하는데, 리딩에서
+   * 틀린 이유는 거의 늘 지문 안에 있다 — 어느 문단을 잘못 읽었는지, C-Test 의
+   * 어떤 어간을 무슨 글자로 메웠는지. 왼쪽에 읽은 것을 그대로 다시 펴고
+   * 오른쪽에 고른 것과 정오를 세운다. 뼈대는 리스닝과 같다. */
+  var READ = null;
+
+  function paintReading() {
+    var el = $('read-card');
+    if (!window.SG_REVIEW_READING) { el.classList.add('hide'); return false; }
+    el.classList.remove('hide');
+    if (READ) { READ.repaint(); return true; }
+    READ = SG_REVIEW_READING.mount(el, {
+      pack: PACK, rows: ALL,
+      extraFor: function (qid) {
+        var notes = commentsFor('question', qid);
+        if (!notes.length && !STAFF) return '';
+        return '<div class="mt-16">' + notes.map(cardOf).join('') +
+               (STAFF ? editorFor('question', qid, notes) : '') + '</div>';
+      },
+      onPaint: function () { wireEditors(); }
+    });
+    return true;
+  }
+
   /* ── 리스닝 리뷰 ──────────────────────────────────────────
    * 표는 "무엇을 골랐나"까지만 말한다. 리스닝에서 학생이 다시 만나야 하는 것은
    * 들었던 클립이라, 리스닝 탭에서는 표 대신 문항 카드(오디오 + 보기 + 정오)를 편다.
@@ -453,7 +482,8 @@
   }
 
   /* 표를 쓰지 않는 영역들. 탭 하나가 켜지면 나머지는 반드시 꺼진다. */
-  var CARDS = { listening: 'listen-card', writing: 'write-card', speaking: 'speak-card' };
+  var CARDS = { reading: 'read-card', listening: 'listen-card',
+                writing: 'write-card', speaking: 'speak-card' };
 
   function hideCards(except) {
     for (var k in CARDS) {
@@ -462,6 +492,7 @@
   }
 
   function paintRows() {
+    if (filter === 'reading' && paintReading()) { hideCards('reading'); $('table-card').classList.add('hide'); return; }
     if (filter === 'listening' && paintListening()) { hideCards('listening'); $('table-card').classList.add('hide'); return; }
     if (filter === 'writing' && paintWriting()) { hideCards('writing'); $('table-card').classList.add('hide'); return; }
     if (filter === 'speaking' && paintSpeaking()) { hideCards('speaking'); $('table-card').classList.add('hide'); return; }
