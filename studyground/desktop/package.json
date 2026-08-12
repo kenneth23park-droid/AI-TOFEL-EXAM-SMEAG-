@@ -8,8 +8,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac --dir",
-    "dmg": "electron-builder --mac"
+    "//": "site/ 는 sg2 의 사본이며 빌드 산출물이다(저장소에 없다). 굽기 전에 반드시 다시 만든다 — 손으로 복사하던 시절 이 사본은 sw.js v1 에 멈춰 있었고, 라이브는 v45 였다.",
+    "site": "bash ../sg2/tools/build_desktop_site.sh",
+    "dist": "npm run site && electron-builder --mac --dir",
+    "dmg": "npm run site && electron-builder --mac"
   },
   "build": {
     "appId": "ai.smeag.studyground",

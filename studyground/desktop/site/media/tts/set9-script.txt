@@ -1,3 +1,0 @@
-Narrator: Welcome to Set 9. This is a mock test conversation.
-Student: I heard the library closes earlier today.
-Professor: Yes, please review the announcement carefully before the exam.

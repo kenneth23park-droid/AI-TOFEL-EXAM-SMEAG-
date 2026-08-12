@@ -29,5 +29,6 @@ rsync -a --delete \
 # 판 도장은 사본 쪽에만 desktop 으로 찍는다 — sg2 자신은 web 채널 그대로 둔다.
 python3 "$SG2/tools/build_version.py" --channel desktop --site "$SITE"
 
-echo "✓ desktop/site ← sg2  ($(grep -o "sg-v[0-9]*" "$SITE/sw.js" | head -1))"
+# 판 번호는 const 줄에서만 읽는다 — 주석에 'sg-media-sg-v3' 같은 옛 이름이 섞여 있다.
+echo "✓ desktop/site ← sg2  ($(sed -n "s/^const VERSION = '\(.*\)';/\1/p" "$SITE/sw.js"))"
 echo "  다음: cd studyground/desktop && npm run dmg"

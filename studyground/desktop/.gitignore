@@ -1,0 +1,6 @@
+
+# 데스크톱 앱이 품고 다니는 사이트 사본은 빌드 산출물이다.
+# sg2 를 손으로 복사하던 파일들이라 v1 에 멈춰 있었고, 저장소에는 같은 mp3 가
+# 두 벌씩 쌓였다. 이제 sg2/tools/build_desktop_site.sh 가 만든다 —
+#   bash studyground/sg2/tools/build_desktop_site.sh && cd studyground/desktop && npm run dmg
+site/
