@@ -147,15 +147,15 @@
 
   dateEl.value = todayStr();
 
-  /* 그 날짜에 몇 자리가 남았는지 미리 보여준다 — 1000개가 다 차면 등록 자체가 막힌다. */
+  /* 그 날짜에 몇 자리가 남았는지 미리 보여준다 — 999개가 다 차면 등록 자체가 막힌다. */
   function refreshAvail() {
     if (!dateEl.value) return;
     SG_AUTH.nextId(dateEl.value).then(function (r) {
       avail.innerHTML = '<span data-en></span><span data-ko></span>';
       avail.querySelector('[data-en]').textContent =
-        'Next ID: ' + (r.student_id || '—') + ' · ' + r.free + ' of 1000 free';
+        'Next ID: ' + (r.student_id || '—') + ' · ' + r.free + ' of 999 free';
       avail.querySelector('[data-ko]').textContent =
-        '다음 아이디: ' + (r.student_id || '—') + ' · 1000개 중 ' + r.free + '개 남음';
+        '다음 아이디: ' + (r.student_id || '—') + ' · 999개 중 ' + r.free + '개 남음';
     }).catch(function () { avail.textContent = ''; });
   }
   dateEl.addEventListener('change', refreshAvail);

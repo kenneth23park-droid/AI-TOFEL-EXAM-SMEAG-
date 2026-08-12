@@ -4,7 +4,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  *
  * 등록의 주요 키: 학생아이디 · 이메일 · 이름  (+ 시험응시 일자 · 담당 선생님)
  *  • 입력받는 건 이름 + 이메일 + 시험일자 + 담당 선생님. 아이디는 서버가 배정한다.
- *  • 아이디는 해당 시험일의 smeag000 ~ smeag999 중 빈 번호.
+ *  • 아이디는 해당 시험일의 smeag001 ~ smeag999 중 가장 빠른 빈 번호.
+ *    000 은 쓰지 않는다 — 배부 카드에서 "번호 없음"으로 읽히던 자리다.
  *  • 비밀번호는 전부 2222.
  *  • 키는 (student_id, exam_date) — 같은 날 중복 불가, 다른 날 재사용 가능.
  *  • 같은 시험일에 같은 이메일/이름이 이미 있으면 팝업으로 알리고 다시 만들게
@@ -36,12 +37,16 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const PW = "2222";
 const STAFF_PW = "smeag2222";
 const DOMAIN = "smeagstudyground.com";
-const ID_RE = /^smeag\d{3}$/;
+const ID_RE = /^smeag(?!000)\d{3}$/;        // 배정 가능한 학생아이디 (001~999)
+const ID_SHAPE_RE = /^smeag\d{3}$/;         // 학생아이디로 "보이는" 모양 — 직원 아이디 금지용
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /* 선생님·관리자 아이디. PostgREST 질의에 그대로 들어가므로 화이트리스트로 좁힌다. */
 const STAFF_LOGIN_RE = /^[a-z0-9][a-z0-9._-]{1,31}$/;
-const MAX_ID = 1000;
+/* 배정 범위는 smeag001 ~ smeag999 — 한 시험일에 999 자리. */
+const MIN_ID = 1;
+const MAX_ID = 999;
+const ID_COUNT = MAX_ID - MIN_ID + 1;
 
 const URL_ = Deno.env.get("SUPABASE_URL")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -112,10 +117,10 @@ async function handleNextId(b: Record<string, unknown>) {
   const date = dateOf(b.exam_date);
   const used = await usedIds(date);
   let next: string | null = null;
-  for (let i = 0; i < MAX_ID; i++) {
+  for (let i = MIN_ID; i <= MAX_ID; i++) {
     if (!used.has(pad3(i))) { next = pad3(i); break; }
   }
-  return json({ exam_date: date, student_id: next, used: used.size, free: MAX_ID - used.size });
+  return json({ exam_date: date, student_id: next, used: used.size, free: ID_COUNT - used.size });
 }
 
 /* ── 담당 선생님 ─────────────────────────────────────────────
@@ -148,7 +153,7 @@ async function handleRegister(b: Record<string, unknown>) {
     return fail(400, "invalid_email", "Enter a valid email address.", "올바른 이메일 주소를 입력하세요.");
   }
   if (wanted && !ID_RE.test(wanted)) {
-    return fail(400, "bad_id", "The ID must be smeag000 – smeag999.", "아이디는 smeag000 ~ smeag999 형식이어야 합니다.");
+    return fail(400, "bad_id", "The ID must be smeag001 – smeag999.", "아이디는 smeag001 ~ smeag999 형식이어야 합니다.");
   }
 
   /* 담당 선생님. 선생님 계정이 하나라도 있으면 반드시 고른다 — 담당이 비면
@@ -213,15 +218,15 @@ async function handleRegister(b: Record<string, unknown>) {
     }
   } else {
     const used = await usedIds(date);
-    for (let i = 0; i < MAX_ID && !got; i++) {
+    for (let i = MIN_ID; i <= MAX_ID && !got; i++) {
       const id = pad3(i);
       if (used.has(id)) continue;
       got = await claim(id, date, name, email, mine);
       if (got) assigned = id;
     }
     if (!got) {
-      return fail(409, "no_free_id", `All 1000 IDs are used for ${date}.`,
-        `${date} 시험일의 아이디 1000개가 모두 사용 중입니다.`, { exam_date: date });
+      return fail(409, "no_free_id", `All ${ID_COUNT} IDs are used for ${date}.`,
+        `${date} 시험일의 아이디 ${ID_COUNT}개가 모두 사용 중입니다.`, { exam_date: date });
     }
   }
 
@@ -301,8 +306,8 @@ async function handleSignin(b: Record<string, unknown>) {
   const bad = () => fail(401, "bad_credentials", "Wrong ID or password.", "아이디 또는 비밀번호가 올바르지 않습니다.");
   let target = login;
 
-  if (ID_RE.test(login)) {
-    // 1) 학생아이디
+  if (ID_SHAPE_RE.test(login)) {
+    // 1) 학생아이디. 로그인은 모양만 본다 — 예전에 배정된 smeag000 계정도 들어와야 한다.
     const acc = await resolveAccount(`student_id=eq.${login}`, b.exam_date);
     if (!acc) return bad();
     target = authEmail(acc.student_id, acc.exam_date);
@@ -353,9 +358,9 @@ async function handleCreateStaff(b: Record<string, unknown>) {
   const role = b.role === "admin" ? "admin" : "teacher";
 
   if (!name) return fail(400, "missing_name", "Enter the teacher's name.", "선생님 이름을 입력하세요.");
-  if (!STAFF_LOGIN_RE.test(login) || ID_RE.test(login)) {
-    return fail(400, "bad_login", "The ID must be 2–32 letters/digits and must not look like smeag000.",
-      "아이디는 영문·숫자 2~32자여야 하며 smeag000 형식은 쓸 수 없습니다.");
+  if (!STAFF_LOGIN_RE.test(login) || ID_SHAPE_RE.test(login)) {
+    return fail(400, "bad_login", "The ID must be 2–32 letters/digits and must not look like smeag001.",
+      "아이디는 영문·숫자 2~32자여야 하며 smeag001 형식은 쓸 수 없습니다.");
   }
   if (password.length < 4) {
     return fail(400, "weak_password", "The password must be at least 4 characters.", "비밀번호는 4자 이상이어야 합니다.");
