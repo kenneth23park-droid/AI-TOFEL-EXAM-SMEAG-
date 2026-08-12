@@ -136,7 +136,10 @@
 //      확대율을 낮춰 한 화면에 담는다 — assets/sg-fullscreen.js 를 새로 넣고 거의
 //      모든 셸 HTML 의 <script> 목록이 바뀌었다(login.html 은 버튼을 누른 그 순간에
 //      전체화면을 요청한다). 캐시된 옛 셸이 남으면 그 기기만 창 모드로 시험을 본다.
-const VERSION = 'sg-v43';
+// v44: 시험이 끝난 자리에서 다시 친다 — 제출 화면에 전체 한 벌과 네 영역 버튼이 선다
+//      (assets/exam-shell.js · assets/exam.css). 캐시된 옛 셸이 남으면 그 기기만
+//      끝난 화면에서 리뷰·성적 두 개만 계속 본다.
+const VERSION = 'sg-v44';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
