@@ -768,3 +768,12 @@ tr.rv-cmt td { border-bottom: 1px solid var(--line); padding-top: 0; }
 .sg-update .sg-prep-dot { background: var(--brand); animation: none; }
 .sg-update .sg-prep-sub { margin-top: 9px; }
 .sg-update .sg-prep-go { display: block; text-align: center; text-decoration: none; }
+
+/* ── Vercel Toolbar 가리기 ─────────────────────────────────────
+   프리뷰·배포에 Vercel 이 스스로 붙이는 코멘트 위젯이다. 우리 코드에는 없다.
+   학생 화면 오른쪽 아래에 검은 말풍선으로 떠서 시험을 가린다. 뿌리는 Vercel
+   프로젝트 설정(Settings → Toolbar)에서 끄고, 여기서 한 번 더 덮는다. */
+vercel-live-feedback,
+[data-vercel-toolbar],
+#vercel-toolbar,
+iframe[src*="vercel.live"] { display: none !important; }
