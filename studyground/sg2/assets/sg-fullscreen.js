@@ -12,10 +12,10 @@
  *
  *  2) 창 잠금 — 학생은 창을 못 만진다
  *     표시가 남아 있는 동안 이 기기는 시험대다. 오른쪽 클릭 메뉴, F11, 새로고침·새
- *     탭·창 닫기·인쇄·소스 보기·개발자 도구 단축키를 막는다. 그래도 전체화면이 풀리면
- *     화면을 덮는다 — 학생이 누를 수 있는 건 "돌아가기" 하나뿐이고, 정말로 창을
- *     돌려받으려면 감독관이 관리자 아이디·비밀번호를 넣어야 한다(SG_ADMIN.verify —
- *     확인만 하고 학생 기기에 관리자 세션은 남기지 않는다).
+ *     탭·창 닫기·인쇄·소스 보기·개발자 도구 단축키를 막는다. 전체화면이 풀려도 화면을
+ *     덮지는 않는다 — 다음 동작 한 번에 조용히 되돌아간다. 정말로 창을 돌려받으려면
+ *     학생이 전체화면 버튼을 눌러야 하고, 그때 감독관이 관리자 아이디·비밀번호를
+ *     넣는다(SG_ADMIN.verify — 확인만 하고 학생 기기에 관리자 세션은 남기지 않는다).
  *     브라우저 밖(Alt+Tab, Dock, 전원 버튼)까지는 웹이 막을 수 없다. 거기까지가 한계다.
  *     전체화면 API 가 없는 기기(iPhone Safari)에서는 잠그지 않는다 — 잠그면 학생이
  *     돌아올 방법이 없다.
@@ -108,7 +108,6 @@ window.SG_FS = (function () {
   /* ── 창 잠금 ───────────────────────────────────────────── */
 
   var SELF = (document.currentScript && document.currentScript.src) || '';
-  var GRACE_MS = 2500;      // 페이지 이동으로 잠깐 풀린 것과 학생이 Esc 를 누른 것을 가른다
 
   function supported() {
     var el = document.documentElement;
@@ -136,7 +135,7 @@ window.SG_FS = (function () {
 
   /* ── 덮개 ──────────────────────────────────────────────── */
 
-  var veil = null, graceTimer = null;
+  var veil = null;
 
   function assetUrl(name) {
     try { return new URL(name, SELF || location.href).href; } catch (e) { return 'assets/' + name; }
@@ -169,9 +168,7 @@ window.SG_FS = (function () {
       '.sgfs-sub{font-size:13px;line-height:1.6;color:#7b716b;margin:0 0 18px}' +
       '.sgfs-btn{font:inherit;font-size:14px;font-weight:750;padding:11px 18px;border-radius:11px;' +
         'cursor:pointer;border:1px solid #e2d9d2;background:#fff;color:inherit}' +
-      '.sgfs-btn.primary{background:#e8481f;border-color:#e8481f;color:#fff;width:100%}' +
-      '.sgfs-link{display:block;margin:14px auto 0;font:inherit;font-size:12.5px;font-weight:700;' +
-        'color:#7b716b;background:none;border:0;cursor:pointer;text-decoration:underline}' +
+      '.sgfs-btn.primary{background:#e8481f;border-color:#e8481f;color:#fff}' +
       '.sgfs-auth{margin-top:18px;border-top:1px solid #efe7e1;padding-top:16px;text-align:left}' +
       '.sgfs-auth[hidden]{display:none}' +
       '.sgfs-err{display:none;font-size:12.5px;font-weight:700;color:#b3261e;background:#fdeceb;' +
@@ -194,11 +191,9 @@ window.SG_FS = (function () {
     veil.innerHTML =
       '<div class="sgfs-card">' +
         '<span class="sgfs-tag">Exam mode</span>' +
-        '<h2 class="sgfs-h" data-role="h">Fullscreen is required</h2>' +
-        '<p class="sgfs-sub" data-role="sub">This device is locked for the test. ' +
-          'Return to fullscreen to continue.</p>' +
-        '<button type="button" class="sgfs-btn primary" data-act="back">Return to fullscreen</button>' +
-        '<button type="button" class="sgfs-link" data-act="ask">Invigilator unlock</button>' +
+        '<h2 class="sgfs-h">Leaving fullscreen needs approval</h2>' +
+        '<p class="sgfs-sub">This device is locked for the test. ' +
+          'An invigilator must sign in to release it.</p>' +
         '<form class="sgfs-auth" autocomplete="off" hidden>' +
           '<p class="sgfs-err">Wrong admin ID or password for this test.</p>' +
           '<label class="sgfs-lb">Admin ID' +
@@ -207,7 +202,7 @@ window.SG_FS = (function () {
           '<label class="sgfs-lb">Password<input name="fs-pw" type="password" required></label>' +
           '<div class="sgfs-acts">' +
             '<button type="button" class="sgfs-btn" data-act="cancel">Cancel</button>' +
-            '<button type="submit" class="sgfs-btn primary" style="width:auto">Unlock</button>' +
+            '<button type="submit" class="sgfs-btn primary">Unlock</button>' +
           '</div>' +
         '</form>' +
       '</div>';
@@ -218,12 +213,7 @@ window.SG_FS = (function () {
 
     veil.addEventListener('click', function (e) {
       var act = e.target.getAttribute && e.target.getAttribute('data-act');
-      if (act === 'back') { enter(); hideVeil(); }
-      else if (act === 'ask') { showAuth(); }
-      else if (act === 'cancel') {
-        // 전체화면 안에서 스스로 연 창이면 닫고, 잠긴 화면이면 폼만 접는다.
-        if (veil.dataset.mode === 'exit') hideVeil(); else hideAuth();
-      }
+      if (act === 'cancel') hideVeil();
     });
 
     form.addEventListener('submit', function (e) {
@@ -267,55 +257,40 @@ window.SG_FS = (function () {
     veil.querySelector('.sgfs-err').classList.remove('on');
   }
 
-  /** mode: 'locked' — 전체화면이 풀렸다. 'exit' — 학생이 나가겠다고 눌렀다. */
-  function showVeil(mode) {
+  /** 학생이 전체화면을 나가겠다고 눌렀을 때만 뜬다 — 감독관이 풀어 준다. */
+  function showVeil() {
     var v = ensureVeil();
-    v.dataset.mode = mode || 'locked';
-    var exit = v.dataset.mode === 'exit';
-    v.querySelector('[data-role=h]').textContent =
-      exit ? 'Leaving fullscreen needs approval' : 'Fullscreen is required';
-    v.querySelector('[data-role=sub]').textContent = exit
-      ? 'This device is locked for the test. An invigilator must sign in to release it.'
-      : 'This device is locked for the test. Return to fullscreen to continue.';
-    v.querySelector('[data-act=back]').hidden = exit;
-    v.querySelector('[data-act=ask]').hidden = exit;
     v.hidden = false;
-    if (exit) showAuth(); else hideAuth();
+    showAuth();
   }
 
   function hideVeil() {
-    if (graceTimer) { window.clearTimeout(graceTimer); graceTimer = null; }
     if (veil) { veil.hidden = true; hideAuth(); }
   }
 
   function veilOpen() { return !!(veil && !veil.hidden); }
   function authOpen() { return veilOpen() && !veil.querySelector('.sgfs-auth').hidden; }
 
-  /** 전체화면이 아니면 덮는다. 페이지가 막 열린 참이면 잠깐 기다려 준다. */
-  function guard(immediate) {
-    if (graceTimer) { window.clearTimeout(graceTimer); graceTimer = null; }
+  /* 전체화면이 풀려도 화면을 덮지 않는다 — 덮개는 학생이 나가겠다고 누른 때만 뜬다.
+     풀린 전체화면은 다음 클릭·키 입력 한 번에 조용히 되돌아간다(rearmOnGesture). */
+  function guard() {
     if (!locked()) { hideVeil(); return; }
-    // 감독관이 아이디를 치는 중이면 전체화면으로 돌아왔어도 덮개를 걷지 않는다.
-    if (on()) { if (!authOpen()) hideVeil(); return; }
-    if (immediate) { showVeil('locked'); return; }
-    graceTimer = window.setTimeout(function () {
-      graceTimer = null;
-      if (locked() && !on()) showVeil('locked');
-    }, GRACE_MS);
+    // 감독관이 아이디를 치는 중이면 덮개를 걷지 않는다.
+    if (on() && !authOpen()) hideVeil();
   }
 
   /** 시험 셸의 전체화면 버튼이 부른다 — 학생 혼자서는 창으로 돌아가지 못한다. */
   function requestExit() {
     if (!locked()) { release(); return; }
-    showVeil('exit');
+    showVeil();
   }
 
   function bindLock() {
     document.addEventListener('keydown', onKey, true);
     document.addEventListener('contextmenu', onContext, true);
-    document.addEventListener('fullscreenchange', function () { guard(true); });
-    document.addEventListener('webkitfullscreenchange', function () { guard(true); });
-    guard(false);                       // 페이지 이동으로 풀린 경우는 유예를 준다
+    document.addEventListener('fullscreenchange', guard);
+    document.addEventListener('webkitfullscreenchange', guard);
+    guard();
   }
 
   /* ── 화면 크기에 맞추기 ─────────────────────────────────── */
