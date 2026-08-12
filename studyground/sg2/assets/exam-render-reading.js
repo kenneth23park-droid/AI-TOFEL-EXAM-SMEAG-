@@ -91,10 +91,38 @@
 
   var FREE_WIDTH = 10;
 
-  // 빈칸은 영어 단어만 받는다. 한글 자판이 켜진 채로 쳐도 화면에도 저장에도 한글은 남지 않는다
-  // (IME 조합 중에는 손대지 않고, compositionend 에서 한 번에 걷어낸다 — 조합이 깨지지 않게).
+  /* 빈칸은 영어 단어만 받는다. 그런데 한글을 그냥 버리면 자판이 한글인 학생에게는
+     "아무것도 안 써지는 칸" 이 된다 — 친 대로 지워지니 고장으로 보인다.
+     그래서 버리는 대신 두벌식 자판을 되돌린다: 'ㅁㅏ'(마)는 a·k 를 누른 결과이므로 'ak' 로 편다.
+     학생이 친 자판 그대로 영문이 들어가므로, 한글 상태인 줄 모르고 쳐도 시험은 이어진다.
+     (IME 조합 중에는 손대지 않고 compositionend 에서 한 번에 편다 — 조합이 깨지지 않게.) */
+  var HG_CHO = ['r', 'R', 's', 'e', 'E', 'f', 'a', 'q', 'Q', 't', 'T', 'd', 'w', 'W', 'c', 'z', 'x', 'v', 'g'];
+  var HG_JUNG = ['k', 'o', 'i', 'O', 'j', 'p', 'u', 'P', 'h', 'hk', 'ho', 'hl', 'y', 'n', 'nj', 'np', 'nl', 'b', 'm', 'ml', 'l'];
+  var HG_JONG = ['', 'r', 'R', 'rt', 's', 'sw', 'sg', 'e', 'f', 'fr', 'fa', 'fq', 'ft', 'fx', 'fv', 'fg', 'a', 'q', 'qt', 't', 'T', 'd', 'w', 'c', 'z', 'x', 'v', 'g'];
+  // 낱자만 남은 조합(ㅡㅁ 처럼 초성이 없는 경우) — 호환 자모 U+3131~U+3163.
+  var HG_JAMO = ['r', 'R', 'rt', 's', 'sw', 'sg', 'e', 'E', 'f', 'fr', 'fa', 'fq', 'ft', 'fx', 'fv', 'fg', 'a', 'q', 'Q', 'qt', 't', 'T', 'd', 'w', 'W', 'c', 'z', 'x', 'v', 'g',
+                'k', 'o', 'i', 'O', 'j', 'p', 'u', 'P', 'h', 'hk', 'ho', 'hl', 'y', 'n', 'nj', 'np', 'nl', 'b', 'm', 'ml', 'l'];
   var NON_ASCII = /[^\x20-\x7E]/g;
-  function asciiOnly(s) { return (s === null || s === undefined) ? '' : String(s).replace(NON_ASCII, ''); }
+
+  function hangulKeys(ch) {
+    var c = ch.charCodeAt(0);
+    if (c >= 0xAC00 && c <= 0xD7A3) {           // 완성형 한 글자 → 초성·중성·종성 순서로 편다
+      var i = c - 0xAC00;
+      return HG_CHO[Math.floor(i / 588)] + HG_JUNG[Math.floor((i % 588) / 28)] + HG_JONG[i % 28];
+    }
+    if (c >= 0x3131 && c <= 0x3163) return HG_JAMO[c - 0x3131] || '';
+    return '';
+  }
+
+  function asciiOnly(s) {
+    if (s === null || s === undefined) return '';
+    var src = String(s), out = '', i, ch;
+    for (i = 0; i < src.length; i++) {
+      ch = src.charAt(i);
+      out += (ch >= ' ' && ch <= '~') ? ch : hangulKeys(ch);
+    }
+    return out.replace(NON_ASCII, '');
+  }
 
   function stemOf(q) { return (q && q.hint) ? String(q.hint) : ''; }
 
