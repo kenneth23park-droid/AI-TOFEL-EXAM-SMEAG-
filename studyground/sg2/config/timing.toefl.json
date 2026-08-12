@@ -227,40 +227,6 @@
   },
   "directions": [
     {
-      "id": "adjustVolume",
-      "label": "Adjusting the Volume",
-      "screenType": "instruction",
-      "insertAt": {
-        "position": "beforeSection",
-        "section": "reading",
-        "module": null
-      },
-      "maxSec": null,
-      "advance": "manual",
-      "controls": [
-        "playTestAudio",
-        "volume",
-        "continue"
-      ]
-    },
-    {
-      "id": "adjustMic",
-      "label": "Adjusting the Microphone",
-      "labelKo": "마이크 조절",
-      "screenType": "hardwareCheck",
-      "insertAt": {
-        "position": "beforeSection",
-        "section": "reading",
-        "module": null
-      },
-      "maxSec": null,
-      "advance": "manual",
-      "controls": [
-        "micTest",
-        "continue"
-      ]
-    },
-    {
       "id": "listeningDirections",
       "label": "Listening Section Directions",
       "screenType": "instruction",
@@ -591,6 +557,12 @@
         "path": "progress (컴파일러 산출 필드)",
         "level": "observed",
         "source": "서브바 좌측 실측 — Listening/Speaking 은 'Question 25 of 32' 단일 번호, Reading 은 'Questions 1-10 of 35' 범위. 분모는 섹션 전체 문항 수. → progress:{first,last,total,style:'single'|'range'}",
+        "verify": "없음(확정)"
+      },
+      {
+        "path": "directions[id=adjustVolume] · directions[id=adjustMic] — 삭제",
+        "level": "spec",
+        "source": "발주처 요구(2026-08-12) — 리딩 앞의 오디오·마이크 점검 화면을 없앤다. 학생은 리딩으로 곧장 들어간다. 리딩은 sectionOrder 의 첫 섹션이라 이 두 화면이 시험 전체의 첫 두 화면이었고, 리딩만 응시할 때도(mode=section) 스피커 테스트와 마이크 권한을 통과해야 지문이 열렸다. 렌더러(exam-render-instruction.js 의 renderInstruction 볼륨 분기·renderMicAdjust)는 그대로 둔다 — IELTS(timing.ielts.json)는 여전히 리스닝 앞에서 두 화면을 쓰고, TOEFL 스피킹 앞 hardwareCheck 도 그대로다. 음량 조절 자체는 상단바 Volume 팝오버로 언제든 가능하다",
         "verify": "없음(확정)"
       }
     ]

@@ -172,6 +172,9 @@
   </div>
 </div>
 
+<!-- 좌석 설정(언어 고정·시험 전용 모드·오디오 배속) — app.js 가 언어를 읽기 전에 정해진다. -->
+<script src="assets/sg-seats.js"></script>
+<script src="assets/seat-runtime.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/sg-fullscreen.js"></script>
 <!-- 관리자 계층 — 학생 화면에는 아무 것도 그리지 않는다(Ctrl+Alt+A 또는 좌하단 ⚙ 로 로그인).
@@ -179,6 +182,7 @@
 <script src="assets/question-config.js"></script>
 <script src="assets/audio-config.js"></script>
 <script src="assets/admin-session.js"></script>
+<script src="assets/admin-approve.js"></script>
 <script src="assets/admin-entry.js"></script>
 <script src="assets/exam-clock.js"></script>
 <script src="assets/exam-store.js"></script>
@@ -189,11 +193,15 @@ window.SG_ROUTE = {
   section: 'listening',
   set: 'set9',
   base: '',
-  path: location.pathname
+  path: ''
 };
 </script>
 <script src="assets/exam-shell.js"></script>
-<script src="assets/offline-prep.js"></script>
+<!-- 답안 동기화. shell 뒤라야 SG_RUNTIME.machine() 을 붙잡을 수 있다.
+     서버가 없으면 조용히 로컬 저장만 하고 시험은 그대로 진행된다. -->
+<script src="assets/exam-sync.js"></script>
+<script src="assets/exam-sync-boot.js"></script>
+<script src="assets/offline-prep.js" data-mode="check"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
 </html>

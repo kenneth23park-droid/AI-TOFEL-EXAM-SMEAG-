@@ -117,6 +117,24 @@ window.SG_RUNTIME = { timing: function () { return timing; } };
 var res = window.SG_COMPILE.compileScreens(window.SMEAG_SET1, timing, { profile: 'toefl' });
 var screens = res.screens;
 
+/* intro.volume(Adjusting the Volume) · intro.microphone(Adjusting the Microphone) 은
+ * 2026-08-12 에 TOEFL 리딩 앞에서 내려갔다(config/timing.toefl.json 의 directions).
+ * 렌더러는 그대로 남는다 — IELTS(config/timing.ielts.json)가 리스닝 앞에서 여전히 두
+ * 화면을 쓰고, 그 레이아웃은 계속 검사해야 한다. 그래서 아래 [8]·[9] 는 TOEFL 컴파일
+ * 결과에서 두 화면을 찾지 않고, 같은 directions 를 되붙인 timing 으로 한 번 더 컴파일해
+ * 렌더러만 검사한다. TOEFL 화면열 자체의 기대값은 위 screens 가 그대로 맡는다. */
+var prepTiming = JSON.parse(JSON.stringify(timing));
+prepTiming.directions = [
+  { id: 'adjustVolume', label: 'Adjusting the Volume', screenType: 'instruction',
+    insertAt: { position: 'beforeSection', section: 'reading', module: null },
+    maxSec: null, advance: 'manual', controls: ['playTestAudio', 'volume', 'continue'] },
+  { id: 'adjustMic', label: 'Adjusting the Microphone', labelKo: '마이크 조절', screenType: 'hardwareCheck',
+    insertAt: { position: 'beforeSection', section: 'reading', module: null },
+    maxSec: null, advance: 'manual', controls: ['micTest', 'continue'] }
+].concat(prepTiming.directions);
+var prepScreens = window.SG_COMPILE.compileScreens(window.SMEAG_SET1, prepTiming, { profile: 'toefl' }).screens;
+function prepById(id) { return prepScreens.filter(function (s) { return s.id === id; })[0]; }
+
 var fails = [];
 function check(name, actual, expected) {
   var ok = actual === expected;
@@ -140,7 +158,7 @@ var audioSet = by(function (s) { return s.blockKind === 'audio-set'; });
 console.log('       instruction ids: ' + instr.map(function (s) { return s.id; }).join(', '));
 ok('instruction >= 5', instr.length >= 5, String(instr.length));
 ok('moduleEnd >= 1', mend.length >= 1, String(mend.length));
-check('hardwareCheck (intro.microphone + speaking.hardware)', hw.length, 2);
+check('hardwareCheck (speaking.hardware)', hw.length, 1);
 check('review', rev.length, 1);
 check('audio-set 화면', audioSet.length, 33);
 
@@ -245,7 +263,7 @@ check('렌더 성공 화면 수', rendered, instr.length + mend.length + hw.leng
 console.log('\n[8] 렌더 산출물 내용');
 function textOf(node) { return flatten(node); }
 
-var volScreen = instr.filter(function (s) { return s.id === 'intro.volume'; })[0];
+var volScreen = prepById('intro.volume');
 var volNode = window.SG_INSTRUCTION.renderInstruction(volScreen, ctx);
 var volText = textOf(volNode);
 ok('Adjusting the Volume 에 Play Test Audio', volText.indexOf('Play Test Audio') >= 0);
@@ -333,7 +351,7 @@ function pickRow(sum, sec) {
 }
 
 /* Adjusting the Microphone — 레퍼런스 화면(hardwareCheck 이지만 전용 레이아웃) */
-var micScreen = hw.filter(function (s) { return s.id === 'intro.microphone'; })[0];
+var micScreen = prepById('intro.microphone');
 ok('intro.microphone 화면 존재', !!micScreen);
 var micNode = window.SG_INSTRUCTION.renderMicAdjust(micScreen, ctx);
 var micText = textOf(micNode);

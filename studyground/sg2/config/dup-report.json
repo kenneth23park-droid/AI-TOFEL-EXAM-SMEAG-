@@ -24,7 +24,7 @@
   ],
   "unitCount": 194,
   "frameOnlyUnits": 0,
-  "candidatePairs": 131,
+  "candidatePairs": 133,
   "thresholds": {
     "shingleK": 4,
     "jaccardHigh": 0.55,

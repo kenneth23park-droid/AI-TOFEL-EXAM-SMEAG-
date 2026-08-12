@@ -495,6 +495,18 @@ window.SG_SELFTEST = (function () {
     function byId(id) { for (var i = 0; i < all.length; i++) { if (all[i].id === id) return all[i]; } return null; }
     function by(fn) { return all.filter(fn); }
 
+    /* intro.volume · intro.microphone 은 2026-08-12 에 TOEFL 리딩 앞에서 내려갔다
+       (config/timing.toefl.json 의 directions). 렌더러는 남는다 — IELTS 는 리스닝 앞에서
+       여전히 두 화면을 쓴다. 그래서 컴파일 결과에서 찾지 않고 여기서 직접 세워 렌더러만
+       본다. 두 렌더러가 화면에서 읽는 것은 id 와 copy.title* 뿐이고, 본문·버튼·미터는
+       렌더러가 레퍼런스대로 스스로 그린다. */
+    function prepScreen(id, screenType, titleEn, titleKo) {
+      return { id: id, screenType: screenType, section: 'reading', module: null, moduleId: null,
+               timer: null, timers: [], advance: 'manual', questionIds: [],
+               copy: { titleEn: titleEn, titleKo: titleKo, bodyEn: '', bodyKo: '',
+                       ctaEn: 'Continue', ctaKo: '계속' } };
+    }
+
     /* ── Story 2.1 ─────────────────────────────────────────── */
 
     var instr = by(function (s) { return s.screenType === 'instruction'; });
@@ -503,7 +515,7 @@ window.SG_SELFTEST = (function () {
     T.eq('타이머 달린 instruction(=self-paced 위반)', timed.length, 0);
 
     // Adjusting the Volume — 안내 3단락 + 아이콘 행 + Play Test Audio (녹화 02:30)
-    var vol = byId('intro.volume');
+    var vol = prepScreen('intro.volume', 'instruction', 'Adjusting the Volume', 'Adjusting the Volume');
     var volBox = T.caseBox('intro.volume · Adjusting the Volume');
     var volNode = T.renderInto(volBox, I.renderInstruction, vol, ctx);
     if (volNode) {
@@ -606,7 +618,8 @@ window.SG_SELFTEST = (function () {
 
     // Adjusting the Microphone (레퍼런스 test-nt 레이아웃)
     var micBox = T.caseBox('intro.microphone · Adjusting the Microphone');
-    var micNode = T.renderInto(micBox, I.renderHardwareCheck, byId('intro.microphone'), ctx);
+    var micNode = T.renderInto(micBox, I.renderHardwareCheck,
+      prepScreen('intro.microphone', 'hardwareCheck', 'Adjusting the Microphone', '마이크 조절'), ctx);
     if (micNode) {
       var mt = textOf(micNode);
       T.ok('원형 RECORD 버튼', !!micNode.querySelector('.instr-mic-record'));

@@ -719,9 +719,30 @@ window.SG_RUNTIME = (function () {
 
   /* ── 부팅 ───────────────────────────────────────────────── */
 
+  /* 한 영역만 치는 진입(mode=section)은 관리자 승인이 있어야 시작된다. 학생 화면에는
+     네 영역이 그대로 보이지만(tests.html), 문을 여는 건 감독하는 선생님이다. 목록에서
+     이미 승인받고 넘어왔으면 일회용 표를 받아 그냥 지나가고, 주소를 직접 쳐서 들어온
+     경우에는 여기서 그 자리에 승인을 요구한다. 관리자 세션이 있는 기기는 묻지 않는다
+     (SG_APPROVE.ask 안에서 SG_ADMIN.can 이 판단한다). 전체 한 벌(mode=exam)은 그대로다.
+     승인 스크립트가 못 떴으면 옛 동작 그대로 통과시킨다 — 시험을 멈추지 않는다. */
+  function gateSection(section, next) {
+    var P = window.SG_APPROVE;
+    if (!P || scopeMode() !== 'section' || !section) { next(); return; }
+    if (P.claim(P.key(SET_ID, section))) { next(); return; }
+    var label = section.charAt(0).toUpperCase() + section.slice(1);
+    P.ask({ what: label, setId: SET_ID }, next, function () {
+      // 승인 없이는 시험이 시작되지 않는다 — 목록으로 되돌려보낸다.
+      window.location.href = BASE + 'tests.html';
+    });
+  }
+
   function boot() {
-    var url = EXAM.parseUrl(window.location.search, window.location.hash);
     var section = routeSection();
+    gateSection(section, function () { bootRun(section); });
+  }
+
+  function bootRun(section) {
+    var url = EXAM.parseUrl(window.location.search, window.location.hash);
     var scope = scopeMode();
 
     loadOptional(OPTIONAL, function () {

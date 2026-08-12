@@ -560,10 +560,43 @@
   }
 
   var LIST = [];
+
+  /* 저장하면 화면을 다시 그린다("교체됨" 표시와 개수가 달라지므로). 그런데 그대로 두면
+     펼쳐 놓은 칸이 접히고 방금 친 대본이 사라진다 — 저장이 안 된 것처럼 보이고,
+     실제로 그 대본은 문항 override 에 담기지 않으므로 정말로 없어진다.
+     그래서 열려 있던 문항과 그 대본만 붙들었다가 다시 얹는다. */
+  function openState() {
+    var keep = [];
+    host.querySelectorAll('.qrow.open').forEach(function (r) {
+      var it = LIST[+r.getAttribute('data-i')];
+      if (!it) return;
+      var ta = r.querySelector('[data-f=script]');
+      keep.push({ id: it.q.id, script: ta ? ta.value : null });
+    });
+    return { rows: keep, y: window.scrollY };
+  }
+  function restoreOpen(state) {
+    if (!state || !state.rows.length) return;
+    var byId = {};
+    state.rows.forEach(function (s) { byId[s.id] = s; });
+    host.querySelectorAll('.qrow').forEach(function (r) {
+      var it = LIST[+r.getAttribute('data-i')];
+      var s = it && byId[it.q.id];
+      if (!s) return;
+      r.classList.add('open');
+      var ta = r.querySelector('[data-f=script]');
+      if (ta && s.script != null) ta.value = s.script;
+      loadCatalog(); paintEngines(r); paintKeyRow(r); paintVoices(r);
+    });
+    window.scrollTo(0, state.y);
+  }
+
   function render() {
+    var keep = openState();
     LIST = items();
     host.innerHTML = LIST.map(rowHtml).join('') ||
       '<p class="muted"><span data-en>This set is not loaded on this page.</span><span data-ko>이 SET 이 로드되지 않았습니다.</span></p>';
+    restoreOpen(keep);
     applyFilter();
     var nq = LIST.filter(function (it) { return !it.intro; }).length;
     var ni = LIST.length - nq;
@@ -879,8 +912,13 @@
     var row = act.closest('.qrow'), it = LIST[+row.getAttribute('data-i')], q = it.q;
     var a = act.getAttribute('data-act');
     if (a === 'save') {
-      Q.set(setId, q.id, it.intro ? diffIntro(it, row) : diffAgainstOriginal(q, readRow(row)));
-      toast('Saved · ' + q.id);
+      var patch = it.intro ? diffIntro(it, row) : diffAgainstOriginal(q, readRow(row));
+      /* 무엇이 저장됐는지 이름으로 말한다. 원본과 같은 값은 저장하지 않으므로
+         "눌렀는데 아무 일도 없다" 가 정상일 때가 있는데, 그때 조용하면 고장과 구분되지 않는다. */
+      var changed = Object.keys(patch).filter(function (f) { return patch[f] != null; });
+      Q.set(setId, q.id, patch);
+      toast(changed.length ? 'Saved · ' + q.id + ' · ' + changed.join(', ')
+                           : 'No change to save · ' + q.id + ' (same as the original)');
       render();
     } else if (a === 'revert') {
       Q.reset(setId, q.id);

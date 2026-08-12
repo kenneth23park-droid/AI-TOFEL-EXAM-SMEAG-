@@ -2,7 +2,7 @@
   "provider": "elevenlabs",
   "model": "eleven_flash_v2_5",
   "output": "mp3_44100_128",
-  "note": "시험 오디오(media/audio/set9/) 정본. tts-manifest.set9.json 의 40개 항목에 config/set9-voice-casting.json 의 13인 캐스팅을 입힌 것.",
+  "note": "시험 오디오(media/audio/set9/) 정본. tts-manifest.set9.json 의 40개 항목에 config/set9-voice-casting.json 의 13인 캐스팅을 입힌 것. 2026-08-12: set9-L2-04-05 / -06-07 / -08-11 / -12-15 네 항목의 대사를 원본 전사로 교체했다 (종전 집필본 폐기). 캐스팅은 그대로 두고 텍스트만 갈아끼웠다.",
   "items": [
     {
       "id": "l1-q01",
@@ -476,74 +476,46 @@
       "out": "media/audio/set9/set9-L2-04-05.mp3",
       "segments": [
         {
-          "speaker": "W",
-          "voice": "XrExE9yKIg1WjnnlVkGX",
-          "voice_name": "US-Mia",
-          "el_voice": "Matilda",
-          "text": "You will not believe my morning. Six a.m., and the registrar's system sends me a seat confirmation. Sociolinguistics. The Thursday seminar. I read it four times."
-        },
-        {
           "speaker": "M",
           "voice": "TX3LPaxmHKxFdv7VOQHJ",
           "voice_name": "US-Liam",
           "el_voice": "Liam",
-          "text": "You're in? That thing filled up before I finished typing my ID number. I'm fourteenth in the queue."
+          "text": "Hey, did you manage to get into Professor Hammond's linguistics seminar? I know it fills up fast."
         },
         {
           "speaker": "W",
           "voice": "XrExE9yKIg1WjnnlVkGX",
           "voice_name": "US-Mia",
           "el_voice": "Matilda",
-          "text": "I'd stopped watching it, honestly. Two students in the class dropped over the weekend, the queue ran overnight, and it took the next two names off the top. Mine was one of them."
+          "text": "Not initially. I was number four on the waitlist, but I just got an email saying a spot opened up."
         },
         {
           "speaker": "M",
           "voice": "TX3LPaxmHKxFdv7VOQHJ",
           "voice_name": "US-Liam",
           "el_voice": "Liam",
-          "text": "Overnight. So it's just the software moving people around."
+          "text": "That's great news! I'm still stuck at number seven. I'm keeping my fingers crossed, but I'm not holding my breath."
         },
         {
           "speaker": "W",
           "voice": "XrExE9yKIg1WjnnlVkGX",
           "voice_name": "US-Mia",
           "el_voice": "Matilda",
-          "text": "Start to finish. Hammond gets the roster from the registrar the Monday before classes open, and whoever's on it is who he teaches that term."
+          "text": "You might want to have a backup plan. The add-drop deadline is next Friday, and the list doesn't usually move that quickly."
         },
         {
           "speaker": "M",
           "voice": "TX3LPaxmHKxFdv7VOQHJ",
           "voice_name": "US-Liam",
           "el_voice": "Liam",
-          "text": "Fourteenth. What are my odds here, realistically?"
+          "text": "Yeah, I've been looking at a sociolinguistics course as an alternative. It fits my schedule, but it's not my first choice."
         },
         {
           "speaker": "W",
           "voice": "XrExE9yKIg1WjnnlVkGX",
           "voice_name": "US-Mia",
           "el_voice": "Matilda",
-          "text": "Low enough that you want a second plan moving this week. Look at what else clears the same methods requirement and get yourself registered for one of those before Friday, because Friday is when add - drop shuts. There are two courses that count for it and both were down to single seats yesterday afternoon. If those fill, you're carrying that requirement into next year."
-        },
-        {
-          "speaker": "M",
-          "voice": "TX3LPaxmHKxFdv7VOQHJ",
-          "voice_name": "US-Liam",
-          "el_voice": "Liam",
-          "text": "And if my number does come up after I've signed for something?"
-        },
-        {
-          "speaker": "W",
-          "voice": "XrExE9yKIg1WjnnlVkGX",
-          "voice_name": "US-Mia",
-          "el_voice": "Matilda",
-          "text": "Then you release the other one and walk into the seminar. It doesn't meet until week three anyway, and the roster locks the Friday before that, so it's all settled before anyone's in a classroom."
-        },
-        {
-          "speaker": "M",
-          "voice": "TX3LPaxmHKxFdv7VOQHJ",
-          "voice_name": "US-Liam",
-          "el_voice": "Liam",
-          "text": "Two courses, one week. Right. There's a methods section Tuesday mornings. I'll register for it this afternoon."
+          "text": "Well, sometimes those unexpected courses turn out to be the best ones."
         }
       ],
       "speed": 0.9
@@ -558,84 +530,42 @@
           "voice": "cjVigY5qzO86Huf0OWal",
           "voice_name": "US-Mason",
           "el_voice": "Eric",
-          "text": "My landlord slid an envelope under my door yesterday. I've read it about nine times since."
+          "text": "My landlord just sent me a notice about renewing my lease. The rent is going up by fifteen percent."
         },
         {
           "speaker": "W",
           "voice": "EXAVITQu4vr4xnSDxMaL",
           "voice_name": "US-Emma",
           "el_voice": "Sarah",
-          "text": "Nine times. What was in it?"
+          "text": "Ouch. That's a pretty steep increase. Are you going to stay?"
         },
         {
           "speaker": "M",
           "voice": "cjVigY5qzO86Huf0OWal",
           "voice_name": "US-Mason",
           "el_voice": "Eric",
-          "text": "Two things. The renewal form for September, which I'd sign tonight if you handed me a pen. And a new figure. Four hundred dollars more a month."
+          "text": "I'm torn. The location is perfect - it's a stone's throw from my office - but that's a lot more money every month."
         },
         {
           "speaker": "W",
           "voice": "EXAVITQu4vr4xnSDxMaL",
           "voice_name": "US-Emma",
           "el_voice": "Sarah",
-          "text": "Four hundred? On what the lab pays you?"
+          "text": "Have you thought about negotiating? Sometimes landlords are willing to meet you halfway, especially if you've been a reliable tenant."
         },
         {
           "speaker": "M",
           "voice": "cjVigY5qzO86Huf0OWal",
           "voice_name": "US-Mason",
           "el_voice": "Eric",
-          "text": "It's about a third on top of what I pay now. Four hundred is my groceries, my bus pass, and whatever's left over at the end, all of it. I stood in the kitchen running the arithmetic until two in the morning and it never came out."
+          "text": "That's not a bad idea. I've never missed a payment in three years. Maybe I can use that as leverage."
         },
         {
           "speaker": "W",
           "voice": "EXAVITQu4vr4xnSDxMaL",
           "voice_name": "US-Emma",
           "el_voice": "Sarah",
-          "text": "And you like that apartment."
-        },
-        {
-          "speaker": "M",
-          "voice": "cjVigY5qzO86Huf0OWal",
-          "voice_name": "US-Mason",
-          "el_voice": "Eric",
-          "text": "Ten minutes on foot to the lab. I've been in that lab since sophomore year and I've never once had to think about how I'd get there."
-        },
-        {
-          "speaker": "W",
-          "voice": "EXAVITQu4vr4xnSDxMaL",
-          "voice_name": "US-Emma",
-          "el_voice": "Sarah",
-          "text": "Then go talk to her before you sign anything. Four years in that unit, and in four years I've never seen you counting days at the end of the month, or peeling one of those yellow notices off your door. That goes in a file somewhere. Two empty months would cost her more than four hundred."
-        },
-        {
-          "speaker": "M",
-          "voice": "cjVigY5qzO86Huf0OWal",
-          "voice_name": "US-Mason",
-          "el_voice": "Eric",
-          "text": "Huh. I'd been picturing it as begging."
-        },
-        {
-          "speaker": "W",
-          "voice": "EXAVITQu4vr4xnSDxMaL",
-          "voice_name": "US-Emma",
-          "el_voice": "Sarah",
-          "text": "It's the opposite. Call her tonight. She's downstairs at the desk until eight, same as always."
-        },
-        {
-          "speaker": "M",
-          "voice": "cjVigY5qzO86Huf0OWal",
-          "voice_name": "US-Mason",
-          "el_voice": "Eric",
-          "text": "I did scroll listings across the river for ten minutes last night, out of spite, and closed the tab. Dana took in two roommates when hers went up."
-        },
-        {
-          "speaker": "W",
-          "voice": "EXAVITQu4vr4xnSDxMaL",
-          "voice_name": "US-Emma",
-          "el_voice": "Sarah",
-          "text": "Sign nothing until you've talked to her."
+          "text": "Exactly. The worst they can say is no."
         }
       ],
       "speed": 0.9
@@ -650,35 +580,21 @@
           "voice": "onwK4e9ZLuTAKqWW03F9",
           "voice_name": "GB-Oliver",
           "el_voice": "Daniel",
-          "text": "A blackpoll warbler weighs less than a candy bar. Some evening in September it lifts out of a spruce forest in northern Canada, and weeks later it drops into the same few acres of Central America where it spent the previous winter. So let's take up the steering."
+          "text": "Alright, so today we're going to look at one of the most remarkable phenomena in the animal kingdom - bird migration. Now, many bird species travel thousands of miles each year, and the question is, how exactly do they do this? Well, birds rely on several different navigation systems working together. They use the sun's position during the day to orient themselves, tracking how it moves across the sky. At night, they actually follow star patterns - particularly the North Star and surrounding constellations. Additionally, many species can detect Earth's magnetic field through special proteins in their eyes, which essentially gives them a built-in compass. Some researchers believe birds may even use smell to recognize familiar landscapes, though this is still being studied."
         },
         {
           "speaker": "M",
           "voice": "onwK4e9ZLuTAKqWW03F9",
           "voice_name": "GB-Oliver",
           "el_voice": "Daniel",
-          "text": "By day a migrant has references we would recognize. The sun's position, read against an internal clock that stays accurate to within minutes. And the ground underneath: a coastline, a river cut, a ridge running the right way, which a bird can follow the way you would follow a highway. Underneath both of those is a magnetic sense, and the Earth's field gives a rough bearing even through heavy cloud."
+          "text": "Now, why do birds go through all this trouble? Basically, it comes down to survival. They're moving between breeding grounds in temperate regions and feeding areas in warmer climates. This seasonal movement allows them to take advantage of food resources that vary throughout the year. For instance, insects are abundant in northern areas during summer but disappear in winter, so insect-eating birds must travel south to find food."
         },
         {
           "speaker": "M",
           "voice": "onwK4e9ZLuTAKqWW03F9",
           "voice_name": "GB-Oliver",
           "el_voice": "Daniel",
-          "text": "Most songbirds, though, do their traveling between dusk and dawn. Two thousand meters up at midnight, what lies below is one unbroken dark, and the shoreline that served so well at noon is somewhere down inside it. What the bird still has is overhead. In the planetarium work of the sixties, warblers kept indoors settled onto their normal autumn heading under a projected sky, and when the projector was turned, the birds swung around with it and held the new bearing. It was the arrangement above them they were steering by."
-        },
-        {
-          "speaker": "M",
-          "voice": "onwK4e9ZLuTAKqWW03F9",
-          "voice_name": "GB-Oliver",
-          "el_voice": "Daniel",
-          "text": "Now, a tower sheathed in glass does two things to a night migrant. In daylight the glass hands back a copy of the sky and the trees behind the bird, and the bird flies hard into what it reads as open air. Collisions with buildings kill birds by the hundreds of millions a year in North America alone. On an overcast night the lit floors of that same tower pull migrants off their line, and they circle the glow for hours, spending fuel they were carrying for a thousand kilometers of flight. Walk downtown at sunrise in May and you will find a warbler on a window ledge too spent to lift itself off the stone. Volunteers pick those birds up by hand, one at a time, and carry them out in paper bags."
-        },
-        {
-          "speaker": "M",
-          "voice": "onwK4e9ZLuTAKqWW03F9",
-          "voice_name": "GB-Oliver",
-          "el_voice": "Daniel",
-          "text": "There is one more pressure, and it works more slowly. The trip north runs off the same clock. Day length starts them out of the wintering grounds, and April day length is exactly what it was a century ago, so they reach the boreal forest on the old date and their chicks hatch on the old date. That forest, though, is warming. Spring there now opens a week or two ahead of where it sat forty years ago, and caterpillars take their cue from temperature. They hatch, and they peak, on the new spring."
+          "text": "However, here's where things get problematic. Human activities are increasingly disrupting these ancient migration routes. Light pollution from cities confuses birds that navigate by starlight, causing them to become disoriented and exhausted as they circle illuminated buildings. Building designs, particularly glass structures, pose another serious threat - birds can't see glass and fly directly into windows, leading to millions of collisions annually. Climate change is also shifting the timing of food availability, which means birds may arrive at their destinations only to find their food sources, like certain insects or plants, haven't appeared yet. These disruptions can have serious ecological consequences, potentially threatening entire populations that have followed the same routes for thousands of years."
         }
       ]
     },
@@ -692,28 +608,28 @@
           "voice": "JBFqnCBsd6RMkjVDRZzb",
           "voice_name": "GB-Henry",
           "el_voice": "George",
-          "text": "Every book on jazz gets to the same word by about page three. Improvisation. It gets used loosely, so let's look at where it actually happens: the bandstand."
+          "text": "So, let's talk about something that makes jazz really unique as a musical form - improvisation. In other words, the ability of musicians to create music spontaneously during a performance. Now, this might sound like musicians are just playing whatever comes to mind, but actually, there's a lot of structure involved. It's not random at all."
         },
         {
           "speaker": "M",
           "voice": "JBFqnCBsd6RMkjVDRZzb",
           "voice_name": "GB-Henry",
           "el_voice": "George",
-          "text": "So picture the second set. The tune comes around and it is your turn to step out. That afternoon, in your apartment, you worked something out that you liked, a climbing figure you were saving for the fifth bar. You get eight bars in and the bass player starts placing the beat later than you expected. The drummer leans ahead of him. The pianist arrives at the fifth bar and substitutes a chord from somewhere else entirely, and your climbing figure now belongs to a bar that has stopped existing. Whatever comes out of your horn next has to come out in the same second all of that reaches you; you are still holding a note while you decide. That is the job up there. You are taking in four other people continuously and bending the line you are already in the middle of so that it fits what they just did to it."
+          "text": "Jazz improvisation typically works within a framework. Musicians follow chord progressions and melodic themes established at the beginning of a piece, but within those boundaries, they have freedom to create original phrases and explore different musical ideas. Think of it like a conversation where you know the topic but choose your own words. A saxophone player, for example, might take a familiar melody and transform it through variations in rhythm, pitch, and phrasing. A trumpet player might respond by building on that variation, adding their own interpretation. Each musician brings something personal to the performance."
         },
         {
           "speaker": "M",
           "voice": "JBFqnCBsd6RMkjVDRZzb",
           "voice_name": "GB-Henry",
           "el_voice": "George",
-          "text": "Now, students hear the word improvisation and take it to mean anything goes. So consider breakfast. You sit down and start telling your roommate about your weekend. Nobody handed you those sentences in advance. You pick the words as you go, and starting a sentence you have no clear idea how you will land it. And yet the grammar holds all the way through, and you finish the thought you opened, or your roommate stops following you. The freedom lives inside a set of things you keep. On the bandstand those things are the key, the chord changes, the form, and how many bars before the whole thing comes around again. All of it is settled before anyone plays. What goes inside it is yours. Made up as you go, yes. Made up out of thin air, no."
+          "text": "One interesting challenge with improvisation is that it requires musicians to listen very carefully to each other. They need to respond in real time to what their fellow performers are doing, adjusting their playing moment by moment. If the drummer shifts the rhythm slightly, everyone else has to notice and adapt. This means a jazz performance is never quite the same twice, which is part of what attracts audiences to live jazz. You're witnessing something being created right in front of you."
         },
         {
           "speaker": "M",
           "voice": "JBFqnCBsd6RMkjVDRZzb",
           "voice_name": "GB-Henry",
           "el_voice": "George",
-          "text": "And because what goes inside is yours, a strong improviser is recognizable in about four notes. The phrasing is as particular as handwriting. This way of working also spread outward. Picture a dance band in 1935, before recordings circulated widely. You played the arrangement. The arrangement was the point. Tuesday's version and Saturday's version were the same version, and what a listener weighed was how cleanly a settled piece had been executed. The concert hall ran on that same principle and largely still does. Then the records got around, and by the sixties you had rock and blues bands leaving whole stretches of a song open, a chorus where the notes had been fixed by nobody in advance and the thing came out different every night."
+          "text": "What makes this particularly significant is how improvisation influenced other music genres over time. Rock musicians began incorporating guitar solos that weren't strictly scripted. Blues artists embraced spontaneous vocal variations. Even some classical composers started leaving room for performer interpretation in their works. So jazz didn't just develop its own tradition - it fundamentally changed how we think about musical creativity altogether, encouraging musicians across genres to see performance as an act of creation, not just reproduction."
         }
       ]
     },

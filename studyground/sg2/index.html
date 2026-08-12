@@ -6,11 +6,13 @@
 <script src="assets/gate.js"></script>
 
 <!-- ── 수험생 계정에게 이 랜딩은 없다 ────────────────────────────────────
-     학생이 보는 건 홍보 문구·요금제가 아니라 지금 치를 시험 하나(SET 9)다.
-     로그인해 있는 동안 이 페이지로 들어오면(주소 직접 입력·게이트 기본 행선지·
-     로고 클릭) 본문이 그려지기 전에 모의고사 목록으로 보낸다 — 그 목록은
-     학생에게 SET 9 한 벌만 남긴다(tests.html). 선생님·관리자와 비로그인
-     방문자는 그대로 본다. 판정은 admin-session.js 의 studentSignedIn() 과 같다. -->
+     학생이 보는 건 홍보 문구·요금제도, 세트를 고르는 목록도 아니라 지금 치를
+     시험 하나다 — SET 9 리딩. 로그인해 있는 동안 이 페이지로 들어오면(주소 직접
+     입력·게이트 기본 행선지·로고 클릭) 본문이 그려지기 전에 그 시험으로 보낸다.
+     선생님·관리자와 비로그인 방문자는 그대로 본다.
+     판정은 admin-session.js 의 studentSignedIn() 과 같다.
+     행선지는 assets/student-landing.js 한 곳에서 정한다 — login.html 도 같은 값을 쓴다. -->
+<script src="assets/student-landing.js"></script>
 <script>
 (function () {
   'use strict';
@@ -19,7 +21,7 @@
     var u = s && s.user;
     if (!u) return;
     var r = u.role || (u.is_admin ? 'admin' : 'student');   // role 이 없던 옛 계정은 학생으로 본다
-    if (r !== 'teacher' && r !== 'admin') location.replace('tests.html');
+    if (r !== 'teacher' && r !== 'admin') location.replace(window.SG_STUDENT_LANDING);
   } catch (e) { /* 프라이빗 모드 — 아래 sg-auth 재확인이 맡는다 */ }
 })();
 </script>
@@ -268,7 +270,7 @@
   if (!A) return;
   function sync() {
     if (!A.user()) return;
-    A.isStaff().then(function (staff) { if (!staff) location.replace('tests.html'); }, function () {});
+    A.isStaff().then(function (staff) { if (!staff) location.replace(window.SG_STUDENT_LANDING); }, function () {});
   }
   A.onChange(sync);
   sync();

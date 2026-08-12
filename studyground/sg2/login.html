@@ -78,6 +78,7 @@
 <script src="assets/sg-fullscreen.js"></script>
 <script src="assets/sg-auth.js"></script>
 <script src="assets/sg-qr.js"></script>
+<script src="assets/student-landing.js"></script>
 <script>
 /* 이메일 또는 학번 + 비밀번호 → Supabase 세션. ?next= 가 있으면 그 페이지로 돌아간다. */
 (function () {
@@ -86,8 +87,10 @@
 
   // ?next= 는 이 사이트 안의 페이지 이름만 받는다 — 외부 주소로 튕기지 않게.
   var raw = new URLSearchParams(location.search).get('next') || '';
-  // 돌아갈 곳이 따로 없으면 모의고사 목록으로 — 로그인하고 바로 시험을 보는 게 기본 동선이다.
-  var next = /^[\w.-]+\.html(\?[^#]*)?$/.test(raw) && raw.indexOf('login.html') !== 0 ? raw : 'tests.html';
+  // 돌아갈 곳이 따로 없으면 지금 치를 시험으로 — 세트를 고르는 목록을 지나지 않는다.
+  // 행선지는 assets/student-landing.js 가 정한다(SET 9 리딩, mode=section).
+  var LANDING = window.SG_STUDENT_LANDING || 'tests.html';
+  var next = /^[\w.-]+\.html(\?[^#]*)?$/.test(raw) && raw.indexOf('login.html') !== 0 ? raw : LANDING;
 
   /* ── 좌석이 정해 준 행선지 ──────────────────────────────────
    *
@@ -115,11 +118,14 @@
     }
   }
 
-  /** 로그인 뒤 갈 곳. 좌석 배정이 ?next= 보다 뒤에 온다 — 원래 보던 페이지가 먼저. */
-  function landing() {
+  /** 로그인 뒤 갈 곳. 좌석 배정이 ?next= 보다 뒤에 온다 — 원래 보던 페이지가 먼저.
+   *  staff===true 면 목록으로 돌려보낸다 — 곧장 시험으로 들어가는 건 학생 동선이다.
+   *  staff 를 모르는 자리(전체화면 모듈이 없어 isStaff 를 기다리지 않는 경로)에서는
+   *  학생으로 본다. 선생님이 그리로 떨어져도 상단 메뉴로 목록에 갈 수 있다. */
+  function landing(staff) {
     if (raw) return next;
     if (RT && RT.assigned()) return RT.examUrl();
-    return next;
+    return staff ? 'tests.html' : next;
   }
 
   if (RT && RT.bound()) {
@@ -133,7 +139,12 @@
     err.classList.add('on');
   }
 
-  if (window.SG_AUTH && SG_AUTH.user()) location.replace(landing());
+  /* 이미 로그인해 있으면 로그인 화면에 머무를 이유가 없다. 여기서도 선생님·관리자는
+     목록으로 간다 — 판정을 기다리는 동안 화면이 멈춰 보이지 않게 서버 사본을 쓴다. */
+  if (window.SG_AUTH && SG_AUTH.user()) {
+    SG_AUTH.isStaff().catch(function () { return false; })
+      .then(function (staff) { location.replace(landing(staff)); });
+  }
 
   function enter(id, pw, examDate) {
     err.classList.remove('on');
@@ -143,11 +154,14 @@
         // 학생은 전체화면으로 들어간다. 선생님·관리자는 창을 여러 개 쓰므로 돌려준다.
         // 전체화면 요청 자체는 버튼을 누른 순간에 이미 나갔다(아래 submit 핸들러) —
         // 로그인 응답을 기다린 뒤에는 브라우저가 사용자 동작으로 쳐 주지 않는다.
-        if (!window.SG_FS) return location.replace(landing());
+        if (!window.SG_FS) {
+          return SG_AUTH.isStaff().catch(function () { return false; })
+            .then(function (staff) { location.replace(landing(staff)); });
+        }
         return SG_AUTH.isStaff().catch(function () { return false; })
           .then(function (staff) {
             if (staff) SG_FS.release();
-            location.replace(landing());
+            location.replace(landing(staff));
           });
       })
       .catch(function (e2) {

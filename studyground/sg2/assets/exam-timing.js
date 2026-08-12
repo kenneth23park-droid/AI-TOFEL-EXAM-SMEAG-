@@ -123,8 +123,8 @@
       }
     },
     "directions": [
-      {"id": "adjustVolume", "label": "Adjusting the Volume", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "reading", "module": null}, "maxSec": null, "advance": "manual", "controls": ["playTestAudio", "volume", "continue"]},
-      {"id": "adjustMic", "label": "Adjusting the Microphone", "labelKo": "마이크 조절", "screenType": "hardwareCheck", "insertAt": {"position": "beforeSection", "section": "reading", "module": null}, "maxSec": null, "advance": "manual", "controls": ["micTest", "continue"]},
+      /* 리딩 앞의 adjustVolume·adjustMic 은 없앴다 — config/timing.toefl.json 과 같다.
+         이 폴백이 그 둘을 되살리면 config 를 못 읽은 기기에서만 점검 화면이 다시 뜬다. */
       {"id": "listeningDirections", "label": "Listening Section Directions", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["begin"]},
       {"id": "moduleEnd.listening", "label": "End of Module", "screenType": "moduleEnd", "insertAt": {"position": "betweenModules", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["continue"]},
       {"id": "hardwareCheck", "label": "Hardware Check", "screenType": "hardwareCheck", "insertAt": {"position": "beforeSection", "section": "speaking", "module": null}, "maxSec": null, "advance": "manual", "controls": ["micTest", "speakerTest", "continue"]},

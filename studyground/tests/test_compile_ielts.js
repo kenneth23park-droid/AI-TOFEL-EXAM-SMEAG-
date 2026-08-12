@@ -149,7 +149,9 @@ var t = window.SG_COMPILE.compileScreens(window.SMEAG_SET1, toefl, { profile: 't
 /* 78 → 97: Listening 오디오 화면/답변 화면 분리(2026-08-07 녹화 실측).
  * 근거와 19화면의 산술 유도는 studyground/tests/test_compile_screens.js [1] 주석 참조. */
 // 2026-08-10: audioOnQuestionScreen:true 로 오디오 전용 화면 19개가 사라져 98 → 79.
-check('TOEFL 총 화면', t.screens.length, 79);
+// 2026-08-12: 리딩 앞의 intro.volume · intro.microphone 을 config 에서 내려 79 → 77.
+//   IELTS 는 그 둘을 리스닝 앞에 그대로 두므로 이 파일의 IELTS 기대값은 안 바뀐다.
+check('TOEFL 총 화면', t.screens.length, 77);
 var s1 = null, trCount = 0;
 t.screens.forEach(function (s) {
   if (!s1 && s.screenType === 'speaking' && s.moduleId === 'S1') s1 = s;

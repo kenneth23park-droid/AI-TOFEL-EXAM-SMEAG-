@@ -100,7 +100,12 @@ def build_set_page(set_id: str, section: str, title: str, source: str) -> str:
         "  section: '%s',\n"
         "  set: '%s',\n"
         "  base: '',\n"
-        '  path: location.pathname\n'
+        # path 는 비운다 — 섹션이 바뀔 때 주소창을 갱신하는 기능(exam-shell.js 의
+        # syncRoutePath)은 /en/test-nt/{section} 처럼 경로 마지막 구간이 섹션인
+        # 라우트에만 뜻이 있다. 이 페이지는 파일 하나(set9-reading.html)라서 그 자리에
+        # 섹션을 이어붙이면 'set9-reading.htmlreading' 같은 없는 주소가 만들어지고,
+        # 학생이 새로고침하면 404 가 된다. 빈 값이면 syncRoutePath 가 그냥 물러난다.
+        "  path: ''\n"
         '};\n'
         '</script>\n'
         '<script src="assets/exam-shell.js"></script>'

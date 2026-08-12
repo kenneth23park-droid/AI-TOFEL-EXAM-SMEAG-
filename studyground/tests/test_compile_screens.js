@@ -32,6 +32,8 @@ console.log('\n[1] 화면 수 검산 (architecture.md §4.3)');
 // 기대값은 표의 값 +1 이 된다. 첫 섹션은 sectionOrder(config) 가 정한다 —
 // 2026-08-12 에 시험 순서가 Reading·Listening·Writing·Speaking 으로 서면서
 // 준비 화면 2개(intro.volume / intro.microphone)도 listening 에서 reading 으로 옮겨 붙었다.
+// 같은 날 그 둘을 config 에서 아예 내렸다(발주처 요구) — 학생은 리딩으로 곧장 들어간다.
+// 그래서 reading 은 11 → 9, 총계는 79 → 77 이다.
 //
 // ── 기대값 갱신 (2026-08-07, 37→56 / 78→97) ─────────────────────────────────
 // 근거: 녹화 실측 두 프레임 비교(docs/reference/screens/listening-audio-700s.png vs
@@ -49,9 +51,9 @@ res.screens.forEach(function (s) { bySec[s.section] = (bySec[s.section] || 0) + 
 // 2026-08-10: audioOnQuestionScreen:true — 오디오 전용 화면 19개 제거(57 → 38).
 check('listening',                     bySec.listening || 0, 36);
 check('speaking',                      bySec.speaking  || 0, 15);
-check('reading (7 + intro.volume + intro.microphone)', bySec.reading || 0, 11);
+check('reading',                       bySec.reading   || 0, 9);
 check('writing (16 + review.submit)',  bySec.writing   || 0, 17);
-check('총 화면',                        res.screens.length, 79);
+check('총 화면',                        res.screens.length, 77);
 
 console.log('\n[1b] 오디오/답변 화면 분리 + 타이머 부여 규칙 (실측)');
 var play = res.screens.filter(function (s) { return s.blockKind === 'audio-play'; });

@@ -47,22 +47,34 @@
  * 한 화면이 된 뒤에는 컴파일러가 timerStartsOnAudioEnd 를 달아 명시적으로 보장한다.
  * [1b] 가 검사하는 대상이 "분리됐는가" 에서 "합쳐졌고 시계가 미뤄지는가" 로 바뀐 이유다.
  *
+ * ── 리딩 앞 점검 화면 제거 (2026-08-12, reading 14→12 / 총계 96→94) ────────
+ * 발주처 요구로 config/timing.toefl.json 에서 directions 의 adjustVolume(스피커 테스트)과
+ * adjustMic(마이크 권한)을 내렸다. 둘 다 insertAt beforeSection reading 이었고, reading 이
+ * sectionOrder 의 첫 섹션이라 시험 전체의 첫 두 화면이기도 했다. 학생은 이제 리딩
+ * Directions 로 곧장 들어간다. 스피킹 앞 hardwareCheck 는 그대로다 — 녹음이 필요하다.
+ * 위 유도식의 "listening 78 = adjustVolume 1 + …" 은 sectionOrder 가 listening 으로
+ * 시작하던 시절의 셈이라 지금은 reading 쪽 줄만 읽으면 된다.
+ *
  * ── 결손 해소 이력 (2026-08-07) ────────────────────────────────────────
  * 이전 버전의 [7] 은 "audioMissing 블록 4개 / buildWarnings 4건"을 고정하고 있었다.
  * 근거는 Listening Module 2 의 Q4-15(4블록)에 대해 SET 9 SCRIPT.docx 가 문항 질문문만
  * 싣고 대화/강의 본문 전사를 담고 있지 않다는 사실이었고, 오디오를 만들 수 없으니
  * build_set9.py 가 audio 필드를 떼고 block.audioMissing 을 세웠다.
  *
- * 그 4개 본문은 이제 정답키 제약에 맞춰 집필되어 sg2/config/_set9_l2/L2-B{2,3,4,5}.json
- * 에 origin:"authored" 로 들어 있고, tts_set9.py 가 그 JSON 으로
- * media/audio/set9/set9-L2-{04-05,06-07,08-11,12-15}.mp3 를 생성하며,
- * build_set9.py 가 블록에 audio + script + scriptOrigin:"authored" 를 배선한다.
- * 따라서 기대값을 4 → 0 으로 갱신했다. 원본 SMEAG 전사가 아니라 보충 지문이라는 사실은
- * 팩의 scriptOrigin 필드, tts-manifest.set9.json 의 authored_scripts,
- * docs/bmad/set9-authored-passages.md 세 곳에 남아 있다.
+ * 그 4개 본문은 sg2/config/_set9_l2/L2-B{2,3,4,5}.json 에 들어 있고, tts_set9.py 가
+ * 그 JSON 으로 media/audio/set9/set9-L2-{04-05,06-07,08-11,12-15}.mp3 를 생성하며,
+ * build_set9.py 가 블록에 audio + script + scriptOrigin 을 배선한다.
+ * 따라서 기대값을 4 → 0 으로 갱신했다.
+ *
+ * ── 원본 교체 (2026-08-12) ─────────────────────────────────────────────
+ * 한동안 그 4개 본문은 정답키 제약에 맞춰 집필한 보충 지문이었고(origin:"authored"),
+ * 이 테스트는 scriptOrigin === 'authored' 를 4개로 고정하고 있었다. 원본 전사가
+ * 확보되어 집필본을 폐기하고 원문으로 갈아끼웠으므로(origin:"source") 기대값을 바꾼다.
+ * 고정하려는 성질은 "출처가 표시되어 있는가" 이지 "집필본인가" 가 아니다 — 그래서
+ * 값을 'source' 로 옮기는 대신 4블록 전부가 scriptOrigin 과 script 본문을 갖는지를 본다.
  *
  * [7] 은 이제 반대 방향을 고정한다: 리스닝 블록/문항 중 오디오 없는 것이 하나도 없어야 하고,
- * L2 의 집필 4블록은 반드시 출처 표시(scriptOrigin)를 달고 있어야 한다. */
+ * L2 의 4블록은 반드시 출처 표시(scriptOrigin)와 본문을 달고 있어야 한다. */
 var fs = require('fs');
 var path = require('path');
 
@@ -104,9 +116,10 @@ res.screens.forEach(function (s) { bySec[s.section] = (bySec[s.section] || 0) + 
 //   근거: config/timing.toefl.json provenance "sections.listening.audioOnQuestionScreen".
 check('listening (47 + directions + moduleEnd×2)', bySec.listening || 0, 50);
 check('speaking  (11 + hardware + directions + intro×2)',          bySec.speaking  || 0, 15);
-check('reading   (블록 9 + directions + moduleEnd×2 + intro.volume + intro.microphone)', bySec.reading || 0, 14);
+// 2026-08-12: 리딩 앞의 intro.volume · intro.microphone 을 config 에서 내렸다 → -2.
+check('reading   (블록 9 + directions + moduleEnd×2)',             bySec.reading   || 0, 12);
 check('writing   (12 + directions + taskEnd×3 + review.submit)',   bySec.writing   || 0, 17);
-check('총 화면',                                                    res.screens.length, 96);
+check('총 화면',                                                    res.screens.length, 94);
 
 console.log('\n[1b] 오디오가 문항 화면에서 재생된다 + 타이머 규칙');
 /* 2026-08-10 이전에는 오디오 전용 화면(blockKind 'audio-play')과 답변 화면이 분리돼
@@ -202,8 +215,8 @@ akIds.forEach(function (id) {
 check('정답키 ↔ 문항 미연결', unwired, 0);
 check('정답 범위/형식 위반', badRange, 0);
 
-console.log('\n[7] 오디오 결손 0 + 집필 지문 출처 표시 (구 기대값 4 → 0, 위 주석 참조)');
-var noAudio = 0, listeningNoAudio = 0, authored = 0, authoredNoScript = 0;
+console.log('\n[7] 오디오 결손 0 + L2 지문 출처 표시 (구 기대값 4 → 0, 위 주석 참조)');
+var noAudio = 0, listeningNoAudio = 0, sourced = 0, sourcedNoScript = 0;
 set.sections.forEach(function (sec) {
   sec.modules.forEach(function (mod) {
     mod.blocks.forEach(function (blk) {
@@ -212,9 +225,9 @@ set.sections.forEach(function (sec) {
       if (sec.id === 'listening' && blk.perQuestionAudio) {
         (blk.questions || []).forEach(function (q) { if (!q.audio) listeningNoAudio++; });
       }
-      if (blk.scriptOrigin === 'authored') {
-        authored++;
-        if (!blk.script || !blk.script.length) authoredNoScript++;
+      if (blk.scriptOrigin) {
+        sourced++;
+        if (!blk.script || !blk.script.length) sourcedNoScript++;
       }
     });
   });
@@ -222,8 +235,8 @@ set.sections.forEach(function (sec) {
 check('audioMissing 블록', noAudio, 0);
 check('오디오 없는 리스닝 블록/문항', listeningNoAudio, 0);
 check('buildWarnings', set.buildWarnings.length, 0);
-check('scriptOrigin=authored 블록 (L2 Q4-5/6-7/8-11/12-15)', authored, 4);
-check('집필 블록인데 script 본문 없음', authoredNoScript, 0);
+check('scriptOrigin 표시된 블록 (L2 Q4-5/6-7/8-11/12-15)', sourced, 4);
+check('출처 표시는 있는데 script 본문 없음', sourcedNoScript, 0);
 
 console.log('\n[8] 결정성 (2회 컴파일 동일)');
 var res2 = window.SG_COMPILE.compileScreens(set, timing, { profile: 'toefl', lang: 'en' });
