@@ -52,7 +52,7 @@
   .seccard { border:1px solid var(--line); border-top:3px solid var(--sc); border-radius:12px;
     background:var(--card); padding:12px 13px; }
   .seccard[data-s=reading]{ --sc:#e8481f } .seccard[data-s=listening]{ --sc:#2563c9 }
-  .seccard[data-s=speaking]{ --sc:#1f9d55 } .seccard[data-s=writing]{ --sc:#7a4bc4 }
+  .seccard[data-s=writing]{ --sc:#7a4bc4 } .seccard[data-s=speaking]{ --sc:#1f9d55 }
   .seccard .st { font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--sc); }
   .seccard .sn { display:block; font-size:26px; font-weight:800; color:var(--ink); line-height:1.1; margin-top:4px;
     font-variant-numeric:tabular-nums; }
@@ -105,7 +105,7 @@
     border:1px solid var(--line); border-left:3px solid var(--mc); border-radius:8px;
     padding:4px 9px; color:var(--muted); background:var(--cream-2); }
   .mchip[data-s=reading]{ --mc:#e8481f } .mchip[data-s=listening]{ --mc:#2563c9 }
-  .mchip[data-s=speaking]{ --mc:#1f9d55 } .mchip[data-s=writing]{ --mc:#7a4bc4 }
+  .mchip[data-s=writing]{ --mc:#7a4bc4 } .mchip[data-s=speaking]{ --mc:#1f9d55 }
   .mchip b { font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums; }
   .mchip i { font-style:normal; font-size:10.5px; color:var(--dim); }
 
@@ -164,8 +164,8 @@
     <span class="pill" style="margin-bottom:8px">Admin · Set import</span>
     <h1 style="font-size:clamp(26px,4vw,40px)"><span data-en>Build a set from documents</span><span data-ko>문서로 세트 만들기</span></h1>
     <p class="sub">
-      <span data-en>Drop the question, script and answer key documents. The four sections — reading, listening, speaking, writing — are assembled from what the files actually contain. Nothing is invented: anything that does not line up is listed below instead of being papered over. With no documents to hand, AI can write a set instead — to the same blueprint, and through the same checks.</span>
-      <span data-ko>문항·대본·정답지 문서를 올리면 리딩·리스닝·스피킹·라이팅 네 섹션이 문서에 있는 내용 그대로 조립됩니다. 없는 내용을 지어내지 않고, 짝이 맞지 않는 것은 아래에 그대로 표시합니다.</span>
+      <span data-en>Drop the question, script and answer key documents. The four sections — reading, listening, writing, speaking — are assembled from what the files actually contain. Nothing is invented: anything that does not line up is listed below instead of being papered over. With no documents to hand, AI can write a set instead — to the same blueprint, and through the same checks.</span>
+      <span data-ko>문항·대본·정답지 문서를 올리면 리딩·리스닝·라이팅·스피킹 네 섹션이 문서에 있는 내용 그대로 조립됩니다. 없는 내용을 지어내지 않고, 짝이 맞지 않는 것은 아래에 그대로 표시합니다.</span>
     </p>
   </div>
 
@@ -600,7 +600,7 @@
 
   /* -------------------------------------------------------------- 표시 */
 
-  var SEC_LABEL = { reading: 'Reading', listening: 'Listening', speaking: 'Speaking', writing: 'Writing' };
+  var SEC_LABEL = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
 
   /* ── 겹침 검사 ─────────────────────────────────────────────────────────
    * 세트를 만들 때마다 이미 있는 모든 세트와 대조한다. 나중에 터미널에서 돌리는
@@ -693,7 +693,7 @@
 
     var pack = built.pack, stats = built.stats;
 
-    document.getElementById('secs').innerHTML = ['reading', 'listening', 'speaking', 'writing'].map(function (id) {
+    document.getElementById('secs').innerHTML = ['reading', 'listening', 'writing', 'speaking'].map(function (id) {
       var sec = (pack.sections || []).filter(function (s) { return s.id === id; })[0];
       var mods = sec ? sec.modules.length : 0;
       return '<div class="seccard" data-s="' + id + '">'

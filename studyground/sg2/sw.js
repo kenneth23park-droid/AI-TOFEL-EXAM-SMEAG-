@@ -154,7 +154,12 @@
 // v47: 시험이 끝난 자리에서 다시 친다 — 제출 화면에 전체 한 벌과 네 영역 버튼이 서고,
 //      그 문은 관리자 승인이 있어야 열린다(assets/exam-shell.js · assets/exam.css).
 //      캐시된 옛 셸이 남으면 그 기기만 끝난 화면에서 리뷰·성적 두 개만 계속 본다.
-const VERSION = 'sg-v47';
+// v48: 시험 순서가 Reading · Listening · Writing · Speaking 로 선다
+//      (config/timing.toefl.json 의 sectionOrder). 볼륨·마이크 준비 화면은 첫 섹션
+//      앞이라는 자리를 지켜 리딩 앞으로 따라 옮겼다. 셸에 든 exam-timing.js ·
+//      exam-compile.js · exam-shell.js 와 타이밍 config 가 함께 바뀌므로, 캐시된 옛
+//      셸이 남으면 그 기기만 리스닝부터 시작하는 옛 순서로 계속 시험을 친다.
+const VERSION = 'sg-v48';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

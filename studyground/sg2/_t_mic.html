@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/exam.css">
+<title>mic harness</title></head>
+<body style="padding:20px;background:var(--bg)">
+<div id="host"></div>
+<script src="assets/app.js"></script>
+<script src="assets/exam-types.js"></script>
+<script src="assets/exam-media.js"></script>
+<script src="assets/exam-timing.js"></script>
+<script src="assets/exam-compile.js"></script>
+<script src="assets/set1.js"></script>
+<script src="assets/exam-clock.js"></script>
+<script src="assets/exam-store.js"></script>
+<script src="assets/exam-render.js"></script>
+<script src="assets/exam-render-instruction.js"></script>
+<script>
+// 헤드리스에는 실제 마이크가 없다 — 오실레이터 스트림을 물리거나(기본) 거부를 흉내낸다(?deny).
+(function () {
+  if (location.search.indexOf('deny') >= 0) {
+    navigator.mediaDevices.getUserMedia = function () {
+      var e = new Error('blocked'); e.name = 'NotAllowedError';
+      return Promise.reject(e);
+    };
+    return;
+  }
+  var ac = new (window.AudioContext || window.webkitAudioContext)();
+  var osc = ac.createOscillator(); osc.frequency.value = 220;
+  var g = ac.createGain(); g.gain.value = 0.25;
+  var dest = ac.createMediaStreamDestination();
+  osc.connect(g); g.connect(dest); osc.start();
+  navigator.mediaDevices.getUserMedia = function () { return Promise.resolve(dest.stream); };
+}());
+(function () {
+  var I = window.SG_INSTRUCTION;
+  var screen = { id: 'intro.microphone', screenType: 'hardwareCheck', copy: {} };
+  var ctx = { engine: { next: function () {} }, onLeave: function () {} };
+  document.getElementById('host').appendChild(I.renderMicAdjust(screen, ctx));
+  if (location.search.indexOf('auto') >= 0) {
+    setTimeout(function () { document.querySelector('.instr-mic-record').click(); }, 400);
+  }
+}());
+</script>
+</body></html>

@@ -40,7 +40,7 @@ if (!pack || !pack.sections) {
 
 /* 섹션 순서. 팩마다 배열 순서가 제각각이라 여기서 시험 순서로 한 번 세운다 —
    청사진 순서가 곧 AI 생성 결과의 섹션 순서다. 목록에 없는 섹션은 뒤에 그대로 남긴다. */
-const SECTION_ORDER = ['reading', 'listening', 'speaking', 'writing'];
+const SECTION_ORDER = ['reading', 'listening', 'writing', 'speaking'];
 function sectionRank(id) {
   const i = SECTION_ORDER.indexOf(id);
   return i < 0 ? SECTION_ORDER.length : i;

@@ -28,8 +28,10 @@ function check(name, actual, expected) {
 
 console.log('\n[1] 화면 수 검산 (architecture.md §4.3)');
 // §4.3 표는 intro.volume / review.submit 을 "공통 2" 행으로 따로 셌지만, 컴파일러는
-// 이 둘을 각각 첫 섹션(listening) · 마지막 섹션(writing)에 귀속시킨다. 그래서 섹션별
-// 기대값은 표의 값 +1 이 된다.
+// 이 둘을 각각 첫 섹션(reading) · 마지막 섹션(writing)에 귀속시킨다. 그래서 섹션별
+// 기대값은 표의 값 +1 이 된다. 첫 섹션은 sectionOrder(config) 가 정한다 —
+// 2026-08-12 에 시험 순서가 Reading·Listening·Writing·Speaking 으로 서면서
+// 준비 화면 2개(intro.volume / intro.microphone)도 listening 에서 reading 으로 옮겨 붙었다.
 //
 // ── 기대값 갱신 (2026-08-07, 37→56 / 78→97) ─────────────────────────────────
 // 근거: 녹화 실측 두 프레임 비교(docs/reference/screens/listening-audio-700s.png vs
@@ -45,9 +47,9 @@ var bySec = {};
 res.screens.forEach(function (s) { bySec[s.section] = (bySec[s.section] || 0) + 1; });
 // 2026-08-07: 레퍼런스 test-nt 화면 'Adjusting the Microphone'(intro.microphone) 추가 → 섹션·총계 +1.
 // 2026-08-10: audioOnQuestionScreen:true — 오디오 전용 화면 19개 제거(57 → 38).
-check('listening (36 + intro.volume + intro.microphone)', bySec.listening || 0, 38);
+check('listening',                     bySec.listening || 0, 36);
 check('speaking',                      bySec.speaking  || 0, 15);
-check('reading',                       bySec.reading   || 0, 9);
+check('reading (7 + intro.volume + intro.microphone)', bySec.reading || 0, 11);
 check('writing (16 + review.submit)',  bySec.writing   || 0, 17);
 check('총 화면',                        res.screens.length, 79);
 

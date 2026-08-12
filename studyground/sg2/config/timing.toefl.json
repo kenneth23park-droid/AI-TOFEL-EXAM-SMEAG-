@@ -14,10 +14,10 @@
     "contentRef": "window.SMEAG_SET1"
   },
   "sectionOrder": [
-    "listening",
-    "speaking",
     "reading",
-    "writing"
+    "listening",
+    "writing",
+    "speaking"
   ],
   "defaults": {
     "timerScope": "module",
@@ -232,7 +232,7 @@
       "screenType": "instruction",
       "insertAt": {
         "position": "beforeSection",
-        "section": "listening",
+        "section": "reading",
         "module": null
       },
       "maxSec": null,
@@ -250,7 +250,7 @@
       "screenType": "hardwareCheck",
       "insertAt": {
         "position": "beforeSection",
-        "section": "listening",
+        "section": "reading",
         "module": null
       },
       "maxSec": null,

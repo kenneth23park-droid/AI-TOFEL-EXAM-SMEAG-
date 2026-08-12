@@ -23,7 +23,7 @@
 (function () {
   'use strict';
 
-  var DEFAULT_ORDER = ['listening', 'speaking', 'reading', 'writing'];
+  var DEFAULT_ORDER = ['reading', 'listening', 'writing', 'speaking'];
 
   /* 합성 화면의 고정 id (config directions[].id → screen id). */
   var FIXED_ID = { adjustVolume: 'intro.volume', adjustMic: 'intro.microphone',

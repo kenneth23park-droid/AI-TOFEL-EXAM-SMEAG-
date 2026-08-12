@@ -29,7 +29,7 @@
   var FALLBACK = {
     "schemaVersion": "1.0.0",
     "exam": {"id": "toefl-nt", "label": "New TOEFL", "labelKo": "뉴토플", "scoreScale": "toefl120", "scale": {"sectionMax": 30, "totalMax": 120, "step": 1, "bandLabel": "CEFR"}, "contentRef": "window.SMEAG_SET1"},
-    "sectionOrder": ["listening", "speaking", "reading", "writing"],
+    "sectionOrder": ["reading", "listening", "writing", "speaking"],
     "defaults": {"timerScope": "module", "timerFormat": "MM:SS", "onExpire": "autoAdvance", "advance": "manual", "audioMaxPlays": 1, "instructionMaxSec": null, "graceSec": 0, "warnAtSec": 60},
     "sections": {
       "listening": {
@@ -123,8 +123,8 @@
       }
     },
     "directions": [
-      {"id": "adjustVolume", "label": "Adjusting the Volume", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["playTestAudio", "volume", "continue"]},
-      {"id": "adjustMic", "label": "Adjusting the Microphone", "labelKo": "마이크 조절", "screenType": "hardwareCheck", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["micTest", "continue"]},
+      {"id": "adjustVolume", "label": "Adjusting the Volume", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "reading", "module": null}, "maxSec": null, "advance": "manual", "controls": ["playTestAudio", "volume", "continue"]},
+      {"id": "adjustMic", "label": "Adjusting the Microphone", "labelKo": "마이크 조절", "screenType": "hardwareCheck", "insertAt": {"position": "beforeSection", "section": "reading", "module": null}, "maxSec": null, "advance": "manual", "controls": ["micTest", "continue"]},
       {"id": "listeningDirections", "label": "Listening Section Directions", "screenType": "instruction", "insertAt": {"position": "beforeSection", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["begin"]},
       {"id": "moduleEnd.listening", "label": "End of Module", "screenType": "moduleEnd", "insertAt": {"position": "betweenModules", "section": "listening", "module": null}, "maxSec": null, "advance": "manual", "controls": ["continue"]},
       {"id": "hardwareCheck", "label": "Hardware Check", "screenType": "hardwareCheck", "insertAt": {"position": "beforeSection", "section": "speaking", "module": null}, "maxSec": null, "advance": "manual", "controls": ["micTest", "speakerTest", "continue"]},

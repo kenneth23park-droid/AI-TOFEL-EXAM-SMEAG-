@@ -365,59 +365,6 @@
       "questions": 47
     },
     {
-      "id": "speaking",
-      "label": "Speaking",
-      "labelKo": "스피킹",
-      "timeLimitSec": null,
-      "modules": [
-        {
-          "id": "S1",
-          "label": "Task 1 · Listen and Repeat",
-          "blocks": [
-            {
-              "kind": "record-set",
-              "instruction": "Listen and Repeat",
-              "questions": 7,
-              "questionKinds": {
-                "repeat": 7
-              },
-              "scriptWords": {
-                "min": 10,
-                "max": 20
-              },
-              "perQuestionAudio": true,
-              "introScript": true,
-              "prepSec": 3,
-              "respondSec": 20
-            }
-          ]
-        },
-        {
-          "id": "S2",
-          "label": "Task 2 · Interview",
-          "blocks": [
-            {
-              "kind": "record-set",
-              "instruction": "Answer the interviewer’s questions.",
-              "questions": 4,
-              "questionKinds": {
-                "interview": 4
-              },
-              "scriptWords": {
-                "min": 20,
-                "max": 40
-              },
-              "perQuestionAudio": true,
-              "introScript": true,
-              "prepSec": 3,
-              "respondSec": 45
-            }
-          ]
-        }
-      ],
-      "questions": 11
-    },
-    {
       "id": "writing",
       "label": "Writing",
       "labelKo": "라이팅",
@@ -473,6 +420,59 @@
         }
       ],
       "questions": 12
+    },
+    {
+      "id": "speaking",
+      "label": "Speaking",
+      "labelKo": "스피킹",
+      "timeLimitSec": null,
+      "modules": [
+        {
+          "id": "S1",
+          "label": "Task 1 · Listen and Repeat",
+          "blocks": [
+            {
+              "kind": "record-set",
+              "instruction": "Listen and Repeat",
+              "questions": 7,
+              "questionKinds": {
+                "repeat": 7
+              },
+              "scriptWords": {
+                "min": 10,
+                "max": 20
+              },
+              "perQuestionAudio": true,
+              "introScript": true,
+              "prepSec": 3,
+              "respondSec": 20
+            }
+          ]
+        },
+        {
+          "id": "S2",
+          "label": "Task 2 · Interview",
+          "blocks": [
+            {
+              "kind": "record-set",
+              "instruction": "Answer the interviewer’s questions.",
+              "questions": 4,
+              "questionKinds": {
+                "interview": 4
+              },
+              "scriptWords": {
+                "min": 20,
+                "max": 40
+              },
+              "perQuestionAudio": true,
+              "introScript": true,
+              "prepSec": 3,
+              "respondSec": 45
+            }
+          ]
+        }
+      ],
+      "questions": 11
     }
   ],
   "questions": 120

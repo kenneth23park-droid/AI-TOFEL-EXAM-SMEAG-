@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!--
+  _t_aigen.html — AI 세트 생성 화면을 실제로 눌러 보는 확인용 페이지(임시, 배포 대상 아님).
+
+  admin-set-import.html 을 같은 출처의 iframe 으로 띄우고, 그 안에서 "Generate a set"
+  을 눌러 팩이 만들어지는지까지 본다. 게이트·관리자 세션·선생님 계정 토큰은 여기서
+  미리 심어 둔다 — 확인하려는 것은 로그인이 아니라 그 뒤의 배선이다.
+
+  /api/generate 는 가짜 서버가 답한다(scratchpad/fakeserve.js). 모델은 부르지 않는다.
+
+  결과는 document.title 과 #out 에 남는다 — 헤드리스 --dump-dom 으로 읽으려고.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>checking…</title>
+<style>
+  body { font:13px/1.6 ui-monospace,Menlo,monospace; margin:20px; }
+  #out div { padding:2px 0; }
+  .ok::before { content:'OK   '; color:#1f9d55; }
+  .no::before { content:'FAIL '; color:#c62828; }
+  iframe { width:1200px; height:700px; border:1px solid #ccc; margin-top:14px; }
+</style>
+</head>
+<body>
+<h1 id="head">checking…</h1>
+<div id="out"></div>
+<iframe id="f"></iframe>
+
+<script>
+(function () {
+  'use strict';
+  var out = document.getElementById('out'), fails = 0, n = 0;
+  function ok(name, cond, detail) {
+    n++;
+    if (!cond) fails++;
+    var d = document.createElement('div');
+    d.className = cond ? 'ok' : 'no';
+    d.textContent = name + (detail ? '  — ' + detail : '');
+    out.appendChild(d);
+  }
+  function done() {
+    document.getElementById('head').textContent = fails ? (fails + ' FAILED of ' + n) : ('ALL PASS (' + n + ')');
+    document.title = fails ? ('FAIL ' + fails + '/' + n) : ('PASS ' + n);
+  }
+
+  /* 게이트·관리자 세션·선생님 계정을 심는다. */
+  localStorage.setItem('sg2_gate', String(Date.now()));
+  localStorage.setItem('sg2_admin_v1', JSON.stringify({ t: Date.now(), id: 'admin', sets: ['*'], label: 'Master admin' }));
+  localStorage.setItem('sg2_auth_v1', JSON.stringify({
+    user: { id: 'test-teacher', email: 't@example.com', role: 'teacher' },
+    access_token: 'fake-token', refresh_token: 'fake-refresh',
+    expires_at: Math.floor(Date.now() / 1000) + 86400
+  }));
+
+  var f = document.getElementById('f');
+  f.src = 'admin-set-import.html';
+
+  f.addEventListener('load', function () {
+    var w = f.contentWindow, d = f.contentDocument;
+    setTimeout(function () {
+      ok('화면이 열렸다(게이트 통과)', !d.getElementById('main').hidden);
+      ok('set-generate.js 가 실렸다', !!w.SG_SET_GEN);
+
+      var prov = d.getElementById('aiprov'), model = d.getElementById('aimodel');
+      var gen = d.getElementById('genBtn');
+      ok('프로바이더 목록을 받아 왔다', prov.options.length === 2,
+        Array.prototype.map.call(prov.options, function (o) { return o.textContent; }).join(' / '));
+      ok('키 있는 쪽이 골라져 있다', prov.value === 'openai', prov.value);
+      ok('모델 기본값이 채워졌다', model.value === 'gpt-5.5', model.value);
+      ok('키 없는 쪽은 이유가 보인다',
+        prov.options[1].textContent.indexOf('키 없음') >= 0, prov.options[1].textContent);
+      ok('생성 단추가 열렸다', !gen.disabled);
+
+      /* 키 없는 프로바이더를 고르면 잠기고 이유가 뜬다. */
+      prov.value = 'anthropic';
+      prov.dispatchEvent(new w.Event('change'));
+      ok('키 없는 프로바이더를 고르면 잠긴다', gen.disabled);
+      ok('그 이유가 화면에 뜬다',
+        !d.getElementById('aiwhy').hidden && d.getElementById('aiwhy').textContent.indexOf('ANTHROPIC') >= 0,
+        d.getElementById('aiwhy').textContent);
+
+      prov.value = 'openai';
+      prov.dispatchEvent(new w.Event('change'));
+      ok('되돌리면 다시 열린다', !gen.disabled);
+
+      /* 실제로 눌러 본다. */
+      d.getElementById('code').value = 'SET 11';
+      gen.click();
+
+      var waited = 0;
+      (function wait() {
+        var res = d.getElementById('result');
+        if (res.hidden && waited < 120) { waited++; return setTimeout(wait, 250); }
+        ok('결과가 나왔다', !res.hidden);
+
+        var cards = d.querySelectorAll('.seccard .sn');
+        var nums = Array.prototype.map.call(cards, function (e) { return +e.textContent; });
+        ok('네 섹션이 청사진대로 채워졌다',
+          nums.join(',') === '50,47,11,12', nums.join(','));
+        ok('총 120문항', d.getElementById('pcount').textContent.indexOf('120문항') === 0,
+          d.getElementById('pcount').textContent);
+
+        var gates = d.getElementById('gates').textContent;
+        ok('AI 초안이라고 맨 위에 적힌다', gates.indexOf('AI 가 지은 초안입니다') >= 0);
+        ok('음성이 아직 없다고 알린다', gates.indexOf('음성 파일은 아직 없습니다') >= 0);
+        ok('그림이 없다고 알린다', gates.indexOf('그림을 만들지 않으므로') >= 0);
+        /* 가짜 서버는 블록마다 거의 같은 문장을 쓴다. 그래서 겹침 검사가 멈춤을 올리는
+           것이 **맞다** — 그게 이 화면이 지켜야 할 규칙이다. 여기서 확인할 것은
+           "AI 생성 쪽이 멈춤을 만들지 않았다" 와 "겹침 검사가 AI 산출물에도 돈다" 둘이다. */
+        var stops = Array.prototype.map.call(d.querySelectorAll('.gt.stop'), function (e) {
+          return e.textContent.replace(/^멈춤/, '').trim();
+        });
+        var notDup = stops.filter(function (t) { return t.indexOf('기존과 같은 문항') < 0; });
+        ok('생성 쪽에서 온 멈춤은 없다', notDup.length === 0, notDup.join(' || '));
+        ok('겹침 검사가 AI 산출물에도 돈다',
+          stops.some(function (t) { return t.indexOf('기존과 같은 문항') >= 0; }),
+          '가짜 서버가 블록마다 같은 문장을 쓰므로 걸리는 것이 맞다');
+        ok('멈춤이 있으면 저장이 잠긴다', d.getElementById('saveBtn').disabled,
+          d.getElementById('savehint').textContent);
+
+        ok('진행률이 끝까지 찼다', d.getElementById('aimeter').style.width === '100%',
+          d.getElementById('aimeter').style.width);
+        ok('토큰 사용량이 보인다', d.getElementById('aiproglab').textContent.indexOf('토큰') >= 0,
+          d.getElementById('aiproglab').textContent);
+
+        /* 빠진 것이 없으니 채우기 단추는 뜨지 않는다. */
+        ok('채울 것이 없으면 채우기 줄이 숨는다', d.getElementById('fillbar').hidden);
+
+        done();
+      })();
+    }, 1200);
+  });
+})();
+</script>
+</body>
+</html>

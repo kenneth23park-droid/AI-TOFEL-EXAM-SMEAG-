@@ -41,7 +41,7 @@ var mods = lasts.map(function (x) { return x.module; });
 ok('모듈 수', lasts.length === 9, lasts.length + ' → ' + mods.join(','));
 ok('중복 없음', new Set(mods).size === mods.length);
 ok('각 모듈의 마지막 문항', lasts.map(function (x) { return x.qid; }).join(',') ===
-   'L1-32,L2-15,set9-S1-q07,set9-S2-q04,R1-35,R2-15,set9-W1-q10,set9-W2-email,set9-W3-disc');
+   'R1-35,R2-15,L1-32,L2-15,set9-W1-q10,set9-W2-email,set9-W3-disc,set9-S1-q07,set9-S2-q04');
 
 console.log('\n[2] 채운 답을 진짜 채점기에 먹인다');
 [1, 0.8, 0.6].forEach(function (acc) {
@@ -75,7 +75,7 @@ function cursorOf(at) {
 var c0 = cursorOf('first');
 var sc0 = SCREENS[c0.cur.screenIndex];
 ok('기본 커서 화면에 처음 비운 문항이 있다',
-   (sc0.questionIds || []).indexOf('L1-32') >= 0, sc0.id);
+   (sc0.questionIds || []).indexOf('R1-35') >= 0, sc0.id);
 
 ['speaking', 'writing'].forEach(function (sec) {
   var p = window.SG_SEED.plan(PACK, SCREENS, { accuracy: 0.8, cursorAt: sec });

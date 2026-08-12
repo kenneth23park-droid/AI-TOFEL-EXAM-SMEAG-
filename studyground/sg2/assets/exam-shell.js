@@ -123,7 +123,7 @@ window.SG_RUNTIME = (function () {
   var TIMING_FALLBACK = {
     schemaVersion: '0.0.0-inline',
     exam: { id: 'toefl-nt', label: 'New TOEFL' },
-    sectionOrder: ['listening', 'speaking', 'reading', 'writing'],
+    sectionOrder: ['reading', 'listening', 'writing', 'speaking'],
     defaults: { timerFormat: 'MM:SS', onExpire: 'autoAdvance', advance: 'manual', warnAtSec: 60 },
     sections: {}
   };

@@ -32,7 +32,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var SECTION_ORDER = ['reading', 'listening', 'speaking', 'writing'];
+  var SECTION_ORDER = ['reading', 'listening', 'writing', 'speaking'];
   var CHOICE_LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
   /* ------------------------------------------------------------ 유틸 */
@@ -106,7 +106,7 @@
       }
     });
 
-    var out = { reading: [], listening: [], speaking: [], writing: [] };
+    var out = { reading: [], listening: [], writing: [], speaking: [] };
     if (!marks.length) { out.reading = paras.slice(); return out; }
 
     /* 첫 마크 앞부분은 그 마크가 reading 이면 흡수, 아니면 reading 구간으로 둔다. */
@@ -616,10 +616,10 @@
    * 정답지는 섹션/모듈 머리글 + 자동번호 목록이다. 번호가 본문에 없으므로 순서가 번호다.
    * 목록이 이어지는 도중에 'Writing' 같은 섹션 이름이 목록 항목으로 들어오는 경우가 있어
    * (SET 9 LISTENING MODULE 2), 목록 항목도 머리글 후보로 본다.
-   * @return {{ reading:{1:[…],2:[…]}, listening:{…}, speaking:[…], writing:[…] }}
+   * @return {{ reading:{1:[…],2:[…]}, listening:{…}, writing:[…], speaking:[…] }}
    */
   function parseAnswerKey(paras) {
-    var out = { reading: {}, listening: {}, speaking: {}, writing: {} };
+    var out = { reading: {}, listening: {}, writing: {}, speaking: {} };
     var section = null, moduleNo = 1;
 
     function bucket() {
@@ -752,7 +752,7 @@
     var sModules = parseSpeaking(split.speaking, codeSlug, picsRel, audioRel, 1, scripts.speaking);
     var speaking = { id: 'speaking', label: 'Speaking', labelKo: '스피킹', timeLimitSec: null, modules: sModules };
 
-    var sections = [reading, listening, speaking, writing];
+    var sections = [reading, listening, writing, speaking];
 
     sections.forEach(function (sec) {
       if (!sec.modules.length) gate('stop', sec.id, sec.label + ' 섹션을 찾지 못했습니다 — 문서에 "' + sec.label.toUpperCase() + ' SECTION" 머리글이 있는지 확인해 주세요.');

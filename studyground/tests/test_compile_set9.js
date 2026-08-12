@@ -102,9 +102,9 @@ res.screens.forEach(function (s) { bySec[s.section] = (bySec[s.section] || 0) + 
 // 2026-08-10: audioOnQuestionScreen:true 로 오디오 전용 화면 27개가 사라졌다(-27).
 //   사진과 선택지가 한 화면에 있고 그 화면에서 mp3 가 재생된다.
 //   근거: config/timing.toefl.json provenance "sections.listening.audioOnQuestionScreen".
-check('listening (47 + intro.volume + intro.microphone + directions + moduleEnd×2)', bySec.listening || 0, 52);
+check('listening (47 + directions + moduleEnd×2)', bySec.listening || 0, 50);
 check('speaking  (11 + hardware + directions + intro×2)',          bySec.speaking  || 0, 15);
-check('reading   (블록 9 + directions + moduleEnd×2)',              bySec.reading   || 0, 12);
+check('reading   (블록 9 + directions + moduleEnd×2 + intro.volume + intro.microphone)', bySec.reading || 0, 14);
 check('writing   (12 + directions + taskEnd×3 + review.submit)',   bySec.writing   || 0, 17);
 check('총 화면',                                                    res.screens.length, 96);
 

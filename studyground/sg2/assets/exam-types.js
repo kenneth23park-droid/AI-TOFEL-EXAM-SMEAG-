@@ -10,7 +10,7 @@
 
 /**
  * @typedef {"instruction"|"question"|"speaking"|"moduleEnd"|"hardwareCheck"|"review"} ScreenType
- * @typedef {"listening"|"speaking"|"reading"|"writing"} SectionId
+ * @typedef {"reading"|"listening"|"writing"|"speaking"} SectionId
  *
  * @typedef {Object} TimerSpec
  * @property {"countdown"|"response"|"prep"|"none"} mode
@@ -76,7 +76,7 @@
   'use strict';
 
   var SCREEN_TYPES = ['instruction', 'question', 'speaking', 'moduleEnd', 'hardwareCheck', 'review'];
-  var SECTION_IDS = ['listening', 'speaking', 'reading', 'writing'];
+  var SECTION_IDS = ['reading', 'listening', 'writing', 'speaking'];
   var TIMER_MODES = ['countdown', 'response', 'prep', 'none'];
   var TIMER_SCOPES = ['section', 'module', 'task', 'question', 'screen'];
   var TIMER_FORMATS = ['MM:SS', 'HH:MM:SS'];
