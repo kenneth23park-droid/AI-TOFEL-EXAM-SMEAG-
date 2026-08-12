@@ -1527,7 +1527,8 @@
     var body = bodyNode(screen);
     if (body) wrap.appendChild(body);
 
-    var state = { stream: null, ctxAudio: null, raf: null, granted: false, alive: true, wait: null };
+    var state = { stream: null, ctxAudio: null, raf: null, granted: false, alive: true, wait: null,
+      deviceId: '', picked: false, onDevChange: null };
 
     /* 1) 스피커 테스트 — 볼륨 화면과 동일한 합성음. */
     var speakerRow = el('div', 'instr-hw-row');
@@ -1552,17 +1553,34 @@
     micLabel.className = 'instr-hw-title';
     micRow.appendChild(micLabel);
 
+    /* 장치 고르기 — 권한이 떨어져야 이름이 보인다. 여러 개면 학생이 직접 골라야 넘어간다. */
+    var pick = el('div', 'instr-hw-pick');
+    var pickLabel = bi('label', 'Microphone device', '마이크 장치');
+    pickLabel.className = 'instr-hw-picklabel';
+    pickLabel.setAttribute('for', 'sg-mic-device');
+    var micSel = el('select', 'instr-hw-select');
+    micSel.id = 'sg-mic-device';
+    pick.appendChild(pickLabel);
+    pick.appendChild(micSel);
+    pick.style.display = 'none';
+    micRow.appendChild(pick);
+
     var meter = el('div', 'instr-meter');
     var bar = el('div', 'instr-meter-bar');
     meter.appendChild(bar);
     micRow.appendChild(meter);
 
+    /* 레벨·피치 수치 — 막대만으로는 "움직이는 중"인지 모른다. 숫자를 같이 보여 준다. */
+    var readout = el('p', 'instr-hw-readout');
+    readout.textContent = 'Level —  ·  Pitch —';
+    micRow.appendChild(readout);
+
     var micStatus = el('p', 'instr-hw-status');
     biInto(micStatus, 'Requesting microphone access…', '마이크 권한을 요청하는 중…');
     micRow.appendChild(micStatus);
 
-    var retry = button('exam-btn', 'Retry microphone', '마이크 다시 시도');
-    retry.style.display = 'none';
+    /* 권한 팝업이 접혀 버린 경우가 있다 — 언제든 다시 띄울 수 있게 처음부터 보여 둔다. */
+    var retry = button('exam-btn', 'Allow microphone', '마이크 허용');
     micRow.appendChild(retry);
     wrap.appendChild(micRow);
 
@@ -1588,19 +1606,34 @@
       state.wait = null;
     }
 
-    function cleanup() {
-      state.alive = false;
-      clearWait();
+    function stopMeter() {
       if (state.raf !== null && root.cancelAnimationFrame) {
         try { root.cancelAnimationFrame(state.raf); } catch (e) {}
       }
       state.raf = null;
-      if (state.stream) {
-        var tracks = state.stream.getTracks ? state.stream.getTracks() : [];
-        for (var i = 0; i < tracks.length; i++) { try { tracks[i].stop(); } catch (e2) {} }
-        state.stream = null;
+      if (state.ctxAudio) { try { state.ctxAudio.close(); } catch (e2) {} state.ctxAudio = null; }
+      bar.style.width = '0%';
+      bar.className = 'instr-meter-bar';
+      readout.textContent = 'Level —  ·  Pitch —';
+    }
+
+    function stopStream() {
+      if (!state.stream) return;
+      var tracks = state.stream.getTracks ? state.stream.getTracks() : [];
+      for (var i = 0; i < tracks.length; i++) { try { tracks[i].stop(); } catch (e) {} }
+      state.stream = null;
+    }
+
+    function cleanup() {
+      state.alive = false;
+      clearWait();
+      stopMeter();
+      stopStream();
+      var md = root.navigator && root.navigator.mediaDevices;
+      if (md && state.onDevChange && md.removeEventListener) {
+        try { md.removeEventListener('devicechange', state.onDevChange); } catch (e4) {}
       }
-      if (state.ctxAudio) { try { state.ctxAudio.close(); } catch (e3) {} state.ctxAudio = null; }
+      state.onDevChange = null;
       lockAdvance(false);
     }
     onLeave(ctx, cleanup);
@@ -1616,6 +1649,9 @@
         analyser.fftSize = 1024;
         source.connect(analyser);
         var buf = new Uint8Array(analyser.fftSize);
+        var freq = new Uint8Array(analyser.frequencyBinCount);
+        var binHz = ac.sampleRate / analyser.fftSize;
+        var tick = 0;
         // rAF 루프 — 카운트다운이 아니라 레벨 표시라 SG_CLOCK 대상이 아니다.
         var loop = function () {
           if (!state.alive) return;
@@ -1626,11 +1662,105 @@
           var pct = Math.min(100, Math.round(rms * 320));
           bar.style.width = pct + '%';
           bar.className = 'instr-meter-bar' + (pct > 4 ? ' is-live' : '');
+          // 숫자는 매 프레임 갱신할 필요가 없다 — 눈이 못 따라가고 읽기만 어렵다.
+          if ((tick++ % 6) === 0) {
+            var hz = 0;
+            if (pct > 4) {
+              analyser.getByteFrequencyData(freq);
+              var top = 0, best = 0;
+              // 말소리 대역(80~1000Hz)에서 가장 센 성분을 피치로 읽는다.
+              var lo = Math.max(1, Math.round(80 / binHz)), hi = Math.min(freq.length - 1, Math.round(1000 / binHz));
+              for (i = lo; i <= hi; i++) { if (freq[i] > top) { top = freq[i]; best = i; } }
+              if (top > 24) hz = Math.round(best * binHz);
+            }
+            readout.textContent = 'Level ' + pct + '%  ·  Pitch ' + (hz ? hz + ' Hz' : '—');
+            readout.className = 'instr-hw-readout' + (pct > 4 ? ' is-live' : '');
+          }
           if (root.requestAnimationFrame) state.raf = root.requestAnimationFrame(loop);
         };
         loop();
       } catch (e) { warn('level meter unavailable', e); }
     }
+
+    /* 권한을 받은 뒤에야 장치 이름이 나온다 — 목록을 채우고, 두 개 이상이면 고르게 한다. */
+    function fillDevices() {
+      var md = root.navigator && root.navigator.mediaDevices;
+      if (!md || typeof md.enumerateDevices !== 'function') return;
+      md.enumerateDevices().then(function (list) {
+        if (!state.alive) return;
+        var ins = [], i;
+        for (i = 0; i < list.length; i++) { if (list[i] && list[i].kind === 'audioinput') ins.push(list[i]); }
+        if (!ins.length) return;
+        while (micSel.firstChild) micSel.removeChild(micSel.firstChild);
+        var ph = el('option');
+        ph.value = '';
+        ph.textContent = '— Select your microphone —';
+        micSel.appendChild(ph);
+        for (i = 0; i < ins.length; i++) {
+          var o = el('option');
+          o.value = ins[i].deviceId;
+          o.textContent = ins[i].label || ('Microphone ' + (i + 1));
+          micSel.appendChild(o);
+        }
+        pick.style.display = '';
+        micSel.value = state.deviceId || '';
+        // 하나뿐이면 고를 것이 없다 — 그대로 확정한다. 여러 개면 직접 골라야 Continue 가 열린다.
+        if (ins.length === 1) {
+          micSel.value = ins[0].deviceId;
+          state.deviceId = ins[0].deviceId;
+          state.picked = true;
+          confirmReady(ins[0].label);
+        } else if (!state.picked) {
+          begin.disabled = true;
+          lockAdvance(true);
+          setStatus('Microphone access is allowed. Now select which microphone you will use.',
+            '마이크 권한이 허용되었습니다. 사용할 마이크를 골라 주세요.', '');
+        }
+      })['catch'](function (e) { warn('enumerateDevices failed', e); });
+    }
+
+    function confirmReady(label) {
+      begin.disabled = false;
+      lockAdvance(false);
+      retry.style.display = 'none';
+      var name = label ? String(label) : '';
+      setStatus('Microphone is working' + (name ? ' — ' + name : '') + '. Speak at your normal volume and watch the level and pitch move.',
+        '마이크가 동작합니다' + (name ? ' — ' + name : '') + '. 평소 목소리로 말하면 레벨과 피치가 움직입니다.', 'is-ok');
+    }
+
+    /* 고른 장치로 스트림을 다시 연다 — 이전 스트림은 반드시 놓아야 장치가 바뀐다. */
+    function useDevice(id) {
+      var md = root.navigator && root.navigator.mediaDevices;
+      if (!md) return;
+      state.deviceId = id;
+      state.picked = !!id;
+      stopMeter();
+      stopStream();
+      begin.disabled = true;
+      lockAdvance(true);
+      if (!id) {
+        setStatus('Select which microphone you will use.', '사용할 마이크를 골라 주세요.', '');
+        return;
+      }
+      setStatus('Opening the selected microphone…', '선택한 마이크를 여는 중…', '');
+      md.getUserMedia({ audio: { deviceId: { exact: id } } }).then(function (stream) {
+        if (!state.alive) { var tr = stream.getTracks ? stream.getTracks() : []; for (var i = 0; i < tr.length; i++) { try { tr[i].stop(); } catch (e) {} } return; }
+        state.stream = stream;
+        state.granted = true;
+        startMeter(stream);
+        var t = stream.getAudioTracks ? stream.getAudioTracks()[0] : null;
+        confirmReady(t && t.label ? t.label : '');
+      })['catch'](function (err) {
+        if (!state.alive) return;
+        state.picked = false;
+        setStatus('That microphone could not be opened. Choose another device, or press Allow microphone.',
+          '그 마이크를 열 수 없습니다. 다른 장치를 고르거나 마이크 허용을 누르세요.', 'is-error');
+        retry.style.display = '';
+        warn('device open failed', err);
+      });
+    }
+
+    micSel.onchange = function () { useDevice(micSel.value); };
 
     function request() {
       var nav = root.navigator;
@@ -1644,8 +1774,13 @@
         lockAdvance(true);
         return;
       }
-      setStatus('Requesting microphone access…', '마이크 권한을 요청하는 중…', '');
-      retry.style.display = 'none';
+      setStatus('Requesting microphone access… If nothing appears, select the microphone icon at the right of the address bar and choose Allow.',
+        '마이크 권한을 요청하는 중… 아무 것도 뜨지 않으면 주소창 오른쪽 마이크 아이콘을 눌러 허용을 선택하세요.', '');
+      // 팝업이 접혀 버렸을 때 다시 부를 길을 열어 둔다 — 기다리는 동안에도 버튼은 보인다.
+      retry.style.display = '';
+      stopMeter();
+      stopStream();
+      state.granted = false;
       clearWait();
       // 응답 없이 멈추는 요청이 있다 — 기다림이 길어지면 원인을 말하고 재시도를 연다.
       if (typeof root.setTimeout === 'function') {
@@ -1675,23 +1810,23 @@
         }
         state.stream = stream;
         state.granted = true;
-        setStatus('Microphone is working. Speak at your normal volume and watch the meter move.',
-          '마이크가 동작합니다. 평소 목소리로 말하면 레벨 미터가 움직입니다.', 'is-ok');
-        begin.disabled = false;
-        lockAdvance(false);
+        var tr0 = stream.getAudioTracks ? stream.getAudioTracks()[0] : null;
+        confirmReady(tr0 && tr0.label ? tr0.label : '');
         var st = store();
         if (st && typeof st.pushEvent === 'function') st.pushEvent('mic_granted', screen.id, {});
         startMeter(stream);
+        // 목록은 권한 뒤에야 이름이 붙는다. 여러 개면 fillDevices 가 다시 잠그고 선택을 요구한다.
+        fillDevices();
       })['catch'](function (err) {
         clearWait();
         var name = err && err.name ? err.name : 'Error';
         var denied = name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError';
         if (denied) {
-          setStatus('Microphone access was blocked. Speaking cannot start without it — allow the microphone in your browser settings, then press Retry.',
-            '마이크 접근이 차단되었습니다. 마이크 없이는 스피킹을 시작할 수 없습니다 — 브라우저 설정에서 마이크를 허용한 뒤 다시 시도를 누르세요.', 'is-error');
+          setStatus('Microphone access was blocked. Speaking cannot start without it — open the microphone icon at the right of the address bar (or your browser settings) and choose Allow, then select Allow microphone.',
+            '마이크 접근이 차단되었습니다. 마이크 없이는 스피킹을 시작할 수 없습니다 — 주소창 오른쪽 마이크 아이콘(또는 브라우저 설정)에서 허용을 선택한 뒤 마이크 허용을 누르세요.', 'is-error');
         } else {
-          setStatus('No microphone was found. Connect one and press Retry.',
-            '마이크를 찾지 못했습니다. 마이크를 연결한 뒤 다시 시도를 누르세요.', 'is-error');
+          setStatus('No microphone was found. Connect one and select Allow microphone.',
+            '마이크를 찾지 못했습니다. 마이크를 연결한 뒤 마이크 허용을 누르세요.', 'is-error');
         }
         retry.style.display = '';
         begin.disabled = true;
@@ -1702,7 +1837,19 @@
       });
     }
 
-    retry.onclick = request;
+    retry.onclick = function () {
+      // 이미 고른 장치가 있으면 그 장치로 다시 연다 — 기본 장치로 되돌아가지 않는다.
+      if (state.granted && state.deviceId) { useDevice(state.deviceId); return; }
+      request();
+    };
+
+    /* USB 마이크를 꽂거나 빼면 목록이 바뀐다 — 다시 채운다. */
+    var md0 = root.navigator && root.navigator.mediaDevices;
+    if (md0 && md0.addEventListener) {
+      state.onDevChange = function () { if (state.alive && state.granted) fillDevices(); };
+      try { md0.addEventListener('devicechange', state.onDevChange); } catch (e5) { state.onDevChange = null; }
+    }
+
     request();
     return wrap;
   }

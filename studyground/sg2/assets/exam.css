@@ -1021,6 +1021,19 @@ body.exam-body {
 }
 .instr-meter-bar { height: 100%; width: 0%; background: var(--line-2); transition: width .06s linear; }
 .instr-meter-bar.is-live { background: var(--ok); }
+.instr-hw-pick { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.instr-hw-picklabel { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.instr-hw-select {
+  flex: 1 1 260px; min-width: 0; max-width: 480px;
+  font: inherit; font-size: 14px; color: var(--ink);
+  padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--line); background: #fff;
+}
+.instr-hw-readout {
+  font-size: 13px; font-weight: 700; color: var(--muted);
+  font-variant-numeric: tabular-nums; margin-bottom: 10px;
+}
+.instr-hw-readout.is-live { color: var(--ok); }
 
 /* ── Adjusting the Microphone (레퍼런스 en_test-nt) ─────── */
 /* 관찰: 가운데 정렬 제목 → 가로선 → 흰 카드(좌 원형 RECORD / 우 안내+낭독 지문)
