@@ -259,7 +259,8 @@
       "US-Liam",
       "US-Mia"
     ],
-    "segment_count": 6
+    "segment_count": 6,
+    "asr_text": "Hey, did you manage to get into Professor Hammond's Linguistics Seminar? I know it fills up fast. Not initially. I was number four on the wait list, but I just got an email saying a spot opened up. That's great news. I'm still stuck at number seven. I'm keeping my fingers crossed, but I'm not holding my breath. You might want to have a backup plan. The ad drop deadline is next Friday, and the list doesn't usually move that quickly. Yeah, I've been looking at a sociolinguistics course as an alternative. It fits my schedule, but it's not my first choice. Well, sometimes those unexpected courses turn out to be the best ones."
   },
   {
     "segment_id": "set9-L2-06-07",
@@ -273,7 +274,8 @@
       "US-Mason",
       "US-Emma"
     ],
-    "segment_count": 6
+    "segment_count": 6,
+    "asr_text": "My landlord just sent me a notice about renewing my lease. The rent is going up by 15%. Ouch, that's a pretty steep increase. Are you gonna stay? I'm torn, the location is perfect. It's a stone's throw from my office, but that's a lot more money every month. Have you thought about negotiating? Sometimes landlords are willing to meet you halfway, especially if you've been a reliable tenant. That's not a bad idea. I've never missed a payment in three years. Maybe I can use that as leverage. Exactly the worst they can say is no."
   },
   {
     "segment_id": "set9-L2-08-11",
@@ -284,7 +286,8 @@
       "GB-Oliver",
       "GB-Oliver"
     ],
-    "segment_count": 3
+    "segment_count": 3,
+    "asr_text": "All right, so today we're going to look at one of the most remarkable phenomena in the animal kingdom. Bird migration. Now, many bird species travel thousands of miles each year, and the question is, how exactly do they do this? Well, birds rely on several different navigation systems working together. They use the sun's position during the day to orient themselves, tracking how it moves across the sky. At night, they actually follow star patterns, particularly the North Star and surrounding constellations. Additionally, many species can detect Earth's magnetic field through special proteins in their eyes, which essentially gives them a built-in compass. Some researchers believe birds may even use smell to recognize familiar landscapes, though this is still being studied. Now, why do birds go through all this trouble? Basically, it comes down to survival. They're moving between breeding grounds in temperate regions and feeding areas in warmer climates. This seasonal movement allows them to take advantage of food resources that vary throughout the year. For instance, insects are abundant in northern areas during summer but disappear in winter, so insect-eating birds must travel south to find food. However, here's where things get problematic. Human activities are increasingly disrupting these ancient migration routes. Light pollution from cities confuses birds that navigate by starlight, causing them to become disoriented and exhausted as they circle illuminated buildings. Building designs, particularly glass structures, pose another serious threat. Birds can't see glass and fly directly into windows, leading to millions of collisions annually. Climate change is also shifting the timing of food availability, which means birds may arrive at their destinations only to find their food sources, like certain insects or plants, haven't appeared yet. These disruptions can have serious ecological consequences, potentially threatening entire populations that have followed the same routes for thousands of years."
   },
   {
     "segment_id": "set9-L2-12-15",
@@ -296,7 +299,8 @@
       "GB-Henry",
       "GB-Henry"
     ],
-    "segment_count": 4
+    "segment_count": 4,
+    "asr_text": "So, let's talk about something that makes jazz really unique as a musical form. Improvisation. In other words, the ability of musicians to create music spontaneously during a performance. Now, this might sound like musicians are just playing whatever comes to mind, but actually, there's a lot of structure involved. It's not random at all. Jazz improvisation typically works within a framework. Musicians follow chord progressions and melodic themes established at the beginning of a piece. But within those boundaries, they have freedom to create original phrases and explore different musical ideas. Think of it like a conversation where you know the topic, but choose your own words. A saxophone player, for example, might take a familiar melody and transform it through variations in rhythm, pitch, and phrasing. A trumpet player might respond by building on that variation, adding their own interpretation. Each musician brings something personal to the performance. One interesting challenge with improvisation is that it requires musicians to listen very carefully to each other. They need to respond in real time to what their fellow performers are doing, adjusting their playing moment by moment. If the drummer shifts the rhythm slightly, everyone else has to notice and adapt. This means a jazz performance is never quite the same twice, which is part of what attracts audiences to live jazz. You're witnessing something being created right in front of you. What makes this particularly significant is how improvisation influenced other music genres over time. Rock musicians began incorporating guitar solos that weren't strictly scripted. Blues artists embraced spontaneous vocal variations. Even some classical composers started leaving room for performer interpretation in their works. So jazz didn't just develop its own tradition. It fundamentally changed how we think about musical creativity altogether, encouraging musicians across genres to see performance as an act of creation, not just reproduction."
   },
   {
     "segment_id": "s1-instructions",

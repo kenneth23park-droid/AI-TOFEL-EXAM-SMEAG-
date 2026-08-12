@@ -596,7 +596,9 @@
           "el_voice": "Daniel",
           "text": "However, here's where things get problematic. Human activities are increasingly disrupting these ancient migration routes. Light pollution from cities confuses birds that navigate by starlight, causing them to become disoriented and exhausted as they circle illuminated buildings. Building designs, particularly glass structures, pose another serious threat - birds can't see glass and fly directly into windows, leading to millions of collisions annually. Climate change is also shifting the timing of food availability, which means birds may arrive at their destinations only to find their food sources, like certain insects or plants, haven't appeared yet. These disruptions can have serious ecological consequences, potentially threatening entire populations that have followed the same routes for thousands of years."
         }
-      ]
+      ],
+      "speed": 1.1,
+      "speedNote": "GB-Oliver 가 이 지문을 122wpm 로 읽어 같은 화자의 l1-q25-28(143wpm)과 바로 뒤 강의 set9-L2-12-15(148wpm)보다 눈에 띄게 느렸다. 나란히 나오는 두 강의의 속도차를 줄이려고 1.1 을 준다. 대본은 손대지 않는다."
     },
     {
       "id": "set9-L2-12-15",

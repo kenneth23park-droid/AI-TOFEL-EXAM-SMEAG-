@@ -1,9 +1,9 @@
 {
  "set": "SET9",
  "label": "NEW TOEFL SET 9",
- "rev": "bf17ad624d41",
+ "rev": "25adb4709e1f",
  "count": 92,
- "bytes": 24644163,
+ "bytes": 23056996,
  "files": [
   {
    "u": "media/audio/set9/l1-q01.mp3",
@@ -187,23 +187,23 @@
   },
   {
    "u": "media/audio/set9/set9-L2-04-05.mp3",
-   "b": 941956,
-   "h": "d1b58b232f59"
+   "b": 391826,
+   "h": "aae189df9d03"
   },
   {
    "u": "media/audio/set9/set9-L2-06-07.mp3",
-   "b": 774397,
-   "h": "88468848931c"
+   "b": 335201,
+   "h": "9f5af4b267e4"
   },
   {
    "u": "media/audio/set9/set9-L2-08-11.mp3",
-   "b": 1769491,
-   "h": "5af04599d347"
+   "b": 1417477,
+   "h": "3925ed1ccd85"
   },
   {
    "u": "media/audio/set9/set9-L2-12-15.mp3",
-   "b": 1557252,
-   "h": "cabd0c5949d9"
+   "b": 1311425,
+   "h": "706a6fed8de6"
   },
   {
    "u": "media/pictures/set9/l1-q1-12-speaker-a.webp",

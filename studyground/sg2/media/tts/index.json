@@ -459,10 +459,10 @@
   "set9-L2-04-05": {
     "file": "media/tts/set9-L2-04-05.mp3",
     "voices": [
-      "US-Mia",
-      "US-Liam"
+      "US-Liam",
+      "US-Mia"
     ],
-    "segments": 10
+    "segments": 6
   },
   "set9-L2-06-07": {
     "file": "media/tts/set9-L2-06-07.mp3",
@@ -470,14 +470,14 @@
       "US-Mason",
       "US-Emma"
     ],
-    "segments": 12
+    "segments": 6
   },
   "set9-L2-08-11": {
     "file": "media/tts/set9-L2-08-11.mp3",
     "voices": [
       "GB-Oliver"
     ],
-    "segments": 5
+    "segments": 3
   },
   "set9-L2-12-15": {
     "file": "media/tts/set9-L2-12-15.mp3",

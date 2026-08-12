@@ -372,67 +372,67 @@
       }
     },
     "set9-L2-04-05": {
-      "scriptHash": "d233c6f64f16510b0790493d983b65c0f3db268c465315fa58a12572e9ae4fd5",
+      "scriptHash": "8e07db315acb267af7b69851185428b151b61aefe41ba658c12e1c3cd3979bc4",
       "sigVersion": 3,
-      "bytes": 941956,
-      "durationSec": 92.81,
-      "audioSha256": "d1b58b232f59946d734d1845833752d554b3bc518708265bf9de0eb89ea643aa",
+      "bytes": 391826,
+      "durationSec": 38.55,
+      "audioSha256": "aae189df9d03537f70befdb57aa1caa1c7348affb03d0f61d56141dbd618f60b",
       "stt": {
-        "verdict": "PASS",
-        "wer": 0.0162,
+        "verdict": "WARN",
+        "wer": 0.0265,
         "backend": "faster_whisper",
-        "reason": "WER 1.6%",
-        "transcript": "You will not believe my morning. 6 a.m. and the registrar system sends me a seat confirmation, Sociolinguistics. The Thursday seminar, I read it four times. You're in? That thing filled up before I finished typing my ID number. I'm 14th in the queue. I'd stopped watching it honestly. Two students in the class dropped over the weekend. The queue ran overnight and it took the next two names off the top. Mine was one of them. Overnight. So it's just the software moving people around. Start to finish. Hammond gets the roster from the registrar the Monday before class is open and whoever's on it is who he teaches that term. 14th, what are my odds here realistically? Low enough that you want a second plan moving this week. Look at what else clears the same methods requirement and get yourself registered for one of those before Friday because Friday is when ad, drop shuts. There are two courses that count for it and both were down to single seats yesterday afternoon. If those fill, you're carrying that requirement into next year. And if my number does come up after I've signed for something? Then you release the other one and walk into the seminar. It doesn't meet until week three anyway and the roster locks the Friday before that. So it's all settled before anyone's in a classroom. Two courses one week, right. There's a methods section Tuesday mornings. I'll register for it this afternoon.",
-        "audioSha256": "d1b58b232f59946d734d1845833752d554b3bc518708265bf9de0eb89ea643aa",
-        "scriptHash": "d233c6f64f16510b0790493d983b65c0f3db268c465315fa58a12572e9ae4fd5"
+        "reason": "WER 2.7% — queue for a human listen",
+        "transcript": "Hey, did you manage to get into Professor Hammond's Linguistics Seminar? I know it fills up fast. Not initially. I was number four on the wait list, but I just got an email saying a spot opened up. That's great news. I'm still stuck at number seven. I'm keeping my fingers crossed, but I'm not holding my breath. You might want to have a backup plan. The ad drop deadline is next Friday, and the list doesn't usually move that quickly. Yeah, I've been looking at a sociolinguistics course as an alternative. It fits my schedule, but it's not my first choice. Well, sometimes those unexpected courses turn out to be the best ones.",
+        "audioSha256": "aae189df9d03537f70befdb57aa1caa1c7348affb03d0f61d56141dbd618f60b",
+        "scriptHash": "8e07db315acb267af7b69851185428b151b61aefe41ba658c12e1c3cd3979bc4"
       }
     },
     "set9-L2-06-07": {
-      "scriptHash": "5cfc6874c0ab65865c5978da11a2fc32fd7cda5a14b490a7989b2c7c80b2a4da",
+      "scriptHash": "6ead7308e13f8460c820513b26aee6ac6ce407a2e14352930c9286e190ccfad6",
       "sigVersion": 3,
-      "bytes": 774397,
-      "durationSec": 80.14,
-      "audioSha256": "88468848931c4646df13321dec889a14a1aa8f236b658b96d2228d718f92fe3b",
+      "bytes": 335201,
+      "durationSec": 33.76,
+      "audioSha256": "9f5af4b267e4db46ef597b94c7c164ecb9da9658c2841acbb2a6a1c8d7125c92",
       "stt": {
-        "verdict": "PASS",
-        "wer": 0.012,
+        "verdict": "WARN",
+        "wer": 0.0202,
         "backend": "faster_whisper",
-        "reason": "WER 1.2%",
-        "transcript": "My landlord slid an envelope under my door yesterday. I've read it about nine times since. Nine times, what was in it? Two things, the renewal form for September, which I'd signed tonight if you handed me a pen, and a new figure, $400 more a month. $400 on what the lab pays you? It's about a third on top of what I pay now. $400 is my groceries, my bus pass, and whatever's left over at the end, all of it. I stood in the kitchen running the arithmetic until two in the morning and it never came out. And you like that apartment? 10 minutes on foot to the lab. I've been in that lab since sophomore year, and I've never once had to think about how I'd get there. Then go talk to her before you sign anything. Four years in that unit, and in four years I've never seen you counting days at the end of the month, or peeling one of those yellow notices off your door. That goes in a file somewhere. Two empty months would cost her more than $400. Huh, I'd been picturing it as begging. It's the opposite. Call her tonight. She's downstairs at the desk until eight, same as always. I did scroll listings across the river for 10 minutes last night out of spite, and close the tab. Dana took in two roommates when hers went up. Sign nothing until you've talked to her.",
-        "audioSha256": "88468848931c4646df13321dec889a14a1aa8f236b658b96d2228d718f92fe3b",
-        "scriptHash": "5cfc6874c0ab65865c5978da11a2fc32fd7cda5a14b490a7989b2c7c80b2a4da"
+        "reason": "WER 2.0% — queue for a human listen",
+        "transcript": "My landlord just sent me a notice about renewing my lease. The rent is going up by 15%. Ouch, that's a pretty steep increase. Are you gonna stay? I'm torn, the location is perfect. It's a stone's throw from my office, but that's a lot more money every month. Have you thought about negotiating? Sometimes landlords are willing to meet you halfway, especially if you've been a reliable tenant. That's not a bad idea. I've never missed a payment in three years. Maybe I can use that as leverage. Exactly the worst they can say is no.",
+        "audioSha256": "9f5af4b267e4db46ef597b94c7c164ecb9da9658c2841acbb2a6a1c8d7125c92",
+        "scriptHash": "6ead7308e13f8460c820513b26aee6ac6ce407a2e14352930c9286e190ccfad6"
       }
     },
     "set9-L2-08-11": {
-      "scriptHash": "ab15e8f1d5ceba17ca31a203cfbf7a68e5db7d29c72c37a99f8a8da28c2a329f",
+      "scriptHash": "b62670d9f8d7c873019f7e02f03166d26babd07dec07172ea106a211ed55e0ce",
       "sigVersion": 3,
-      "bytes": 1769491,
-      "durationSec": 179.14,
-      "audioSha256": "5af04599d347660856f689a4ce47c99d6b41a275569909c97e0a995b71ae7eab",
+      "bytes": 1417477,
+      "durationSec": 138.03,
+      "audioSha256": "3925ed1ccd858df6425a408b88cdab9a5072ee4a1eee0132be12c7c3ca618ab1",
       "stt": {
         "verdict": "PASS",
-        "wer": 0.0183,
+        "wer": 0.0066,
         "backend": "faster_whisper",
-        "reason": "WER 1.8%",
-        "transcript": "A black pole warbler weighs less than a candy bar. Some evening in September, it lifts out of a spruce forest in Northern Canada, and weeks later it drops into the same few acres of Central America where it spent the previous winter. So, let's take up the steering. By day, a migrant has references we would recognize, the sun's position, red against an internal clock that stays accurate to within minutes. And the ground underneath, a coastline, a river cut, a ridge running the right way, which a bird can follow the way you would follow a highway. Underneath both of those is a magnetic sense, and the earth's field gives a rough bearing even through heavy cloud. Most songbirds, though, do their travelling between dusk and dawn, 2,000 meters up at midnight. What lies below is one unbroken dark, and the shoreline that served so well at noon is somewhere down inside it. What the bird still has is overhead. In the planetarium work of the 60s, warblers kept indoors, settled onto their normal autumn heading under a projected sky, and when the projector was turned, the birds swung around with it and held the new bearing. It was the arrangement above them they were steering by. Now, a tower sheathed in glass does two things to a night migrant. In daylight, the glass hands back a copy of the sky and the trees behind the bird, and the bird flies hard into what it reads as open air. Collisions with buildings kill birds by the hundreds of millions a year in North America alone. On an overcast night, the lit floors of that same tower pull migrants off their line, and they circle the globe for hours, spending fuel they were carrying for a thousand kilometers of flight. Walk downtown at sunrise in May, and you will find a warbler on a window ledge too spent to lift itself off the stone. Volunteers pick those birds up by hand, one at a time, and carry them out in paper bags. There is one more pressure, and it works more slowly. The trip north runs off the same clock. Day length starts them out of the wintering grounds, and April day length is exactly what it was a century ago, so they reach the boreal forest on the old date, and their chicks hatch on the old date. That forest, though, is warming. Being there now opens a week or two ahead of where it sat 40 years ago, and caterpillars take their cue from temperature. They hatch, and they peak on the new spring.",
-        "audioSha256": "5af04599d347660856f689a4ce47c99d6b41a275569909c97e0a995b71ae7eab",
-        "scriptHash": "ab15e8f1d5ceba17ca31a203cfbf7a68e5db7d29c72c37a99f8a8da28c2a329f"
+        "reason": "WER 0.7%",
+        "transcript": "All right, so today we're going to look at one of the most remarkable phenomena in the animal kingdom. Bird migration. Now, many bird species travel thousands of miles each year, and the question is, how exactly do they do this? Well, birds rely on several different navigation systems working together. They use the sun's position during the day to orient themselves, tracking how it moves across the sky. At night, they actually follow star patterns, particularly the North Star and surrounding constellations. Additionally, many species can detect Earth's magnetic field through special proteins in their eyes, which essentially gives them a built-in compass. Some researchers believe birds may even use smell to recognize familiar landscapes, though this is still being studied. Now, why do birds go through all this trouble? Basically, it comes down to survival. They're moving between breeding grounds in temperate regions and feeding areas in warmer climates. This seasonal movement allows them to take advantage of food resources that vary throughout the year. For instance, insects are abundant in northern areas during summer but disappear in winter, so insect-eating birds must travel south to find food. However, here's where things get problematic. Human activities are increasingly disrupting these ancient migration routes. Light pollution from cities confuses birds that navigate by starlight, causing them to become disoriented and exhausted as they circle illuminated buildings. Building designs, particularly glass structures, pose another serious threat. Birds can't see glass and fly directly into windows, leading to millions of collisions annually. Climate change is also shifting the timing of food availability, which means birds may arrive at their destinations only to find their food sources, like certain insects or plants, haven't appeared yet. These disruptions can have serious ecological consequences, potentially threatening entire populations that have followed the same routes for thousands of years.",
+        "audioSha256": "3925ed1ccd858df6425a408b88cdab9a5072ee4a1eee0132be12c7c3ca618ab1",
+        "scriptHash": "b62670d9f8d7c873019f7e02f03166d26babd07dec07172ea106a211ed55e0ce"
       }
     },
     "set9-L2-12-15": {
-      "scriptHash": "b0a02d9a023fc5f772f96739f533fa02853cb6716b450709905f63a20022c0db",
+      "scriptHash": "591b75813a9fdb93cf2af2c0346c80745e3e0093f9d45b870c16853733b65652",
       "sigVersion": 3,
-      "bytes": 1557252,
-      "durationSec": 151.48,
-      "audioSha256": "cabd0c5949d99f86e02c76d79b58c485f48f619e6a01749b2b6eb81e7a7a91f4",
+      "bytes": 1311425,
+      "durationSec": 123.75,
+      "audioSha256": "706a6fed8de6084650ecdc5c4a5ca281cb36546cd8dd5df96b1f28de0da4f392",
       "stt": {
         "verdict": "PASS",
-        "wer": 0.0044,
+        "wer": 0.0,
         "backend": "faster_whisper",
-        "reason": "WER 0.4%",
-        "transcript": "Every book on jazz gets to the same word by about page 3. Improvisation. It gets used loosely, so let's look at where it actually happens, the bandstand. So picture the second set. The tune comes around, and it is your turn to step out. That afternoon, in your apartment, you worked something out that you liked. A climbing figure you were saving for the fifth bar. You get 8 bars in, and the bass player starts placing the beat later than you expected. The drummer leans ahead of him. The pianist arrives at the fifth bar and substitutes a chord from somewhere else entirely. And your climbing figure now belongs to a bar that has stopped existing. Whatever comes out of your horn next has to come out in the same second. All of that reaches you. You are still holding a note while you decide. That is the job up there. You are taking in four other people continuously and bending the line you are already in the middle of, so that it fits what they just did to it. Now students hear this word improvisation and take it to mean anything goes. So consider breakfast. You sit down and start telling your roommate about your weekend. Nobody handed you those sentences in advance. You pick the words as you go, and starting a sentence you have no clear idea how you will land it. And yet the grammar holds all the way through, and you finish the thought you opened, or your roommate stops following you. The freedom lives inside a set of things you keep. On the bandstand those things are the key, the chord changes, the form. And how many bars before the whole thing comes around again, all of it is settled before anyone plays. What goes inside it is yours. Made up as you go, yes. Made up out of thin air, no. And because what goes inside is yours, a strong improviser is recognizable in about four notes. The phrasing is as particular as handwriting. This way of working also spread outward. Picture a dance band in 1935 before recordings circulated widely. You played the arrangement. The arrangement was the point. Tuesday's version and Saturday's version were the same version, and what a listener weighed was how cleanly a settled piece had been executed. The concert hall ran on that same principle and largely still does. Then the records got around and by the 60s you had rock and blues bands leaving whole stretches of a song open, a chorus where the notes had been fixed by nobody in advance and the thing came out different every night.",
-        "audioSha256": "cabd0c5949d99f86e02c76d79b58c485f48f619e6a01749b2b6eb81e7a7a91f4",
-        "scriptHash": "b0a02d9a023fc5f772f96739f533fa02853cb6716b450709905f63a20022c0db"
+        "reason": "WER 0.0%",
+        "transcript": "So, let's talk about something that makes jazz really unique as a musical form. Improvisation. In other words, the ability of musicians to create music spontaneously during a performance. Now, this might sound like musicians are just playing whatever comes to mind, but actually, there's a lot of structure involved. It's not random at all. Jazz improvisation typically works within a framework. Musicians follow chord progressions and melodic themes established at the beginning of a piece. But within those boundaries, they have freedom to create original phrases and explore different musical ideas. Think of it like a conversation where you know the topic, but choose your own words. A saxophone player, for example, might take a familiar melody and transform it through variations in rhythm, pitch, and phrasing. A trumpet player might respond by building on that variation, adding their own interpretation. Each musician brings something personal to the performance. One interesting challenge with improvisation is that it requires musicians to listen very carefully to each other. They need to respond in real time to what their fellow performers are doing, adjusting their playing moment by moment. If the drummer shifts the rhythm slightly, everyone else has to notice and adapt. This means a jazz performance is never quite the same twice, which is part of what attracts audiences to live jazz. You're witnessing something being created right in front of you. What makes this particularly significant is how improvisation influenced other music genres over time. Rock musicians began incorporating guitar solos that weren't strictly scripted. Blues artists embraced spontaneous vocal variations. Even some classical composers started leaving room for performer interpretation in their works. So jazz didn't just develop its own tradition. It fundamentally changed how we think about musical creativity altogether, encouraging musicians across genres to see performance as an act of creation, not just reproduction.",
+        "audioSha256": "706a6fed8de6084650ecdc5c4a5ca281cb36546cd8dd5df96b1f28de0da4f392",
+        "scriptHash": "591b75813a9fdb93cf2af2c0346c80745e3e0093f9d45b870c16853733b65652"
       }
     },
     "s1-instructions": {
