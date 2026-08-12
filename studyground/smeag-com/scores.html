@@ -346,8 +346,12 @@ var CFG = {
 
   /* 문항별 리뷰(문제 지문·정답)를 그리려면 sg2 의 콘텐츠 팩이 필요하다.
      비워 두면 이 화면은 점수·영역별 요약과 '내 답'까지만 보여준다.
-     sg2 배포 주소를 넣으면 문항별 정답까지 펼친다. */
-  packBase: '',            // 예: 'https://smeag-studyground.vercel.app/assets/'
+
+     ⚠️ 여기를 채우면 그 주소의 팩에 담긴 **정답이 학생 브라우저로 내려간다**
+     (sg2 번들도 지금은 같은 상태다). showAnswerKey: false 로는 못 막는다 —
+     팩 파일 자체에 답이 들어 있다. 정답을 감추려면 이 칸을 비우거나, 채점
+     결과를 서버에서 내려주는 쪽으로 바꿔야 한다. */
+  packBase: 'https://smeag-studyground.vercel.app/assets/',
   packs: { SET1: 'set1.js', SET9: 'set9.js' },
 
   /* 학생용 문항별 정답 공개 여부. false 면 정답 열을 감추고 O/X 만 남긴다. */
