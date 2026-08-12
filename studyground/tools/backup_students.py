@@ -206,10 +206,12 @@ def copy_media(bundle: dict, dest: Path) -> tuple[int, int]:
     return ok, missing
 
 
-def strip_local_only(bundle: dict) -> None:
+def strip_internal(bundle: dict) -> None:
+    """파일로 나가기 전에 내부용 힌트를 턴다."""
     for att in bundle["attempts"]:
         for m in att["media"]:
             m.pop("_local_uri", None)
+            m.pop("_cloud_path", None)
 
 
 # ── 클라우드(Supabase REST) 에서 읽기 ─────────────────────────────────────
@@ -228,22 +230,26 @@ class Supabase:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
             return resp.read()
 
-    def select(self, table: str, query: list[tuple[str, str]]) -> list[dict]:
-        """PK(id) 키셋으로 전부 받는다 — offset 은 시험 중 행이 늘면 어긋난다."""
+    def select(self, table: str, query: list[tuple[str, str]], pk: str = "id") -> list[dict]:
+        """PK 키셋으로 전부 받는다 — offset 은 시험 중 행이 늘면 어긋난다."""
         out: list[dict] = []
         last = None
         while True:
-            q = list(query) + [("select", "*"), ("order", "id.asc"), ("limit", str(PAGE))]
+            q = list(query) + [("select", "*"), ("order", f"{pk}.asc"), ("limit", str(PAGE))]
             if last is not None:
-                q.append(("id", f"gt.{last}"))
+                q.append((pk, f"gt.{last}"))
             path = f"/rest/v1/{table}?" + urllib.parse.urlencode(q, quote_via=urllib.parse.quote)
             page = json.loads(self._req("GET", path, None, {"Accept": "application/json"}) or b"[]")
             out.extend(page)
             if len(page) < PAGE:
                 return out
-            last = page[-1].get("id")
+            last = page[-1].get(pk)
             if last is None:
                 return out
+
+    def get_object(self, bucket: str, key: str) -> bytes:
+        path = "/storage/v1/object/" + urllib.parse.quote(f"{bucket}/{key}")
+        return self._req("GET", path)
 
     def ensure_bucket(self, name: str) -> None:
         try:
@@ -260,60 +266,101 @@ class Supabase:
 
 
 def collect_cloud(sb: Supabase, target: date) -> list[dict]:
-    d = target.isoformat()
-    nxt = (target + timedelta(days=1)).isoformat()
+    """sg2 응시. 한 응시 = sg_results 한 행이고, 나머지는 (owner, session) 으로 붙는다."""
+    # 시험은 이 컴퓨터의 시간대로 하루다. timestamptz 비교는 offset 을 붙여 보낸다 —
+    # UTC 로 잘라 버리면 아침 9시(KST) 이전 응시가 전날로 새어 나간다.
+    lo = datetime.combine(target, datetime.min.time()).astimezone()
+    hi = lo + timedelta(days=1)
 
-    attempts = {a["id"]: a for a in sb.select("attempts", [("exam_date", f"eq.{d}")])}
-    for a in sb.select("attempts", [("taken_at", f"gte.{d}"), ("taken_at", f"lt.{nxt}")]):
-        attempts.setdefault(a["id"], a)
-    if not attempts:
+    results = sb.select("sg_results", [("created_at", f"gte.{lo.isoformat()}"),
+                                       ("created_at", f"lt.{hi.isoformat()}")])
+    if not results:
         return []
 
-    ids = "(" + ",".join(str(i) for i in attempts) + ")"
-    kids = {t: {} for t in CHILDREN}
-    for t in CHILDREN:
-        for r in sb.select(t, [("attempt_id", f"in.{ids}")]):
-            kids[t].setdefault(r["attempt_id"], []).append(r)
+    owners = sorted({r["owner"] for r in results})
+    sessions = sorted({r["session"] for r in results if r.get("session")})
+    owner_in = "(" + ",".join(f'"{o}"' for o in owners) + ")"
+    session_in = "(" + ",".join(f'"{s}"' for s in sessions) + ")" if sessions else "()"
 
-    student_ids = "(" + ",".join(str(i) for i in {a["student_id"] for a in attempts.values()}) + ")"
-    students = {s["id"]: s for s in sb.select("students", [("id", f"in.{student_ids}")])}
-    exam_ids = "(" + ",".join(str(i) for i in {a["exam_id"] for a in attempts.values()}) + ")"
-    exams = {e["id"]: e for e in sb.select("exams", [("id", f"in.{exam_ids}")])}
+    # 계정(smeagNNN ↔ owner). 시험 계정은 그날치만 만들어지지만, 다른 날 계정으로
+    # 친 응시도 있으므로 owner 로 찾는다 — exam_date 로 거르지 않는다.
+    accounts = {a["user_id"]: a for a in
+                sb.select("sg_exam_accounts", [("user_id", f"in.{owner_in}")])}
 
-    drop = ("id", "attempt_id", "student_id", "exam_id")
-
-    def clean(r: dict) -> dict:
-        return {k: v for k, v in r.items() if k not in drop}
+    tasks: dict[tuple, list] = {}
+    comments: dict[tuple, list] = {}
+    if sessions:
+        for t in sb.select("sg_task_scores", [("session", f"in.{session_in}")]):
+            tasks.setdefault((t["owner"], t["session"]), []).append(t)
+        for c in sb.select("sg_comments", [("session", f"in.{session_in}")]):
+            comments.setdefault((c["owner"], c["session"]), []).append(c)
 
     by_student: dict[str, dict] = {}
-    for aid, a in sorted(attempts.items()):
-        student = students.get(a["student_id"]) or {"student_no": f"unknown-{a['student_id']}"}
+    for r in sorted(results, key=lambda x: (x["owner"], x.get("created_at") or "")):
+        owner, session = r["owner"], r.get("session")
+        acct = accounts.get(owner, {})
+        key = (owner, session)
+
         envelope = {
-            "session": a.get("session"),
-            "exam_code": (exams.get(a["exam_id"]) or {}).get("code"),
-            "attempt": clean(a),
-            "section_scores": [clean(r) for r in kids["section_scores"].get(aid, [])],
-            "question_responses": [clean(r) for r in kids["question_responses"].get(aid, [])],
-            "rubric_scores": [clean(r) for r in kids["rubric_scores"].get(aid, [])],
-            "ai_feedback": [clean(r) for r in kids["ai_feedback"].get(aid, [])],
-            "events": [clean(r) for r in kids["attempt_events"].get(aid, [])],
+            "session": session,
+            "exam_code": r.get("set_code"),
+            "attempt": r,
+            "task_scores": tasks.get(key, []),
+            "comments": comments.get(key, []),
             "media": [],
         }
-        for m in kids["media_assets"].get(aid, []):
-            meta = clean(m)
-            meta["storage_key"] = (f"{RECORDINGS_BUCKET}/{a.get('session')}/"
-                                   f"{m.get('question_key')}{Path(m.get('uri') or '').suffix}"
-                                   ) if a.get("session") else None
-            envelope["media"].append(meta)
+        # 녹음 경로는 sg_task_scores.media_path 가 이미 정확히 갖고 있다
+        # ({owner}/{session}/{question_id}.ext). 따로 목록 API 를 돌 필요가 없다.
+        for t in tasks.get(key, []):
+            path = (t.get("media_path") or "").strip()
+            if path:
+                envelope["media"].append({
+                    "question_id": t.get("question_id"),
+                    "skill": t.get("skill"),
+                    "storage_key": f"{RECORDINGS_BUCKET}/{path}",
+                    "_cloud_path": path,
+                })
 
-        no = student.get("student_no") or f"unknown-{a['student_id']}"
+        # 학번은 유일하지 않다 — smeag000 을 여러 사람이 쓴다(시험 계정 재사용).
+        # 파일을 학번으로만 가르면 남남이 한 파일에 섞인다. 진짜 열쇠는 owner 다.
+        no = f"{acct.get('student_id') or 'unknown'}-{owner[:8]}"
         bundle = by_student.setdefault(no, {
             "student_no": no,
-            "student": {k: v for k, v in student.items() if k != "id"},
+            "student": {"student_id": acct.get("student_id"), "name": acct.get("name", ""),
+                        "email": acct.get("email"), "owner": owner,
+                        "exam_date": acct.get("exam_date"),
+                        "teacher_id": acct.get("teacher_id")},
             "attempts": [],
         })
         bundle["attempts"].append(envelope)
     return list(by_student.values())
+
+
+def download_media(sb: Supabase, bundle: dict, dest: Path) -> tuple[int, int]:
+    """클라우드 녹음을 학생 폴더로. 90일 뒤 지워지는 원본을 여기서 붙잡는다."""
+    ok = missing = 0
+    for att in bundle["attempts"]:
+        for m in att["media"]:
+            path = m.pop("_cloud_path", "") or ""
+            if not path:
+                continue
+            name = f"{safe(m.get('question_id') or 'media')}{Path(path).suffix or '.webm'}"
+            out = dest / "media" / name
+            out.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                data = sb.get_object(RECORDINGS_BUCKET, path)
+            except (urllib.error.HTTPError, OSError) as e:
+                print(f"  ! 녹음 없음 {path} — {e}", file=sys.stderr)
+                m["file"] = None
+                m["missing"] = True
+                missing += 1
+                continue
+            out.write_bytes(data)
+            m["file"] = f"media/{name}"
+            m["bytes"] = len(data)
+            m["sha256"] = hashlib.sha256(data).hexdigest()
+            ok += 1
+    return ok, missing
 
 
 # ── main ──────────────────────────────────────────────────────────────────
@@ -322,8 +369,8 @@ def collect_cloud(sb: Supabase, target: date) -> list[dict]:
 def main() -> int:
     ap = argparse.ArgumentParser(description="시험 당일 학생별 백업 (로컬 + Supabase)")
     ap.add_argument("--date", help="시험 날짜 YYYY-MM-DD (기본: 오늘)")
-    ap.add_argument("--source", choices=("local", "cloud"), default="local",
-                    help="어디서 읽을지 (기본 local = 교실 SQLite)")
+    ap.add_argument("--source", choices=("cloud", "local"), default="cloud",
+                    help="어디서 읽을지 (기본 cloud = sg2 실전 응시)")
     ap.add_argument("--out", default=str(ROOT / "backups" / "students"), help="받을 폴더")
     ap.add_argument("--no-upload", action="store_true", help="Supabase 로 올리지 않는다")
     ap.add_argument("--no-media", action="store_true", help="녹음 복사를 생략한다")
@@ -380,7 +427,7 @@ def main() -> int:
         }
 
         if args.dry_run:
-            strip_local_only(payload)
+            strip_internal(payload)
             kb = len(json.dumps(payload, ensure_ascii=False).encode()) // 1024
             n_media = sum(len(a["media"]) for a in payload["attempts"])
             print(f"  → {no:<12} {name:<12} 응시 {len(payload['attempts'])} · "
@@ -389,9 +436,12 @@ def main() -> int:
 
         folder.mkdir(parents=True, exist_ok=True)
         media_ok = media_missing = 0
-        if args.source == "local" and not args.no_media:
-            media_ok, media_missing = copy_media(payload, folder)
-        strip_local_only(payload)
+        if not args.no_media:
+            if args.source == "local":
+                media_ok, media_missing = copy_media(payload, folder)
+            elif sb:
+                media_ok, media_missing = download_media(sb, payload, folder)
+        strip_internal(payload)
 
         raw = json.dumps(payload, ensure_ascii=False, indent=1).encode("utf-8")
         (folder / "bundle.json").write_bytes(raw)

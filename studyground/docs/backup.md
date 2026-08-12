@@ -75,6 +75,62 @@ JSON 배열 하나면 379 행 중 한 행을 보려고 파일 전체를 파싱�
 python3 tools/backup_supabase.py --force --prune-recordings 90
 ```
 
+## 시험 당일 — 학생 한 명 = 파일 하나
+
+전체 덤프는 "그날 DB 가 이랬다" 를 말해 준다. 그런데 시험 당일 실제로 터지는
+질문은 언제나 한 명 단위다 — *"3번 학생 스피킹이 안 들어갔다는데요."* 그때
+379행짜리 테이블 덤프에서 그 학생 행을 골라내는 일을, 사고가 난 뒤에 하고
+싶지는 않다. 그래서 **시험 날에는 학생별로 미리 갈라 둔다.**
+
+```bash
+cd studyground
+export SUPABASE_URL=https://<ref>.supabase.co
+export SUPABASE_SERVICE_ROLE_KEY=...
+
+python3 tools/backup_students.py                 # 오늘 응시분 — 로컬 저장 + 클라우드 업로드
+python3 tools/backup_students.py --dry-run       # 누가 몇 KB 인지만
+python3 tools/backup_students.py --date 2026-08-12
+python3 tools/backup_students.py --source local  # 교실 SQLite 로 친 시험이면
+```
+
+받는 모양:
+
+```
+backups/students/2026-08-12/
+  manifest.json                     그날 만든 파일 목록 · 크기 · sha256
+  smeag006-265a7c80-HAYUL KIM/
+    bundle.json                     응시 · 점수 · 답안 · 과제채점 · 코멘트 · 녹음 메타
+    media/set9-S1-q01.webm          스피킹 녹음 원본
+Supabase Storage  sg-backups/2026-08-12/smeag006-265a7c80.json    ← bundle.json 과 동일
+```
+
+| 옵션 | |
+|---|---|
+| `--date YYYY-MM-DD` | 시험 날짜 (기본 오늘, 이 컴퓨터의 시간대 기준) |
+| `--source cloud\|local` | sg2 실전 응시(기본) / 교실 SQLite |
+| `--no-upload` | 로컬에만 |
+| `--no-media` | 녹음은 빼고 |
+| `--zip` | 학생 폴더를 각각 한 파일로 |
+
+### 왜 두 곳에 두는가
+
+로컬(관리자 노트북)은 빠르지만 그 노트북이 죽으면 같이 죽는다. Supabase 는
+살아남지만 회선이 끊기면 그날은 못 만든다. 그래서 **로컬을 먼저 완성하고,
+그다음 같은 바이트를 올린다.** 업로드가 실패해도 백업은 이미 손에 있고,
+같은 날짜로 다시 돌리면 같은 경로를 덮어쓴다(멱등).
+
+녹음은 **내려받기만 하고 올리지는 않는다.** 원본은 이미 `toefl-recordings` 에
+있으니 두 벌 둘 이유가 없다. 반대로 로컬 사본은 반드시 필요하다 — 녹음은
+90일 뒤 클라우드에서 지워지고(`purge_after`), 그때 남는 건 이 파일뿐이다.
+
+### 파일을 가르는 열쇠는 학번이 아니라 owner 다
+
+`sg_exam_accounts.student_id`(smeag000…) 는 **유일하지 않다.** 실제로 smeag000
+하나를 서로 다른 사람 셋이 쓰고 있다. 학번으로만 파일을 가르면 남남의 답안이
+한 파일에 합쳐진다. 그래서 폴더·객체 이름은 `<학번>-<owner 앞 8자>` 다.
+같은 이유로 `sg_task_scores`·`sg_comments` 는 session 이 아니라
+**(owner, session)** 으로 붙인다 — session 은 응시자끼리 겹친다.
+
 ## service_role 키
 
 이 도구는 RLS 를 우회하는 키를 쓴다. 교실 서버·관리자 노트북에만 두고,
