@@ -1,6 +1,6 @@
-/* SMEAG · StudyGround — 학생 화면은 로그인하는 순간 전체화면이 된다.
+/* SMEAG · StudyGround — 학생 화면은 로그인하는 순간 전체화면이 되고, 잠긴다.
  *
- * 두 가지를 한다.
+ * 세 가지를 한다.
  *
  *  1) 전체화면 자동 진입
  *     브라우저는 "사용자가 방금 누른 것"이 있어야만 전체화면을 열어 준다. 그래서
@@ -10,7 +10,17 @@
  *     조용히 되돌린다(그때가 또 하나의 사용자 동작이므로 허용된다).
  *     선생님·관리자는 표시를 지운다 — 관리 화면은 창을 여러 개 띄워 쓴다.
  *
- *  2) 화면 크기에 맞추기
+ *  2) 창 잠금 — 학생은 창을 못 만진다
+ *     표시가 남아 있는 동안 이 기기는 시험대다. 오른쪽 클릭 메뉴, F11, 새로고침·새
+ *     탭·창 닫기·인쇄·소스 보기·개발자 도구 단축키를 막는다. 그래도 전체화면이 풀리면
+ *     화면을 덮는다 — 학생이 누를 수 있는 건 "돌아가기" 하나뿐이고, 정말로 창을
+ *     돌려받으려면 감독관이 관리자 아이디·비밀번호를 넣어야 한다(SG_ADMIN.verify —
+ *     확인만 하고 학생 기기에 관리자 세션은 남기지 않는다).
+ *     브라우저 밖(Alt+Tab, Dock, 전원 버튼)까지는 웹이 막을 수 없다. 거기까지가 한계다.
+ *     전체화면 API 가 없는 기기(iPhone Safari)에서는 잠그지 않는다 — 잠그면 학생이
+ *     돌아올 방법이 없다.
+ *
+ *  3) 화면 크기에 맞추기
  *     시험 셸(.exam-shell)은 높이가 화면에 묶여 있고 본문(.exam-main)만 스크롤한다.
  *     노트북 세로 해상도가 낮으면 지문·보기가 접혀 학생이 스크롤을 찾아야 하는데,
  *     시험 중에는 그 자체가 손해다. 그래서 본문이 넘치면 넘치지 않을 때까지 확대율을
@@ -66,6 +76,7 @@ window.SG_FS = (function () {
   /** 관리자·선생님, 그리고 로그아웃. 표시를 지우고 창을 돌려준다. */
   function release() {
     try { window.sessionStorage.removeItem(KEY); } catch (e) {}
+    hideVeil();
     exit();
   }
 
@@ -86,10 +97,225 @@ window.SG_FS = (function () {
       pending = false;
       document.removeEventListener('pointerdown', go, true);
       document.removeEventListener('keydown', go, true);
-      if (armed()) enter();
+      // 덮개가 떠 있으면 그 위의 버튼이 스스로 부른다 — 감독관이 아이디를 치는 중에
+      // 화면이 전체화면으로 튀어 덮개가 닫히는 일이 없게.
+      if (armed() && !veilOpen()) enter();
     }
     document.addEventListener('pointerdown', go, true);
     document.addEventListener('keydown', go, true);
+  }
+
+  /* ── 창 잠금 ───────────────────────────────────────────── */
+
+  var SELF = (document.currentScript && document.currentScript.src) || '';
+  var GRACE_MS = 2500;      // 페이지 이동으로 잠깐 풀린 것과 학생이 Esc 를 누른 것을 가른다
+
+  function supported() {
+    var el = document.documentElement;
+    return !!(el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen);
+  }
+
+  /** 지금 이 화면이 잠겨 있는가 — 학생 세션이고, 전체화면을 걸 수 있는 기기다. */
+  function locked() { return armed() && supported(); }
+
+  /* 브라우저가 스스로 처리해 버리는 것(Alt+Tab, Cmd+Q)은 애초에 오지 않는다.
+     오는 것만 막는다. 크롬은 Ctrl+W·Ctrl+N 을 넘겨주지 않을 때가 있어 완벽하지 않다. */
+  function onKey(e) {
+    if (!locked()) return;
+    var k = e.key || '';
+    var mod = e.ctrlKey || e.metaKey;
+    var stop =
+      k === 'F11' || k === 'F12' || k === 'ContextMenu' ||
+      (mod && e.shiftKey && /^[ijc]$/i.test(k)) ||        // 개발자 도구
+      (mod && /^[rwntpsuo]$/i.test(k)) ||                 // 새로고침·닫기·새 창·인쇄·저장·소스
+      (e.altKey && (k === 'ArrowLeft' || k === 'ArrowRight'));   // 뒤로·앞으로
+    if (stop) { e.preventDefault(); e.stopPropagation(); }
+  }
+
+  function onContext(e) { if (locked()) e.preventDefault(); }
+
+  /* ── 덮개 ──────────────────────────────────────────────── */
+
+  var veil = null, graceTimer = null;
+
+  function assetUrl(name) {
+    try { return new URL(name, SELF || location.href).href; } catch (e) { return 'assets/' + name; }
+  }
+
+  /** admin-session.js 는 시험 셸에만 실려 있다. 없으면 그 자리에서 불러온다. */
+  function ensureAdmin(cb) {
+    if (window.SG_ADMIN) { cb(true); return; }
+    var s = document.createElement('script');
+    s.src = assetUrl('admin-session.js');
+    s.onload = function () { cb(!!window.SG_ADMIN); };
+    s.onerror = function () { cb(false); };
+    document.head.appendChild(s);
+  }
+
+  function veilCss() {
+    if (document.getElementById('sgfs-css')) return;
+    var s = document.createElement('style');
+    s.id = 'sgfs-css';
+    s.textContent =
+      '.sgfs-veil{position:fixed;inset:0;z-index:9500;background:rgba(20,16,14,.92);display:flex;' +
+        'align-items:center;justify-content:center;padding:20px;' +
+        'font-family:system-ui,-apple-system,"Segoe UI",sans-serif;zoom:1}' +
+      '.sgfs-veil[hidden]{display:none}' +
+      '.sgfs-card{background:#fff;color:#221c19;border-radius:18px;padding:28px 28px 22px;' +
+        'width:min(430px,100%);box-shadow:0 24px 60px rgba(0,0,0,.4);text-align:center}' +
+      '.sgfs-tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.08em;' +
+        'text-transform:uppercase;color:#e8481f;background:#f6efe9;border-radius:999px;padding:5px 11px}' +
+      '.sgfs-h{font-size:20px;font-weight:850;margin:13px 0 6px}' +
+      '.sgfs-sub{font-size:13px;line-height:1.6;color:#7b716b;margin:0 0 18px}' +
+      '.sgfs-btn{font:inherit;font-size:14px;font-weight:750;padding:11px 18px;border-radius:11px;' +
+        'cursor:pointer;border:1px solid #e2d9d2;background:#fff;color:inherit}' +
+      '.sgfs-btn.primary{background:#e8481f;border-color:#e8481f;color:#fff;width:100%}' +
+      '.sgfs-link{display:block;margin:14px auto 0;font:inherit;font-size:12.5px;font-weight:700;' +
+        'color:#7b716b;background:none;border:0;cursor:pointer;text-decoration:underline}' +
+      '.sgfs-auth{margin-top:18px;border-top:1px solid #efe7e1;padding-top:16px;text-align:left}' +
+      '.sgfs-auth[hidden]{display:none}' +
+      '.sgfs-err{display:none;font-size:12.5px;font-weight:700;color:#b3261e;background:#fdeceb;' +
+        'border:1px solid #f5c6c2;border-radius:10px;padding:9px 12px;margin:0 0 12px}' +
+      '.sgfs-err.on{display:block}' +
+      '.sgfs-lb{display:block;font-size:12px;font-weight:750;color:#4a423d;margin-bottom:11px}' +
+      '.sgfs-lb input{display:block;width:100%;margin-top:5px;font:inherit;font-size:14px;' +
+        'padding:10px 12px;border:1px solid #e2d9d2;border-radius:10px;background:#fff;color:inherit}' +
+      '.sgfs-lb input:focus{outline:none;border-color:#e8481f}' +
+      '.sgfs-acts{display:flex;gap:8px;justify-content:flex-end}';
+    document.head.appendChild(s);
+  }
+
+  function ensureVeil() {
+    if (veil) return veil;
+    veilCss();
+    veil = document.createElement('div');
+    veil.className = 'sgfs-veil';
+    veil.hidden = true;
+    veil.innerHTML =
+      '<div class="sgfs-card">' +
+        '<span class="sgfs-tag">Exam mode</span>' +
+        '<h2 class="sgfs-h" data-role="h">Fullscreen is required</h2>' +
+        '<p class="sgfs-sub" data-role="sub">This device is locked for the test. ' +
+          'Return to fullscreen to continue.</p>' +
+        '<button type="button" class="sgfs-btn primary" data-act="back">Return to fullscreen</button>' +
+        '<button type="button" class="sgfs-link" data-act="ask">Invigilator unlock</button>' +
+        '<form class="sgfs-auth" autocomplete="off" hidden>' +
+          '<p class="sgfs-err">Wrong admin ID or password for this test.</p>' +
+          '<label class="sgfs-lb">Admin ID' +
+            '<input name="fs-id" type="text" autocapitalize="none" autocorrect="off"' +
+            ' spellcheck="false" required></label>' +
+          '<label class="sgfs-lb">Password<input name="fs-pw" type="password" required></label>' +
+          '<div class="sgfs-acts">' +
+            '<button type="button" class="sgfs-btn" data-act="cancel">Cancel</button>' +
+            '<button type="submit" class="sgfs-btn primary" style="width:auto">Unlock</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>';
+    document.body.appendChild(veil);
+
+    var form = veil.querySelector('form');
+    var err = veil.querySelector('.sgfs-err');
+
+    veil.addEventListener('click', function (e) {
+      var act = e.target.getAttribute && e.target.getAttribute('data-act');
+      if (act === 'back') { enter(); hideVeil(); }
+      else if (act === 'ask') { showAuth(); }
+      else if (act === 'cancel') {
+        // 전체화면 안에서 스스로 연 창이면 닫고, 잠긴 화면이면 폼만 접는다.
+        if (veil.dataset.mode === 'exit') hideVeil(); else hideAuth();
+      }
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var id = form.querySelector('[name=fs-id]').value;
+      var pw = form.querySelector('[name=fs-pw]').value;
+      ensureAdmin(function (ok) {
+        var A = window.SG_ADMIN;
+        var who = ok && A && A.verify
+          ? A.verify(id, pw, A.pageSet ? A.pageSet() : '') : null;
+        if (!who) {
+          err.textContent = ok
+            ? 'Wrong admin ID or password for this test.'
+            : 'Admin sign-in is unavailable on this device.';
+          err.classList.add('on');
+          form.querySelector('[name=fs-pw]').value = '';
+          return;
+        }
+        release();                       // 표시를 지우고 창을 돌려준다
+        hideVeil();
+        try {
+          document.dispatchEvent(new CustomEvent('sg-fs-unlock', { detail: { by: who.id } }));
+        } catch (e2) {}
+      });
+    });
+
+    return veil;
+  }
+
+  function showAuth() {
+    var v = ensureVeil();
+    v.querySelector('.sgfs-auth').hidden = false;
+    v.querySelector('.sgfs-err').classList.remove('on');
+    v.querySelector('form').reset();
+    setTimeout(function () { v.querySelector('[name=fs-id]').focus(); }, 30);
+  }
+
+  function hideAuth() {
+    if (!veil) return;
+    veil.querySelector('.sgfs-auth').hidden = true;
+    veil.querySelector('.sgfs-err').classList.remove('on');
+  }
+
+  /** mode: 'locked' — 전체화면이 풀렸다. 'exit' — 학생이 나가겠다고 눌렀다. */
+  function showVeil(mode) {
+    var v = ensureVeil();
+    v.dataset.mode = mode || 'locked';
+    var exit = v.dataset.mode === 'exit';
+    v.querySelector('[data-role=h]').textContent =
+      exit ? 'Leaving fullscreen needs approval' : 'Fullscreen is required';
+    v.querySelector('[data-role=sub]').textContent = exit
+      ? 'This device is locked for the test. An invigilator must sign in to release it.'
+      : 'This device is locked for the test. Return to fullscreen to continue.';
+    v.querySelector('[data-act=back]').hidden = exit;
+    v.querySelector('[data-act=ask]').hidden = exit;
+    v.hidden = false;
+    if (exit) showAuth(); else hideAuth();
+  }
+
+  function hideVeil() {
+    if (graceTimer) { window.clearTimeout(graceTimer); graceTimer = null; }
+    if (veil) { veil.hidden = true; hideAuth(); }
+  }
+
+  function veilOpen() { return !!(veil && !veil.hidden); }
+  function authOpen() { return veilOpen() && !veil.querySelector('.sgfs-auth').hidden; }
+
+  /** 전체화면이 아니면 덮는다. 페이지가 막 열린 참이면 잠깐 기다려 준다. */
+  function guard(immediate) {
+    if (graceTimer) { window.clearTimeout(graceTimer); graceTimer = null; }
+    if (!locked()) { hideVeil(); return; }
+    // 감독관이 아이디를 치는 중이면 전체화면으로 돌아왔어도 덮개를 걷지 않는다.
+    if (on()) { if (!authOpen()) hideVeil(); return; }
+    if (immediate) { showVeil('locked'); return; }
+    graceTimer = window.setTimeout(function () {
+      graceTimer = null;
+      if (locked() && !on()) showVeil('locked');
+    }, GRACE_MS);
+  }
+
+  /** 시험 셸의 전체화면 버튼이 부른다 — 학생 혼자서는 창으로 돌아가지 못한다. */
+  function requestExit() {
+    if (!locked()) { release(); return; }
+    showVeil('exit');
+  }
+
+  function bindLock() {
+    document.addEventListener('keydown', onKey, true);
+    document.addEventListener('contextmenu', onContext, true);
+    document.addEventListener('fullscreenchange', function () { guard(true); });
+    document.addEventListener('webkitfullscreenchange', function () { guard(true); });
+    guard(false);                       // 페이지 이동으로 풀린 경우는 유예를 준다
   }
 
   /* ── 화면 크기에 맞추기 ─────────────────────────────────── */
@@ -153,6 +379,7 @@ window.SG_FS = (function () {
     document.addEventListener('fullscreenchange', rearmOnGesture);
     document.addEventListener('webkitfullscreenchange', rearmOnGesture);
     rearmOnGesture();
+    bindLock();
     watch();
   }
 
@@ -165,6 +392,7 @@ window.SG_FS = (function () {
   return {
     on: on, enter: enter, exit: exit,
     arm: arm, armed: armed, armAndEnter: armAndEnter, release: release,
+    locked: locked, requestExit: requestExit, guard: guard,
     fit: fit, refit: refit, zoom: function () { return zoom; }
   };
 })();

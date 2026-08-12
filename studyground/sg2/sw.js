@@ -136,10 +136,17 @@
 //      확대율을 낮춰 한 화면에 담는다 — assets/sg-fullscreen.js 를 새로 넣고 거의
 //      모든 셸 HTML 의 <script> 목록이 바뀌었다(login.html 은 버튼을 누른 그 순간에
 //      전체화면을 요청한다). 캐시된 옛 셸이 남으면 그 기기만 창 모드로 시험을 본다.
-// v44: 시험이 끝난 자리에서 다시 친다 — 제출 화면에 전체 한 벌과 네 영역 버튼이 선다
-//      (assets/exam-shell.js · assets/exam.css). 캐시된 옛 셸이 남으면 그 기기만
-//      끝난 화면에서 리뷰·성적 두 개만 계속 본다.
-const VERSION = 'sg-v44';
+// v44: 학생 화면은 잠긴다 — assets/sg-fullscreen.js 가 전체화면이 풀리면 화면을 덮고,
+//      오른쪽 클릭·F11·새로고침·새 탭·개발자 도구 단축키를 막는다. 창을 돌려받으려면
+//      감독관이 관리자 아이디·비밀번호를 넣어야 하고(admin-session.js 의 verify —
+//      학생 기기에 관리자 세션은 남지 않는다), 시험 셸의 전체화면 버튼도 같은 문을
+//      지난다(assets/exam-shell.js). 캐시된 옛 셸이 남으면 그 기기만 잠기지 않는다.
+// v45: 리딩도 문항 카드로 편다 — assets/sg-review-reading.js 가 왼쪽에 읽은 것(지문 ·
+//      C-Test 문단 · 메신저 대화)을, 오른쪽에 고른 것과 정오를 세운다. 리딩에서 틀린
+//      이유는 거의 늘 지문 안에 있어, 표 한 줄("내 답 C / 정답 A")로는 복기가 되지
+//      않던 자리다. review.html · app.css 도 함께 바뀌었으므로, 캐시된 옛 셸이 남으면
+//      그 기기만 리딩 탭에서 표를 계속 본다. 그래서 판올림한다.
+const VERSION = 'sg-v45';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -152,8 +159,8 @@ const SHELL_ASSETS = [
 
   // 채점 리뷰 — 제출 직후 오프라인에서도 자기 답안을 문항별로 볼 수 있어야 한다.
   'review.html', 'admin-results.html', 'assets/sg-results.js', 'assets/sg-comments.js',
-  'assets/sg-review-listening.js', 'assets/sg-review-writing.js',
-  'assets/sg-review-speaking.js',
+  'assets/sg-review-reading.js', 'assets/sg-review-listening.js',
+  'assets/sg-review-writing.js', 'assets/sg-review-speaking.js',
   // 밴드 환산 — 제출 화면이 채점 직후 네 영역 점수를 그 자리에서 편다.
   'assets/sg-band.js',
 

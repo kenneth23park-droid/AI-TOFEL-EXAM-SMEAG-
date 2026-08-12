@@ -567,10 +567,11 @@ window.SG_RUNTIME = (function () {
       fs.onclick = function () {
         var d = document, el = d.documentElement;
         var isOn = !!(d.fullscreenElement || d.webkitFullscreenElement);
-        /* 이 버튼은 학생의 뜻이다. 나가겠다고 눌렀으면 자동 복귀도 함께 끈다 —
-           안 그러면 다음 클릭에서 sg-fullscreen 이 도로 전체화면으로 끌고 간다. */
+        /* 나가는 쪽은 학생 혼자 못 누른다 — 시험 중인 기기는 잠겨 있고, 창을
+           돌려받으려면 감독관이 관리자 아이디·비밀번호를 넣어야 한다(SG_FS.requestExit
+           가 그 창을 띄운다). 잠기지 않은 화면에서는 예전처럼 그냥 나간다. */
         if (window.SG_FS) {
-          if (isOn) SG_FS.release(); else SG_FS.armAndEnter();
+          if (isOn) SG_FS.requestExit(); else SG_FS.armAndEnter();
           return;
         }
         try {
