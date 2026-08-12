@@ -45,22 +45,18 @@
 <div class="auth">
   <div class="auth-card">
 
-    <!-- 1단계: 이름 · 이메일 · 시험일자. 아이디는 서버가 배정한다. -->
+    <!-- 1단계: 이름 · 시험일자. 아이디는 서버가 배정한다. -->
     <div id="step-form">
       <span class="pill"><span data-en>Test-day registration</span><span data-ko>시험 당일 등록</span></span>
       <h1 class="mt-16"><span data-en>Register for the test</span><span data-ko>시험 등록</span></h1>
-      <p class="sub"><span data-en>Enter your name, email and the test date. Your ID and password are issued automatically.</span>
-        <span data-ko>이름·이메일·시험일자를 입력하세요. 아이디와 비밀번호는 자동으로 발급됩니다.</span></p>
+      <p class="sub"><span data-en>Enter your name and the test date. Your ID and password are issued automatically.</span>
+        <span data-ko>이름과 시험일자를 입력하세요. 아이디와 비밀번호는 자동으로 발급됩니다.</span></p>
 
       <div class="auth-err" id="err"><span data-en></span><span data-ko></span></div>
 
       <form id="f" autocomplete="on">
         <div class="field"><label data-en>Name</label><label data-ko>이름</label>
           <input id="name" type="text" name="name" autocomplete="name" placeholder="김민수" required></div>
-        <div class="field"><label data-en>Email (optional)</label><label data-ko>이메일 (선택)</label>
-          <input id="email" type="email" name="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com">
-          <div class="auth-hint"><span data-en>Optional — you can log in with this email too. One registration per email per test date.</span>
-            <span data-ko>선택 입력입니다. 적으면 이 이메일로도 로그인할 수 있고, 같은 시험일에는 이메일당 한 번만 등록됩니다.</span></div></div>
         <div class="field" id="teacher-field" hidden><label data-en>Your teacher (optional)</label><label data-ko>담당 선생님 (선택)</label>
           <select id="teacher" name="teacher">
             <option value="">— not assigned —</option>
@@ -88,7 +84,6 @@
       <div class="idbox">
         <div class="id" id="out-id"></div>
         <div class="pw"><span data-en>Password</span><span data-ko>비밀번호</span>: <b id="out-pw"></b></div>
-        <div class="muted" style="font-size:12px;margin-top:4px" id="out-mail"></div>
         <div class="muted" style="font-size:12px" id="out-date"></div>
         <div class="muted" style="font-size:12px" id="out-teacher"></div>
         <div id="out-qr"></div>
@@ -128,7 +123,6 @@
   'use strict';
   var f = document.getElementById('f'), go = document.getElementById('go'), err = document.getElementById('err');
   var nameEl = document.getElementById('name'), dateEl = document.getElementById('date');
-  var emailEl = document.getElementById('email');
   var teacherEl = document.getElementById('teacher'), teacherField = document.getElementById('teacher-field');
   var avail = document.getElementById('avail');
   var dup = document.getElementById('dup');
@@ -186,7 +180,6 @@
     document.getElementById('who').textContent = (res.user && res.user.name) || nameEl.value;
     document.getElementById('out-id').textContent = res.student_id;
     document.getElementById('out-pw').textContent = res.password || '2222';
-    document.getElementById('out-mail').textContent = res.email || emailEl.value.trim();
     document.getElementById('out-date').textContent = res.exam_date;
     document.getElementById('out-teacher').textContent =
       res.teacher && res.teacher.name ? 'Teacher: ' + res.teacher.name : '';
@@ -233,7 +226,6 @@
     go.disabled = true;
     SG_AUTH.register({
       name: nameEl.value.trim(),
-      email: emailEl.value.trim(),
       examDate: dateEl.value,
       teacherId: teacherField.hidden ? '' : teacherEl.value,
       force: force
@@ -264,7 +256,7 @@
     SG_AUTH.signOut();
     document.getElementById('step-done').hidden = true;
     document.getElementById('step-form').hidden = false;
-    nameEl.value = ''; emailEl.value = ''; nameEl.focus();
+    nameEl.value = ''; nameEl.focus();
     refreshAvail();
   });
 })();

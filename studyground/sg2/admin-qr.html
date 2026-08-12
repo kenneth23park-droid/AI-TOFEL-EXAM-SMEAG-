@@ -122,7 +122,10 @@
         return '<div class="card-qr">' +
           '<div class="nm">' + esc(r.name) + '</div>' +
           '<div class="id">' + esc(r.student_id) + '</div>' +
-          (r.email ? '<div class="meta">' + esc(r.email) + '</div>' : '') +
+          /* 학생이 적은 이메일만 찍는다. 등록이 이메일을 받지 않게 된 뒤로는 아이디로
+             합성한 로그인 주소가 그 칸에 들어 있는데, 카드에 찍힐 이유가 없다. */
+          (r.email && r.email.indexOf('@smeagstudyground.com') < 0
+            ? '<div class="meta">' + esc(r.email) + '</div>' : '') +
           '<div class="meta">' + esc(r.exam_date) + ' · PW 2222</div>' +
           (window.SG_QR ? SG_QR.svg(payload, { size: 132 }) : '') +
           '</div>';

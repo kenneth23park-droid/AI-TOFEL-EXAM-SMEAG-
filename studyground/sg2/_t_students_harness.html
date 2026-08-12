@@ -147,7 +147,23 @@
 </div></footer>
 
 <script src="assets/app.js"></script>
-<script src="assets/sg-auth.js"></script>
+<script>
+window.CALLS = [];
+window.SG_AUTH = {
+  user: function () { return { id: 'a1', name: 'Admin' }; },
+  role: function () { return Promise.resolve('admin'); },
+  require: function () { throw new Error('require() should not be called'); },
+  teachers: function () { return Promise.resolve([{ id: 't1', name: 'Sunny', student_id: 'sunny' }]); },
+  nextId: function (d) { return Promise.resolve({ exam_date: d, student_id: 'smeag003', used: 3, free: 997 }); },
+  register: function (o) {
+    window.CALLS.push(JSON.parse(JSON.stringify(o)));
+    if (o.name === 'FAILME') return Promise.reject(new Error('smeag050 is already used on that date.'));
+    var auto = 'smeag' + String(100 + window.CALLS.length).slice(1);
+    var id = o.studentId || auto;
+    return Promise.resolve({ student_id: id, password: '2222', exam_date: o.examDate, name: o.name || id });
+  }
+};
+</script>
 <script>
 (function () {
   'use strict';
@@ -486,5 +502,82 @@
 })();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+<pre id="TEST" style="padding:20px;font:12px monospace"></pre>
+<script>
+(function () {
+  var out = [], R = function (m, ok) { out.push((ok ? 'PASS ' : 'FAIL ') + m); };
+  function cells(sel) { return [].map.call(document.querySelectorAll(sel), function (n) { return n.value !== undefined ? n.value : n.textContent; }); }
+  function idsShown() {
+    return [].map.call(document.querySelectorAll('#rows .id'), function (td) {
+      var i = td.querySelector('input');
+      return i ? (i.value || i.placeholder) : td.textContent;
+    });
+  }
+  function names() { return cells('#rows input[data-f="name"]'); }
+  function statuses() { return [].map.call(document.querySelectorAll('#rows .st'), function (td) { return td.textContent.trim(); }); }
+  function states() { return [].map.call(document.querySelectorAll('#rows tr'), function (tr) { return tr.className || 'todo'; }); }
+  function set(sel, i, v) {
+    var el = document.querySelectorAll(sel)[i];
+    el.value = v; el.dispatchEvent(new Event('input', { bubbles: true }));
+    return el;
+  }
+  function tick(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  tick(300).then(function () {
+    R('boot: no email column', document.querySelectorAll('#rows input[data-f="email"]').length === 0);
+    R('boot: id column is typeable', document.querySelectorAll('#rows input[data-f="id0"]').length === 10);
+    R('boot: preview starts at the first free id', idsShown()[0] === 'smeag003' && idsShown()[1] === 'smeag004');
+
+    document.getElementById('howmany').value = '4';
+    document.getElementById('build').click();
+
+    // 첫 줄 아이디를 손으로 집는다 — 번호만 쳐도 받아야 한다.
+    set('#rows input[data-f="id0"]', 0, '50');
+    document.getElementById('add').click();     // 다시 그려도 값이 남는가
+    R('manual: typed id survives a redraw', document.querySelectorAll('#rows input[data-f="id0"]')[0].value === '50');
+    R('manual: the auto rows keep counting from the first free id',
+      idsShown()[1] === 'smeag003' && idsShown()[2] === 'smeag004');
+
+    // 손으로 집은 번호는 자동 배정이 건너뛴다.
+    set('#rows input[data-f="id0"]', 1, 'smeag004');
+    R('manual: auto rows skip a number claimed by hand',
+      idsShown()[2] === 'smeag003' && idsShown()[3] === 'smeag005');
+    set('#rows input[data-f="id0"]', 1, '');
+
+    // 엑셀에서 아이디·이름 두 열 붙여넣기.
+    var target = document.querySelectorAll('#rows input[data-f="id0"]')[1];
+    target.focus();
+    var dt = new DataTransfer();
+    dt.setData('text/plain', 'smeag010\tAnn\n011\tBen');
+    target.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+    R('paste: ids landed', idsShown()[1] === 'smeag010' && idsShown()[2] === '011');
+    R('paste: names landed beside them', names()[1] === 'Ann' && names()[2] === 'Ben');
+
+    // 잘못된 모양과 시트 안 중복.
+    set('#rows input[data-f="id0"]', 3, 'abc');
+    set('#rows input[data-f="id0"]', 4, '50');
+    R('bad id is flagged before creating', /smeag000/.test(statuses()[3]));
+
+    document.getElementById('go').click();
+    return tick(500);
+  }).then(function () {
+    var calls = window.CALLS;
+    R('create: only the valid rows were sent', calls.length === 3);
+    R('create: the pinned id went as smeag050', calls[0].studentId === 'smeag050');
+    R('create: 011 was normalised to smeag011', calls[2].studentId === 'smeag011');
+    R('create: a blank id column sends nothing', calls.some(function (c) { return c.studentId === ''; }) === false);
+    R('create: no email is sent at all', calls.every(function (c) { return c.email === undefined; }));
+    R('bad id row failed', states()[3] === 'fail' && /smeag000/.test(statuses()[3]));
+    R('duplicate row inside the sheet failed with its reason',
+      states()[4] === 'fail' && /twice in this sheet/.test(statuses()[4]));
+    R('created rows show the id the server returned',
+      idsShown()[0] === 'smeag050' && idsShown()[1] === 'smeag010');
+    R('created rows show the password', /2222/.test(statuses()[0]));
+    document.getElementById('TEST').textContent = out.join('\n');
+  }).catch(function (e) {
+    document.getElementById('TEST').textContent = out.join('\n') + '\nFAIL threw: ' + (e && e.message);
+  });
+})();
+</script>
 </body>
 </html>
