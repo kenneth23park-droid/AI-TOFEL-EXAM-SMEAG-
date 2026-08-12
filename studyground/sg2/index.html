@@ -16,6 +16,11 @@
 (function () {
   'use strict';
   try {
+    /* 재부팅으로 끊긴 세션은 아직 저장소에 남아 있다 — sg-auth.js 는 문서 끝에서야
+       실려 지운다. 여기서 그 판정(살아 있다는 표시의 공백)을 먼저 되짚지 않으면,
+       로그인해야 할 사람을 시험 화면으로 보내 놓고 거기서 막게 된다. */
+    var alive = parseInt(localStorage.getItem('sg2_alive_v1') || '0', 10) || 0;
+    if (!alive || Date.now() - alive >= 2 * 60 * 1000) return;
     var s = JSON.parse(localStorage.getItem('sg2_auth_v1') || 'null');
     var u = s && s.user;
     if (!u) return;

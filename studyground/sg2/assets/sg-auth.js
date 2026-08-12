@@ -25,7 +25,8 @@
  *   SG_AUTH.role()               → Promise<'student'|'teacher'|'admin'>
  *   SG_AUTH.isStaff()            → Promise<boolean>  선생님 또는 관리자
  *   SG_AUTH.token()              → Promise<string|null>  만료됐으면 알아서 갱신
- *   SG_AUTH.require()            비로그인이면 login.html?next= 로 보낸다
+ *   SG_AUTH.require()            비로그인이면 "Please log in" 막으로 화면을 덮는다
+ *                                (<meta name="sg-auth" content="required"> 를 단 문서는 자동)
  *   SG_AUTH.onChange(fn)         로그인/로그아웃 때 호출
  */
 window.SG_AUTH = (function () {
@@ -43,6 +44,44 @@ window.SG_AUTH = (function () {
     try { v ? localStorage.setItem(KEY, JSON.stringify(v)) : localStorage.removeItem(KEY); } catch (e) {}
     listeners.forEach(function (fn) { try { fn(v && v.user); } catch (e) {} });
   }
+
+  /* ── 컴퓨터를 다시 켜면 로그인부터 ──────────────────────────────
+   *
+   * 고사장 PC 는 여러 학생이 돌려 쓴다. 앞사람 세션이 살아 있는 채로 다음 사람이
+   * 앉으면 그 사람 이름으로 시험이 저장된다 — 그래서 부팅마다 아이디·비밀번호를
+   * 다시 받는다.
+   *
+   * 브라우저에는 "이 컴퓨터가 언제 켜졌나"를 묻는 길이 없다. 대신 열려 있는 탭이
+   * 계속 살아 있다는 표시를 남기고, 페이지가 뜰 때 그 표시가 얼마나 묵었는지 본다.
+   * 재부팅(또는 브라우저 종료)이면 그 사이 아무도 표시를 남기지 못해 공백이 생긴다.
+   * 공백이 GAP 을 넘었으면 저장된 세션을 지운다 — 남는 건 로그인 화면뿐이다.
+   *
+   * 탭을 잠깐 닫았다 다시 여는 것(GAP 안쪽)은 로그아웃이 아니다 — 시험 도중
+   * 창을 잘못 닫은 학생을 다시 로그인시키자고 만든 장치가 아니다.
+   * 시계가 뒤로 간 경우도 공백으로 친다(막는 쪽이 안전).
+   *
+   * 표시 자체는 로그인 여부와 무관하게 늘 남긴다 — 비로그인으로 둘러보다 로그인한
+   * 사람의 첫 표시가 방금 찍힌 것처럼 보이게 하려면 그래야 한다. */
+  var ALIVE_KEY = 'sg2_alive_v1';
+  var ALIVE_GAP_MS = 2 * 60 * 1000;      // 이만큼 조용했으면 그 사이 컴퓨터가 꺼져 있었다
+  var ALIVE_TICK_MS = 10 * 1000;         // 숨은 탭에서 타이머가 늘어져도 GAP 안쪽
+
+  function stampAlive() {
+    try { localStorage.setItem(ALIVE_KEY, String(Date.now())); } catch (e) {}
+  }
+  function expireOnBoot() {
+    var last = 0;
+    try { last = parseInt(localStorage.getItem(ALIVE_KEY) || '0', 10) || 0; } catch (e) { return; }
+    var now = Date.now();
+    if (last && now >= last && now - last < ALIVE_GAP_MS) return;   // 계속 켜져 있었다
+    /* 지우는 것은 세션 하나(sg2_auth_v1)뿐이다. 답안·응시 기록·아웃박스 같은
+       기기에 쌓인 자료는 그대로 둔다 — 다시 로그인하면 그 자리에서 이어진다. */
+    try { localStorage.removeItem(KEY); } catch (e) {}
+  }
+  expireOnBoot();
+  stampAlive();
+  setInterval(stampAlive, ALIVE_TICK_MS);
+  window.addEventListener('pageshow', stampAlive);
 
   /** Edge Function/토큰 응답을 { user, access_token, refresh_token, expires_at } 로 정규화. */
   function store(payload) {
@@ -234,10 +273,36 @@ window.SG_AUTH = (function () {
     return refreshing;
   }
 
+  /* 비로그인 화면을 덮는 막. 예전에는 login.html 로 조용히 튕겼는데, 재부팅으로
+   * 세션이 지워진 자리에서는 화면이 왜 갈아엎어졌는지 학생이 모른 채 넘어간다.
+   * 지금은 그 자리에 "로그인하세요"를 세우고, 버튼을 눌러야 로그인 화면으로 간다.
+   * 막은 문서 맨 위(z-index)라 아래 화면은 손댈 수 없다 — 시험도 시작되지 않는다. */
+  function blockWithLogin() {
+    if (document.getElementById('sg-auth-block')) return;
+    var next = location.pathname.split('/').pop() + location.search;
+    var href = 'login.html?next=' + encodeURIComponent(next);
+    var box = document.createElement('div');
+    box.id = 'sg-auth-block';
+    box.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;' +
+      'align-items:center;justify-content:center;padding:24px;background:#fffdf8;' +
+      'font-family:inherit;text-align:center';
+    box.innerHTML =
+      '<div style="max-width:420px">' +
+        '<div style="font-size:40px;line-height:1">🔒</div>' +
+        '<h1 style="margin:14px 0 8px;font-size:22px;font-weight:800">Please log in</h1>' +
+        '<p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#6b6357">' +
+          'This computer was restarted, so the previous session was cleared. ' +
+          'Enter your ID and password to continue. Your saved work is untouched.</p>' +
+        '<a href="' + href + '" style="display:inline-block;padding:12px 22px;border-radius:999px;' +
+          'background:#e8481f;color:#fff;font-weight:800;font-size:15px;text-decoration:none">Log in</a>' +
+      '</div>';
+    function mount() { (document.body || document.documentElement).appendChild(box); }
+    if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
+  }
+
   function require_() {
     if (user()) return true;
-    var next = location.pathname.split('/').pop() + location.search;
-    location.replace('login.html?next=' + encodeURIComponent(next));
+    blockWithLogin();
     return false;
   }
 
@@ -317,8 +382,17 @@ window.SG_AUTH = (function () {
     }
   }
 
+  /* 로그인을 요구하는 문서는 스스로 그렇게 말한다:
+   *   <meta name="sg-auth" content="required">
+   * 페이지마다 같은 검사를 손으로 적지 않게, 여기서 한 번에 처리한다. */
+  function autoGuard() {
+    var m = document.querySelector('meta[name="sg-auth"]');
+    if (m && m.getAttribute('content') === 'required') require_();
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     paintNav();
+    autoGuard();
     if (user()) token();   // 세션이 살아 있는지 조용히 확인/갱신
   });
   onChange(paintNav);
