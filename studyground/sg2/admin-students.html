@@ -265,10 +265,20 @@
 
   /* ── 시트 입력 ─────────────────────────────────────────────── */
 
+  /* 이름은 모델만 고친다 — 칸을 다시 그리면 타이핑이 끊긴다.
+     아이디는 다르다. 한 칸을 집는 순간 아래 줄들의 미리보기가 밀리므로 그 자리에서
+     다시 그리고, 대신 커서를 있던 자리에 돌려놓는다. */
   function onInput(e) {
     var el = e.target;
     if (!el.dataset || el.dataset.r === undefined) return;
     rows[+el.dataset.r][el.dataset.f] = el.value;
+    if (el.dataset.f !== 'id0') return;
+    var i = el.dataset.r, at = el.selectionStart;
+    render();
+    var again = $('rows').querySelector('input[data-r="' + i + '"][data-f="id0"]');
+    if (!again) return;
+    again.focus();
+    try { again.setSelectionRange(at, at); } catch (err) { /* 지원 안 하면 끝으로 */ }
   }
 
   /* 엑셀에서 열을 긁어 오면 탭으로 붙어 온다. 붙여넣은 자리에서부터 오른쪽·아래로
