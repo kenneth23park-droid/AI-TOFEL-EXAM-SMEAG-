@@ -190,7 +190,12 @@
 //      assets/admin-approve.js 는 부르는 곳이 없어 지웠다. 시험을 뜨는 문(Exit Test)
 //      만 그대로 감독관 승인을 받는다. 셸 HTML 의 <script> 목록이 함께 바뀌므로,
 //      캐시된 옛 사본이 남으면 그 기기만 없어진 승인 칸을 계속 만난다.
-const VERSION = 'sg-v56';
+// v57: 라이팅에도 Back 이 선다 — 답을 쓰다가 앞 문항으로 돌아가 문제를 다시 보고
+//      고칠 수 있다. 열리는 범위는 리딩과 같은 규칙(같은 태스크 안, 시간이 남은 동안)이라
+//      W1 의 문항 10개 사이만 오간다. Next 는 그 자리에 그대로 서서 다시 앞으로 나온다.
+//      assets/exam-shell.js 한 파일이 바뀌므로, 캐시된 옛 셸이 남은 기기는 라이팅에서
+//      Back 을 계속 못 본다.
+const VERSION = 'sg-v57';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

@@ -378,6 +378,7 @@ window.SG_RUNTIME = (function () {
   /* ── 상단바 버튼 노출(섹션별, 관찰값) ─────────────────────
        Listening : Exit · Volume · Help · Next        (Back 없음)
        Reading   : Exit · Help · Review · Back · Next (Volume 없음)
+       Writing   : Exit · Help · Back · Next          (Review 없음)
        Speaking  : Exit · Volume                      (녹음 중)
        moduleEnd : Exit · Continue                                        */
   function syncActions(screen) {
@@ -389,7 +390,11 @@ window.SG_RUNTIME = (function () {
     var showVolume = !terminal && (sec === 'listening' || sec === 'speaking');
     var showHelp = !terminal && !speakingLive;
     var showReview = (sec === 'reading') && (t === 'question');
-    var showBack = (sec === 'reading') && (t === 'question');
+    /* Back 은 리딩과 라이팅에 선다. 라이팅은 답을 쓰고 나서 문제를 다시 보고 고치는 일이
+       잦다 — W1 은 문항 10개가 화면 10개라 앞 문장으로 돌아가야 하고, W2·W3 은 화면
+       하나뿐이라 되돌아갈 곳이 없어 Back 이 비활성으로 남는다(감추지 않는다).
+       열리는 범위는 리딩과 같다: 같은 모듈 안, 시간이 남아 있는 동안만. */
+    var showBack = (sec === 'reading' || sec === 'writing') && (t === 'question');
     /* 스피킹 Task 안내 방송 화면(speaking.intro.*)에는 진행 버튼을 두지 않는다
        (2026-08-11 발주처 요구). 방송이 끝나면 렌더러가 스스로 다음 화면으로 넘긴다 —
        버튼이 있으면 안내를 끝까지 듣지 않고 눌러 버린다. 방송이 실패해 갈 곳이 없어지면
