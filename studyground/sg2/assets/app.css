@@ -600,6 +600,21 @@ tr.is-wrong td { background: rgba(232,72,31,.045); }
 .cm-list { margin: 6px 0 0 16px; font-size: 13px; color: var(--ink-2); }
 .cm-list li { margin-top: 2px; }
 .cm-lab { font-size: 11px; font-weight: 800; color: var(--muted); margin-top: 7px; }
+
+/* 문제점과 해결책 — 한 문단으로 이어 놓으면 학생은 앞의 '틀렸다' 만 읽고 만다.
+   딱지를 왼쪽에 세워 줄을 가르고, 고치는 법에는 색을 준다(읽고 나갈 자리다). */
+.cm-line { display: flex; gap: 8px; margin-top: 5px; font-size: 13.5px; color: var(--ink-2); }
+.cm-tag { flex: 0 0 auto; min-width: 58px; font-size: 10.5px; font-weight: 800; line-height: 1.75;
+  letter-spacing: .03em; text-transform: uppercase; color: var(--muted); }
+.cm-line.problem .cm-tag { color: var(--ink); }
+.cm-line.fix .cm-tag { color: var(--brand); }
+.cm-line.fix { color: var(--ink); }
+.cm-issue { margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--line-2); }
+.cm-issue-h { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+@media (max-width: 560px) {
+  .cm-line { display: block; }
+  .cm-tag { display: block; min-width: 0; line-height: 1.4; margin-bottom: 1px; }
+}
 .cm-edit textarea { width: 100%; min-height: 80px; padding: 11px 13px; border: 1px solid var(--line-2);
   border-radius: 11px; font-family: inherit; font-size: 13.5px; background: var(--cream); resize: vertical; }
 .cm-edit textarea:focus { outline: none; border-color: var(--brand); background: #fff; }

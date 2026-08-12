@@ -575,6 +575,30 @@
     }).sort(function (a, b) { return a.source === 'teacher' ? -1 : 1; });   // 선생님 말이 먼저다
   }
 
+  /* 한 줄짜리 딱지 + 본문. 문제점과 해결책을 같은 문단에 붙여 놓으면 학생이 읽는 것은
+     앞의 '무엇이 틀렸다' 뿐이라, 정작 고치는 법이 문장 꼬리에 묻힌다. 줄을 가른다. */
+  function labeled(label, ko, text, tone) {
+    if (!text) return '';
+    return '<div class="cm-line' + (tone ? ' ' + tone : '') + '">' +
+      '<span class="cm-tag">' + bi(label, ko) + '</span>' +
+      '<span>' + esc(text) + '</span></div>';
+  }
+
+  /* 영역 총평의 '문제점' — 무엇이 · 무엇을 근거로 · 어떻게 고치나. 근거가 붙어 있어야
+     학생이 자기 답안에서 그 자리를 다시 찾아갈 수 있다. */
+  function issuesOf(list) {
+    if (!list || !list.length) return '';
+    return '<div class="cm-lab">' + bi('What is going wrong', '무엇이 문제인가') + '</div>' +
+      list.slice(0, 3).map(function (x) {
+        if (!x || !x.issue) return '';
+        return '<div class="cm-issue">' +
+          '<div class="cm-issue-h">' + esc(x.issue) + '</div>' +
+          labeled('Evidence', '근거', x.evidence, '') +
+          labeled('Fix', '해결', x.fix, 'fix') +
+        '</div>';
+      }).join('');
+  }
+
   function cardOf(c) {
     var who = c.source === 'teacher'
       ? '<span class="cm-badge">' + bi('Teacher', '선생님') + '</span>' +
@@ -585,10 +609,21 @@
       return '<div class="cm-lab">' + bi(label, ko) + '</div><ul class="cm-list">' +
         arr.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
     };
+    var d = c.data || {};
+
+    /* 문항 코멘트에 문제점·해결책이 갈라져 있으면 그렇게 그리고, 없으면(선생님이 쓴 글,
+       예전에 저장된 AI 초안) 예전처럼 한 문단으로 그린다. */
+    var body = (d.problem || d.solution)
+      ? labeled('Problem', '문제점', d.problem, 'problem') +
+        labeled('Why', '원인', d.cause, '') +
+        labeled('How to fix it', '해결책', d.solution, 'fix')
+      : (c.body ? '<div class="cm-body">' + esc(c.body) + '</div>' : '');
+
     return '<div class="cm ' + (c.source === 'teacher' ? 'teacher' : 'ai') + '">' +
       '<div class="cm-who">' + who + '</div>' +
-      (c.body ? '<div class="cm-body">' + esc(c.body) + '</div>' : '') +
+      body +
       list('What went well', '잘한 점', c.strengths) +
+      issuesOf(d.issues) +
       list('What to work on', '보완할 점', c.improvements) +
     '</div>';
   }

@@ -26,6 +26,7 @@ function ok(cond, what) {
 
 var SG2 = path.join(__dirname, '..', 'sg2');
 var API = require(path.join(SG2, 'api', 'feedback.js'));
+var SRC_EARLY = fs.readFileSync(path.join(SG2, 'api', 'feedback.js'), 'utf8');
 
 /* ── 1. 서버가 만드는 행 ─────────────────────────────────────────────── */
 
@@ -55,8 +56,14 @@ ok(out.plan && out.plan.scope === 'plan' && out.plan.question_id === '',
    'B: 학습 계획은 scope=plan 한 행이다');
 ok(out.plan && out.plan.data && out.plan.data.weeks && out.plan.data.weeks.length === 1,
    'B: 계획 전문은 data 칸에 통째로 들어간다');
-ok(out.rows.every(function (r) { return !('data' in r); }),
-   'C: 총평·문항별 행에는 data 칸을 붙이지 않는다 (없는 DB 에서 배열 전체가 죽는다)');
+/* 총평·문항별 행도 구조를 들고 간다(영역별 문제점·근거·해결, 문항의 문제점·원인·해결).
+   예전에는 이 행에 data 를 못 붙였다 — 칸이 없는 DB 에서 배열 전체가 400 으로 죽었기
+   때문이다. 지금은 putComments 가 그 400 을 잡아 data 를 떼고 한 번 더 넣으므로,
+   구조를 붙이되 없는 DB 에서도 글은 남는다. 그 재시도가 이 규칙의 전제다. */
+ok(out.rows.every(function (r) { return !('data' in r) || r.data && typeof r.data === 'object'; }),
+   'C: 총평·문항별 행의 data 는 있으면 객체다');
+ok(/PGRST204/.test(SRC_EARLY) && /delete copy\.data/.test(SRC_EARLY),
+   'C: data 칸이 없는 DB 는 400 을 잡아 data 를 떼고 다시 넣는다');
 ok(out.plan && out.plan.improvements.indexOf('Dictation') >= 0,
    'C: data 칸이 없는 DB 를 대비해 할 일 제목은 improvements 에도 겹쳐 둔다');
 

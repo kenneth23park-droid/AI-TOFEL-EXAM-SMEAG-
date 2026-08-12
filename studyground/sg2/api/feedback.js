@@ -67,10 +67,12 @@ const SYSTEM =
   'Return only JSON.';
 
 const SCHEMA = `Return ONLY a JSON object, no prose, in this exact shape:
-{"sections":[{"scope":"reading","summary":"...","strengths":["..."],"improvements":["..."]},
+{"sections":[{"scope":"reading","summary":"...","strengths":["..."],"improvements":["..."],
+              "issues":[{"issue":"...","evidence":"...","fix":"..."}]},
              {"scope":"listening", ...},{"scope":"writing", ...},{"scope":"speaking", ...},
              {"scope":"overall", ...}],
- "questions":[{"question_id":"R1-7","body":"why this was missed and what to do about it"}],
+ "questions":[{"question_id":"R1-7","problem":"what exactly went wrong in this answer",
+               "cause":"the underlying gap it points to","solution":"what to do instead, step by step"}],
  "plan":{"summary":"one short paragraph: where this student stands and what changes it",
          "focus":[{"skill":"listening","why":"...","target":"..."}],
          "study":[{"title":"...","detail":"...","minutes":30,"how_often":"daily"}],
@@ -84,8 +86,25 @@ Rules:
   band is null has not been scored yet — say so plainly and do not guess it.
 - Productive tasks (Writing, Speaking) also carry a 0-5 rubric score from the official ETS
   scoring guide, with the rater's own comments. Use those comments; do not contradict them.
+- "issues": 1-3 per section, and this is where the report earns its keep. Each one is a
+  named, concrete problem — not a restatement of the score.
+  * "issue": the problem in one clause ("misses negation in short conversations"), never
+    a grade word ("weak listening") and never a generic label ("vocabulary").
+  * "evidence": the proof from the JSON — quote the question_id(s), the student's own
+    wrong answer, or the rater's comment. If you cannot point at evidence, drop the issue.
+  * "fix": what the student does about it, specific enough to start today.
+  A section that was not scored gets one issue explaining what is missing and how to get
+  it scored next time, and nothing else.
 - "questions": only for items given in wrong_questions and open_answers, at most 25 entries,
   each keyed by the exact question_id you were given. Skip the ones with nothing to say.
+  * "problem": what is wrong with THIS answer. Compare the student's answer to the correct
+    one and name the difference ("wrote 'has went', the present perfect needs the past
+    participle 'gone'"). Never write "this was incorrect" — that is already on the screen.
+  * "cause": the gap behind it, so the student sees the pattern, not one unlucky item.
+  * "solution": the repair. Give the rule, the correct answer restated in a full sentence,
+    or the reading/listening move that would have caught it. One or two sentences.
+  * For an open answer (writing/speaking), "problem" points at real sentences from the
+    student's own text and "solution" rewrites or restructures one of them as a model.
 - "plan" is the point of this report. It must follow from the weakest sections in the JSON,
   name the skill it fixes, and be doable by one student alone with no teacher:
   * "focus": 1-3 skills, weakest first. "target" is the band to aim for next time.
@@ -213,9 +232,10 @@ function attemptFor(row, taskRows, meta) {
 
 /* ── sg_comments 로 옮겨 적기 ────────────────────────────────────────────── */
 
-/* data 칸은 여기서 넣지 않는다. 학습 계획 행에서만 붙인다 — 아직
-   supabase/ai_review_plan.sql 을 돌리지 않은 DB 에서는 그 칸을 보내는 순간
-   PostgREST 가 400 을 내고, 총평·문항별 코멘트까지 통째로 저장에 실패한다. */
+/* data 칸(구조가 있는 것 — 영역별 문제점, 문항의 문제점·해결책, 학습 계획)은
+   supabase/ai_review_plan.sql 을 돌린 DB 에만 있다. 그 칸이 없으면 보내는 순간
+   PostgREST 가 400 을 내고 배열 전체가 저장에 실패하므로, put() 이 한 번 더
+   data 를 떼고 넣는다 — 구조는 잃어도 글은 남는다(body 에 다 들어 있다). */
 function commentRow(owner, session, scope, questionId, model, lang, body, extra) {
   return Object.assign({
     owner: owner, session: session,
@@ -235,22 +255,92 @@ function strList(arr, n) {
 
 const SCOPES = { reading: 1, listening: 1, writing: 1, speaking: 1, overall: 1 };
 
+/** 문제점·원인·해결책을 한 문단으로 잇는다.
+ *
+ * 화면은 data 칸의 세 조각을 따로 그리지만, body 는 그 칸을 못 읽는 자리(인쇄,
+ * 예전 리뷰 화면, data 칸 없는 DB)에서 남는 유일한 글이다. 거기서도 "무엇이
+ * 잘못됐고 어떻게 고치는가" 가 온전히 읽혀야 한다. */
+function joinText() {
+  const parts = [];
+  for (let i = 0; i < arguments.length; i++) {
+    const s = String(arguments[i] == null ? '' : arguments[i]).trim();
+    if (s) parts.push(/[.!?]$/.test(s) ? s : s + '.');
+  }
+  return parts.join(' ');
+}
+
+/** 근거 없는 문제 제기는 버린다 — 화면에 남는 것은 짚을 수 있는 것뿐이다. */
+function issueList(arr) {
+  return (Array.isArray(arr) ? arr : []).slice(0, 3).map(function (x) {
+    if (!x || !x.issue) return null;
+    return {
+      issue: clip(x.issue, 300),
+      evidence: clip(x.evidence, 500),
+      fix: clip(x.fix, 600)
+    };
+  }).filter(Boolean);
+}
+
+/** sg_comments 에 넣는다. 같은 자리는 덮어쓴다 — 리뷰는 쌓이는 것이 아니다.
+ *
+ * data 칸이 없는 DB 라면 그 칸만 떼고 한 번 더 넣는다. 구조(문제점 목록·계획표)는
+ * 잃지만 글은 남는다 — body 에 문제점·원인·해결책이 이미 한 문단으로 들어 있다.
+ * 여기서 포기하면 리뷰가 통째로 사라지는데, 그건 훨씬 나쁘다.
+ * 돌려주는 값은 실제로 넣은 행 수다. */
+async function putComments(rows) {
+  if (!rows || !rows.length) return 0;
+  const post = function (payload) {
+    return svc('sg_comments?on_conflict=owner,session,source,scope,question_id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(payload)
+    });
+  };
+  try {
+    await post(rows);
+  } catch (e) {
+    const msg = String((e && e.message) || e);
+    // PGRST204: "Could not find the 'data' column of 'sg_comments' in the schema cache"
+    if (!/PGRST204/.test(msg) && !/'data'/.test(msg)) throw e;
+    await post(rows.map(function (r) {
+      const copy = Object.assign({}, r);
+      delete copy.data;
+      return copy;
+    }));
+  }
+  return rows.length;
+}
+
 /** { rows, plan } — 총평·문항별과 학습 계획을 갈라 준다(저장도 따로 한다). */
 function rowsFor(owner, session, model, lang, parsed) {
   const out = [];
 
   (parsed.sections || []).forEach(function (s) {
     if (!s || !SCOPES[s.scope]) return;
+    const issues = issueList(s.issues);
     out.push(commentRow(owner, session, s.scope, '', model, lang, clip(s.summary, 2000), {
       strengths: strList(s.strengths, 3),
-      improvements: strList(s.improvements, 3)
+      /* 문제점의 '고치는 법' 은 보완할 점이기도 하다. data 칸을 못 그리는 자리에서도
+         최소한 무엇을 해야 하는지는 남게 겹쳐 둔다 — 계획 행과 같은 이유다. */
+      improvements: strList(
+        (s.improvements || []).concat(issues.map(function (x) { return x.fix; })), 4),
+      data: issues.length ? { issues: issues } : {}
     }));
   });
 
   (parsed.questions || []).slice(0, 25).forEach(function (q) {
-    if (!q || !q.question_id || !q.body) return;
+    if (!q || !q.question_id) return;
+    const problem = clip(q.problem, 800);
+    const cause = clip(q.cause, 500);
+    const solution = clip(q.solution, 800);
+    const body = clip(joinText(problem, cause, solution) || q.body, 2000);
+    if (!body) return;
     out.push(commentRow(owner, session, 'question', String(q.question_id),
-                        model, lang, clip(q.body, 1200)));
+                        model, lang, body, {
+      data: (problem || solution)
+        ? { problem: problem, cause: cause, solution: solution }
+        : {}
+    }));
   });
 
   const plan = parsed.plan;
@@ -368,13 +458,7 @@ module.exports = async function handler(req, res) {
   let saved = 0, saveError = '';
 
   async function put(rows) {
-    if (!rows.length) return;
-    await svc('sg_comments?on_conflict=owner,session,source,scope,question_id', {
-      method: 'POST',
-      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify(rows)
-    });
-    saved += rows.length;
+    saved += await putComments(rows);
   }
 
   try { await put(writes.rows); }
@@ -406,8 +490,14 @@ module.exports = async function handler(req, res) {
   });
 };
 
-module.exports.attemptFor = attemptFor;   // 테스트용
+/* 테스트와 tools/ai_review_run.js(시험 끝난 뒤 한 반을 통째로 돌리는 자리)가 쓴다.
+ * 프롬프트는 여기 한 벌뿐이다 — 화면에서 부른 리뷰와 배치로 부른 리뷰가 다른 글이면
+ * "AI 리뷰" 라는 말이 두 가지를 가리키게 된다. */
+module.exports.attemptFor = attemptFor;
 module.exports.rowsFor = rowsFor;
+module.exports.putComments = putComments;
+module.exports.SYSTEM = SYSTEM;
+module.exports.SCHEMA = SCHEMA;
 
 /* 리뷰 한 벌은 모델 호출 한 번이지만, 응시 하나를 통째로 읽고 쓰는 긴 프롬프트다.
    기본 상한(10초)으로는 끝나지 않는다. */
