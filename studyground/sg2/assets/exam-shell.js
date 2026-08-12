@@ -721,26 +721,10 @@ window.SG_RUNTIME = (function () {
 
   /* ── 부팅 ───────────────────────────────────────────────── */
 
-  /* 한 영역만 치는 진입(mode=section)은 관리자 승인이 있어야 시작된다. 학생 화면에는
-     네 영역이 그대로 보이지만(tests.html), 문을 여는 건 감독하는 선생님이다. 목록에서
-     이미 승인받고 넘어왔으면 일회용 표를 받아 그냥 지나가고, 주소를 직접 쳐서 들어온
-     경우에는 여기서 그 자리에 승인을 요구한다. 관리자 세션이 있는 기기는 묻지 않는다
-     (SG_APPROVE.ask 안에서 SG_ADMIN.can 이 판단한다). 전체 한 벌(mode=exam)은 그대로다.
-     승인 스크립트가 못 떴으면 옛 동작 그대로 통과시킨다 — 시험을 멈추지 않는다. */
-  function gateSection(section, next) {
-    var P = window.SG_APPROVE;
-    if (!P || scopeMode() !== 'section' || !section) { next(); return; }
-    if (P.claim(P.key(SET_ID, section))) { next(); return; }
-    var label = section.charAt(0).toUpperCase() + section.slice(1);
-    P.ask({ what: label, setId: SET_ID }, next, function () {
-      // 승인 없이는 시험이 시작되지 않는다 — 목록으로 되돌려보낸다.
-      window.location.href = BASE + 'tests.html';
-    });
-  }
-
+  /* 한 영역만 치는 진입(mode=section)도 학생이 그대로 연다 — 관리자 승인 칸은 없앴다.
+     시험을 뜨는 문(Exit Test)만 여전히 감독 선생님의 승인을 받는다. */
   function boot() {
-    var section = routeSection();
-    gateSection(section, function () { bootRun(section); });
+    bootRun(routeSection());
   }
 
   function bootRun(section) {
@@ -817,11 +801,8 @@ window.SG_RUNTIME = (function () {
    * 주소는 상대경로 그대로다. 라우트 페이지(en/test-nt/{section}/)에는 <base> 가
    * 있어 sg2 루트로 풀린다 — 위의 review.html 링크와 같은 이유로 BASE 를 붙이지 않는다.
    *
-   * 다시 응시는 관리자 승인이 있어야 열린다. 학생이 혼자 다시 치면 같은 세트를 두 번
-   * 본 성적이 섞이고, 시험장에서는 남은 시간을 학생이 정하게 된다. Exit 과 같은 문을
-   * 쓴다 — 감독하는 선생님이 그 자리에서 아이디·비밀번호를 넣고(SG_ADMIN.verify),
-   * 확인만 하지 관리자 세션은 만들지 않는다(학생 기기에 권한을 남기지 않는다).
-   * 그래서 버튼은 <a> 가 아니라 <button> 이다 — 주소가 손에 잡히면 문이 아니게 된다. */
+   * 다시 응시는 학생이 바로 연다 — 관리자 승인 칸은 없앴다. 버튼이 <a> 가 아니라
+   * <button> 인 것은 그대로다: 누른 자리에서 응시 기록을 남기고 옮겨 가야 한다. */
   var RETAKE_SECTIONS = [
     { id: 'reading', label: 'Reading' },
     { id: 'listening', label: 'Listening' },
@@ -861,85 +842,30 @@ window.SG_RUNTIME = (function () {
             '<span data-en>Or one section</span><span data-ko>또는 한 영역만</span></span>' +
           secs +
         '</div>' +
-        /* 관리자 승인 칸 — 버튼을 누르면 펴진다. 마크업을 여섯 벌의 시험 HTML 에
-           넣는 대신 여기서 한 번에 그린다(buildExitGate 와 같은 이유). */
-        '<div class="exam-retake-gate exam-exit-auth" id="done-retake-gate" hidden>' +
-          '<p class="exam-retake-note">' +
-            '<span data-en>An administrator must approve a retake.</span>' +
-            '<span data-ko>다시 응시하려면 관리자 승인이 필요합니다.</span> ' +
-            '<b id="done-retake-what"></b></p>' +
-          '<p class="exam-exit-err" id="done-retake-err" hidden>Wrong admin ID or password.</p>' +
-          '<label>Admin ID' +
-            '<input type="text" id="done-retake-id" autocomplete="off" autocapitalize="none"' +
-            ' autocorrect="off" spellcheck="false"></label>' +
-          '<label>Password' +
-            '<input type="password" id="done-retake-pw" autocomplete="off"></label>' +
-          '<div class="exam-retake-row">' +
-            '<button type="button" class="exam-btn primary" id="done-retake-go">' +
-              '<span data-en>Start</span><span data-ko>시작</span></button>' +
-            '<button type="button" class="exam-btn" id="done-retake-cancel">' +
-              '<span data-en>Cancel</span><span data-ko>취소</span></button>' +
-          '</div>' +
-        '</div>' +
       '</div>';
   }
 
-  /* 버튼 → 승인 칸 → 이동. 승인 없이는 아무 데도 가지 않는다.
-   * setId 는 넘기지 않는다 — Exit 승인과 같이 "관리자가 그 자리에 있다" 만 본다.
-   * 업로드로 만든 세트는 SET 목록에 없어서, 세트로 좁히면 그 시험만 아무도 못 연다. */
+  /* 버튼 → 이동. 누른 자리에서 재응시를 기록에 남기고 옮겨 간다 — 같은 세트를 두 번 친
+   * 성적이 나중에 나왔을 때, 그것이 재응시였는지 여기서 알 수 있다. */
   function bindRetake(session) {
     var box = document.getElementById('done-retake');
     if (!box) return;
-    var gate = document.getElementById('done-retake-gate');
-    var what = document.getElementById('done-retake-what');
-    var err = document.getElementById('done-retake-err');
-    var idEl = document.getElementById('done-retake-id');
-    var pwEl = document.getElementById('done-retake-pw');
-    var target = '';
-
-    function closeGate() {
-      gate.hidden = true;
-      err.hidden = true;
-      idEl.value = ''; pwEl.value = '';
-      target = '';
-    }
 
     var buttons = box.querySelectorAll('[data-retake]');
     for (var i = 0; i < buttons.length; i++) {
       (function (btn) {
         btn.onclick = function () {
-          target = btn.getAttribute('data-retake');
-          what.textContent = btn.getAttribute('data-retake-what') || '';
-          err.hidden = true;
-          idEl.value = ''; pwEl.value = '';
-          gate.hidden = false;
-          setTimeout(function () { idEl.focus(); }, 30);
+          var target = btn.getAttribute('data-retake');
+          if (!target) return;
+          try {
+            STORE.pushEvent('retake', session || '', { to: target });
+            STORE.flushAnswers();
+          } catch (e) {}
+          if (window.SG_FS) SG_FS.allow();     // 학생이 스스로 여는 재응시다 — 다시 묻지 않는다
+          window.location.href = target;
         };
       }(buttons[i]));
     }
-
-    document.getElementById('done-retake-cancel').onclick = closeGate;
-    document.getElementById('done-retake-go').onclick = function () {
-      if (!target) return;
-      var A = window.SG_ADMIN;
-      var who = A && A.verify ? A.verify(idEl.value, pwEl.value) : null;
-      /* 확인 수단이 없으면 열지 않는다 — 관리자 스크립트가 안 실려도 문이 열리면
-         승인은 이름뿐이다(Exit 승인과 같은 판단). */
-      if (!who) { err.hidden = false; pwEl.value = ''; pwEl.focus(); return; }
-      /* 누가 열어 줬는지는 방금 끝난 응시 기록에 남는다 — 같은 세트를 두 번 친
-         성적이 나중에 나왔을 때, 그것이 승인된 재응시인지 여기서 알 수 있다. */
-      try {
-        STORE.pushEvent('retake', session || '', { approved_by: who.id, to: target });
-        STORE.flushAnswers();
-      } catch (e) {}
-      if (window.SG_FS) SG_FS.allow();        // 승인받은 재응시다 — 다시 묻지 않는다
-      window.location.href = target;
-    };
-
-    gate.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('done-retake-go').click(); }
-      if (e.key === 'Escape') { e.preventDefault(); closeGate(); }
-    });
   }
 
   /* ── 제출 직후 ──────────────────────────────────────────────

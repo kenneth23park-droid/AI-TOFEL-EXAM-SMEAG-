@@ -158,11 +158,9 @@
 //      앞이라는 자리를 지켜 리딩 앞으로 따라 옮겼다. 셸에 든 exam-timing.js ·
 //      exam-compile.js · exam-shell.js 와 타이밍 config 가 함께 바뀌므로, 캐시된 옛
 //      셸이 남으면 그 기기만 리스닝부터 시작하는 옛 순서로 계속 시험을 친다.
-// v49: 학생도 네 영역을 본다 — 다만 문은 관리자가 연다. 목록(tests.html)의 영역 칸이
-//      학생에게도 서고, 누르면 관리자 승인 칸이 뜬다(assets/admin-approve.js). 승인은
-//      일회용 표로 셸에 넘어가고, 주소를 직접 친 진입은 셸(assets/exam-shell.js)이
-//      그 자리에서 다시 묻는다. 캐시된 옛 셸이 남으면 그 기기만 영역 칸 없는 옛
-//      목록을 계속 보므로 판올림한다.
+// v49: 학생도 네 영역을 본다 — 목록(tests.html)의 영역 칸이 학생에게도 선다.
+//      (이때 붙었던 관리자 승인 칸은 v56 에서 없앴다.) 캐시된 옛 셸이 남으면
+//      그 기기만 영역 칸 없는 옛 목록을 계속 보므로 판올림한다.
 // v50: 학생의 행선지가 SET 9 리딩 한 영역이 된다. 로그인하면 목록을 지나지 않고
 //      곧장 그 시험으로 떨어지고(assets/student-landing.js 가 주소를 갖는다),
 //      리딩 앞의 볼륨·마이크 준비 화면 두 장은 config/timing.toefl.json 에서
@@ -187,7 +185,12 @@
 //      모듈의 앞 지문(그 마지막 문항)으로 돌아간다. 앞 모듈로는 못 넘어간다.
 //      exam-engine.js · exam-shell.js · exam-render-reading.js 가 함께 바뀌므로,
 //      캐시된 옛 엔진이 남으면 첫 문항에서 Back 이 계속 죽어 있다.
-const VERSION = 'sg-v55';
+// v55.1 → v56: 학생 앞의 관리자 승인 칸이 사라진다. 한 영역만 진입(tests.html ·
+//      exam-shell.js 의 gateSection)과 다시 응시가 승인 없이 바로 열리고,
+//      assets/admin-approve.js 는 부르는 곳이 없어 지웠다. 시험을 뜨는 문(Exit Test)
+//      만 그대로 감독관 승인을 받는다. 셸 HTML 의 <script> 목록이 함께 바뀌므로,
+//      캐시된 옛 사본이 남으면 그 기기만 없어진 승인 칸을 계속 만난다.
+const VERSION = 'sg-v56';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -209,8 +212,6 @@ const SHELL_ASSETS = [
 
   // SET 별 관리자 계층 — 오프라인 수업 중에도 로그인·문항 교체가 되어야 한다.
   'assets/admin-session.js', 'assets/admin-entry.js', 'assets/tts-client.js',
-  // 영역별 진입 승인 — 오프라인 시험장에서도 감독관이 그 자리에서 문을 열어야 한다.
-  'assets/admin-approve.js',
   // 학생의 행선지 — index.html · login.html 이 <head>·로그인 직후에 읽는다.
   // 빠지면 오프라인에서 학생이 로그인해도 갈 곳을 모른다.
   'assets/student-landing.js',

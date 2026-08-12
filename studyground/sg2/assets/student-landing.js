@@ -7,8 +7,8 @@
  *   exam-runtime.html  · 시험 셸. set·profile 을 쿼리로 받는다
  *   ?mode=exam         · 네 영역을 순서대로 잇는다. tests.html 의 Full Test 버튼과 같은 주소다.
  *
- * 한 영역만 치던 때와 달리 관리자 승인 칸을 지나지 않는다 — 승인은 mode=section
- * 진입에만 걸린다(assets/admin-approve.js · exam-shell.js 의 gateSection).
+ * 관리자 승인 칸은 지나지 않는다 — 학생 앞의 승인은 전부 걷어냈고, 감독관 승인은
+ * 시험을 뜨는 문(Exit Test)에만 남는다(assets/exam-shell.js).
  *
  * 값을 바꾸는 곳은 여기 하나다. index.html 은 <head> 에서, login.html 은 로그인 뒤
  * 갈 곳(landing())에서 이 전역을 읽는다. login.html 의 ?next= 검사식이 받는 모양

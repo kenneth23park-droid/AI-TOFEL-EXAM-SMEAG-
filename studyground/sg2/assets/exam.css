@@ -296,21 +296,6 @@ body.exam-body {
 .exam-retake-lab { font-size: 12.5px; font-weight: 700; color: var(--muted); }
 .exam-retake .sec { padding: 7px 13px; font-size: 13px; }
 
-/* 관리자 승인 칸 — 버튼을 누르면 펴진다. 칸 모양은 Exit 모달의 것을 그대로 쓴다
-   (.exam-exit-auth). 여기서는 그 칸이 앉을 자리와 오류 문구 색만 정한다. */
-.exam-retake-gate {
-  max-width: 340px; margin: 16px auto 0; text-align: left;
-  background: var(--exam-response-soft); border: 1px solid var(--line);
-  border-radius: var(--radius, 14px); padding: 16px 16px 6px;
-}
-.exam-retake-gate[hidden] { display: none; }
-.exam-retake-note { font-size: 12.5px; color: var(--ink-2); margin-bottom: 12px; line-height: 1.55; }
-.exam-retake-gate .exam-exit-err {
-  font-size: 12.5px; font-weight: 700; color: #b3261e; background: #fdeceb;
-  border: 1px solid #f5c6c2; border-radius: 10px; padding: 9px 12px; margin-bottom: 12px;
-}
-.exam-retake-gate .exam-retake-row { justify-content: flex-start; margin-bottom: 12px; }
-
 @media (max-width: 720px) {
   .exam-topbar { height: auto; padding: 8px 12px; flex-wrap: wrap; }
   .exam-actions { flex: 1 1 100%; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
