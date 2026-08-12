@@ -15,8 +15,7 @@
 //     exam.css / exam-runtime.html / exam-render-{instruction,listening,reading,writing,
 //     speaking}.js 가 전부 바뀌었다. 이 파일들은 전부 SHELL_ASSETS(cache-first)라서
 //     VERSION 을 올리지 않으면 재방문 기기가 옛 UI(빨간 중앙 pill 등)를 계속 본다.
-// v9: 내부용 접근 게이트(gate.html · assets/gate.js) 추가. 모든 셸 HTML 의 <head> 가
-//     바뀌었고, 오프라인에서도 게이트를 통과해야 하므로 두 파일을 프리캐시에 넣는다.
+// v9: 내부용 접근 게이트 추가(v53 에서 삭제). 모든 셸 HTML 의 <head> 가 바뀌었다.
 // v10: 관리자 오디오 설정(admin-audio.html · assets/audio-config.js) 추가.
 //      오프라인에서도 출제자가 문항별 오디오를 지정/미리듣기 할 수 있어야 하므로 프리캐시.
 // v11: SET 별 관리자 계층 추가 — 관리자 로그인(assets/admin-session.js), 오디오
@@ -175,7 +174,16 @@
 //      SET 9 배역표의 voice_id 로 갈았다. admin-questions.html 도 함께 바뀌었으므로
 //      (저장 뒤 펼친 칸 유지, 속도 0.7–1.2), 캐시된 옛 사본이 남으면 그 기기만
 //      Google 목소리 목록을 계속 보고 생성이 400 으로 떨어진다.
-const VERSION = 'sg-v51';
+// v52: 학생 계정을 시트처럼 한 번에 뽑는다 — admin-students.html 이 학생 수를 받아
+//      그만큼 줄을 세우고 아이디를 smeag000 부터 붙인다(실제 배정은 서버가 한다).
+//      엑셀에서 이름·이메일을 그대로 붙여넣을 수 있고, 비워 두면 아이디가 이름이 된다.
+//      sg-auth.js 에 keepSession 이 생겨 여러 명을 만들어도 관리자 세션이 학생
+//      세션으로 덮이지 않는다. 두 파일 모두 셸이라 판올림해야 재방문 기기가 새 화면을
+//      본다 — 옛 사본이 남으면 관리자 홈의 카드를 눌러도 없는 주소로 간다.
+// v53: 공용 접속 게이트(gate.html · assets/gate.js)를 걷어냈다. 모든 셸 HTML 의
+//      <head> 에서 그 한 줄이 빠졌고 두 파일도 사라졌다. 판올림하지 않으면 재방문
+//      기기가 캐시된 옛 <head> 를 계속 읽어 없어진 게이트로 되돌아간다.
+const VERSION = 'sg-v53';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -193,8 +201,7 @@ const SHELL_ASSETS = [
   // 밴드 환산 — 제출 화면이 채점 직후 네 영역 점수를 그 자리에서 편다.
   'assets/sg-band.js',
 
-  // 내부용 접근 게이트 — 오프라인 진입도 이 화면을 먼저 지난다.
-  'gate.html', 'assets/gate.js', 'assets/audio-config.js',
+  'assets/audio-config.js',
 
   // SET 별 관리자 계층 — 오프라인 수업 중에도 로그인·문항 교체가 되어야 한다.
   'assets/admin-session.js', 'assets/admin-entry.js', 'assets/tts-client.js',
@@ -213,6 +220,9 @@ const SHELL_ASSETS = [
 
   // 관리자 홈과 좌석 관리 — 시험장에서 회선이 없어도 좌석을 다시 짤 수 있어야 한다.
   'admin.html', 'admin-seats.html', 'assets/sg-seats.js', 'admin-teachers.html',
+  // 학생 계정 대량 발급 — 시험 당일 아침에 회선이 흔들려도 화면 자체는 떠야 한다
+  // (계정 생성은 서버가 하므로 오프라인에서는 만들지 못한다).
+  'admin-students.html',
   'seat-setup.html', 'assets/seat-runtime.js',
 
   // 오프라인 사전 다운로드 — 목록 자체가 캐시에 있어야, 두 번째 방문이 오프라인이어도

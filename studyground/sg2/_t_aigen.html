@@ -44,8 +44,7 @@
     document.title = fails ? ('FAIL ' + fails + '/' + n) : ('PASS ' + n);
   }
 
-  /* 게이트·관리자 세션·선생님 계정을 심는다. */
-  localStorage.setItem('sg2_gate', String(Date.now()));
+  /* 관리자 세션·선생님 계정을 심는다. */
   localStorage.setItem('sg2_admin_v1', JSON.stringify({ t: Date.now(), id: 'admin', sets: ['*'], label: 'Master admin' }));
   localStorage.setItem('sg2_auth_v1', JSON.stringify({
     user: { id: 'test-teacher', email: 't@example.com', role: 'teacher' },

@@ -1,13 +1,12 @@
 /* SMEAG StudyGround — SET 별 관리자 세션.
  *
- * gate.js/gate.html 이 "이 사이트에 들어올 수 있는가"를 가른다면, 이 파일은
- * "이 SET 을 손댈 수 있는가"를 가른다. 관리자로 로그인해야만
+ * 이 파일은 "이 SET 을 손댈 수 있는가"를 가른다. 관리자로 로그인해야만
  *   · 시험 셸의 화면 이동·문항 편집 패널(assets/exam-admin-nav.js)
  *   · 오디오 교체(assets/audio-config.js · admin-audio.html)
  *   · 문항 교체(assets/question-config.js · admin-questions.html)
  * 가 열린다. 학생 화면은 로그인 전과 완전히 동일하다.
  *
- * 주의 — gate.js 와 같은 성격의 "가림막"이지 인증이 아니다. 정적 배포라 서버가
+ * 주의 — "가림막"이지 인증이 아니다. 정적 배포라 서버가
  * 없고 아래 계정표가 파일에 그대로 들어 있다. 외부 공개 시에는 서버/프록시
  * 인증(Vercel Password Protection, Basic Auth 등)으로 교체해야 한다.
  *

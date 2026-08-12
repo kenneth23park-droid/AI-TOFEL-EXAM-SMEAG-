@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="assets/gate.js"></script>
 <title>QR Cards · SMEAG MockTest</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
@@ -79,7 +78,10 @@
 
   function two(n) { return (n < 10 ? '0' : '') + n; }
   function todayStr() { var d = new Date(); return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()); }
-  dateEl.value = todayStr();
+  /* ?date=2026-08-12 로 들어오면 그 날짜로 열고 곧바로 불러온다 — 학생을 막 발급한
+     화면(admin-students.html)에서 카드 인쇄로 넘어오는 길이다. */
+  var asked = (/[?&]date=(\d{4}-\d{2}-\d{2})/.exec(location.search) || [])[1];
+  dateEl.value = asked || todayStr();
 
   function say(en, ko, bad) {
     status.innerHTML = '<span data-en></span><span data-ko></span>';
