@@ -87,6 +87,7 @@
   .engines select:disabled { color:var(--dim); background:var(--cream-2); }
   .engnote { font-size:11px; color:var(--muted); }
   .engnote b { color:#a8331a; }
+  .speedhint { font-size:11px; color:var(--muted); }
   /* 키 행 — 엔진마다 "서버에 설정됨 / 이 기기 키 / 키 없음" 셋 중 하나를 보여준다. */
   .keyrow { display:flex; flex-wrap:wrap; gap:7px; align-items:center; margin:2px 0 4px;
     font-size:11.5px; color:var(--muted); }
@@ -175,7 +176,7 @@
   /* 생성 패널은 편집 판 위에 한 겹 더 어두운 면으로 앉힌다. */
   .qbody .gen { background: var(--edit-bg-2); border-color: var(--edit-line); }
   .qbody .gen > label, .qbody .gen .muted, .qbody .gen .mini, .qbody .engnote,
-  .qbody .keyrow { color: var(--edit-dim); }
+  .qbody .speedhint, .qbody .keyrow { color: var(--edit-dim); }
   .qbody .gen .muted b, .qbody .gen b { color: var(--edit-ink); }
   .qbody .voices .vrow { background: var(--edit-bg); border-color: var(--edit-line); color: var(--edit-ink); }
   .qbody .voices select { color: var(--edit-ink); }
@@ -427,8 +428,8 @@
     '<div class="fld gen">' +
       '<label>🎙 <span data-en>Generate the audio from a script</span><span data-ko>스크립트로 음성 생성</span></label>' +
       '<p class="muted" style="font-size:11.5px;line-height:1.55;margin:0 0 7px">' +
-        '<span data-en>One line per turn — write <b>Speaker 1: …</b> to split speakers; each gets its own voice. Runs on the deployed site only (the API key lives on the server).</span>' +
-        '<span data-ko>한 줄에 한 대사 — <b>Speaker 1: …</b> 형식으로 쓰면 화자별로 다른 목소리가 배정됩니다. API 키가 서버에 있으므로 배포된 사이트에서만 동작합니다.</span></p>' +
+        '<span data-en>One line per turn — write <b>Speaker 1: …</b> to split speakers; each gets its own voice. ElevenLabs only, so a re-made clip matches the rest of the set. No silence is inserted between turns — for that, rebuild the clip with tools/tts_multivoice.py.</span>' +
+        '<span data-ko>한 줄에 한 대사 — <b>Speaker 1: …</b> 형식으로 쓰면 화자별로 다른 목소리가 배정됩니다. 엔진은 ElevenLabs 하나이며, 그래야 다시 만든 문항도 나머지와 같은 목소리로 들립니다. 화자 사이 무음은 넣지 않습니다 — 필요하면 tools/tts_multivoice.py 로 다시 만드세요.</span></p>' +
       '<textarea rows="4" data-f="script" placeholder="Speaker 1: Where is the student lounge?&#10;Speaker 2: It&#39;s on the second floor, near the elevators.">' +
         esc(scriptFor(it)) + '</textarea>' +
       /* 엔진 · 언어 · 모델 — mp3 를 그대로 내주는 엔진만 서버가 싣는다. */
@@ -444,10 +445,13 @@
       '<div class="keyrow" data-role="keyrow"></div>' +
       '<div class="voices" data-role="voices"></div>' +
       '<div class="qacts">' +
-        '<label class="mini"><span data-en>gap ms</span><span data-ko>간격 ms</span>' +
-          '<input type="number" data-f="gap" value="400" min="0" max="2000" step="50"></label>' +
-        '<label class="mini"><span data-en>rate</span><span data-ko>속도</span>' +
-          '<input type="number" data-f="rate" value="1" min="0.5" max="1.5" step="0.05"></label>' +
+        /* 속도는 ElevenLabs 의 낭독 속도(0.7 가장 느림 … 1.2 가장 빠름)다. SET 9 정본은
+           한 줄짜리 문항 0.75, 대화 0.9, Listen &amp; Repeat 0.7, 강의는 1 로 만들었다 —
+           다시 만드는 문항은 같은 값을 써야 나머지 트랙과 페이스가 맞는다. */
+        '<label class="mini"><span data-en>speed</span><span data-ko>속도</span>' +
+          '<input type="number" data-f="rate" value="1" min="0.7" max="1.2" step="0.05"></label>' +
+        '<span class="speedhint"><span data-en>SET 9: 0.75 one-liners · 0.9 conversations · 0.7 listen&amp;repeat</span>' +
+          '<span data-ko>SET 9 기준: 한 줄 0.75 · 대화 0.9 · 따라 말하기 0.7</span></span>' +
         '<button class="btn brand sm" data-act="gen" type="button">🎙 <span data-en>Generate</span><span data-ko>생성</span></button>' +
         '<span class="genmsg"></span>' +
       '</div>' +
@@ -709,20 +713,18 @@
         note = row.querySelector('.engnote');
     if (!ps) return;
     if (!ps.options.length) {
+      // 엔진은 ElevenLabs 하나다. 그래도 드롭다운을 남긴 건 무엇으로 만드는지가
+      // 화면에 적혀 있어야 하기 때문이고, 키가 없으면 그 사실도 여기에 붙는다.
       ps.innerHTML = CAT.providers.map(function (p) {
-        // 키가 없어도 고를 수 있어야 한다 — 골라야 키를 넣을 자리가 열린다.
-        // 정말 못 쓰는 건 로컬 전용(kokoro)뿐이다.
-        var locked = !!p.local;
-        var tail = p.local ? ' — 로컬 전용' : (p.ready ? (p.byLocalKey ? ' — 이 기기 키' : '') : ' — 키 필요');
-        return '<option value="' + esc(p.id) + '"' + (locked ? ' disabled' : '') + '>' +
-          esc(p.label) + tail + '</option>';
+        var tail = p.ready ? (p.byLocalKey ? ' — 이 기기 키' : '') : ' — 키 필요';
+        return '<option value="' + esc(p.id) + '">' + esc(p.label) + tail + '</option>';
       }).join('');
       var first = CAT.providers.filter(function (p) { return p.ready; })[0];
       if (first) ps.value = first.id;
     }
     var P = providerOf(row);
     if (!P) return;
-    // 언어: 엔진이 언어 선택을 받는 경우만(ElevenLabs·OpenAI 는 모델이 자동 판별).
+    // 언어 칸은 잠겨 있다 — ElevenLabs 의 다국어 모델이 대본을 보고 스스로 판별한다.
     var langs = P.langs && P.langs.length ? P.langs : [];
     ls.disabled = !langs.length;
     var keepL = ls.value;
@@ -746,8 +748,7 @@
     var box = row.querySelector('[data-role=keyrow]');
     var P = providerOf(row);
     if (!box) return;
-    if (!P || P.local) { box.innerHTML = ''; return; }
-    if (!P.acceptsKey) { box.innerHTML = ''; return; }
+    if (!P || !P.acceptsKey) { box.innerHTML = ''; return; }
 
     if (box.dataset.editing === P.id) return;      // 입력 중이면 다시 그리지 않는다
 
@@ -778,8 +779,6 @@
     box.innerHTML =
       '<input type="password" data-key="input" autocomplete="off" spellcheck="false" ' +
         'placeholder="' + esc(P.label) + ' API key 붙여넣기">' +
-      (P.needsRegion ? '<input type="text" data-key="region" placeholder="region (예: eastus)" ' +
-        'value="' + esc(SG_TTS_GEN.regionOf(P.id) || '') + '" style="min-width:120px">' : '') +
       '<button type="button" data-key="save">저장</button>' +
       '<button type="button" data-key="cancel">취소</button>' +
       '<span>이 브라우저에만 저장됩니다. 공용 PC 라면 넣지 마세요.</span>';
@@ -799,8 +798,7 @@
     var P = providerOf(row);
     if (!P) return SG_TTS_GEN.FALLBACK_VOICES;
     var lang = row.querySelector('[data-f=lang]').value;
-    var model = row.querySelector('[data-f=model]').value;
-    var list = SG_TTS_GEN.voicesFor(CAT, P.id, lang, model);
+    var list = SG_TTS_GEN.voicesFor(CAT, P.id, lang);
     return list.length ? list : SG_TTS_GEN.FALLBACK_VOICES;
   }
   function paintVoices(row) {
@@ -845,7 +843,6 @@
       model: row.querySelector('[data-f=model]').value,
       lang: row.querySelector('[data-f=lang]').value,
       segments: payload,
-      gapMs: +row.querySelector('[data-f=gap]').value,
       rate: +row.querySelector('[data-f=rate]').value,
       filename: q.id || 'clip'
     }).then(function (out) {
@@ -894,9 +891,8 @@
       }
       if (kact === 'save') {
         var v = (kbox.querySelector('[data-key=input]') || {}).value || '';
-        var rg = (kbox.querySelector('[data-key=region]') || {}).value || '';
         if (!v.trim()) { alert('키를 붙여넣어 주세요.'); return; }
-        SG_TTS_GEN.setKey(KP.id, v, rg);
+        SG_TTS_GEN.setKey(KP.id, v);
         delete kbox.dataset.editing;
         CAT = null;
         loadCatalog().then(function () {

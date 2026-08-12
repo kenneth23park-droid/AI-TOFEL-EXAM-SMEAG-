@@ -32,10 +32,9 @@
     catch (e) { return {}; }
   }
   function keyOf(pid) { var e = allKeys()[pid]; return (e && e.key) || ''; }
-  function regionOf(pid) { var e = allKeys()[pid]; return (e && e.region) || ''; }
-  function saveKey(pid, key, region) {
+  function saveKey(pid, key) {
     var all = allKeys();
-    if (key) all[pid] = { key: String(key).trim(), region: String(region || '').trim() };
+    if (key) all[pid] = { key: String(key).trim() };
     else delete all[pid];
     try { localStorage.setItem(KEYS_KEY, JSON.stringify(all)); } catch (e) {}
     catalogCache = null;            // ready 판정이 달라지므로 목록을 다시 받는다
@@ -47,37 +46,42 @@
     if (k.length <= 10) return k.slice(0, 2) + '••••';
     return k.slice(0, 4) + '••••••••' + k.slice(-4);
   }
-  /** 선택한 엔진의 키만 실어 보낸다. 쓰지도 않을 다른 키까지 보낼 이유가 없다. */
+  /** 이 기기에 붙여넣은 키가 있으면 그것만 실어 보낸다. */
   function credHeaders(pid) {
     var h = {};
-    if (!pid) return h;
-    var k = keyOf(pid); if (k) h['x-sg-key'] = k;
-    var r = regionOf(pid); if (r) h['x-sg-region'] = r;
+    var k = keyOf(pid || 'elevenlabs');
+    if (k) h['x-sg-key'] = k;
     return h;
   }
 
   /* 서버 목록을 못 받았을 때 화면을 세우기 위한 최소 세트.
-     tools/tts_google.py 로 SET 9 를 만들 때 쓴 12개와 같다. */
+     SET 9 배역표(config/set9-voice-casting.json)의 13인 그대로다 — 시험 음성 정본을
+     만든 voice_id 이므로, 한 문항을 다시 만들어도 나머지와 같은 목소리가 나온다.
+     계정이 다르면 이 id 는 맞지 않는다. 그때는 서버에서 받은 목록이 이 자리를 대신한다. */
   var FALLBACK_VOICES = [
-    { id: 'en-US-Neural2-C', lang: 'en-US', label: 'US · Ava (F)' },
-    { id: 'en-US-Neural2-F', lang: 'en-US', label: 'US · Mia (F)' },
-    { id: 'en-US-Neural2-E', lang: 'en-US', label: 'US · Emma (F)' },
-    { id: 'en-US-Neural2-G', lang: 'en-US', label: 'US · Zoe (F)' },
-    { id: 'en-US-Neural2-D', lang: 'en-US', label: 'US · Liam (M)' },
-    { id: 'en-US-Neural2-J', lang: 'en-US', label: 'US · Mason (M)' },
-    { id: 'en-US-Neural2-A', lang: 'en-US', label: 'US · Noah (M)' },
-    { id: 'en-US-Neural2-I', lang: 'en-US', label: 'US · Ethan (M)' },
-    { id: 'en-GB-Neural2-A', lang: 'en-GB', label: 'GB · Alice (F)' },
-    { id: 'en-GB-Neural2-B', lang: 'en-GB', label: 'GB · Oliver (M)' },
-    { id: 'en-GB-Neural2-D', lang: 'en-GB', label: 'GB · Henry (M)' },
-    { id: 'en-AU-Neural2-A', lang: 'en-AU', label: 'AU · Lily (F)' }
+    { id: 'FGY2WhTYpPnrIDTdsKH5', lang: 'en-US', label: 'US · Ava (F) — Laura' },
+    { id: 'EXAVITQu4vr4xnSDxMaL', lang: 'en-US', label: 'US · Emma (F) — Sarah' },
+    { id: 'XrExE9yKIg1WjnnlVkGX', lang: 'en-US', label: 'US · Mia (F) — Matilda' },
+    { id: 'cgSgspJ2msm6clMCkdW9', lang: 'en-US', label: 'US · Zoe (F) — Jessica' },
+    { id: 'TX3LPaxmHKxFdv7VOQHJ', lang: 'en-US', label: 'US · Liam (M) — Liam' },
+    { id: 'cjVigY5qzO86Huf0OWal', lang: 'en-US', label: 'US · Mason (M) — Eric' },
+    { id: 'nPczCjzI2devNBz1zQrb', lang: 'en-US', label: 'US · Ethan (M) — Brian' },
+    { id: 'CwhRBWXzGAHq8TQ4Fs17', lang: 'en-US', label: 'US · Noah (M) — Roger' },
+    { id: 'Xb7hH8MSUJpSbSDYk0k2', lang: 'en-GB', label: 'GB · Alice (F) — Alice' },
+    { id: 'pFZP5JQG7iQjIQuC4Bku', lang: 'en-GB', label: 'GB · Ivy (F) — Lily' },
+    { id: 'JBFqnCBsd6RMkjVDRZzb', lang: 'en-GB', label: 'GB · Henry (M) — George' },
+    { id: 'onwK4e9ZLuTAKqWW03F9', lang: 'en-GB', label: 'GB · Oliver (M) — Daniel' },
+    { id: 'VyyyOgRmsqOzaZXnKWnI', lang: 'en-AU', label: 'AU · Lily (F) — Sunny' }
   ];
   var FALLBACK = {
-    providers: [{ id: 'google', label: 'Google Cloud TTS', mp3: 'native', gap: true,
-                  free: '월 100만자 무료 티어', models: ['Neural2'], defaultModel: 'Neural2',
-                  langs: ['en-US', 'en-GB', 'en-AU'], ready: false, note: 'server unreachable' }],
-    voices: { google: FALLBACK_VOICES },
-    langs: ['en-US', 'en-GB', 'en-AU']
+    providers: [{ id: 'elevenlabs', label: 'ElevenLabs', mp3: 'native', gap: false,
+                  free: '가입 시 무료 크레딧, 이후 유료',
+                  models: ['eleven_flash_v2_5', 'eleven_multilingual_v2', 'eleven_turbo_v2_5', 'eleven_v3'],
+                  defaultModel: 'eleven_flash_v2_5', langs: [], acceptsKey: true,
+                  envVar: 'ELEVENLABS_API_KEY',
+                  ready: false, envReady: false, note: 'server unreachable' }],
+    voices: { elevenlabs: FALLBACK_VOICES },
+    langs: []
   };
 
   function token() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
@@ -132,9 +136,8 @@
     /* 엔진 키 — 화면이 쓰는 표면. 값 자체는 이 모듈 밖으로 원문 그대로 나가지 않는다. */
     hasKey: function (pid) { return !!keyOf(pid); },
     keyMask: function (pid) { return maskKey(keyOf(pid)); },
-    regionOf: function (pid) { return regionOf(pid); },
-    setKey: function (pid, key, region) { saveKey(pid, key, region); },
-    clearKey: function (pid) { saveKey(pid, '', ''); },
+    setKey: function (pid, key) { saveKey(pid, key); },
+    clearKey: function (pid) { saveKey(pid, ''); },
     setToken: function (t) {
       catalogCache = null;
       try { t ? localStorage.setItem(TOKEN_KEY, String(t).trim()) : localStorage.removeItem(TOKEN_KEY); }
@@ -218,25 +221,20 @@
         .catch(function () { return cat; });
     },
 
-    /** 엔진+언어+모델에 맞는 목소리만 추린다.
-     *  비면 조건을 단계적으로 푼다 — 모델 먼저, 그래도 없으면 언어까지.
-     *  (언어를 끝까지 붙들면 "그 언어에 그 모델이 없다"는 이유로 빈 목록이 나온다.) */
-    voicesFor: function (cat, providerId, lang, model) {
-      var all = (cat.voices && cat.voices[providerId]) || [];
-      function byLang(v) { return !lang || !v.lang || v.lang === lang; }
-      function byModel(v) {
-        if (!model || !v.family) return true;
-        if (providerId === 'google') return v.family.toLowerCase().indexOf(model.toLowerCase()) >= 0;
-        return true;                      // 다른 엔진의 model 은 목소리를 가르지 않는다
-      }
-      var strict = all.filter(function (v) { return byLang(v) && byModel(v); });
-      if (strict.length) return strict;
-      var langOnly = all.filter(byLang);
-      return langOnly.length ? langOnly : all;
+    /** 고를 수 있는 목소리. ElevenLabs 의 model 은 목소리를 가르지 않고(같은 목소리를
+     *  어느 모델로도 읽는다), 언어는 다국어 모델이 자동 판별하므로 필터가 남는 건
+     *  액센트 표시뿐이다. 걸러서 비면 전체를 돌려준다 — 빈 목록은 화면을 못 세운다. */
+    voicesFor: function (cat, providerId, lang) {
+      var all = (cat.voices && cat.voices[providerId || 'elevenlabs']) || [];
+      if (!lang) return all;
+      var hit = all.filter(function (v) { return !v.lang || v.lang === lang; });
+      return hit.length ? hit : all;
     },
-    /** 이전 버전 호환 — google 목소리만 평평하게. */
+    /** 이전 버전 호환 — 목소리 목록만 평평하게. */
     listVoices: function () {
-      return API.catalog().then(function (c) { return (c.voices && c.voices.google) || FALLBACK_VOICES; });
+      return API.catalog().then(function (c) {
+        return (c.voices && c.voices.elevenlabs) || FALLBACK_VOICES;
+      });
     },
 
     /** segments: [{text, voice}] → { blob, file, chars, bytes, provider, model } */

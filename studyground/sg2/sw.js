@@ -169,7 +169,13 @@
 //      리딩 앞의 볼륨·마이크 준비 화면 두 장은 config/timing.toefl.json 에서
 //      내려갔다. 셸에 든 exam-timing.js 의 내장 폴백도 같이 바뀌므로, 캐시된 옛
 //      사본이 남으면 그 기기만 목록으로 떨어지거나 점검 화면을 다시 만난다.
-const VERSION = 'sg-v50';
+// v51: 문항 스크립트 → 음성은 ElevenLabs 로만 만든다. 시험 음성 정본이 전부 그
+//      계정의 목소리라, 한 문항만 다른 엔진으로 다시 만들면 그 문항만 목소리가 튄다.
+//      api/tts.js 에서 나머지 엔진을 걷어내고 assets/tts-client.js 의 폴백 목소리를
+//      SET 9 배역표의 voice_id 로 갈았다. admin-questions.html 도 함께 바뀌었으므로
+//      (저장 뒤 펼친 칸 유지, 속도 0.7–1.2), 캐시된 옛 사본이 남으면 그 기기만
+//      Google 목소리 목록을 계속 보고 생성이 400 으로 떨어진다.
+const VERSION = 'sg-v51';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
