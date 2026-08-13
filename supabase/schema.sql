@@ -21,7 +21,8 @@
 --   toefl_attempts     : 한 번의 응시(회차). 학생 1명 = auth.uid() 1개.
 --   toefl_answers      : 자동채점 대상 문항의 응답(리딩/리스닝/Build a Sentence).
 --   toefl_submissions  : 사람이 채점할 산출물(이메일/토론 본문, 스피킹 녹음 경로).
---   storage 'toefl-recordings' : 스피킹 녹음 webm. 경로 = <uid>/<attemptId>/<questionId>.webm
+--   storage 'toefl-recordings' : 스피킹 녹음. 경로 = <uid>/<session>/<questionId>.<ext>
+--       (session = 응시 기기의 세션 id. 확장자는 브라우저마다 webm/m4a 로 갈린다.)
 --
 -- 모든 테이블에 RLS 를 켜고 "본인 행만" 접근하도록 막는다.
 -- =============================================================
@@ -201,7 +202,7 @@ create policy "toefl_submissions_update_own"
 
 -- -------------------------------------------------------------
 -- 6. Storage — 스피킹 녹음 버킷 (private)
---    경로 규칙: <auth.uid()>/<attemptId>/<questionId>.webm
+--    경로 규칙: <auth.uid()>/<session>/<questionId>.<ext>
 --    → 경로의 첫 폴더가 자기 uid 인 객체만 올리고 읽을 수 있다.
 -- -------------------------------------------------------------
 insert into storage.buckets (id, name, public)

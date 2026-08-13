@@ -269,6 +269,9 @@
         tx.oncomplete = function () {
           upsertAnswer(qid, 'idb:' + qid, { media: 'idb:' + qid, recorded: true });
           flushAnswers();
+          /* 녹음이 기기에 안착한 그 순간을 알린다 — 클라우드로 곧장 올리는 쪽
+             (exam-live-boot.js)이 여기에 붙는다. 이 파일은 여전히 전역을 모른다. */
+          notifyWrite('media', { qid: qid, rec: blob });
           if (cb) cb(null, 'idb:' + qid);
         };
         tx.onerror = function () { if (cb) cb(tx.error || new Error('Media write failed.')); };

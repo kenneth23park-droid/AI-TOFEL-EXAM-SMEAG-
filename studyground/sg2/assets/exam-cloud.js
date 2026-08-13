@@ -23,8 +23,11 @@
   var URL_ = 'https://qrmidnmlethqvdbmnyun.supabase.co';
   var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybWlkbm1sZXRocXZkYm1ueXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg3NzQsImV4cCI6MjEwMTMxNDc3NH0.U2cprYXkpIS_1tSAiEjCFuHAztZRwIIK6DYCCowgxg4';
   var LS_ATTEMPT = 'sg2_cloud_attempt::';   // + session → uuid
+  var LS_UPLOADED = 'sg2_media_up::';       // + session → 이미 올린 qid[] (sg-results.js 와 공유)
+  var BUCKET = 'toefl-recordings';
   var PUSH_MS = 1000;                       // 답안 변경을 1초로 모아 보낸다
   var RETRY_MS = 4000;
+  var MEDIA_TRIES = 5;                      // 녹음 재시도 상한 — 이 뒤로는 제출 후 업로더가 맡는다
 
   var cfg = { session: '', setCode: '', mode: '' };
   var attemptId = null;
@@ -94,6 +97,33 @@
       var f = root.fetch;
       if (!f) { cb(new Error('no_fetch'), 0); return; }
       f(URL_ + '/rest/v1/' + path, opts).then(function (r) {
+        if (r.ok) { cb(null, r.status); return; }
+        r.text().then(function (txt) {
+          var e = new Error('HTTP ' + r.status + ' ' + String(txt || '').slice(0, 200));
+          e.status = r.status;
+          cb(e, r.status);
+        }, function () { cb(new Error('HTTP ' + r.status), r.status); });
+      }, function (err) { cb(err || new Error('network'), 0); });
+    });
+  }
+
+  /* 녹음은 JSON 이 아니라 바이트다 — PostgREST 가 아니라 Storage 로 간다.
+     x-upsert 로 같은 자리에 덮어쓴다(재시도가 파일을 늘리지 않는다). */
+  function storagePut(path, blob, mime, cb) {
+    token(function (t) {
+      if (!t) { cb(new Error('no_session'), 0); return; }
+      var f = root.fetch;
+      if (!f) { cb(new Error('no_fetch'), 0); return; }
+      f(URL_ + '/storage/v1/object/' + BUCKET + '/' + path, {
+        method: 'POST',
+        headers: {
+          'apikey': ANON,
+          'Authorization': 'Bearer ' + t,
+          'Content-Type': mime || 'application/octet-stream',
+          'x-upsert': 'true'
+        },
+        body: blob
+      }).then(function (r) {
         if (r.ok) { cb(null, r.status); return; }
         r.text().then(function (txt) {
           var e = new Error('HTTP ' + r.status + ' ' + String(txt || '').slice(0, 200));
@@ -209,6 +239,98 @@
     return null;
   }
 
+  /* ── 스피킹 녹음 ─────────────────────────────────────────
+   *
+   * 경로는 제출 후 업로더(sg-results.js)·채점기(api/score.js)가 이미 쓰는 규칙 그대로다:
+   *   toefl-recordings / {user_id}/{session}/{question_id}.{ext}
+   * 버킷 정책이 첫 칸을 auth.uid() 와 대조하므로 남의 자리에는 쓸 수 없다.
+   * 같은 자리에 덮어쓰기 때문에 "녹음 끝난 즉시"와 "제출 후"가 겹쳐도 파일은 하나다.
+   */
+
+  function extOf(mime) {
+    var m = String(mime || '').toLowerCase();
+    if (m.indexOf('webm') >= 0) return 'webm';
+    if (m.indexOf('ogg') >= 0) return 'ogg';
+    if (m.indexOf('mp4') >= 0 || m.indexOf('m4a') >= 0 || m.indexOf('aac') >= 0) return 'm4a';
+    if (m.indexOf('wav') >= 0) return 'wav';
+    if (m.indexOf('mpeg') >= 0 || m.indexOf('mp3') >= 0) return 'mp3';
+    return 'webm';
+  }
+
+  function userId() {
+    try {
+      var A = root.SG_AUTH;
+      var u = A && typeof A.user === 'function' ? A.user() : null;
+      return u && u.id ? u.id : null;
+    } catch (e) { return null; }
+  }
+
+  /* 올린 문항을 남긴다 — 제출 후 업로더가 같은 목록을 보고 건너뛴다. */
+  function markUploaded(sess, qid) {
+    var k = LS_UPLOADED + sess, list = [];
+    try { list = JSON.parse(lsGet(k) || '[]') || []; } catch (e) { list = []; }
+    if (list.indexOf(qid) < 0) list.push(qid);
+    lsSet(k, JSON.stringify(list));
+  }
+
+  function sendMedia(p, cb) {
+    var u = userId();
+    var sess = p.session || cfg.session;
+    if (!u) { cb(new Error('no_user'), 0); return; }        // 로그인 전 — 재시도 대상이다
+    if (!sess) { cb(new Error('no_session'), 0); return; }
+    if (!p.blob || !p.blob.size) { cb(null, 0); return; }   // 올릴 게 없다(NOT SUBMIT)
+    var name = p.qid + '.' + extOf(p.mime);
+    var path = [u, sess, name].map(encodeURIComponent).join('/');
+    storagePut(path, p.blob, p.mime, function (err, status) {
+      if (err) { cb(err, status); return; }
+      markUploaded(sess, p.qid);
+      /* 파일만 올라가면 "어느 응시의 몇 번 문항인지"는 폴더 이름에만 남는다.
+         채점·검토가 곧장 찾아갈 수 있게 제출행도 같은 순간에 남긴다. */
+      var aId = p.attemptId || attemptId;
+      if (aId) {
+        enqueue('submission', {
+          attempt_id: aId,
+          question_id: p.qid,
+          kind: 'speaking',
+          storage_path: u + '/' + sess + '/' + name,
+          duration_ms: p.durationMs || null
+        });
+      }
+      cb(null, status);
+    });
+  }
+
+  /* 녹음이 끝나면 곧장 부른다. 실패해도 조용히 큐로 내려가고 시험은 그대로 간다. */
+  function uploadMedia(qid, rec) {
+    if (!qid || !rec) return null;
+    var blob = rec.blob || rec;
+    if (!blob || typeof blob.size !== 'number' || !blob.size) return null;
+    var p = {
+      qid: qid,
+      blob: blob,
+      mime: rec.mime || blob.type || 'audio/webm',
+      durationMs: rec.durationMs || 0,
+      session: cfg.session,
+      attemptId: attemptId,
+      tries: 0
+    };
+    sendMedia(p, function (err, status) {
+      if (!err) {
+        stats.sent += 1;
+        stats.lastOkAt = Date.now();
+        emit('sent', { kind: 'media', qid: qid });
+        scheduleRetry(0);
+        return;
+      }
+      stats.failed += 1;
+      stats.lastError = String(err.message || err);
+      if (permanent(status)) { warn('녹음을 버린다: ' + qid + ' — ' + stats.lastError); return; }
+      emit('offline', { reason: 'media', error: stats.lastError });
+      enqueue('media', p);          // 정전에도 살아남는 자리로 — 연결되면 다시 올라간다
+    });
+    return p;
+  }
+
   /* 큐를 앞에서부터 하나씩 비운다. 순서를 지키는 이유는 state/checkpoint 가
      "나중 것이 이긴다"는 성질에 기대고 있어서다. */
   function flushQueue(cb) {
@@ -217,6 +339,35 @@
       if (err || !list.length) { stats.queued = 0; if (cb) cb(); return; }
       stats.queued = list.length;
       var q = list[0];
+
+      /* 녹음은 수 MB 다. 실패한 녹음이 큐 머리에 눌러앉으면 그 뒤의 답안이 통째로
+         막힌다 — 그래서 실패하면 머리에서 빼서 꼬리로 돌린다. 답안이 먼저다. */
+      if (q.item.kind === 'media') {
+        sending = true;
+        sendMedia(q.item.payload, function (e2, status) {
+          sending = false;
+          if (!e2) {
+            dropQueued([q.id]);
+            stats.sent += 1;
+            stats.lastOkAt = Date.now();
+            emit('sent', { kind: 'media' });
+            scheduleRetry(0);
+            if (cb) cb();
+            return;
+          }
+          stats.failed += 1;
+          stats.lastError = String(e2.message || e2);
+          var p = q.item.payload;
+          p.tries = (p.tries || 0) + 1;
+          dropQueued([q.id]);
+          if (!permanent(status) && p.tries < MEDIA_TRIES) enqueue('media', p);
+          else warn('녹음을 포기한다(제출 후 업로더가 맡는다): ' + p.qid + ' — ' + stats.lastError);
+          scheduleRetry(permanent(status) ? 0 : RETRY_MS);
+          if (cb) cb(e2);
+        });
+        return;
+      }
+
       var ep = endpointFor(q.item);
       if (!ep || !q.item.attemptId) { dropQueued([q.id]); if (cb) cb(); return; }
       sending = true;
@@ -368,12 +519,13 @@
   root.SG_CLOUD = {
     start: start, id: id, ready: ready, reset: reset,
     markAnswer: markAnswer, pushAnswers: pushAnswers,
+    uploadMedia: uploadMedia,
     pushState: pushState, pushCheckpoint: pushCheckpoint,
     markSubmitted: markSubmitted,
     fetchCheckpoints: fetchCheckpoints,
     flush: flushQueue, stats: snapshot,
     on: function (fn) { if (typeof fn === 'function') listeners.push(fn); },
     // 테스트 훅
-    _rest: rest, _permanent: permanent, _uuid: uuid
+    _rest: rest, _permanent: permanent, _uuid: uuid, _extOf: extOf, _sendMedia: sendMedia
   };
 })(typeof window !== 'undefined' ? window : this);

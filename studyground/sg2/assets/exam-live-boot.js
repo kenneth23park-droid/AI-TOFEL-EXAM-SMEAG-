@@ -45,6 +45,14 @@
         if (root.SG_CLOUD) { try { root.SG_CLOUD.markAnswer(ev.detail && ev.detail.qid); } catch (e) {} }
         return;
       }
+      if (ev.type === 'media') {
+        /* 녹음은 모으지 않는다 — 다음 문항으로 넘어가기 전에 기기 밖으로 내보낸다.
+           IndexedDB 사본은 그대로 남으므로 실패해도 잃는 것은 없다. */
+        if (root.SG_CLOUD) {
+          try { root.SG_CLOUD.uploadMedia(ev.detail && ev.detail.qid, ev.detail && ev.detail.rec); } catch (e) {}
+        }
+        return;
+      }
       if (ev.type === 'answers') {
         if (root.SG_LDB) { try { root.SG_LDB.saveAnswers(sess, ev.detail); state.ldb = true; } catch (e) {} }
         return;
