@@ -8,6 +8,12 @@
   붙여넣거나 비워 둬도 된다 — 비면 아이디가 이름이 된다(서버의 claim()).
   이메일은 받지 않는다. 로그인은 아이디와 비밀번호 2222 로 한다.
 
+  명단이 이미 손에 있으면 세는 자리를 건너뛴다. 표 위의 붙여넣기 칸에 목록을 붙이거나
+  (Read the list), 엑셀 파일을 그대로 집으면(Import Excel — .xlsx · .csv) 표가 그 명단으로
+  채워진다. 이름·아이디 순서는 묻지 않는다 — 한 줄에서 smeag005 · 005 처럼 생긴 조각을
+  아이디로 집고 남은 글자를 이름으로 본다. 사람이 적어 온 명단은 이름이 먼저인 일이 훨씬
+  흔해서다. 빈 양식은 assets/smeag-students-template.xlsx 로 내려받는다.
+
   아이디 칸은 비워 두는 것이 기본이지만, 손으로 쳐서 번호를 집을 수도 있다(50 · 050 ·
   smeag050 전부 같은 자리). 빈 줄은 서버가 순서대로 채우되 손으로 집어 둔 번호는
   건너뛴다. 표의 회색 번호는 미리보기일 뿐이고, 실제 번호는 만들 때 서버가 그 시험일의
@@ -66,6 +72,15 @@
   .sheet tr.fail td { background:#fdf3f2; }
   .sheet tr.busy td { background:#fff7e0; }
   .pw { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:800; }
+
+  /* 명단 붙여넣기. 엑셀·카톡·메모장에서 긁어 온 덩어리를 그대로 받는 자리. */
+  .paste { width:100%; min-height:132px; resize:vertical; padding:10px 12px; font-size:13px;
+           line-height:1.6; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+           border:1px solid var(--line-2); border-radius:10px; background:#fff; color:var(--ink); }
+  .paste:focus { outline:2px solid var(--brand); outline-offset:-2px; }
+  .paste::placeholder { color:var(--dim); }
+  .read-sum { font-size:12.5px; font-weight:700; }
+  .read-sum .warn { color:#b3261e; }
   .ok-t { color:#1f6f45; font-weight:750; }
   .bad-t { color:#b3261e; font-weight:750; }
   .scroll { max-height:62vh; overflow:auto; border:1px solid var(--line-2); border-radius:12px; }
@@ -89,9 +104,10 @@
 <main class="wrap" style="padding-bottom:60px">
   <div class="page-h mt-24">
     <h1 style="font-size:clamp(24px,3.4vw,36px)">Register students</h1>
-    <p class="sub">Type how many students sit that day and the IDs fill themselves in — smeag000, smeag001, smeag002 …
+    <p class="sub">Bring the roster in the way you already have it — paste the list, import the Excel file, or
+      just type how many students sit that day and let the IDs fill themselves in: smeag000, smeag001, smeag002 …
       Type over an ID to pin a number, or leave the column alone and the server keeps counting. Names are
-      optional — type them in, paste a column straight from Excel, or leave them blank.</p>
+      optional — a blank name becomes the ID.</p>
   </div>
 
   <div class="card mt-16 hide" id="notice"></div>
@@ -111,6 +127,25 @@
         <div class="note grow" id="avail" style="margin-left:auto"></div>
       </div>
       <p class="note mt-8" id="hint"></p>
+    </section>
+
+    <section class="card mt-16">
+      <div class="field" style="margin:0">
+        <label for="paste">Paste your roster</label>
+        <textarea id="paste" class="paste" spellcheck="false" autocapitalize="none"
+          placeholder="HUANG PIN JUI&#9;smeag005&#10;HAYUL KIM&#9;smeag006&#10;PAI JUN YUAN&#9;smeag007"></textarea>
+      </div>
+      <div class="acts mt-8">
+        <button class="btn brand" id="read" type="button">Read the list</button>
+        <button class="btn ghost" id="pick" type="button">Import Excel…</button>
+        <button class="btn ghost" id="clearpaste" type="button">Clear</button>
+        <input id="file" type="file" accept=".xlsx,.csv,.tsv,.txt" hidden>
+        <div class="read-sum grow" id="readsum" style="margin-left:auto"></div>
+      </div>
+      <p class="note mt-8">One student per line. Name and ID may come in either order, separated by a tab,
+        a comma, or two spaces — leave the ID off and the server hands out the next free number.
+        <b>Import Excel</b> takes .xlsx or .csv straight from the file —
+        <a href="assets/smeag-students-template.xlsx" download>download the template</a> if you want the shape.</p>
     </section>
 
     <section class="card mt-16">
@@ -148,6 +183,7 @@
 
 <script src="assets/app.js"></script>
 <script src="assets/sg-auth.js"></script>
+<script src="assets/xlsx-read.js"></script>
 <script>
 (function () {
   'use strict';
@@ -256,6 +292,8 @@
         : 'All 1000 IDs are used on ' + r.exam_date;
       $('cards').href = 'admin-qr.html?date=' + encodeURIComponent(d);
       render();
+      /* 날짜가 바뀌면 "이미 나간 번호"의 기준도 바뀐다 — 붙여넣은 명단을 다시 본다. */
+      showSummary();
     }).catch(function () { $('avail').textContent = ''; });
   }
 
@@ -333,6 +371,166 @@
     if (!b) return;
     rows.splice(+b.dataset.del, 1);
     render();
+  }
+
+  /* ── 명단 붙여넣기 ──────────────────────────────────────────
+   *
+   * 표 안에서 붙여넣는 길은 엑셀의 열 순서(아이디 → 이름)를 그대로 따른다. 하지만
+   * 손으로 적어 온 명단은 사람 이름이 먼저 오는 쪽이 훨씬 흔하다. 그래서 이 칸은
+   * 순서를 묻지 않는다 — 한 줄에서 smeag005 · 005 처럼 생긴 조각을 아이디로 집고,
+   * 남은 글자를 이름으로 본다. 아이디가 없는 줄은 빈 칸으로 두고 서버가 순번을 준다.
+   */
+
+  function isIdToken(s) { return /^(?:smeag)?\d{1,3}$/i.test(s); }
+
+  /** 한 줄 → { id0, name }. 탭·쉼표·두 칸 이상 공백으로 자르고, 그래도 한 덩어리면
+   *  줄 끝(또는 줄 앞)에 붙은 아이디를 한 칸 공백에서 떼어 낸다. */
+  function parseLine(line) {
+    var parts = line.split(/\t|,|\s{2,}/).map(function (s) { return s.trim(); })
+                    .filter(function (s) { return s; });
+    if (parts.length === 1) {
+      var m = /^(.*\S)\s+((?:smeag)?\d{1,3})$/i.exec(parts[0]) ||
+              /^((?:smeag)?\d{1,3})\s+(\S.*)$/i.exec(parts[0]);
+      if (m) parts = isIdToken(m[1]) ? [m[1], m[2]] : [m[2], m[1]];
+    }
+    var id = '', name = [];
+    parts.forEach(function (p) {
+      if (!id && isIdToken(p)) id = p; else name.push(p);
+    });
+    return { id0: id, name: name.join(' ') };
+  }
+
+  function parseRoster(text) {
+    return String(text || '').replace(/\r/g, '').split('\n')
+      .map(function (l) { return l.trim(); })
+      .filter(function (l) { return l; })
+      .slice(0, MAX_ROWS)
+      .map(parseLine);
+  }
+
+  /* 붙여넣자마자 알려 주는 것들. 겹치는 아이디는 시트가 잡고, 이미 나간 번호는
+     서버가 알려준 첫 빈 자리로 안다 — 그 앞 번호는 전부 쓰인 자리다. */
+  function rosterSummary(list) {
+    if (!list.length) return '';
+    var ids = list.map(function (r) { return normId(r.id0); }).filter(function (v) { return v; });
+    var seen = {}, dup = [], taken = [];
+    ids.forEach(function (id) {
+      if (seen[id]) { if (dup.indexOf(id) < 0) dup.push(id); }
+      seen[id] = true;
+      if (parseInt(id.slice(5), 10) < start && taken.indexOf(id) < 0) taken.push(id);
+    });
+    var blank = list.length - ids.length;
+    var bad = list.filter(function (r) { return r.id0 && !normId(r.id0); }).length;
+
+    var head = list.length + ' row' + (list.length === 1 ? '' : 's');
+    if (ids.length) {
+      var sorted = ids.slice().sort();
+      head += ' · ' + sorted[0] + (sorted.length > 1 ? ' – ' + sorted[sorted.length - 1] : '');
+    }
+    if (blank) head += ' · ' + blank + ' auto';
+
+    var warn = [];
+    if (dup.length) warn.push('twice in the list: ' + dup.join(', '));
+    if (taken.length) warn.push('already used on ' + ($('date').value || 'this date') + ': ' + taken.join(', '));
+    if (bad) warn.push(bad + ' ID' + (bad === 1 ? '' : 's') + ' outside smeag000 – smeag999');
+    return head + (warn.length ? ' · <span class="warn">' + esc(warn.join(' · ')) + '</span>' : ' · ✓ all free');
+  }
+
+  function showSummary() {
+    $('readsum').innerHTML = rosterSummary(parseRoster($('paste').value));
+  }
+
+  /* 읽으면 표를 이 명단으로 갈아 끼운다 — 이미 만든 줄은 남긴다. 두 번 눌러도
+     같은 학생이 두 번 생기지 않게. */
+  function readList() {
+    var list = parseRoster($('paste').value);
+    if (!list.length) { say($('err'), 'Nothing to read — paste the roster first.'); return; }
+    var capped = $('paste').value.replace(/\r/g, '').split('\n')
+      .filter(function (l) { return l.trim(); }).length > MAX_ROWS;
+    rows = rows.filter(function (r) { return r.state === 'ok'; })
+               /* 읽어 온 번호는 여기서 smeag### 로 편다 — 손으로 친 칸과 달리, 파일에서
+                  온 "8" 을 그대로 두면 표가 무엇으로 만들지 말해 주지 못한다. */
+               .concat(list.map(function (r) {
+                 return { id0: normId(r.id0) || r.id0, name: r.name, state: 'todo' };
+               }));
+    render();
+    say($('ok'), list.length + ' row' + (list.length === 1 ? '' : 's') + ' read into the sheet.');
+    say($('err'), capped ? 'Only the first ' + MAX_ROWS + ' rows were read — run the rest as a second batch.' : '');
+  }
+
+  /* ── 엑셀 파일 가져오기 ─────────────────────────────────────
+   *
+   * 파일은 표를 바로 채우지 않고 위의 붙여넣기 칸에 글자로 들어온다. 관리자가 무엇이
+   * 읽혔는지 눈으로 본 뒤 고칠 수 있어야 하기 때문이다 — 파일에서 표로 바로 뛰면
+   * 잘못 읽힌 줄을 되돌릴 자리가 없다. 읽은 다음 곧바로 시트에도 옮긴다.
+   *
+   * .xlsx 는 SG_XLSX 가 zip 을 풀어 첫 시트를 준다. .csv/.tsv 는 글자 그대로다.
+   * 어느 쪽이든 결과는 한 줄 = 셀들이고, 순서 판단은 붙여넣기와 같은 parseLine 이 한다.
+   */
+
+  var HEADER_RE = /^(name|student\s*id|studentid|id|이름|성명|아이디|학번|번호|no\.?|#)$/i;
+
+  /** 첫 줄이 제목줄이면 버린다 — 채워진 칸이 전부 제목 낱말일 때만. */
+  function dropHeader(rows) {
+    if (!rows.length) return rows;
+    var cells = rows[0].filter(function (c) { return String(c).trim(); });
+    var head = cells.length && cells.every(function (c) { return HEADER_RE.test(String(c).trim()); });
+    return head ? rows.slice(1) : rows;
+  }
+
+  /** 따옴표를 지키는 CSV/TSV 파서. 구분자는 첫 줄에서 정한다. */
+  function parseDelimited(text) {
+    var s = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    var first = s.split('\n')[0] || '';
+    var sep = first.indexOf('\t') >= 0 ? '\t' : ',';
+    var rows = [], row = [], cell = '', quoted = false;
+    for (var i = 0; i < s.length; i++) {
+      var ch = s.charAt(i);
+      if (quoted) {
+        if (ch !== '"') { cell += ch; continue; }
+        if (s.charAt(i + 1) === '"') { cell += '"'; i++; continue; }
+        quoted = false;
+      } else if (ch === '"' && !cell) { quoted = true; }
+      else if (ch === sep) { row.push(cell); cell = ''; }
+      else if (ch === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+      else { cell += ch; }
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+
+  /** 표(2차원) → 붙여넣기 칸에 넣을 글자. 빈 줄은 버린다. */
+  function rowsToText(rows) {
+    return dropHeader(rows).map(function (r) {
+      return (r || []).map(function (c) { return String(c == null ? '' : c).trim(); })
+                      .join('\t').replace(/\t+$/, '');
+    }).filter(function (l) { return l.replace(/\t/g, '').trim(); }).join('\n');
+  }
+
+  function importFile(file) {
+    if (!file) return;
+    say($('err'), ''); say($('ok'), '');
+    var xlsx = /\.xlsx$/i.test(file.name);
+    if (/\.xls$/i.test(file.name)) {
+      say($('err'), 'Old .xls files are not supported — save it as .xlsx or .csv and try again.');
+      return;
+    }
+    var read = xlsx
+      ? file.arrayBuffer().then(function (buf) {
+          if (!window.SG_XLSX) throw new Error('The Excel reader did not load. Reload the page.');
+          return SG_XLSX.read(buf);
+        })
+      : file.text().then(parseDelimited);
+
+    read.then(function (rows) {
+      var text = rowsToText(rows);
+      if (!text) { say($('err'), 'That file has no rows to read.'); return; }
+      $('paste').value = text;
+      showSummary();
+      readList();
+    }).catch(function (e) {
+      say($('err'), 'Could not read ' + file.name + ' — ' + (e && e.message ? e.message : 'unknown error'));
+    });
   }
 
   /* ── 만들기 ────────────────────────────────────────────────── */
@@ -463,6 +661,14 @@
       say($('err'), rows.length >= MAX_ROWS ? 'The sheet holds ' + MAX_ROWS + ' rows at a time.' : '');
     });
     $('add').addEventListener('click', function () { addRows(1); render(); });
+    $('read').addEventListener('click', readList);
+    $('clearpaste').addEventListener('click', function () { $('paste').value = ''; showSummary(); });
+    $('paste').addEventListener('input', showSummary);
+    $('pick').addEventListener('click', function () { $('file').click(); });
+    $('file').addEventListener('change', function () {
+      importFile(this.files && this.files[0]);
+      this.value = '';                       // 같은 파일을 두 번 골라도 change 가 뜨게
+    });
     $('go').addEventListener('click', run);
     $('stop').addEventListener('click', function () { halt = true; });
     $('csv').addEventListener('click', csv);

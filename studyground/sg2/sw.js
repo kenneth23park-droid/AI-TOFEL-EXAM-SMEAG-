@@ -213,7 +213,12 @@
 //      가 셸에 들어오고, set9.html · set9-reading.html · en/test-nt/* 넷은 여태 빠져
 //      있던 assets/sg-auth.js 를 함께 싣는다 — 그 화면들은 SG_AUTH 가 없어 exam-cloud.js
 //      가 토큰을 못 얻었고, 그래서 답안이 아예 클라우드로 가지 않았다.
-const VERSION = 'sg-v60';
+// v61: 학생 명단을 손으로 옮겨 적지 않는다 — admin-students.html 이 붙여넣기 칸과
+//      엑셀 파일(.xlsx/.csv)을 받는다. 이름·아이디 순서는 알아서 가려 읽는다.
+//      새 파일 assets/xlsx-read.js(zip 을 DecompressionStream 으로 푸는 순수 계산)와
+//      빈 양식 assets/smeag-students-template.xlsx 가 셸에 들어온다. 캐시된 옛 사본이
+//      남은 기기는 붙여넣기 칸 없이 인원수 방식만 보고, Import 를 눌러도 아무 일이 없다.
+const VERSION = 'sg-v61';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -250,7 +255,7 @@ const SHELL_ASSETS = [
   'admin.html', 'admin-seats.html', 'assets/sg-seats.js', 'admin-teachers.html',
   // 학생 계정 대량 발급 — 시험 당일 아침에 회선이 흔들려도 화면 자체는 떠야 한다
   // (계정 생성은 서버가 하므로 오프라인에서는 만들지 못한다).
-  'admin-students.html',
+  'admin-students.html', 'assets/xlsx-read.js', 'assets/smeag-students-template.xlsx',
   'seat-setup.html', 'assets/seat-runtime.js',
 
   // 오프라인 사전 다운로드 — 목록 자체가 캐시에 있어야, 두 번째 방문이 오프라인이어도
