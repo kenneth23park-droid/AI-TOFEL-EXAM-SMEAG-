@@ -97,6 +97,10 @@
     </div>
   </div>
 
+  <!-- 이 기기에 남아 있던 녹음을 올린 결과. 아무 일도 없으면 서지 않는다. -->
+  <div id="media-note" hidden style="max-width:960px;margin:18px auto 0;padding:11px 14px;
+       border:1px solid var(--line-2);border-radius:10px;font-size:13px;line-height:1.6"></div>
+
   <!-- recent scores table -->
   <section class="section hide" id="recent" style="padding:40px 0">
     <h2 class="title mb-24"><span data-en>Recent scores</span><span data-ko>최근 성적</span></h2>
@@ -129,6 +133,12 @@
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
 <script src="assets/sg-band.js"></script>
+<!-- 스피킹 녹음은 IndexedDB 에 있고, 그 문을 여는 것은 SG_STORE 하나뿐이다
+     (assets/exam-store.js). 이 줄이 없으면 sg-results.js 의 uploadRecordings 가
+     window.SG_STORE 를 못 찾고 첫 줄에서 조용히 돌아선다 — 요청조차 나가지 않는다.
+     제출 화면(exam-runtime)에는 이 파일이 있어서 그 자리에서는 올라갔지만, 밀린
+     녹음을 다시 올릴 유일한 자리인 이 대시보드에서는 여태 한 번도 올라가지 못했다. -->
+<script src="assets/exam-store.js"></script>
 <script src="assets/sg-results.js"></script>
 <script>
 /* 내 성적 — 실제 응시 기록만 그린다. 예시 데이터는 두지 않는다.
@@ -297,10 +307,40 @@
       .then(function (staff) { if (staff) { ONLY = ''; cl.remove('sg-student'); } });
   }
 
+  /* 이 화면의 다른 문구와 같은 방식으로 두 언어를 함께 심는다 — [data-ko] 는
+     app.css 가 감추므로 화면에는 영어만 선다(KO 토글은 폐지됐다). */
+  function sayMedia(kind, en, ko) {
+    var box = document.getElementById('media-note');
+    if (!box) return;
+    box.hidden = false;
+    box.style.background = kind === 'good' ? '#e6f5ec' : '#fdf1dc';
+    box.style.borderColor = kind === 'good' ? '#b7dcc5' : '#e5c98f';
+    box.style.color = kind === 'good' ? '#1f7a44' : '#7a4a00';
+    box.innerHTML = '<span data-en></span><span data-ko></span>';
+    box.firstChild.textContent = en;
+    box.lastChild.textContent = ko;
+  }
+
   function boot() {
     paintAccount();
-    // 이 기기에 남아 있고 아직 안 올라간 응시가 있으면 조용히 올린다.
-    if (window.SG_RESULTS && SG_AUTH.user()) { SG_RESULTS.push().catch(function () {}); }
+    /* 이 기기에 남아 있고 아직 안 올라간 응시가 있으면 올린다. 답안은 조용히 가도
+       되지만 녹음은 아니다 — 못 올라간 녹음은 이 기기를 떠나는 순간 없어지므로,
+       그 사실만은 화면에 적는다(2026-08-12 시험을 잃은 자리가 정확히 여기다). */
+    if (window.SG_RESULTS && SG_AUTH.user()) {
+      SG_RESULTS.push().then(function (r) {
+        var m = (r && r.media) || null;
+        if (!m || (!m.sent && !m.failed)) return;
+        if (m.failed) {
+          sayMedia('warn', m.failed + ' recording(s) on this computer could not be uploaded (' +
+                   (m.error || 'unknown') + '). Open Recover recordings on this computer.',
+                   '이 컴퓨터의 녹음 ' + m.failed + '개를 올리지 못했습니다 (' +
+                   (m.error || 'unknown') + '). 이 컴퓨터에서 녹음 회수를 여세요.');
+        } else {
+          sayMedia('good', m.sent + ' recording(s) uploaded from this computer.',
+                   '이 컴퓨터에 남아 있던 녹음 ' + m.sent + '개를 올렸습니다.');
+        }
+      })['catch'](function () {});
+    }
 
     /* 응시 목록과 W·S 채점을 각각 한 번씩만 읽는다(응시마다 묻지 않는다).
        채점 조회가 실패해도 목록은 그려야 하므로 빈 배열로 받아 넘긴다. */

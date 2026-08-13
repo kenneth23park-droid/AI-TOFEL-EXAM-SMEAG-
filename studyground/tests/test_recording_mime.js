@@ -160,6 +160,16 @@ async function main() {
   var sw = fs.readFileSync(path.join(SG2, 'sw.js'), 'utf8');
   ok('회수 페이지가 셸에 들어 있다', /'recover-recordings\.html'/.test(sw));
 
+  /* 밀린 녹음을 다시 올리는 자리는 대시보드 하나뿐이다. 거기에 SG_STORE 가 없으면
+     uploadRecordings 는 첫 줄에서 돌아서고, 요청은 나가지도 않는다 — 화면만 보면
+     "올렸는데 안 올라간다" 로 보이는 그 상태다. */
+  var dash = fs.readFileSync(path.join(SG2, 'dashboard.html'), 'utf8');
+  ok('대시보드가 녹음 저장소(exam-store.js)를 싣는다',
+     /assets\/exam-store\.js/.test(dash));
+  ok('대시보드가 sg-results.js 도 싣는다', /assets\/sg-results\.js/.test(dash));
+  ok('대시보드가 녹음 업로드 결과를 화면에 적는다',
+     /sayMedia/.test(dash) && /r\.media/.test(dash));
+
   console.log('');
   if (fails.length) {
     console.log('FAILED (' + fails.length + '): ' + fails.join(', '));

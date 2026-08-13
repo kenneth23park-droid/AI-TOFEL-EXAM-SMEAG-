@@ -242,7 +242,13 @@
 //      기기에 남은 녹음을 세어 파일로 내려받고(오프라인 가능) 클라우드로 올린다.
 //      캐시된 옛 사본이 남은 기기는 여전히 코덱을 붙여 보내지만, 버킷 쪽도 함께
 //      넓혔으므로(supabase/recordings_staff.sql) 그 기기의 업로드도 통과한다.
-const VERSION = 'sg-v65';
+// v66: 밀린 녹음을 다시 올릴 수 있는 자리가 실제로 생긴다 — dashboard.html 이
+//      assets/exam-store.js 를 싣는다. 이 파일이 없어 window.SG_STORE 가 없었고,
+//      sg-results.js 의 uploadRecordings 는 첫 줄에서 조용히 돌아섰다. 그래서
+//      "다시 로그인해서 성적 화면을 열면 올라간다"는 길이 여태 한 번도 열린 적이
+//      없다(요청조차 나가지 않았다). 대시보드는 이제 올린 개수·실패 이유를 적는다.
+//      캐시된 옛 사본이 남은 기기는 여전히 아무 말 없이 아무것도 올리지 않는다.
+const VERSION = 'sg-v66';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
