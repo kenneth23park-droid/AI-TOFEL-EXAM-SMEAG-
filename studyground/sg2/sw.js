@@ -274,7 +274,15 @@
 //      회색으로 붙들고 있어 학생 눈에는 되돌아갈 길이 없어 보였다. 이제 앞 칸은
 //      engine.back(), 뒤 칸은 engine.next() 로 한 칸씩 옮긴다 — 모듈 경계는 그대로
 //      엔진이 막는다. 캐시된 옛 렌더러가 남은 기기는 계속 회색 칸을 본다.
-const VERSION = 'sg-v69';
+// v70: AI 채점이 곧 성적이다 — 선생님의 확정을 기다리지 않는다. 라이팅·스피킹의
+//      AI 점수와 채점 근거가 나오는 즉시 학생 성적표·리뷰·대시보드에 그대로 실리고,
+//      "AI 초안 · 교사 확정 대기" 라는 상태(sg-band.js 의 'draft')는 사라졌다.
+//      선생님은 여전히 점수를 고칠 수 있고, 고친 점수가 AI 를 이긴다(그 자리는
+//      자동 재채점도 건드리지 않는다) — 다만 관문이 아니라 덮어쓰기다.
+//      assets/sg-band.js · sg-review-writing.js · sg-review-speaking.js ·
+//      exam-shell.js 와 dashboard.html · review.html 이 함께 바뀌므로, 캐시된 옛
+//      사본이 남은 기기는 점수 밑에 "선생님이 아직 확정하지 않았습니다" 를 계속 본다.
+const VERSION = 'sg-v70';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

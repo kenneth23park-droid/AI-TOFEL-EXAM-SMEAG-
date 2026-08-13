@@ -260,7 +260,7 @@ window.SG_REVIEW_SPEAKING = (function () {
       '<span class="rw-score">' + it.score.toFixed(2) + '<span> / 5.00</span></span>' +
       '<small>' + (t.confirmed_at
         ? bi('Confirmed by a teacher.', '선생님이 확정한 점수입니다.')
-        : bi('AI draft — a teacher has not confirmed it yet.', 'AI 초안 — 선생님이 아직 확정하지 않았습니다.')) +
+        : bi('Scored by AI on the official ETS scoring guide.', 'ETS 공식 채점 가이드로 AI 가 채점했습니다.')) +
       '</small></div>';
   }
 

@@ -644,16 +644,17 @@ var BAND = (function () {
       byTask[skill].push({ score: Number(score), confirmed: !!t.confirmed_at, question_id: t.question_id || '' });
     });
 
-    var sections = {}, bands = {}, pending = [], draft = false;
+    var sections = {}, bands = {}, pending = [];
     SKILLS.forEach(function (s) {
       var band = null, status = 'pending', detail = null;
       if (s === 'writing' || s === 'speaking') {
         var list = byTask[s];
         band = taskBand(list, s);
         if (band !== null) {
+          /* AI 점수가 곧 성적이다. confirmed 는 선생님이 손본 자리를 세는 값일 뿐,
+             성적표에 점수를 실을지 말지를 가르지 않는다(sg-band.js 와 같은 규칙). */
           var ok = list.filter(function (t) { return t.confirmed; }).length;
-          status = ok === list.length ? 'final' : 'draft';
-          if (status === 'draft') draft = true;
+          status = ok === list.length ? 'final' : 'scored';
           /* 산출형의 원점수는 '받은 점수 / 만점' 이다 — 과제 하나가 5점. */
           var got = list.reduce(function (a, t) { return a + Number(t.score); }, 0);
           detail = { tasks: list.length, confirmed: ok, got: got, top: list.length * TASK_MAX,
@@ -674,7 +675,7 @@ var BAND = (function () {
 
     var total = overall(bands);
     return { sections: sections, overall: total, cefr: total === null ? '' : cefr(total),
-             pending: pending, draft: draft, conventional: conventional(sections) };
+             pending: pending, conventional: conventional(sections) };
   }
 
   /** 옛 눈금(/120) — 네 영역이 모두 채점된 응시에서만 말이 된다. 아니면 null. */
@@ -842,8 +843,7 @@ var BAND = (function () {
     });
   }
   function statusOf(v) {
-    if (!v.pending.length && !v.draft) return '<span class="status">✓ ' + bi('Done', '완료') + '</span>';
-    if (v.draft) return '<span class="status wait">' + bi('AI draft', 'AI 초안') + '</span>';
+    if (!v.pending.length) return '<span class="status">✓ ' + bi('Done', '완료') + '</span>';
     return '<span class="status wait">' + bi('Scoring', '채점 중') + '</span>';
   }
   function bandCell(band, cls) {
@@ -949,8 +949,8 @@ var BAND = (function () {
         var sec = v.sections[s];
         var sub = sec.band === null ? bi('not scored yet', '채점 전')
           : (s === 'reading' || s === 'listening') ? esc(rateOf(sec))
-          : (sec.status === 'draft' ? bi('AI draft · awaiting teacher', 'AI 초안 · 교사 확정 대기')
-                                    : bi('teacher-confirmed', '교사 확정'));
+          : (sec.status === 'final' ? bi('teacher-adjusted', '교사 확정')
+                                    : bi('AI-scored', 'AI 채점'));
         return cell(secHead(s), sec.band, sub);
       }).join('');
   }
@@ -1031,8 +1031,8 @@ var BAND = (function () {
         return '<div class="task">' +
           '<span class="qid">' + esc(t.question_id || '—') + '</span>' +
           '<span class="sc">' + Number(t.score).toFixed(2) + ' <small>/ ' + BAND.TASK_MAX + '</small></span>' +
-          '<span class="status' + (t.confirmed ? '' : ' wait') + '">' +
-            (t.confirmed ? bi('confirmed', '확정') : bi('AI draft', 'AI 초안')) + '</span>' +
+          '<span class="status">' +
+            (t.confirmed ? bi('teacher', '교사 확정') : bi('AI', 'AI 채점')) + '</span>' +
           (given ? '<div class="ans">' + esc(cut(given, 400)) + '</div>' : '') +
         '</div>';
       }).join('') : '<p class="muted" style="padding:14px 0;font-size:13.5px">' +
@@ -1242,9 +1242,6 @@ var BAND = (function () {
             return { skill: LAB[s][0], band: bandView.sections[s].band,
                      status: bandView.sections[s].status };
           }),
-          /* draft = 아직 선생님이 확정하지 않은 AI 초안이 섞여 있다. 성적표에
-             그대로 인쇄되면 확정 점수처럼 읽히므로 생성기가 표시해야 한다. */
-          draft: bandView.draft,
           pending: bandView.pending
         } : null,
         /* 영역이 빠진 채 매긴 등급은 실제보다 낮게 보인다 — 아예 비워 둔다. */
@@ -1280,9 +1277,16 @@ var BAND = (function () {
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
   function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+  /** CSV 한 칸으로 줄인 응시 상태. 선생님이 산출형 점수를 하나라도 고쳤으면 final. */
+  function bandStatus(v) {
+    if (v.pending.length) return 'incomplete';
+    return ['writing', 'speaking'].some(function (s) {
+      return v.sections[s] && v.sections[s].status === 'final';
+    }) ? 'final' : 'scored';
+  }
   function csvList() {
-    /* 밴드가 앞, 원점수가 뒤다 — 성적표의 눈금이 밴드이기 때문이다. band_status 가
-       draft 이면 아직 선생님이 확정하지 않은 AI 초안이 섞여 있다는 뜻이다. */
+    /* 밴드가 앞, 원점수가 뒤다 — 성적표의 눈금이 밴드이기 때문이다. band_status 는
+       incomplete(아직 덜 채점됨) · final(선생님이 손봄) · scored(AI 채점 그대로). */
     var head = ['submitted_at', 'name', 'student_id', 'test', 'kind',
                 'band_overall', 'cefr', 'band_reading', 'band_listening',
                 'band_writing', 'band_speaking', 'band_status',
@@ -1295,7 +1299,7 @@ var BAND = (function () {
                   isFull(r) ? 'full' : 'section',
                   v.overall === null ? '' : BAND.fmt(v.overall), v.cefr,
                   b('reading'), b('listening'), b('writing'), b('speaking'),
-                  v.draft ? 'draft' : (v.pending.length ? 'incomplete' : 'final'),
+                  bandStatus(v),
                   r.score, r.total, r.session].map(csvCell).join(','));
     });
     save('smeag-toefl-scores.csv', lines.join('\r\n'));

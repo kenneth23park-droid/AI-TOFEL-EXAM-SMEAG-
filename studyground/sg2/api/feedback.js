@@ -184,7 +184,7 @@ function attemptFor(row, taskRows, meta) {
     const s = view.sections[skill] || {};
     sections[skill] = {
       band: s.band,
-      status: s.status,                       // scored | draft | final | pending
+      status: s.status,                       // scored | final | pending
       detail: s.detail || null                // R·L 은 {correct,total,scaled}, W·S 는 {tasks,confirmed}
     };
   });
@@ -244,7 +244,6 @@ function attemptFor(row, taskRows, meta) {
     scale: 'TOEFL band 1.0-6.0',
     overall_band: view.overall,
     cefr: view.cefr,
-    includes_unconfirmed_ai_draft: !!view.draft,
     sections: sections,
     productive_tasks: tasks,
     wrong_questions: wrong,

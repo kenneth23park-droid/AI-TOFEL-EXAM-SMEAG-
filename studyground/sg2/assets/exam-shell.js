@@ -1012,8 +1012,8 @@ window.SG_RUNTIME = (function () {
                 /* 밴드가 나오면 이 줄은 지운다 — 아래에 네 영역 점수가 그려지고 나면
                    "자동 채점 문항 기준" 은 방금 그린 표와 어긋나 보인다. */
                 '<p id="done-auto-note" style="opacity:.7;font-size:13px;margin:0 0 6px">' +
-                  '<span data-en>Auto-scored questions only. Writing and Speaking are scored by AI first, then confirmed by a teacher.</span>' +
-                  '<span data-ko>자동 채점 문항 기준입니다. 라이팅·스피킹은 AI 가 먼저 채점하고 선생님이 확정합니다.</span></p>'
+                  '<span data-en>Auto-scored questions only. Writing and Speaking are being scored by AI right now.</span>' +
+                  '<span data-ko>자동 채점 문항 기준입니다. 라이팅·스피킹은 지금 AI 가 채점하고 있습니다.</span></p>'
               : '<p style="opacity:.7"><span data-en>Your answers are saved.</span><span data-ko>답안이 저장되었습니다.</span></p>') +
         '<p id="done-sync" style="opacity:.6;font-size:12px;margin:14px 0"></p>' +
         '<div id="done-bands" hidden style="margin:18px auto 0;max-width:420px;text-align:left"></div>' +
@@ -1180,12 +1180,7 @@ window.SG_RUNTIME = (function () {
           box.hidden = false;
           var auto = document.getElementById('done-auto-note');
           if (auto) auto.hidden = true;
-          if (b.draft) {
-            say('Scored. Writing and Speaking are AI drafts — a teacher confirms them later.',
-                '채점이 끝났습니다. 라이팅·스피킹은 AI 초안이며 선생님이 나중에 확정합니다.');
-          } else {
-            say('Scored.', '채점이 끝났습니다.');
-          }
+          say('Scored.', '채점이 끝났습니다.');
           return b;
         });
       })['catch'](function () { return null; });

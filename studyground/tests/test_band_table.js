@@ -133,15 +133,14 @@ eq(view.sections.writing.status, 'pending', 'of(): 채점 전 라이팅 상태')
 eq(view.pending.join(','), 'writing,speaking', 'of(): 대기 목록');
 eq(view.overall, 5.5, 'of(): 종합은 채점된 둘의 평균 (5.0 + 5.5) / 2');
 eq(view.cefr, 'C1', 'of(): CEFR');
-eq(view.draft, false, 'of(): AI 초안이 없으면 draft 아님');
 
 var withAi = BAND.of(row, [
   { skill: 'writing', question_id: 'set9-W2-email', ai_score: 4, teacher_score: null, confirmed_at: null },
   { skill: 'writing', question_id: 'set9-W3-disc', ai_score: 3, teacher_score: null, confirmed_at: null }
 ]);
-eq(withAi.sections.writing.band, 4.5, 'of(): AI 초안 7/10 → 21/30 → W 4.5');
-eq(withAi.sections.writing.status, 'draft', 'of(): 교사 확정 전은 draft');
-eq(withAi.draft, true, 'of(): draft 플래그');
+eq(withAi.sections.writing.band, 4.5, 'of(): AI 채점 7/10 → 21/30 → W 4.5');
+eq(withAi.sections.writing.status, 'scored', 'of(): 교사 확정 없이도 채점된 상태다');
+eq(withAi.overall, 5, 'of(): AI 점수도 종합에 그대로 들어간다 (5.0 + 5.5 + 4.5) / 3 = 5.0');
 
 var confirmed = BAND.of(row, [
   { skill: 'writing', question_id: 'set9-W2-email', ai_score: 4, teacher_score: 5, confirmed_at: '2026-08-11T00:00:00Z' },
@@ -149,7 +148,6 @@ var confirmed = BAND.of(row, [
 ]);
 eq(confirmed.sections.writing.band, 6, 'of(): 교사 점수가 AI 를 이긴다 (10/10 → 30/30 → 6.0)');
 eq(confirmed.sections.writing.status, 'final', 'of(): 확정 상태');
-eq(confirmed.draft, false, 'of(): 전부 확정되면 draft 아님');
 
 console.log('\n' + (fails ? fails + ' FAILED' : 'ALL PASS'));
 process.exit(fails ? 1 : 0);

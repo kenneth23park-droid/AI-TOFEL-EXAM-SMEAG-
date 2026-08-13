@@ -139,7 +139,8 @@ ok(rep.indexOf('data-play="' + repeats[0].id + '"') >= 0, 'D: 녹음 자리가 �
 ok(rep.indexOf('Word by word') >= 0, 'D: 복창에는 낱말 대조 카드가 있어야 한다');
 ok(/rs-diff/.test(rep) && /<i class="del">/.test(rep),
    'D: 빠뜨린 낱말이 취소선으로 갈려야 한다');
-ok(rep.indexOf('AI draft') >= 0, 'D: 확정 전이면 초안이라고 말해야 한다');
+ok(rep.indexOf('Scored by AI') >= 0, 'D: 확정 전이면 AI 채점이라고 말해야 한다');
+ok(rep.indexOf('AI draft') < 0, 'D: 초안이라고 부르지 않는다 — AI 점수가 곧 점수다');
 
 var ask = RS.html(M, { m: 1, q: 0 });
 ok(ask.indexOf('What the interviewer asked') >= 0, 'D: 인터뷰에는 질문이라는 이름이 붙어야 한다');

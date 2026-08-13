@@ -1,13 +1,14 @@
-/* review.html 요약줄의 ✎ — "AI 초안 있음" 표시를 선생님에게는 버튼으로 준다.
+/* review.html 요약줄의 ✎ — 선생님이 그 자리에서 AI 리뷰를 부르는 버튼.
  *
  * 왜 필요한가
- *   채점(초안)과 코멘트(AI 리뷰)는 따로 만들어진다. 제출 직후 초안 점수만 생기고
- *   리뷰는 없는 답안지가 흔하다. 그때 선생님이 화면을 옮기지 않고 그 자리에서
- *   리뷰를 부를 수 있어야 한다 — 그 입구가 요약줄의 연필이다.
+ *   채점과 코멘트(AI 리뷰)는 따로 만들어진다. 제출 직후 점수만 생기고 리뷰는 없는
+ *   답안지가 흔하다. 그때 선생님이 화면을 옮기지 않고 그 자리에서 리뷰를 부를 수
+ *   있어야 한다 — 그 입구가 요약줄의 연필이다.
  *
  * 지켜야 할 두 가지
- *   1. 학생 화면에는 버튼이 없다. /api/feedback 은 교사·관리자 전용이라, 학생에게
- *      누를 수 있게 보여 주면 401 만 돌려받는 버튼이 된다.
+ *   1. 학생 화면에는 이 줄 자체가 없다. /api/feedback 은 교사·관리자 전용이라,
+ *      학생에게 누를 수 있게 보여 주면 401 만 돌려받는 버튼이 된다. 학생 쪽 리뷰는
+ *      autoReview() 가 알아서 부른다.
  *   2. 생성 경로는 하나다. 선생님 줄의 Generate 와 연필이 각자 저장 코드를 들고
  *      있으면 한쪽만 고친 날 두 입구가 다르게 동작한다.
  *
@@ -47,7 +48,7 @@ function run(staff) {
   var slot = { innerHTML: '' };
   var nodes = {};                                   // id → 가짜 노드
   var STUB = [
-    "var VIEW = { overall: 4.5, cefr: 'B2', draft: true, sections: {} };",
+    "var VIEW = { overall: 4.5, cefr: 'B2', sections: {} };",
     "var STAFF = __staff;",
     "function esc(s) { return String(s == null ? '' : s); }",
     "function bi(en) { return en; }",
@@ -73,11 +74,12 @@ function run(staff) {
   return { html: slot.innerHTML, nodes: nodes, called: called };
 }
 
-/* A. 학생 — 연필은 글자일 뿐이다 */
+/* A. 학생 — 요청 줄이 아예 없다 */
 var student = run(false);
-ok(student.html.indexOf('✎') >= 0, 'A: 학생에게도 초안 표시(✎)는 보여야 한다');
 ok(student.html.indexOf('id="ai-ask"') < 0, 'A: 학생 화면에는 요청 버튼이 없어야 한다');
-ok(student.html.indexOf('<button') < 0, 'A: 학생 화면 초안 줄에는 버튼이 없어야 한다');
+ok(student.html.indexOf('<button') < 0, 'A: 학생 요약줄에는 버튼이 없어야 한다');
+ok(student.html.indexOf('AI draft') < 0 && student.html.indexOf('초안') < 0,
+   'A: 학생에게 초안이라고 말하지 않는다 — AI 점수가 곧 점수다');
 
 /* B. 선생님 — 연필이 버튼이고, 누르면 AI 리뷰를 부른다 */
 var staff = run(true);
@@ -96,12 +98,12 @@ ok(gens === 1, 'C: SG_COMMENTS.generate 호출은 한 군데뿐이어야 한다 
 ok(src.indexOf('runAiComments(pick[0], pick[1]') >= 0,
    'C: 선생님 줄의 Generate 도 같은 함수를 지나야 한다');
 
-/* D. 초안이 아닌 답안지에는 요청 줄 자체가 없다 */
-var noDraft = (function () {
+/* D. 아직 아무것도 채점되지 않아 밴드 관점이 없으면 요청 줄도 없다 */
+var noView = (function () {
   var slot = { innerHTML: '' };
   new Function('__slot', '__find', '__called', '__staff', 'window',
     [
-      "var VIEW = { overall: 4.5, cefr: 'B2', draft: false, sections: {} };",
+      "var VIEW = null;",
       "var STAFF = true;",
       "function esc(s) { return String(s == null ? '' : s); }",
       "function bi(en) { return en; }",
@@ -114,7 +116,7 @@ var noDraft = (function () {
     JSON.stringify(DET) + ', null);')(slot, function () { return null; }, [], true, {});
   return slot.innerHTML;
 })();
-ok(noDraft.indexOf('id="ai-ask"') < 0, 'D: 초안이 없으면 요청 버튼도 없어야 한다');
+ok(noView.indexOf('id="ai-ask"') < 0, 'D: 밴드 관점이 없으면 요청 버튼도 없어야 한다');
 
 if (fails) { console.error('\n' + fails + '개 실패'); process.exit(1); }
-console.log('OK — 리뷰 요약의 ✎ : 학생 표시 · 선생님 버튼 · 단일 생성 경로');
+console.log('OK — 리뷰 요약의 ✎ : 선생님 전용 버튼 · 단일 생성 경로');

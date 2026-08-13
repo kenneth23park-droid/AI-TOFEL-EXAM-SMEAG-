@@ -145,13 +145,17 @@
    *
    * @param row       sg_results 행 ({ by_section, set_code, scale })
    * @param taskRows  sg_task_scores 행 [] (없으면 W·S 는 채점 대기)
-   * @returns { scale, sections:{skill:{band,status,...}}, overall, cefr, pending:[], draft:bool }
+   * @returns { scale, sections:{skill:{band,status,...}}, overall, cefr, pending:[] }
    *
    * status 는 셋 중 하나다. 화면은 이 값만 보고 문구를 고르면 된다.
-   *   'scored'  자동채점 끝 (R·L)
-   *   'draft'   AI 초안이 나왔고 교사 확정 전 (W·S)
-   *   'final'   교사가 확정 (W·S)
+   *   'scored'  채점 끝 — R·L 은 자동채점, W·S 는 AI 채점
+   *   'final'   교사가 손대서 확정 (W·S)
    *   'pending' 아직 점수가 없다
+   *
+   * AI 채점은 그 자체로 성적이다. 예전에는 'draft' 라는 네 번째 상태가 있어서
+   * 교사가 확정하기 전까지 화면마다 "초안 · 확정 대기" 라고 붙였는데, 확정을
+   * 기다리는 동안 학생에게는 점수가 없는 것처럼 보였다. 이제 AI 점수는 나오는
+   * 즉시 그 응시의 점수이고, 교사의 확정은 **덮어쓰기**일 뿐 관문이 아니다.
    */
   function of(row, taskRows) {
     row = row || {};
@@ -162,7 +166,7 @@
       var t = taskRows[i] || {};
       var skill = String(t.skill || '').toLowerCase();
       if (!byTask[skill]) continue;
-      /* 최종 점수는 교사가 이긴다. 교사가 손대지 않았을 때만 AI 초안을 쓴다. */
+      /* 최종 점수는 교사가 이긴다. 교사가 손대지 않았으면 AI 점수가 그대로 점수다. */
       var score = (t.teacher_score === null || t.teacher_score === undefined)
         ? t.ai_score : t.teacher_score;
       if (score === null || score === undefined || score === '') continue;
@@ -174,7 +178,7 @@
       });
     }
 
-    var sections = {}, bands = {}, pending = [], anyDraft = false;
+    var sections = {}, bands = {}, pending = [];
     for (var s = 0; s < SKILLS.length; s++) {
       var skill2 = SKILLS[s];
       var band = null, status = 'pending', detail = null;
@@ -185,8 +189,9 @@
         if (band !== null) {
           var confirmed = 0;
           for (var j = 0; j < tasks.length; j++) if (tasks[j].confirmed) confirmed += 1;
-          status = confirmed === tasks.length ? 'final' : 'draft';
-          if (status === 'draft') anyDraft = true;
+          /* 점수는 이미 나와 있다. confirmed 는 "선생님이 들여다본 자리" 를 세는
+             것일 뿐, 점수가 유효한지를 가르는 값이 아니다. */
+          status = confirmed === tasks.length ? 'final' : 'scored';
           detail = { tasks: tasks.length, confirmed: confirmed };
         }
       } else {
@@ -212,8 +217,7 @@
       sections: sections,
       overall: total,
       cefr: total === null ? '' : cefr(total),
-      pending: pending,
-      draft: anyDraft
+      pending: pending
     };
   }
 

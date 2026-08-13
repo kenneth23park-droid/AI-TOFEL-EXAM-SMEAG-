@@ -207,9 +207,8 @@
 
   /* 영역이 왜 비어 있는지 한 마디로 말해 준다. 빈칸만 두면 0점으로 읽힌다. */
   function why(status) {
-    if (status === 'draft') return bi('AI draft · awaiting teacher', 'AI 초안 · 교사 확정 대기');
-    if (status === 'final') return bi('teacher-confirmed', '교사 확정');
-    if (status === 'scored') return bi('auto-scored', '자동 채점');
+    if (status === 'final') return bi('teacher-adjusted', '교사 확정');
+    if (status === 'scored') return bi('scored', '채점 완료');
     return bi('not scored yet', '아직 채점 전');
   }
 
@@ -243,9 +242,6 @@
         '<div style="font-size:13px">' +
           (v.cefr ? '<div><b>CEFR ' + esc(v.cefr) + '</b></div>' : '') +
           '<div class="muted">' + note + '</div>' +
-          (v.draft ? '<div class="muted">' +
-            bi('Includes an AI draft that a teacher has not confirmed yet.',
-               '아직 교사가 확정하지 않은 AI 초안이 포함되어 있습니다.') + '</div>' : '') +
         '</div>' +
         '<a class="btn ghost sm" style="margin-left:auto" href="review.html?session=' +
           encodeURIComponent(best.row.session) + '">' + bi('Review', '리뷰') + '</a>' +
@@ -281,8 +277,7 @@
     return Object.keys(LAB).map(function (s) {
       var sec = v.sections[s];
       var band = sec && sec.band !== null ? SG_BAND.fmt(sec.band) : '—';
-      var mark = sec && sec.status === 'draft' ? ' ✎' : '';   // ✎ = AI 초안, 확정 전
-      return '<span class="chip">' + esc(LAB[s][0]) + ' ' + esc(band + mark) + '</span>';
+      return '<span class="chip">' + esc(LAB[s][0]) + ' ' + esc(band) + '</span>';
     }).join(' ');
   }
 

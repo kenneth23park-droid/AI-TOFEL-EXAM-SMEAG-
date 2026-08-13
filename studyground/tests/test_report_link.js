@@ -115,7 +115,9 @@ eq(band6.band.sections.map(function (s) { return s.band; }), [5, 5.5, null, null
 eq(band6.band.overall, 5.5, '종합은 채점된 영역의 평균 (5.0+5.5)/2 = 5.25 → 5.5');
 eq(band6.band.cefr, 'C1', 'CEFR');
 eq(band6.band.pending, ['writing', 'speaking'], '채점 전 영역을 알린다');
-eq(band6.band.draft, false, '확정 전 AI 초안이 없으면 draft 아님');
+eq(band6.band.sections.map(function (s) { return s.status; }),
+   ['scored', 'scored', 'pending', 'pending'],
+   '성적표에 실리는 상태는 채점됐는지 뿐이다 — 확정 대기라는 자리는 없다');
 ok(band6.total !== null && band6.total !== undefined,
    '옛 0~120 값은 그대로 남는다 (전환기 병기) → ' + band6.total);
 

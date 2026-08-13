@@ -129,8 +129,8 @@
     return Object.keys(LAB).map(function (s) {
       var sec = v.sections[s];
       var band = sec && sec.band !== null ? SG_BAND.fmt(sec.band) : '—';
-      // ✎ = AI 초안(교사 확정 전). 선생님이 손볼 곳을 한눈에 찾는 표시다.
-      return '<span class="chip">' + LAB[s] + ' ' + band + (sec && sec.status === 'draft' ? ' ✎' : '') + '</span>';
+      // ✎ = 선생님이 점수를 고친 자리. 나머지는 AI 채점 그대로다.
+      return '<span class="chip">' + LAB[s] + ' ' + band + (sec && sec.status === 'final' ? ' ✎' : '') + '</span>';
     }).join(' ');
   }
 
@@ -181,10 +181,12 @@
 
   function paint() {
     var list = shown();
-    var waiting = list.filter(function (r) { return viewOf(r).draft; }).length;
+    /* 예전에는 "확정 대기" 를 셌다. AI 점수가 곧 성적이 된 뒤로 기다리는 것은
+       채점이 아직 안 끝난 응시뿐이다 — 그것만 센다. */
+    var waiting = list.filter(function (r) { return viewOf(r).pending.length; }).length;
     var hid = ALL.filter(function (r) { return r.hidden; }).length;
     $('count').textContent = list.length + ' / ' + ALL.length +
-      (waiting ? '  ·  ✎ ' + waiting + ' awaiting confirmation' : '') +
+      (waiting ? '  ·  ' + waiting + ' not fully scored' : '') +
       (hid ? '  ·  ' + hid + ' hidden' : '');
     $('rows').innerHTML = list.length ? list.map(function (r) {
       return '<tr' + (r.hidden ? ' style="opacity:.55"' : '') + '>' +
@@ -392,10 +394,20 @@
     $('set').innerHTML = opts;
   }
 
+  /** CSV 한 칸으로 줄인 응시 상태. 선생님이 산출형 점수를 하나라도 고쳤으면 final. */
+  function bandStatus(v) {
+    if (v.pending.length) return 'incomplete';
+    var touched = ['writing', 'speaking'].some(function (s) {
+      return v.sections[s] && v.sections[s].status === 'final';
+    });
+    return touched ? 'final' : 'scored';
+  }
+
   function csv() {
     /* 밴드를 앞에 두고 원점수를 뒤에 둔다 — 성적표의 눈금이 밴드이기 때문이다.
-       확정 전(AI 초안)이면 band_status 가 draft 다. 그 열이 없으면 스프레드시트에서
-       초안과 확정 점수가 구분 없이 섞인다. */
+       band_status 는 scored(AI 채점 그대로) · final(선생님이 손봄) · incomplete(아직
+       채점되지 않은 영역이 있음) 셋이다. 그 열이 없으면 스프레드시트에서 아직 덜
+       채점된 응시가 다 끝난 응시처럼 섞인다. */
     var head = ['submitted_at', 'name', 'student_id', 'teacher', 'set', 'attempt_no',
                 'band_overall', 'band_reading', 'band_listening', 'band_writing', 'band_speaking',
                 'band_status', 'cefr', 'auto_correct', 'auto_total', 'session', 'hidden', 'hidden_reason'];
@@ -407,7 +419,7 @@
                   r.hidden ? '' : (r.attempt_no || 1),
                   v.overall === null ? '' : SG_BAND.fmt(v.overall),
                   b('reading'), b('listening'), b('writing'), b('speaking'),
-                  v.draft ? 'draft' : (v.pending.length ? 'incomplete' : 'final'),
+                  bandStatus(v),
                   v.cefr, r.score, r.total, r.session,
                   r.hidden ? 'hidden' : '', r.hidden_reason || '']
         .map(function (v2) { return '"' + String(v2).replace(/"/g, '""') + '"'; }).join(','));

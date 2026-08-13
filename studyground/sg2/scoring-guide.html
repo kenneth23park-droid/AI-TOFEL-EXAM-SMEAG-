@@ -221,25 +221,32 @@
 
   <!-- 5 -->
   <div class="card mt-16">
-    <h2><span data-en>5. Speaking &amp; Writing: AI drafts, the teacher decides</span><span data-ko>5. 스피킹·라이팅 — AI 는 초안, 점수는 선생님</span></h2>
+    <h2><span data-en>5. Speaking &amp; Writing: AI scores at once, the teacher may adjust</span><span data-ko>5. 스피킹·라이팅 — AI 가 바로 채점, 선생님은 조정</span></h2>
     <p style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px">
-      <span data-en>student response → rubric draft (AI or rules) → teacher confirms → report</span>
-      <span data-ko>학생 답안 → 루브릭 초안(AI 또는 규칙) → 선생님 확정 → 성적표</span>
+      <span data-en>student response → rubric score (AI or rules) → report → teacher may adjust</span>
+      <span data-ko>학생 답안 → 루브릭 채점(AI 또는 규칙) → 성적표 → 선생님이 조정 가능</span>
     </p>
     <ul>
-      <li><b><span data-en>A draft is a starting point, not a score.</span><span data-ko>초안은 점수가 아니라 출발점.</span></b>
-        <span data-en>It is always labelled "draft · teacher review required", and the record keeps who confirmed it.</span>
-        <span data-ko>화면에 항상 "초안 · 교사 검수 필요"로 표시되고, 확정한 사람이 기록에 남습니다.</span></li>
-      <li><b><span data-en>Drafts are deliberately conservative.</span><span data-ko>초안은 의도적으로 보수적.</span></b>
-        <span data-en>The rule-based draft starts at the middle of the band and moves only within bounds; it never
+      <li><b><span data-en>The AI score is the score.</span><span data-ko>AI 점수가 곧 점수.</span></b>
+        <span data-en>It reaches the student's report as soon as it is written — about a minute after submitting —
+          with the rubric reasons beside it. Nothing waits for an approval step. The record keeps which model
+          produced it, and who changed it if anyone did.</span>
+        <span data-ko>제출 뒤 1분쯤이면 채점 근거와 함께 학생 성적표에 그대로 실립니다. 승인을 기다리는 단계는
+          없습니다. 어떤 모델이 매겼는지, 누가 고쳤는지는 기록에 남습니다.</span></li>
+      <li><b><span data-en>A teacher outranks the AI, whenever they look.</span><span data-ko>선생님이 AI 를 이긴다 — 언제 보든.</span></b>
+        <span data-en>A teacher can change any task score at any time; the new score replaces the AI one on every
+          screen, and automatic re-scoring never touches a task a teacher has edited.</span>
+        <span data-ko>선생님은 언제든 과제 점수를 고칠 수 있고, 고친 점수가 모든 화면에서 AI 점수를 대신합니다.
+          선생님이 손댄 과제는 자동 재채점이 건드리지 않습니다.</span></li>
+      <li><b><span data-en>Rule-based scores are deliberately conservative.</span><span data-ko>규칙 기반 점수는 의도적으로 보수적.</span></b>
+        <span data-en>The rule-based fallback starts at the middle of the band and moves only within bounds; it never
           awards the top of the scale. A teacher raising a score is safer than an unearned top band reaching a report.</span>
-        <span data-ko>규칙 기반 초안은 밴드의 가운데에서 시작해 정해진 폭만큼만 움직이고, 척도의 최상단은 주지
+        <span data-ko>규칙 기반 대체 채점은 밴드의 가운데에서 시작해 정해진 폭만큼만 움직이고, 척도의 최상단은 주지
           않습니다. 근거 없는 만점이 성적표에 실리는 것보다 선생님이 올려 주는 편이 안전하기 때문입니다.</span></li>
-      <li><b><span data-en>A draft exists even offline.</span><span data-ko>네트워크가 없어도 초안이 나온다.</span></b>
-        <span data-en>On site without a network, the draft is rule-based (length, sentence count, lexical variety);
-          online, an LLM writes it. Either way the score is decided by a person.</span>
-        <span data-ko>오프라인 현장에서는 규칙 기반(길이·문장수·어휘 다양도), 온라인에서는 LLM 이 초안을 만듭니다.
-          어느 쪽이든 최종 점수의 주체는 사람입니다.</span></li>
+      <li><b><span data-en>A score exists even offline.</span><span data-ko>네트워크가 없어도 점수가 나온다.</span></b>
+        <span data-en>On site without a network, scoring is rule-based (length, sentence count, lexical variety);
+          online, an LLM does it.</span>
+        <span data-ko>오프라인 현장에서는 규칙 기반(길이·문장수·어휘 다양도), 온라인에서는 LLM 이 채점합니다.</span></li>
       <li><b><span data-en>Listen and Repeat is an exception.</span><span data-ko>복창은 예외 규칙.</span></b>
         <span data-en>Its target is one 8–14 word sentence, so length metrics would floor even a perfect answer.
           It is compared to the script instead.</span>
@@ -340,9 +347,9 @@
         <tr><td><span data-en>Answer keys are separated</span><span data-ko>정답지 분리</span></td>
           <td><span data-en>Keys are service-role only; student-facing code does not carry them.</span>
               <span data-ko>정답지는 service_role 전용입니다. 학생 화면 코드가 정답을 들고 다니지 않습니다.</span></td></tr>
-        <tr><td><span data-en>AI output is labelled</span><span data-ko>AI 초안 표시</span></td>
-          <td><span data-en>Anything an AI produced is shown as a draft, and the confirming teacher is recorded.</span>
-              <span data-ko>AI 가 만든 값은 항상 초안으로 표시되고, 확정한 사람이 기록에 남습니다.</span></td></tr>
+        <tr><td><span data-en>AI output is labelled</span><span data-ko>AI 채점 표시</span></td>
+          <td><span data-en>Anything an AI produced says so, with the model recorded — and the teacher, if one changed it.</span>
+              <span data-ko>AI 가 매긴 값은 그렇다고 표시되고 모델이 기록에 남습니다. 선생님이 고쳤다면 그것도 남습니다.</span></td></tr>
         <tr><td><span data-en>Usage ledger</span><span data-ko>단가·사용량 원장</span></td>
           <td><span data-en>AI calls record tokens and cost; when a price is unknown the amount stays empty rather than estimated.</span>
               <span data-ko>AI 호출은 토큰·금액이 원장에 남고, 단가를 모르면 추정치를 지어내지 않고 비워 둡니다.</span></td></tr>
@@ -362,8 +369,8 @@
           <span data-ko>자체 루브릭을 만들지 않습니다 — 1절.</span></li>
       <li><span data-en>No calling the scaled number a predicted official score — see section 6.</span>
           <span data-ko>환산 점수를 공식 예상 점수라고 부르지 않습니다 — 6절.</span></li>
-      <li><span data-en>No AI score reaching a report unconfirmed — see section 5.</span>
-          <span data-ko>AI 점수를 그대로 확정하지 않습니다 — 5절.</span></li>
+      <li><span data-en>No AI score without its reasons — a score reaches the report with the rubric that produced it, see section 5.</span>
+          <span data-ko>근거 없는 AI 점수를 싣지 않습니다 — 점수는 채점 근거와 함께 갑니다, 5절.</span></li>
     </ul>
     <p class="muted mt-16" style="font-size:12.5px">
       <span data-en>A new rule is written here before it is written in code. A rule with no stated reason cannot be
