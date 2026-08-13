@@ -289,6 +289,15 @@ footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font
       </div>
     </div>
 
+    <!-- 확정 성적 세트 — 여러 회차에서 영역별로 하나씩 골라 관리자가 확정한 한 벌.
+         아래 「내 최고 점수」와 다르다. 저쪽은 기계가 집은 참고값이고, 이쪽은 사람이
+         고른 성적이다(선생님 동의 + 관리자 확정). 그래서 위에 둔다. -->
+    <div class="card mt-16 hide" id="official-card">
+      <div class="eyebrow"><span data-en>My score set</span><span data-ko>확정 성적 세트</span></div>
+      <div class="score-row mt-16" id="official-row"></div>
+      <p class="muted mt-8" style="font-size:12.5px" id="official-note"></p>
+    </div>
+
     <div class="card mt-16" id="best-card">
       <div class="eyebrow"><span data-en>My best score</span><span data-ko>내 최고 점수</span></div>
       <div class="score-row mt-16" id="best-row"></div>
@@ -704,7 +713,7 @@ var BAND = (function () {
   var LAB = { reading: ['Reading', '리딩'], listening: ['Listening', '리스닝'],
               writing: ['Writing', '라이팅'], speaking: ['Speaking', '스피킹'], other: ['Other', '기타'] };
   var SHORT = { reading: 'R', listening: 'L', writing: 'W', speaking: 'S' };
-  var ALL = [], ME = null, OPEN = null, KIND = 'full', TAB = 'summary';
+  var ALL = [], SETS = [], ME = null, OPEN = null, KIND = 'full', TAB = 'summary';
 
   /* 영역 아이콘 — 화면 어디서나 같은 그림이어야 한 영역으로 읽힌다. */
   var ICON = {
@@ -795,6 +804,64 @@ var BAND = (function () {
       (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
   }
   function secHead(s) { return icon(s, 15) + '<span>' + LAB[s][0] + '</span>'; }
+
+  /* ── 대시보드 · 확정 성적 세트 ──────────────────────────
+     시험을 다시 친 학생은 응시가 여러 건이다. 그중 어느 회차를 성적으로 삼을지는
+     선생님이 동의하고 관리자가 확정한다(sg2/admin-score-sets.html → sg_score_sets).
+
+     세트는 점수를 복사해 두지 않는다 — 영역마다 "어느 응시" 만 가리킨다. 그래서
+     여기서 그 응시들을 다시 합쳐 계산한다. 나중에 선생님이 라이팅 점수를 고치면
+     성적표도 따라 고쳐진다는 뜻이다. 확정 당시의 값은 snapshot 에 남아 있고 화면은
+     쓰지 않는다 — 학생에게 보여야 할 것은 지금의 점수다. */
+  function composeSet(v) {
+    var picks = (v && v.picks) || {};
+    var row = { by_section: {}, scale: 'toefl6' };
+    var tasks = [], from = {};
+    BAND.SKILLS.forEach(function (s) {
+      var p = picks[s];
+      var sess = p && (typeof p === 'string' ? p : p.session);
+      if (!sess) return;
+      var src = rowOf(sess);
+      if (!src) return;                       // 지워졌거나 내가 못 읽는 응시
+      if (s === 'reading' || s === 'listening') {
+        var by = (src.by_section || {})[s];
+        if (by) row.by_section[s] = by;
+      } else {
+        (TASKS[sess] || []).forEach(function (t) {
+          if (String((t || {}).skill || '').toLowerCase() === s) tasks.push(t);
+        });
+      }
+      from[s] = src;
+    });
+    return { view: BAND.of(row, tasks), from: from };
+  }
+
+  function paintOfficial() {
+    var v = SETS[0];
+    if (!v) { $('official-card').classList.add('hide'); return; }
+    var c = composeSet(v);
+
+    var cells = BAND.SKILLS.map(function (s) {
+      var src = c.from[s];
+      return cell(secHead(s), c.view.sections[s].band,
+        src ? esc(src.set_code || '') + ' · ' + slash(src.submitted_at)
+            : bi('not included', '포함되지 않음'));
+    }).join('') + '<div class="sep"></div>';
+
+    var sub = c.view.conventional === null || c.view.conventional === undefined
+      ? bi('some sections still being scored', '일부 영역 채점 중')
+      : '<b style="color:var(--ink-2)">' + c.view.conventional + '/120</b><span class="conv">Conventional</span>';
+
+    $('official-row').innerHTML = cells +
+      cell('<span>Total</span>', c.view.overall, sub, c.view.cefr, 'total-cell');
+
+    $('official-note').innerHTML =
+      (v.label ? '<b>' + esc(v.label) + '</b> · ' : '') +
+      bi('Confirmed ' + when(v.created_at), when(v.created_at) + ' 확정') +
+      (v.approved_name ? ' · ' + bi('approved by ' + v.approved_name, '동의 ' + v.approved_name) : '') +
+      (v.approved_note ? ' · ' + esc(v.approved_note) : '');
+    $('official-card').classList.remove('hide');
+  }
 
   /* ── 대시보드 · 최고 점수 ────────────────────────────── */
   function paintBest() {
@@ -1143,7 +1210,7 @@ var BAND = (function () {
     $('rev-bar').classList.toggle('hide', !r);
     $('dash').classList.toggle('hide', !!r);
     $('review').classList.toggle('hide', !r);
-    if (!r) { OPEN = null; TAB = 'summary'; paintBest(); paintList(); return; }
+    if (!r) { OPEN = null; TAB = 'summary'; paintOfficial(); paintBest(); paintList(); return; }
 
     OPEN = r; TAB = rt.tab;
     paintReviewHead(r);
@@ -1332,6 +1399,7 @@ var BAND = (function () {
   /* ── 데이터 ── */
   var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers,scale';
   var TASK_SELECT = 'session,question_id,skill,task_kind,ai_score,teacher_score,confirmed_at';
+  var SET_SELECT = 'id,label,set_code,picks,snapshot,approved_name,approved_note,created_at';
   function load() {
     var u = AUTH.user();
     /* 응시와 W·S 채점을 함께 읽는다. 밴드는 둘이 다 있어야 완성된다.
@@ -1339,6 +1407,11 @@ var BAND = (function () {
     return Promise.all([
       AUTH.rest('sg_results?select=' + SELECT + '&owner=eq.' + u.id + '&order=submitted_at.desc'),
       AUTH.rest('sg_task_scores?select=' + TASK_SELECT + '&owner=eq.' + u.id)
+        .catch(function () { return []; }),
+      /* 확정 성적 세트. 없는 게 보통이다 — 다시 친 학생에게만 생긴다.
+         무효로 돌린 것은 빼고 최신 한 벌만 보여 준다. */
+      AUTH.rest('sg_score_sets?select=' + SET_SELECT + '&owner=eq.' + u.id +
+                '&voided_at=is.null&order=created_at.desc')
         .catch(function () { return []; })
     ])
       .then(function (out) {
@@ -1348,6 +1421,7 @@ var BAND = (function () {
           (TASKS[t.session] = TASKS[t.session] || []).push(t);
         });
         ALL = out[0] || [];
+        SETS = out[2] || [];
         fillSets();
         $('notice').classList.toggle('hide', !!ALL.length);
         if (!ALL.length) {
@@ -1398,7 +1472,7 @@ var BAND = (function () {
       });
     };
     $('out').onclick = function () {
-      AUTH.signOut(); OPEN = null; ALL = []; location.hash = '#/'; showGate();
+      AUTH.signOut(); OPEN = null; ALL = []; SETS = []; location.hash = '#/'; showGate();
     };
     $('f-set').onchange = paintList;
     $('refresh').onclick = function () {

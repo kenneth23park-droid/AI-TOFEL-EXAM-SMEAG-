@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<!--
+  admin-score-sets.html — 여러 번 친 시험에서 성적 한 벌을 고른다.
+
+  시험을 다시 치는 일은 선생님의 허락으로 일어난다. 리딩만 다시 치기도 하고, 스피킹만
+  다시 치기도 한다 — 그때마다 sg_results 에 줄이 하나씩 늘 뿐, 성적표에 적을 "한 벌"은
+  어디에도 만들어지지 않는다. 이 화면이 그 한 벌을 만든다.
+
+  고르는 방식은 영역별이다. 리딩은 1회차, 리스닝은 1회차, 라이팅·스피킹은 2회차 —
+  이렇게 넷을 각각 집으면 아래에 그 조합의 밴드와 종합이 바로 뜬다. 종합은 네 영역
+  밴드의 평균이다(ETS 2026 규칙, sg-band.js).
+
+  두 사람이 필요하다.
+   · 선생님 — 다시 치는 것을 허락한 사람. 이름이 성적 세트에 함께 굳는다(동의의 기록).
+   · 관리자 — 확정하는 사람. 저장은 관리자 계정으로만 된다(RLS: sg_is_admin).
+  선생님 계정으로 이 주소를 열면 서버가 INSERT 를 거절한다 — 화면의 안내는 그 사실을
+  미리 말해 줄 뿐 방어선이 아니다.
+
+  점수를 복사하지 않는다. 저장되는 것은 "어느 영역을 어느 응시에서 가져오는가"뿐이라,
+  나중에 선생님이 라이팅 점수를 고치면 이 성적 세트도 따라 고쳐진다.
+
+  잘못 만들었으면 무효로 돌린다(Void). 지우는 길은 없다 — 만들어졌다는 사실은 남는다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score sets · MockTest</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .msg { display:none; font-size:13px; font-weight:700; border-radius:10px; padding:10px 12px; margin-bottom:12px; }
+  .msg.on { display:block; }
+  .msg.bad { color:#b3261e; background:#fdeceb; border:1px solid #f5c6c2; }
+  .msg.ok  { color:#1f6f45; background:#e7f6ec; border:1px solid #bfe4cd; }
+
+  .pick-table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  .pick-table th { font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;
+                   letter-spacing:.06em; text-align:left; padding:9px 10px; border-bottom:1px solid var(--line-2); }
+  .pick-table td { padding:10px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  .pick-table tr.on td { background:var(--brand-soft); }
+  .pick-table td.sel { text-align:center; width:74px; }
+  .pick-table td.sel label { display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; }
+  .pick-table td.sel small { font-weight:800; font-size:12px; }
+  .pick-table td.sel.off { opacity:.35; }
+  .pick-table td.sel.off label { cursor:not-allowed; }
+
+  .sum { display:grid; gap:10px; grid-template-columns:repeat(2,1fr); }
+  @media (min-width:720px) { .sum { grid-template-columns:repeat(5,1fr); } }
+  .sum .box { border:1px solid var(--line-2); border-radius:12px; padding:12px 13px; background:var(--cream); }
+  .sum .box.tot { border-color:var(--brand); background:var(--brand-soft); }
+  .sum .box .k { font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .sum .box .v { font-size:26px; font-weight:850; letter-spacing:-.02em; margin-top:2px; }
+  .sum .box .s { font-size:11.5px; color:var(--dim); min-height:15px; }
+
+  .who-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .set-card { border:1px solid var(--line-2); border-radius:12px; padding:13px 14px; margin-top:10px; }
+  .set-card.void { opacity:.5; }
+  .set-card .h { display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
+  .set-card .h b { font-size:15px; }
+  .set-card .lines { margin:8px 0 0; font-size:12.5px; color:var(--ink-2); line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="admin.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Admin · Score sets</small></span></a>
+    <div class="nav-right">
+      <span class="chip" id="who"></span>
+      <a class="btn ghost sm" href="admin-results.html"><span data-en>Student results</span><span data-ko>학생 응시 결과</span></a>
+      <a class="btn ghost sm" href="admin.html"><span data-en>Admin home</span><span data-ko>관리자 홈</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:80px">
+  <div class="page-h mt-24">
+    <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Score sets</span><span data-ko>성적 세트</span></h1>
+    <p class="sub">
+      <span data-en>A student who retook a test with their teacher's approval has more than one attempt. Pick one attempt per section and confirm it as their score set.</span>
+      <span data-ko>선생님의 동의로 다시 친 시험은 응시가 여러 건입니다. 영역마다 회차를 하나씩 골라 한 벌의 성적으로 확정합니다.</span>
+    </p>
+  </div>
+
+  <div class="msg" id="msg"></div>
+
+  <!-- 1. 학생 고르기 -->
+  <div class="card mt-16" id="step-who">
+    <div class="who-row">
+      <input id="q" placeholder="Name or student ID"
+             style="flex:1;min-width:220px;padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:var(--cream)">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap">
+        <input type="checkbox" id="only-multi" checked>
+        <span data-en>Only students with retakes</span><span data-ko>재응시한 학생만</span>
+      </label>
+      <span class="muted" style="font-size:12.5px" id="who-count"></span>
+    </div>
+    <div id="who-list" class="mt-16"></div>
+  </div>
+
+  <!-- 2. 영역별로 회차 고르기 -->
+  <div class="card mt-16 hide" id="step-pick">
+    <div class="who-row" style="justify-content:space-between">
+      <h3 style="margin:0" id="pick-h"></h3>
+      <button class="btn ghost sm" id="clear"><span data-en>Clear picks</span><span data-ko>선택 비우기</span></button>
+    </div>
+    <p class="muted" style="font-size:12.5px;margin:6px 0 0">
+      <span data-en>A section that has no score in an attempt cannot be picked from it. Hidden attempts are not listed.</span>
+      <span data-ko>그 응시에 점수가 없는 영역은 고를 수 없습니다. 숨긴 응시는 목록에 없습니다.</span>
+    </p>
+    <div class="table-wrap mt-16" style="overflow-x:auto">
+      <table class="pick-table">
+        <thead><tr>
+          <th><span data-en>Attempt</span><span data-ko>응시</span></th>
+          <th style="text-align:center">R</th>
+          <th style="text-align:center">L</th>
+          <th style="text-align:center">W</th>
+          <th style="text-align:center">S</th>
+        </tr></thead>
+        <tbody id="pick-rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 3. 합쳐진 성적 -->
+  <div class="card mt-16 hide" id="step-sum">
+    <div class="eyebrow"><span data-en>This score set</span><span data-ko>이 성적 세트</span></div>
+    <div class="sum mt-16" id="sum"></div>
+
+    <div class="mt-24" style="display:grid;gap:12px;grid-template-columns:1fr">
+      <label class="field" style="margin:0"><span data-en>Label</span><span data-ko>이름</span>
+        <input id="label" placeholder="e.g. Official score set"></label>
+      <label class="field" style="margin:0">
+        <span data-en>Approving teacher</span><span data-ko>동의한 선생님</span>
+        <select id="teacher"></select></label>
+      <label class="field" style="margin:0">
+        <span data-en>Note (why the retake was allowed)</span><span data-ko>메모 (재응시를 허락한 까닭)</span>
+        <input id="note" placeholder="e.g. Speaking recording failed on Aug 3"></label>
+    </div>
+    <p class="muted" style="font-size:12.5px;margin:10px 0 0">
+      <span data-en>The teacher's name is stored with the set — a score set is never made by an administrator alone.</span>
+      <span data-ko>선생님 이름이 성적 세트에 함께 남습니다 — 관리자 혼자 만든 성적은 없습니다.</span>
+    </p>
+    <div class="mt-16" style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn brand" id="save"><span data-en>Confirm score set</span><span data-ko>성적 세트 확정</span></button>
+    </div>
+  </div>
+
+  <!-- 4. 이미 만든 것들 -->
+  <div class="card mt-16 hide" id="step-list">
+    <div class="eyebrow"><span data-en>Confirmed score sets</span><span data-ko>확정된 성적 세트</span></div>
+    <div id="sets"></div>
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap foot-in">
+  <small class="muted">© SMEAG MockTest · Score sets</small>
+</div></footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script src="assets/sg-band.js"></script>
+<script src="assets/sg-results.js"></script>
+<script src="assets/sg-score-set.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var SKILLS = SG_SCORE_SET.SKILLS;
+  var SHORT = { reading: 'R', listening: 'L', writing: 'W', speaking: 'S' };
+  var LAB = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
+
+  var ALL = [];            // sg_results 행 전체(관리자라 전교생)
+  var TASKS = {};          // session → W·S 채점 행
+  var SUPPLY = {};         // session → { skill: band|null }
+  var BY_OWNER = {};       // owner → [행]
+  var TEACHERS = [];
+  var OWNER = '';          // 지금 고른 학생
+  var PICKS = {};          // skill → session
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function bi(en, ko) { return '<span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span>'; }
+  function say(kind, en, ko) {
+    var m = $('msg');
+    m.className = 'msg on ' + kind;
+    m.innerHTML = bi(en, ko);
+  }
+  function quiet() { $('msg').className = 'msg'; }
+  function when(iso) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d)) return '—';
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function nameOf(r) { return (r.student && (r.student.name || r.student.email)) || '—'; }
+  function idOf(r) { return (r.student && r.student.student_id) || ''; }
+
+  /* ── 학생 고르기 ──────────────────────────────────────────────── */
+
+  function students() {
+    var q = ($('q').value || '').trim().toLowerCase();
+    var multi = $('only-multi').checked;
+    var out = [];
+    for (var owner in BY_OWNER) {
+      if (!BY_OWNER.hasOwnProperty(owner)) continue;
+      var rows = BY_OWNER[owner];
+      if (multi && rows.length < 2) continue;
+      var r0 = rows[0];
+      if (q && (nameOf(r0) + ' ' + idOf(r0)).toLowerCase().indexOf(q) < 0) continue;
+      out.push({ owner: owner, rows: rows });
+    }
+    out.sort(function (a, b) { return nameOf(a.rows[0]) < nameOf(b.rows[0]) ? -1 : 1; });
+    return out;
+  }
+
+  function paintWho() {
+    var list = students();
+    $('who-count').textContent = list.length + ' students';
+    $('who-list').innerHTML = list.length ? list.map(function (s) {
+      var r0 = s.rows[0];
+      return '<button class="btn ghost sm" data-owner="' + esc(s.owner) + '" style="margin:0 6px 6px 0">' +
+        esc(nameOf(r0)) + (idOf(r0) ? ' · ' + esc(idOf(r0)) : '') +
+        ' <span class="chip">' + s.rows.length + '</span></button>';
+    }).join('') : '<p class="muted" style="font-size:13px;margin:0">' +
+      bi('No student matches.', '해당하는 학생이 없습니다.') + '</p>';
+
+    Array.prototype.forEach.call($('who-list').querySelectorAll('[data-owner]'), function (b) {
+      b.onclick = function () { choose(b.getAttribute('data-owner')); };
+    });
+  }
+
+  function choose(owner) {
+    OWNER = owner;
+    PICKS = {};
+    var rows = BY_OWNER[owner] || [];
+    var r0 = rows[0] || {};
+    $('pick-h').innerHTML = esc(nameOf(r0)) + (idOf(r0) ? ' <span class="muted">· ' + esc(idOf(r0)) + '</span>' : '');
+    $('step-pick').classList.remove('hide');
+    $('step-sum').classList.remove('hide');
+    $('step-list').classList.remove('hide');
+
+    /* 담당 선생님이 있으면 동의한 사람의 기본값으로 둔다 — 대개 그 사람이 허락한다. */
+    var tid = (r0.student && r0.student.teacher_id) || '';
+    $('teacher').value = tid;
+    $('label').value = '';
+    $('note').value = '';
+
+    guessPicks(rows);
+    paintPicks();
+    paintSum();
+    loadSets();
+    $('step-pick').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* 첫 제안 — 영역마다 가장 최근에 점수가 나온 회차. 사람이 그 위에서 고쳐 고른다.
+     "가장 높은 회차"로 제안하지 않는다. 성적은 잘 본 것을 모으는 일이 아니라 어느
+     응시를 성적으로 삼을지 정하는 일이고, 그 판단은 화면이 대신할 수 없다. */
+  function guessPicks(rows) {
+    var sorted = rows.slice().sort(function (a, b) {
+      return (a.submitted_at < b.submitted_at) ? 1 : -1;
+    });
+    SKILLS.forEach(function (s) {
+      for (var i = 0; i < sorted.length; i++) {
+        var sup = SUPPLY[sorted[i].session] || {};
+        if (sup[s] !== null && sup[s] !== undefined) { PICKS[s] = sorted[i].session; return; }
+      }
+    });
+  }
+
+  /* ── 영역별 회차 고르기 ───────────────────────────────────────── */
+
+  function paintPicks() {
+    var rows = (BY_OWNER[OWNER] || []).slice().sort(function (a, b) {
+      return (a.submitted_at < b.submitted_at) ? 1 : -1;
+    });
+    $('pick-rows').innerHTML = rows.map(function (r) {
+      var sup = SUPPLY[r.session] || {};
+      var used = SKILLS.some(function (s) { return PICKS[s] === r.session; });
+      var cells = SKILLS.map(function (s) {
+        var band = sup[s];
+        var can = band !== null && band !== undefined;
+        var on = PICKS[s] === r.session;
+        return '<td class="sel' + (can ? '' : ' off') + '">' +
+          '<label>' +
+            '<input type="radio" name="pick-' + s + '" value="' + esc(r.session) + '"' +
+              (on ? ' checked' : '') + (can ? '' : ' disabled') + '>' +
+            '<small>' + (can ? SG_BAND.fmt(band) : '—') + '</small>' +
+          '</label></td>';
+      }).join('');
+      return '<tr' + (used ? ' class="on"' : '') + '>' +
+        '<td><b>' + esc(r.set_code || '—') + '</b>' +
+          (r.attempt_no > 1 ? ' <span class="chip">#' + r.attempt_no + '</span>' : '') +
+          '<div class="muted" style="font-size:12px">' + when(r.submitted_at) + '</div></td>' +
+        cells + '</tr>';
+    }).join('');
+
+    Array.prototype.forEach.call($('pick-rows').querySelectorAll('input[type=radio]'), function (el) {
+      el.onchange = function () {
+        var skill = el.name.replace('pick-', '');
+        PICKS[skill] = el.value;
+        paintPicks();
+        paintSum();
+      };
+    });
+  }
+
+  /* ── 합쳐진 성적 ─────────────────────────────────────────────── */
+
+  function sources() {
+    var out = {};
+    (BY_OWNER[OWNER] || []).forEach(function (r) {
+      out[r.session] = { row: r, tasks: TASKS[r.session] || [] };
+    });
+    return out;
+  }
+
+  function composed() { return SG_SCORE_SET.compose(PICKS, sources()); }
+
+  function paintSum() {
+    var c = composed();
+    var boxes = SKILLS.map(function (s) {
+      var from = c.sections[s];
+      var band = c.view.sections[s].band;
+      return '<div class="box">' +
+        '<div class="k">' + LAB[s] + '</div>' +
+        '<div class="v">' + SG_BAND.fmt(band) + '</div>' +
+        '<div class="s">' + (from
+          ? esc(from.set_code || '') + (from.attempt_no > 1 ? ' #' + from.attempt_no : '') +
+            ' · ' + when(from.submitted_at).slice(0, 10)
+          : bi('not picked', '고르지 않음')) + '</div>' +
+      '</div>';
+    }).join('');
+    $('sum').innerHTML = boxes +
+      '<div class="box tot"><div class="k">Overall</div>' +
+      '<div class="v">' + SG_BAND.fmt(c.view.overall) + '</div>' +
+      '<div class="s">' + (c.view.cefr || '—') + '</div></div>';
+
+    $('save').disabled = !!c.missing.length || !SKILLS.some(function (s) { return PICKS[s]; });
+    if (c.missing.length) {
+      say('bad',
+        'Still missing: ' + c.missing.map(function (s) { return LAB[s]; }).join(', ') +
+          '. A score set needs all four sections.',
+        '아직 빈 영역이 있습니다: ' + c.missing.map(function (s) { return LAB[s]; }).join(', ') +
+          '. 성적 세트는 네 영역이 다 있어야 합니다.');
+    } else {
+      quiet();
+    }
+  }
+
+  /* ── 확정 ────────────────────────────────────────────────────── */
+
+  function teacherName(id) {
+    for (var i = 0; i < TEACHERS.length; i++) {
+      if (TEACHERS[i].id === id) return TEACHERS[i].name || TEACHERS[i].student_id || '';
+    }
+    return '';
+  }
+
+  function save() {
+    var c = composed();
+    if (c.missing.length) return;
+    var tid = $('teacher').value;
+    if (!tid) {
+      say('bad', 'Choose the teacher who approved the retake.', '재응시를 허락한 선생님을 고르세요.');
+      return;
+    }
+    var picks = {};
+    SKILLS.forEach(function (s) {
+      var from = c.sections[s];
+      if (!from) return;
+      picks[s] = { session: from.session, set_code: from.set_code, attempt_no: from.attempt_no };
+    });
+
+    $('save').disabled = true;
+    SG_SCORE_SET.save({
+      owner: OWNER,
+      label: ($('label').value || '').trim(),
+      set_code: c.setCode,
+      picks: picks,
+      snapshot: SG_SCORE_SET.snapshotOf(c.view),
+      approved_by: tid,
+      approved_name: teacherName(tid),
+      approved_note: ($('note').value || '').trim()
+    }).then(function () {
+      say('ok', 'Score set confirmed. The student sees it on smeag.com.',
+                '성적 세트를 확정했습니다. 학생은 smeag.com 에서 봅니다.');
+      $('save').disabled = false;
+      loadSets();
+    }, function (err) {
+      $('save').disabled = false;
+      say('bad',
+        (err && err.status === 403)
+          ? 'Only an administrator can confirm a score set.'
+          : 'Could not save: ' + ((err && err.message) || 'unknown error'),
+        (err && err.status === 403)
+          ? '성적 세트는 관리자만 확정할 수 있습니다.'
+          : '저장하지 못했습니다: ' + ((err && err.message) || '알 수 없는 오류'));
+    });
+  }
+
+  /* ── 이미 만든 것들 ──────────────────────────────────────────── */
+
+  function loadSets() {
+    return SG_SCORE_SET.list(OWNER).then(function (rows) {
+      $('sets').innerHTML = (rows && rows.length) ? rows.map(function (v) {
+        var snap = v.snapshot || {};
+        var picks = v.picks || {};
+        var lines = SKILLS.map(function (s) {
+          var p = picks[s] || {};
+          var b = (snap.sections || {})[s];
+          return '<div>' + SHORT[s] + ' <b>' + (b === null || b === undefined ? '—' : Number(b).toFixed(1)) +
+            '</b> · ' + esc(p.set_code || '—') + (p.attempt_no > 1 ? ' #' + p.attempt_no : '') + '</div>';
+        }).join('');
+        return '<div class="set-card' + (v.voided_at ? ' void' : '') + '">' +
+          '<div class="h"><b>' + esc(v.label || when(v.created_at)) + '</b>' +
+            '<span class="chip">' + esc(v.set_code || '—') + '</span>' +
+            '<span class="chip">Overall ' +
+              (snap.overall === null || snap.overall === undefined ? '—' : Number(snap.overall).toFixed(1)) +
+            '</span>' +
+            (v.voided_at ? '<span class="chip">' + bi('void', '무효') + '</span>' : '') +
+            '<span class="muted" style="font-size:12px;margin-left:auto">' + when(v.created_at) + '</span>' +
+          '</div>' +
+          '<div class="lines">' + lines +
+            '<div class="muted">' + bi('Approved by ', '동의 ') + esc(v.approved_name || '—') +
+              (v.approved_note ? ' — ' + esc(v.approved_note) : '') + '</div>' +
+            (v.voided_at ? '<div class="muted">' + bi('Voided: ', '무효 사유: ') + esc(v.voided_reason || '—') + '</div>' : '') +
+          '</div>' +
+          (v.voided_at ? '' :
+            '<div class="mt-8"><button class="btn ghost sm" data-void="' + esc(v.id) + '">' +
+              bi('Void this set', '이 세트 무효로') + '</button></div>') +
+        '</div>';
+      }).join('') : '<p class="muted" style="font-size:13px;margin:8px 0 0">' +
+        bi('No score set has been confirmed for this student yet.',
+           '이 학생에게 확정된 성적 세트가 아직 없습니다.') + '</p>';
+
+      Array.prototype.forEach.call($('sets').querySelectorAll('[data-void]'), function (b) {
+        b.onclick = function () {
+          var why = window.prompt('왜 무효로 합니까? (기록에 남습니다)', '');
+          if (why === null) return;
+          b.disabled = true;
+          SG_SCORE_SET.voidSet(b.getAttribute('data-void'), why).then(loadSets, function () {
+            b.disabled = false;
+            say('bad', 'Could not void that set.', '무효로 돌리지 못했습니다.');
+          });
+        };
+      });
+    }, function () {
+      $('sets').innerHTML = '<p class="muted" style="font-size:13px;margin:8px 0 0">' +
+        bi('Could not load score sets.', '성적 세트를 불러오지 못했습니다.') + '</p>';
+    });
+  }
+
+  /* ── 부팅 ────────────────────────────────────────────────────── */
+
+  function load() {
+    return Promise.all([
+      SG_RESULTS.listAll({}),
+      SG_RESULTS.tasks()['catch'](function () { return []; })
+    ]).then(function (out) {
+      ALL = out[0] || [];
+      TASKS = SG_RESULTS.tasksBySession(out[1]);
+      BY_OWNER = {};
+      SUPPLY = {};
+      ALL.forEach(function (r) {
+        (BY_OWNER[r.owner] = BY_OWNER[r.owner] || []).push(r);
+        SUPPLY[r.session] = SG_SCORE_SET.supplies(r, TASKS[r.session] || []);
+      });
+      paintWho();
+    });
+  }
+
+  function boot() {
+    if (!window.SG_AUTH || !SG_AUTH.user()) { SG_AUTH.require(); return; }
+    SG_AUTH.role().then(function (role) {
+      $('who').textContent = role;
+      if (role !== 'admin') {
+        say('bad', 'This page is for administrators. A teacher can see the results but cannot confirm a score set.',
+                   '이 화면은 관리자 전용입니다. 선생님은 결과를 볼 수 있지만 성적 세트를 확정할 수는 없습니다.');
+        if (role !== 'teacher') return;
+      }
+      $('q').oninput = paintWho;
+      $('only-multi').onchange = paintWho;
+      $('clear').onclick = function () { PICKS = {}; paintPicks(); paintSum(); };
+      $('save').onclick = save;
+
+      return SG_AUTH.teachers().then(function (list) {
+        TEACHERS = list || [];
+        $('teacher').innerHTML = '<option value="">— choose —</option>' + TEACHERS.map(function (t) {
+          return '<option value="' + esc(t.id) + '">' + esc(t.name || t.student_id) + '</option>';
+        }).join('');
+      })['catch'](function () {}).then(load);
+    }).catch(function () {
+      say('bad', 'Could not load this page. Reload and try again.', '화면을 불러오지 못했습니다. 새로 고침 후 다시 시도하세요.');
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>
