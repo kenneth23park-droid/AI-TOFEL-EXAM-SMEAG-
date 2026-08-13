@@ -385,23 +385,30 @@ ins[0].onblur();
 ok('블러 시 강조 해제', navBlanks[0].className.indexOf('is-focus') < 0, navBlanks[0].className);
 
 /* ── [11] 빈칸은 영어만 받는다 ────────────────────────────────────────────
- * 한글 자판이 켜진 채로 쳐도 화면에도 저장에도 한글이 남으면 안 된다. */
+ * 한글 자판이 켜진 채로 쳐도 화면에도 저장에도 한글이 남으면 안 된다.
+ * 다만 버리지는 않는다 — 버리면 자판이 한글인 학생에게는 "아무것도 안 써지는 칸"이
+ * 되어 고장으로 보인다. 두벌식 자판을 되돌려 학생이 누른 그 글쇠를 남긴다:
+ * '한글' 은 g·k·s·r·m·f 를 누른 결과이므로 'gksrmf' 가 된다. */
 console.log('\n[11] cloze 빈칸 영문 강제');
 var kb = ins[5];                                   // maxLength 6
 ok('입력칸 lang="en"', kb.getAttribute('lang') === 'en', String(kb.getAttribute('lang')));
 
 kb.value = '한글'; kb.oninput();
-check('한글만 친 경우 남는 값', kb.value, '');
+check('한글은 누른 글쇠로 되돌린다', kb.value, 'gksrmf');
 
+kb.value = 'a한b'; kb.oninput();
+check('섞어 쳐도 영문만 남는다', kb.value, 'agksb');
+
+/* 되돌린 글쇠가 칸 길이를 넘으면 칸만큼만 남는다(need = 6). */
 kb.value = 'a한b글c'; kb.oninput();
-check('섞어 친 경우 영문만 남는다', kb.value, 'abc');
+check('칸 길이를 넘으면 잘린다', kb.value, 'agksbr');
 
 kb.value = ''; kb.oninput();
 kb.oncompositionstart();
 kb.value = 'ㅎ'; kb.oninput();
 check('IME 조합 중에는 건드리지 않는다', kb.value, 'ㅎ');
 kb.oncompositionend();
-check('조합이 끝나면 걷어낸다', kb.value, '');
+check('조합이 끝나면 되돌린다', kb.value, 'g');
 
 var kbId = String(kb.id || '').replace('rd-q-', '');
 var savedKb = window.SG_STORE && window.SG_STORE.getAnswer ? window.SG_STORE.getAnswer(kbId) : null;

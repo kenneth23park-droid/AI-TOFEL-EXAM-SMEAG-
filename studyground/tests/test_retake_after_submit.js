@@ -5,14 +5,13 @@
  * reading, listening, writing, speaking section". 시험이 끝난 화면에서 곧바로
  * 다시 들어갈 수 있어야 하고, 그 문은 tests.html 과 같은 URL 계약을 써야 한다.
  *
- * 다시 응시는 관리자 승인이 있어야 열린다(발주 요구, 같은 날). 학생이 혼자 다시
- * 치면 같은 세트를 두 번 본 성적이 섞인다.
+ * 다시 응시는 학생이 바로 연다 — 관리자 승인 칸은 2026-08-12(sg-v56)에 없앴다.
+ * 대신 그 이동이 재응시로 기록에 남아, 같은 세트 성적이 둘일 때 까닭을 알 수 있다.
  *
  * 여기서 붙잡는 것은 넷이다.
  *  [1] 링크가 만들어지는 규칙 — exam-shell.js 의 retakeUrl/retakeHtml 을 잘라 내
  *      화면 밖에서 돌린다(test_report_link.js 와 같은 방식).
- *  [2] 관리자 승인 — 틀린 비밀번호로도, 확인 수단이 없어도 문이 열리지 않는다.
- *      승인한 사람은 기록에 남는다.
+ *  [2] 버튼 → 이동 — 누른 영역으로 가고, 그 이동이 응시 기록에 남는다.
  *  [3] 제출 화면 배선 — 채점·업로드가 끝난 뒤에야 문이 열린다. 열어 두면 학생이
  *      진행 중에 떠나 채점 요청이 끊긴다(test_submit_scores_now.js 의 waitScore 와 같은 취지).
  *  [4] 다시 들어갔을 때 새 세션이 열린다 — 제출된 세션은 이어보지 못한다는 계약에 기댄다.
@@ -45,7 +44,7 @@ if (a < 0 || b < 0 || b < a) {
 }
 
 /* 셸이 기대는 이웃만 세운다: 쿼리스트링 한 줄, 이 페이지가 실은 팩의 id,
-   그리고 승인 칸이 만지는 것들(document · window · STORE). */
+   그리고 다시 응시 칸이 만지는 것들(document · window · STORE). */
 function build(search, setId, env) {
   var stub =
     'function query(name) {' +
@@ -54,7 +53,9 @@ function build(search, setId, env) {
     '}\n' +
     'var SET_ID = SETID;\n' +
     'var document = ENV.document, window = ENV.window, STORE = ENV.STORE,' +
-    '    setTimeout = ENV.setTimeout;\n';
+    '    setTimeout = ENV.setTimeout;\n' +
+    // 셸은 전체화면 모듈을 전역 이름으로 부른다(window.SG_FS 로 있는지 보고 SG_FS 로 쓴다).
+    'var SG_FS = (ENV.window || {}).SG_FS;\n';
   return new Function('SEARCH', 'SETID', 'ENV',
     stub + shell.slice(a, b) +
     '\nreturn { retakeUrl: retakeUrl, retakeHtml: retakeHtml, sections: RETAKE_SECTIONS,' +
@@ -105,11 +106,15 @@ ok('네 영역이 모두 서 있다',
    R.sections.every(function (s) { return html.indexOf('>' + s.label + '</button>') >= 0; }));
 ok('전체 한 벌이 서 있다', html.indexOf('Full test') >= 0);
 ok('처음에는 접혀 있다', /id="done-retake" hidden/.test(html));
-/* 주소가 손에 잡히면 문이 아니다 — 학생이 링크를 복사해 승인 없이 들어갈 수 있다. */
+/* 버튼은 <a> 가 아니다 — 누른 자리에서 재응시를 기록에 남기고 옮겨 가야 하므로,
+   주소는 data-retake 에만 있고 손에 잡히는 링크로는 내걸지 않는다. */
 ok('누를 수 있는 주소를 내걸지 않는다', html.indexOf('href=') < 0);
 
-/* ── [2] 관리자 승인 ───────────────────────────────────────── */
-console.log('\n[2] 관리자 승인');
+/* ── [2] 버튼 → 이동 ──────────────────────────────────────────
+ * 다시 응시는 학생이 바로 연다 — 관리자 승인 칸은 없앴다(2026-08-12, sg-v56).
+ * 남은 계약은 둘이다: 누른 영역으로 간다, 그리고 그 이동이 재응시로 기록에 남는다.
+ * 기록이 빠지면 같은 세트를 두 번 친 성적이 나중에 왜 둘인지 알 수 없다. */
+console.log('\n[2] 버튼 → 이동');
 
 /* retakeHtml() 이 낸 마크업에서 필요한 만큼만 DOM 을 세운다 — id 하나가 어긋나면
    여기서 null 참조로 터진다(= 배선이 끊긴 것을 잡는다). */
@@ -142,13 +147,12 @@ function fakeDom(markup) {
   };
 }
 
-/* who 가 null 이면 "틀린 비밀번호", SG_ADMIN 자체가 없으면 "확인 수단 없음". */
-function gateRun(admin) {
+function retakeRun() {
   var dom = fakeDom(R.retakeHtml());
-  var events = [];
+  var events = [], allowed = false;
   var env = {
     document: dom.document,
-    window: { location: { href: '' }, SG_ADMIN: admin },
+    window: { location: { href: '' }, SG_FS: { allow: function () { allowed = true; } } },
     STORE: {
       pushEvent: function (kind, id, data) { events.push({ kind: kind, id: id, data: data }); },
       flushAnswers: function () {}
@@ -156,87 +160,40 @@ function gateRun(admin) {
     setTimeout: function (fn) { fn(); }
   };
   build('?profile=toefl&set=set9', 'set9', env).bindRetake('sess-1');
-  return { dom: dom, events: events, env: env };
+  return { dom: dom, events: events, env: env, allowed: function () { return allowed; } };
 }
 
-var ADMIN = {
-  verify: function (id, pw) {
-    return (String(id).toLowerCase() === 'teacher1' && pw === 'right')
-      ? { id: 'teacher1', label: 'Teacher One', sets: ['*'] } : null;
-  }
-};
-
-var g = gateRun(ADMIN);
-ok('승인 칸은 처음엔 접혀 있다', g.dom.byId['done-retake-gate'].hidden === true);
+var g = retakeRun();
 ok('버튼은 다섯이다 (전체 + 네 영역)', g.dom.retakes.length === 5, String(g.dom.retakes.length));
+ok('누르기 전에는 아무 데도 가지 않았다', g.env.window.location.href === '');
 
 var readingBtn = g.dom.retakes.filter(function (el) {
   return /section=reading/.test(el.getAttribute('data-retake'));
 })[0];
 readingBtn.click();
-ok('버튼을 누르면 승인 칸이 펴진다', g.dom.byId['done-retake-gate'].hidden === false);
-ok('무엇을 다시 치는지 적힌다', g.dom.byId['done-retake-what'].textContent === 'Reading — one section',
-   g.dom.byId['done-retake-what'].textContent);
-ok('아이디 칸으로 커서가 간다', g.dom.byId['done-retake-id'].focused === true);
-ok('아직 아무 데도 가지 않았다', g.env.window.location.href === '');
-
-/* 틀린 비밀번호 — 문은 열리지 않고, 그 자리에 남는다. */
-g.dom.byId['done-retake-id'].value = 'teacher1';
-g.dom.byId['done-retake-pw'].value = 'wrong';
-g.dom.byId['done-retake-go'].click();
-ok('틀리면 가지 않는다', g.env.window.location.href === '');
-ok('틀리면 그렇다고 말한다', g.dom.byId['done-retake-err'].hidden === false);
-ok('틀린 비밀번호는 지운다', g.dom.byId['done-retake-pw'].value === '');
-ok('틀린 응시는 기록에 남지 않는다', g.events.length === 0);
-
-/* 맞으면 그 영역으로 간다 — 누가 열어 줬는지 기록에 남는다. */
-g.dom.byId['done-retake-pw'].value = 'right';
-g.dom.byId['done-retake-go'].click();
-ok('승인하면 그 영역으로 간다', /section=reading/.test(g.env.window.location.href),
+ok('누르면 그 영역으로 간다', /(^|[?&])section=reading($|&)/.test(g.env.window.location.href),
    g.env.window.location.href);
-ok('누가 열어 줬는지 남는다',
-   g.events.length === 1 && g.events[0].kind === 'retake' && g.events[0].data.approved_by === 'teacher1',
+ok('묻지 않고 바로 연다 — 승인 칸은 없다', g.dom.byId['done-retake-gate'] === undefined);
+ok('재응시로 기록에 남는다',
+   g.events.length === 1 && g.events[0].kind === 'retake' &&
+   g.events[0].id === 'sess-1' && /section=reading/.test(g.events[0].data.to),
    JSON.stringify(g.events));
+/* 전체화면은 학생이 스스로 여는 이동이므로 다시 묻지 않는다 — 안 풀면 이동한 자리에서
+   화면 잠금이 덮어쓴다. */
+ok('전체화면 잠금을 풀고 간다', g.allowed() === true);
 
-/* 확인 수단이 없으면(관리자 스크립트 미로드) 승인은 이름뿐이다 — 열지 않는다. */
-var g2 = gateRun(null);
-g2.dom.retakes[0].click();
-g2.dom.byId['done-retake-id'].value = 'teacher1';
-g2.dom.byId['done-retake-pw'].value = 'right';
-g2.dom.byId['done-retake-go'].click();
-ok('확인 수단이 없으면 열지 않는다', g2.env.window.location.href === '');
-
-/* 취소하면 접히고, 넣던 것은 지워진다. */
-var g3 = gateRun(ADMIN);
-g3.dom.retakes[0].click();
-g3.dom.byId['done-retake-id'].value = 'teacher1';
-g3.dom.byId['done-retake-cancel'].click();
-ok('취소하면 접힌다', g3.dom.byId['done-retake-gate'].hidden === true);
-ok('취소하면 넣던 아이디가 남지 않는다', g3.dom.byId['done-retake-id'].value === '');
-ok('취소한 뒤에는 가지 않는다', g3.env.window.location.href === '');
-
-/* 승인 칸을 열지 않고 Start 만 눌러도 아무 일이 없어야 한다. */
-var g4 = gateRun(ADMIN);
-g4.dom.byId['done-retake-id'].value = 'teacher1';
-g4.dom.byId['done-retake-pw'].value = 'right';
-g4.dom.byId['done-retake-go'].click();
-ok('고른 것이 없으면 가지 않는다', g4.env.window.location.href === '');
-
-/* Enter 로도 승인한다 — 비밀번호를 치고 손을 옮기지 않는다. */
-var g5 = gateRun(ADMIN);
-g5.dom.retakes[0].click();
-g5.dom.byId['done-retake-id'].value = 'teacher1';
-g5.dom.byId['done-retake-pw'].value = 'right';
-g5.dom.byId['done-retake-gate'].emit('keydown', { key: 'Enter', preventDefault: function () {} });
-ok('Enter 로 승인된다', /mode=exam/.test(g5.env.window.location.href), g5.env.window.location.href);
-
-ok('승인 칸 모양이 CSS 에 있다', css.indexOf('.exam-retake-gate') >= 0);
-ok('Exit 승인과 같은 칸을 쓴다', /class="exam-retake-gate exam-exit-auth"/.test(html));
+/* 전체 한 벌도 같은 길이다. */
+var g2 = retakeRun();
+g2.dom.retakes.filter(function (el) {
+  return el.getAttribute('data-retake').indexOf('mode=exam') >= 0;
+})[0].click();
+ok('전체 한 벌도 바로 연다', /(^|[?&])mode=exam($|&)/.test(g2.env.window.location.href),
+   g2.env.window.location.href);
 
 /* ── [3] 제출 화면 배선 ────────────────────────────────────── */
 console.log('\n[3] 제출 화면 배선');
 
-ok('승인 칸을 배선한다', /bindRetake\(session\);/.test(shell));
+ok('다시 응시 칸을 배선한다', /bindRetake\(session\);/.test(shell));
 
 ok('제출 화면에 붙는다', /retakeHtml\(\) \+/.test(shell));
 ok('여는 함수가 있다', /function openRetake\s*\(/.test(shell));
