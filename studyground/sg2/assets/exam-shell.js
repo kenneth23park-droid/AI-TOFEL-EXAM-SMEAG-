@@ -1279,8 +1279,17 @@ window.SG_RUNTIME = (function () {
     }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
+  /* 시작 전 한 번, "이 답안이 이 기기 밖에도 남는가"를 확인한다(sg-storage-guard.js).
+     막이 서면 boot 은 학생이 누른 뒤에 돈다 — 시계는 boot 안에서 시작하므로, 읽는
+     동안 시험 시간이 흐르지 않는다. 파일이 없으면 예전처럼 그냥 시작한다. */
+  function bootGuarded() {
+    var G = window.SG_GUARD;
+    if (G && typeof G.gate === 'function') { G.gate(boot); return; }
+    boot();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootGuarded);
+  else bootGuarded();
 
   return {
     machine: function () { return machine; },

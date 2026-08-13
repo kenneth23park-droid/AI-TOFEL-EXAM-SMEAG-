@@ -207,7 +207,13 @@
 //      한다(api/feedback.js + service_role). assets/sg-comments.js · exam-shell.js ·
 //      review.html 이 함께 바뀌므로, 캐시된 옛 사본이 남은 기기는 예전 계약(attempt
 //      본문을 보내고 브라우저가 저장)으로 계속 호출해 401 만 받는다.
-const VERSION = 'sg-v59';
+// v60: 응시 화면이 시작하기 전에 "이 답안이 이 기기 밖에도 남는가"를 묻는다. 비로그인이면
+//      클라우드 사본이 없다는 것을, 저장소가 막힌 창(시크릿 등)이면 창을 닫는 순간
+//      답안이 사라진다는 것을 읽히고 나서 시작한다. 새 파일 assets/sg-storage-guard.js
+//      가 셸에 들어오고, set9.html · set9-reading.html · en/test-nt/* 넷은 여태 빠져
+//      있던 assets/sg-auth.js 를 함께 싣는다 — 그 화면들은 SG_AUTH 가 없어 exam-cloud.js
+//      가 토큰을 못 얻었고, 그래서 답안이 아예 클라우드로 가지 않았다.
+const VERSION = 'sg-v60';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -253,6 +259,9 @@ const SHELL_ASSETS = [
 
   // 전체화면 자동 진입 · 화면 맞춤 — 오프라인 시험장에서도 첫 화면부터 적용돼야 한다.
   'assets/sg-fullscreen.js',
+
+  // 시작 전 저장 위험 확인 — 셸이 이 파일을 기다렸다가 boot 하므로 오프라인에서도 있어야 한다.
+  'assets/sg-storage-guard.js',
 
   // 판올림 확인 — 사본이 지니고 다니는 판 번호와, 그것을 라이브와 대조하는 검사기.
   // 검사기는 오프라인이면 조용히 물러나므로 프리캐시해도 시험장에서 걸리지 않는다.

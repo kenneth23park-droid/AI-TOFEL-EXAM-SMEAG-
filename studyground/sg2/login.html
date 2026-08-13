@@ -89,7 +89,12 @@
   // 돌아갈 곳이 따로 없으면 지금 치를 시험으로 — 세트를 고르는 목록을 지나지 않는다.
   // 행선지는 assets/student-landing.js 가 정한다(SET 9 리딩, mode=section).
   var LANDING = window.SG_STUDENT_LANDING || 'tests.html';
-  var next = /^[\w.-]+\.html(\?[^#]*)?$/.test(raw) && raw.indexOf('login.html') !== 0 ? raw : LANDING;
+  /* 페이지 이름(exam-runtime.html)뿐 아니라 라우트 경로(en/test-nt/reading/)도 받는다 —
+     응시 화면의 저장 위험 막(sg-storage-guard.js)이 그 경로에서 학생을 보내오기 때문이다.
+     절대경로(/…, //…)와 상위 이동(..)은 받지 않는다: 외부 주소로 튕기지 않게. */
+  var SAFE = /^(?:[\w.-]+\/)*[\w.-]*(?:\.html)?(?:\?[^#]*)?$/;
+  var safe = SAFE.test(raw) && raw.indexOf('..') === -1 && raw.indexOf('login.html') !== 0;
+  var next = safe && raw ? raw : LANDING;
 
   /* ── 좌석이 정해 준 행선지 ──────────────────────────────────
    *

@@ -49,8 +49,27 @@ SET_BANNER = """<!--
 -->"""
 
 
+AUTH_META = re.compile(
+    r'\n<!-- 시험은 누가 쳤는지.*?-->\n<meta name="sg-auth" content="required">', re.S)
+
+
+def soften_auth(out: str) -> str:
+    """파생 페이지에서는 로그인 강제(<meta name="sg-auth" content="required">)를 뗀다.
+
+    exam-runtime.html 은 관리자·재응시로 들어오는 문이라 로그인 없이는 열리지 않아도
+    된다. 하지만 파생 페이지(set9-reading.html · /en/test-nt/*)는 학생이 처음 앉는
+    자리이고, 오프라인 시험장(USB 사본·회선 없음)에서도 열려야 한다. 거기서 로그인을
+    강제하면 네트워크가 없는 날 시험 자체가 시작되지 않는다 — 어떤 실패도 시험을
+    멈추지 않는다는 계약(F12)에 어긋난다.
+
+    대신 assets/sg-storage-guard.js 가 시작 전에 "로그인이 없으면 이 기기에만 남는다"를
+    읽히고, 학생은 읽은 뒤 로그인하거나 그대로 시작한다. 막는 대신 알린다.
+    """
+    return AUTH_META.sub('', out, count=1)
+
+
 def build(section: str, source: str) -> str:
-    out = source
+    out = soften_auth(source)
 
     # 1) <base> — 상대 URL 이 sg2 루트 기준으로 풀리도록 head 최상단(스타일시트보다 위)에 넣는다.
     out = out.replace(
@@ -90,7 +109,7 @@ def build(section: str, source: str) -> str:
 
 def build_set_page(set_id: str, section: str, title: str, source: str) -> str:
     """세트 전용 진입 페이지. sg2 루트에 놓이므로 <base> 는 필요 없다."""
-    out = source
+    out = soften_auth(source)
 
     out = re.sub(r'<title>.*?</title>', '<title>%s</title>' % title, out, count=1, flags=re.S)
 

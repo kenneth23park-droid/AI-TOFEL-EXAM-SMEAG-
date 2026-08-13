@@ -171,6 +171,8 @@
 <script src="assets/seat-runtime.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/sg-fullscreen.js"></script>
+<!-- 회원 세션 — 셸보다 먼저 실려야 로그인 막이 시험 화면 위에 선다. -->
+<script src="assets/sg-auth.js"></script>
 <!-- 관리자 계층 — 학생 화면에는 아무 것도 그리지 않는다(Ctrl+Alt+A 또는 좌하단 ⚙ 로 로그인).
      question-config.js 는 exam-shell.js 가 콘텐츠 팩을 붙이기 전에 실려야 교체분이 반영된다. -->
 <script src="assets/question-config.js"></script>
@@ -185,6 +187,8 @@
 <script src="assets/exam-resume.js"></script>
 <script src="assets/exam-render.js"></script>
 <script src="assets/exam-engine.js"></script>
+<!-- 시작 전 저장 위험 확인. 로그인·저장소가 멀쩡하면 아무것도 그리지 않는다. -->
+<script src="assets/sg-storage-guard.js"></script>
 <script>
 window.SG_ROUTE = {
   section: 'speaking',

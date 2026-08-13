@@ -798,6 +798,46 @@ tr.rv-cmt td { border-bottom: 1px solid var(--line); padding-top: 0; }
 .sg-update .sg-prep-sub { margin-top: 9px; }
 .sg-update .sg-prep-go { display: block; text-align: center; text-decoration: none; }
 
+/* ── 저장 위험 막 (assets/sg-storage-guard.js) ──────────────────
+   시작 전에 한 번만 서는 막이다. 오프라인 알림처럼 구석에 두지 않는 이유는
+   하나뿐이다 — 이건 읽지 않고 지나가면 두 시간이 사라지는 종류의 말이다.
+   그래도 문은 열려 있다: Start anyway 가 늘 있고, 시험은 막히지 않는다. */
+.sg-guard {
+  position: fixed; inset: 0; z-index: 2147482000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: rgba(31, 26, 20, .55);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+}
+.sg-guard-card {
+  width: min(520px, 100%); max-height: calc(100vh - 48px); overflow: auto;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 18px; box-shadow: var(--shadow-lg); padding: 26px 26px 22px;
+}
+.sg-guard-mark { font-size: 34px; line-height: 1; }
+.sg-guard-card h1 {
+  margin: 12px 0 6px; font-size: 21px; font-weight: 800; letter-spacing: -.02em;
+}
+.sg-guard-lead { margin: 0 0 16px; font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+.sg-guard-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.sg-guard-list li {
+  display: flex; gap: 11px; align-items: flex-start;
+  background: var(--cream-2); border-radius: 12px; padding: 12px 13px;
+  font-size: 13px; line-height: 1.55; color: var(--muted);
+}
+.sg-guard-list b { color: var(--ink); font-size: 13.5px; }
+.sg-guard-ico { font-size: 17px; line-height: 1.35; flex: none; }
+.sg-guard-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.sg-guard-go, .sg-guard-anyway {
+  flex: 1 1 190px; padding: 12px 18px; border-radius: 999px;
+  font-size: 14.5px; font-weight: 800; text-align: center; text-decoration: none;
+}
+.sg-guard-go { background: var(--brand); border: 1px solid var(--brand); color: #fff; }
+.sg-guard-go:hover { background: var(--brand-ink); border-color: var(--brand-ink); }
+.sg-guard-anyway { background: none; border: 1px solid var(--line); color: var(--muted); }
+.sg-guard-anyway:hover { border-color: var(--ink); color: var(--ink); }
+.sg-guard-fine { margin: 14px 0 0; font-size: 11.5px; color: var(--dim); line-height: 1.5; }
+.sg-guard :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
 /* ── Vercel Toolbar 가리기 ─────────────────────────────────────
    프리뷰·배포에 Vercel 이 스스로 붙이는 코멘트 위젯이다. 우리 코드에는 없다.
    학생 화면 오른쪽 아래에 검은 말풍선으로 떠서 시험을 가린다. 뿌리는 Vercel
