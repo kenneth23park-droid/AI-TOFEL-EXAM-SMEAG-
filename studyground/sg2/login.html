@@ -123,13 +123,19 @@
   }
 
   /** 로그인 뒤 갈 곳. 좌석 배정이 ?next= 보다 뒤에 온다 — 원래 보던 페이지가 먼저.
-   *  staff===true 면 목록으로 돌려보낸다 — 곧장 시험으로 들어가는 건 학생 동선이다.
-   *  staff 를 모르는 자리(전체화면 모듈이 없어 isStaff 를 기다리지 않는 경로)에서는
-   *  학생으로 본다. 선생님이 그리로 떨어져도 상단 메뉴로 목록에 갈 수 있다. */
-  function landing(staff) {
+   *  선생님·관리자는 관리 화면(admin.html)으로 간다 — 곧장 시험으로 들어가는 건
+   *  학생 동선이다. 선생님은 그 화면에서 읽기 전용 카드만 본다(admin.html 이 가른다).
+   *  role 을 모르는 자리에서는 학생으로 본다. */
+  function landing(role) {
     if (raw) return next;
+    if (role === 'teacher' || role === 'admin') return 'admin.html';
     if (RT && RT.assigned()) return RT.examUrl();
-    return staff ? 'tests.html' : next;
+    return next;
+  }
+
+  /** 판정을 기다리는 동안 화면이 멈추지 않게, 실패하면 학생으로 본다. */
+  function whoRole() {
+    return SG_AUTH.role().catch(function () { return 'student'; });
   }
 
   if (RT && RT.bound()) {
@@ -146,8 +152,7 @@
   /* 이미 로그인해 있으면 로그인 화면에 머무를 이유가 없다. 여기서도 선생님·관리자는
      목록으로 간다 — 판정을 기다리는 동안 화면이 멈춰 보이지 않게 서버 사본을 쓴다. */
   if (window.SG_AUTH && SG_AUTH.user()) {
-    SG_AUTH.isStaff().catch(function () { return false; })
-      .then(function (staff) { location.replace(landing(staff)); });
+    whoRole().then(function (r) { location.replace(landing(r)); });
   }
 
   function enter(id, pw, examDate) {
@@ -159,14 +164,12 @@
         // 전체화면 요청 자체는 버튼을 누른 순간에 이미 나갔다(아래 submit 핸들러) —
         // 로그인 응답을 기다린 뒤에는 브라우저가 사용자 동작으로 쳐 주지 않는다.
         if (!window.SG_FS) {
-          return SG_AUTH.isStaff().catch(function () { return false; })
-            .then(function (staff) { location.replace(landing(staff)); });
+          return whoRole().then(function (r) { location.replace(landing(r)); });
         }
-        return SG_AUTH.isStaff().catch(function () { return false; })
-          .then(function (staff) {
-            if (staff) SG_FS.release();
-            location.replace(landing(staff));
-          });
+        return whoRole().then(function (r) {
+          if (r === 'teacher' || r === 'admin') SG_FS.release();
+          location.replace(landing(r));
+        });
       })
       .catch(function (e2) {
         go.disabled = false;
