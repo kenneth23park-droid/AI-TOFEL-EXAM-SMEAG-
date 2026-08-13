@@ -95,11 +95,15 @@ Rules:
   * "fix": what the student does about it, specific enough to start today.
   A section that was not scored gets one issue explaining what is missing and how to get
   it scored next time, and nothing else.
-- "questions": only for items given in wrong_questions and open_answers, at most 25 entries,
-  each keyed by the exact question_id you were given. Skip the ones with nothing to say.
-  * "problem": what is wrong with THIS answer. Compare the student's answer to the correct
-    one and name the difference ("wrote 'has went', the present perfect needs the past
-    participle 'gone'"). Never write "this was incorrect" — that is already on the screen.
+- "questions": one entry for EVERY item in wrong_questions and open_answers, in the order
+  given, up to 25 entries — a missed question with no comment is the one the student will
+  miss again. Key each by the exact question_id you were given. If a multiple-choice item
+  gives you "choices", say what makes the correct option right and the chosen one wrong.
+  * "problem": what is wrong with THIS answer. Quote the student's own answer and the
+    correct one verbatim, in quotation marks, and name the difference between them
+    ("wrote 'has went'; the present perfect needs the past participle 'gone'"). For a
+    multiple-choice item, quote the option text, never the option number. Never write
+    "this was incorrect" or "chose the wrong option" — that is already on the screen.
   * "cause": the gap behind it, so the student sees the pattern, not one unlucky item.
   * "solution": the repair. Give the rule, the correct answer restated in a full sentence,
     or the reading/listening move that would have caught it. One or two sentences.
@@ -108,7 +112,12 @@ Rules:
 - "plan" is the point of this report. It must follow from the weakest sections in the JSON,
   name the skill it fixes, and be doable by one student alone with no teacher:
   * "focus": 1-3 skills, weakest first. "target" is the band to aim for next time.
-  * "study": 3-6 concrete drills. "detail" says exactly what to do, not "practice more".
+  * "study": 3-6 concrete drills. "detail" says exactly what to do and ends with something
+    the student can hand in or check off — a rewritten paragraph, a list of 20 words with
+    their own sentences, a re-answered question set. Build the drills out of material this
+    student already has (the passages and recordings of this test, their own two essays,
+    the questions they missed), not out of material they would have to go find.
+    Never "practice more", "review grammar" or "build vocabulary" on their own.
     "minutes" is an integer. "how_often" is plain English ("daily", "3x a week").
   * "weeks": exactly 2 entries (week 1 and week 2), 2-4 tasks each, built from "study".
 - Do not recommend a paid product, a website, or an app by name.`;
@@ -149,6 +158,16 @@ function answerText(rec) {
 }
 
 function clip(s, n) { return String(s == null ? '' : s).slice(0, n); }
+
+/** 객관식에서 학생이 남긴 것은 보기 번호다. 리뷰가 "2번을 골랐다" 고 쓰면 학생은
+ *  자기가 무엇을 골랐는지 다시 찾아봐야 한다. 보기 목록이 함께 왔으면 문장으로 편다.
+ *  (보기 목록은 콘텐츠 팩에서 오므로 브라우저가 보내 준다 — 서버는 팩을 모른다.) */
+function choiceText(rec, choices) {
+  const raw = answerText(rec);
+  if (!Array.isArray(choices) || raw === '') return raw;
+  const i = Number(raw);
+  return (Number.isInteger(i) && choices[i] != null) ? String(choices[i]) : raw;
+}
 
 /* ── 모델에 보낼 응시 한 건 ──────────────────────────────────────────────── */
 
@@ -199,11 +218,14 @@ function attemptFor(row, taskRows, meta) {
   const wrong = [], open = [];
   (meta.questions || []).forEach(function (q) {
     if (!q || !q.question_id || q.kind === 'build') return;
-    const given = answerText(answers[q.question_id]);
+    const given = choiceText(answers[q.question_id], q.choices);
     if (q.ok === false && wrong.length < MAX_WRONG) {
       wrong.push({
         question_id: q.question_id, no: q.no, section: q.section, kind: q.kind,
         prompt: clip(q.prompt, 200),
+        choices: Array.isArray(q.choices)
+          ? q.choices.slice(0, 8).map(function (c) { return clip(c, 200); })
+          : undefined,
         given: clip(given, 200),
         correct: clip(q.correct, 200)
       });

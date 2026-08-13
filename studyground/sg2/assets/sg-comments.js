@@ -161,12 +161,24 @@ window.SG_COMMENTS = (function () {
     ((detail && detail.rows) || []).forEach(function (r) {
       if (r.kind === 'build') return;
       if (r.ok !== false && r.ok !== null) return;      // 맞은 문항은 뺀다
-      out.push({
+
+      /* 객관식 정답은 팩 안에서 보기 번호다. 번호를 그대로 보내면 리뷰가 쓸 수 있는
+         말은 "정답은 2번" 뿐이라, 여기서 보기 문장으로 펴서 보낸다. 보기 목록도 함께
+         보낸다 — 학생이 고른 보기가 무엇이었는지는 서버가 이 목록으로 되짚는다. */
+      var choices = (Object.prototype.toString.call(r.choices) === '[object Array]')
+        ? r.choices.slice(0, 8).map(function (c) { return String(c).slice(0, 200); })
+        : null;
+      var key = r.key;
+      if (choices && typeof key === 'number' && choices[key] != null) key = choices[key];
+
+      var q = {
         question_id: r.qid, no: r.no, section: r.section, kind: r.kind,
         prompt: String(r.prompt || '').slice(0, 300),
-        correct: String(r.key == null ? '' : r.key).slice(0, 200),
+        correct: String(key == null ? '' : key).slice(0, 200),
         ok: r.ok
-      });
+      };
+      if (choices) q.choices = choices;
+      out.push(q);
     });
     return out;
   }

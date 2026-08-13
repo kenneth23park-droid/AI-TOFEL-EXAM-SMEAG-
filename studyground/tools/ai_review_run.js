@@ -11,6 +11,15 @@
  * 필요한 것:  SUPABASE_URL · SUPABASE_SERVICE_ROLE_KEY · (OPENAI|ANTHROPIC)_API_KEY
  *             studyground/.env 를 자동으로 읽는다.
  *
+ * ── service_role 키가 없는 자리 ────────────────────────────────────────────
+ * 그 키는 Vercel 에만 두는 것이 원칙이라, 노트북에서는 DB 를 직접 읽고 쓸 수 없다.
+ * 그때는 읽기와 쓰기를 밖에서 하고 이 도구는 가운데(모델 호출)만 맡는다.
+ *
+ *     node tools/ai_review_run.js --attempts in.json --emit out.json
+ *
+ *   --attempts  [{ student_id, name, row:{…sg_results 행…}, tasks:[…sg_task_scores…] }]
+ *   --emit      sg_comments 에 그대로 넣을 행 배열. 넣는 것은 부른 쪽의 몫이다.
+ *
  * ── 왜 따로 도구가 있나 ────────────────────────────────────────────────────
  * 리뷰는 원래 학생이 부른다 — 제출 직후 그 화면에서(exam-shell.js), 오프라인으로
  * 쳤다면 리뷰 화면을 여는 순간(review.html). 그런데 그 두 자리는 **학생이 화면을
@@ -69,6 +78,8 @@ var DRY = flag('dry-run');
 var FORCE = flag('force');
 var PROVIDER = opt('provider', '');
 var MODEL = opt('model', '');
+var ATTEMPTS = opt('attempts', '');     // DB 대신 파일에서 읽는다
+var EMIT = opt('emit', '');             // DB 대신 파일로 내보낸다
 
 /* ── 브라우저 자산을 node 에서 쓴다 ──────────────────────────────────────── */
 /* set9.js · sg-results.js · sg-comments.js 는 <script src> 로 로드되는 ES5 라
@@ -127,8 +138,9 @@ function packOf(setCode) {
   return global.window['SMEAG_SET' + code] || null;
 }
 
-/** 응시 한 건 → 리뷰 한 벌. 저장까지 하고, 무엇을 했는지 한 줄로 돌려준다. */
-async function reviewOne(row, who, picked, model) {
+/** 응시 한 건 → 리뷰 한 벌. 저장까지 하고, 무엇을 했는지 한 줄로 돌려준다.
+ *  preTasks 가 오면 sg_task_scores 를 다시 읽지 않는다(--attempts 경로). */
+async function reviewOne(row, who, picked, model, preTasks) {
   var label = (who.student_id || '?') + ' ' + (who.name || '');
 
   var pack = packOf(row.set_code);
@@ -137,7 +149,7 @@ async function reviewOne(row, who, picked, model) {
   var det = SG_RESULTS.score(pack, row.answers || {});
   var questions = SG_COMMENTS.questionsFor(det);
 
-  var taskRows = await svc('sg_task_scores?select=question_id,skill,task_kind,ai_score,ai_rubric,' +
+  var taskRows = preTasks || await svc('sg_task_scores?select=question_id,skill,task_kind,ai_score,ai_rubric,' +
     'teacher_score,teacher_note,confirmed_at,transcript' +
     '&owner=eq.' + q(row.owner) + '&session=eq.' + q(row.session));
 
@@ -173,6 +185,17 @@ async function reviewOne(row, who, picked, model) {
   }
 
   var writes = FB.rowsFor(row.owner, row.session, model, LANG, parsed);
+  var all = writes.rows.concat(writes.plan ? [writes.plan] : []);
+
+  /* 내보내기만 하는 경로에서는 여기서 끝난다 — 넣는 것은 부른 쪽이다. */
+  if (EMIT) {
+    return {
+      label: label, band: attempt.overall_band, rows: all,
+      saved: all.length, questions: (parsed.questions || []).length,
+      planErr: '', usage: (out && out.usage) || {}
+    };
+  }
+
   var saved = await FB.putComments(writes.rows);
   var planErr = '';
   if (writes.plan) {
@@ -193,8 +216,9 @@ async function reviewOne(row, who, picked, model) {
 /* ── 한 반 ──────────────────────────────────────────────────────────────── */
 
 async function main() {
-  if (!SERVICE_KEY) {
-    console.error('SUPABASE_SERVICE_ROLE_KEY 가 없다. studyground/.env 에 넣거나 셸에 걸어라.');
+  if (!SERVICE_KEY && !(ATTEMPTS && EMIT)) {
+    console.error('SUPABASE_SERVICE_ROLE_KEY 가 없다. studyground/.env 에 넣거나,\n' +
+                  '읽기·쓰기를 밖에서 한다면 --attempts 와 --emit 을 함께 써라.');
     process.exit(1);
   }
   var picked = LLM.resolve(PROVIDER);
@@ -204,40 +228,48 @@ async function main() {
   }
   var model = MODEL || picked.P.def();
 
-  var span = dayRange(DATE);
-  var rows = await svc('sg_results?select=owner,session,set_code,submitted_at,answers,by_section,' +
-    'score,total,scale&submitted_at=gte.' + q(span.from) + '&submitted_at=lt.' + q(span.to) +
-    '&order=submitted_at.asc');
-  rows = rows || [];
+  /* 응시 목록. 파일로 받았으면 DB 를 보지 않는다 — 이미 밖에서 읽어 온 것이다. */
+  var work = [], by = {}, seen = {};
 
-  /* 누가 쳤는지. 이름은 화면(로그)에만 쓴다 — 모델에는 신원을 보내지 않는다. */
-  var people = await svc('sg_exam_accounts?select=user_id,student_id,name,exam_date');
-  var by = {};
-  (people || []).forEach(function (p) {
-    var cur = by[p.user_id];
-    // 같은 사람이 여러 날 응시하면 그날 자리의 학번이 맞다.
-    if (!cur || p.exam_date === DATE) by[p.user_id] = p;
-  });
+  if (ATTEMPTS) {
+    JSON.parse(fs.readFileSync(ATTEMPTS, 'utf8')).forEach(function (a) {
+      by[a.row.owner] = { student_id: a.student_id, name: a.name };
+      work.push({ row: a.row, tasks: a.tasks || [] });
+    });
+  } else {
+    var span = dayRange(DATE);
+    var rows = await svc('sg_results?select=owner,session,set_code,submitted_at,answers,by_section,' +
+      'score,total,scale&submitted_at=gte.' + q(span.from) + '&submitted_at=lt.' + q(span.to) +
+      '&order=submitted_at.asc') || [];
+
+    /* 누가 쳤는지. 이름은 화면(로그)에만 쓴다 — 모델에는 신원을 보내지 않는다. */
+    var people = await svc('sg_exam_accounts?select=user_id,student_id,name,exam_date');
+    (people || []).forEach(function (p) {
+      // 같은 사람이 여러 날 응시하면 그날 자리의 학번이 맞다.
+      if (!by[p.user_id] || p.exam_date === DATE) by[p.user_id] = p;
+    });
+
+    /* 이미 AI 리뷰가 있는 응시는 건너뛴다 — 다시 부르는 것은 --force 일 때뿐이다. */
+    var had = rows.length ? await svc('sg_comments?select=owner,session&source=eq.ai' +
+      '&session=in.(' + rows.map(function (r) { return '"' + r.session + '"'; }).join(',') + ')') : [];
+    (had || []).forEach(function (c) { seen[c.owner + '|' + c.session] = true; });
+
+    work = rows.map(function (r) { return { row: r, tasks: null }; });
+  }
 
   if (ONLY) {
-    rows = rows.filter(function (r) {
-      return (by[r.owner] || {}).student_id === ONLY;
+    work = work.filter(function (w) {
+      return (by[w.row.owner] || {}).student_id === ONLY;
     });
   }
 
-  /* 이미 AI 리뷰가 있는 응시는 건너뛴다 — 다시 부르는 것은 --force 일 때뿐이다. */
-  var had = await svc('sg_comments?select=owner,session&source=eq.ai' +
-    '&session=in.(' + rows.map(function (r) { return '"' + r.session + '"'; }).join(',') + ')');
-  var seen = {};
-  (had || []).forEach(function (c) { seen[c.owner + '|' + c.session] = true; });
-
-  console.log(DATE + ' (KST) — 응시 ' + rows.length + '건 · ' +
+  console.log(DATE + ' (KST) — 응시 ' + work.length + '건 · ' +
               picked.id + '/' + model + ' · ' + LANG + (DRY ? ' · dry-run' : ''));
 
-  var done = 0, skipped = 0, failed = 0, tokensIn = 0, tokensOut = 0;
+  var done = 0, skipped = 0, failed = 0, tokensIn = 0, tokensOut = 0, emitted = [];
 
-  for (var i = 0; i < rows.length; i++) {
-    var row = rows[i];
+  for (var i = 0; i < work.length; i++) {
+    var row = work[i].row;
     var who = by[row.owner] || {};
     var name = (who.student_id || row.owner.slice(0, 8)) + ' ' + (who.name || '');
 
@@ -248,7 +280,8 @@ async function main() {
     }
 
     try {
-      var res = await reviewOne(row, who, picked, model);
+      var res = await reviewOne(row, who, picked, model, work[i].tasks);
+      if (res.rows) emitted = emitted.concat(res.rows);
       if (res.skipped) {
         console.log('  · ' + name + ' — 건너뜀: ' + res.skipped);
         skipped++;
@@ -267,6 +300,11 @@ async function main() {
       console.log('  ✗ ' + name + ' — ' + String((e && e.message) || e));
       failed++;
     }
+  }
+
+  if (EMIT) {
+    fs.writeFileSync(EMIT, JSON.stringify(emitted, null, 1));
+    console.log('→ ' + EMIT + ' 에 ' + emitted.length + '행. 넣는 것은 부른 쪽의 몫이다.');
   }
 
   console.log('완료: ' + done + ' · 건너뜀: ' + skipped + ' · 실패: ' + failed +

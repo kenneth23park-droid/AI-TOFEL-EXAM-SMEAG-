@@ -133,6 +133,9 @@ window.SG_RESULTS = (function () {
       rows.push({
         qid: qid, no: q.no, section: sec, kind: q.kind,
         prompt: q.prompt || q.text || q.question || '',
+        /* 보기 — 객관식의 정답은 팩 안에서 번호다. 번호만 들고 다니면 리뷰에
+           "정답은 2번" 밖에 못 쓴다. 보기 문장을 함께 들고 다닌다. */
+        choices: isArray(q.choices) ? q.choices : null,
         given: given, key: key, ok: ok
       });
     }
