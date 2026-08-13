@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<!--
+  recover-recordings.html — 이 컴퓨터에 남은 스피킹 녹음을 꺼낸다.
+
+  왜 있는가. 녹음은 응시 기기의 IndexedDB(sg2-media)에 먼저 앉고, 제출 화면이
+  그것을 비공개 버킷 toefl-recordings 로 올린다. 그 업로드가 실패하면 — 2026-08-12
+  시험에서는 61건이 전부 400(InvalidMimeType)으로 거절당했다 — 녹음은 그 브라우저
+  프로필 안에만 남는다. 그 상태에서 캐시를 지우거나 다음 학생이 앉으면 없어진다.
+
+  이 페이지는 그 자리로 걸어가서 여는 도구다. 순서는 하나다:
+    1) Scan      — 이 브라우저에 무엇이 남았는지 센다. 네트워크가 필요 없다.
+    2) Save      — 파일로 내려받는다. 로그인도 회선도 필요 없다. 먼저 이것을 한다.
+    3) Upload    — 로그인해서 클라우드로 올린다. 회선이 있으면 이어서 한다.
+
+  Save 를 먼저 두는 이유. 회선·로그인·정책 어느 하나라도 어긋나면 Upload 는 멈추는데,
+  그 사이에 그 PC 를 떠나면 원본이 사라진다. 손에 파일을 쥐는 일이 가장 먼저다.
+
+  올리는 자리는 {owner}/{session}/{question_id}.{ext} 이고 owner 는 sg_results 에서
+  session 으로 찾아온다(정책이 남의 자리에 못 쓰게 막으므로 짐작으로 쓰지 않는다).
+  학생 본인으로 로그인하면 자기 것을, 선생님·관리자로 로그인하면 맡은 학생 것을 올린다
+  (supabase/recordings_staff.sql 을 적용한 프로젝트에서).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recover recordings · SMEAG MockTest</title>
+<link rel="stylesheet" href="assets/app.css">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<style>
+  .wrap { max-width: 900px; margin: 0 auto; padding: 18px 16px 60px; }
+  h1 { font-size: 21px; font-weight: 850; margin: 10px 0 4px; }
+  .lede { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0 0 18px; }
+  .steps { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; }
+  .steps button { font: inherit; font-size: 13px; font-weight: 800; padding: 11px 16px;
+    border: 1px solid var(--line-2); border-radius: 10px; background: var(--paper, #fff);
+    color: var(--ink); cursor: pointer; }
+  .steps button.go { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .steps button[disabled] { opacity: .45; cursor: default; }
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 0 16px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 9px 13px; min-width: 96px; }
+  .stat b { display: block; font-size: 21px; font-weight: 850; line-height: 1.15; }
+  .stat span { font-size: 10.5px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .04em; }
+  .note { border: 1px solid var(--line-2); border-radius: 10px; padding: 11px 13px;
+    font-size: 12.5px; line-height: 1.6; margin: 0 0 14px; }
+  .note.warn { background: #fdf1dc; border-color: #e5c98f; color: #7a4a00; }
+  .note.bad  { background: #fdeeee; border-color: #eec3c3; color: #8d1f16; }
+  .note.good { background: #e6f5ec; border-color: #b7dcc5; color: #1f7a44; }
+  .signin { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 0 0 16px; }
+  .signin input { font: inherit; font-size: 13px; padding: 10px 12px; border: 1px solid var(--line-2);
+    border-radius: 9px; background: var(--paper, #fff); color: var(--ink); min-width: 150px; }
+  table.rec { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.rec th { text-align: left; font-size: 10.5px; font-weight: 800; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--muted); padding: 8px 9px;
+    border-bottom: 1px solid var(--line-2); white-space: nowrap; }
+  table.rec td { padding: 8px 9px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.rec tr.head td { background: var(--cream-2); font-weight: 800; }
+  .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    word-break: break-all; }
+  .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tag { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+  .tag.ok   { background: #e6f5ec; color: #1f7a44; }
+  .tag.fail { background: #fdeeee; color: #c62828; }
+  .tag.wait { background: #eee; color: #666; }
+  .tag.skip { background: #fdf1dc; color: #a86b00; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Recover recordings from this computer</h1>
+  <p class="lede">
+    Speaking recordings are written to this browser first, then uploaded. If the upload
+    failed, they are still here — until this browser's data is cleared.
+    <b>Save to this computer first.</b> Upload afterwards.
+  </p>
+
+  <div id="msg"></div>
+
+  <div class="steps">
+    <button id="btn-scan" class="go">1 · Scan this computer</button>
+    <button id="btn-save" disabled>2 · Save all to this computer</button>
+    <button id="btn-up" disabled>3 · Sign in &amp; upload</button>
+  </div>
+
+  <div class="stats" id="stats" hidden>
+    <div class="stat"><b id="s-sessions">0</b><span>Tests</span></div>
+    <div class="stat"><b id="s-files">0</b><span>Recordings</span></div>
+    <div class="stat"><b id="s-size">0</b><span>MB</span></div>
+    <div class="stat"><b id="s-up">0</b><span>Uploaded</span></div>
+  </div>
+
+  <div class="signin" id="signin" hidden>
+    <input id="in-id" type="text" placeholder="Student ID or teacher login" autocomplete="off">
+    <input id="in-pw" type="password" placeholder="Password" autocomplete="off">
+    <button id="btn-login" class="go" style="font:inherit;font-size:13px;font-weight:800;padding:10px 16px;border:1px solid var(--brand);border-radius:9px;background:var(--brand);color:#fff;cursor:pointer;">Sign in</button>
+    <span id="who" style="font-size:12.5px;color:var(--muted);"></span>
+  </div>
+
+  <div id="out"></div>
+</div>
+
+<script src="assets/build-version.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var MEDIA_DB = 'sg2-media', MEDIA_STORE = 'recordings';
+  var BUCKET = 'toefl-recordings';
+  var found = [];           // [{ key, session, qid, blob, mime, size, state, why }]
+  var owners = {};          // session -> owner uuid
+
+  function $(id) { return document.getElementById(id); }
+  function say(cls, html) { $('msg').innerHTML = '<div class="note ' + cls + '">' + html + '</div>'; }
+  function esc(s) {
+    return String(s === null || s === undefined ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function mb(n) { return (n / 1048576).toFixed(2); }
+
+  /* MediaRecorder 는 'audio/webm;codecs=opus' 를 준다. 버킷은 파라미터 없는 이름만
+     알아 400 으로 되돌린다 — 이 페이지가 고치러 온 그 사고다. 여기서도 코덱을 뗀다. */
+  function baseMime(m) {
+    var s = String(m || '').split(';')[0].trim().toLowerCase();
+    return s || 'audio/webm';
+  }
+  function extOf(mime) {
+    var m = String(mime || '').toLowerCase();
+    if (m.indexOf('webm') >= 0) return 'webm';
+    if (m.indexOf('ogg') >= 0) return 'ogg';
+    if (m.indexOf('mp4') >= 0 || m.indexOf('m4a') >= 0 || m.indexOf('aac') >= 0) return 'm4a';
+    if (m.indexOf('wav') >= 0) return 'wav';
+    if (m.indexOf('mpeg') >= 0 || m.indexOf('mp3') >= 0) return 'mp3';
+    return 'webm';
+  }
+
+  /* ── 1. 이 기기 뒤지기 ──────────────────────────────────────
+     키는 '{session}/{questionId}' 다(assets/exam-store.js mediaKey).
+     값은 {questionKey, blob, mime, …} 이고, 아주 옛 기록은 Blob 자체다. */
+  function scan() {
+    return new Promise(function (resolve, reject) {
+      if (!window.indexedDB) { reject(new Error('IndexedDB is not available in this browser.')); return; }
+      var req;
+      try { req = indexedDB.open(MEDIA_DB, 1); } catch (e) { reject(e); return; }
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(MEDIA_STORE)) db.createObjectStore(MEDIA_STORE);
+      };
+      req.onerror = function () { reject(req.error || new Error('Could not open the recording store.')); };
+      req.onsuccess = function () {
+        var db = req.result, st;
+        try { st = db.transaction(MEDIA_STORE, 'readonly').objectStore(MEDIA_STORE); }
+        catch (e) { reject(e); return; }
+        var kq = st.getAllKeys(), vq = st.getAll();
+        var keys = null, vals = null;
+        function done() {
+          if (!keys || !vals) return;
+          var out = [], i;
+          for (i = 0; i < keys.length; i++) {
+            var k = String(keys[i]);
+            var cut = k.lastIndexOf('/');
+            var rec = vals[i];
+            var blob = rec && rec.blob ? rec.blob : rec;
+            if (!blob || typeof blob.size !== 'number' || !blob.size) continue;
+            out.push({
+              key: k,
+              session: cut > 0 ? k.slice(0, cut) : '(unknown)',
+              qid: cut > 0 ? k.slice(cut + 1) : k,
+              blob: blob,
+              mime: baseMime((rec && rec.mime) || blob.type),
+              size: blob.size,
+              state: 'wait',
+              why: ''
+            });
+          }
+          out.sort(function (a, b) {
+            return a.session === b.session ? (a.qid < b.qid ? -1 : 1) : (a.session < b.session ? -1 : 1);
+          });
+          resolve(out);
+        }
+        kq.onsuccess = function () { keys = kq.result || []; done(); };
+        vq.onsuccess = function () { vals = vq.result || []; done(); };
+        kq.onerror = vq.onerror = function () { reject(new Error('Could not read the recording store.')); };
+      };
+    });
+  }
+
+  /** 이 기기의 응시 기록에서 세트·제출시각을 붙인다(있으면). */
+  function metaOf(session) {
+    try {
+      var m = JSON.parse(localStorage.getItem('sg2_attempt::' + session + '::meta') || 'null');
+      if (!m) return '';
+      var when = m.submittedAt ? new Date(m.submittedAt).toLocaleString() : '';
+      return [String(m.setCode || m.set || '').toUpperCase(), when].filter(Boolean).join(' · ');
+    } catch (e) { return ''; }
+  }
+
+  function render() {
+    var bySession = {}, order = [];
+    found.forEach(function (f) {
+      if (!bySession[f.session]) { bySession[f.session] = []; order.push(f.session); }
+      bySession[f.session].push(f);
+    });
+
+    var total = found.reduce(function (a, f) { return a + f.size; }, 0);
+    $('s-sessions').textContent = order.length;
+    $('s-files').textContent = found.length;
+    $('s-size').textContent = mb(total);
+    $('s-up').textContent = found.filter(function (f) { return f.state === 'ok'; }).length;
+    $('stats').hidden = false;
+
+    var h = ['<table class="rec"><thead><tr><th>Question</th><th>Type</th>' +
+             '<th class="num">Size</th><th>Status</th></tr></thead><tbody>'];
+    order.forEach(function (s) {
+      var meta = metaOf(s);
+      var owner = owners[s];
+      h.push('<tr class="head"><td colspan="4"><span class="mono">' + esc(s) + '</span>' +
+             (meta ? ' &nbsp;· ' + esc(meta) : '') +
+             (owner ? ' &nbsp;· <span class="mono">owner ' + esc(owner.slice(0, 8)) + '…</span>' : '') +
+             '</td></tr>');
+      bySession[s].forEach(function (f) {
+        h.push('<tr><td class="mono">' + esc(f.qid) + '</td><td class="mono">' + esc(f.mime) +
+               '</td><td class="num">' + Math.round(f.size / 1024) + ' KB</td><td><span class="tag ' +
+               (f.state === 'ok' ? 'ok' : f.state === 'fail' ? 'fail' : f.state === 'skip' ? 'skip' : 'wait') +
+               '">' + esc(f.state === 'wait' ? 'on this PC' : f.state) + '</span>' +
+               (f.why ? ' <span style="color:var(--muted);font-size:11.5px;">' + esc(f.why) + '</span>' : '') +
+               '</td></tr>');
+      });
+    });
+    h.push('</tbody></table>');
+    $('out').innerHTML = found.length ? h.join('') : '';
+  }
+
+  /* ── 2. 파일로 내려받기 ─────────────────────────────────────
+     로그인도 회선도 없이 되는 유일한 길이라 제일 먼저 놓는다. 이름에 세션과 문항을
+     같이 넣어 두면, 나중에 어느 응시의 몇 번인지 파일 이름만으로 되찾을 수 있다. */
+  function saveAll() {
+    if (!found.length) return;
+    var manifest = { device_saved_at: new Date().toISOString(), files: [] };
+    var i = 0;
+    function next() {
+      if (i >= found.length) {
+        drop(new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' }),
+             'manifest.json');
+        say('good', 'Saved ' + found.length + ' recording(s) to this computer’s Downloads folder. ' +
+                    'Keep the folder together with manifest.json.');
+        return;
+      }
+      var f = found[i++];
+      var name = f.session + '__' + f.qid + '.' + extOf(f.mime);
+      manifest.files.push({ file: name, session: f.session, question_id: f.qid,
+                            mime: f.mime, bytes: f.size });
+      drop(f.blob, name);
+      setTimeout(next, 120);      // 브라우저가 연속 다운로드를 막지 않을 만큼만 띄운다
+    }
+    next();
+  }
+
+  function drop(blob, name) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} }, 4000);
+  }
+
+  /* ── 3. 클라우드로 올리기 ───────────────────────────────────
+     owner 는 짐작하지 않는다 — sg_results 에서 session 으로 찾는다. 못 찾으면
+     그 응시는 건너뛰고(skip) 그렇게 적는다. 남의 폴더에 올리는 것보다 낫다. */
+  function resolveOwners() {
+    var list = [];
+    found.forEach(function (f) { if (list.indexOf(f.session) < 0) list.push(f.session); });
+    if (!list.length) return Promise.resolve();
+    var q = 'sg_results?select=session,owner&session=in.(' +
+            list.map(function (s) { return '"' + s + '"'; }).join(',') + ')';
+    return SG_AUTH.token().then(function (tok) {
+      if (!tok) return null;
+      return fetch(SG_AUTH.url + '/rest/v1/' + q, {
+        headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok }
+      }).then(function (r) { return r.ok ? r.json() : null; });
+    }).then(function (rows) {
+      (rows || []).forEach(function (r) { if (r && r.session && r.owner) owners[r.session] = r.owner; });
+    })['catch'](function () {});
+  }
+
+  function uploadAll() {
+    var u = SG_AUTH.user();
+    if (!u) { say('warn', 'Sign in first — the cloud has to know whose recordings these are.'); return; }
+    say('warn', 'Uploading…');
+    return resolveOwners().then(function () {
+      render();
+      return SG_AUTH.token();
+    }).then(function (tok) {
+      if (!tok) { say('bad', 'Not signed in.'); return; }
+      var i = 0;
+      function one() {
+        if (i >= found.length) {
+          var ok = found.filter(function (f) { return f.state === 'ok'; }).length;
+          var bad = found.filter(function (f) { return f.state !== 'ok'; }).length;
+          say(bad ? 'warn' : 'good',
+              'Uploaded ' + ok + ' of ' + found.length + '.' +
+              (bad ? ' ' + bad + ' still only on this computer — keep the saved files.' : ''));
+          render();
+          return Promise.resolve();
+        }
+        var f = found[i++];
+        if (f.state === 'ok') return one();
+        var owner = owners[f.session];
+        if (!owner) {
+          f.state = 'skip'; f.why = 'no account found for this test on the server';
+          render(); return one();
+        }
+        var path = [owner, f.session, f.qid + '.' + extOf(f.mime)]
+          .map(encodeURIComponent).join('/');
+        return fetch(SG_AUTH.url + '/storage/v1/object/' + BUCKET + '/' + path, {
+          method: 'POST',
+          headers: {
+            apikey: SG_AUTH.anonKey,
+            Authorization: 'Bearer ' + tok,
+            'Content-Type': f.mime,
+            'x-upsert': 'true'
+          },
+          body: f.blob
+        }).then(function (r) {
+          if (r.ok) { f.state = 'ok'; f.why = ''; render(); return null; }
+          return r.text()['catch'](function () { return ''; }).then(function (t) {
+            f.state = 'fail'; f.why = 'HTTP ' + r.status + ' ' + String(t).slice(0, 90);
+            render();
+          });
+        })['catch'](function (e) {
+          f.state = 'fail'; f.why = String((e && e.message) || e).slice(0, 90); render();
+        }).then(one);
+      }
+      return one();
+    });
+  }
+
+  /* ── 화면 배선 ─────────────────────────────────────────── */
+
+  $('btn-scan').onclick = function () {
+    say('warn', 'Scanning…');
+    scan().then(function (list) {
+      found = list;
+      render();
+      if (!found.length) {
+        say('bad', 'No recordings are stored in this browser. If this is the right computer, ' +
+                   'the exam may have been taken in a Guest or Incognito window (that data is ' +
+                   'deleted when the window closes), or in a different Chrome profile.');
+        $('btn-save').disabled = true; $('btn-up').disabled = true;
+        return;
+      }
+      say('good', 'Found ' + found.length + ' recording(s) on this computer. ' +
+                  'Click <b>Save all</b> now — before anything else.');
+      $('btn-save').disabled = false;
+      $('btn-up').disabled = false;
+      $('signin').hidden = false;
+      showWho();
+    })['catch'](function (e) {
+      say('bad', 'Could not read this browser’s recording store: ' + esc((e && e.message) || e));
+    });
+  };
+
+  $('btn-save').onclick = saveAll;
+  $('btn-up').onclick = uploadAll;
+
+  function showWho() {
+    var u = window.SG_AUTH && SG_AUTH.user();
+    $('who').textContent = u ? ('Signed in as ' + (u.student_id || u.name || u.email || u.id)) : 'Not signed in.';
+  }
+
+  $('btn-login').onclick = function () {
+    var id = $('in-id').value.trim(), pw = $('in-pw').value;
+    if (!id || !pw) { say('warn', 'Enter the ID and password.'); return; }
+    say('warn', 'Signing in…');
+    SG_AUTH.signIn(id, pw).then(function () {
+      showWho();
+      say('good', 'Signed in. Now click <b>Sign in &amp; upload</b>.');
+    })['catch'](function (e) {
+      say('bad', 'Sign-in failed: ' + esc((e && e.message) || e));
+    });
+  };
+
+  showWho();
+})();
+</script>
+</body>
+</html>

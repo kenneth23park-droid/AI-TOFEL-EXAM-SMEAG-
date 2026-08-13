@@ -130,6 +130,42 @@ async function main() {
   var done = JSON.parse(localStorage.getItem('sg2_media_up::sess-A') || '[]');
   ok('올린 문항이 목록에 남는다', done.indexOf('S1-1') >= 0, done.join(','));
 
+  /* ── [4-2] 스피킹 답안 행도 뜻이 통해야 한다 ─────────────── */
+  console.log('\n[4-2] toefl_answers — "idb:…" 한 줄로는 아무것도 못 읽는다');
+
+  calls.length = 0;
+  CLOUD.markAnswer('S1-1');
+  CLOUD.pushAnswers({
+    'S1-1': { v: 'idb:S1-1', media: 'idb:S1-1', recorded: true, mime: 'audio/webm',
+              durationMs: 45000, bytes: 120000, peak: 0.4213, t: 1 }
+  });
+  CLOUD.flush();
+  await settle(); await settle();
+  var arow = JSON.parse(restCalls('toefl_answers')[0].opts.body)[0];
+  eq('기기 표시는 그대로 둔다(v)', arow.response.v, 'idb:S1-1');
+  eq('녹음됨', arow.response.recorded, true);
+  eq('길이', arow.response.duration_ms, 45000);
+  eq('용량', arow.response.bytes, 120000);
+  eq('입력 최대치는 두 자리로', arow.response.peak, 0.42);
+  eq('스피킹으로 표시된다', arow.kind, 'speaking');
+
+  calls.length = 0;
+  CLOUD.markAnswer('S1-3');
+  CLOUD.pushAnswers({
+    'S1-3': { v: 'NOT SUBMIT', notSubmit: true, recorded: false, media: '',
+              reason: 'recorder_unavailable', t: 2 }
+  });
+  CLOUD.flush();
+  await settle(); await settle();
+  var nrow = JSON.parse(restCalls('toefl_answers')[0].opts.body)[0];
+  eq('녹음 못 한 문항도 그대로 올라간다', nrow.response.v, 'NOT SUBMIT');
+  eq('까닭이 남는다', nrow.response.reason, 'recorder_unavailable');
+  eq('not_submit 표시', nrow.response.not_submit, true);
+
+  var storeSrc2 = fs.readFileSync(path.join(SG2, 'assets/exam-store.js'), 'utf8');
+  ok('무음 판정은 녹음 순간에만 알 수 있다 — 답안에 적어 둔다',
+     storeSrc2.indexOf('meta.silent = true') > 0);
+
   /* ── [5] 실패한 녹음이 답안을 막지 않는다 ───────────────── */
   console.log('\n[5] 큐 — 녹음이 실패해도 답안은 먼저 나간다');
 

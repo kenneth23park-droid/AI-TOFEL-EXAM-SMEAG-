@@ -233,7 +233,16 @@
 //      카드 하나만 남기고 나머지는 DOM 에서 지운다(읽기 전용). 성적을 고치는
 //      권한은 종전대로 review.html 이, 정본은 RLS 가 가른다. 캐시된 옛 사본이
 //      남은 기기는 선생님에게 관리자 비밀번호 창만 계속 띄운다.
-const VERSION = 'sg-v64';
+// v65: 스피킹 녹음이 실제로 올라간다 — MediaRecorder 가 주는 타입은
+//      'audio/webm;codecs=opus' 인데 버킷은 'audio/webm' 만 알고 있어, 2026-08-12
+//      시험의 녹음 61건이 전부 400(InvalidMimeType)으로 거절당했다. 화면은 그동안
+//      "계정에 저장되었습니다" 라고 했다. assets/sg-results.js 가 코덱을 떼고 보내고,
+//      실패하면 그 이유를 들고 나온다. assets/exam-shell.js 는 녹음이 못 올라간 제출을
+//      성공이라고 말하지 않는다. 회수용 recover-recordings.html 이 새로 들어온다 —
+//      기기에 남은 녹음을 세어 파일로 내려받고(오프라인 가능) 클라우드로 올린다.
+//      캐시된 옛 사본이 남은 기기는 여전히 코덱을 붙여 보내지만, 버킷 쪽도 함께
+//      넓혔으므로(supabase/recordings_staff.sql) 그 기기의 업로드도 통과한다.
+const VERSION = 'sg-v65';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -246,6 +255,9 @@ const SHELL_ASSETS = [
 
   // 채점 리뷰 — 제출 직후 오프라인에서도 자기 답안을 문항별로 볼 수 있어야 한다.
   'review.html', 'admin-results.html', 'assets/sg-results.js', 'assets/sg-comments.js',
+  // 녹음 회수 — 업로드가 실패한 PC 앞에서 여는 도구다. 그 PC 가 오프라인일 수도 있고
+  // (스캔·저장은 회선 없이 된다), 회수는 미룰수록 브라우저 정리에 지워진다.
+  'recover-recordings.html',
   'assets/sg-review-reading.js', 'assets/sg-review-listening.js',
   'assets/sg-review-writing.js', 'assets/sg-review-speaking.js',
   // 밴드 환산 — 제출 화면이 채점 직후 네 영역 점수를 그 자리에서 편다.

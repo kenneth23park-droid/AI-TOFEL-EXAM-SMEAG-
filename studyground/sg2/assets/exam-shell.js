@@ -1049,6 +1049,19 @@ window.SG_RUNTIME = (function () {
             '이 기기에 저장했습니다. 온라인이 되면 올라갑니다.');
         return null;
       }
+      /* 녹음이 한 장도 못 올라간 채로 "계정에 저장되었습니다" 라고 하면 안 된다.
+         2026-08-12 시험이 정확히 그랬다 — 답안은 올라갔고 녹음 61건은 전부 거절
+         (400 InvalidMimeType)당했는데 화면은 아무 말이 없었다. 이제는 그 자리에서
+         말하고, 감독 선생님이 그 PC 를 떠나기 전에 회수할 수 있게 한다. */
+      var m = (r && r.media) || null;
+      if (m && m.failed) {
+        say('Your answers are saved, but ' + m.failed + ' recording(s) could not be uploaded (' +
+              (m.error || 'unknown') + '). Tell your teacher BEFORE leaving this computer.',
+            '답안은 저장되었지만 녹음 ' + m.failed + '개를 올리지 못했습니다 (' +
+              (m.error || 'unknown') + '). 이 컴퓨터를 떠나기 전에 선생님께 알리세요.');
+        openRetake();
+        return null;
+      }
       say('Saved to your account. Building your score report…',
           '계정에 저장되었습니다. 성적을 정리하는 중…');
       /* 채점이 서버에서 거절당했으면(설정 누락·권한) 그렇게 말한다. "잠시 후 확인하세요"

@@ -10,7 +10,8 @@
  *   SG_RESULTS.local()                → 제출된 로컬 응시 [{ session, setCode, ... }]
  *   SG_RESULTS.list()                 → Promise<[결과]>  로컬 + 서버 병합(세션 기준 중복 제거)
  *   SG_RESULTS.get(session)           → Promise<결과|null>
- *   SG_RESULTS.push(opts)             → Promise<{ sent, failed, scored }>  안 올라간 것만 올린다
+ *   SG_RESULTS.push(opts)             → Promise<{ sent, failed, scored, media }>  안 올라간 것만 올린다
+ *                                       media = { sent, failed, error } — 스피킹 녹음 쪽 결과
  *                                       opts.waitScore  AI 채점까지 기다린다(제출 직후 화면)
  *                                       opts.onProgress (done, total) 채점 진행
  *   SG_RESULTS.listFor(ownerId)       → Promise<[결과]>  관리자/선생님 전용
@@ -334,6 +335,16 @@ window.SG_RESULTS = (function () {
    */
   var BUCKET = 'toefl-recordings';
 
+  /* MediaRecorder 가 내놓는 타입은 'audio/webm;codecs=opus' 다 — 코덱까지 붙는다.
+   * 버킷의 allowed_mime_types 는 'audio/webm' 처럼 파라미터 없는 이름만 알고 있어,
+   * 그대로 Content-Type 에 실으면 Storage 가 400(InvalidMimeType)으로 되돌린다.
+   * 2026-08-12 시험의 녹음 61건이 전부 이 400 이었다: 파일은 한 장도 올라가지 않았고,
+   * 학생 화면에는 "계정에 저장되었습니다" 만 떴다. 그래서 보내기 전에 코덱을 뗀다. */
+  function baseMime(mime) {
+    var m = String(mime || '').split(';')[0].trim().toLowerCase();
+    return m || 'audio/webm';
+  }
+
   function extOf(mime) {
     var m = String(mime || '').toLowerCase();
     if (m.indexOf('webm') >= 0) return 'webm';
@@ -397,14 +408,18 @@ window.SG_RESULTS = (function () {
 
     return SG_AUTH.token().then(function (tok) {
       if (!tok) return { sent: 0, failed: todo.length };
-      var sent = 0, failed = 0;
+      var sent = 0, failed = 0, why = '';
+
+      /* 왜 거절당했는지 한 줄이라도 들고 나간다. 이 값이 없었기 때문에 400 이
+         61번 반복되는 동안 화면에도 로그에도 아무 말이 남지 않았다. */
+      function note(msg) { if (!why) why = String(msg || '').slice(0, 200); }
 
       function one(i) {
         if (i >= todo.length) return Promise.resolve();
         var qid = todo[i];
         return mediaOf(qid).then(function (rec) {
           if (!rec || !rec.blob || !rec.blob.size) return null;   // 녹음 실패 문항(NOT SUBMIT)
-          var mime = rec.mime || rec.blob.type || 'audio/webm';
+          var mime = baseMime(rec.mime || rec.blob.type);
           var path = [u.id, row.session, qid + '.' + extOf(mime)]
             .map(encodeURIComponent).join('/');
           return fetch(SG_AUTH.url + '/storage/v1/object/' + BUCKET + '/' + path, {
@@ -417,16 +432,24 @@ window.SG_RESULTS = (function () {
             },
             body: rec.blob
           }).then(function (r) {
-            if (r.ok) { sent += 1; markUploaded(row.session, qid); }
-            else failed += 1;
-          })['catch'](function () { failed += 1; });
-        })['catch'](function () { failed += 1; })
+            if (r.ok) { sent += 1; markUploaded(row.session, qid); return null; }
+            failed += 1;
+            return r.text()['catch'](function () { return ''; }).then(function (t) {
+              note('HTTP ' + r.status + ' ' + t);
+            });
+          })['catch'](function (e) { failed += 1; note((e && e.message) || e); });
+        })['catch'](function (e) { failed += 1; note((e && e.message) || e); })
           .then(function () { return one(i + 1); });   // 한 번에 하나씩 — 시험장 회선을 막지 않는다
       }
 
-      return one(0).then(function () { return { sent: sent, failed: failed }; });
-    })['catch'](function () {
-      return { sent: 0, failed: todo.length };
+      return one(0).then(function () {
+        if (failed) {
+          try { console.warn('[sg2] recordings failed to upload: ' + failed + ' — ' + why); } catch (e) {}
+        }
+        return { sent: sent, failed: failed, error: why };
+      });
+    })['catch'](function (e) {
+      return { sent: 0, failed: todo.length, error: String((e && e.message) || e) };
     }).then(function (out) {
       if (was && was !== row.session) { try { SG_STORE.open(was, false); } catch (e) {} }
       return out;
@@ -580,8 +603,11 @@ window.SG_RESULTS = (function () {
          * 점수까지 보여 주려면 어차피 기다려야 하고, 기다리는 김에 끊기지도 않는다.
          * 실패해도 조용하다: 선생님이 확정하면 그만이고, 자동 채점은 그 초안일 뿐이다. */
         var out = null;
+        var media = { sent: 0, failed: 0, error: '' };
         var jobs = landed.map(function (r) {
           return uploadRecordings(r).then(function (up) {
+            media.sent += up.sent; media.failed += up.failed;
+            if (up.error && !media.error) media.error = up.error;
             var isNew = pushed.indexOf(r) >= 0;
             // 새 응시는 무조건, 예전 응시는 밀렸던 녹음이 방금 올라갔을 때만 채점을 건다.
             if (!(isNew || up.sent)) return null;
@@ -592,7 +618,9 @@ window.SG_RESULTS = (function () {
         });
 
         return Promise.all(jobs).then(function () {
-          return { sent: pushed.length, failed: todo.length - pushed.length, scored: out };
+          /* media 를 같이 돌려준다 — 답안이 올라갔다는 사실만으로 "다 저장됐다"고
+             말하면, 녹음이 통째로 실패한 날에도 아무도 그 사실을 모른다. */
+          return { sent: pushed.length, failed: todo.length - pushed.length, scored: out, media: media };
         });
       });
     });

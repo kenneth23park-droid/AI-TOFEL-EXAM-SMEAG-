@@ -267,7 +267,18 @@
         var tx = db.transaction(MEDIA_STORE, 'readwrite');
         tx.objectStore(MEDIA_STORE).put(blob, mediaKey(qid));
         tx.oncomplete = function () {
-          upsertAnswer(qid, 'idb:' + qid, { media: 'idb:' + qid, recorded: true });
+          /* 녹음이 남긴 사실을 답안에 함께 적는다 — 길이·무음 여부는 나중에 파일을
+             열어도 알 수 없거나(무음 판정) 비싸다(길이). 옛 경로가 Blob 을 그대로
+             넘기는 경우도 있어 record 인지 먼저 본다. */
+          var meta = { media: 'idb:' + qid, recorded: true };
+          if (blob && blob.blob) {
+            if (blob.mime) meta.mime = blob.mime;
+            if (typeof blob.durationMs === 'number') meta.durationMs = blob.durationMs;
+            if (typeof blob.peak === 'number') meta.peak = blob.peak;
+            if (blob.silent === true) meta.silent = true;
+            if (typeof blob.blob.size === 'number') meta.bytes = blob.blob.size;
+          }
+          upsertAnswer(qid, 'idb:' + qid, meta);
           flushAnswers();
           /* 녹음이 기기에 안착한 그 순간을 알린다 — 클라우드로 곧장 올리는 쪽
              (exam-live-boot.js)이 여기에 붙는다. 이 파일은 여전히 전역을 모른다. */

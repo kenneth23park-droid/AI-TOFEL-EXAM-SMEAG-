@@ -247,6 +247,15 @@
    * 같은 자리에 덮어쓰기 때문에 "녹음 끝난 즉시"와 "제출 후"가 겹쳐도 파일은 하나다.
    */
 
+  /* MediaRecorder 의 타입에는 코덱이 붙는다('audio/webm;codecs=opus'). 버킷의
+     allowed_mime_types 는 파라미터 없는 이름만 알아서, 그대로 실으면 400
+     (InvalidMimeType)으로 되돌아온다 — 2026-08-12 시험이 그렇게 통째로 막혔다.
+     보내기 직전에 떼고, 확장자는 원래대로 전체 문자열에서 고른다. */
+  function baseMime(mime) {
+    var m = String(mime || '').split(';')[0].trim().toLowerCase();
+    return m || 'audio/webm';
+  }
+
   function extOf(mime) {
     var m = String(mime || '').toLowerCase();
     if (m.indexOf('webm') >= 0) return 'webm';
@@ -281,7 +290,7 @@
     if (!p.blob || !p.blob.size) { cb(null, 0); return; }   // 올릴 게 없다(NOT SUBMIT)
     var name = p.qid + '.' + extOf(p.mime);
     var path = [u, sess, name].map(encodeURIComponent).join('/');
-    storagePut(path, p.blob, p.mime, function (err, status) {
+    storagePut(path, p.blob, baseMime(p.mime), function (err, status) {
       if (err) { cb(err, status); return; }
       markUploaded(sess, p.qid);
       /* 파일만 올라가면 "어느 응시의 몇 번 문항인지"는 폴더 이름에만 남는다.
@@ -419,6 +428,26 @@
     }
   }
 
+  /* 스피킹 답안의 v 는 "idb:{qid}" — 그 기기 안에서만 뜻이 있는 표시다. 서버에서
+     그 한 줄만 보면 녹음이 됐는지, 몇 초인지, 소리가 잡혔는지 알 길이 없다.
+     그래서 녹음이 남긴 사실을 답안 행에 같이 싣는다. v 는 건드리지 않는다 —
+     채점기(api/score.js)와 리뷰 화면이 그 모양에 기대고 있다. */
+  function responseOf(rec) {
+    var r = { v: rec.v === undefined ? null : rec.v };
+    if (rec.media) r.media = rec.media;
+    if (rec.recorded === true) r.recorded = true;
+    if (rec.notSubmit === true) {
+      r.not_submit = true;
+      if (rec.reason) r.reason = String(rec.reason);
+    }
+    if (typeof rec.durationMs === 'number' && rec.durationMs > 0) r.duration_ms = rec.durationMs;
+    if (typeof rec.bytes === 'number' && rec.bytes > 0) r.bytes = rec.bytes;
+    if (rec.silent === true) r.silent = true;            // 파일은 있는데 소리가 없었다
+    if (typeof rec.peak === 'number') r.peak = Math.round(rec.peak * 100) / 100;
+    if (rec.mime) r.mime = String(rec.mime);
+    return r;
+  }
+
   function pushAnswers(answersMap) {
     if (pushTimer !== null) { (root.clearTimeout || clearTimeout)(pushTimer); pushTimer = null; }
     if (!attemptId) return null;
@@ -437,8 +466,8 @@
         section: rec.skill || rec.section || '',
         module: rec.module || '',
         q_no: typeof rec.no === 'number' ? rec.no : null,
-        kind: rec.qtype || '',
-        response: { v: rec.v === undefined ? null : rec.v },
+        kind: rec.qtype || (rec.recorded === true || rec.notSubmit === true ? 'speaking' : ''),
+        response: responseOf(rec),
         client_ts: rec.t || Date.now()
       });
     }
