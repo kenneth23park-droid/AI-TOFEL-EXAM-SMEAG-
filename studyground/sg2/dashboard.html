@@ -325,9 +325,15 @@
     paintAccount();
     /* 이 기기에 남아 있고 아직 안 올라간 응시가 있으면 올린다. 답안은 조용히 가도
        되지만 녹음은 아니다 — 못 올라간 녹음은 이 기기를 떠나는 순간 없어지므로,
-       그 사실만은 화면에 적는다(2026-08-12 시험을 잃은 자리가 정확히 여기다). */
+       그 사실만은 화면에 적는다(2026-08-12 시험을 잃은 자리가 정확히 여기다).
+
+       push() 는 이때 "아직 채점 전" 인 과제를 다시 의뢰하기도 한다(sg-results.js).
+       그래서 여기서 기다렸다가, 새로 매겨진 점수가 있으면 목록을 다시 그린다 —
+       기다리지 않으면 방금 올라간 점수를 다음 방문 때야 보게 된다. */
     if (window.SG_RESULTS && SG_AUTH.user()) {
-      SG_RESULTS.push().then(function (r) {
+      SG_RESULTS.push({ waitScore: true }).then(function (r) {
+        var sc = (r && r.scored) || null;
+        if (sc && ((sc.scored || []).length)) paintAll();
         var m = (r && r.media) || null;
         if (!m || (!m.sent && !m.failed)) return;
         if (m.failed) {
@@ -342,9 +348,15 @@
       })['catch'](function () {});
     }
 
+    paintAll();
+  }
+
+  /* 목록을 그린다. 채점이 새로 붙으면 이 함수를 다시 부른다 — 그때 필요한 것은
+     한 번 더 읽는 일뿐이라, 화면을 다시 그리는 길을 하나로 둔다. */
+  function paintAll() {
     /* 응시 목록과 W·S 채점을 각각 한 번씩만 읽는다(응시마다 묻지 않는다).
        채점 조회가 실패해도 목록은 그려야 하므로 빈 배열로 받아 넘긴다. */
-    Promise.all([
+    return Promise.all([
       decide(),
       SG_RESULTS.list(),
       SG_RESULTS.tasks().catch(function () { return []; })
@@ -356,6 +368,7 @@
       paintBand(list, byS);
       paintBests(list, byS);
       if (!list.length) { $('empty').classList.remove('hide'); return; }
+      $('empty').classList.add('hide');      // 다시 그릴 때 빈 화면 안내가 남지 않게
       paintRows(list, byS);
       $('recent').classList.remove('hide');
     }).catch(function () {

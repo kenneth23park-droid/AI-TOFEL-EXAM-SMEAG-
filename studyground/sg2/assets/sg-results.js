@@ -25,6 +25,9 @@
  *   SG_RESULTS.uploadRecordings(row)  → Promise<{sent,failed}>  녹음 → 비공개 버킷
  *   SG_RESULTS.aiScore(row, opts)     → Promise<채점 결과|null>  /api/score 호출
  *                                       opts.onProgress(done, total) 로 진행을 알린다
+ *   SG_RESULTS.unscored(row, 채점행)  → [아직 점수가 없는 과제]  "아직 채점 전" 의 정체
+ *   SG_RESULTS.scoreMissing(row,opts) → Promise<{missing, scored, skipped}>  못 매긴 것만 다시 의뢰
+ *                                       opts.auto 면 응시당 횟수·간격 고삐를 쓴다
  *   SG_RESULTS.bandOf(row)            → Promise<SG_BAND.of(...)>  밴드까지 한 번에
  *
  * 점수 두 벌에 대하여
@@ -339,6 +342,93 @@ window.SG_RESULTS = (function () {
     return rest(q).then(function (rows) { return rows || []; });
   }
 
+  /** 이 과제에 이미 점수가 있는가. 교사 확정 > 교사 점수 > AI 초안 순으로 본다.
+   *  ai_error 만 있고 ai_score 가 null 인 행은 **점수가 없는 것**이다 — 채점을
+   *  걸었다가 모델이 실패한 자리이고, 그런 행이야말로 다시 의뢰해야 한다. */
+  function hasScore(t) {
+    if (!t) return false;
+    if (t.confirmed_at) return true;
+    if (t.teacher_score !== null && t.teacher_score !== undefined) return true;
+    return t.ai_score !== null && t.ai_score !== undefined;
+  }
+
+  /**
+   * 이 응시에서 **아직 점수가 없는** 산출형 과제. "아직 채점 전" 이라고 적힌 자리의
+   * 정체가 이것이다 — 화면이 그 문구를 띄우는 조건과 다시 의뢰하는 조건이 같아야
+   * 한다. 그렇지 않으면 버튼을 눌러도 아무 일도 일어나지 않는 화면이 생긴다.
+   */
+  function unscored(row, taskRows) {
+    var by = {};
+    (taskRows || []).forEach(function (t) { if (t && t.question_id) by[t.question_id] = t; });
+    return productive(row).filter(function (t) { return !hasScore(by[t.question_id]); });
+  }
+
+  /* 자동 재의뢰의 고삐.
+   *
+   * 점수가 없는 이유가 늘 "아직" 인 것은 아니다. 녹음이 이 기기를 떠나기 전에
+   * 올라가지 못했다면 서버는 언제 물어도 no_transcript 로 돌려보내고, 그때마다
+   * 전사·채점을 다시 시도하면 대시보드를 열 때마다 돈만 나간다. 그래서 자동으로
+   * 거는 재의뢰는 응시당 몇 번, 몇 분 간격으로만 허락한다. 사람이 버튼을 누른
+   * 경우는 이 고삐를 지나친다 — 선생님이 지금 고쳐 놓고 다시 거는 자리다. */
+  var AUTO_MAX = 4;                      // 응시 하나에 자동 재의뢰는 네 번까지
+  var AUTO_GAP = 10 * 60 * 1000;         // 그리고 10분에 한 번까지
+  function autoKey(session) { return 'sg2_score_auto::' + session; }
+  function autoState(session) { return readJSON(autoKey(session), null) || { n: 0, at: 0 }; }
+  function autoAllowed(session) {
+    var st = autoState(session);
+    if (st.n >= AUTO_MAX) return false;
+    return (Date.now() - (st.at || 0)) >= AUTO_GAP;
+  }
+  function autoMark(session, progressed) {
+    /* 한 과제라도 새로 매겨졌으면 시도 횟수를 되돌린다. 서버리스 상한에 걸려
+       한 묶음만 채점되고 끊긴 경우가 여기다 — 진전이 있는 한 계속 이어 간다. */
+    var st = autoState(session);
+    var next = { n: progressed ? 0 : (st.n || 0) + 1, at: Date.now() };
+    try { localStorage.setItem(autoKey(session), JSON.stringify(next)); } catch (e) {}
+  }
+
+  /**
+   * 점수가 없는 과제만 골라 채점을 다시 의뢰한다.
+   *
+   * force 가 아니다 — 이미 매겨진 과제는 애초에 보내지 않고(돈), 서버도
+   * already_scored 로 거른다(안전). 교사가 확정한 행은 어느 쪽에서도 건드리지 않는다.
+   * 결과는 서버가 sg_task_scores 에 직접 쓴다: 이 함수가 돌아온 뒤 화면이
+   * 다시 읽으면 점수가 그 자리에 있다.
+   *
+   * @param opts.owner      staff 가 남의 응시를 채점할 때만(학생은 늘 자기 것)
+   * @param opts.taskRows   이미 읽어 둔 sg_task_scores 행(다시 묻지 않기 위해)
+   * @param opts.auto       사람이 누른 것이 아니라 화면이 스스로 건 것 → 고삐를 쓴다
+   * @returns Promise<{ missing, scored, skipped, throttled?, error? }>
+   */
+  function scoreMissing(row, opts) {
+    opts = opts || {};
+    if (!row || !row.session || !window.SG_AUTH || !SG_AUTH.user()) {
+      return Promise.resolve(null);
+    }
+    var known = opts.taskRows
+      ? Promise.resolve(opts.taskRows)
+      : tasks(row.session, opts.owner || undefined)['catch'](function () { return []; });
+
+    return known.then(function (rows) {
+      var todo = unscored(row, rows);
+      var base = { session: row.session, missing: todo.length, scored: [], skipped: [] };
+      if (!todo.length) return base;
+      if (opts.auto && !autoAllowed(row.session)) {
+        base.throttled = true;
+        return base;
+      }
+      return aiScore(row, {
+        owner: opts.owner, tasks: todo, lang: opts.lang, onProgress: opts.onProgress
+      }).then(function (out) {
+        var got = (out && out.scored) || [];
+        if (opts.auto) autoMark(row.session, got.length > 0);
+        if (!out) return base;
+        out.missing = todo.length;
+        return out;
+      });
+    });
+  }
+
   /** session → 채점 행[] 로 묶는다. 목록 화면이 한 번만 묻고 나눠 쓰기 위한 것. */
   function tasksBySession(rows) {
     var by = {};
@@ -631,14 +721,37 @@ window.SG_RESULTS = (function () {
          * 실패해도 조용하다: 선생님이 확정하면 그만이고, 자동 채점은 그 초안일 뿐이다. */
         var out = null;
         var media = { sent: 0, failed: 0, error: '' };
+
+        /* 이미 매겨진 과제가 무엇인지는 여기서 한 번만 읽는다. 응시마다 물으면
+           대시보드 한 번에 스무 번이 된다 — 목록 화면이 tasks() 를 한 번만 부르는
+           것과 같은 이유다. 새 응시만 있으면 물을 것도 없다. */
+        var older = landed.filter(function (r) { return pushed.indexOf(r) < 0; });
+        var known = older.length
+          ? tasks().then(tasksBySession)['catch'](function () { return {}; })
+          : Promise.resolve({});
+
+        return known.then(function (byS) {
         var jobs = landed.map(function (r) {
           return uploadRecordings(r).then(function (up) {
             media.sent += up.sent; media.failed += up.failed;
             if (up.error && !media.error) media.error = up.error;
             var isNew = pushed.indexOf(r) >= 0;
-            // 새 응시는 무조건, 예전 응시는 밀렸던 녹음이 방금 올라갔을 때만 채점을 건다.
-            if (!(isNew || up.sent)) return null;
-            var job = aiScore(r, { onProgress: opts.onProgress })['catch'](function () { return null; });
+            /* 새 응시는 통째로 채점한다(아직 아무 점수도 없다).
+             *
+             * 예전 응시는 "아직 점수가 없는 과제" 만 다시 의뢰한다. 예전에는 밀렸던
+             * 녹음이 방금 올라간 경우에만 채점을 걸었는데, 그러면 제출 당시 채점이
+             * 끊기거나(서버리스 상한) 거절당한(키 미설정) 응시는 영원히 "아직 채점 전"
+             * 으로 남았다 — 고칠 사람은 그 사실조차 몰랐다. 이제는 대시보드를 여는
+             * 것만으로 못 매긴 과제가 다시 의뢰되고, 결과는 Supabase 로 올라간다.
+             * 녹음이 방금 올라간 응시는 새 재료가 생긴 것이니 고삐 없이 바로 건다. */
+            var job = isNew
+              ? aiScore(r, { onProgress: opts.onProgress })
+              : scoreMissing(r, {
+                  auto: !up.sent,
+                  taskRows: byS[r.session] || [],
+                  onProgress: opts.onProgress
+                });
+            job = job['catch'](function () { return null; });
             if (!opts.waitScore) return null;
             return job.then(function (res) { if (res && !out) out = res; });
           })['catch'](function () {});
@@ -648,6 +761,7 @@ window.SG_RESULTS = (function () {
           /* media 를 같이 돌려준다 — 답안이 올라갔다는 사실만으로 "다 저장됐다"고
              말하면, 녹음이 통째로 실패한 날에도 아무도 그 사실을 모른다. */
           return { sent: pushed.length, failed: todo.length - pushed.length, scored: out, media: media };
+        });
         });
       });
     });
@@ -699,6 +813,7 @@ window.SG_RESULTS = (function () {
     local: local, remote: remote, list: list, get: get, push: push,
     listFor: listFor, listAll: listAll, archives: archives, setHidden: setHidden,
     productive: productive, tasks: tasks, tasksBySession: tasksBySession,
+    unscored: unscored, hasTaskScore: hasScore, scoreMissing: scoreMissing,
     aiScore: aiScore, bandOf: bandOf,
     uploadRecordings: uploadRecordings, recordedQids: recordedQids, extOf: extOf
   };
