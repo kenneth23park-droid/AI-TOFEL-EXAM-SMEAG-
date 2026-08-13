@@ -10,6 +10,27 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MockTest">
+
+<!-- ── 수험생 계정으로 들어오면 시험 한 벌만 남긴다 ──────────────────────────
+     로그인한 학생이 도착하는 화면이다(assets/student-landing.js). 여기서는
+     지금 치를 시험(SET 9) 하나만 문으로 열고, 성적도 SET 9 만 센다 —
+     밴드 · 영역별 최고 · 최근 성적 모두. 비로그인 방문자와 선생님/관리자는 전체를 본다.
+     tests.html 의 같은 판정을 쓴다(admin-session.js 의 studentSignedIn()). -->
+<script>
+(function () {
+  'use strict';
+  // 본문이 그려지기 전에 정해야 카드가 한 번 보였다 사라지지 않는다 — 저장소를 직접 읽는다.
+  try {
+    var s = JSON.parse(localStorage.getItem('sg2_auth_v1') || 'null');
+    var u = s && s.user;
+    if (!u) return;
+    var r = u.role || (u.is_admin ? 'admin' : 'student');   // role 이 없던 옛 계정은 학생으로 본다
+    if (r !== 'teacher' && r !== 'admin') document.documentElement.classList.add('sg-student');
+  } catch (e) { /* 프라이빗 모드 — 아래 sg-auth 재확인이 맡는다 */ }
+})();
+</script>
+<style>[data-student-only]{display:none!important}
+       .sg-student [data-student-only]{display:block!important}</style>
 </head>
 <body>
 
@@ -47,6 +68,19 @@
     <a class="btn brand sm" href="admin-results.html" style="margin-left:auto"><span data-en>All students' results</span><span data-ko>전체 학생 결과</span></a>
   </div>
 
+  <!-- 학생이 로그인해 도착하는 자리 — 지금 치를 시험 한 벌(SET 9)만 문으로 연다.
+       주소는 tests.html 의 Full Test 버튼과 같다(assets/student-landing.js). -->
+  <div class="card mt-16" data-student-only id="mytest">
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <div>
+        <div class="muted" style="font-size:12px"><span data-en>Your test</span><span data-ko>내 시험</span></div>
+        <div style="font-size:20px;font-weight:800">NEW TOEFL SET 9</div>
+        <div class="muted" style="font-size:12.5px"><span data-en>Full 4-section mock · Reading · Listening · Speaking · Writing</span><span data-ko>4영역 전체 모의고사 · 리딩 · 리스닝 · 스피킹 · 라이팅</span></div>
+      </div>
+      <a class="btn brand lg" style="margin-left:auto" id="mytest-go" href="exam-runtime.html?mode=exam&amp;profile=toefl&amp;set=set9"><span data-en>Start SET 9</span><span data-ko>SET 9 응시</span></a>
+    </div>
+  </div>
+
   <!-- 최고 성적의 TOEFL 밴드 (1.0~6.0, ETS 2026 눈금) -->
   <div class="card mt-16 hide" id="bandcard"></div>
 
@@ -59,7 +93,7 @@
     <h2 class="title mt-16"><span data-en>Start your TOEFL journey today</span><span data-ko>오늘 TOEFL 여정을 시작하세요</span></h2>
     <p class="muted mt-8"><span data-en>No graded test yet. Take a mock test and your review will appear here.</span><span data-ko>아직 채점된 응시가 없습니다. 모의고사를 보면 이곳에 리뷰가 쌓입니다.</span></p>
     <div class="mt-24" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <a class="btn brand lg" href="tests.html"><span data-en>Take the mock test</span><span data-ko>모의고사 응시</span></a>
+      <a class="btn brand lg" id="empty-go" href="tests.html"><span data-en>Take the mock test</span><span data-ko>모의고사 응시</span></a>
     </div>
   </div>
 
@@ -89,6 +123,7 @@
 <script src="assets/app.js"></script>
 <script src="assets/sg-fullscreen.js"></script>
 <script src="assets/sg-auth.js"></script>
+<script src="assets/student-landing.js"></script>
 <!-- 응시 기록은 기기(localStorage)가 정본이고, 로그인해 있으면 서버 사본이 합쳐진다.
      문항별 점수를 다시 세려면 콘텐츠 팩이 필요하다. -->
 <script src="assets/set1.js"></script>
@@ -102,6 +137,19 @@
   'use strict';
 
   var $ = function (id) { return document.getElementById(id); };
+
+  /* 학생 화면은 한 세트만 센다. <head> 는 기기에 저장된 프로필만 보고 먼저 접어 두고,
+     여기서 서버 사본으로 되짚는다(선생님·관리자면 다시 편다).
+     세트 이름은 A–Z0–9 로만 줄여서 견준다 — 'SET 9' 도 'set-9' 도 같은 것으로 읽는다. */
+  var SET = String(window.SG_STUDENT_SET || 'SET9').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  var EXAM = window.SG_STUDENT_EXAM || 'tests.html';
+  var ONLY = '';                      // 학생으로 확인된 뒤에만 채워진다
+  function code(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function mine(list) {
+    if (!ONLY) return list || [];
+    return (list || []).filter(function (r) { return code(r.set_code) === ONLY; });
+  }
+
   var LAB = { reading: ['Reading', '리딩'], listening: ['Listening', '리스닝'],
               writing: ['Writing', '라이팅'], speaking: ['Speaking', '스피킹'] };
 
@@ -129,7 +177,10 @@
     }
     $('acct-body').innerHTML = '<b style="font-size:14px;color:var(--ink)">' +
       esc(u.name || u.email) + '</b> · ' + esc(u.student_id || u.email);
-    $('acct-act').innerHTML = '<a class="btn ghost sm" href="tests.html">' + bi('Take a test', '응시하기') + '</a>';
+    // 학생에겐 목록을 거치지 않는 문을 준다 — 어차피 고를 세트가 하나다.
+    $('acct-act').innerHTML = ONLY
+      ? '<a class="btn ghost sm" href="' + esc(EXAM) + '">' + bi('Start SET 9', 'SET 9 응시') + '</a>'
+      : '<a class="btn ghost sm" href="tests.html">' + bi('Take a test', '응시하기') + '</a>';
     if (SG_AUTH.isStaff) {
       SG_AUTH.isStaff().then(function (yes) { if (yes) $('staff').classList.remove('hide'); });
     }
@@ -234,6 +285,18 @@
     }).join('');
   }
 
+  /* 누구로 로그인했는지 먼저 매듭짓는다 — 학생이면 SET 9 만 남기고, 선생님·관리자면
+     <head> 가 접어 둔 것을 다시 편다. 비로그인은 이 기기의 기록을 전부 본다. */
+  function decide() {
+    var u = window.SG_AUTH && SG_AUTH.user();
+    var cl = document.documentElement.classList;
+    if (!u) { ONLY = ''; cl.remove('sg-student'); return Promise.resolve(); }
+    cl.add('sg-student');                         // 막는 쪽이 기본 — 확인되면 푼다
+    ONLY = SET;
+    return SG_AUTH.isStaff().catch(function () { return false; })
+      .then(function (staff) { if (staff) { ONLY = ''; cl.remove('sg-student'); } });
+  }
+
   function boot() {
     paintAccount();
     // 이 기기에 남아 있고 아직 안 올라간 응시가 있으면 조용히 올린다.
@@ -242,16 +305,22 @@
     /* 응시 목록과 W·S 채점을 각각 한 번씩만 읽는다(응시마다 묻지 않는다).
        채점 조회가 실패해도 목록은 그려야 하므로 빈 배열로 받아 넘긴다. */
     Promise.all([
+      decide(),
       SG_RESULTS.list(),
       SG_RESULTS.tasks().catch(function () { return []; })
     ]).then(function (out) {
-      var list = out[0], byS = SG_RESULTS.tasksBySession(out[1]);
+      var list = mine(out[1]), byS = SG_RESULTS.tasksBySession(out[2]);
+      paintAccount();                       // 누구인지 매듭지어졌으니 버튼의 행선지도 정해진다
+      // 아직 아무것도 안 친 학생도 목록을 거치지 않는다 — 빈 화면의 버튼도 같은 문이다.
+      if (ONLY) $('empty-go').href = EXAM;
       paintBand(list, byS);
       paintBests(list, byS);
       if (!list.length) { $('empty').classList.remove('hide'); return; }
       paintRows(list, byS);
       $('recent').classList.remove('hide');
     }).catch(function () {
+      paintAccount();
+      if (ONLY) $('empty-go').href = EXAM;
       paintBests([], {});
       $('empty').classList.remove('hide');
     });

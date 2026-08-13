@@ -218,7 +218,12 @@
 //      새 파일 assets/xlsx-read.js(zip 을 DecompressionStream 으로 푸는 순수 계산)와
 //      빈 양식 assets/smeag-students-template.xlsx 가 셸에 들어온다. 캐시된 옛 사본이
 //      남은 기기는 붙여넣기 칸 없이 인원수 방식만 보고, Import 를 눌러도 아무 일이 없다.
-const VERSION = 'sg-v61';
+// v62: 학생의 행선지가 대시보드가 된다 — 로그인하면 시험으로 곧장 떨어지지 않고
+//      자기 화면(dashboard.html)에 선다. 그 화면에는 SET 9 시작 버튼 하나와 SET 9
+//      성적만 보인다(다른 세트 기록은 학생에게 세지 않는다). assets/student-landing.js
+//      가 주소를 갖는다. 캐시된 옛 사본이 남으면 그 기기만 로그인하자마자 시험으로
+//      떨어지고, 대시보드에 SET 9 버튼이 서지 않는다.
+const VERSION = 'sg-v62';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
