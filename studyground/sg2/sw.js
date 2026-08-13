@@ -268,7 +268,13 @@
 //      대시보드를 열 때 마저 보낸다. 그래서 dashboard.html 도 이 파일을 싣는다.
 //      캐시된 옛 사본이 남은 기기는 아무 알림도 보내지 않는다 — 그 기기의 사고는
 //      종전대로 그 PC 화면에만 적힌다. 그래서 판올림한다.
-const VERSION = 'sg-v68';
+// v69: 라이팅 Task 1 의 1..10 문항 그리드가 앞 번호로도 열린다 —
+//      assets/exam-render-writing.js. 상단바 Back 은 이미 같은 모듈 안에서 열려
+//      있었는데(2026-08-12), 화면 안 그리드만 "You cannot go back" 으로 앞 번호를
+//      회색으로 붙들고 있어 학생 눈에는 되돌아갈 길이 없어 보였다. 이제 앞 칸은
+//      engine.back(), 뒤 칸은 engine.next() 로 한 칸씩 옮긴다 — 모듈 경계는 그대로
+//      엔진이 막는다. 캐시된 옛 렌더러가 남은 기기는 계속 회색 칸을 본다.
+const VERSION = 'sg-v69';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

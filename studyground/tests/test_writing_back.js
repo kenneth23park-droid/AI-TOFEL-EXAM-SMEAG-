@@ -92,6 +92,14 @@ ok('Next 비활성 조건은 오디오 잠금 하나뿐',
 ok('showAdvance 는 스피킹 녹음·안내 방송만 제외',
   /var showAdvance = !speakingLive && !announcement;/.test(shell));
 
+/* W1 화면 안의 1..10 그리드도 같은 규칙을 따라야 한다. 상단바 Back 은 열렸는데
+   그리드의 앞 번호만 회색으로 남아 있으면 학생은 "돌아갈 수 없다"고 읽는다. */
+console.log('\n[4] W1 문항 그리드 (소스 확인)');
+var wr = fs.readFileSync(path.join(SG2, 'assets/exam-render-writing.js'), 'utf8');
+ok('앞 번호를 disabled 로 막지 않는다', wr.indexOf('You cannot go back to a previous question.') < 0);
+ok('뒤로 가는 칸은 engine.back() 으로 옮긴다', /eng\.back\('manual'\)/.test(wr));
+ok('앞으로 가는 칸은 그대로 engine.next()', /eng\.next\('manual'\)/.test(wr));
+
 console.log('');
 if (fails.length) { console.log('FAILED ' + fails.length + ': ' + fails.join(', ')); process.exit(1); }
 console.log('ALL PASS');
