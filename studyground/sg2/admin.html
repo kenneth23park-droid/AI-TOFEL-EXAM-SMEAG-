@@ -6,7 +6,12 @@
   시험 당일 가장 먼저 여는 「좌석 관리」가 맨 위, 그 다음이 콘텐츠·오디오·기록이다.
   각 카드는 그저 링크다 — 기능은 각 화면에 있고 여기엔 아무 상태도 두지 않는다.
 
-  관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
+  들어오는 문이 둘이다.
+   · 관리자 — assets/admin-session.js 의 비밀번호 계정. 아래 카드를 전부 본다.
+   · 선생님 — Supabase 계정(role=teacher). data-staff 가 붙은 카드만 본다.
+     선생님 자리에서 나머지 카드는 숨기는 게 아니라 DOM 에서 지운다.
+  선생님 화면은 읽기 전용이다 — 이 홈이 여는 곳(학생 응시 결과)의 쓰기 버튼은
+  admin-results.html 이 role 로 다시 가르고, 정본은 Supabase RLS 다.
 -->
 <html lang="en">
 <head>
@@ -40,6 +45,10 @@
     text-transform:uppercase; color:var(--muted); border:1px solid var(--line-2); border-radius:4px; padding:2px 5px; }
   .who { font-size:12px; font-weight:750; color:var(--muted); }
   .gate { max-width:520px; margin:60px auto; text-align:center; }
+  /* 선생님 자리에서만 바뀌는 문구. 카드는 JS 가 지우고, 말은 여기서 갈린다. */
+  .only-teacher { display:none; }
+  body.as-teacher .only-admin { display:none; }
+  body.as-teacher .only-teacher { display:block; }
 </style>
 </head>
 <body>
@@ -57,11 +66,16 @@
 
 <main class="wrap" id="main" hidden>
   <div class="page-h" style="padding-top:24px">
-    <span class="pill" style="margin-bottom:8px">Admin</span>
-    <h1 style="font-size:clamp(26px,4vw,40px)"><span data-en>Everything you can run from here</span><span data-ko>관리자 화면 모음</span></h1>
-    <p class="sub">
+    <span class="pill" style="margin-bottom:8px" id="pill">Admin</span>
+    <h1 style="font-size:clamp(26px,4vw,40px)" class="only-admin"><span data-en>Everything you can run from here</span><span data-ko>관리자 화면 모음</span></h1>
+    <h1 style="font-size:clamp(26px,4vw,40px)" class="only-teacher"><span data-en>Your students' results</span><span data-ko>담당 학생 성적</span></h1>
+    <p class="sub only-admin">
       <span data-en>Exam-day controls first, then the content you prepare beforehand.</span>
       <span data-ko>시험 당일에 쓰는 것부터, 그 다음이 미리 준비하는 콘텐츠입니다.</span>
+    </p>
+    <p class="sub only-teacher">
+      <span data-en>A teacher account opens the results, read only. Everything that changes a test, a seat or an account is administrator-only.</span>
+      <span data-ko>선생님 계정으로는 성적을 읽기 전용으로 봅니다. 시험·좌석·계정을 바꾸는 화면은 관리자 전용입니다.</span>
     </p>
   </div>
 
@@ -76,7 +90,7 @@
            <span data-ko>컴퓨터마다 연결 모드(로컬·인터넷), 코스, 배정 세트, 출제 문항, 오디오 배속, 화면 언어를 지정합니다. 학생은 아무것도 고르지 않습니다.</span></p>
         <span class="f">admin-seats.html</span>
       </a>
-      <a class="mcard" href="admin-results.html">
+      <a class="mcard" href="admin-results.html" data-staff="teacher">
         <span class="ic">📊</span>
         <h3><span data-en>Student results</span><span data-ko>학생 응시 결과</span></h3>
         <p><span data-en>Who sat which test, what they scored, and the recordings behind it.</span>
@@ -191,15 +205,25 @@
     </div>
   </section>
 
-  <p class="muted" style="font-size:11.5px;margin:34px 0 44px">
-    <span data-en>Signed in as a teacher or admin. The sign-in lasts a few hours on this device and only unlocks the sets your account owns.</span>
-    <span data-ko>선생님·관리자로 로그인한 상태입니다. 로그인은 이 기기에서 몇 시간 유지되며, 계정이 가진 SET 만 열립니다.</span>
+  <p class="muted only-admin" style="font-size:11.5px;margin:34px 0 44px">
+    <span data-en>Signed in as an administrator. The sign-in lasts a few hours on this device and only unlocks the sets your account owns.</span>
+    <span data-ko>관리자로 로그인한 상태입니다. 로그인은 이 기기에서 몇 시간 유지되며, 계정이 가진 SET 만 열립니다.</span>
+  </p>
+  <p class="muted only-teacher" style="font-size:11.5px;margin:34px 0 44px">
+    <span data-en>Signed in as a teacher. You see the students assigned to you — the server returns nobody else's, whatever address you open.</span>
+    <span data-ko>선생님으로 로그인한 상태입니다. 배정된 담당 학생만 보입니다 — 어떤 주소를 열어도 서버가 남의 학생을 돌려주지 않습니다.</span>
   </p>
 </main>
 
 <div class="wrap gate" id="gate">
   <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
   <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+  <p class="muted" style="font-size:12px;margin-top:18px">
+    <span data-en>A teacher? Sign in with your teacher account instead — you will see your students' results, read only.</span>
+    <span data-ko>선생님이라면 선생님 계정으로 로그인하세요 — 담당 학생 성적을 읽기 전용으로 봅니다.</span>
+  </p>
+  <a class="btn ghost sm" id="teacher-signin" href="login.html?next=admin.html">
+    <span data-en>Teacher sign-in</span><span data-ko>선생님 로그인</span></a>
 </div>
 
 <script src="assets/admin-session.js"></script>
@@ -209,22 +233,61 @@
 (function () {
   'use strict';
   var A = window.SG_ADMIN;
+  var $ = function (id) { return document.getElementById(id); };
+  var MODE = '';                       // 'admin' | 'teacher'
 
-  function open() {
-    document.getElementById('gate').hidden = true;
-    document.getElementById('main').hidden = false;
+  function openAdmin() {
+    MODE = 'admin';
+    $('gate').hidden = true;
+    $('main').hidden = false;
     var s = A.current();
-    if (s) {
-      var w = document.getElementById('who');
-      w.textContent = (document.documentElement.lang === 'ko' ? s.labelKo : s.label) || s.id;
-    }
+    if (s) $('who').textContent = (document.documentElement.lang === 'ko' ? s.labelKo : s.label) || s.id;
   }
-  document.getElementById('signin').addEventListener('click', function () { A.openLogin('', open); });
-  document.getElementById('out').addEventListener('click', function () {
+
+  /* 선생님 자리. 허락한 카드만 남기고 나머지는 지운다 — 숨기면 소스에 남고,
+     남으면 "왜 눌러도 안 되나"가 된다. 카드가 하나도 안 남은 묶음은 제목째 지운다. */
+  function openTeacher(profile, role) {
+    MODE = 'teacher';
+    document.body.classList.add('as-teacher');
+    Array.prototype.forEach.call(document.querySelectorAll('a.mcard'), function (c) {
+      if (c.getAttribute('data-staff') !== 'teacher') c.parentNode.removeChild(c);
+      else c.classList.remove('hero');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.grp'), function (g) {
+      if (!g.querySelector('a.mcard')) g.parentNode.removeChild(g);
+    });
+    /* role=admin 인 계정도 비밀번호 없이는 여기까지다 — 이름표는 사실대로 쓰고,
+       전체 화면이 필요하면 관리자 비밀번호로 다시 들어오면 된다. */
+    $('pill').textContent = role === 'admin' ? 'Admin · read only' : 'Teacher';
+    $('who').textContent = (profile && (profile.name || profile.email)) || role;
+    $('gate').hidden = true;
+    $('main').hidden = false;
+  }
+
+  $('signin').addEventListener('click', function () { A.openLogin('', openAdmin); });
+  $('out').addEventListener('click', function () {
+    if (MODE === 'teacher') {
+      if (window.SG_AUTH && SG_AUTH.signOut) SG_AUTH.signOut();
+      location.href = 'login.html';
+      return;
+    }
     A.logout();
     location.reload();
   });
-  if (A.can()) open(); else A.openLogin('', open);
+
+  /* 관리자 비밀번호가 먼저다 — 그 계정이 전부를 연다. 없으면 로그인해 있는
+     Supabase 계정의 role 을 본다. 선생님·관리자면 읽기 전용 자리로 들여보내고,
+     학생이거나 비로그인이면 여느 때처럼 관리자 로그인 창을 띄운다. */
+  if (A.can()) { openAdmin(); return; }
+
+  var Auth = window.SG_AUTH;
+  if (!Auth || !Auth.user()) { A.openLogin('', openAdmin); return; }
+
+  Auth.profile().then(function (p) {
+    var r = (p && (p.role || (p.is_admin ? 'admin' : 'student'))) || 'student';
+    if (r === 'teacher' || r === 'admin') openTeacher(p, r);
+    else A.openLogin('', openAdmin);
+  }, function () { A.openLogin('', openAdmin); });
 })();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>

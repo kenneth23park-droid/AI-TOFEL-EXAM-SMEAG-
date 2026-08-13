@@ -1,0 +1,167 @@
+<!doctype html>
+<!--
+  _verify_admin_teacher.html — 관리자 홈의 "선생님은 읽기 전용" 검증.
+  배포에서 제외된다(.vercelignore).
+
+  검산하는 것은 판정이 아니라 화면이다. admin.html 을 iframe 에 그대로 띄우되
+  SG_ADMIN(비밀번호 세션)과 SG_AUTH(회원 계정)만 가짜로 갈아 끼우고, 세 사람이
+  같은 주소를 열었을 때 각자 무엇을 보는지를 센다.
+
+    선생님   본문이 열리고, 남은 카드는 admin-results.html 하나뿐이다.
+             문항 교체·좌석·계정 발급 같은 쓰기 화면은 숨는 게 아니라 DOM 에 없다.
+    학생     본문이 끝내 열리지 않는다(관리자 로그인 창으로 되돌아간다).
+    관리자   비밀번호 세션이면 카드가 전부 그대로다.
+
+  "숨었나"가 아니라 "없나"를 보는 이유는, 숨긴 링크는 소스에 남아 그대로 눌리기
+  때문이다. 성적을 고칠 수 있느냐의 정본은 여기가 아니라 Supabase RLS 이고,
+  이 화면이 지키는 것은 그 앞의 문이다.
+
+  실행:
+    (cd studyground/sg2 && python3 -m http.server 8899 &)
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+      --disable-gpu --virtual-time-budget=8000 --dump-dom \
+      http://localhost:8899/_verify_admin_teacher.html | grep -A99 'id="out"'
+-->
+<html lang="en">
+<head><meta charset="utf-8"><title>verify admin teacher</title></head>
+<body>
+<pre id="out">RUNNING</pre>
+<iframe id="fr" style="width:1100px;height:700px;border:1px solid #ccc"></iframe>
+
+<script>
+var LOG = [], FAILS = 0;
+function ok(cond, label, detail) {
+  LOG.push((cond ? '  ok   ' : '  FAIL ') + label + (cond || !detail ? '' : '\n         ' + detail));
+  if (!cond) FAILS++;
+}
+function head(t) { LOG.push('', t); }
+function done() {
+  document.getElementById('out').textContent =
+    LOG.join('\n') + '\n\n' + (FAILS ? 'FAILED: ' + FAILS : 'ALL PASS');
+}
+
+/* 선생님이 열어서는 안 되는 화면들 — 이 중 하나라도 카드로 남으면 실패다. */
+var WRITE_PAGES = ['admin-seats.html', 'admin-students.html', 'admin-teachers.html',
+                   'admin-questions.html', 'admin-set-import.html', 'admin-audio.html',
+                   'admin-audio-sync.html', 'admin-log.html', 'admin-qr.html',
+                   'seat-setup.html'];
+
+var SRC = null;
+
+/* role 과 관리자 비밀번호 세션 유무를 바꿔 가며 같은 화면을 다시 그린다. */
+function boot(role, adminSession) {
+  var stub = '<scr' + 'ipt>' + [
+    'window.SG_ADMIN = {',
+    '  can: function () { return ' + (adminSession ? 'true' : 'false') + '; },',
+    '  current: function () { return ' + (adminSession
+        ? '{ id: "admin", label: "Master admin", labelKo: "전체 관리자", sets: ["*"] }'
+        : 'null') + '; },',
+    '  openLogin: function () { window.__login = (window.__login || 0) + 1; },',
+    '  logout: function () {}',
+    '};',
+    'window.SG_AUTH = {',
+    '  user: function () { return { id: "u1", email: "t@example.com" }; },',
+    '  signOut: function () {},',
+    '  profile: function () {',
+    '    return Promise.resolve({ id: "u1", name: "Gecelyn Oljol",',
+    '                             email: "t@example.com", role: ' + JSON.stringify(role) + ' });',
+    '  }',
+    '};'
+  ].join('\n') + '</scr' + 'ipt>';
+
+  var patched = SRC
+    .replace(/<script src="assets\/admin-session\.js"><\/script>\s*<script src="assets\/sg-auth\.js"><\/script>/, stub)
+    .replace(/<script>if\("serviceWorker"[\s\S]*?<\/script>/, '');
+  if (patched === SRC) { ok(false, '스텁이 끼워졌다 (' + role + ')'); return null; }
+
+  var d = document.getElementById('fr').contentDocument;
+  d.open(); d.write(patched); d.close();
+  return d;
+}
+
+/* profile() 이 프라미스라 본문은 한 틱 뒤에 열린다. 열릴 때까지(또는 포기할 때까지) 기다린다. */
+function settle(d, cb, tries) {
+  tries = tries || 0;
+  if (!d.getElementById('main').hidden) return cb(true);
+  if (tries > 60) return cb(false);
+  setTimeout(function () { settle(d, cb, tries + 1); }, 40);
+}
+
+function cards(d) {
+  return Array.prototype.map.call(d.querySelectorAll('a.mcard'), function (a) {
+    return a.getAttribute('href');
+  });
+}
+
+fetch('admin.html').then(function (r) { return r.text(); }).then(function (t) {
+  SRC = t;
+  runTeacher();
+});
+
+/* ── 1. 선생님 ─────────────────────────────────────────────────────── */
+function runTeacher() {
+  head('선생님 계정 (role=teacher, 관리자 비밀번호 없음)');
+  var d = boot('teacher', false);
+  if (!d) { done(); return; }
+  settle(d, function (open) {
+    ok(open, '본문이 열린다 — 비밀번호 없이 선생님 계정만으로');
+    if (!open) { runStudent(); return; }
+
+    var hrefs = cards(d);
+    ok(hrefs.length === 1, '카드가 하나만 남는다 (' + hrefs.length + ')', hrefs.join(' '));
+    ok(hrefs[0] === 'admin-results.html', '남은 하나가 학생 응시 결과다', String(hrefs[0]));
+
+    var html = d.body.innerHTML;
+    WRITE_PAGES.forEach(function (p) {
+      ok(html.indexOf(p) < 0, '쓰기 화면이 소스에도 남지 않는다 — ' + p);
+    });
+
+    ok(d.body.classList.contains('as-teacher'), 'as-teacher 로 문구가 갈린다');
+    ok(d.getElementById('pill').textContent === 'Teacher', '이름표가 Teacher 다',
+       d.getElementById('pill').textContent);
+    ok(/Gecelyn Oljol/.test(d.getElementById('who').textContent), '누구로 들어왔는지 적힌다',
+       d.getElementById('who').textContent);
+    ok(!d.defaultView.__login, '관리자 로그인 창을 띄우지 않는다');
+
+    /* 관리자 전용 문구는 접히고 선생님 문구가 선다 (CSS 규칙이 살아 있는가) */
+    var teach = d.querySelector('.only-teacher');
+    var adm = d.querySelector('.only-admin');
+    ok(teach && d.defaultView.getComputedStyle(teach).display !== 'none', '선생님 문구가 보인다');
+    ok(adm && d.defaultView.getComputedStyle(adm).display === 'none', '관리자 문구는 접힌다');
+
+    runStudent();
+  });
+}
+
+/* ── 2. 학생 ───────────────────────────────────────────────────────── */
+function runStudent() {
+  head('학생 계정 (role=student)');
+  var d = boot('student', false);
+  if (!d) { done(); return; }
+  settle(d, function (open) {
+    ok(!open, '본문이 열리지 않는다');
+    ok(d.defaultView.__login > 0, '대신 관리자 로그인 창이 뜬다');
+    runAdmin();
+  });
+}
+
+/* ── 3. 관리자 ─────────────────────────────────────────────────────── */
+function runAdmin() {
+  head('관리자 비밀번호 세션');
+  var d = boot('student', true);          // role 은 무엇이든 비밀번호가 먼저다
+  if (!d) { done(); return; }
+  settle(d, function (open) {
+    ok(open, '본문이 열린다');
+    var hrefs = cards(d);
+    ok(hrefs.length >= 12, '카드가 전부 그대로다 (' + hrefs.length + ')');
+    ok(hrefs.indexOf('admin-questions.html') >= 0, '문항 교체가 그대로 있다');
+    ok(hrefs.indexOf('admin-results.html') >= 0, '학생 응시 결과도 그대로 있다');
+    ok(!d.body.classList.contains('as-teacher'), 'as-teacher 가 붙지 않는다');
+    done();
+  });
+}
+
+window.addEventListener('error', function (e) { ok(false, '페이지 에러 없음', e.message); });
+</script>
+</body>
+</html>
