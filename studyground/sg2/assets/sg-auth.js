@@ -334,6 +334,15 @@ window.SG_AUTH = (function () {
    * 바꾼다. 아이디까지 세우는 이유는 고사장 사고 하나 때문이다 — 앞사람이 로그아웃
    * 하지 않은 자리에서 그대로 시험을 시작하면, 이름만 봐서는 아무도 못 알아챈다.
    * 페이지마다 같은 마크업이라 여기서 한 번에 처리한다. */
+  /** 이름표를 누르면 갈 곳. 학생은 자기 성적(dashboard.html), 선생님·관리자는
+   *  관리 화면(admin.html) — 두 사이트를 섞지 않는다. 저장해 둔 프로필을 그대로
+   *  읽는다(서버를 기다리면 이름표가 늦게 그려진다). role 이 없으면 학생으로 본다. */
+  function homeHref() {
+    var s = read(), u = s && s.user;
+    var r = u && (u.role || (u.is_admin ? 'admin' : 'student'));
+    return (r === 'teacher' || r === 'admin') ? 'admin.html' : 'dashboard.html';
+  }
+
   var idFetched = false;
   function paintNav() {
     var right = document.querySelector('.nav-right');
@@ -356,7 +365,7 @@ window.SG_AUTH = (function () {
       chip.setAttribute('data-sg-user', '');
       chip.style.cssText = 'display:inline-flex;align-items:center;gap:8px';
       chip.innerHTML =
-        '<a class="btn ghost sm" href="dashboard.html" data-role="who"></a>' +
+        '<a class="btn ghost sm" href="' + homeHref() + '" data-role="who"></a>' +
         '<button class="btn ghost sm" type="button" data-role="out">' +
           '<span data-en>Log out</span><span data-ko>로그아웃</span></button>';
       chip.querySelector('[data-role=out]').addEventListener('click', function () {
@@ -368,6 +377,7 @@ window.SG_AUTH = (function () {
     /* 이름과 아이디를 각각 다른 span 에 넣는다 — 폰처럼 좁은 화면에서는 이름을 접고
        아이디만 남기려면(app.css) 둘이 나뉘어 있어야 한다. */
     var who = chip.querySelector('[data-role=who]');
+    who.setAttribute('href', homeHref());   // role 이 늦게 채워져도 행선지가 따라온다
     var id = loginLabel(u);
     who.textContent = '👤 ';
     who.title = u.name && id ? u.name + ' · ' + id : (u.name || id);

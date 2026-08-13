@@ -25,7 +25,10 @@
     var u = s && s.user;
     if (!u) return;
     var r = u.role || (u.is_admin ? 'admin' : 'student');   // role 이 없던 옛 계정은 학생으로 본다
-    if (r !== 'teacher' && r !== 'admin') document.documentElement.classList.add('sg-student');
+    /* 선생님·관리자에게 "내 성적"은 빈 화면이다 — 그들이 볼 것은 학생들의 결과다.
+       학생 화면과 관리 화면을 섞지 않는다: 여기서 곧장 학생 응시 결과로 보낸다. */
+    if (r === 'teacher' || r === 'admin') { location.replace('admin-results.html'); return; }
+    document.documentElement.classList.add('sg-student');
   } catch (e) { /* 프라이빗 모드 — 아래 sg-auth 재확인이 맡는다 */ }
 })();
 </script>
