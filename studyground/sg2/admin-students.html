@@ -20,6 +20,12 @@
   가장 빠른 빈 자리로 준다 — 옆에서 동시에 등록해도 겹치지 않는다. 겹치면 DB 의
   unique(student_id, exam_date) 가 막고, 지정한 번호였다면 그 줄만 실패로 남는다.
 
+  겹침을 만들기 전에 보여 주기 위해, 날짜를 고르면 그 시험일 명단을 통째로 읽어 둔다
+  (sg_exam_accounts, 관리자 토큰 + RLS). 그 한 벌이 세 자리에 같이 쓰인다: 위의 조회
+  칸("smeag007 은 비었나, 누가 쥐고 있나"), 붙여넣기 요약, 그리고 표의 상태 칸 —
+  번호를 치는 순간 "smeag007 is taken — kenneth" 가 그 줄에 뜬다. 명단을 못 읽었으면
+  heldKnown 이 false 로 남아 아무 말도 하지 않는다. 서버의 막음은 그대로 최후 방어다.
+
   줄은 하나씩 순서대로 만든다. 한꺼번에 던지면 어느 줄이 실패했는지 알 수 없고,
   실패한 줄만 다시 만들 수도 없다. 그래서 실패한 줄은 표에 그대로 남고, 다시 누르면
   성공한 줄은 건드리지 않고 남은 줄만 이어서 만든다.
@@ -81,6 +87,15 @@
   .paste::placeholder { color:var(--dim); }
   .read-sum { font-size:12.5px; font-weight:700; }
   .read-sum .warn { color:#b3261e; }
+
+  /* 아이디 조회. 그 시험일에 이미 나간 자리를 이름까지 같이 보여 준다. */
+  .find-res { font-size:13px; margin-top:10px; }
+  .find-res .r { display:flex; gap:10px; align-items:baseline; padding:6px 2px;
+                 border-top:1px solid var(--line); }
+  .find-res .r:first-child { border-top:0; }
+  .find-res .fid { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:800;
+                   width:96px; flex:none; }
+  .find-res .ft { margin-left:auto; font-size:12px; color:var(--dim); }
   .ok-t { color:#1f6f45; font-weight:750; }
   .bad-t { color:#b3261e; font-weight:750; }
   .scroll { max-height:62vh; overflow:auto; border:1px solid var(--line-2); border-radius:12px; }
@@ -126,6 +141,12 @@
         <button class="btn ghost" id="add" type="button">+ 1 row</button>
         <div class="note grow" id="avail" style="margin-left:auto"></div>
       </div>
+      <div class="bar mt-12">
+        <div class="field" style="flex:1;min-width:240px;margin:0"><label for="find">Look up an ID or a name</label>
+          <input id="find" placeholder="smeag007 or Kenneth" autocapitalize="none" spellcheck="false"></div>
+        <div class="note" id="findsum" style="margin-left:auto;padding-bottom:10px"></div>
+      </div>
+      <div class="find-res" id="findres"></div>
       <p class="note mt-8" id="hint"></p>
     </section>
 
@@ -199,6 +220,11 @@
   var teachers = [];
   var running = false, halt = false;
 
+  /* 그 시험일에 이미 나간 자리. { smeag007: {student_id, name, teacher_id} }.
+     heldKnown 이 false 면 명단을 못 읽은 것이고, 그때는 아무것도 단정하지 않는다 —
+     "비어 있다"고 잘못 말하는 편보다 말을 안 하는 편이 낫다. */
+  var held = {}, heldKnown = false, heldCount = 0;
+
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
@@ -237,10 +263,27 @@
       if (r.state === 'ok') return r.id;
       var m = normId(r.id0);
       if (m) return m;
-      while (taken[pad3(n)]) n++;
+      /* 시트가 집어 둔 번호도, 서버에 이미 나간 번호도 건너뛴다 — 첫 빈 자리
+         위쪽에 흩어진 자리가 있으면 그냥 세는 것으로는 맞지 않는다. */
+      while (taken[pad3(n)] || heldBy(pad3(n))) n++;
       taken[pad3(n)] = true;
       return pad3(n);
     });
+  }
+
+  /* 아직 만들지 않은 줄이 지금 이대로면 실패할 이유. 없으면 빈 문자열이다.
+     Create 를 누른 뒤에야 빨개지면 늦다 — 열 줄을 만들고 나서 세 줄이 실패했다고
+     듣는 대신, 번호를 치는 그 자리에서 말한다. */
+  function rowIssue(i) {
+    var r = rows[i];
+    if (r.state === 'ok' || r.state === 'busy') return '';
+    var mine = normId(r.id0);
+    if (r.id0 && !mine) return 'smeag000 – smeag999';
+    if (!mine) return '';
+    if (claimedInSheet(i)) return mine + ' is used twice in this sheet';
+    var who = heldBy(mine);
+    if (who) return mine + ' is taken' + (who.name ? ' — ' + who.name : '');
+    return '';
   }
 
   function render() {
@@ -251,7 +294,7 @@
       var st = done ? '<span class="ok-t">✓ created</span> · <span class="pw">' + esc(r.pw) + '</span>'
              : busy ? 'creating…'
              : fail ? '<span class="bad-t">✕ ' + esc(r.msg) + '</span>'
-             : (r.id0 && !normId(r.id0) ? '<span class="bad-t">smeag000 – smeag999</span>' : '');
+             : (function (m) { return m ? '<span class="bad-t">' + esc(m) + '</span>' : ''; })(rowIssue(i));
       var ro = (done || busy) ? ' readonly' : '';
       /* 만들기 전에는 아이디도 칸이다 — 비우면 미리보기(placeholder)대로 서버가 준다. */
       var idCell = (done || busy)
@@ -280,11 +323,44 @@
     for (var i = 0; i < n && rows.length < MAX_ROWS; i++) rows.push({ id0: '', name: '', state: 'todo' });
   }
 
+  /* ── 이미 나간 자리 ────────────────────────────────────────
+   *
+   * 예전에는 "첫 빈 번호보다 작으면 쓰인 자리"라고 어림했다. 중간에 지운 계정이
+   * 하나라도 있으면 그 어림은 멀쩡한 번호를 못 쓴다고 말하고, 반대로 첫 빈 번호
+   * 위쪽에 흩어진 자리는 놓친다. 그래서 명단을 그대로 읽는다 — 관리자 토큰으로
+   * sg_exam_accounts 를 직접 보고(RLS 가 관리자만 통과시킨다), 아이디와 이름을 쥔다.
+   * 이 한 벌이 조회 칸·붙여넣기 요약·표의 경고 세 자리에 같이 쓰인다.
+   */
+  function loadHeld() {
+    var d = $('date').value;
+    held = {}; heldKnown = false; heldCount = 0;
+    if (!d) return Promise.resolve();
+    return SG_AUTH.token().then(function (tok) {
+      if (!tok) return null;
+      return fetch(SG_AUTH.url + '/rest/v1/sg_exam_accounts?exam_date=eq.' + encodeURIComponent(d) +
+                   '&select=student_id,name,teacher_id&order=student_id.asc',
+                   { headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok } })
+        .then(function (r) { return r.ok ? r.json() : null; });
+    }).then(function (list) {
+      if (!Array.isArray(list)) return;
+      list.forEach(function (r) { held[r.student_id] = r; heldCount++; });
+      heldKnown = true;
+    }).catch(function () { /* 못 읽으면 heldKnown 이 false 로 남는다 */ });
+  }
+
+  /** 이 아이디를 쥔 사람. 명단을 못 읽었으면 null — 어림으로 막지 않는다. */
+  function heldBy(id) { return id && heldKnown ? (held[id] || null) : null; }
+
+  function teacherName(id) {
+    var t = teachers.filter(function (x) { return x.id === id; })[0];
+    return t ? (t.name || t.student_id) : '';
+  }
+
   /* 그 날짜의 첫 빈 번호와 남은 자리. 미리보기의 기준점이다. */
   function refreshAvail() {
     var d = $('date').value;
     if (!d) return Promise.resolve();
-    return SG_AUTH.nextId(d).then(function (r) {
+    return loadHeld().then(function () { return SG_AUTH.nextId(d); }).then(function (r) {
       var m = /^smeag(\d{3})$/.exec(r.student_id || '');
       start = m ? parseInt(m[1], 10) : 0;
       $('avail').textContent = r.student_id
@@ -292,13 +368,87 @@
         : 'All 1000 IDs are used on ' + r.exam_date;
       $('cards').href = 'admin-qr.html?date=' + encodeURIComponent(d);
       render();
-      /* 날짜가 바뀌면 "이미 나간 번호"의 기준도 바뀐다 — 붙여넣은 명단을 다시 본다. */
+      /* 날짜가 바뀌면 "이미 나간 번호"의 기준도 바뀐다 — 붙여넣은 명단과 조회 결과를 다시 본다. */
       showSummary();
+      showFind();
     }).catch(function () { $('avail').textContent = ''; });
   }
 
   function teacherId() {
     return teachers.length ? $('teacher').value : '';
+  }
+
+  /* ── 조회 ──────────────────────────────────────────────────
+   *
+   * "smeag007 은 비어 있나, 누가 쥐고 있나"를 만들기 전에 묻는 자리다. 번호처럼
+   * 생긴 글자는 그 한 자리를 정확히 보고(50 · 050 · smeag050 다 같다), 그 외에는
+   * 이름·번호 조각으로 훑는다. 빈 자리로 나오면 시트가 지금 그 번호를 집어 두고
+   * 있는지도 같이 말해 준다 — 비어 있다고 믿고 두 줄이 같은 번호를 집는 일이 흔해서다.
+   */
+  var FIND_MAX = 20;
+
+  function findRow(r) {
+    var t = teacherName(r.teacher_id);
+    return '<div class="r"><span class="fid">' + esc(r.student_id) + '</span>' +
+           '<span>' + esc(r.name || '—') + '</span>' +
+           (t ? '<span class="ft">' + esc(t) + '</span>' : '') + '</div>';
+  }
+
+  /** 시트에서 이 번호를 집어 둔 아직 안 만든 줄의 번호(1부터). 없으면 0. */
+  function pinnedInSheet(id) {
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].state !== 'ok' && normId(rows[i].id0) === id) return i + 1;
+    }
+    return 0;
+  }
+
+  function showFind() {
+    var q = $('find').value.trim(), d = $('date').value;
+    var sum = $('findsum'), res = $('findres');
+    if (!q) {
+      res.innerHTML = '';
+      sum.textContent = heldKnown && d
+        ? heldCount + ' registered on ' + d
+        : '';
+      return;
+    }
+    if (!heldKnown) {
+      res.innerHTML = '';
+      sum.innerHTML = '<span class="bad-t">The roster for this date could not be read.</span>';
+      return;
+    }
+
+    var id = normId(q), ql = q.toLowerCase();
+    var all = Object.keys(held).sort().map(function (k) { return held[k]; });
+    var hits = id
+      ? all.filter(function (r) { return r.student_id === id; })
+      : all.filter(function (r) {
+          return String(r.name || '').toLowerCase().indexOf(ql) >= 0 ||
+                 r.student_id.indexOf(ql.replace(/\s+/g, '')) >= 0;
+        });
+
+    if (hits.length) {
+      sum.textContent = hits.length + ' of ' + heldCount + ' on ' + d;
+      res.innerHTML = hits.slice(0, FIND_MAX).map(findRow).join('') +
+        (hits.length > FIND_MAX
+          ? '<div class="r"><span class="fid">…</span><span>' +
+            (hits.length - FIND_MAX) + ' more — narrow the search.</span></div>' : '');
+      return;
+    }
+
+    if (id) {
+      var at = pinnedInSheet(id);
+      sum.innerHTML = '<span class="ok-t">' + esc(id) + ' is free</span>';
+      res.innerHTML = '<div class="r"><span class="fid">' + esc(id) + '</span><span>' +
+        'Free on ' + esc(d) + ' — type it into the ID column to pin it.' +
+        (at ? ' Row ' + at + ' of this sheet is already about to take it.' : '') +
+        '</span></div>';
+      return;
+    }
+
+    sum.textContent = '';
+    res.innerHTML = '<div class="r"><span class="fid">—</span><span>No one matches “' +
+      esc(q) + '” on ' + esc(d) + '.</span></div>';
   }
 
   /* ── 시트 입력 ─────────────────────────────────────────────── */
@@ -409,15 +559,23 @@
   }
 
   /* 붙여넣자마자 알려 주는 것들. 겹치는 아이디는 시트가 잡고, 이미 나간 번호는
-     서버가 알려준 첫 빈 자리로 안다 — 그 앞 번호는 전부 쓰인 자리다. */
+     읽어 둔 그 날짜 명단이 이름까지 알려 준다. 명단을 못 읽었을 때만 예전 어림으로
+     — 첫 빈 자리보다 앞이면 쓰인 자리로 — 물러선다. */
   function rosterSummary(list) {
     if (!list.length) return '';
     var ids = list.map(function (r) { return normId(r.id0); }).filter(function (v) { return v; });
-    var seen = {}, dup = [], taken = [];
+    var seen = {}, listed = {}, dup = [], taken = [];
     ids.forEach(function (id) {
       if (seen[id]) { if (dup.indexOf(id) < 0) dup.push(id); }
+      var first = !seen[id];
       seen[id] = true;
-      if (parseInt(id.slice(5), 10) < start && taken.indexOf(id) < 0) taken.push(id);
+      if (!first) return;
+      var who = heldBy(id);
+      var used = heldKnown ? !!who : parseInt(id.slice(5), 10) < start;
+      if (used && !listed[id]) {
+        listed[id] = true;
+        taken.push(id + (who && who.name ? ' (' + who.name + ')' : ''));
+      }
     });
     var blank = list.length - ids.length;
     var bad = list.filter(function (r) { return r.id0 && !normId(r.id0); }).length;
@@ -557,6 +715,15 @@
       r.state = 'fail'; r.msg = wanted + ' is used twice in this sheet.';
       return Promise.resolve();
     }
+    /* 이미 나간 번호는 서버도 막지만(id_taken_today), 읽어 둔 명단으로 알고 있으면
+       한 번 다녀올 이유가 없다 — 누가 쥐고 있는지까지 여기서 말해 준다. */
+    var who = heldBy(wanted);
+    if (who) {
+      r.state = 'fail';
+      r.msg = wanted + ' is already used on ' + $('date').value +
+              (who.name ? ' — ' + who.name : '') + '.';
+      return Promise.resolve();
+    }
     r.state = 'busy';
     render();
     return SG_AUTH.register({
@@ -651,7 +818,9 @@
       'The ID column is yours to override: leave it blank and the server hands out the next free number, ' +
       'or type 50 / smeag050 to pin one. Name and teacher are optional too — a blank name becomes the ID, ' +
       'and with no teacher only admins can open those answers until you assign one. ' +
-      'Password is 2222 for everyone. Paste an ID/Name block from Excel anywhere in the sheet.';
+      'Password is 2222 for everyone. Paste an ID/Name block from Excel anywhere in the sheet. ' +
+      'Use the lookup above to see whether a number is still free on this date and who holds it — ' +
+      'a number that is already out is flagged on its row before you press Create.';
 
     $('build').addEventListener('click', function () {
       var n = Math.max(1, Math.min(MAX_ROWS, parseInt($('howmany').value, 10) || 0));
@@ -673,6 +842,7 @@
     $('stop').addEventListener('click', function () { halt = true; });
     $('csv').addEventListener('click', csv);
     $('date').addEventListener('change', refreshAvail);
+    $('find').addEventListener('input', showFind);
     $('rows').addEventListener('input', onInput);
     $('rows').addEventListener('paste', onPaste);
     $('rows').addEventListener('keydown', onKey);

@@ -1,0 +1,174 @@
+<!doctype html>
+<!--
+  _verify_students_lookup.html — 학생 등록 화면의 "아이디 조회 · 겹침 경고" 검증.
+  배포에서 제외된다(.vercelignore).
+
+  검산하는 것은 판정이 아니라 화면이다. admin-students.html 을 iframe 에 그대로
+  띄우되 SG_AUTH 와 fetch 만 가짜로 갈아 끼워, 그 시험일에 이미 나간 명단이
+  { smeag000 · smeag001 · smeag002 · smeag007 } 일 때:
+    · 조회 칸이 아이디로(smeag007 · 007 둘 다) 그 사람을 찾아내는가
+    · 이름 조각으로도 찾는가
+    · 비어 있는 번호를 "free" 라고 말하는가
+    · 표에 그 번호를 치면 Create 를 누르기 전에 그 줄이 빨개지는가
+    · 같은 번호를 두 줄에 치면 뒷줄이 "used twice" 인가
+    · 빈 줄의 미리보기가 007 을 건너뛰는가 (첫 빈 자리 위의 구멍 — 옛 어림이 놓치던 자리)
+    · 붙여넣기 요약이 이미 나간 번호를 이름과 함께 세는가
+
+  실행:
+    (cd studyground/sg2 && python3 -m http.server 8899 &)
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+      --disable-gpu --virtual-time-budget=8000 --dump-dom \
+      http://localhost:8899/_verify_students_lookup.html | grep -A99 'id="out"'
+-->
+<html lang="en">
+<head><meta charset="utf-8"><title>verify students lookup</title></head>
+<body>
+<pre id="out">RUNNING</pre>
+<iframe id="fr" style="width:1100px;height:700px;border:1px solid #ccc"></iframe>
+
+<script>
+var LOG = [], FAILS = 0;
+function ok(cond, label, detail) {
+  LOG.push((cond ? '  ok   ' : '  FAIL ') + label + (cond || !detail ? '' : '\n         ' + detail));
+  if (!cond) FAILS++;
+}
+function done() {
+  document.getElementById('out').textContent =
+    LOG.join('\n') + '\n\n' + (FAILS ? 'FAILED: ' + FAILS : 'ALL PASS');
+}
+
+/* 이미 나간 자리. 003 이 첫 빈 번호이고 007 은 그 위에 뚫린 구멍이다 —
+   "첫 빈 자리보다 앞이면 쓰인 자리" 라는 옛 어림이 놓치던 바로 그 모양. */
+var ROSTER = [
+  { student_id: 'smeag000', name: 'Kenneth Reyes', teacher_id: 't1' },
+  { student_id: 'smeag001', name: 'Hayul Kim',     teacher_id: null },
+  { student_id: 'smeag002', name: 'Huang Pin Jui', teacher_id: 't1' },
+  { student_id: 'smeag007', name: 'Pai Jun Yuan',  teacher_id: 't1' }
+];
+
+var STUB = '<scr' + 'ipt>' + [
+  'window.SG_AUTH = {',
+  '  url: "https://stub.invalid", anonKey: "anon",',
+  '  user: function () { return { id: "admin-1" }; },',
+  '  require: function () {},',
+  '  role: function () { return Promise.resolve("admin"); },',
+  '  teachers: function () { return Promise.resolve([{ id: "t1", name: "Gecelyn Oljol" }]); },',
+  '  token: function () { return Promise.resolve("tok"); },',
+  '  nextId: function (d) {',
+  '    return Promise.resolve({ exam_date: d, student_id: "smeag003", used: 4, free: 996 });',
+  '  },',
+  '  register: function () { return Promise.reject(new Error("not exercised here")); }',
+  '};',
+  'window.__roster = ' + JSON.stringify(ROSTER) + ';',
+  'window.fetch = function (u) {',
+  '  if (String(u).indexOf("sg_exam_accounts") >= 0) {',
+  '    return Promise.resolve({ ok: true, json: function () { return Promise.resolve(window.__roster); } });',
+  '  }',
+  '  return Promise.reject(new Error("unexpected fetch: " + u));',
+  '};'
+].join('\n') + '</scr' + 'ipt>';
+
+var fr = document.getElementById('fr');
+
+fetch('admin-students.html').then(function (r) { return r.text(); }).then(function (html) {
+  /* 진짜 sg-auth.js 자리에 가짜를 끼우고, 서비스워커 등록은 뺀다. */
+  var patched = html
+    .replace(/<script src="assets\/sg-auth\.js"><\/script>/, STUB)
+    .replace(/<script>if\("serviceWorker"[\s\S]*?<\/script>/, '');
+  ok(patched !== html, '스텁이 실제로 끼워졌다');
+
+  var d = fr.contentDocument;
+  d.open(); d.write(patched); d.close();
+  wait();
+});
+
+var tries = 0;
+function wait() {
+  var d = fr.contentDocument;
+  var body = d.getElementById('body');
+  if (body && !body.classList.contains('hide')) return setTimeout(run, 60);
+  if (++tries > 100) { ok(false, '본문이 열렸다 (관리자 게이트 통과)'); done(); return; }
+  setTimeout(wait, 60);
+}
+
+function type(el, v) {
+  el.value = v;
+  el.dispatchEvent(new fr.contentWindow.Event('input', { bubbles: true }));
+}
+
+function run() {
+  var d = fr.contentDocument;
+  var find = d.getElementById('find'), res = d.getElementById('findres'), sum = d.getElementById('findsum');
+  ok(!!find && !!res, '조회 칸과 결과 자리가 있다');
+  if (!find) { done(); return; }
+
+  /* ── 조회 ── */
+  ok(/4 registered/.test(sum.textContent), '비었을 때는 그 날짜의 등록 수를 말한다',
+     sum.textContent);
+
+  type(find, 'smeag007');
+  ok(/Pai Jun Yuan/.test(res.textContent), '아이디로 그 사람을 찾는다', res.textContent);
+  ok(/Gecelyn Oljol/.test(res.textContent), '담당 선생님도 같이 보여 준다', res.textContent);
+
+  type(find, '7');
+  ok(/Pai Jun Yuan/.test(res.textContent), '"7" 도 smeag007 로 읽는다', res.textContent);
+
+  type(find, 'hayul');
+  ok(/smeag001/.test(res.textContent), '이름 조각으로도 찾는다', res.textContent);
+
+  type(find, 'smeag500');
+  ok(/free/i.test(res.textContent), '비어 있는 번호는 free 라고 말한다', res.textContent);
+
+  type(find, 'nobody-here');
+  ok(/No one matches/.test(res.textContent), '없는 이름은 없다고 말한다', res.textContent);
+
+  type(find, '');
+  ok(res.textContent === '', '비우면 결과도 사라진다');
+
+  /* ── 미리보기: 007 을 건너뛰는가 ── */
+  var ph = [];
+  d.querySelectorAll('#rows input[data-f="id0"]').forEach(function (el) { ph.push(el.placeholder); });
+  ok(ph.length >= 6, '빈 줄이 열 줄 서 있다 (' + ph.length + ')');
+  ok(ph.indexOf('smeag007') < 0, '미리보기가 이미 나간 smeag007 을 건너뛴다', ph.slice(0, 6).join(' '));
+  ok(ph[0] === 'smeag003' && ph[3] === 'smeag006' && ph[4] === 'smeag008',
+     '구멍 위아래로 003·004·005·006·008 로 이어진다', ph.slice(0, 6).join(' '));
+
+  /* ── 표: 만들기 전에 빨개지는가 ── */
+  var ids = d.querySelectorAll('#rows input[data-f="id0"]');
+  type(ids[0], 'smeag007');
+  var st0 = d.querySelectorAll('#rows tr')[0].querySelector('.st');
+  ok(/taken/.test(st0.textContent), 'Create 전에 "taken" 이 그 줄에 뜬다', st0.textContent);
+  ok(/Pai Jun Yuan/.test(st0.textContent), '누가 쥐고 있는지 이름까지 말한다', st0.textContent);
+  ok(!!st0.querySelector('.bad-t'), '빨간 글씨로 뜬다');
+
+  /* 같은 번호를 두 줄에 — 뒷줄만 잡힌다 */
+  var again = d.querySelectorAll('#rows input[data-f="id0"]');
+  type(again[0], 'smeag500');
+  type(d.querySelectorAll('#rows input[data-f="id0"]')[1], 'smeag500');
+  var trs = d.querySelectorAll('#rows tr');
+  ok(trs[0].querySelector('.st').textContent.trim() === '', '먼저 집은 줄은 조용하다',
+     trs[0].querySelector('.st').textContent);
+  ok(/twice/.test(trs[1].querySelector('.st').textContent), '뒷줄이 "used twice" 로 잡힌다',
+     trs[1].querySelector('.st').textContent);
+
+  /* 모양이 아닌 것 */
+  type(d.querySelectorAll('#rows input[data-f="id0"]')[2], 'smeag9999');
+  ok(/smeag000/.test(d.querySelectorAll('#rows tr')[2].querySelector('.st').textContent),
+     '범위 밖은 그대로 범위를 알려 준다');
+
+  /* ── 붙여넣기 요약 ── */
+  var paste = d.getElementById('paste');
+  paste.value = 'Kenneth\tsmeag007\nSomeone\tsmeag500';
+  paste.dispatchEvent(new fr.contentWindow.Event('input', { bubbles: true }));
+  var rs = d.getElementById('readsum').textContent;
+  ok(/already used/.test(rs), '요약이 이미 나간 번호를 짚는다', rs);
+  ok(/Pai Jun Yuan/.test(rs), '요약도 이름을 같이 준다', rs);
+  ok(!/smeag500/.test(rs.split('already used')[1] || ''), '비어 있는 번호는 짚지 않는다', rs);
+
+  done();
+}
+
+window.addEventListener('error', function (e) { ok(false, '페이지 에러 없음', e.message); });
+</script>
+</body>
+</html>

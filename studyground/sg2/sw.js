@@ -223,7 +223,12 @@
 //      성적만 보인다(다른 세트 기록은 학생에게 세지 않는다). assets/student-landing.js
 //      가 주소를 갖는다. 캐시된 옛 사본이 남으면 그 기기만 로그인하자마자 시험으로
 //      떨어지고, 대시보드에 SET 9 버튼이 서지 않는다.
-const VERSION = 'sg-v62';
+// v63: 겹치는 아이디를 만들기 전에 본다 — admin-students.html 이 날짜를 고를 때
+//      그 시험일 명단(sg_exam_accounts)을 읽어 두고, 조회 칸·붙여넣기 요약·표의
+//      상태 칸 세 자리에 같이 쓴다. 번호를 치는 순간 누가 그 자리를 쥐고 있는지
+//      그 줄에 뜬다. 캐시된 옛 사본이 남은 기기는 조회 칸이 없고, 겹침을 Create 를
+//      누른 뒤에야 안다.
+const VERSION = 'sg-v63';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
