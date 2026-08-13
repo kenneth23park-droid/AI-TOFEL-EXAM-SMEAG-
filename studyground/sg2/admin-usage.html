@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<!--
+  admin-usage.html — AI 채점이 실제로 쓴 모델·토큰·금액.
+
+  /api/score 는 채점 한 건마다 ai_usage = { in, out, ms } 를 sg_task_scores 에 남겨
+  왔는데, 그것을 읽는 화면이 없었다. 토큰은 쌓이고 있는데 "이번 달 얼마 썼나" 에
+  아무도 답하지 못하던 자리다. 이 화면이 그 원장을 읽어 모델별·날짜별로 접는다.
+
+  금액은 여기서 계산한다 — 단가표(PRICES)는 app/scoring/pricing.py 의 JS 판이고,
+  같은 원칙을 지킨다.
+   · 마이크로달러(1/1,000,000 USD) 정수로만 곱한다. float 반올림이 쌓이면 정산이 틀린다.
+   · 단가에 유효기간이 있다. claude-sonnet-5 는 2026-08-31 까지 도입가($2/$10),
+     9/1 부터 정가($3/$15) 다. 호출 시각이 속한 구간을 골라 쓴다.
+   · 모르는 단가는 0 이 아니라 "—" 다. 0 으로 접으면 "공짜로 썼다" 가 되어 합계가
+     조용히 틀린다. 그런 호출은 '단가 미등록' 으로 따로 센다.
+
+  전사(STT)는 금액에 넣지 않는다. gpt-4o-transcribe 는 토큰이 아니라 **분 단위**로
+  과금되고 원장에 길이가 남지 않는다 — 세지 못하는 것을 0 원으로 적지 않는다는
+  같은 규칙이라, 건수만 세어 따로 보여 준다.
+
+  관리자 비밀번호 세션(assets/admin-session.js)으로 열고, 행은 Supabase 계정 토큰으로
+  읽는다. 학생 토큰으로는 남의 행이 오지 않는다 — 권한의 정본은 여기가 아니라 RLS 다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI usage &amp; cost (admin) · SMEAG MockTest</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e8481f">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:14px 0 10px; }
+  .seg { display:inline-flex; border:1px solid var(--line-2); border-radius:9px; overflow:hidden; }
+  .seg button { font:inherit; font-size:12px; font-weight:750; padding:8px 12px; border:0; cursor:pointer;
+    background:var(--paper,#fff); color:var(--ink-2); }
+  .seg button + button { border-left:1px solid var(--line-2); }
+  .seg button.on { background:var(--brand); color:#fff; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin:4px 0 18px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 14px; min-width:104px; }
+  .stat b { display:block; font-size:21px; font-weight:850; line-height:1.15; font-variant-numeric:tabular-nums; }
+  .stat span { font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .stat.lead { border-color:var(--brand); background:var(--brand-soft); }
+
+  table.usg { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.usg th { text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--muted); padding:8px 9px; border-bottom:1px solid var(--line-2); white-space:nowrap; }
+  table.usg td { padding:9px; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.usg tr:hover td { background:var(--cream-2); }
+  table.usg td.n, table.usg th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  @media (max-width:720px) { table.usg.cardify td.n { text-align:left; } }
+  .mdl { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; word-break:break-all; }
+  .prov { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
+  .prov.anthropic { background:#efe7fb; color:#6b3fbe; }
+  .prov.openai { background:#e6f5ec; color:#1f7a44; }
+  .norate { font-size:10.5px; font-weight:800; color:#a86b00; background:#fdf1dc; border-radius:999px; padding:2px 7px; }
+
+  /* 날짜별 막대 — 금액이 아니라 토큰 수로 그린다. 단가 미등록 모델이 섞여도 길이가 정직하다. */
+  .day { display:grid; grid-template-columns:88px 1fr 96px; gap:10px; align-items:center; margin:0 0 6px; font-size:12px; }
+  .day .lab { color:var(--muted); font-variant-numeric:tabular-nums; }
+  .day .track { height:9px; background:var(--cream-2); border-radius:999px; overflow:hidden; }
+  .day .fill { height:100%; background:var(--brand); border-radius:999px; }
+  .day .amt { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
+
+  .gate { max-width:520px; margin:60px auto; text-align:center; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="admin.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Admin · AI usage</small></span></a>
+    <div class="nav-right">
+      <a class="btn ghost sm" href="admin.html"><span data-en>Admin home</span><span data-ko>관리자 홈</span></a>
+      <a class="btn ghost sm" href="admin-results.html"><span data-en>Student results</span><span data-ko>학생 응시 결과</span></a>
+      <a class="btn ghost sm" href="admin-log.html"><span data-en>Change log</span><span data-ko>변경 기록</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main" hidden style="padding-bottom:60px">
+  <div class="page-h" style="padding-top:24px">
+    <span class="pill" style="margin-bottom:8px">Admin · AI usage</span>
+    <h1 style="font-size:clamp(25px,4vw,38px)"><span data-en>What the AI scoring actually costs</span><span data-ko>AI 채점이 실제로 쓴 비용</span></h1>
+    <p class="sub"><span data-en>Every AI-scored task records the model it used and the tokens it burned. This reads that ledger and folds it by model and by day, priced with the published rate card.</span>
+      <span data-ko>AI 채점 한 건마다 어떤 모델로 토큰을 얼마나 썼는지가 남습니다. 그 원장을 모델별·날짜별로 접고 공개 단가로 금액을 매깁니다.</span></p>
+  </div>
+
+  <div class="bar">
+    <span class="seg" id="rangeseg">
+      <button data-days="7"><span data-en>7 days</span><span data-ko>7일</span></button>
+      <button data-days="30" class="on"><span data-en>30 days</span><span data-ko>30일</span></button>
+      <button data-days="0"><span data-en>All time</span><span data-ko>전체</span></button>
+    </span>
+    <button class="btn ghost sm" id="reload"><span data-en>Reload</span><span data-ko>다시 읽기</span></button>
+    <button class="btn ghost sm" id="csv"><span data-en>Export CSV</span><span data-ko>CSV 내보내기</span></button>
+    <span class="muted" id="msg" style="font-size:12px;font-weight:700"></span>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <h2 style="font-size:15px;font-weight:850;margin:26px 0 8px"><span data-en>By model</span><span data-ko>모델별</span></h2>
+  <div class="table-scroll">
+  <table class="usg cardify">
+    <thead><tr>
+      <th><span data-en>Model</span><span data-ko>모델</span></th>
+      <th class="n"><span data-en>Scored tasks</span><span data-ko>채점 건수</span></th>
+      <th class="n"><span data-en>Input tok</span><span data-ko>입력 토큰</span></th>
+      <th class="n"><span data-en>Output tok</span><span data-ko>출력 토큰</span></th>
+      <th class="n"><span data-en>Avg in/out</span><span data-ko>건당 평균</span></th>
+      <th class="n"><span data-en>Median sec</span><span data-ko>중앙 소요</span></th>
+      <th class="n"><span data-en>Cost</span><span data-ko>금액</span></th>
+    </tr></thead>
+    <tbody id="models"></tbody>
+  </table>
+  </div>
+
+  <h2 style="font-size:15px;font-weight:850;margin:26px 0 8px"><span data-en>By day</span><span data-ko>날짜별</span></h2>
+  <div id="days"></div>
+
+  <h2 style="font-size:15px;font-weight:850;margin:26px 0 8px"><span data-en>By skill</span><span data-ko>영역별</span></h2>
+  <div class="table-scroll">
+  <table class="usg cardify">
+    <thead><tr>
+      <th><span data-en>Skill</span><span data-ko>영역</span></th>
+      <th class="n"><span data-en>Scored tasks</span><span data-ko>채점 건수</span></th>
+      <th class="n"><span data-en>Tokens</span><span data-ko>토큰</span></th>
+      <th class="n"><span data-en>Cost</span><span data-ko>금액</span></th>
+      <th class="n"><span data-en>Cost / task</span><span data-ko>건당 금액</span></th>
+    </tr></thead>
+    <tbody id="skills"></tbody>
+  </table>
+  </div>
+
+  <div class="card mt-24">
+    <h3 style="margin:0 0 6px;font-size:14px"><span data-en>What is not in these numbers</span><span data-ko>이 숫자에 없는 것</span></h3>
+    <p class="muted" style="font-size:12.5px;margin:0 0 8px">
+      <span data-en>Speaking transcription is billed per minute of audio, not per token, and the ledger keeps no duration — so it is counted, not priced. Blank answers are scored 0 by rule without calling a model and cost nothing. Rows whose model has no published rate in this build are listed as “no rate”, never as zero.</span>
+      <span data-ko>스피킹 전사는 토큰이 아니라 오디오 <b>분</b> 단위로 과금되고 원장에 길이가 없습니다 — 그래서 건수만 세고 금액은 매기지 않습니다. 빈 답안은 모델을 부르지 않고 규칙으로 0점 처리되어 비용이 없습니다. 단가표에 없는 모델은 0원이 아니라 '단가 미등록' 으로 따로 셉니다.</span>
+    </p>
+    <p class="muted" style="font-size:11.5px;margin:0" id="ratecard"></p>
+  </div>
+</main>
+
+<div class="wrap gate" id="gate">
+  <p class="muted"><span data-en>Admin sign-in required.</span><span data-ko>관리자 로그인이 필요합니다.</span></p>
+  <button class="btn brand" id="signin"><span data-en>Sign in</span><span data-ko>로그인</span></button>
+</div>
+
+<script src="assets/admin-session.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var A = window.SG_ADMIN;
+  var $ = function (id) { return document.getElementById(id); };
+  var MICROS = 1000000, PER_MTOK = 1000000;
+  var PRICE_VERSION = '2026-08-10';
+
+  /* ── 단가표 (app/scoring/pricing.py 의 JS 판) ────────────────────────────
+   * 값은 "100만 토큰당 마이크로달러" 정수다. 구간은 [시작, 끝(포함), in, out].
+   * 끝이 '' 이면 다음 가격이 아직 예고되지 않았다는 뜻. */
+  function usd(s) {
+    var p = String(s).split('.'), frac = ((p[1] || '') + '000000').slice(0, 6);
+    return parseInt(p[0], 10) * MICROS + parseInt(frac, 10);
+  }
+  var PRICES = {
+    'claude-opus-5':     [['2026-01-01', '', usd('5.00'), usd('25.00')]],
+    'claude-opus-4-8':   [['2026-01-01', '', usd('5.00'), usd('25.00')]],
+    'claude-fable-5':    [['2026-01-01', '', usd('10.00'), usd('50.00')]],
+    // 도입가 → 정가. 이 저장소의 기본 모델이라 구간이 실제로 넘어간다.
+    'claude-sonnet-5':   [['2026-01-01', '2026-08-31', usd('2.00'), usd('10.00')],
+                          ['2026-09-01', '', usd('3.00'), usd('15.00')]],
+    'claude-sonnet-4-6': [['2026-01-01', '', usd('3.00'), usd('15.00')]],
+    'claude-haiku-4-5':  [['2026-01-01', '', usd('1.00'), usd('5.00')]],
+    'gpt-4o':            [['2026-01-01', '', usd('2.50'), usd('10.00')]],
+    'gpt-4o-mini':       [['2026-01-01', '', usd('0.15'), usd('0.60')]],
+    'gpt-4.1':           [['2026-01-01', '', usd('2.00'), usd('8.00')]],
+    'gpt-4.1-mini':      [['2026-01-01', '', usd('0.40'), usd('1.60')]],
+    'gpt-5':             [['2026-01-01', '', usd('1.25'), usd('10.00')]]
+  };
+
+  /** 'claude-haiku-4-5-20251001' → 'claude-haiku-4-5'. 날짜 접미사를 벗겨 별칭으로. */
+  function normalize(model) {
+    var raw = String(model || '').trim();
+    if (!raw || PRICES[raw]) return raw;
+    var parts = raw.split('-');
+    while (parts.length > 1) {
+      parts.pop();
+      var c = parts.join('-');
+      if (PRICES[c]) return c;
+    }
+    return raw;
+  }
+
+  /** 그 날짜에 유효한 [in, out] 단가. 모르면 null — 0 이 아니다. */
+  function rateFor(model, day) {
+    var tiers = PRICES[normalize(model)];
+    if (!tiers) return null;
+    var d = day || todayKey();
+    for (var i = 0; i < tiers.length; i++) {
+      var t = tiers[i];
+      if (d >= t[0] && (!t[1] || d <= t[1])) return [t[2], t[3]];
+    }
+    return null;
+  }
+
+  /** 이 호출의 금액(마이크로달러). 단가를 모르면 null. 정수 곱셈만 쓴다. */
+  function costOf(model, inTok, outTok, day) {
+    var r = rateFor(model, day);
+    if (!r) return null;
+    return Math.floor(inTok * r[0] / PER_MTOK) + Math.floor(outTok * r[1] / PER_MTOK);
+  }
+
+  function money(micros, places) {
+    if (micros === null || micros === undefined) return '—';
+    places = places || 2;
+    if (micros && places === 2 && micros < MICROS / 100) places = 4;
+    var scale = Math.pow(10, places), n = Math.floor(micros * scale / MICROS);
+    var frac = String(n % scale);
+    while (frac.length < places) frac = '0' + frac;
+    return '$' + Math.floor(n / scale) + '.' + frac;
+  }
+  function num(n) { return (n || 0).toLocaleString('en-US'); }
+  function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
+  function dayKey(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toISOString().slice(0, 10); }
+  function todayKey() { return new Date().toISOString().slice(0, 10); }
+  function median(list) {
+    if (!list.length) return 0;
+    var s = list.slice().sort(function (a, b) { return a - b; });
+    return s[Math.floor(s.length / 2)];
+  }
+
+  /* ── 원장 읽기 ──────────────────────────────────────────────────────────
+   * 행은 Supabase 계정 토큰으로 읽는다. RLS 가 허락하는 만큼만 온다 — 관리자에게는
+   * 전부, 선생님에게는 자기 학생만. 이 화면은 관리자 문으로 여는 곳이라 보통 전부다. */
+  var ROWS = [], DAYS = 30;
+
+  function load() {
+    $('msg').textContent = 'loading…';
+    return SG_AUTH.token().then(function (tok) {
+      if (!tok) throw new Error('signed out — sign in with your teacher/admin account');
+      var q = 'sg_task_scores?select=session,owner,skill,task_kind,ai_provider,ai_model,ai_at,' +
+              'ai_usage,ai_error,transcript_model,transcript_at&ai_at=not.is.null' +
+              '&order=ai_at.desc&limit=20000';
+      return fetch(SG_AUTH.url + '/rest/v1/' + q, {
+        headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok }
+      }).then(function (r) {
+        if (!r.ok) throw new Error('supabase ' + r.status);
+        return r.json();
+      });
+    }).then(function (rows) {
+      ROWS = Array.isArray(rows) ? rows : [];
+      $('msg').textContent = ROWS.length + ' scored rows on the server';
+      render();
+    })['catch'](function (e) {
+      ROWS = []; render();
+      $('msg').textContent = 'could not read the ledger — ' + String(e.message || e);
+    });
+  }
+
+  /** 기간 안의 행. 토큰이 하나도 없는 행(규칙 0점·모델 실패)은 호출이 아니다. */
+  function inRange() {
+    if (!DAYS) return ROWS;
+    var cut = new Date(Date.now() - DAYS * 86400000).toISOString();
+    return ROWS.filter(function (r) { return String(r.ai_at || '') >= cut; });
+  }
+  function tokensOf(r) {
+    var u = r.ai_usage || {};
+    return { i: Number(u['in'] || 0), o: Number(u.out || 0), ms: Number(u.ms || 0) };
+  }
+  function called(r) { var t = tokensOf(r); return t.i > 0 || t.o > 0; }
+
+  function render() {
+    var rows = inRange(), calls = rows.filter(called);
+
+    var tin = 0, tout = 0, cost = 0, unpriced = 0, sessions = {};
+    var byModel = {}, byDay = {}, bySkill = {};
+
+    calls.forEach(function (r) {
+      var t = tokensOf(r), day = dayKey(r.ai_at);
+      var model = String(r.ai_model || '(unknown)');
+      var c = costOf(model, t.i, t.o, day);
+      tin += t.i; tout += t.o;
+      if (c === null) unpriced++; else cost += c;
+      sessions[r.session] = 1;
+
+      var m = byModel[model] || (byModel[model] = {
+        provider: r.ai_provider || '', n: 0, i: 0, o: 0, cost: 0, priced: true, ms: []
+      });
+      m.n++; m.i += t.i; m.o += t.o; m.ms.push(t.ms);
+      if (c === null) m.priced = false; else m.cost += c;
+
+      /* 날짜·영역은 모델이 섞인다. 단가를 모르는 호출 하나 때문에 그 날 전체를 '—' 로
+       * 비우면, 아는 몫까지 안 보인다. 아는 만큼 더하고 모르는 건수를 옆에 적는다. */
+      var d = byDay[day] || (byDay[day] = { n: 0, tok: 0, cost: 0, unp: 0 });
+      d.n++; d.tok += t.i + t.o;
+      if (c === null) d.unp++; else d.cost += c;
+
+      var sk = String(r.skill || '—');
+      var s = bySkill[sk] || (bySkill[sk] = { n: 0, tok: 0, cost: 0, unp: 0 });
+      s.n++; s.tok += t.i + t.o;
+      if (c === null) s.unp++; else s.cost += c;
+    });
+
+    var attempts = Object.keys(sessions).length;
+    var stt = rows.filter(function (r) { return r.transcript_at && r.transcript_model && r.transcript_model !== 'manual'; }).length;
+    var failed = rows.filter(function (r) { return r.ai_error; }).length;
+
+    $('stats').innerHTML =
+      '<div class="stat lead"><b>' + money(cost) + '</b><span data-en>spent</span><span data-ko>사용 금액</span></div>' +
+      '<div class="stat"><b>' + num(calls.length) + '</b><span data-en>model calls</span><span data-ko>모델 호출</span></div>' +
+      '<div class="stat"><b>' + num(tin + tout) + '</b><span data-en>tokens</span><span data-ko>총 토큰</span></div>' +
+      '<div class="stat"><b>' + num(attempts) + '</b><span data-en>attempts</span><span data-ko>응시</span></div>' +
+      '<div class="stat"><b>' + (attempts ? money(Math.floor(cost / attempts), 4) : '—') + '</b><span data-en>per attempt</span><span data-ko>응시 1건당</span></div>' +
+      '<div class="stat"><b>' + num(stt) + '</b><span data-en>transcriptions</span><span data-ko>전사 (분 단위 과금)</span></div>' +
+      (unpriced ? '<div class="stat"><b>' + num(unpriced) + '</b><span data-en>no rate</span><span data-ko>단가 미등록</span></div>' : '') +
+      (failed ? '<div class="stat"><b>' + num(failed) + '</b><span data-en>model errors</span><span data-ko>채점 실패</span></div>' : '');
+
+    var names = Object.keys(byModel).sort(function (a, b) { return byModel[b].n - byModel[a].n; });
+    $('models').innerHTML = names.map(function (name) {
+      var m = byModel[name], p = String(m.provider || '').toLowerCase();
+      return '<tr>' +
+        '<td ' + SG_LABEL('Model', '모델') + '>' +
+          (p ? '<span class="prov ' + esc(p) + '">' + esc(p) + '</span> ' : '') +
+          '<span class="mdl">' + esc(name) + '</span>' +
+          (m.priced ? '' : ' <span class="norate">no rate</span>') + '</td>' +
+        '<td class="n" ' + SG_LABEL('Scored', '건수') + '>' + num(m.n) + '</td>' +
+        '<td class="n" ' + SG_LABEL('Input', '입력') + '>' + num(m.i) + '</td>' +
+        '<td class="n" ' + SG_LABEL('Output', '출력') + '>' + num(m.o) + '</td>' +
+        '<td class="n" ' + SG_LABEL('Avg in/out', '건당 평균') + '>' +
+          num(Math.round(m.i / m.n)) + ' / ' + num(Math.round(m.o / m.n)) + '</td>' +
+        '<td class="n" ' + SG_LABEL('Median sec', '중앙 소요') + '>' + (median(m.ms) / 1000).toFixed(1) + 's</td>' +
+        '<td class="n" ' + SG_LABEL('Cost', '금액') + '>' + (m.priced ? money(m.cost) : '—') + '</td>' +
+      '</tr>';
+    }).join('') || '<tr><td colspan="7" class="muted" style="padding:18px 9px">' +
+      '<span data-en>No AI scoring in this period yet.</span><span data-ko>이 기간에는 AI 채점 기록이 없습니다.</span></td></tr>';
+
+    var dayKeys = Object.keys(byDay).sort().reverse().slice(0, 21);
+    var peak = 1;
+    dayKeys.forEach(function (k) { peak = Math.max(peak, byDay[k].tok); });
+    $('days').innerHTML = dayKeys.map(function (k) {
+      var d = byDay[k];
+      return '<div class="day"><span class="lab">' + esc(k) + '</span>' +
+        '<span class="track"><span class="fill" style="width:' + Math.max(2, Math.round(d.tok * 100 / peak)) + '%"></span></span>' +
+        // 그 날이 통째로 단가 미등록이면 $0.0000 이 아니라 '—' 다. 0 원으로 쓴 게 아니다.
+        '<span class="amt">' + (d.cost || !d.unp ? money(d.cost, 4) : '—') +
+          (d.unp ? ' <span class="norate">+' + d.unp + '</span>' : '') + '</span></div>';
+    }).join('') || '<p class="muted" style="font-size:12.5px">' +
+      '<span data-en>Nothing to chart yet.</span><span data-ko>아직 그릴 것이 없습니다.</span></p>';
+
+    $('skills').innerHTML = Object.keys(bySkill).sort().map(function (k) {
+      var s = bySkill[k];
+      return '<tr>' +
+        '<td ' + SG_LABEL('Skill', '영역') + '>' + esc(k) + '</td>' +
+        '<td class="n" ' + SG_LABEL('Scored', '건수') + '>' + num(s.n) + '</td>' +
+        '<td class="n" ' + SG_LABEL('Tokens', '토큰') + '>' + num(s.tok) + '</td>' +
+        '<td class="n" ' + SG_LABEL('Cost', '금액') + '>' + money(s.cost) +
+          (s.unp ? ' <span class="norate">' + s.unp + ' no rate</span>' : '') + '</td>' +
+        // 건당 금액은 **값이 매겨진 건수**로 나눈다. 전체 건수로 나누면 단가 미등록이
+        // 섞인 영역만 조용히 싸 보인다.
+        '<td class="n" ' + SG_LABEL('Per task', '건당') + '>' +
+          (s.n - s.unp ? money(Math.floor(s.cost / (s.n - s.unp)), 4) : '—') + '</td>' +
+      '</tr>';
+    }).join('') || '<tr><td colspan="5" class="muted" style="padding:18px 9px">—</td></tr>';
+
+    var today = todayKey();
+    $('ratecard').textContent = 'Rate card ' + PRICE_VERSION + ' · in/out per 1M tokens, as of ' + today + ': ' +
+      Object.keys(PRICES).map(function (m) {
+        var r = rateFor(m, today);
+        return m + ' ' + money(r[0]) + '/' + money(r[1]);
+      }).join(' · ');
+  }
+
+  /* ── 내보내기 ───────────────────────────────────────────────────────────
+   * 접기 전의 한 줄 = 채점 한 건. 회계로 넘길 때 화면의 합계가 아니라 원장이 필요하다. */
+  function csv() {
+    var head = ['ai_at', 'session', 'owner', 'skill', 'task_kind', 'provider', 'model',
+                'input_tokens', 'output_tokens', 'ms', 'cost_usd', 'error'];
+    var lines = [head.join(',')];
+    inRange().filter(called).forEach(function (r) {
+      var t = tokensOf(r), day = dayKey(r.ai_at);
+      var c = costOf(r.ai_model, t.i, t.o, day);
+      lines.push([r.ai_at, r.session, r.owner, r.skill, r.task_kind, r.ai_provider, r.ai_model,
+                  t.i, t.o, t.ms, c === null ? '' : (c / MICROS).toFixed(6),
+                  String(r.ai_error || '').replace(/[",\n]/g, ' ')]
+        .map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','));
+    });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+    a.download = 'sg-ai-usage.csv';
+    a.click();
+  }
+
+  $('rangeseg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-days]'); if (!b) return;
+    DAYS = parseInt(b.getAttribute('data-days'), 10) || 0;
+    this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    render();
+  });
+  $('reload').addEventListener('click', load);
+  $('csv').addEventListener('click', csv);
+
+  function open() {
+    $('gate').hidden = true;
+    $('main').hidden = false;
+    load();
+  }
+  $('signin').addEventListener('click', function () { A.openLogin('', open); });
+  if (A.can()) open(); else A.openLogin('', open);
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>

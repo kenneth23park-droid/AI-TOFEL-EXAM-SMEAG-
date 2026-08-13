@@ -282,7 +282,12 @@
 //      assets/sg-band.js · sg-review-writing.js · sg-review-speaking.js ·
 //      exam-shell.js 와 dashboard.html · review.html 이 함께 바뀌므로, 캐시된 옛
 //      사본이 남은 기기는 점수 밑에 "선생님이 아직 확정하지 않았습니다" 를 계속 본다.
-const VERSION = 'sg-v70';
+// v71: AI 채점이 쓴 토큰과 금액을 볼 수 있다 — admin-usage.html 이 sg_task_scores 의
+//      ai_usage 원장을 읽어 모델별·날짜별·영역별로 접고, 단가표를 태워 금액을 낸다.
+//      admin.html 허브에 그 카드가 생겼다(허브는 셸 자산이라 판올림하지 않으면 재방문
+//      기기가 옛 카드 목록을 계속 본다). 새 화면 자체는 서버 원장을 읽어야 의미가
+//      있어 셸에 넣지 않는다 — 오프라인에서 열어 봐야 빈 표다.
+const VERSION = 'sg-v71';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
