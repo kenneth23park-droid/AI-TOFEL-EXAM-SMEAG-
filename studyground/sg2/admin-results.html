@@ -41,7 +41,7 @@
   <div class="card mt-16 hide" id="notice"></div>
 
   <div class="card mt-16 hide" id="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-    <input id="q" placeholder="Name or student ID" style="flex:1;min-width:220px;padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:var(--cream)">
+    <input id="q" placeholder="Name, student ID, or date (2026-08-12)" style="flex:1;min-width:220px;padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:var(--cream)">
     <select id="set" style="padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:#fff"></select>
     <span class="muted" style="font-size:12.5px" id="count"></span>
   </div>
@@ -127,10 +127,18 @@
   function shown() {
     var q = ($('q').value || '').trim().toLowerCase();
     var set = $('set').value;
+    /* 시험일자로도 찾는다. 화면에 적힌 그대로("2026-08-12", "08-12", "20:41")도 되고,
+       구분자를 뭘로 쓰든("2026.08.12", "2026/08/12", "20260812") 같은 날을 가리킨다.
+       숫자만 남긴 질의는 4자리 이상일 때만 날짜로 본다 — "12" 한 줄이 분·초까지
+       긁어 오면 검색이 아니라 소음이 된다. */
+    var qd = q.replace(/\D/g, '');
     return ALL.filter(function (r) {
       if (set && r.set_code !== set) return false;
       if (!q) return true;
-      return (nameOf(r) + ' ' + idOf(r)).toLowerCase().indexOf(q) >= 0;
+      if ((nameOf(r) + ' ' + idOf(r)).toLowerCase().indexOf(q) >= 0) return true;
+      var d = when(r.submitted_at);
+      if (d.indexOf(q) >= 0) return true;
+      return qd.length >= 4 && d.replace(/\D/g, '').indexOf(qd) >= 0;
     });
   }
 
