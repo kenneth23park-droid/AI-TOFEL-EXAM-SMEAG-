@@ -187,6 +187,9 @@
 <!-- 실시간 저장: 로컬 DB(IndexedDB) · Supabase · 정전 복구 체크포인트 -->
 <script src="assets/exam-localdb.js"></script>
 <script src="assets/exam-cloud.js"></script>
+<!-- 시험장에서 난 일을 메일로도 알린다(/api/notify). exam-cloud 뒤라야 그 이벤트에
+     붙을 수 있고, exam-shell 앞이라야 제출 화면이 SG_NOTIFY 를 찾는다. -->
+<script src="assets/sg-notify.js"></script>
 <script src="assets/exam-resume.js"></script>
 <script src="assets/exam-render.js"></script>
 <script src="assets/exam-engine.js"></script>

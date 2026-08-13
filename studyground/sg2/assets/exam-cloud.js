@@ -340,7 +340,13 @@
       }
       stats.failed += 1;
       stats.lastError = String(err.message || err);
-      if (permanent(status)) { warn('녹음을 버린다: ' + qid + ' — ' + stats.lastError); return; }
+      if (permanent(status)) {
+        warn('녹음을 버린다: ' + qid + ' — ' + stats.lastError);
+        /* 버렸다는 사실은 밖으로 낸다. 콘솔에만 적으면 그날 아무도 모른다 —
+           2026-08-12 가 정확히 그랬다. sg-notify.js 가 이 자리에서 메일을 띄운다. */
+        emit('dropped', { kind: 'media', qid: qid, error: stats.lastError });
+        return;
+      }
       emit('offline', { reason: 'media', error: stats.lastError });
       enqueue('media', p);          // 정전에도 살아남는 자리로 — 연결되면 다시 올라간다
     });
@@ -377,7 +383,10 @@
           p.tries = (p.tries || 0) + 1;
           dropQueued([q.id]);
           if (!permanent(status) && p.tries < MEDIA_TRIES) enqueue('media', p);
-          else warn('녹음을 포기한다(제출 후 업로더가 맡는다): ' + p.qid + ' — ' + stats.lastError);
+          else {
+            warn('녹음을 포기한다(제출 후 업로더가 맡는다): ' + p.qid + ' — ' + stats.lastError);
+            emit('dropped', { kind: 'media', qid: p.qid, error: stats.lastError });
+          }
           scheduleRetry(permanent(status) ? 0 : RETRY_MS);
           if (cb) cb(e2);
         });

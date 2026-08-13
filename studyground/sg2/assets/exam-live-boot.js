@@ -76,6 +76,18 @@
     if (!session) return;
     var meta = {};
     try { meta = S.meta() || {}; } catch (e) {}
+    /* 알림은 클라우드보다 먼저 붙인다 — attempt 열기가 실패하는 그 순간부터
+       'offline' 이벤트가 나오는데, 그때 듣는 사람이 없으면 첫 사고를 놓친다. */
+    if (root.SG_NOTIFY) {
+      try {
+        root.SG_NOTIFY.setContext({
+          session: session,
+          setCode: meta.setCode || param('set') || param('testId') || '',
+          mode: meta.mode || ''
+        });
+        root.SG_NOTIFY.watchCloud();
+      } catch (e3) {}
+    }
     C.start({
       session: session,
       setCode: meta.setCode || param('set') || param('testId') || '',

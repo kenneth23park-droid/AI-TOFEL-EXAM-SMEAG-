@@ -259,7 +259,16 @@
 //      않고 왜 로그인해야 하는지를 말하고, 돌아갈 자리를 baseURI 기준으로 잡아
 //      /en/test-nt/* 에서도 보던 화면으로 되돌아온다(여태는 빈 값이었다).
 //      캐시된 옛 사본이 남은 기기는 로그인 없이 시험을 시작할 수 있다.
-const VERSION = 'sg-v67';
+// v68: 시험장에서 난 일이 메일함까지 간다 — assets/sg-notify.js 와 서버리스
+//      api/notify.js(Resend). 녹음 업로드 실패·오래 끊긴 회선·처음부터 다시 시작·
+//      채점 거절은 난 그 자리에서 한 통씩(issue), 한 학생의 응시가 끝나면 제출 사실과
+//      밴드 점수를 묶어 한 통(done)이 jitnet57@gmail.com · ai@smeagschool.com 으로
+//      나간다. 화면에만 적어 두면 아무도 그날 모른다는 것을 2026-08-12 이 보여 줬다.
+//      알림은 시험을 멈추지 않는다(F12): 로그인·회선이 없으면 기기 큐에 눌러 뒀다가
+//      대시보드를 열 때 마저 보낸다. 그래서 dashboard.html 도 이 파일을 싣는다.
+//      캐시된 옛 사본이 남은 기기는 아무 알림도 보내지 않는다 — 그 기기의 사고는
+//      종전대로 그 PC 화면에만 적힌다. 그래서 판올림한다.
+const VERSION = 'sg-v68';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -334,6 +343,9 @@ const SHELL_ASSETS = [
   // 이 네 파일은 오프라인에서도 반드시 캐시에 있어야 한다.
   'assets/exam-localdb.js', 'assets/exam-cloud.js', 'assets/exam-resume.js',
   'assets/exam-live-boot.js',
+  // 알림 — 사고는 오프라인에서 난다. 보내지 못한 알림을 큐에 눌러 두는 일 자체가
+  // 회선 없이 돌아야 하므로 이 파일도 캐시에 있어야 한다(/api/notify 는 서버리스라 제외).
+  'assets/sg-notify.js',
 
   // Timing profiles — exam-timing.js falls back to an inline default if these are
   // missing, but precaching them keeps offline timings identical to online ones.

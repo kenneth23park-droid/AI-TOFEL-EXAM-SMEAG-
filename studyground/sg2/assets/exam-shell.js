@@ -796,6 +796,13 @@ window.SG_RUNTIME = (function () {
             }
             STORE.dropSession(session);
             if (window.SG_LDB) { try { SG_LDB.dropSession(session); } catch (e) {} }
+            /* 통째로 되감은 것은 사고다 — 정전이든 오조작이든. 그 사실을 알린다. */
+            if (window.SG_NOTIFY) {
+              try {
+                SG_NOTIFY.issue('attempt_abandoned', { session: session,
+                  message: '응시를 처음부터 다시 시작했습니다. 이전 답안은 백업본으로만 남습니다.' });
+              } catch (e1) {}
+            }
             var fresh = STORE.offlineSessionId();
             STORE.open(fresh);
             if (window.SG_LIVE) { try { SG_LIVE.rebind(fresh); } catch (e2) {} }
@@ -1037,21 +1044,52 @@ window.SG_RUNTIME = (function () {
       openRetake();
       return;
     }
+
+    /* 이 응시에서 무슨 일이 있었는지 한 곳에 모은다. 사고는 난 그 자리에서 한 통씩
+     * 나가고(issue), 여기 모은 것은 마지막에 완료 메일 한 통으로 함께 간다 — 제출과
+     * 채점을 따로 보내면 학생 30명짜리 시험이 메일 60통이 된다. */
+    var report = { issues: [], bands: null, media: null };
+    function tell(code, message, detail) {
+      report.issues.push(code);
+      if (!window.SG_NOTIFY) return;
+      try { SG_NOTIFY.issue(code, { session: session, message: message, detail: detail }); } catch (e) {}
+    }
+    /* 완료 메일은 마지막 한 번이다. 실패해도 화면은 이미 제 할 말을 다 했다. */
+    function tellDone() {
+      if (!window.SG_NOTIFY) return;
+      try {
+        SG_NOTIFY.done({
+          session: session,
+          bands: report.bands,
+          message: report.issues.length
+            ? '문제가 있었습니다: ' + report.issues.join(', ')
+            : '',
+          detail: report.media
+            ? { recordings_uploaded: report.media.sent, recordings_failed: report.media.failed,
+                media_error: report.media.error }
+            : null
+        });
+      } catch (e) {}
+    }
     /* push() 는 답안 → 스피킹 녹음 → AI 채점을 이 순서로 건다. 셋 다 여기서
        끝까지 기다린다(waitScore). 예전에는 채점을 걸어만 두고 화면을 넘겼는데,
        학생이 곧바로 창을 닫으면 그 요청이 끊겨 채점이 반만 되곤 했다. 지금은
        제출 화면에 남아 진행(몇/몇)을 보여 주고, 끝나면 그 자리에서 밴드를 편다. */
     say('Uploading your answers and recordings…', '답안과 녹음을 올리는 중…');
-    SG_RESULTS.push({
+    var finishing = SG_RESULTS.push({
       waitScore: true,
       onProgress: function (done, total) {
         say('Scoring Writing and Speaking… ' + done + ' / ' + total,
             '라이팅·스피킹 채점 중… ' + done + ' / ' + total);
       }
     }).then(function (r) {
+      report.media = (r && r.media) || null;
       if (r && r.failed) {
         say('Saved on this device. It will upload when you are online.',
             '이 기기에 저장했습니다. 온라인이 되면 올라갑니다.');
+        tell('answers_not_uploaded',
+             '답안 ' + r.failed + '건이 아직 이 기기에만 있습니다.',
+             { failed: r.failed, sent: r.sent });
         return null;
       }
       /* 녹음이 한 장도 못 올라간 채로 "계정에 저장되었습니다" 라고 하면 안 된다.
@@ -1064,6 +1102,9 @@ window.SG_RUNTIME = (function () {
               (m.error || 'unknown') + '). Tell your teacher BEFORE leaving this computer.',
             '답안은 저장되었지만 녹음 ' + m.failed + '개를 올리지 못했습니다 (' +
               (m.error || 'unknown') + '). 이 컴퓨터를 떠나기 전에 선생님께 알리세요.');
+        tell('media_upload_failed',
+             '녹음 ' + m.failed + '개를 올리지 못했습니다. 이 PC 에 아직 남아 있습니다.',
+             { failed: m.failed, sent: m.sent, error: m.error || 'unknown' });
         openRetake();
         return null;
       }
@@ -1081,14 +1122,23 @@ window.SG_RUNTIME = (function () {
                 '). A teacher will score this test.',
               '답안은 저장되었지만 지금 채점을 할 수 없습니다 (' + why +
                 '). 선생님이 채점합니다.');
+          tell('scoring_unavailable', '채점이 거절당했습니다. 선생님이 손으로 채점해야 합니다.',
+               { reason: String(why) });
           return;
         }
         say('Saved to your account. Check My results in a few minutes.',
             '계정에 저장되었습니다. 잠시 후 내 성적에서 확인하세요.');
       });
-    }).catch(function () {
+    }).catch(function (e) {
       say('Saved on this device.', '이 기기에 저장되었습니다.');
-    }).then(openRetake, openRetake);
+      tell('answers_not_uploaded', '제출 처리가 중간에 끊겼습니다. 답안은 이 기기에 있습니다.',
+           { error: String((e && e.message) || e || 'unknown') });
+    });
+    // 다시 응시하는 문은 어느 쪽으로 끝나도 열린다 — 학생이 이 화면에 갇히면 안 된다.
+    finishing.then(openRetake, openRetake);
+    /* 완료 메일은 그 옆에서 따로 간다. 문 여는 일과 엮지 않는 이유는 하나다 —
+       메일 쪽에서 무슨 일이 나도 문은 열려야 한다. */
+    finishing.then(tellDone, tellDone);
 
     /* 방금 채점된 W·S 까지 얹어 네 영역 밴드를 제출 화면에 바로 그린다.
        채점이 하나도 안 됐으면(키 없음·녹음 없음 등) 아무 것도 그리지 않고
@@ -1100,12 +1150,16 @@ window.SG_RUNTIME = (function () {
         if (!row) return null;
         return SG_RESULTS.bandOf(row).then(function (b) {
           if (!b || b.overall === null) return null;
+          /* 완료 메일이 실을 점수. 화면에 그린 그 값 그대로다 — 메일과 화면이
+             다른 점수를 말하면 둘 다 못 믿게 된다. */
+          report.bands = { overall: b.overall, cefr: b.cefr || '' };
           var LABELS = { reading: 'Reading', listening: 'Listening',
                          writing: 'Writing', speaking: 'Speaking' };
           var html = '';
           SG_BAND.SKILLS.forEach(function (skill) {
             var s = (b.sections || {})[skill] || {};
             var waiting = s.band === null || s.band === undefined;
+            if (!waiting) report.bands[skill] = s.band;
             html +=
               '<div style="display:flex;justify-content:space-between;align-items:baseline;' +
                 'padding:7px 2px;border-bottom:1px solid rgba(128,128,128,.22)">' +
