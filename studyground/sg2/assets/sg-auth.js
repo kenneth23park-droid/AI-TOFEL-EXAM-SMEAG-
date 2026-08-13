@@ -276,10 +276,20 @@ window.SG_AUTH = (function () {
   /* 비로그인 화면을 덮는 막. 예전에는 login.html 로 조용히 튕겼는데, 재부팅으로
    * 세션이 지워진 자리에서는 화면이 왜 갈아엎어졌는지 학생이 모른 채 넘어간다.
    * 지금은 그 자리에 "로그인하세요"를 세우고, 버튼을 눌러야 로그인 화면으로 간다.
-   * 막은 문서 맨 위(z-index)라 아래 화면은 손댈 수 없다 — 시험도 시작되지 않는다. */
+   * 막은 문서 맨 위(z-index)라 아래 화면은 손댈 수 없다 — 시험도 시작되지 않는다.
+   *
+   * 2026-08-13 부터 이 막은 모든 응시 화면의 문이다(파생 페이지 포함). 그래서 문구도
+   * 한 경우("재부팅해서 세션이 지워졌다")만 말하지 않는다 — 처음부터 로그인한 적 없는
+   * 학생이 훨씬 흔하고, 그 사람에게 필요한 말은 "왜 로그인해야 하는가"다: 로그인이
+   * 없으면 답안이 이 컴퓨터 밖으로 나가지 않는다. */
   function blockWithLogin() {
     if (document.getElementById('sg-auth-block')) return;
-    var next = location.pathname.split('/').pop() + location.search;
+    /* 돌아올 자리는 sg2 루트에서 본 상대경로다. /en/test-nt/reading/ 같은 라우트는
+       경로가 곧 페이지라 pathname 의 마지막 조각만 떼면 빈 문자열이 된다 —
+       <base href="../../../"> 를 기준으로 잘라야 그 자리로 되돌아온다. */
+    var here = String(location.href || (location.pathname || '') + (location.search || ''));
+    var base = String(document.baseURI || here).replace(/[?#].*$/, '').replace(/[^/]*$/, '');
+    var next = here.indexOf(base) === 0 ? here.slice(base.length) : here.split('/').pop();
     var href = 'login.html?next=' + encodeURIComponent(next);
     var box = document.createElement('div');
     box.id = 'sg-auth-block';
@@ -291,8 +301,9 @@ window.SG_AUTH = (function () {
         '<div style="font-size:40px;line-height:1">🔒</div>' +
         '<h1 style="margin:14px 0 8px;font-size:22px;font-weight:800">Please log in</h1>' +
         '<p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#6b6357">' +
-          'This computer was restarted, so the previous session was cleared. ' +
-          'Enter your ID and password to continue. Your saved work is untouched.</p>' +
+          'The test is saved to your account. Without a login your answers stay on ' +
+          'this computer only, and leave with it. Enter your ID and password to ' +
+          'continue — anything already saved is untouched.</p>' +
         '<a href="' + href + '" style="display:inline-block;padding:12px 22px;border-radius:999px;' +
           'background:#e8481f;color:#fff;font-weight:800;font-size:15px;text-decoration:none">Log in</a>' +
       '</div>';

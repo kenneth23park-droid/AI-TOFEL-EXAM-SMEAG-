@@ -248,7 +248,18 @@
 //      "다시 로그인해서 성적 화면을 열면 올라간다"는 길이 여태 한 번도 열린 적이
 //      없다(요청조차 나가지 않았다). 대시보드는 이제 올린 개수·실패 이유를 적는다.
 //      캐시된 옛 사본이 남은 기기는 여전히 아무 말 없이 아무것도 올리지 않는다.
-const VERSION = 'sg-v66';
+// v67: 응시 화면은 로그인 없이 열리지 않는다. v60 이 학생 화면에 세운 것은 경고였고
+//      Start anyway 가 열려 있었는데, 그 문을 누르면 답안이 그 PC 안에만 남는다 —
+//      경고로는 막지 못한다는 판단(2026-08-13). 이제 파생 페이지(set9.html ·
+//      set9-reading.html · en/test-nt/*)도 원본 exam-runtime.html 의
+//      <meta name="sg-auth" content="required"> 를 그대로 물려받는다
+//      (tools/build_routes.py 의 soften_auth 를 걷어냈다). 오프라인 시험장은 세션이
+//      localStorage 에 남아 통과한다 — 회선이 필요한 것은 새 로그인뿐이다.
+//      assets/sg-auth.js 의 막도 함께 고쳤다: 문구가 "재부팅했다" 한 경우만 말하지
+//      않고 왜 로그인해야 하는지를 말하고, 돌아갈 자리를 baseURI 기준으로 잡아
+//      /en/test-nt/* 에서도 보던 화면으로 되돌아온다(여태는 빈 값이었다).
+//      캐시된 옛 사본이 남은 기기는 로그인 없이 시험을 시작할 수 있다.
+const VERSION = 'sg-v67';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

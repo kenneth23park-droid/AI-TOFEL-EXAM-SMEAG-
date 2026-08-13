@@ -191,13 +191,12 @@ function run(name, opts, expect) {
            'guard=' + guard + ' auth=' + auth);
         ok('  막은 셸보다 먼저 실린다 · ' + p,
            html.indexOf('assets/sg-storage-guard.js') < html.indexOf('assets/exam-shell.js'));
-        /* 학생이 처음 앉는 자리는 로그인을 강제하지 않는다 — 회선 없는 시험장에서
-           로그인 막이 서면 시험 자체가 시작되지 않는다(F12). 알리되 막지 않는다.
-           관리자·재응시로 들어오는 exam-runtime.html 만 여전히 잠겨 있다. */
-        if (p !== 'exam-runtime.html') {
-          ok('  로그인을 강제하지는 않는다 · ' + p,
-             html.indexOf('sg-auth" content="required"') < 0);
-        }
+        /* [8] 로그인은 강제다(2026-08-13 결정). 경고만으로는 Start anyway 를 누르는
+           학생을 막지 못한다 — 비로그인 응시는 그 PC 를 떠나는 순간 사라진다.
+           오프라인 시험장은 세션이 localStorage 에 남아 통과한다(회선은 새 로그인에만
+           필요하다). 파생 페이지도 원본에서 이 표식을 그대로 물려받아야 한다. */
+        ok('  로그인이 없으면 열리지 않는다 · ' + p,
+           html.indexOf('sg-auth" content="required"') > 0);
       });
 
       var sw = fs.readFileSync(path.join(SG2, 'sw.js'), 'utf8');
