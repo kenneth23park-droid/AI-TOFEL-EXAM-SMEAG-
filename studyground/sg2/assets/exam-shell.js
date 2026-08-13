@@ -789,6 +789,11 @@ window.SG_RUNTIME = (function () {
         if (opt.kind === 'fresh') {
           // 세션을 통째로 버린다 — 백업본을 뜬 뒤에만 지운다.
           archiveThen('restart_all', function () {
+            /* 지우기 전에 클라우드의 attempt 를 '버려짐'으로 적는다. 지우지는 않는다 —
+               같은 학생의 attempt 가 둘일 때 어느 쪽이 버려진 회차인지 알아야 한다. */
+            if (window.SG_CLOUD && typeof SG_CLOUD.markAbandoned === 'function') {
+              try { SG_CLOUD.markAbandoned(); } catch (e0) {}
+            }
             STORE.dropSession(session);
             if (window.SG_LDB) { try { SG_LDB.dropSession(session); } catch (e) {} }
             var fresh = STORE.offlineSessionId();

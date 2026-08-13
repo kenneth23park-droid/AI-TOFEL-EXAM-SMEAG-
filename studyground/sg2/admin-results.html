@@ -43,7 +43,20 @@
   <div class="card mt-16 hide" id="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
     <input id="q" placeholder="Name, student ID, or date (2026-08-12)" style="flex:1;min-width:220px;padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:var(--cream)">
     <select id="set" style="padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:#fff"></select>
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap">
+      <input type="checkbox" id="show-hidden"><span data-en>Show hidden</span><span data-ko>숨긴 응시 보기</span>
+    </label>
     <span class="muted" style="font-size:12.5px" id="count"></span>
+  </div>
+
+  <!-- 되감기·다시 시작 직전의 백업본. 표에서 한 줄을 고르면 여기에 펼친다. -->
+  <div class="card mt-16 hide" id="arch-card">
+    <h3 style="margin:0 0 4px"><span data-en>Discarded work</span><span data-ko>버려진 답안 (백업본)</span></h3>
+    <p class="muted" style="font-size:12.5px;margin:0 0 12px">
+      <span data-en>Saved just before the student rewound or restarted. Kept, never counted.</span>
+      <span data-ko>학생이 되감거나 다시 시작하기 직전에 뜬 한 벌입니다. 남겨 두되 성적에는 세지 않습니다.</span>
+    </p>
+    <div id="arch-body"></div>
   </div>
 
   <div class="card mt-16 hide" id="table-card" style="padding:0;overflow:hidden">
@@ -132,7 +145,9 @@
        숫자만 남긴 질의는 4자리 이상일 때만 날짜로 본다 — "12" 한 줄이 분·초까지
        긁어 오면 검색이 아니라 소음이 된다. */
     var qd = q.replace(/\D/g, '');
+    var withHidden = $('show-hidden').checked;
     return ALL.filter(function (r) {
+      if (r.hidden && !withHidden) return false;
       if (set && r.set_code !== set) return false;
       if (!q) return true;
       if ((nameOf(r) + ' ' + idOf(r)).toLowerCase().indexOf(q) >= 0) return true;
@@ -142,31 +157,147 @@
     });
   }
 
+  /* 같은 학생이 같은 세트를 두 번 이상 쳤을 때만 회차를 적는다 — 한 번뿐인
+     응시에 "1회차"를 달면 모든 줄에 같은 말이 붙어 읽는 데 방해만 된다.
+     숨긴 응시는 회차를 먹지 않는다(서버에서 attempt_no = 0). */
+  function attemptCell(r) {
+    if (r.hidden) {
+      return ' <span class="chip" title="' + esc(r.hidden_reason || '') + '">' +
+             bi('hidden', '숨김') + '</span>';
+    }
+    return (r.attempt_no > 1) ? ' <span class="chip">#' + r.attempt_no + '</span>' : '';
+  }
+
+  /* 이 응시에 딸린 백업본 수. 되감기·다시 시작이 있었다는 뜻이다. */
+  function archCell(r) {
+    var n = (ARCH[r.owner + '|' + r.session] || []).length;
+    if (!n) return '';
+    return ' <button class="btn ghost sm" data-arch="' + esc(r.owner + '|' + r.session) + '">↩ ' + n + '</button>';
+  }
+
+  function hideCell(r) {
+    if (ROLE !== 'admin') return '';
+    return r.hidden
+      ? '<button class="btn ghost sm" data-unhide="' + esc(r.id) + '">' + bi('Restore', '되돌리기') + '</button>'
+      : '<button class="btn ghost sm" data-hide="' + esc(r.id) + '">' + bi('Hide', '숨기기') + '</button>';
+  }
+
   function paint() {
     var list = shown();
     var waiting = list.filter(function (r) { return viewOf(r).draft; }).length;
+    var hid = ALL.filter(function (r) { return r.hidden; }).length;
     $('count').textContent = list.length + ' / ' + ALL.length +
-      (waiting ? '  ·  ✎ ' + waiting + ' awaiting confirmation' : '');
+      (waiting ? '  ·  ✎ ' + waiting + ' awaiting confirmation' : '') +
+      (hid ? '  ·  ' + hid + ' hidden' : '');
     $('rows').innerHTML = list.length ? list.map(function (r) {
-      return '<tr>' +
+      return '<tr' + (r.hidden ? ' style="opacity:.55"' : '') + '>' +
         '<td ' + SG_LABEL('Date', '날짜') + '>' + when(r.submitted_at) + '</td>' +
         '<td class="card-title"><b>' + esc(nameOf(r)) + '</b>' +
           (idOf(r) ? '<div class="muted" style="font-size:12px">' + esc(idOf(r)) + '</div>' : '') + '</td>' +
         (ROLE === 'admin'
           ? '<td class="col-teacher" ' + SG_LABEL('Teacher', '담당 선생님') + '>' + esc(teacherOf(r) || '—') + '</td>'
           : '') +
-        '<td ' + SG_LABEL('Test', '시험') + '><span class="chip">' + esc(r.set_code || '—') + '</span></td>' +
+        '<td ' + SG_LABEL('Test', '시험') + '><span class="chip">' + esc(r.set_code || '—') + '</span>' +
+          attemptCell(r) + archCell(r) + '</td>' +
         '<td ' + SG_LABEL('Sections', '영역') + '><span class="chips" style="margin:0">' + chips(r) + '</span></td>' +
         '<td class="score" ' + SG_LABEL('Overall', '종합') + '>' +
           (viewOf(r).overall === null ? '—' : 'Band ' + SG_BAND.fmt(viewOf(r).overall)) + '</td>' +
         '<td ' + SG_LABEL('Review window', '리뷰 열람') + '>' + windowCell(r) + '</td>' +
         '<td class="card-actions"><a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) +
-          '&owner=' + encodeURIComponent(r.owner) + '">' + bi('Review', '리뷰') + '</a></td>' +
+          '&owner=' + encodeURIComponent(r.owner) + '">' + bi('Review', '리뷰') + '</a>' + hideCell(r) + '</td>' +
       '</tr>';
     }).join('') : '<tr><td colspan="' + (ROLE === 'admin' ? 8 : 7) + '" class="muted" style="padding:24px;text-align:center">' +
       bi('No results match.', '해당하는 응시가 없습니다.') + '</td></tr>';
 
     wireWindowButtons();
+    wireArchiveButtons();
+    wireHideButtons();
+  }
+
+  /* ── 백업본 · 숨김 ────────────────────────────────────────────────────
+     둘 다 "지우지 않는다"는 한 가지 원칙에서 나온다. 학생이 되감아 버린 답안도,
+     기기를 공유하다 잘못 붙은 응시도, 남기되 성적에는 세지 않는다. */
+
+  var ARCH = {};                                 // owner|session → [백업본]
+
+  function loadArchives() {
+    return SG_RESULTS.archives({ limit: 500 }).then(function (rows) {
+      ARCH = {};
+      (rows || []).forEach(function (a) {
+        var k = a.owner + '|' + a.session;
+        (ARCH[k] = ARCH[k] || []).push(a);
+      });
+    }).catch(function () { ARCH = {}; });
+  }
+
+  /* 사유를 사람의 말로 옮긴다. rewind_step_7 → '되감기 (7스텝)'. */
+  function reasonText(reason) {
+    var s = String(reason || '');
+    var m = /^rewind_step_(\d+)$/.exec(s);
+    if (m) return ['Rewound (step ' + m[1] + ')', '되감기 (' + m[1] + '스텝)'];
+    m = /^course_restart_(.*)$/.exec(s);
+    if (m) return ['Restarted ' + (m[1] || 'section'), '이 코스 처음부터 (' + (m[1] || '영역') + ')'];
+    if (s === 'restart_all') return ['Restarted the whole test', '전체 다시 시작'];
+    return [s || '—', s || '—'];
+  }
+
+  function showArchives(key) {
+    var list = (ARCH[key] || []).slice().sort(function (a, b) { return (a.client_ts || 0) - (b.client_ts || 0); });
+    var r = ALL.filter(function (x) { return x.owner + '|' + x.session === key; })[0];
+    $('arch-body').innerHTML =
+      '<p style="margin:0 0 10px"><b>' + esc(r ? nameOf(r) : '') + '</b> ' +
+        '<span class="muted" style="font-size:12.5px">' + esc(key.split('|')[1]) + '</span></p>' +
+      '<div class="table-wrap" style="overflow-x:auto"><table class="rv-table cardify"><thead><tr>' +
+        '<th>' + bi('When', '시각') + '</th><th>' + bi('Why', '까닭') + '</th>' +
+        '<th>' + bi('Answers kept', '남은 답안') + '</th><th>' + bi('Screen', '화면') + '</th>' +
+      '</tr></thead><tbody>' +
+      list.map(function (a) {
+        var t = reasonText(a.reason);
+        var n = a.answers ? Object.keys(a.answers).length : 0;
+        var cur = a.cursor || {};
+        return '<tr>' +
+          '<td ' + SG_LABEL('When', '시각') + '>' + when(a.created_at) + '</td>' +
+          '<td ' + SG_LABEL('Why', '까닭') + '>' + bi(t[0], t[1]) + '</td>' +
+          '<td ' + SG_LABEL('Answers', '답안') + '>' + n + '</td>' +
+          '<td ' + SG_LABEL('Screen', '화면') + '>' + esc(cur.screenId || '—') + '</td>' +
+        '</tr>';
+      }).join('') + '</tbody></table></div>';
+    $('arch-card').classList.remove('hide');
+    $('arch-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function wireArchiveButtons() {
+    Array.prototype.forEach.call($('rows').querySelectorAll('[data-arch]'), function (b) {
+      b.onclick = function () { showArchives(b.getAttribute('data-arch')); };
+    });
+  }
+
+  function rowOfId(id) {
+    for (var i = 0; i < ALL.length; i++) if (String(ALL[i].id) === String(id)) return ALL[i];
+    return null;
+  }
+
+  function wireHideButtons() {
+    Array.prototype.forEach.call($('rows').querySelectorAll('[data-hide],[data-unhide]'), function (b) {
+      b.onclick = function () {
+        var on = b.hasAttribute('data-hide');
+        var r = rowOfId(b.getAttribute(on ? 'data-hide' : 'data-unhide'));
+        if (!r) return;
+        /* 왜 가리는지 적게 한다 — 반년 뒤에 이 줄을 보는 사람은 까닭을 모른다. */
+        var why = on ? window.prompt('왜 가립니까? (기록에 남습니다)', '') : '';
+        if (on && why === null) return;
+        b.disabled = true;
+        SG_RESULTS.setHidden(r, on, why).then(function () {
+          r.hidden = on;
+          r.hidden_reason = on ? String(why || '') : '';
+          if (on) r.attempt_no = 0;
+          paint();
+        }, function () {
+          b.disabled = false;
+          notice('Could not change that result.', '해당 응시를 바꾸지 못했습니다.');
+        });
+      };
+    });
   }
 
   /* ── 리뷰 열람 창 ─────────────────────────────────────────────────────
@@ -268,18 +399,20 @@
     /* 밴드를 앞에 두고 원점수를 뒤에 둔다 — 성적표의 눈금이 밴드이기 때문이다.
        확정 전(AI 초안)이면 band_status 가 draft 다. 그 열이 없으면 스프레드시트에서
        초안과 확정 점수가 구분 없이 섞인다. */
-    var head = ['submitted_at', 'name', 'student_id', 'teacher', 'set',
+    var head = ['submitted_at', 'name', 'student_id', 'teacher', 'set', 'attempt_no',
                 'band_overall', 'band_reading', 'band_listening', 'band_writing', 'band_speaking',
-                'band_status', 'cefr', 'auto_correct', 'auto_total', 'session'];
+                'band_status', 'cefr', 'auto_correct', 'auto_total', 'session', 'hidden', 'hidden_reason'];
     var lines = [head.join(',')];
     shown().forEach(function (r) {
       var v = viewOf(r);
       function b(s) { return v.sections[s].band === null ? '' : SG_BAND.fmt(v.sections[s].band); }
       lines.push([r.submitted_at || '', nameOf(r), idOf(r), teacherOf(r), r.set_code || '',
+                  r.hidden ? '' : (r.attempt_no || 1),
                   v.overall === null ? '' : SG_BAND.fmt(v.overall),
                   b('reading'), b('listening'), b('writing'), b('speaking'),
                   v.draft ? 'draft' : (v.pending.length ? 'incomplete' : 'final'),
-                  v.cefr, r.score, r.total, r.session]
+                  v.cefr, r.score, r.total, r.session,
+                  r.hidden ? 'hidden' : '', r.hidden_reason || '']
         .map(function (v2) { return '"' + String(v2).replace(/"/g, '""') + '"'; }).join(','));
     });
     var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
@@ -292,8 +425,10 @@
   function load() {
     /* 응시 목록과 W·S 채점을 각각 한 번씩만 읽는다. 채점 조회가 실패해도 목록은
        그린다 — 그때는 W·S 가 '아직 채점 전' 으로 보이고 리뷰에서 확인하면 된다. */
+    /* 가려 둔 응시까지 받아 온다 — 화면의 '숨긴 응시 보기' 가 그 자리에서 켜고 끈다.
+       서버에 다시 묻지 않으므로 토글이 즉시 반응한다. */
     Promise.all([
-      SG_RESULTS.listAll(),
+      SG_RESULTS.listAll({ includeHidden: true }),
       SG_RESULTS.tasks().catch(function () { return []; })
     ]).then(function (out) {
       var rows = out[0];
@@ -309,8 +444,10 @@
       paint();
       $('q').oninput = paint;
       $('set').onchange = paint;
-      /* 열람 창은 뒤늦게 와도 된다 — 먼저 목록을 보여 주고 그 위에 덧그린다. */
+      $('show-hidden').onchange = paint;
+      /* 열람 창과 백업본은 뒤늦게 와도 된다 — 먼저 목록을 보여 주고 그 위에 덧그린다. */
       loadWindows().then(paint);
+      loadArchives().then(paint);
     }).catch(function () {
       notice('Could not load results.', '결과를 불러오지 못했습니다.');
     });

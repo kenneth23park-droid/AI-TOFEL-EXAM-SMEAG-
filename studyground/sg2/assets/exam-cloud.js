@@ -11,6 +11,7 @@
  *     attempt      upsert on (user_id, session)      ← 같은 세션이면 같은 행
  *     answers      upsert on (attempt_id, question_id)
  *     checkpoints  upsert on (attempt_id, step)
+ *     archives     upsert on (owner, session, reason, client_ts)
  *   그래서 재전송이 무해하고, 정전 뒤 켜서 다시 보내도 값이 겹쳐 쓰일 뿐이다.
  *
  * attempt id 는 클라이언트가 만든 uuid 다. 서버 왕복 없이 첫 답안부터 바로 실을 수
@@ -236,6 +237,12 @@
       return { method: 'POST', path: 'toefl_submissions?on_conflict=attempt_id,question_id',
                body: [p], prefer: 'return=minimal,resolution=merge-duplicates' };
     }
+    /* 백업본은 attempt 가 아니라 학생(owner)에 달린다 — 전체 다시 시작이면 그 attempt
+       자체가 버려지는데, 백업본은 그것을 넘어 남아야 하기 때문이다. */
+    if (item.kind === 'archive') {
+      return { method: 'POST', path: 'sg_archives?on_conflict=owner,session,reason,client_ts',
+               body: [p], prefer: 'return=minimal,resolution=merge-duplicates' };
+    }
     return null;
   }
 
@@ -378,7 +385,8 @@
       }
 
       var ep = endpointFor(q.item);
-      if (!ep || !q.item.attemptId) { dropQueued([q.id]); if (cb) cb(); return; }
+      // 백업본만 attempt 없이도 간다 — 버려진 attempt 를 넘어 남아야 하는 기록이다.
+      if (!ep || (!q.item.attemptId && q.item.kind !== 'archive')) { dropQueued([q.id]); if (cb) cb(); return; }
       sending = true;
       rest(ep.method, ep.path, ep.body, ep.prefer, function (e2, status) {
         sending = false;
@@ -502,6 +510,38 @@
     });
   }
 
+  /* 되감기·다시 시작 직전의 한 벌을 클라우드에도 남긴다(sg_archives).
+   *
+   * 원본은 학생 기기의 SG_LDB.arch 다 — 이것은 그 사본이고, 기기를 초기화하거나
+   * 브라우저 저장소가 비워져도 남게 하는 자리다. 큐로 간다: 시험장은 오프라인일
+   * 수 있고, 백업 하나 때문에 지우기가 늦어져서는 안 된다(F12).
+   *
+   * client_ts 까지 넣어 (owner, session, reason, client_ts) 로 유일하다 — 같은 세션을
+   * 두 번 되감아도 두 벌이 남고, 큐가 재전송해도 한 벌로 겹쳐 쓰인다. */
+  function pushArchive(rec) {
+    if (!rec || !rec.session) return null;
+    return enqueue('archive', {
+      session: rec.session,
+      set_code: rec.setCode || cfg.setCode || '',
+      reason: rec.reason || '',
+      step: typeof rec.step === 'number' ? rec.step : 0,
+      client_ts: rec.ts || Date.now(),
+      answers: rec.answers || {},
+      clocks: rec.clocks || {},
+      cursor: rec.cursor || {},
+      meta: rec.meta || {}
+    });
+  }
+
+  /* 전체 다시 시작 — 지금까지의 attempt 는 버려진다. 지우지 않고 표시만 남긴다.
+     이 표시가 없으면 나중에 같은 학생의 attempt 가 왜 둘인지 알 수 없다. */
+  function markAbandoned(extra) {
+    if (!attemptId) return null;
+    var patch = { status: 'abandoned', last_seen_at: new Date().toISOString() };
+    if (extra) { for (var k in extra) { if (extra.hasOwnProperty(k)) patch[k] = extra[k]; } }
+    return enqueue('state', patch);
+  }
+
   function markSubmitted(extra) {
     if (!attemptId) return null;
     var patch = { status: 'submitted', submitted_at: new Date().toISOString() };
@@ -550,7 +590,8 @@
     markAnswer: markAnswer, pushAnswers: pushAnswers,
     uploadMedia: uploadMedia,
     pushState: pushState, pushCheckpoint: pushCheckpoint,
-    markSubmitted: markSubmitted,
+    pushArchive: pushArchive,
+    markSubmitted: markSubmitted, markAbandoned: markAbandoned,
     fetchCheckpoints: fetchCheckpoints,
     flush: flushQueue, stats: snapshot,
     on: function (fn) { if (typeof fn === 'function') listeners.push(fn); },

@@ -16,6 +16,9 @@
  *                                       opts.onProgress (done, total) 채점 진행
  *   SG_RESULTS.listFor(ownerId)       → Promise<[결과]>  관리자/선생님 전용
  *   SG_RESULTS.listAll(opts)          → Promise<[결과+student]>  선생님/관리자 전용
+ *                                       opts.includeHidden  가려 둔 응시까지 본다
+ *   SG_RESULTS.archives(opts)         → Promise<[백업본]>  되감기·다시시작 직전의 한 벌
+ *   SG_RESULTS.setHidden(row, on, 사유) 응시를 가린다(지우지 않는다)
  *   SG_RESULTS.detail(row)            → { score, total, percent, bySection, rows }  문항별 리뷰
  *   SG_RESULTS.tasks(session, owner)  → Promise<[sg_task_scores 행]>  W·S 채점
  *   SG_RESULTS.productive(row)        → [{question_id, skill, task_kind, prompt, …}]
@@ -222,18 +225,39 @@ window.SG_RESULTS = (function () {
     }).catch(function () { return null; });        // 오프라인이면 조용히 로컬만
   }
 
-  var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers,scale';
+  var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,' +
+               'by_section,answers,scale,attempt_no,hidden,hidden_reason';
 
-  function remote() {
+  /* 숨긴 응시(hidden)는 기본으로 빠진다 — 지우지는 않았지만 성적으로 세어서는
+     안 되는 것들이다(기기를 공유하다 잘못 붙은 응시, 리허설 기록).
+     관리자 화면이 opts.includeHidden 으로 켤 수 있다. */
+  function visibility(opts) {
+    return (opts && opts.includeHidden) ? '' : '&hidden=is.false';
+  }
+
+  function remote(opts) {
     var u = window.SG_AUTH && SG_AUTH.user();
     if (!u) return Promise.resolve([]);
-    return rest('sg_results?select=' + SELECT + '&owner=eq.' + u.id + '&order=submitted_at.desc')
+    return rest('sg_results?select=' + SELECT + '&owner=eq.' + u.id + visibility(opts) +
+                '&order=submitted_at.desc')
       .then(function (rows) { return rows || []; });
   }
 
-  function listFor(ownerId) {
+  function listFor(ownerId, opts) {
     return rest('sg_results?select=' + SELECT + '&owner=eq.' + encodeURIComponent(ownerId) +
-                '&order=submitted_at.desc').then(function (rows) { return rows || []; });
+                visibility(opts) + '&order=submitted_at.desc')
+      .then(function (rows) { return rows || []; });
+  }
+
+  /* 되감기·다시 시작 직전의 백업본(sg_archives). 학생은 자기 것만, 선생님·관리자는
+     맡은 학생의 것까지 — 실제 경계는 RLS(sg_can_see)가 쥔다. */
+  function archives(opts) {
+    opts = opts || {};
+    var q = 'sg_archives?select=id,owner,session,set_code,reason,step,client_ts,answers,clocks,cursor,meta,created_at' +
+            '&order=created_at.desc&limit=' + (opts.limit || 200);
+    if (opts.owner) q += '&owner=eq.' + encodeURIComponent(opts.owner);
+    if (opts.session) q += '&session=eq.' + encodeURIComponent(opts.session);
+    return rest(q).then(function (rows) { return rows || []; });
   }
 
   /* 선생님·관리자 화면용 전체 목록. RLS(sg_is_staff) 가 실제 권한을 쥐고 있으므로
@@ -243,7 +267,8 @@ window.SG_RESULTS = (function () {
    * 없다. 결과를 받은 뒤 등장한 owner 만 모아 프로필을 한 번 더 읽어 이어 붙인다. */
   function listAll(opts) {
     opts = opts || {};
-    var q = 'sg_results?select=' + SELECT + '&order=submitted_at.desc&limit=' + (opts.limit || 500);
+    var q = 'sg_results?select=' + SELECT + visibility(opts) +
+            '&order=submitted_at.desc&limit=' + (opts.limit || 500);
     if (opts.setCode) q += '&set_code=eq.' + encodeURIComponent(opts.setCode);
     return rest(q).then(function (rows) {
       rows = rows || [];
@@ -567,7 +592,9 @@ window.SG_RESULTS = (function () {
     var mine = local();
     if (!u || !mine.length) return Promise.resolve({ sent: 0, failed: 0, scored: null });
 
-    return remote().then(function (rows) {
+    /* 숨긴 응시까지 본다 — 여기서 빼면 "서버에 없다"고 판단해 다시 올리고,
+       가려 둔 응시가 성적 목록으로 되돌아온다. */
+    return remote({ includeHidden: true }).then(function (rows) {
       var have = {};
       (rows || []).forEach(function (r) { have[r.session] = true; });
       var todo = mine.filter(function (r) { return !have[r.session]; });
@@ -652,10 +679,25 @@ window.SG_RESULTS = (function () {
     });
   }
 
+  /* 응시를 가리거나 되돌린다. 선생님·관리자만 남의 응시를 만질 수 있다(RLS).
+     지우는 길은 여기 없다 — 잘못 붙은 응시도 기록으로는 남아야 한다. */
+  function setHidden(row, hidden, reason) {
+    if (!row || !row.id) return Promise.resolve(null);
+    return rest('sg_results?id=eq.' + encodeURIComponent(row.id), {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        hidden: !!hidden,
+        hidden_reason: hidden ? String(reason || '') : '',
+        attempt_no: hidden ? 0 : (row.attempt_no || 1)
+      })
+    });
+  }
+
   return {
     sectionOf: sectionOf, label: LABEL, pack: pack, score: score, detail: detail,
     local: local, remote: remote, list: list, get: get, push: push,
-    listFor: listFor, listAll: listAll,
+    listFor: listFor, listAll: listAll, archives: archives, setHidden: setHidden,
     productive: productive, tasks: tasks, tasksBySession: tasksBySession,
     aiScore: aiScore, bandOf: bandOf,
     uploadRecordings: uploadRecordings, recordedQids: recordedQids, extOf: extOf

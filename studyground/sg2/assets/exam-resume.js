@@ -193,12 +193,14 @@
   /* ── 되돌리기 ────────────────────────────────────────────── */
 
   /* 지우기 전에 한 벌 뜬다. 되감기도 코스 재시작도 "지금 답안"을 버리는 동작이라
-     잘못 누른 학생에게 돌아갈 자리를 남겨야 한다(SG_LDB.arch). 로컬 DB 가 없으면
-     조용히 건너뛴다 — 백업 실패가 시험을 멈추면 안 된다(F12). */
+     잘못 누른 학생에게 돌아갈 자리를 남겨야 한다.
+     두 곳에 남긴다 — 기기(SG_LDB.arch)와 클라우드(sg_archives). 어느 쪽이 없어도
+     다른 쪽은 간다. 백업 실패가 시험을 멈추지는 않는다(F12). */
   function backup(storeApi, reason, cb) {
     var done = typeof cb === 'function' ? cb : function () {};
     var sess = session || (storeApi && storeApi.current ? storeApi.current() : null);
-    if (!sess || !root.SG_LDB || typeof root.SG_LDB.archiveSession !== 'function') { done(null, null); return; }
+    if (!sess) { done(null, null); return; }
+    var hasLdb = !!(root.SG_LDB && typeof root.SG_LDB.archiveSession === 'function');
     /* 스냅샷은 지금, 동기로 뜬다 — 지운 뒤에 뜨면 빈 백업본이 남는다. */
     var snap = {};
     try { snap.answers = JSON.parse(JSON.stringify(storeApi.answers() || {})); } catch (e) { snap.answers = {}; }
@@ -208,8 +210,23 @@
     var local = null;
     try { local = storeApi.serializeSession ? storeApi.serializeSession(sess) : null; } catch (e4) {}
 
+    /* 같은 한 벌을 클라우드에도 보낸다(sg_archives). 기기 저장소가 비워지면 로컬
+       백업본은 그대로 사라지고, 선생님은 애초에 볼 수가 없다. 큐로 가므로
+       오프라인이어도 지우기를 붙잡지 않는다 — 연결되면 그때 올라간다. */
+    if (root.SG_CLOUD && typeof root.SG_CLOUD.pushArchive === 'function') {
+      try {
+        root.SG_CLOUD.pushArchive({
+          session: sess, reason: reason || 'backup', step: step, ts: Date.now(),
+          setCode: (snap.meta && (snap.meta.setCode || snap.meta.set_code)) || '',
+          answers: snap.answers, clocks: snap.clocks,
+          cursor: snap.cursor || {}, meta: snap.meta
+        });
+      } catch (e5) {}
+    }
+
+    if (!hasLdb) { done(null, null); return; }
     try { root.SG_LDB.archiveSession(sess, reason || 'backup', { snapshot: snap, local: local, step: step }, done); }
-    catch (e5) { done(e5, null); }
+    catch (e6) { done(e6, null); }
   }
 
   /* 고른 체크포인트를 SG_STORE 에 도로 심는다. 화면 복귀는 셸이 맡는다 —

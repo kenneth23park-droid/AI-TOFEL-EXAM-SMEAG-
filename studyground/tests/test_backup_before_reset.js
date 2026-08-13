@@ -129,8 +129,10 @@ ok('세션 상태는 지워졌다', (function () {
 console.log('\n[5] 셸 — 백업이 끝난 뒤에 지운다');
 
 var shellSrc = fs.readFileSync(path.join(SG2, 'assets/exam-shell.js'), 'utf8');
+/* 창은 넉넉히 잡는다 — 붙잡는 것은 "지우기가 archiveThen 콜백 안에 있다"이지
+   그 사이에 몇 줄이 있느냐가 아니다(2026-08-13 에 markAbandoned 가 그 사이에 붙었다). */
 ok('전체 다시는 archiveThen 안에서 지운다',
-   /archiveThen\([^)]*,\s*function[\s\S]{0,200}dropSession/.test(shellSrc));
+   /archiveThen\([^)]*,\s*function[\s\S]{0,500}dropSession/.test(shellSrc));
 ok('백업이 늦어도 시험은 진행한다(타임아웃 우회)', shellSrc.indexOf('setTimeout(once') > 0);
 
 var ldbSrc = fs.readFileSync(path.join(SG2, 'assets/exam-localdb.js'), 'utf8');
