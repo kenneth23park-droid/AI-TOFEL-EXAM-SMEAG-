@@ -25,6 +25,7 @@
  *   SG_RESULTS.uploadRecordings(row)  → Promise<{sent,failed}>  녹음 → 비공개 버킷
  *   SG_RESULTS.aiScore(row, opts)     → Promise<채점 결과|null>  /api/score 호출
  *                                       opts.onProgress(done, total) 로 진행을 알린다
+ *                                       .expired 면 세션이 끊긴 것(로그인부터 다시)
  *   SG_RESULTS.unscored(row, 채점행)  → [아직 점수가 없는 과제]  "아직 채점 전" 의 정체
  *   SG_RESULTS.scoreMissing(row,opts) → Promise<{missing, scored, skipped}>  못 매긴 것만 다시 의뢰
  *                                       opts.auto 면 응시당 횟수·간격 고삐를 쓴다
@@ -398,7 +399,9 @@ window.SG_RESULTS = (function () {
    * @param opts.owner      staff 가 남의 응시를 채점할 때만(학생은 늘 자기 것)
    * @param opts.taskRows   이미 읽어 둔 sg_task_scores 행(다시 묻지 않기 위해)
    * @param opts.auto       사람이 누른 것이 아니라 화면이 스스로 건 것 → 고삐를 쓴다
-   * @returns Promise<{ missing, scored, skipped, throttled?, error? }>
+   * @returns Promise<{ missing, scored, skipped, throttled?, error?, expired? }>
+   *          expired 면 세션이 서버에서 끊긴 것이다 — 다시 걸어 봐야 소용없고,
+   *          화면은 재시도 대신 로그인 문을 세워야 한다.
    */
   function scoreMissing(row, opts) {
     opts = opts || {};
@@ -581,6 +584,11 @@ window.SG_RESULTS = (function () {
    * 뒤에서 끊겨도 다음 방문 때 못 매긴 것만 이어서 매긴다(서버가 already_scored 로 거른다). */
   var SCORE_BATCH = 3;
 
+  /* 세션이 죽었을 때 화면에 세울 말. 서버의 'Sign-in is required.' 를 그대로 옮기면
+   * 로그인해 있는 사람에게는 거짓말로 읽힌다 — 문제는 로그인을 안 한 게 아니라
+   * 들고 있던 세션이 서버에서 끊긴 것이다. */
+  var SESSION_GONE = 'your session has expired — log in again and try once more.';
+
   function aiScore(row, opts) {
     opts = opts || {};
     var list = opts.tasks || productive(row);
@@ -599,34 +607,60 @@ window.SG_RESULTS = (function () {
 
       var merged = null;
 
+      /* 토큰은 묶음마다 새로 받는다. 한 번 집어 둔 토큰으로 네 묶음(묶음마다 수십 초)을
+       * 다 보내면 중간에 만료된 자리부터 뒤가 통째로 401 로 날아간다 — 앞의 결과만
+       * 남고 나머지는 "아직 채점 전" 으로 되돌아온다.
+       *
+       * 401 은 그 자리에서 한 번만 강제 갱신해 다시 보낸다. 만료 시각이 멀쩡해 보여도
+       * 서버가 거절하는 경우가 있다: 기기 시계가 어긋났거나, 같은 계정을 쓰는 다른
+       * 기기에서 로그아웃해 세션이 서버에서 끊긴 자리다. 갱신하고도 401 이면 세션이
+       * 정말 죽은 것이라 SG_AUTH 를 비운다 — 헤더의 이름표도 함께 내려간다. */
+      function post(i, retried) {
+        return SG_AUTH.token(retried === true).then(function (tok2) {
+          if (!tok2) {
+            SG_AUTH.invalidate();
+            return { _fail: SESSION_GONE, _status: 401, _expired: true };
+          }
+          return fetch('/api/score', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + tok2, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              session: row.session,
+              owner: opts.owner || undefined,
+              provider: opts.provider || undefined,
+              model: opts.model || undefined,
+              lang: opts.lang || undefined,
+              force: !!opts.force,
+              tasks: list.slice(i, i + SCORE_BATCH)
+            })
+          }).then(function (r) {
+            if (r.ok) return r.json();
+            if (r.status === 401 && !retried) return post(i, true);
+            /* 서버가 왜 거절했는지는 본문에 있다(키 미설정 503, 권한 401, …).
+               이걸 버리면 화면에는 "채점 중" 만 남고, 아무도 설정이 빠졌다는 걸 모른다. */
+            return r.json()['catch'](function () { return null; }).then(function (j) {
+              var fail = { _fail: (j && j.error) || ('HTTP ' + r.status), _status: r.status };
+              if (r.status === 401) {
+                SG_AUTH.invalidate();
+                fail._fail = SESSION_GONE;
+                fail._expired = true;
+              }
+              return fail;
+            });
+          });
+        });
+      }
+
       function send(i) {
         if (i >= list.length) return Promise.resolve(merged);
-        return fetch('/api/score', {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            session: row.session,
-            owner: opts.owner || undefined,
-            provider: opts.provider || undefined,
-            model: opts.model || undefined,
-            lang: opts.lang || undefined,
-            force: !!opts.force,
-            tasks: list.slice(i, i + SCORE_BATCH)
-          })
-        }).then(function (r) {
-          if (r.ok) return r.json();
-          /* 서버가 왜 거절했는지는 본문에 있다(키 미설정 503, 권한 401, …).
-             이걸 버리면 화면에는 "채점 중" 만 남고, 아무도 설정이 빠졌다는 걸 모른다. */
-          return r.json()['catch'](function () { return null; }).then(function (j) {
-            return { _fail: (j && j.error) || ('HTTP ' + r.status), _status: r.status };
-          });
-        })
+        return post(i, false)
           .then(function (out) {
             if (out && out._fail) {
               // 같은 이유로 남은 묶음도 다 거절당한다. 더 보내지 않고 이유를 들고 돌아간다.
               if (!merged) merged = { session: row.session, scored: [], skipped: [] };
               merged.error = out._fail;
               merged.status = out._status;
+              merged.expired = !!out._expired;
               return merged;
             }
             if (out) {

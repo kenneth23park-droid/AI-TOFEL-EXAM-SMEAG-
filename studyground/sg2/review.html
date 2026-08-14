@@ -1051,6 +1051,20 @@
     if (box) box.textContent = msg || '';
   }
 
+  /* 세션이 끊겨 채점이 거절당한 자리. 문구만 두면 어디로 가야 할지 알 수 없어서
+     로그인 문을 함께 세운다. SG_AUTH 는 이미 죽은 세션을 비웠고(헤더의 이름표도
+     내려갔다), 로그인하고 돌아오면 이 화면 그대로다 — 매겨 둔 점수는 서버에 있다. */
+  function sayExpired(msg) {
+    var box = document.getElementById('score-say');
+    if (!box) return;
+    var here = (location.pathname.split('/').pop() || 'review.html') + location.search;
+    box.textContent = msg + ' ';
+    var a = document.createElement('a');
+    a.href = 'login.html?next=' + encodeURIComponent(here);
+    a.textContent = 'Log in';
+    box.appendChild(a);
+  }
+
   /* 채점 요청 버튼. 선생님은 이미 매겨진 과제까지 다시 매기고(force), 학생은
      아직 점수가 없는 과제만 다시 의뢰한다 — 서버도 force 는 staff 만 받는다.
      어느 쪽이든 결과를 쓰는 것은 서버(service_role)이고, 그 자리가 Supabase 다. */
@@ -1069,6 +1083,7 @@
         re.disabled = false;
         if (!out) { saySc('AI scoring is not available right now.'); return; }
         // 서버가 거절한 이유를 그대로 보여 준다 — 설정이 빠졌으면 여기서 알아야 고친다.
+        if (out.expired) { sayExpired('AI scoring failed: ' + out.error); return; }
         if (out.error) { saySc('AI scoring failed: ' + out.error); return; }
         saySc('');
         reloadTasks();
@@ -1100,6 +1115,7 @@
       onProgress: function (done, total) { saySc('Scoring… ' + done + ' / ' + total); }
     }).then(function (out) {
       if (!out || out.throttled) { saySc(''); return; }
+      if (out.expired) { sayExpired('Scoring failed: ' + out.error); return; }
       if (out.error) { saySc('Scoring failed: ' + out.error); return; }
       saySc('');
       if ((out.scored || []).length) reloadTasks();

@@ -24,7 +24,9 @@
  *   SG_AUTH.profile(force)       → Promise<프로필|null>  서버 사본으로 갱신(role 포함)
  *   SG_AUTH.role()               → Promise<'student'|'teacher'|'admin'>
  *   SG_AUTH.isStaff()            → Promise<boolean>  선생님 또는 관리자
- *   SG_AUTH.token()              → Promise<string|null>  만료됐으면 알아서 갱신
+ *   SG_AUTH.token(force)         → Promise<string|null>  만료됐으면 알아서 갱신
+ *                                force 면 만료 전이라도 리프레시로 새 토큰을 받는다
+ *   SG_AUTH.invalidate()         서버가 401 로 거절한 세션을 버린다(이름표도 내려간다)
  *   SG_AUTH.require()            비로그인이면 "Please log in" 막으로 화면을 덮는다
  *                                (<meta name="sg-auth" content="required"> 를 단 문서는 자동)
  *   SG_AUTH.onChange(fn)         로그인/로그아웃 때 호출
@@ -248,11 +250,15 @@ window.SG_AUTH = (function () {
     return role().then(function (r) { return r === 'teacher' || r === 'admin'; });
   }
 
+  /* force 는 "만료 시각은 멀쩡한데 서버가 거절했다" 는 자리에서 쓴다. expires_at 은
+   * 이 기기의 시계로 읽은 값이라, 시계가 어긋났거나 다른 기기에서 로그아웃해
+   * 세션이 서버에서 끊겼으면 아직 살아 있다고 잘못 읽는다. 그때는 만료를 묻지 말고
+   * 리프레시 토큰으로 새 access token 을 받아 본다. */
   var refreshing = null;
-  function token() {
+  function token(force) {
     var s = read();
     if (!s) return Promise.resolve(null);
-    if (s.expires_at - 60 > Math.floor(Date.now() / 1000)) return Promise.resolve(s.access_token);
+    if (!force && s.expires_at - 60 > Math.floor(Date.now() / 1000)) return Promise.resolve(s.access_token);
     if (refreshing) return refreshing;
     refreshing = fetch(URL_ + '/auth/v1/token?grant_type=refresh_token', {
       method: 'POST',
@@ -271,6 +277,19 @@ window.SG_AUTH = (function () {
       return null;
     }).then(function (t) { refreshing = null; return t; });
     return refreshing;
+  }
+
+  /** 서버가 이 토큰을 거절했다(401). 들고 있는 세션을 버린다.
+   *
+   * 헤더의 이름표는 localStorage 의 프로필만 보고 그려서, 토큰이 죽어도 로그인한
+   * 것처럼 남아 있었다. 화면은 admin 인데 서버는 "Sign-in is required" 라고 답하는
+   * 자리가 그래서 생긴다. 세션을 비우면 onChange → paintNav 가 이름표를 내리고
+   * Login 버튼이 돌아온다 — 화면과 서버가 같은 말을 한다.
+   * 지우는 것은 세션 하나뿐이라, 기기에 쌓인 응시 기록·답안은 그대로 남는다. */
+  function invalidate() {
+    if (!read()) return false;
+    write(null);
+    return true;
   }
 
   /* 비로그인 화면을 덮는 막. 예전에는 login.html 로 조용히 튕겼는데, 재부팅으로
@@ -422,7 +441,7 @@ window.SG_AUTH = (function () {
     nextId: nextId, teachers: teachers, register: register,
     createTeacher: createTeacher, signIn: signIn, signOut: signOut,
     user: user, profile: profile, role: role, isStaff: isStaff,
-    token: token, require: require_, onChange: onChange,
+    token: token, invalidate: invalidate, require: require_, onChange: onChange,
     url: URL_, anonKey: ANON
   };
 })();
