@@ -111,6 +111,7 @@
 <script src="assets/audio-script-check.js"></script>
 <script src="assets/sg-band.js"></script>
 <script src="assets/sg-results.js"></script>
+<script src="assets/sg-recordings.js"></script>
 <script src="assets/sg-comments.js"></script>
 <script src="assets/sg-review-reading.js"></script>
 <script src="assets/sg-review-listening.js"></script>
@@ -932,9 +933,32 @@
   /* 아직 점수가 없는 산출형 과제. 화면이 "아직 채점 전" 이라고 적는 조건과
      다시 채점을 의뢰하는 조건은 같은 함수에서 나와야 한다 — 갈라지면 눌러도
      아무 일도 일어나지 않는 버튼이 생긴다. */
-  function unscoredTasks() {
+  function unscoredTasks(skill) {
     if (!RES || !window.SG_RESULTS || !SG_RESULTS.unscored) return [];
-    return SG_RESULTS.unscored(RES, TASKS || []);
+    return SG_RESULTS.unscored(RES, TASKS || [], skill);
+  }
+
+  /* 채점 버튼은 영역마다 하나다.
+   *
+   * 라이팅과 스피킹은 매기는 값이 다르다. 라이팅은 글이 DB 에 있으면 그 자리에서
+   * 매겨지지만, 스피킹은 녹음이 버킷에 닿아야 시작조차 된다 — 없으면 서버가
+   * no_transcript 로 건너뛴다. 한 버튼으로 묶어 두면 라이팅이 끝난 뒤에도 같은
+   * 버튼을 누를 수밖에 없고, 무엇이 왜 안 되는지가 한 덩어리로 뭉개진다.
+   * 나눠 두면 라이팅이 끝난 자리에서 스피킹만 두드릴 수 있다. */
+  function askBtn(skill, editable) {
+    var n = unscoredTasks(skill).length;
+    var name = skill === 'writing' ? bi('Writing', '라이팅') : bi('Speaking', '스피킹');
+    if (!n && !editable) {
+      return '<span class="muted" style="font-size:12px">' + name + ' ' +
+             bi('done', '완료') + '</span>';
+    }
+    var verb = editable ? bi('Re-run', '재채점') : bi('Score', '채점');
+    return '<button class="btn ghost sm" data-score-skill="' + skill + '">' +
+             verb + ' ' + name + (n ? ' (' + n + ')' : '') + '</button>';
+  }
+  function askRow(editable) {
+    return '<span style="display:inline-flex;gap:8px;align-items:center;margin-left:auto">' +
+             askBtn('writing', editable) + askBtn('speaking', editable) + '</span>';
   }
 
   function paintTasks() {
@@ -946,9 +970,6 @@
        서버는 학생 토큰으로도 자기 응시를 채점해 준다(답안은 본문이 아니라 DB 에서
        읽으므로 점수를 살 수는 없다). 다만 재채점(force)은 그대로 staff 만 한다. */
     var canAsk = missing > 0 && !!OWNER_ID && !!(window.SG_AUTH && SG_AUTH.user());
-    var askLabel = editable
-      ? bi('Run AI scoring now', '지금 AI 채점')
-      : bi('Request scoring now', '지금 채점 요청');
     if (!list.length) {
       /* 아직 채점 행이 없다. 이 세트에 W·S 과제가 있는데 비어 있다면 "없다"가 아니라
          "아직"이다 — 제출 직후 몇십 초는 정상적으로 이 상태다. 카드를 감춰 버리면
@@ -969,8 +990,10 @@
             : bi('Being scored — this usually takes a minute after you submit. Reload this page to check.',
                  '채점 중입니다 — 제출 후 보통 1분쯤 걸립니다. 새로고침해서 확인하세요.')) + '</div>' +
         '<div class="muted" id="score-say" style="font-size:12.5px;margin-top:6px"></div>' +
-        ((editable || canAsk) ? '<div style="margin-top:10px"><button class="btn ghost sm" id="rescore">' +
-          askLabel + '</button></div>' : '');
+        ((editable || canAsk)
+          ? '<div style="margin-top:10px;display:flex;gap:8px">' +
+              askBtn('writing', editable) + askBtn('speaking', editable) + '</div>'
+          : '');
       $('taskscores').classList.remove('hide');
       if (editable) wireTaskEditors();
       wireRescore();
@@ -983,16 +1006,16 @@
         '<span class="muted" style="font-size:12px">' +
           bi('Scored 0–5 on the official ETS scoring guide. Section bands are worked out from these.',
              'ETS 공식 채점 가이드 0–5 로 채점합니다. 영역 밴드는 이 점수에서 나옵니다.') + '</span>' +
-        ((editable || canAsk)
-          ? '<button class="btn ghost sm" id="rescore" style="margin-left:auto">' +
-              (editable ? bi('Re-run AI scoring', 'AI 재채점') : askLabel) + '</button>'
-          : '') +
+        ((editable || canAsk) ? askRow(editable) : '') +
       '</div>' +
       /* 일부만 매겨진 자리도 말해 준다 — 13개 중 4개가 비어 있는데 카드만 늘어놓으면
-         학생은 나머지가 0점인 줄 안다. */
+         학생은 나머지가 0점인 줄 안다. 영역을 갈라 적는다: "11개 남음" 만으로는
+         라이팅을 기다려야 하는지 녹음을 올려야 하는지 알 수 없다. */
       (missing
         ? '<div class="muted" style="font-size:12.5px;margin-top:6px">' +
-            bi(missing + ' task(s) not scored yet.', '아직 채점되지 않은 과제 ' + missing + '개.') +
+            bi('Not scored yet — ', '아직 채점 전 — ') +
+            [['writing', bi('Writing', '라이팅')], ['speaking', bi('Speaking', '스피킹')]]
+              .map(function (p) { return p[1] + ' ' + unscoredTasks(p[0]).length; }).join(' · ') +
           '</div>'
         : '') +
       '<div class="muted" id="score-say" style="font-size:12.5px;margin-top:6px"></div>' +
@@ -1068,31 +1091,74 @@
   /* 채점 요청 버튼. 선생님은 이미 매겨진 과제까지 다시 매기고(force), 학생은
      아직 점수가 없는 과제만 다시 의뢰한다 — 서버도 force 는 staff 만 받는다.
      어느 쪽이든 결과를 쓰는 것은 서버(service_role)이고, 그 자리가 Supabase 다. */
+  /* 스피킹 채점 앞에 서는 관문. 녹음을 이 기기에서 찾아 한 장(아이디_이름_응시날짜.zip)
+     으로 묶어 손에 쥐여 주고, 버킷에 아직 없는 것만 올린다. 채점은 그 다음이다 —
+     녹음이 없는 채로 모델을 부르면 no_transcript 로 돌아올 뿐이고 돈만 나간다. */
+  function recoverRecordings() {
+    if (!window.SG_REC || !RES) return Promise.resolve(null);
+    saySc('Checking recordings on this computer…');
+    return SG_REC.ensure(RES, {
+      owner: OWNER_ID,
+      student: (WHO && (WHO.name || WHO.student_id)) || '',
+      studentId: (WHO && WHO.student_id) || '',
+      onProgress: function (done, total) {
+        saySc('Uploading recordings… ' + done + ' / ' + total);
+      }
+    }).then(function (r) {
+      if (!r || !r.found) return r;                    // 이 기기엔 녹음이 없다(다른 PC 에서 쳤다)
+      var said = [];
+      if (r.saved) said.push('saved ' + r.saved.name);
+      if (r.uploaded) said.push('uploaded ' + r.uploaded);
+      if (r.already) said.push(r.already + ' already on the server');
+      if (r.failed) said.push(r.failed + ' failed (' + (r.error || 'unknown') + ')');
+      if (said.length) saySc('Recordings: ' + said.join(' · '));
+      return r;
+    })['catch'](function () { return null; });
+  }
+
+  /* 채점 요청 버튼(영역마다 하나). 선생님은 이미 매겨진 과제까지 다시 매기고(force),
+     학생은 아직 점수가 없는 과제만 다시 의뢰한다 — 서버도 force 는 staff 만 받는다.
+     어느 쪽이든 결과를 쓰는 것은 서버(service_role)이고, 그 자리가 Supabase 다. */
   function wireRescore() {
-    var re = document.getElementById('rescore');
-    if (!re) return;
-    re.onclick = function () {
-      re.disabled = true;
-      var n = unscoredTasks().length;
-      saySc(STAFF ? 'Scoring…' : 'Requesting scoring… ' + n + ' task(s).');
-      var job = STAFF
-        /* force: 이미 매겨진 AI 점수도 다시 매긴다. 교사가 고친 행은 서버가 건너뛴다. */
-        ? SG_RESULTS.aiScore(RES, { owner: OWNER_ID, force: true })
-        : SG_RESULTS.scoreMissing(RES, { owner: OWNER_ID, taskRows: TASKS || [] });
-      job.then(function (out) {
-        re.disabled = false;
-        if (!out) { saySc('AI scoring is not available right now.'); return; }
-        // 서버가 거절한 이유를 그대로 보여 준다 — 설정이 빠졌으면 여기서 알아야 고친다.
-        if (out.expired) { sayExpired('AI scoring failed: ' + out.error); return; }
-        if (out.error) { saySc('AI scoring failed: ' + out.error); return; }
-        // 눌렀는데 한 건도 안 매겨졌으면 까닭을 적는다 — 버튼이 먹지 않은 것처럼 보인다.
-        saySc((out.scored || []).length ? '' : whyNothing(out));
-        reloadTasks();
-      })['catch'](function (e) {
-        re.disabled = false;
-        saySc('AI scoring failed: ' + (e.message || e));
-      });
-    };
+    var btns = $('taskscores').querySelectorAll('[data-score-skill]');
+    Array.prototype.forEach.call(btns, function (re) {
+      var skill = re.getAttribute('data-score-skill');
+      re.onclick = function () {
+        Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
+        function done() { Array.prototype.forEach.call(btns, function (b) { b.disabled = false; }); }
+
+        var pre = skill === 'speaking' ? recoverRecordings() : Promise.resolve(null);
+        pre.then(function () {
+          var n = unscoredTasks(skill).length;
+          saySc(STAFF ? 'Scoring ' + skill + '…'
+                      : 'Requesting scoring… ' + n + ' ' + skill + ' task(s).');
+          return STAFF
+            /* force: 이미 매겨진 AI 점수도 다시 매긴다. 교사가 고친 행은 서버가 건너뛴다.
+               영역을 가르려고 tasks 를 직접 넘긴다 — 비어 있으면 aiScore 가 그냥 돌아온다. */
+            ? SG_RESULTS.aiScore(RES, {
+                owner: OWNER_ID, force: true,
+                tasks: SG_RESULTS.productive(RES).filter(function (t) {
+                  return String(t.skill || '').toLowerCase() === skill;
+                })
+              })
+            : SG_RESULTS.scoreMissing(RES, {
+                owner: OWNER_ID, taskRows: TASKS || [], skill: skill
+              });
+        }).then(function (out) {
+          done();
+          if (!out) { saySc('AI scoring is not available right now.'); return; }
+          // 서버가 거절한 이유를 그대로 보여 준다 — 설정이 빠졌으면 여기서 알아야 고친다.
+          if (out.expired) { sayExpired('AI scoring failed: ' + out.error); return; }
+          if (out.error) { saySc('AI scoring failed: ' + out.error); return; }
+          // 눌렀는데 한 건도 안 매겨졌으면 까닭을 적는다 — 버튼이 먹지 않은 것처럼 보인다.
+          saySc((out.scored || []).length ? '' : whyNothing(out));
+          reloadTasks();
+        })['catch'](function (e) {
+          done();
+          saySc('AI scoring failed: ' + (e.message || e));
+        });
+      };
+    });
   }
 
   /* 화면을 여는 것만으로 한 번 의뢰한다.
@@ -1131,6 +1197,20 @@
     var todo = unscoredTasks();
     if (!todo.length) return;
     SCORE_TRIED = true;
+
+    /* 스피킹이 남아 있으면 채점보다 녹음이 먼저다. 이 기기에 원본이 있는데 버킷이
+       비어 있으면(2026-08-14 응시가 그랬다) 채점은 몇 번을 걸어도 no_transcript 다.
+       저장은 'once' — 성적 화면을 열 때마다 같은 ZIP 을 쏟지 않는다. */
+    var pre = unscoredTasks('speaking').length && window.SG_REC
+      ? SG_REC.ensure(RES, {
+          owner: OWNER_ID, save: 'once',
+          student: (WHO && (WHO.name || WHO.student_id)) || '',
+          studentId: (WHO && WHO.student_id) || '',
+          onProgress: function (d, t) { saySc('Uploading recordings… ' + d + ' / ' + t); }
+        })['catch'](function () { return null; })
+      : Promise.resolve(null);
+
+    pre.then(function () {
     SG_RESULTS.scoreMissing(RES, {
       owner: OWNER_ID, taskRows: TASKS || [], auto: true,
       onProgress: function (done, total) { saySc('Scoring… ' + done + ' / ' + total); }
@@ -1148,6 +1228,7 @@
       if ((out.scored || []).length) { saySc(''); reloadTasks(); return; }
       saySc(whyNothing(out));
     })['catch'](function () { saySc(''); });
+    });
   }
 
   function reloadTasks() {

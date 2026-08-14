@@ -307,7 +307,17 @@
 //      건너뛰었을 때)을 막았다. 녹음도 있고 서버 키도 있는데 화면에는 "Not scored
 //      yet" 만 남아, 왜 안 되는지 아무 데도 적히지 않던 자리다. 서버가 전사에서
 //      잡은 예외(detail)를 그대로 편다. 셸 자산이라 판올림해야 도착한다.
-const VERSION = 'sg-v75';
+// v76: 스피킹 녹음을 시험이 끝나는 그 자리에서 회수한다 — assets/sg-recordings.js 가
+//      이 기기의 IndexedDB 를 뒤져 아이디_이름_응시날짜.zip 한 장으로 묶고, 그 한 장을
+//      이 컴퓨터와 Supabase 두 곳에 남긴 뒤, 버킷의 **실제 목록**과 대조해 아직 없는
+//      녹음만 올린다. "올렸다"는 localStorage 표를 믿지 않는다 — 그 표가 어긋난 채
+//      버킷이 비어 있던 것이 2026-08-14 응시였다(기기에 11개, 서버에 0개).
+//      exam-shell 이 push() 보다 먼저 이것을 부르고, review.html 은 스피킹 채점 앞에
+//      세운다. 채점 버튼도 라이팅·스피킹으로 갈랐다 — 라이팅이 끝난 자리에서 스피킹만
+//      두드릴 수 있어야, 무엇이 왜 안 되는지가 한 덩어리로 뭉개지지 않는다.
+//      exam-shell.js · review.html · sg-results.js 가 함께 바뀌었고 새 파일이 셸에
+//      들어왔으므로 판올림한다.
+const VERSION = 'sg-v76';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -320,6 +330,9 @@ const SHELL_ASSETS = [
 
   // 채점 리뷰 — 제출 직후 오프라인에서도 자기 답안을 문항별로 볼 수 있어야 한다.
   'review.html', 'admin-results.html', 'assets/sg-results.js', 'assets/sg-comments.js',
+  /* 녹음 회수 — 시험이 끝나는 자리에서 원본을 손에 쥐는 일이라, 회선이 없는
+     시험장에서도 반드시 있어야 한다. 그래서 셸에 넣는다. */
+  'assets/sg-recordings.js',
   // 녹음 회수 — 업로드가 실패한 PC 앞에서 여는 도구다. 그 PC 가 오프라인일 수도 있고
   // (스캔·저장은 회선 없이 된다), 회수는 미룰수록 브라우저 정리에 지워진다.
   'recover-recordings.html',

@@ -106,6 +106,9 @@ window.SG_RUNTIME = (function () {
                      리뷰 화면을 열었을 때 이미 준비돼 있게. */
                   'assets/sg-auth.js',
                   'assets/sg-results.js',
+                  /* 녹음 회수. 시험이 끝나는 그 자리가 원본을 손에 쥘 마지막 기회라,
+                     제출 흐름이 push() 보다 먼저 이것을 부른다. 없으면 조용히 건너뛴다. */
+                  'assets/sg-recordings.js',
                   'assets/sg-band.js',
                   'assets/sg-comments.js'];
 
@@ -1076,7 +1079,36 @@ window.SG_RUNTIME = (function () {
        학생이 곧바로 창을 닫으면 그 요청이 끊겨 채점이 반만 되곤 했다. 지금은
        제출 화면에 남아 진행(몇/몇)을 보여 주고, 끝나면 그 자리에서 밴드를 편다. */
     say('Uploading your answers and recordings…', '답안과 녹음을 올리는 중…');
-    var finishing = SG_RESULTS.push({
+
+    /* push() 보다 녹음이 먼저다.
+     *
+     * 시험이 끝나는 이 순간이 원본을 회수할 수 있는 마지막 자리다. 여기서 놓치면
+     * 녹음은 이 브라우저 프로필 안에만 남고, 다음 학생이 앉거나 캐시가 지워지면
+     * 사라진다 — 2026-08-12 에 61건이 그렇게 됐다.
+     *
+     * SG_REC.ensure 는 두 곳에 남긴다: 이 컴퓨터의 파일 한 장(아이디_이름_응시날짜.zip)
+     * 과 Supabase. 그리고 버킷의 실제 목록을 보고 아직 없는 녹음만 올린다 — "올렸다"
+     * 는 표를 믿지 않기 때문에, 표가 어긋나 있어도 여기서 바로잡힌다.
+     *
+     * 채점보다 앞에 서는 이유는 하나다. 스피킹은 버킷에 파일이 있어야 매겨진다.
+     * 뒤에 두면 방금 올린 녹음을 두고 채점은 이미 지나간 뒤가 된다. */
+    var u = SG_AUTH.user();
+    var recovering = window.SG_REC
+      ? SG_REC.ensure({ session: session, owner: u && u.id, submitted_at: new Date().toISOString() }, {
+          student: (u && u.name) || '', studentId: (u && u.student_id) || '',
+          onProgress: function (d, t) {
+            say('Saving your recordings… ' + d + ' / ' + t, '녹음을 저장하는 중… ' + d + ' / ' + t);
+          }
+        })['catch'](function () { return null; })
+      : Promise.resolve(null);
+
+    var finishing = recovering.then(function (rec) {
+      if (rec && rec.failed) {
+        tell('media_upload_failed',
+             '녹음 ' + rec.failed + '개를 올리지 못했습니다(파일 한 장은 이 컴퓨터에 저장했습니다).',
+             { failed: rec.failed, saved: rec.saved && rec.saved.name, error: rec.error || 'unknown' });
+      }
+      return SG_RESULTS.push({
       waitScore: true,
       onProgress: function (done, total) {
         say('Scoring Writing and Speaking… ' + done + ' / ' + total,
@@ -1129,6 +1161,7 @@ window.SG_RUNTIME = (function () {
         say('Saved to your account. Check My results in a few minutes.',
             '계정에 저장되었습니다. 잠시 후 내 성적에서 확인하세요.');
       });
+    });
     }).catch(function (e) {
       say('Saved on this device.', '이 기기에 저장되었습니다.');
       tell('answers_not_uploaded', '제출 처리가 중간에 끊겼습니다. 답안은 이 기기에 있습니다.',

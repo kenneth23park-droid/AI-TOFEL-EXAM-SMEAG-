@@ -358,10 +358,18 @@ window.SG_RESULTS = (function () {
    * 정체가 이것이다 — 화면이 그 문구를 띄우는 조건과 다시 의뢰하는 조건이 같아야
    * 한다. 그렇지 않으면 버튼을 눌러도 아무 일도 일어나지 않는 화면이 생긴다.
    */
-  function unscored(row, taskRows) {
+  /* skill 을 주면 그 영역만 센다. 라이팅과 스피킹은 매기는 값이 다르다 — 라이팅은
+     글만 있으면 그 자리에서 매겨지지만, 스피킹은 녹음이 버킷에 닿아야 시작조차 된다.
+     그래서 화면도 둘을 따로 걸 수 있어야 한다: 라이팅이 끝난 자리에서 스피킹만 다시
+     걸면, 이미 끝난 쪽을 건드리지 않고 남은 관문만 두드린다. */
+  function unscored(row, taskRows, skill) {
     var by = {};
     (taskRows || []).forEach(function (t) { if (t && t.question_id) by[t.question_id] = t; });
-    return productive(row).filter(function (t) { return !hasScore(by[t.question_id]); });
+    var want = String(skill || '').toLowerCase();
+    return productive(row).filter(function (t) {
+      if (want && String(t.skill || '').toLowerCase() !== want) return false;
+      return !hasScore(by[t.question_id]);
+    });
   }
 
   /* 자동 재의뢰의 고삐.
@@ -399,6 +407,7 @@ window.SG_RESULTS = (function () {
    * @param opts.owner      staff 가 남의 응시를 채점할 때만(학생은 늘 자기 것)
    * @param opts.taskRows   이미 읽어 둔 sg_task_scores 행(다시 묻지 않기 위해)
    * @param opts.auto       사람이 누른 것이 아니라 화면이 스스로 건 것 → 고삐를 쓴다
+   * @param opts.skill      'writing' | 'speaking' — 한 영역만 건다(비우면 둘 다)
    * @returns Promise<{ missing, scored, skipped, throttled?, error?, expired? }>
    *          expired 면 세션이 서버에서 끊긴 것이다 — 다시 걸어 봐야 소용없고,
    *          화면은 재시도 대신 로그인 문을 세워야 한다.
@@ -413,7 +422,7 @@ window.SG_RESULTS = (function () {
       : tasks(row.session, opts.owner || undefined)['catch'](function () { return []; });
 
     return known.then(function (rows) {
-      var todo = unscored(row, rows);
+      var todo = unscored(row, rows, opts.skill);
       var base = { session: row.session, missing: todo.length, scored: [], skipped: [] };
       if (!todo.length) return base;
       if (opts.auto && !autoAllowed(row.session)) {
