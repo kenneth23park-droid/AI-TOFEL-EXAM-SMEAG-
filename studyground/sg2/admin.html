@@ -90,6 +90,28 @@
     </p>
   </div>
 
+  <!-- 관리자 계정인데 이 브라우저에 비밀번호 세션이 없는 자리.
+       네비의 작은 버튼 하나로는 못 본 채 지나간다 — 맥에서는 되던 화면이
+       윈도우에서 반쪽으로 열리면 "권한이 없나" 부터 의심하게 된다.
+       그래서 본문 맨 위에, 읽고 그 자리에서 누를 수 있는 크기로 다시 세운다. -->
+  <div class="card only-locked" id="unlock-card"
+       style="margin-top:18px;border-color:var(--brand);background:var(--brand-soft)">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="font-size:26px;line-height:1">🔑</div>
+      <div style="flex:1;min-width:240px">
+        <b style="font-size:15px">
+          <span data-en>The admin password hasn't been entered on this computer.</span>
+          <span data-ko>이 컴퓨터에서는 관리자 비밀번호를 아직 넣지 않았습니다.</span></b>
+        <div class="muted" style="font-size:12.5px;line-height:1.6;margin-top:4px">
+          <span data-en>That is why you see fewer cards here than on your other machine — it is the computer, not your account. The password is asked once per browser and lasts 12 hours.</span>
+          <span data-ko>다른 컴퓨터보다 카드가 적게 보이는 이유입니다 — 계정이 아니라 이 컴퓨터의 문제입니다. 비밀번호는 브라우저마다 한 번씩, 12시간 동안 유지됩니다.</span>
+        </div>
+      </div>
+      <button class="btn brand lg" id="unlock-big" style="margin-left:auto">
+        <span data-en>Open full admin</span><span data-ko>관리자 전체 열기</span></button>
+    </div>
+  </div>
+
   <section class="grp">
     <h2><span data-en>Exam day</span><span data-ko>시험장 운영</span></h2>
     <p><span data-en>The room, the machines, the results.</span><span data-ko>강의실과 컴퓨터, 그리고 결과.</span></p>
@@ -299,7 +321,9 @@
       $('unlock').hidden = false;
       document.body.classList.add('locked-admin');
     }
-    $('pill').textContent = role === 'admin' ? 'Admin · read only' : 'Teacher';
+    /* 여기까지 온 관리자는 비밀번호 세션이 없는 관리자다(A.can() 이 false 라 이 자리다).
+       "read only" 는 그 이유를 감춘다 — 잠긴 곳이 계정이 아니라 이 컴퓨터라고 적는다. */
+    $('pill').textContent = role === 'admin' ? 'Admin · locked on this computer' : 'Teacher';
     $('who').textContent = (profile && (profile.name || profile.email)) || role;
     $('gate').hidden = true;
     $('main').hidden = false;
@@ -309,9 +333,9 @@
 
   /* 비밀번호가 맞으면 화면을 다시 그린다 — 선생님 자리로 들어오면서 카드를 DOM 에서
      지웠으니, 그 자리에서 되살리는 것보다 새로 여는 쪽이 정직하다. */
-  $('unlock').addEventListener('click', function () {
-    A.openLogin('', function () { location.reload(); });
-  });
+  function askUnlock() { A.openLogin('', function () { location.reload(); }); }
+  $('unlock').addEventListener('click', askUnlock);
+  $('unlock-big').addEventListener('click', askUnlock);   // 본문 맨 위의 같은 문
   $('out').addEventListener('click', function () {
     if (MODE === 'teacher') {
       if (window.SG_AUTH && SG_AUTH.signOut) SG_AUTH.signOut();
