@@ -199,6 +199,66 @@ tr.row-bad{background:var(--bad-soft)}
 .err{background:var(--bad-soft);border:1px solid #f3c9bb;color:var(--brand-ink);
   border-radius:11px;padding:10px 13px;font-size:13px;font-weight:700}
 
+/* ── 성적표 한 장 ───────────────────────────────────────
+   화면에 보이는 그대로가 종이에 나와야 한다. 그래서 이 구역만 앱의 크림색·둥근
+   모서리에서 벗어나 A4 한 장(210mm)을 흉내 낸다 — 글꼴도 화면용이 아니라
+   인쇄용(Arial 계열)이고, 표의 선은 프린터가 흐리게 먹지 않도록 검정 1px 이다. */
+.card-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:22px}
+.card-bar .note{font-size:12.5px;color:var(--muted);font-weight:600;margin-left:auto}
+.sheet{width:210mm;max-width:100%;margin:16px auto 50px;background:#fff;color:#111;
+  border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);
+  padding:13mm 11mm 15mm;line-height:1.32;letter-spacing:0;
+  font-family:Arial,"Helvetica Neue",Helvetica,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+.sh-top{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.sh-mark{display:flex;align-items:baseline;font-weight:900;font-size:42px;letter-spacing:-.045em;color:#111}
+.sh-mark .st{font-size:30px;margin-right:1px}
+.sh-mark .mt{color:#e8102b;font-size:24px;font-weight:800;margin-left:1px;letter-spacing:-.02em}
+.sh-date{font-size:18px;font-weight:700;padding-bottom:5px}
+.sh-who{display:flex;gap:30px;flex-wrap:wrap;margin-top:16px;font-size:15px;font-weight:700;color:#e8102b}
+.sh-who .v{display:inline-block;min-width:96px;padding:0 5px;color:#111;
+  border-bottom:1px dotted #b9b9b9}
+[contenteditable]:empty:before{content:attr(data-ph);color:#c6c6c6;font-weight:400}
+[contenteditable]:focus{outline:2px solid #ffd9cc;border-radius:3px}
+
+table.rc{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px;color:#111}
+table.rc th,table.rc td{border:1px solid #111;padding:9px 6px;text-align:center;vertical-align:middle}
+/* 앱의 th 는 작은 대문자로 늘어놓는 눈금 글씨다. 성적표의 머리글은 그냥 낱말이라
+   그 규칙을 여기서 되돌린다 — 'Scaled score' 는 라벨이 아니라 열 이름이다. */
+table.rc th{font-weight:700;font-size:12.5px;line-height:1.25;
+  text-transform:none;letter-spacing:0;color:#111}
+/* 칸 색은 종이 성적표의 눈금이다 — 어느 칸이 환산점수이고 어느 칸이 원점수인지
+   글자를 읽기 전에 색으로 갈린다. 인쇄에서도 같아야 해서 print-color-adjust 를 쓴다. */
+.rc .c-scaled{background:#d9e5d2}
+.rc .c-correct{background:#daeaf3}
+.rc .c-avg{background:#f4e3e3}
+.rc .c-cefr{background:#ff0}
+.rc td.c-cefr{font-size:30px;font-weight:900;letter-spacing:-.02em}
+.rc .sec{font-weight:800;font-size:15px}
+.rc td.c-scaled,.rc td.c-avg{font-weight:700;font-size:14px}
+.rc .tot td{font-weight:900;font-size:15px}
+.rc .part{font-size:13px}
+.rc .dim{color:#8e8e8e}
+.sh-foot{margin-top:8px;font-size:11px;color:#7a7a7a;line-height:1.5}
+
+.sh-gauge{margin-top:26px;border:2px solid #e2761b;border-radius:14px;padding:18px 20px 20px}
+.sh-gauge svg{display:block;margin:0 auto}
+.sh-sum{margin-top:14px;border:1px solid #cfcfcf;border-radius:6px;min-height:96px;
+  padding:13px 15px;font-size:13.5px;line-height:1.6}
+.sh-sum b{font-size:15px}
+.sh-cmt-h{margin-top:20px;font-size:15px;font-weight:900}
+.sh-cmt{margin-top:7px;border:1px solid #cfcfcf;border-radius:6px;min-height:118px;
+  padding:13px 15px;font-size:13.5px;line-height:1.7;white-space:pre-wrap}
+.sh-cmt .cmt{display:block;min-height:88px}
+.sh-cmt .by{display:block;margin-top:10px;font-size:11.5px;color:#8e8e8e}
+
+@media (max-width:640px){
+  .sheet{padding:16px 14px}
+  .sh-mark{font-size:32px}.sh-mark .mt{font-size:18px}.sh-date{font-size:15px}
+  table.rc{font-size:11.5px}
+  table.rc th,table.rc td{padding:7px 3px}
+  .rc td.c-cefr{font-size:22px}
+}
+
 footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font-size:12.5px;color:var(--muted)}
 
 @media (max-width:900px){
@@ -226,6 +286,17 @@ footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font
   header.nav,.rev-bar,footer.foot,.no-print{display:none !important}
   body{background:#fff}
   .card,.sec-card{box-shadow:none;break-inside:avoid}
+
+  /* 성적표는 A4 한 장으로 떨어져야 한다. 종이에는 여백이 이미 있으므로 화면에서
+     쓰던 210mm 폭과 그림자·테두리를 걷어낸다 — 안 걷으면 한 장이 두 장이 된다. */
+  @page{size:A4 portrait;margin:12mm}
+  .wrap{padding:0;max-width:none}
+  .sheet{width:auto;max-width:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none}
+  .sh-gauge,.sh-cmt,table.rc{break-inside:avoid}
+  /* 색이 곧 눈금이라 브라우저가 배경을 지우면 성적표가 아니라 표가 된다. */
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* 비어 있는 칸의 안내 글씨는 종이에 남기지 않는다 — 빈칸은 손으로 채우는 자리다. */
+  [contenteditable]:empty:before{content:"" !important}
 }
 </style>
 </head>
@@ -348,10 +419,31 @@ footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font
       <div class="score-row rev" id="rev-row"></div>
     </div>
     <div class="acts no-print mt-16" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <a class="btn brand sm" id="go-card"><span data-en>Report card</span><span data-ko>성적표 한 장</span></a>
       <button class="btn sm" id="dl-one"><span data-en>Download this test (CSV)</span><span data-ko>이 응시 CSV</span></button>
       <button class="btn sm hide" id="dl-report"><span data-en>Score report</span><span data-ko>성적 보고서</span></button>
     </div>
     <div id="rev-body"></div>
+  </section>
+
+  <!-- ── 성적표 한 장 ───────────────────────────────────── -->
+  <section id="report" class="hide">
+    <div class="card-bar no-print">
+      <a class="btn brand sm" href="#/" id="card-back">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span data-en>Dashboard</span><span data-ko>대시보드</span></a>
+      <a class="btn sm" id="card-review"><span data-en>Answer review</span><span data-ko>답안 리뷰</span></a>
+      <button class="btn sm" id="card-print">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+        <span data-en>Print / PDF</span><span data-ko>인쇄 · PDF</span></button>
+      <span class="note">
+        <span data-en>Dotted fields are yours to type in before printing — they stay on this device only.</span>
+        <span data-ko>점선 칸은 인쇄 전에 직접 채우는 자리입니다 — 이 기기에만 남습니다.</span>
+      </span>
+    </div>
+    <div class="sheet" id="sheet"></div>
   </section>
 
 </main>
@@ -931,10 +1023,18 @@ var BAND = (function () {
         '<td>' + bandCell(v.overall, ' tot') + '</td>' +
         BAND.SKILLS.map(function (s) { return '<td>' + bandCell(v.sections[s].band) + '</td>'; }).join('') +
         '<td>' + statusOf(v) + '</td>' +
-        '<td class="no-print"><a class="btn brand sm" href="#/review/' + esc(r.session) + '">' +
+        '<td class="no-print" style="white-space:nowrap">' +
+          '<a class="btn brand sm" href="#/review/' + esc(r.session) + '">' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
           'stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
-          '<circle cx="12" cy="12" r="3"/></svg>' + bi('Review', '리뷰') + '</a></td>' +
+          '<circle cx="12" cy="12" r="3"/></svg>' + bi('Review', '리뷰') + '</a> ' +
+          /* 성적표는 리뷰를 거치지 않고도 한 번에 닿아야 한다 — 인쇄하러 오는 사람은
+             문항을 보러 온 것이 아니다. */
+          '<a class="btn sm" href="#/report/' + esc(r.session) + '">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+          'stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 ' +
+          '2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>' +
+          bi('Report', '성적표') + '</a></td>' +
       '</tr>';
     }).join('') : '<tr><td colspan="9" class="muted" style="padding:28px">' +
       bi('No records here yet.', '아직 기록이 없습니다.') + '</td></tr>';
@@ -993,8 +1093,9 @@ var BAND = (function () {
     $('rev-set').textContent = r.set_code || '—';
     $('rev-when').textContent = (isFull(r) ? 'Full Test' : 'Section Test') + ' · ' + longWhen(r.submitted_at);
     $('rev-me').textContent = (ME && (ME.email || ME.student_id || ME.name)) || '';
+    $('go-card').href = '#/report/' + encodeURIComponent(r.session);
 
-    var tabs = [{ id: 'summary', lab: 'Summary', on: true }].concat(BAND.SKILLS.map(function (s) {
+    var tabs =[{ id: 'summary', lab: 'Summary', on: true }].concat(BAND.SKILLS.map(function (s) {
       return { id: s, lab: LAB[s][0], on: v.sections[s].band !== null || (r.by_section || {})[s] };
     }));
     $('rev-tabs').innerHTML = tabs.map(function (t) {
@@ -1189,6 +1290,8 @@ var BAND = (function () {
      '리스닝 3번 문항' 을 열어 보일 수 있다. */
   var TABS = { summary: 1, reading: 1, listening: 1, writing: 1, speaking: 1 };
   function route() {
+    var c = /^#\/report\/([^\/]+)$/.exec(location.hash || '');
+    if (c) return { view: 'report', session: decodeURIComponent(c[1]) };
     var m = /^#\/review\/([^\/]+)(?:\/([a-z]+))?$/.exec(location.hash || '');
     if (!m) return { view: 'dash' };
     return { view: 'review', session: decodeURIComponent(m[1]),
@@ -1203,18 +1306,237 @@ var BAND = (function () {
   }
   function render() {
     var rt = route();
-    var r = rt.view === 'review' ? rowOf(rt.session) : null;
-    if (rt.view === 'review' && !r) { location.hash = '#/'; return; }
+    var r = rt.session ? rowOf(rt.session) : null;
+    if (rt.session && !r) { location.hash = '#/'; return; }
+    var card = rt.view === 'report';
 
+    /* 성적표는 한 장짜리 종이다 — 앱의 머리글도 리뷰의 탭 줄도 그 위에 없어야 한다. */
     $('nav').classList.toggle('hide', !!r);
-    $('rev-bar').classList.toggle('hide', !r);
+    $('rev-bar').classList.toggle('hide', !r || card);
     $('dash').classList.toggle('hide', !!r);
-    $('review').classList.toggle('hide', !r);
+    $('review').classList.toggle('hide', !r || card);
+    $('report').classList.toggle('hide', !card);
     if (!r) { OPEN = null; TAB = 'summary'; paintOfficial(); paintBest(); paintList(); return; }
 
-    OPEN = r; TAB = rt.tab;
+    OPEN = r;
+    if (card) { paintCard(r); return; }
+
+    TAB = rt.tab;
     paintReviewHead(r);
     if (TAB === 'summary') paintSummary(r); else paintSection(r, TAB);
+  }
+
+  /* ── 성적표 한 장 ─────────────────────────────────────────────
+     리뷰 화면은 "왜 이 점수인가" 를 보여 준다. 성적표는 다른 물건이다 — 선생님이
+     학생·학부모에게 건네는 한 장이고, 종이로 나가는 순간 고쳐 쓸 수 없다.
+
+     그래서 여기는 영역(R·L·W·S)이 아니라 **파트**로 편다. 라이팅 3.0 은 세 가지
+     다른 일(문장 만들기·이메일·토론 글)의 평균이라, 무엇을 더 해야 하는지는 파트를
+     펴야 보인다. 파트 구성은 세트가 바뀌어도 같으므로 표로 박아 둔다. */
+  var PARTS = {
+    reading:   [{ id: 'reading',    label: 'Reading',                        auto: true }],
+    listening: [{ id: 'listening',  label: 'Listening',                      auto: true }],
+    /* Build a Sentence 는 기계가 채점한다 — 산출형 두 과제와 출처가 다르다. */
+    /* 이메일과 토론 글은 '문항 수' 가 없는 과제다 — 한 편을 써서 루브릭으로 받는다.
+       거기에 1 을 찍으면 한 문제짜리 시험처럼 읽히므로 그 칸은 비운다. */
+    writing:   [{ id: 'build',      label: 'Build a Sentence',               auto: true },
+                { id: 'email',      label: 'Write an Email',                 essay: true },
+                { id: 'discussion', label: 'Write for an Academic Discussion', essay: true }],
+    speaking:  [{ id: 'repeat',     label: 'Listen and Repeat' },
+                { id: 'interview',  label: 'Take an Interview' }]
+  };
+  var CEFR_SAY = {
+    C2: ['Proficient user', '원어민에 가까운 숙달'],
+    C1: ['Advanced user', '고급 — 복잡한 글과 말을 자유롭게'],
+    B2: ['Upper-intermediate user', '중상급 — 익숙한 주제라면 막힘 없이'],
+    B1: ['Intermediate user', '중급 — 일상과 학교 생활을 감당'],
+    A2: ['Elementary user', '초급 — 짧고 익숙한 표현 위주'],
+    A1: ['Beginner', '입문 — 아주 짧은 표현부터']
+  };
+
+  /** 산출형 채점 한 줄이 어느 파트인지. task_kind 가 정본이고, 없으면 문항 번호로 짐작한다. */
+  function partOf(t) {
+    var k = String((t && t.task_kind) || '').toLowerCase();
+    if (k === 'email' || k === 'discussion' || k === 'repeat' || k === 'interview') return k;
+    var q = String((t && t.question_id) || '');
+    if (/W2|email/i.test(q)) return 'email';
+    if (/W3|disc/i.test(q)) return 'discussion';
+    if (/S1/.test(q)) return 'repeat';
+    if (/S2|interview/i.test(q)) return 'interview';
+    return '';
+  }
+
+  /**
+   * 응시 한 건 → 성적표가 그릴 줄들.
+   *
+   * 파트의 환산점수와 영역의 평균은 **다른 곳에서 온다**. 파트는 그 파트만 놓고 다시
+   * 환산한 값이고, 평균 칸은 앱이 쓰는 공식 밴드(BAND.of)를 그대로 옮긴 값이다.
+   * 성적표만 따로 계산하면 대시보드의 4.0 과 성적표의 4.5 가 갈리는 날이 온다.
+   */
+  function cardRows(r) {
+    var v = viewOf(r), by = r.by_section || {}, byPart = {};
+    (TASKS[r.session] || []).forEach(function (t) {
+      var p = partOf(t);
+      if (!p) return;
+      var sc = (t.teacher_score === null || t.teacher_score === undefined) ? t.ai_score : t.teacher_score;
+      if (sc === null || sc === undefined || sc === '') return;
+      (byPart[p] = byPart[p] || []).push({ score: Number(sc), confirmed: !!t.confirmed_at });
+    });
+
+    return BAND.SKILLS.map(function (s) {
+      var parts = PARTS[s].map(function (p) {
+        if (p.auto) {
+          /* 자동채점 파트 — 리딩·리스닝은 영역이 곧 파트이고, Build a Sentence 는
+             라이팅 영역의 객관 채점분이 그대로 by_section.writing 에 들어 있다. */
+          var d = by[s === 'writing' ? 'writing' : s];
+          if (!d || !(Number(d.total) > 0)) return { label: p.label, band: null };
+          return { label: p.label, band: BAND.sectionBand(d.score, d.total, s),
+                   correct: Number(d.score) || 0, items: Number(d.total) || 0 };
+        }
+        var list = byPart[p.id] || [];
+        return { label: p.label, band: BAND.taskBand(list, s),
+                 items: p.essay ? null : (list.length || null) };
+      });
+      return { skill: s, short: SHORT[s], parts: parts,
+               band: v.sections[s].band, status: v.sections[s].status };
+    });
+  }
+
+  /* 반원 눈금 — 밴드 1.0 이 왼쪽 끝, 6.0 이 오른쪽 끝이다. 숫자를 못 읽는 사람에게도
+     "어디쯤" 이 먼저 가 닿아야 해서 표보다 크게 그린다. */
+  function gaugeSvg(band) {
+    var R = 92, cx = 130, cy = 112, w = 30, len = Math.PI * R;
+    var frac = (band === null || band === undefined) ? 0 : Math.max(0, Math.min(1, (band - 1) / 5));
+    var arc = 'M' + (cx - R) + ' ' + cy + ' A ' + R + ' ' + R + ' 0 0 1 ' + (cx + R) + ' ' + cy;
+    return '<svg width="260" height="132" viewBox="0 0 260 132" role="img" aria-label="Overall band">' +
+      '<path d="' + arc + '" fill="none" stroke="#ececec" stroke-width="' + w + '"/>' +
+      (frac > 0 ? '<path d="' + arc + '" fill="none" stroke="#4a7f96" stroke-width="' + w + '" ' +
+        'stroke-dasharray="' + (len * frac).toFixed(2) + ' ' + len.toFixed(2) + '"/>' : '') +
+      '<text x="' + cx + '" y="102" text-anchor="middle" font-size="34" font-weight="900" fill="#111">' +
+        (band === null || band === undefined ? '—' : BAND.fmt(band)) + '</text>' +
+      '<text x="' + (cx - R) + '" y="128" text-anchor="middle" font-size="11" fill="#9a9a9a">1.0</text>' +
+      '<text x="' + (cx + R) + '" y="128" text-anchor="middle" font-size="11" fill="#9a9a9a">6.0</text>' +
+      '</svg>';
+  }
+
+  /* 손으로 채우는 칸(E-name·담당 선생님·코멘트)은 서버에 올리지 않는다. 학생 토큰으로는
+     sg_comments 에 못 쓰고, 쓸 수 있게 하는 순간 '선생님이 남긴 말' 과 구별이 사라진다.
+     그래서 이 기기에만 남긴다 — 화면이 그 사실을 위에 적어 둔다. */
+  var CARD_MEM = 'smeag_card_v1';
+  function memAll() { try { return JSON.parse(localStorage.getItem(CARD_MEM) || '{}'); } catch (e) { return {}; } }
+  function memGet(session, k) { var m = memAll()[session] || {}; return m[k] || ''; }
+  function memSet(session, k, v) {
+    var m = memAll();
+    (m[session] = m[session] || {})[k] = v;
+    try { localStorage.setItem(CARD_MEM, JSON.stringify(m)); } catch (e) {}
+  }
+
+  function editable(session, key, ph, cls) {
+    return '<span class="' + (cls || 'v') + '" contenteditable="true" spellcheck="false" ' +
+      'data-mem="' + esc(key) + '" data-ph="' + esc(ph) + '">' + esc(memGet(session, key)) + '</span>';
+  }
+
+  function paintCard(r) {
+    var v = viewOf(r), rows = cardRows(r);
+    var name = (ME && (ME.name || ME.student_id)) || '';
+    var say = CEFR_SAY[v.cefr] || null;
+
+    /* CEFR 칸 하나가 표 전체를 세로로 가른다 — 등급은 한 영역의 성질이 아니라
+       이 응시 전체의 성질이기 때문이다. 그래서 rowspan 은 파트 수 + 총점 줄이다. */
+    var span = rows.reduce(function (n, x) { return n + x.parts.length; }, 0) + 1;
+    var first = true, body = '';
+
+    rows.forEach(function (sec) {
+      sec.parts.forEach(function (p, i) {
+        body += '<tr>' +
+          (i === 0 ? '<td class="sec" rowspan="' + sec.parts.length + '">' + sec.short + '</td>' : '') +
+          '<td class="part">' + esc(p.label) + '</td>' +
+          '<td class="c-scaled">' + (p.band === null || p.band === undefined
+            ? '<span class="dim">—</span>' : BAND.fmt(p.band)) + '</td>' +
+          '<td class="c-correct">' + (p.correct === undefined ? '<span class="dim">–</span>' : p.correct) + '</td>' +
+          '<td>' + (p.items ? p.items : '<span class="dim">–</span>') + '</td>' +
+          (i === 0 ? '<td class="c-avg" rowspan="' + sec.parts.length + '">' +
+            (sec.band === null ? '<span class="dim">—</span>' : BAND.fmt(sec.band)) + '</td>' : '') +
+          (first ? '<td class="c-cefr" rowspan="' + span + '">' + (v.cefr || '—') + '</td>' : '') +
+          '</tr>';
+        first = false;
+      });
+    });
+
+    var head = '<div class="sh-top">' +
+        '<span class="sh-mark"><span class="st">✻</span>toefl<span class="mt">Mock Test</span></span>' +
+        '<span class="sh-date">' + when(r.submitted_at) + '</span>' +
+      '</div>' +
+      '<div class="sh-who">' +
+        '<span>Name : ' + (name ? '<span class="v">' + esc(name) + '</span>'
+                                : editable(r.session, 'name', 'name')) + '</span>' +
+        '<span>E-name: ' + editable(r.session, 'ename', 'english name') + '</span>' +
+        '<span>S.A Teacher: ' + editable(r.session, 'teacher', 'teacher') + '</span>' +
+      '</div>';
+
+    var table = '<table class="rc"><thead><tr>' +
+        '<th>Section</th><th>Part</th>' +
+        '<th class="c-scaled">Scaled score</th>' +
+        '<th class="c-correct">Correct<br>Answer</th>' +
+        '<th>Total<br>Items</th>' +
+        '<th class="c-avg">Average</th>' +
+        '<th class="c-cefr">CEFR</th>' +
+      '</tr></thead><tbody>' + body +
+      '<tr class="tot"><td>Total</td><td></td><td></td><td></td><td></td>' +
+        '<td class="c-avg">' + (v.overall === null ? '—' : BAND.fmt(v.overall)) + '</td></tr>' +
+      '</tbody></table>';
+
+    /* 눈금이 둘이라는 사실을 성적표가 스스로 밝힌다. 파트 점수를 평균 내도 영역
+       점수가 안 나오는 이유가 여기 적혀 있지 않으면, 읽는 사람은 오타로 본다. */
+    var foot = '<p class="sh-foot">' +
+      esc('Scaled score and Average are TOEFL bands (1.0–6.0); Total is the average of the scored sections. ' +
+          'Writing and Speaking averages follow the ETS rubric for the productive tasks — ' +
+          'Build a Sentence is reported for diagnosis.') +
+      (v.pending.length ? '<br>' + esc('Still being scored: ' +
+        v.pending.map(function (s) { return LAB[s][0]; }).join(', ') + '.') : '') +
+      '</p>';
+
+    var sum = '<div class="sh-gauge">' + gaugeSvg(v.overall) +
+      '<div class="sh-sum" id="sh-sum">' +
+        '<b>' + (v.overall === null ? 'Not scored yet'
+          : 'Overall ' + BAND.fmt(v.overall) + ' / 6.0' + (v.cefr ? ' · CEFR ' + v.cefr : '')) + '</b>' +
+        (say ? '<br>' + esc(say[0]) : '') +
+        '<br>' + esc(r.set_code || '') + (r.set_code ? ' · ' : '') +
+        esc(isFull(r) ? 'Full test' : 'Section test') +
+      '</div></div>';
+
+    var cmt = '<div class="sh-cmt-h">SA Teacher\'s Comments</div>' +
+      '<div class="sh-cmt" id="sh-cmt">' +
+        editable(r.session, 'comment', "Type the teacher's comments here, or leave blank to write by hand.", 'cmt') +
+      '</div>';
+
+    $('sheet').innerHTML = head + table + foot + sum + cmt;
+
+    /* 고친 자리는 그 자리에서 이 기기에 남는다 — 인쇄 버튼을 누르기 전에 화면을
+       떠나도 다시 왔을 때 그대로여야 하기 때문이다. */
+    [].forEach.call($('sheet').querySelectorAll('[data-mem]'), function (el) {
+      el.onblur = function () { memSet(r.session, el.getAttribute('data-mem'), el.textContent.trim()); };
+    });
+    $('card-review').href = '#/review/' + encodeURIComponent(r.session);
+
+    teacherWord(r);
+  }
+
+  /** 선생님이 서버에 남긴 총평이 있으면 그것이 코멘트 칸의 정본이다. */
+  function teacherWord(r) {
+    if (!ME || !ME.id) return;
+    AUTH.rest('sg_comments?select=scope,source,author_name,body,updated_at' +
+      '&session=eq.' + encodeURIComponent(r.session) +
+      '&owner=eq.' + ME.id + '&scope=eq.overall&source=eq.teacher&order=updated_at.desc&limit=1')
+      .then(function (rows) {
+        var c = rows && rows[0];
+        if (!c || !c.body) return;
+        if (route().session !== r.session) return;       // 그 사이 다른 화면으로 갔다
+        var host = $('sh-cmt');
+        if (!host) return;
+        host.innerHTML = esc(c.body) +
+          '<span class="by">— ' + esc(c.author_name || 'Teacher') + ' · ' + when(c.updated_at) + '</span>';
+      });
   }
 
   /* ── 보고서 연동 ─────────────────────────────────────────────
@@ -1444,6 +1766,8 @@ var BAND = (function () {
       $('who').textContent = '👤 ' + [(ME && ME.name), (ME && ME.student_id) || (ME && ME.email)]
         .filter(Boolean).join(' · ');
       if (OPEN) $('rev-me').textContent = (ME && (ME.email || ME.student_id || ME.name)) || '';
+      /* 성적표에는 이름이 인쇄된다 — 프로필이 늦게 와도 빈칸으로 남겨 두지 않는다. */
+      if (OPEN && route().view === 'report') paintCard(OPEN);
     });
     load();
   }
@@ -1496,6 +1820,12 @@ var BAND = (function () {
       $('dl-report').onclick = function () { if (OPEN) REPORT.open(OPEN, ME); };
     }
     $('print').onclick = function () { window.print(); };
+    $('card-print').onclick = function () {
+      /* 편집 중인 칸에 커서가 남아 있으면 그 글자는 아직 기기에 저장되지 않았다.
+         인쇄 대화상자가 뜨기 전에 초점을 떼어 blur 를 한 번 태운다. */
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      window.print();
+    };
 
     /* 주소가 바뀌면 그 주소가 가리키는 화면을 그린다 — 뒤로 가기도 이 길로 온다.
        아직 목록을 못 받은 동안(로그인 직후)에는 load() 가 이어서 그린다. */

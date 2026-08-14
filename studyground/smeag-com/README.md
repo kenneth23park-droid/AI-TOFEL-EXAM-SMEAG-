@@ -41,6 +41,36 @@ sg2 응시 → 로컬 채점 → Supabase sg_results  ←── scores.html (본
   고쳐도 서버가 자기 행 말고는 돌려주지 않는다.
 - 로그인은 sg2 와 같은 Edge Function `sg-auth` 를 쓴다 — 학번(`smeag###`) 또는 이메일.
 
+## 성적표 한 장 (`#/report/<session>`)
+
+학생·학부모에게 건네는 종이 한 장. 대시보드 목록의 **Report** 또는 리뷰 화면의
+**Report card** 로 들어가고, **Print / PDF** 로 A4 한 장에 떨어진다.
+
+리뷰 화면과 무엇이 다른가 — 리뷰는 영역(R·L·W·S)으로 말하고, 성적표는 **파트**로 편다.
+라이팅 3.0 은 문장 만들기·이메일·토론 글 셋의 결과라, 무엇을 더 해야 하는지는 파트를
+펴야 보이기 때문이다.
+
+| 열 | 어디서 오나 |
+|---|---|
+| Scaled score | 그 **파트만** 놓고 다시 환산한 밴드(1.0–6.0) |
+| Correct Answer · Total Items | 자동채점 파트만(리딩 · 리스닝 · Build a Sentence). 이메일·토론 글은 문항이 없어 비운다 |
+| Average | **앱의 공식 밴드**(`BAND.of`) 그대로 — 대시보드에 뜬 수와 언제나 같다 |
+| CEFR · Total | 채점된 영역 밴드의 평균과 그 등급 |
+
+⚠️ 파트 점수를 평균 내도 Average 가 안 나올 수 있다. 라이팅·스피킹의 영역 밴드는 ETS
+루브릭을 따르는 산출형 과제로 매기고, Build a Sentence 는 **진단용으로만** 싣기 때문이다.
+성적표 밑줄이 이 사실을 스스로 밝힌다. 셋을 함께 평균 내려면 `BAND.of` 를 고쳐야 하고,
+그건 이 화면 혼자 할 일이 아니다(밴드 표는 세 곳에 산다 — `test_band_table.js`).
+
+- 파트 구성: `scores.html` 의 `PARTS`. 산출형 한 줄이 어느 파트인지는 `sg_task_scores.task_kind`
+  가 정하고, 그 칸이 빈 옛 행은 문항 번호로 짐작한다(`partOf`).
+- 이름은 프로필에서 채운다. **E-name · S.A Teacher · 코멘트**는 점선 칸이라 인쇄 전에 직접
+  치면 되고, 그 글자는 **이 기기에만** 남는다(localStorage) — 학생 토큰으로는 `sg_comments`
+  에 쓸 수 없고, 쓸 수 있게 하면 '선생님이 남긴 말' 과 구별이 사라진다.
+- 선생님이 서버에 남긴 총평(`sg_comments`, `scope='overall'`, `source='teacher'`)이 있으면
+  그것이 코멘트 칸의 정본이고, 누가 언제 썼는지까지 인쇄된다.
+- 판정: `studyground/tests/test_report_card.js`
+
 ## 설정 (`scores.html` 상단 `CFG`)
 
 | 키 | 뜻 |
