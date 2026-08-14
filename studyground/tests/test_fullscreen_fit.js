@@ -87,7 +87,11 @@ ok(document.body.style.zoom === '', '확대율 1 인데 body 에 zoom 이 남았
 var login = fs.readFileSync(path.join(SG2, 'login.html'), 'utf8');
 ok(/submit[\s\S]{0,200}SG_FS\.armAndEnter\(\)/.test(login),
    'login.html 의 submit 핸들러가 armAndEnter 를 부르지 않는다');
-ok(/isStaff\(\)[\s\S]{0,200}SG_FS\.release\(\)/.test(login),
+/* 선생님·관리자는 창을 여러 개 쓰므로 전체화면을 돌려준다. 이걸 어떻게 묻는지는
+   화면이 바꿔 왔다 — isStaff() 한 번이었다가, 지금은 role() 을 받아 'teacher'·'admin'
+   을 가른다(관리자는 admin.html 로 보내야 해서 역할 이름 자체가 필요해졌다).
+   묻는 방법이 아니라 **역할을 보고 release 를 부르는가**만 붙잡는다. */
+ok(/(isStaff\(\)|role\s*===\s*'teacher'|'teacher'\s*\|\|)[\s\S]{0,200}SG_FS\.release\(\)/.test(login),
    'login.html 이 선생님·관리자에게 전체화면을 돌려주지 않는다');
 
 ['login.html', 'tests.html', 'exam-runtime.html', 'exam.html', 'dashboard.html',

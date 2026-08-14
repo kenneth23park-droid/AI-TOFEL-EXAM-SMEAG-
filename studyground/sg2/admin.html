@@ -130,6 +130,16 @@
            <span data-ko>누가 어느 시험을 봤고 몇 점인지, 그 뒤의 녹음까지.</span></p>
         <span class="f">admin-results.html</span>
       </a>
+      <!-- 성적 조회는 응시 앱 밖에 산다(smeag.com, 파일 하나짜리 자립형). 주소를 외워
+           들어가던 것을 여기 카드 하나로 세운다 — 성적표 한 장을 인쇄하는 자리다. -->
+      <a class="mcard" id="scores-card" href="https://smeag-scores.vercel.app/scores.html"
+         target="_blank" rel="noopener" data-staff="teacher">
+        <span class="ic">🖨️</span>
+        <h3><span data-en>Scores &amp; report card</span><span data-ko>성적 조회 · 성적표</span></h3>
+        <p><span data-en>The student-facing score site. One attempt prints as a one-page TOEFL report card — parts, bands, CEFR and the teacher's comments.</span>
+           <span data-ko>학생이 보는 성적 조회 화면입니다. 응시 한 건이 A4 한 장짜리 TOEFL 성적표로 인쇄됩니다 — 파트별 점수·밴드·CEFR·선생님 코멘트.</span></p>
+        <span class="f">smeag-scores.vercel.app</span>
+      </a>
       <a class="mcard" href="admin-score-sets.html">
         <span class="tag">New</span><span class="ic">🏅</span>
         <h3><span data-en>Score sets</span><span data-ko>성적 세트</span></h3>
@@ -320,6 +330,20 @@
     if (role === 'admin') {
       $('unlock').hidden = false;
       document.body.classList.add('locked-admin');
+      /* 관리자 계정으로 들어온 사람에게 반쪽 화면을 먼저 보이고 "버튼을 찾아 누르라"고
+         하는 것은 순서가 뒤집힌 것이다. 문을 먼저 연다 — 비밀번호 창을 그 자리에서
+         띄우고, 넣으면 전체가 열린다. 취소(Esc)하면 지금까지처럼 읽기 전용으로 남고
+         본문 맨 위의 큰 버튼이 그대로 기다린다.
+
+         브라우저 탭 하나에 한 번만 묻는다. 관리 화면들을 오가며 admin.html 로 돌아올
+         때마다 창이 뜨면, 읽기 전용으로 일하기로 한 사람에게는 그게 방해다. */
+      var ASKED = 'sg2_admin_unlock_asked';
+      var asked = false;
+      try { asked = sessionStorage.getItem(ASKED) === '1'; } catch (e) {}
+      if (!asked) {
+        try { sessionStorage.setItem(ASKED, '1'); } catch (e) {}
+        setTimeout(askUnlock, 0);
+      }
     }
     /* 여기까지 온 관리자는 비밀번호 세션이 없는 관리자다(A.can() 이 false 라 이 자리다).
        "read only" 는 그 이유를 감춘다 — 잠긴 곳이 계정이 아니라 이 컴퓨터라고 적는다. */
