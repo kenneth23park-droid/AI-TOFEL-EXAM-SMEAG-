@@ -1085,7 +1085,8 @@
         // 서버가 거절한 이유를 그대로 보여 준다 — 설정이 빠졌으면 여기서 알아야 고친다.
         if (out.expired) { sayExpired('AI scoring failed: ' + out.error); return; }
         if (out.error) { saySc('AI scoring failed: ' + out.error); return; }
-        saySc('');
+        // 눌렀는데 한 건도 안 매겨졌으면 까닭을 적는다 — 버튼이 먹지 않은 것처럼 보인다.
+        saySc((out.scored || []).length ? '' : whyNothing(out));
         reloadTasks();
       })['catch'](function (e) {
         re.disabled = false;
@@ -1101,6 +1102,26 @@
    * 아무 일도 일어나지 않는다. 이 화면이 열린 지금이 다시 걸 자리다.
    * 되풀이는 sg-results.js 의 고삐(응시당 횟수·간격)가 막는다 — 녹음이 아예
    * 없는 응시를 열 때마다 전사·채점을 다시 사지 않기 위한 것. */
+  /* 한 건도 매겨지지 않고 끝났을 때 그 까닭을 한 줄로 만든다.
+   *
+   * 여태 이 자리는 조용했다. 서버가 200 으로 "전부 건너뛰었다"고 답해도 out.error 가
+   * 없으니 화면은 saySc('') 로 입을 닫았고, 남는 것은 "Not scored yet" 뿐이었다 —
+   * 녹음도 있고 키도 있는데 왜 점수가 없는지 아무 데도 적히지 않는다.
+   *
+   * 말할 값어치가 있는 것은 no_transcript 하나다. 나머지(no_answer·confirmed·
+   * already_scored)로 0 건인 것은 정상이라 알릴 일이 아니다. detail 은 서버가
+   * 전사에서 잡은 예외를 그대로 담아 온 것이라(storage 404, STT 거절 …) 실제
+   * 원인이 거기 있다 — 지우지 않고 그대로 보여 준다. */
+  function whyNothing(out) {
+    var list = ((out && out.skipped) || []).filter(function (s) {
+      return s && s.reason === 'no_transcript';
+    });
+    if (!list.length) return '';
+    var withDetail = list.filter(function (s) { return s.detail; })[0];
+    return 'Speaking was not scored: ' + list.length + ' recording(s) could not be transcribed' +
+           (withDetail ? ' — ' + withDetail.detail : '') + '.';
+  }
+
   var SCORE_TRIED = false;
   function autoScore() {
     if (SCORE_TRIED || !RES || !TASKS_READY) return;
@@ -1114,11 +1135,18 @@
       owner: OWNER_ID, taskRows: TASKS || [], auto: true,
       onProgress: function (done, total) { saySc('Scoring… ' + done + ' / ' + total); }
     }).then(function (out) {
-      if (!out || out.throttled) { saySc(''); return; }
+      if (!out) { saySc(''); return; }
+      /* 고삐에 걸린 것도 알린다. 여기서 입을 닫으면 화면은 "아직 채점 전" 인 채로
+         멎어 있고, 사람은 새로고침만 되풀이한다 — 자동은 이미 그만두었는데 그 사실이
+         어디에도 없어서다. 버튼은 이 고삐를 지나가므로 그리로 보낸다. */
+      if (out.throttled) {
+        saySc('Automatic scoring has already been retried for this attempt. Press Re-score to try again now.');
+        return;
+      }
       if (out.expired) { sayExpired('Scoring failed: ' + out.error); return; }
       if (out.error) { saySc('Scoring failed: ' + out.error); return; }
-      saySc('');
-      if ((out.scored || []).length) reloadTasks();
+      if ((out.scored || []).length) { saySc(''); reloadTasks(); return; }
+      saySc(whyNothing(out));
     })['catch'](function () { saySc(''); });
   }
 

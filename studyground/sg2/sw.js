@@ -302,7 +302,12 @@
 //      바뀌었고 셋 다 셸 자산이다 — 판올림하지 않으면 재방문 기기는 캐시된 옛
 //      사본으로 계속 "Sign-in is required" 만 본다. 이 화면을 쓰는 관리자 기기는
 //      전부 재방문이라, 고쳐도 고쳐진 것이 도착하지 않는 자리였다.
-const VERSION = 'sg-v74';
+// v75: 채점이 조용히 끝나지 않는다 — review.html 이 "한 건도 매기지 못했다" 는 답을
+//      받고도 입을 닫던 자리 둘(자동 재의뢰 고삐에 걸렸을 때, 전부 no_transcript 로
+//      건너뛰었을 때)을 막았다. 녹음도 있고 서버 키도 있는데 화면에는 "Not scored
+//      yet" 만 남아, 왜 안 되는지 아무 데도 적히지 않던 자리다. 서버가 전사에서
+//      잡은 예외(detail)를 그대로 편다. 셸 자산이라 판올림해야 도착한다.
+const VERSION = 'sg-v75';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
