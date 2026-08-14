@@ -197,7 +197,9 @@ ok('다시 응시 칸을 배선한다', /bindRetake\(session\);/.test(shell));
 
 ok('제출 화면에 붙는다', /retakeHtml\(\) \+/.test(shell));
 ok('여는 함수가 있다', /function openRetake\s*\(/.test(shell));
-ok('로그인 전이면 바로 연다', /say\('Saved on this device\.'[^)]*\);\s*\n\s*openRetake\(\);/.test(shell));
+/* 로그인 전 제출은 경고를 세우고 나서 문을 연다 — 경고가 서더라도 학생이 이
+   화면에 갇히면 안 되므로 openRetake() 는 그 자리에서 바로 불린다. */
+ok('로그인 전이면 바로 연다', /warnNotUploaded\(\);\s*\n\s*openRetake\(\);/.test(shell));
 ok('업로드·채점이 끝난 뒤에 연다', /\.then\(openRetake, openRetake\);/.test(shell));
 ok('채점 실패해도 열린다 — 갇히지 않는다',
    shell.indexOf('.catch(function () {') >= 0 && /\.then\(openRetake, openRetake\);/.test(shell));

@@ -1042,10 +1042,83 @@ window.SG_RUNTIME = (function () {
     function say(en, ko) {
       if (note) note.innerHTML = '<span data-en>' + en + '</span><span data-ko>' + ko + '</span>';
     }
+    /* 로그인이 없으면 이 답안은 이 브라우저 프로필 밖으로 한 발도 못 나간다 —
+       sg_results 도 녹음 버킷도 토큰이 있어야 열린다(SG_RESULTS.push 는 user() 가
+       없으면 아무것도 하지 않고 그냥 돌아온다). 예전에는 이 자리가 "이 기기에
+       저장되었습니다" 한 줄로 조용히 지나갔다. 2026-08-12 smeag007 이 그 자리였다:
+       제출은 끝났고 화면은 아무 문제도 말하지 않았고, 그 PC 를 떠나는 순간 답안은
+       세상 어디에도 없었다.
+
+       그래서 여기서는 조용히 지나가지 않는다. 붉은 막을 세워 학생을 그 자리에
+       붙잡고, 녹음은 로그인과 무관하게 파일 한 장으로 손에 쥐여 주고(§SG_REC —
+       업로드는 토큰이 있어야 하지만 내려받기는 아니다), 로그인해서 올릴 문을
+       그 자리에 연다. 메일은 못 보낸다 — 알림도 토큰 위에 서 있다. 그러니 이
+       화면이 유일한 전달 수단이고, 그만큼 크게 말해야 한다. */
     if (!window.SG_RESULTS || !window.SG_AUTH || !SG_AUTH.user()) {
-      say('Saved on this device.', '이 기기에 저장되었습니다.');
+      warnNotUploaded();
       openRetake();
       return;
+    }
+
+    /* 서버에 한 발도 못 나간 제출 앞에 세우는 막. 시험을 되돌리지는 못하니
+       할 수 있는 일만 준다 — 원본을 손에 쥐는 일과, 지금 로그인해 올리는 일. */
+    function warnNotUploaded() {
+      say('NOT saved to your account.', '계정에 저장되지 않았습니다.');
+
+      var box = document.createElement('div');
+      box.id = 'done-offline-warn';
+      box.setAttribute('style',
+        'margin:18px auto;max-width:520px;padding:14px 16px;text-align:left;' +
+        'border:2px solid #c0392b;border-radius:10px;background:#fdecea;color:#7b241c;font-size:14px;line-height:1.55');
+      box.innerHTML =
+        '<div style="font-weight:800;font-size:15px;margin-bottom:6px">' +
+          '<span data-en>⚠ Your answers are on THIS COMPUTER ONLY.</span>' +
+          '<span data-ko>⚠ 답안이 이 컴퓨터에만 있습니다.</span></div>' +
+        '<div><span data-en>You were not signed in, so nothing was uploaded. If you leave this ' +
+          'computer or its data is cleared, your test is gone. <b>Call your teacher now.</b></span>' +
+          '<span data-ko>로그인되어 있지 않아 아무것도 올라가지 않았습니다. 이 컴퓨터를 떠나거나 ' +
+          '기록이 지워지면 시험이 사라집니다. <b>지금 선생님을 부르세요.</b></span></div>' +
+        '<div id="done-offline-rec" style="margin-top:8px;font-size:13px;opacity:.85"></div>' +
+        '<div style="margin-top:12px">' +
+          '<a class="exam-btn primary" id="done-offline-login" href="#">' +
+            '<span data-en>Sign in and upload now</span><span data-ko>지금 로그인하고 올리기</span></a>' +
+        '</div>';
+
+      var host = document.querySelector('.exam-done');
+      if (host && note) host.insertBefore(box, note); else if (host) host.appendChild(box);
+
+      /* 로그인 뒤에는 대시보드로 보낸다 — 그 화면이 열리면서 push() 가 돌고,
+         이 기기에 남은 제출된 응시가 그 계정으로 따라 올라간다. */
+      var a = document.getElementById('done-offline-login');
+      if (a) a.href = 'login.html?next=' + encodeURIComponent('dashboard.html');
+
+      /* 녹음은 토큰 없이도 손에 쥘 수 있다. 업로드가 막힌 자리일수록 이 한 장이
+         유일한 사본이라 더 세게 붙잡는다 — 실패해도 화면은 이미 할 말을 다 했다. */
+      var line = document.getElementById('done-offline-rec');
+      if (!window.SG_REC) return;
+      SG_REC.scan(session).then(function (files) {
+        if (!files || !files.length) return;
+        if (line) {
+          line.innerHTML = '<span data-en>Saving your ' + files.length +
+            ' recording(s) as a file on this computer…</span><span data-ko>녹음 ' +
+            files.length + '개를 이 컴퓨터에 파일로 저장하는 중…</span>';
+        }
+        return SG_REC.saveLocal(files, {
+          session: session, setCode: SET_ID, submittedAt: new Date().toISOString()
+        }).then(function (saved) {
+          if (!line) return;
+          line.innerHTML = '<span data-en>Recordings saved to this computer as <b>' +
+            ((saved && saved.name) || 'a .zip file') + '</b>. Give this file to your teacher.</span>' +
+            '<span data-ko>녹음을 이 컴퓨터에 <b>' + ((saved && saved.name) || 'zip 파일') +
+            '</b> 로 저장했습니다. 이 파일을 선생님께 전달하세요.</span>';
+        });
+      })['catch'](function () {
+        if (line) {
+          line.innerHTML = '<span data-en>Could not save the recordings to a file. ' +
+            'Do NOT close this browser — call your teacher.</span>' +
+            '<span data-ko>녹음을 파일로 저장하지 못했습니다. 브라우저를 닫지 말고 선생님을 부르세요.</span>';
+        }
+      });
     }
 
     /* 이 응시에서 무슨 일이 있었는지 한 곳에 모은다. 사고는 난 그 자리에서 한 통씩
