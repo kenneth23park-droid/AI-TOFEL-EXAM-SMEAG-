@@ -843,6 +843,73 @@ window.SG_RUNTIME = (function () {
     }
   }
 
+  /* 같은 시험인가 — 세트도 문항도 그대로인가. 범위만 바꿔 이어 가려면 이것이 참이어야
+     한다. contentHash 를 적지 않은 옛 세션까지 끌어오지는 않는다(모르면 안 한다). */
+  function sameContent(hash) {
+    var m = STORE.meta() || {};
+    return !!hash && !!m.contentHash && m.contentHash === hash;
+  }
+
+  function sectionLabel(section) {
+    if (!section) return 'the full test';
+    return section.charAt(0).toUpperCase() + section.slice(1);
+  }
+
+  /* ── 범위가 달라진 채로 돌아온 응시 ──────────────────────────
+   * 시험 중에 문제가 생겨 감독관 승인을 받고 나간 학생이, 이번에는 한 영역만 열어
+   * 돌아왔을 때 뜬다(반대 방향도 같다).
+   *
+   * 예전에는 아무것도 묻지 않고 새 세션을 열었다. 옛 세션이 지워지지는 않았지만
+   * 제출 시각이 없어 성적표에도 리뷰에도 뜨지 않았다 — 학생 눈에는 이미 친 리딩이
+   * 사라진 것이다. 이제는 이어 가는 쪽이 기본이고, 두 길 모두 지우는 것이 없다.
+   *
+   *   · 이어 가기 — 같은 응시에 이 영역을 얹는다. 앞서 친 답안·녹음, 다른 영역에
+   *     남은 시간은 그대로 있고, 제출하면 네 영역이 한 장으로 채점된다.
+   *   · 따로 새 응시 — 옛 응시는 기기에 그대로 두고 빈 응시를 하나 더 연다.
+   */
+  function buildScopeChoices(url, session, contentHash, timingHash, section) {
+    var box = document.getElementById('resume-choices');
+    if (!box) return;
+    box.innerHTML = '';
+
+    var what = sectionLabel(section);
+    var head = document.querySelector('#modal-resume h2');
+    if (head) {
+      head.innerHTML = '<span data-en>Continue your unfinished test?</span>' +
+                       '<span data-ko>치던 시험을 이어서 볼까요?</span>';
+    }
+    var note = document.getElementById('resume-note');
+    if (note) {
+      note.innerHTML =
+        '<span data-en>An unfinished attempt is on this device. Keep it and take ' + what +
+          ' now — your earlier answers and recordings stay, the time left in the other sections stays, ' +
+          'and everything is scored together when you submit.</span>' +
+        '<span data-ko>이 기기에 아직 제출하지 않은 응시가 있습니다. 그대로 두고 지금 ' + what +
+          ' 을 칩니다 — 앞서 친 답안·녹음과 다른 영역의 남은 시간은 그대로이고, ' +
+          '제출할 때 함께 채점됩니다.</span>';
+    }
+
+    box.appendChild(resumeChoiceButton(
+      'Keep my earlier answers', '이전 답안 유지하고 이어서', true, function () {
+        closeModal('modal-resume');
+        var R = window.SG_RESUME;
+        var at = R && R.applyRescope
+          ? R.applyRescope(STORE, screens, section, timingHash, CLOCK.now()) : null;
+        startRun(url, session, contentHash, timingHash, false, section,
+                 at ? at.screenIndex : -1);
+      }));
+
+    box.appendChild(resumeChoiceButton(
+      'Start a separate new attempt', '새 응시로 따로 시작', false, function () {
+        closeModal('modal-resume');
+        /* 옛 응시는 지우지 않는다 — 빈 세션을 하나 더 열 뿐이다. */
+        var fresh = STORE.offlineSessionId();
+        STORE.open(fresh);
+        if (window.SG_LIVE) { try { SG_LIVE.rebind(fresh); } catch (e) {} }
+        startRun(url, fresh, contentHash, timingHash, false, section);
+      }));
+  }
+
   /* ── 부팅 ───────────────────────────────────────────────── */
 
   /* 한 영역만 치는 진입(mode=section)도 학생이 그대로 연다 — 관리자 승인 칸은 없앴다.
@@ -884,11 +951,17 @@ window.SG_RUNTIME = (function () {
         var resumable = (session === active) && !query('goq') && !url.screenId &&
                         can.ok && !!STORE.cursor();
 
-        /* 이어볼 수 없는 활성 세션은 재사용하지 않고 새 세션을 연다.
-           세트·응시 범위가 달라진 경우(전체 → 리딩만 등) 화면 id 는 그대로라서,
-           같은 세션을 다시 쓰면 옛 시계(남은 시간)와 답안이 새 응시에 섞인다.
+        /* 범위만 달라진 미제출 응시(전체 → 리딩만, 리딩만 → 전체)는 새 세션을 열지
+           않는다. 감독관 승인을 받고 나갔다가 한 영역만 다시 여는 길이 바로 이것이고,
+           새 세션을 열면 앞서 친 영역은 제출되지 않은 옛 세션에 갇혀 성적표에서
+           사라진다. 세션은 그대로 두고 범위만 갈아끼운다(SG_RESUME.applyRescope).
+           세트나 문항이 바뀐 경우는 여기 해당하지 않는다 — 그때는 정말 다른 시험이다. */
+        var rescopable = (session === active) && !url.sessionId && !query('goq') && !url.screenId &&
+                         can.reason === 'timing_changed' && sameContent(contentHash);
+
+        /* 그 밖에 이어볼 수 없는 활성 세션은 재사용하지 않고 새 세션을 연다.
            URL 로 세션을 지정했거나 한 번도 시작한 적 없는 세션은 건드리지 않는다. */
-        if (!can.ok && can.reason !== 'no_meta' && !url.sessionId && session === active) {
+        if (!can.ok && can.reason !== 'no_meta' && !url.sessionId && session === active && !rescopable) {
           session = STORE.offlineSessionId();
           STORE.open(session);
         }
@@ -899,6 +972,9 @@ window.SG_RUNTIME = (function () {
         if (resumable) {
           openModal('modal-resume');
           buildResumeChoices(url, session, contentHash, timingHash, section);
+        } else if (rescopable) {
+          openModal('modal-resume');
+          buildScopeChoices(url, session, contentHash, timingHash, section);
         } else {
           startRun(url, session, contentHash, timingHash, false, section);
         }
@@ -1350,7 +1426,9 @@ window.SG_RUNTIME = (function () {
     finishScreen(session);
   }
 
-  function startRun(url, session, contentHash, timingHash, resume, section) {
+  /* atIndex — 범위를 갈아끼운 뒤 안착할 화면(SG_RESUME.applyRescope 가 정한다).
+     주지 않으면 예전처럼 이 범위의 첫 화면에서 시작한다. */
+  function startRun(url, session, contentHash, timingHash, resume, section, atIndex) {
     var meta = STORE.meta();
     if (!meta || !meta.session) {
       STORE.saveMeta({
@@ -1371,8 +1449,9 @@ window.SG_RUNTIME = (function () {
     machine = EXAM.create(screens, { mode: mode });
     SG_RENDER.setMount(document.getElementById('screen-mount'));
 
-    /* 시작 지점 우선순위: 이어보기 > `#screen=` > 라우트 섹션의 첫 화면 > 0 */
+    /* 시작 지점 우선순위: 이어보기 > `#screen=` > 범위 전환이 정한 자리 > 라우트 섹션의 첫 화면 > 0 */
     var startIndex = sectionStartIndex(screens, section);
+    if (typeof atIndex === 'number' && atIndex > 0 && atIndex < screens.length) startIndex = atIndex;
     if (resume) {
       var plan = STORE.planResume(screens, STORE.cursor(), STORE.clocks(), CLOCK.now());
       startIndex = plan.screenIndex;

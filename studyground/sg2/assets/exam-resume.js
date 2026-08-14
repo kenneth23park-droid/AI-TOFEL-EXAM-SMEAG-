@@ -112,6 +112,57 @@
     return keep;
   }
 
+  /* 한 화면에 걸린 타이머들. 엔진의 계약(screen.timer + screen.timers)을 그대로 읽는다. */
+  function timersOfScreen(sc) {
+    var out = [], i;
+    if (!sc) return out;
+    if (sc.timer) out.push(sc.timer);
+    if (sc.timers && sc.timers.length) {
+      for (i = 0; i < sc.timers.length; i++) { if (sc.timers[i]) out.push(sc.timers[i]); }
+    }
+    return out;
+  }
+
+  /* 이 화면열이 쓰는 clock key 집합. 문자열로 짐작하지 않고 엔진의 clockKeyFor 로 만든다 —
+     key 는 'section:reading' 뿐 아니라 'module:R1' · 'screen:R1-q2' 도 된다. */
+  function clockKeysOfScreens(screens, keyFor) {
+    var fn = keyFor || (root.SG_EXAM && root.SG_EXAM.clockKeyFor);
+    var out = {}, i, j, ts, k;
+    if (!fn) return out;
+    for (i = 0; i < (screens || []).length; i++) {
+      ts = timersOfScreen(screens[i]);
+      for (j = 0; j < ts.length; j++) {
+        k = fn(screens[i], ts[j]);
+        if (k) out[k] = true;
+      }
+    }
+    return out;
+  }
+
+  /* 새 범위 안에서 이미 만료된 시계만 고른다. 남은 시간이 있는 시계는 손대지 않는다 —
+     쓰다 만 시간은 학생이 이미 쓴 시간이다. */
+  function expiredInScope(clocks, keySet, nowMs) {
+    var out = [], k, d;
+    for (k in (clocks || {})) {
+      if (!clocks.hasOwnProperty(k)) continue;
+      if (!keySet || !keySet[k]) continue;
+      d = clocks[k];
+      if (d !== null && d !== undefined && d <= nowMs) out.push(k);
+    }
+    return out;
+  }
+
+  /* 커서가 새 화면열 안에 있으면 그 자리, 없으면 이 범위의 첫 화면. */
+  function landingIndex(screens, cursor, section) {
+    var i;
+    if (cursor && cursor.screenId) {
+      for (i = 0; i < (screens || []).length; i++) {
+        if (screens[i] && screens[i].id === cursor.screenId) return i;
+      }
+    }
+    return courseStartIndex(screens, section);
+  }
+
   /* ── 기록 ────────────────────────────────────────────────── */
 
   var step = 0;
@@ -294,13 +345,65 @@
     return { screenIndex: idx, phaseIndex: 0 };
   }
 
+  /* '범위만 바꿔 이어 가기' — 같은 응시(세션)를 그대로 두고 응시 범위만 갈아끼운다.
+   *
+   * 왜 필요한가 —
+   *   전체로 치던 학생이 문제가 생겨 감독관 승인을 받고 나갔다가, 이번에는 한 영역만
+   *   열어 들어온다. 화면열 길이가 달라 timingHash 가 어긋나므로 셸은 지금까지
+   *   "새 세션"을 열었다. 옛 세션은 지워지지는 않지만 제출 시각이 없어 성적표에도
+   *   리뷰에도 영영 뜨지 않는다 — 학생이 이미 친 리딩·리스닝이 사라진 것과 같다.
+   *   여기서는 세션을 그대로 쓴다. 답안·녹음(세션 id 로 묶인다)·이벤트는 한 글자도
+   *   지우지 않고, 제출할 때 네 영역이 한 응시로 함께 채점된다.
+   *
+   * 손대는 것은 둘뿐이다.
+   *   · timingHash — 새 범위 기준으로 고쳐 적는다(다음 새로고침이 정상 재개되도록).
+   *   · 시계 — 새 범위 안에서 "이미 만료된" key 만 지운다. 만료된 채로 두면 그 영역에
+   *     들어서자마자 00:00 이라 아예 칠 수가 없다. 남은 시간이 있으면 그대로 둔다.
+   *   다른 영역의 시계는 건드리지 않는다(F: 지우는 동작 앞에는 backup 이 선다).
+   */
+  function applyRescope(storeApi, screens, section, timingHash, nowMs) {
+    if (!storeApi) return null;
+    backup(storeApi, 'rescope_' + (section || 'full'));
+    var now = typeof nowMs === 'number' ? nowMs : Date.now();
+    var dropped = [];
+    try {
+      var clocks = storeApi.clocks() || {};
+      dropped = expiredInScope(clocks, clockKeysOfScreens(screens), now);
+      for (var i = 0; i < dropped.length; i++) delete clocks[dropped[i]];
+      if (dropped.length) storeApi.saveClocks(clocks);
+    } catch (e) {}
+
+    /* 시계가 끝나 있던 영역은 처음부터다 — 시계를 새로 주면서 커서만 중간에 두면
+       남은 화면이 다 지나간 것처럼 보인다. 그 밖에는 나가던 자리 그대로 돌아간다. */
+    var cur = null;
+    try { cur = storeApi.cursor(); } catch (e1) {}
+    var idx = dropped.length ? courseStartIndex(screens, section)
+                             : landingIndex(screens, cur, section);
+
+    try {
+      var patch = { screenCount: (screens || []).length };
+      if (timingHash) patch.timingHash = timingHash;
+      storeApi.patchMeta(patch);
+    } catch (e2) {}
+    try {
+      storeApi.saveCursor(screens && screens[idx] ? screens[idx].id : '', idx, 0);
+      storeApi.pushEvent('resume_rescope', screens && screens[idx] ? screens[idx].id : '',
+        { section: section || 'full', clearedClocks: dropped });
+    } catch (e3) {}
+
+    return { screenIndex: idx, phaseIndex: 0, clearedClocks: dropped };
+  }
+
   root.SG_RESUME = {
     MAX_BACK: MAX_BACK,
     // 순수
     remainOf: remainOf, rebaseClocks: rebaseClocks, optionsFor: optionsFor, pick: pick,
     courseStartIndex: courseStartIndex, answersOutsideSection: answersOutsideSection,
+    clockKeysOfScreens: clockKeysOfScreens, expiredInScope: expiredInScope,
+    landingIndex: landingIndex,
     // 기록·복구
     attach: attach, step: currentStep, capture: capture, backup: backup,
-    applyCheckpoint: applyCheckpoint, applyCourseRestart: applyCourseRestart
+    applyCheckpoint: applyCheckpoint, applyCourseRestart: applyCourseRestart,
+    applyRescope: applyRescope
   };
 })(typeof window !== 'undefined' ? window : this);
