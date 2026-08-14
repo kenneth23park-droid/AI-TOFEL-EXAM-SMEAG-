@@ -1598,9 +1598,26 @@ var BAND = (function () {
       return n ? { got: got, top: n * BAND.TASK_MAX } : null;
     }
 
+    /** 옛 총점(/120) — 네 영역이 모두 채점됐을 때만 말이 되는 수다. 아니면 null. */
+    function conventionalOf(scores) {
+      var sum = 0;
+      for (var i = 0; i < scores.length; i++) {
+        var v = scores[i].scaled;
+        if (typeof v !== 'number' || !isFinite(v)) return null;
+        sum += v;
+      }
+      return scores.length === SKILLS.length ? sum : null;
+    }
+
     function build(r, me) {
       var ielts = profileOf(r.set_code) === 'ielts';
       var by = r.by_section || {}, scores = [], pts = [], missing = [];
+
+      /* TOEFL 성적표에 실리는 점수는 **밴드(1.0~6.0)** 다. ETS 가 2026-01 부터 그렇게
+         보고하고, 리뷰 화면·성적표 한 장도 그 눈금으로 말한다. 옛 /30·/120 값은
+         버리지 않고 conventional 로 함께 넘긴다 — 전환기(2026~2028)의 병기 규칙이다. */
+      var bandView = ielts ? null : BAND.of(r, (TASKS && TASKS[r.session]) || []);
+
       SKILLS.forEach(function (s) {
         var rate = null, points = null;
         if (s === 'writing' || s === 'speaking') {
@@ -1619,33 +1636,42 @@ var BAND = (function () {
           /* 선생님 채점 영역(총 문항 0)은 점수 칸을 비운다 — 0 으로 찍으면 오해가 된다. */
           points = tot ? (ielts ? bandFor(s, got, tot) : halfUp(rate * 30)) : null;
         }
-        if (points === null) missing.push(LAB[s][0]);
-        else pts.push(points);
+        /* 보고서에 실리는 점수. IELTS 는 밴드 0~9, TOEFL 은 ETS 2026 밴드 1.0~6.0.
+           옛 환산점수(/30)는 scaled 로 따라간다. */
+        var band = bandView ? bandView.sections[s].band : null;
+        var report = ielts ? points : band;
+        if (report === null || report === undefined) missing.push(LAB[s][0]);
+        else pts.push(report);
         scores.push({
           skill: LAB[s][0],
           rate: rate,
-          points: points,
-          /* ⚠️ 가설(검증필요) — 영역 CEFR 은 환산점수를 4배 해 총점 표에 대본 값이다.
-             공식 영역별 대응표가 아니다. */
-          level: (!ielts && points !== null) ? cefrFor(points * 4) : null
+          points: report,
+          scaled: points,
+          /* 영역 등급도 밴드에서 나온다 — 예전에는 환산점수를 4배 해 총점 표에
+             대보는 가설이었다. 밴드→CEFR 은 ETS 표라 대볼 필요가 없다. */
+          level: (!ielts && band !== null) ? BAND.cefr(band) : null
         });
       });
 
       var sum = pts.reduce(function (a, b) { return a + b; }, 0);
-      var average = pts.length ? (ielts ? toHalf(sum / pts.length) : sum / pts.length) : null;
-      var total = pts.length ? (ielts ? toHalf(sum / pts.length) : sum) : null;
+      var average, total;
+      if (ielts) {
+        average = pts.length ? toHalf(sum / pts.length) : null;
+        total = average;
+      } else {
+        /* 종합은 합이 아니라 **평균**이다(ETS 2026). BAND.of 가 이미 그 규칙으로
+           계산해 두었으므로 여기서 다시 세지 않는다 — 두 번 세면 언젠가 갈린다. */
+        average = bandView ? bandView.overall : null;
+        total = average;
+      }
       var warnings = [];
       if (missing.length) {
-        warnings.push(missing.join(' · ') + ' 영역은 아직 점수가 없어 총점에서 빠졌습니다.');
+        warnings.push(missing.join(' · ') + ' — not scored yet, left out of the overall.');
       }
 
-      /* TOEFL 1~6 밴드 (ETS, 2026-01~). 옛 /30·/120 값은 그대로 두고 **덧붙인다** —
-         전환기(2026~2028)에는 두 눈금을 병기하는 것이 ETS 의 규칙이고, 리포트
-         생성기가 아직 밴드를 모를 수도 있기 때문이다(모르면 이 칸을 무시한다). */
-      var bandView = ielts ? null : BAND.of(r, (TASKS && TASKS[r.session]) || []);
-
       return {
-        profile: ielts ? 'ielts' : 'toefl',
+        /* toefl6 = ETS 2026 밴드 눈금. 옛 'toefl'(/30·/120)과 다른 프로파일이다. */
+        profile: ielts ? 'ielts' : 'toefl6',
         scale: ielts ? 'ielts9' : (r.scale || 'toefl6'),
         set_code: r.set_code || '',
         student: {
@@ -1665,9 +1691,13 @@ var BAND = (function () {
           }),
           pending: bandView.pending
         } : null,
+        /* 옛 눈금(/120)은 버리지 않고 함께 보낸다 — 전환기에는 둘을 병기한다.
+           BAND 의 값을 빌리지 않고 여기서 세는 이유는 produced() 와 같다: 그 칸의
+           모양이 사본마다 다르다. 네 영역이 다 있을 때만 말이 되는 수다. */
+        conventional: conventionalOf(scores),
         /* 영역이 빠진 채 매긴 등급은 실제보다 낮게 보인다 — 아예 비워 둔다. */
         grade: (total === null || missing.length) ? ''
-          : (ielts ? 'Band ' + total.toFixed(1) : cefrFor(total)),
+          : (ielts ? 'Band ' + total.toFixed(1) : (bandView ? bandView.cefr : '')),
         warnings: warnings
       };
     }

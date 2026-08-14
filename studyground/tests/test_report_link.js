@@ -82,20 +82,27 @@ eq(REPORT.profileOf('SET9'), 'toefl', 'SET9 는 TOEFL');
 eq(REPORT.profileOf('IELTS-SAMPLE'), 'ielts', 'IELTS-SAMPLE 은 IELTS');
 eq(REPORT.profileOf(''), 'toefl', '세트 코드가 없으면 TOEFL 로 본다');
 
-console.log('TOEFL 환산 (영역 /30 · 총점 합 /120)');
+console.log('TOEFL — 보고서에 실리는 점수는 ETS 2026 밴드(1.0~6.0)다');
 var t = REPORT.build(row('SET9',
   { reading: { score: 26, total: 35 }, listening: { score: 26, total: 33 },
     writing: { score: 3, total: 10 } },              // Build a Sentence — 총점에는 안 쓴다
   produced('writing', 7, 2)                          // 과제 2개 · 7.0/10 → 21
     .concat(produced('speaking', 12, 4))             // 과제 4개 · 12.0/20 → 18
 ), ME);
-eq(t.profile, 'toefl', '프로파일');
-eq(t.scores[0].points, 22, 'Reading 26/35 → 22');        // 0.7429×30 = 22.29
-eq(t.scores[1].points, 24, 'Listening 26/33 → 24');      // 0.7879×30 = 23.64, .5 는 올림
-eq(t.total, 85, '총점은 영역의 합');
-eq(t.average, 21.25, '영역 평균');
-eq(t.grade, 'B2', '등급은 총점의 CEFR');
-eq(t.scores.map(function (s) { return s.level; }), ['B2', 'B2+', 'B2', 'B1+'], '영역 CEFR');
+eq(t.profile, 'toefl6', '프로파일 — 옛 /30 눈금(toefl)과 다른 이름이어야 한다');
+eq(t.scores[0].points, 4.5, 'Reading 26/35 → 환산 22 → 밴드 4.5');
+eq(t.scores[1].points, 5, 'Listening 26/33 → 환산 24 → 밴드 5.0');
+eq(t.scores[2].points, 4.5, 'Writing 과제 7.0/10 → 환산 21 → 밴드 4.5');
+eq(t.scores[3].points, 3.5, 'Speaking 과제 12.0/20 → 환산 18 → 밴드 3.5');
+/* 옛 환산점수를 버리지 않는다 — 전환기(2026~2028)에는 두 눈금을 병기한다. */
+eq(t.scores.map(function (s) { return s.scaled; }), [22, 24, 21, 18], '옛 환산점수는 scaled 로 따라간다');
+eq(t.conventional, 85, '옛 총점(/120)도 함께 넘긴다');
+/* 종합은 **합이 아니라 평균**이다: (4.5+5.0+4.5+3.5)/4 = 4.375 → 4.5 */
+eq(t.total, 4.5, '종합은 네 밴드의 평균');
+eq(t.average, 4.5, '평균과 종합은 같은 수다 — 밴드 눈금에서는 총점이 곧 평균이다');
+eq(t.grade, 'B2', '등급은 종합 밴드의 CEFR');
+/* 영역 등급도 밴드에서 나온다(ETS 표). 예전엔 환산점수를 4배 해 총점 표에 대봤다. */
+eq(t.scores.map(function (s) { return s.level; }), ['B2', 'C1', 'B2', 'B1'], '영역 CEFR 은 밴드에서');
 eq(t.student.name, '박광섭', '학생 이름');
 eq(t.student.date, '2026-08-10', '시험일');
 
@@ -123,9 +130,9 @@ var p = REPORT.build(row('SET9', {
 }), ME);
 /* 네 영역이 언제나 네 줄로 간다 — 채점 전이면 빈 칸으로. 예전에는 by_section 에
    없는 영역을 아예 빼고 보냈는데, 그러면 성적표에서 스피킹이 있었는지조차 알 수 없다. */
-eq(p.scores.map(function (s) { return s.points; }), [22, 24, null, null],
+eq(p.scores.map(function (s) { return s.points; }), [4.5, 5, null, null],
    '아직 채점되지 않은 영역은 점수 칸을 비운다 — 줄은 남긴다');
-eq(p.total, 46, '총점에서도 뺀다');
+eq(p.total, 5, '종합은 채점된 영역만의 평균 (4.5+5.0)/2 = 4.75 → 5.0');
 eq(p.grade, '', '반쪽 총점에 등급을 매기지 않는다');
 ok(p.warnings.length === 1 && /Writing/.test(p.warnings[0]) && /Speaking/.test(p.warnings[0]),
    '빠진 영역을 경고로 알린다');
@@ -160,7 +167,7 @@ ok(opened.indexOf('?') < 0, '질의 문자열로는 보내지 않는다 — 서�
 var frag = /#d=(.+)$/.exec(opened)[1].replace(/-/g, '+').replace(/_/g, '/');
 var back = JSON.parse(Buffer.from(frag, 'base64').toString('utf8'));
 eq(back.student.name, '박광섭', 'base64url 왕복 후에도 한글 이름이 살아 있다');
-eq(back.profile, 'toefl', '프로파일도 함께 건너간다');
+eq(back.profile, 'toefl6', '프로파일도 함께 건너간다');
 
 /* reportUrl 이 비면 아무 창도 열지 않는다 — 조회·CSV 만 쓰는 배포를 위한 안전장치. */
 var before = opened;
