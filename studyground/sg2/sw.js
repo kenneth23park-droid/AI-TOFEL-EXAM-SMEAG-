@@ -317,7 +317,14 @@
 //      두드릴 수 있어야, 무엇이 왜 안 되는지가 한 덩어리로 뭉개지지 않는다.
 //      exam-shell.js · review.html · sg-results.js 가 함께 바뀌었고 새 파일이 셸에
 //      들어왔으므로 판올림한다.
-const VERSION = 'sg-v76';
+// v77: 녹음 회수 도구를 스피킹 리뷰 옆에 세운다. 여태 그 도구는 admin 허브 카드로만
+//      있어서, "녹음이 없다"는 문구를 보고 무엇을 해야 하는지 아는 사람만 찾아갔다.
+//      이제 sg-review-speaking.js 가 녹음이 없다고 말하는 자리마다(제출 안 됨 · 이 기기에
+//      없음 · 버킷에서 안 열림) 선생님·관리자에게 문을 세우고, 채점 카드에도 문 하나를
+//      둔다 — 스피킹이 통째로 비어 있으면 문항을 넘겨 볼 것도 없이 거기가 첫 화면이다.
+//      recover-recordings.html 은 ?session= 을 받으면 그 응시만 추려 스스로 스캔한다.
+//      셋 다 셸 자산이라 판올림해야 재방문 기기에 도착한다.
+const VERSION = 'sg-v77';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

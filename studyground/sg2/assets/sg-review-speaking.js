@@ -443,15 +443,35 @@ window.SG_REVIEW_SPEAKING = (function () {
     slot.innerHTML = '<span class="muted">' + bi(en, ko) + '</span>';
   }
 
-  function wirePlayback(el, it, session) {
+  /* 녹음이 없다고 말하는 자리마다 회수 도구로 가는 문을 세운다(선생님·관리자에게만).
+   *
+   * 이 문구가 뜨는 자리는 둘 중 하나다 — 업로드가 실패했거나, 애초에 올라간 적이
+   * 없거나. 어느 쪽이든 다음 할 일은 같다: 시험을 친 그 컴퓨터에서 원본을 꺼내는 것.
+   * 그 사실을 아는 사람만 admin 허브를 뒤져 도구를 찾을 수 있었고, 그동안 스피킹은
+   * 영영 no_transcript 였다. 세션을 달아 보내면 그 응시의 녹음만 추려 스스로 스캔한다. */
+  function recoverInto(slot, session, staff) {
+    if (!staff || !session || !slot) return;
+    var a = document.createElement('a');
+    a.href = 'recover-recordings.html?session=' + encodeURIComponent(session);
+    a.className = 'btn ghost sm';
+    a.style.marginLeft = '8px';
+    a.textContent = bi('Recover from this PC', '이 PC 에서 회수');
+    slot.appendChild(a);
+  }
+
+  function wirePlayback(el, it, session, staff) {
     var slot = el.querySelector('[data-play]');
     if (!slot) return;
     var path = it.task && it.task.media_path;
-    if (!it.recorded && !path) return;                 // 녹음 자체가 없다 — html() 이 이미 말했다
+    if (!it.recorded && !path) {                       // 녹음 자체가 없다 — html() 이 이미 말했다
+      recoverInto(slot, session, staff);
+      return;
+    }
 
     function cloud() {
       if (!path || !window.SG_AUTH) {
         say(slot, 'The recording is not on this device.', '이 기기에는 녹음이 없습니다.');
+        recoverInto(slot, session, staff);
         return;
       }
       SG_AUTH.token().then(function (tok) {
@@ -464,13 +484,17 @@ window.SG_REVIEW_SPEAKING = (function () {
           body: JSON.stringify({ expiresIn: 3600 })
         }).then(function (r) { return r.ok ? r.json() : null; })
           .then(function (j) {
-            if (j && j.signedURL) playerInto(slot, SG_AUTH.url + '/storage/v1' + j.signedURL);
-            else say(slot, 'The recording could not be opened from this device.',
-                     '이 기기에서는 녹음을 열 수 없습니다.');
+            if (j && j.signedURL) { playerInto(slot, SG_AUTH.url + '/storage/v1' + j.signedURL); return; }
+            /* 채점 행에는 경로가 적혀 있는데 버킷에서 열리지 않는다 — 파일이 그 자리에
+               없다는 뜻이다(업로드가 400 으로 거절당한 자리가 그랬다). 회수가 답이다. */
+            say(slot, 'The recording could not be opened from this device.',
+                '이 기기에서는 녹음을 열 수 없습니다.');
+            recoverInto(slot, session, staff);
           });
       })['catch'](function () {
         say(slot, 'The recording could not be opened from this device.',
             '이 기기에서는 녹음을 열 수 없습니다.');
+        recoverInto(slot, session, staff);
       });
     }
 
@@ -494,6 +518,7 @@ window.SG_REVIEW_SPEAKING = (function () {
    *   opts.rows      SG_RESULTS.detail(res).rows
    *   opts.tasks     sg_task_scores 행[] (늦게 와도 된다 — setTasks 로 갈아 끼운다)
    *   opts.session   녹음을 찾을 응시 세션 id
+   *   opts.staff     선생님·관리자면 true — 녹음이 없는 자리에 회수 도구 문을 세운다
    *   opts.extraFor  fn(qid) → 문항 아래 붙일 HTML(코멘트 등)
    *   opts.onPaint   fn(el) 다시 그린 뒤 부를 것(코멘트 편집기 배선 등)
    * @returns {{repaint, setTasks, state, model}}
@@ -515,7 +540,7 @@ window.SG_REVIEW_SPEAKING = (function () {
         try { window.SG_AUDIO.apply(el); } catch (e) {}
       }
       var it = current();
-      if (it) wirePlayback(el, it, opts.session);
+      if (it) wirePlayback(el, it, opts.session, opts.staff);
       if (typeof opts.onPaint === 'function') opts.onPaint(el);
     }
 

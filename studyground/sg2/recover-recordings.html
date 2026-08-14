@@ -341,13 +341,26 @@
 
   /* ── 화면 배선 ─────────────────────────────────────────── */
 
-  $('btn-scan').onclick = function () {
+  /* 스피킹 리뷰에서 곧장 넘어오는 길.
+     ?session=… 을 달고 오면 그 응시의 녹음만 추려 보여 주고 스캔을 스스로 돌린다 —
+     선생님이 보던 학생 옆에 다른 응시 열두 건이 함께 늘어서면, 어느 것을 올려야 하는지
+     화면이 답을 주지 못한다. 파라미터가 없으면 예전처럼 이 컴퓨터 전체를 훑는다. */
+  var ONLY = (function () {
+    try { return new URLSearchParams(location.search).get('session') || ''; }
+    catch (e) { return ''; }
+  })();
+
+  function doScan() {
     say('warn', 'Scanning…');
-    scan().then(function (list) {
-      found = list;
+    return scan().then(function (list) {
+      found = ONLY ? list.filter(function (f) { return f.session === ONLY; }) : list;
       render();
       if (!found.length) {
-        say('bad', 'No recordings are stored in this browser. If this is the right computer, ' +
+        say('bad', (ONLY
+              ? 'No recordings for this attempt are stored in this browser. ' +
+                'The test was taken on a different computer — open this page there. '
+              : '') +
+                   'No recordings are stored in this browser. If this is the right computer, ' +
                    'the exam may have been taken in a Guest or Incognito window (that data is ' +
                    'deleted when the window closes), or in a different Chrome profile.');
         $('btn-save').disabled = true; $('btn-up').disabled = true;
@@ -362,7 +375,13 @@
     })['catch'](function (e) {
       say('bad', 'Could not read this browser’s recording store: ' + esc((e && e.message) || e));
     });
-  };
+  }
+
+  $('btn-scan').onclick = doScan;
+
+  /* 리뷰에서 넘어온 자리는 한 번 더 누르게 하지 않는다 — 여기까지 온 사람의 뜻은
+     이미 "그 응시의 녹음을 보자" 이고, 스캔은 회선도 로그인도 필요 없다. */
+  if (ONLY) doScan();
 
   $('btn-save').onclick = saveAll;
   $('btn-up').onclick = uploadAll;
