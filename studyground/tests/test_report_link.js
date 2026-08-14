@@ -37,10 +37,13 @@ var STUB = [
   "var LAB = { reading: ['Reading','읽기'], listening: ['Listening','듣기'],",
   "            writing: ['Writing','쓰기'], speaking: ['Speaking','말하기'] };",
   "function when(iso) { return String(iso).slice(0, 10); }",
-  "var BAND = __BAND, TASKS = {};"
+  "var BAND = __BAND, TASKS = __TASKS;"
 ].join('\n');
 
-var REPORT = new Function('__BAND', STUB + src.slice(a, b) + '\nreturn REPORT;')(SG_BAND);
+/* session → sg_task_scores 행. 라이팅·스피킹의 점수는 **여기에만** 있다. */
+var TASKS = {};
+var REPORT = new Function('__BAND', '__TASKS',
+  STUB + src.slice(a, b) + '\nreturn REPORT;')(SG_BAND, TASKS);
 
 var fails = 0;
 function ok(cond, msg) {
@@ -53,8 +56,25 @@ function eq(got, want, msg) {
 }
 
 var ME = { name: '박광섭', student_id: 'smeag001' };
-function row(code, by) {
-  return { set_code: code, submitted_at: '2026-08-10T02:00:00Z', by_section: by };
+
+/* 응시 한 건. by_section 에는 **자동채점만** 들어간다 — 리딩·리스닝, 그리고 라이팅의
+   Build a Sentence. 스피킹에는 객관 채점 문항이 하나도 없어 이 칸 자체가 없다.
+   라이팅·스피킹의 점수는 sg_task_scores(과제당 0~5)에 있고, 그것을 tasks 로 넘긴다.
+
+   예전 이 파일은 writing·speaking 을 by_section 에 넣어 두고 시험했다. 실제로는
+   그런 응시가 없어서, "by_section 만 보면 스피킹이 통째로 빠진다" 는 진짜 결함이
+   테스트를 통과한 채 살아 있었다. */
+var SESSION = 0;
+function row(code, by, tasks) {
+  var s = 'sess' + (++SESSION);
+  TASKS[s] = tasks || [];
+  return { set_code: code, session: s, submitted_at: '2026-08-10T02:00:00Z', by_section: by };
+}
+/** 과제 n 개로 got 점을 받은 산출형 한 벌(만점 n×5). */
+function produced(skill, got, n) {
+  var out = [], each = got / n;
+  for (var i = 0; i < n; i++) out.push({ skill: skill, question_id: skill[0] + i, ai_score: each });
+  return out;
 }
 
 console.log('시험 판별');
@@ -63,10 +83,12 @@ eq(REPORT.profileOf('IELTS-SAMPLE'), 'ielts', 'IELTS-SAMPLE 은 IELTS');
 eq(REPORT.profileOf(''), 'toefl', '세트 코드가 없으면 TOEFL 로 본다');
 
 console.log('TOEFL 환산 (영역 /30 · 총점 합 /120)');
-var t = REPORT.build(row('SET9', {
-  reading: { score: 26, total: 35 }, listening: { score: 26, total: 33 },
-  writing: { score: 8, total: 12 }, speaking: { score: 7, total: 11 }
-}), ME);
+var t = REPORT.build(row('SET9',
+  { reading: { score: 26, total: 35 }, listening: { score: 26, total: 33 },
+    writing: { score: 3, total: 10 } },              // Build a Sentence — 총점에는 안 쓴다
+  produced('writing', 7, 2)                          // 과제 2개 · 7.0/10 → 21
+    .concat(produced('speaking', 12, 4))             // 과제 4개 · 12.0/20 → 18
+), ME);
 eq(t.profile, 'toefl', '프로파일');
 eq(t.scores[0].points, 22, 'Reading 26/35 → 22');        // 0.7429×30 = 22.29
 eq(t.scores[1].points, 24, 'Listening 26/33 → 24');      // 0.7879×30 = 23.64, .5 는 올림
@@ -78,10 +100,11 @@ eq(t.student.name, '박광섭', '학생 이름');
 eq(t.student.date, '2026-08-10', '시험일');
 
 console.log('IELTS 환산 (밴드표 · 총점은 평균)');
-var i = REPORT.build(row('IELTS-SAMPLE', {
-  reading: { score: 30, total: 40 }, listening: { score: 26, total: 40 },
-  writing: { score: 6, total: 9 }, speaking: { score: 7, total: 9 }
-}), ME);
+var i = REPORT.build(row('IELTS-SAMPLE',
+  { reading: { score: 30, total: 40 }, listening: { score: 26, total: 40 } },
+  produced('writing', 10, 3)                         // 10/15 → 0.667×9 = 6.0
+    .concat(produced('speaking', 15.5, 4))           // 15.5/20 → 0.775×9 = 6.975 → 7.0
+), ME);
 eq(i.profile, 'ielts', '프로파일');
 eq(i.scores[0].points, 7, 'Reading 30/40 → band 7.0');
 eq(i.scores[1].points, 6.5, 'Listening 26/40 → band 6.5');
@@ -90,15 +113,18 @@ eq(i.grade, 'Band 6.5', '등급');
 ok(i.scores.every(function (s) { return s.level === null; }), 'IELTS 는 CEFR 을 매기지 않는다');
 
 console.log('밴드표가 없는 영역은 비율 환산으로 떨어진다');
-var w = REPORT.build(row('IELTS-SAMPLE', { writing: { score: 9, total: 9 } }), ME);
-eq(w.scores[0].points, 9, 'Writing 만점 → band 9.0');
+var w = REPORT.build(row('IELTS-SAMPLE', {}, produced('writing', 10, 2)), ME);
+eq(w.scores[2].points, 9, 'Writing 만점 → band 9.0');
 
 console.log('아직 채점되지 않은 영역');
 var p = REPORT.build(row('SET9', {
   reading: { score: 26, total: 35 }, listening: { score: 26, total: 33 },
   writing: { score: 0, total: 0 }
 }), ME);
-eq(p.scores.map(function (s) { return s.points; }), [22, 24, null], '선생님 채점 영역은 점수 칸을 비운다');
+/* 네 영역이 언제나 네 줄로 간다 — 채점 전이면 빈 칸으로. 예전에는 by_section 에
+   없는 영역을 아예 빼고 보냈는데, 그러면 성적표에서 스피킹이 있었는지조차 알 수 없다. */
+eq(p.scores.map(function (s) { return s.points; }), [22, 24, null, null],
+   '아직 채점되지 않은 영역은 점수 칸을 비운다 — 줄은 남긴다');
 eq(p.total, 46, '총점에서도 뺀다');
 eq(p.grade, '', '반쪽 총점에 등급을 매기지 않는다');
 ok(p.warnings.length === 1 && /Writing/.test(p.warnings[0]) && /Speaking/.test(p.warnings[0]),

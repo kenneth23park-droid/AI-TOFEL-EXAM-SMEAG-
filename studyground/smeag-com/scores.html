@@ -1577,16 +1577,48 @@ var BAND = (function () {
       return rows[rows.length - 1][1];
     }
 
+    /* 산출형(라이팅·스피킹)의 원점수 — 과제 하나가 0~5 다.
+       왜 여기서 다시 세는가: by_section 에는 이 점수가 **없다**. 스피킹에는 객관 채점
+       문항이 하나도 없고(전부 루브릭 채점), 라이팅의 by_section 은 Build a Sentence
+       뿐이다. by_section 만 보면 스피킹은 통째로 사라지고 라이팅은 반쪽이 된다.
+       BAND.of 의 detail 을 빌리지 않는 것은 그 칸의 모양이 사본마다 달라서다
+       (sg2/assets/sg-band.js 에는 got·top 이 없다). 여기서 세면 어디서든 같다. */
+    function produced(r, skill) {
+      var rows = (typeof TASKS !== 'undefined' && TASKS[r.session]) || [];
+      var got = 0, n = 0;
+      for (var i = 0; i < rows.length; i++) {
+        var t = rows[i] || {};
+        if (String(t.skill || '').toLowerCase() !== skill) continue;
+        /* 최종 점수는 선생님이 이긴다 — 손대지 않았으면 AI 점수가 그대로 점수다. */
+        var sc = (t.teacher_score === null || t.teacher_score === undefined)
+          ? t.ai_score : t.teacher_score;
+        if (sc === null || sc === undefined || sc === '') continue;
+        got += Number(sc); n += 1;
+      }
+      return n ? { got: got, top: n * BAND.TASK_MAX } : null;
+    }
+
     function build(r, me) {
       var ielts = profileOf(r.set_code) === 'ielts';
       var by = r.by_section || {}, scores = [], pts = [], missing = [];
       SKILLS.forEach(function (s) {
-        var v = by[s];
-        if (!v) { missing.push(LAB[s][0]); return; }
-        var tot = Number(v.total) || 0, got = Number(v.score) || 0;
-        var rate = tot ? got / tot : null;
-        /* 선생님 채점 영역(총 문항 0)은 점수 칸을 비운다 — 0 으로 찍으면 오해가 된다. */
-        var points = tot ? (ielts ? bandFor(s, got, tot) : halfUp(rate * 30)) : null;
+        var rate = null, points = null;
+        if (s === 'writing' || s === 'speaking') {
+          /* 채점된 과제가 하나도 없으면 비운다 — by_section 으로 물러서지 않는다.
+             그랬다가는 리뷰 화면이 "채점 전" 이라 부르는 영역에 성적표만 점수를
+             적어 내려간다. */
+          var prod = produced(r, s);
+          if (prod) {
+            rate = prod.got / prod.top;
+            points = ielts ? toHalf(rate * 9) : halfUp(rate * 30);
+          }
+        } else {
+          var v = by[s];
+          var tot = v ? Number(v.total) || 0 : 0, got = v ? Number(v.score) || 0 : 0;
+          rate = tot ? got / tot : null;
+          /* 선생님 채점 영역(총 문항 0)은 점수 칸을 비운다 — 0 으로 찍으면 오해가 된다. */
+          points = tot ? (ielts ? bandFor(s, got, tot) : halfUp(rate * 30)) : null;
+        }
         if (points === null) missing.push(LAB[s][0]);
         else pts.push(points);
         scores.push({
