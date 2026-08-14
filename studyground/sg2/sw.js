@@ -332,7 +332,21 @@
 //      시험일 명단 대조를 얹었다 — 배부한 아이디에서 도착한 것을 빼면 빈칸이
 //      이름을 갖는다. 그날은 9명 중 8명만 도착했고 아무도 세지 않았다.
 //      둘 다 셸 자산이라 판올림해야 시험장 PC 에 도착한다.
-const VERSION = 'sg-v78';
+// v79: AI 채점·리뷰가 확인할 수 있는 것만 말한다. 셋이 함께 바뀌었다.
+//      1) 채점(api/score.js) — 온도 0, 복창은 원문과 견주어 **세고**(_rubric_toefl.js
+//         compareRepeat) 루브릭이 그 셈에 허락하지 않는 점수는 내린다. 채점 근거로
+//         붙는 인용은 답안에 글자 그대로 있는지 확인하고 없으면 지운다.
+//      2) 리뷰(api/feedback.js) — 오답에 그 문항이 딛고 선 원문(리딩 지문·리스닝
+//         대본)을 함께 실어 보낸다. 여태 모델이 본 것은 문제문 한 줄뿐이라, 해설이
+//         "지문을 다시 읽어 보세요" 아니면 지어낸 근거였다. 받은 인용은 서버가
+//         응시와 대조해 지어낸 것을 걷어 낸다.
+//      3) 화면 — 확인된 인용(내가 쓴 답 · 지문 근거)과 복창의 셈을 학생에게 그대로
+//         보여 준다.
+//      sg-results.js · sg-comments.js · exam-shell.js · review.html ·
+//      sg-review-writing.js · sg-review-speaking.js · app.css 가 모두 셸 자산이라
+//      판올림해야 재방문 기기에 도착한다. 시험 셸에 audio-script-check.js 가 새로
+//      실린다 — 문항마다 음원이 따로 붙는 리스닝은 학생이 들은 말이 그 인덱스에만 있다.
+const VERSION = 'sg-v79';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

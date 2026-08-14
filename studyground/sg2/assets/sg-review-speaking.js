@@ -301,9 +301,30 @@ window.SG_REVIEW_SPEAKING = (function () {
     if (t.ai_error) out += '<p class="muted">' + bi('AI scoring failed: ', 'AI 채점 실패: ') + esc(t.ai_error) + '</p>';
     if (rub.summary) out += '<p class="rs-body">' + esc(rub.summary) + '</p>';
     if (crit.length) {
+      /* 인용은 전사문에서 글자 그대로 찾은 것만 남는다(api/score.js) — 학생이 "내가
+         그렇게 말했나" 를 전사문에서 바로 확인할 수 있어야 한다. */
       out += '<ul class="rw-crit">' + crit.map(function (c) {
-        return '<li><b>' + esc(c.criterion) + '</b> — ' + esc(c.comment || '') + '</li>';
+        return '<li><b>' + esc(c.criterion) + '</b> — ' + esc(c.comment || '') +
+          (c.quote ? ' <q class="rw-quote">' + esc(c.quote) + '</q>' : '') + '</li>';
       }).join('') + '</ul>';
+    }
+    /* Listen and Repeat 는 세어서 아는 과제다. 센 것을 그대로 보여 준다 — "몇 개 중
+       몇 개를 옮겼고 무엇이 빠졌는가" 는 어떤 총평보다 학생이 바로 쓸 수 있는 말이다. */
+    if (rub.guard && rub.guard.content_total) {
+      var g = rub.guard;
+      out += '<p class="rs-body">' +
+        (g.exact
+          ? bi('Repeated exactly, word for word.', '한 단어도 빠짐없이 그대로 따라 했습니다.')
+          : bi('Kept ' + g.content_kept + ' of ' + g.content_total + ' key words.',
+               '핵심 단어 ' + g.content_total + '개 중 ' + g.content_kept + '개를 옮겼습니다.') +
+            ((g.missing_content && g.missing_content.length)
+              ? ' ' + bi('Missing: ', '빠진 말: ') + esc(g.missing_content.join(', '))
+              : '')) +
+        '</p>';
+    }
+    if (rub.why_not_higher) {
+      out += '<p class="rs-body"><b>' + bi('To score higher', '한 점 더 받으려면') + '</b> — ' +
+        esc(rub.why_not_higher) + '</p>';
     }
     if (t.teacher_note) {
       out += '<p class="rs-body"><b>' + bi('Teacher', '선생님') + '</b> — ' + esc(t.teacher_note) + '</p>';

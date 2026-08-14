@@ -533,6 +533,9 @@ tr.is-wrong td { background: rgba(232,72,31,.045); }
 .rw-score { font-size: 26px; font-weight: 860; color: var(--brand); letter-spacing: -.02em; }
 .rw-score span { font-size: 14px; font-weight: 750; color: var(--muted); }
 .rw-crit { margin: 8px 0 0 17px; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
+/* 채점 근거로 붙는 인용 — 학생이 자기 글에서 그대로 찾을 수 있는 말만 온다
+   (api/score.js 가 답안에 없는 인용은 지운다). 본문과 달리 보여야 눈이 먼저 간다. */
+.rw-quote { font-style: italic; color: var(--ink); }
 .rw-model { font-size: 11px; color: var(--dim); margin-top: 6px; }
 
 /* 과제 셋의 점수는 늘 함께 보인다 — 라이팅 점수가 어디서 왔는지 알아야 하기 때문이다. */

@@ -111,6 +111,39 @@ window.SG_RESULTS = (function () {
     return (typeof rec === 'object' && rec !== null && 'v' in rec) ? rec.v : rec;
   }
 
+  /* 문항이 딛고 선 원문 — 리딩은 지문, 리스닝은 대본. AI 리뷰가 "왜 그 답인가" 를
+   * 쓰려면 이게 있어야 한다. 없으면 모델이 기댈 것은 문제문 한 줄뿐이고, 그러면
+   * 지문에 있지도 않은 근거를 지어내거나 "다시 읽어 보라" 는 말만 남는다.
+   * 화면은 이 값을 쓰지 않는다 — 지문은 이미 리뷰 화면이 따로 그린다. */
+  function sourceOf(entry) {
+    var blk = (entry && entry.block) || {};
+    var q = (entry && entry.q) || {};
+    if (isArray(blk.paragraphs) && blk.paragraphs.length) {
+      return { kind: 'passage', title: String(blk.title || blk.heading || ''),
+               text: blk.paragraphs.join('\n\n') };
+    }
+    if (blk.script) {
+      return { kind: 'script', title: String(blk.title || blk.heading || ''), text: String(blk.script) };
+    }
+    /* 문항마다 음원이 따로 붙는 리스닝(짧은 응답)에는 블록 대본이 없다. 그 한 줄은
+       대본 인덱스에만 있는데, 그게 곧 학생이 들은 전부다 — 없으면 리뷰는 "다시 들어
+       보세요" 밖에 못 쓴다. 인덱스가 아직 안 실렸으면 조용히 없는 대로 간다
+       (부르는 쪽이 SG_SCRIPT_CHECK.load 를 먼저 기다린다). */
+    if (window.SG_SCRIPT_CHECK && window.SG_SCRIPT_CHECK.forPath) {
+      /* 문항 제 음원이 먼저다. 없으면 블록이 함께 쓰는 클립(Questions 13-14 처럼
+         한 대화에 문항 둘)의 대본을 쓴다. */
+      var rec = (q.audio && window.SG_SCRIPT_CHECK.forPath(q.audio)) ||
+                (blk.audio && window.SG_SCRIPT_CHECK.forPath(blk.audio));
+      if (rec && rec.text) {
+        return { kind: 'script', title: String(blk.heading || ''), text: String(rec.text) };
+      }
+    }
+    if (blk.text) {
+      return { kind: 'passage', title: String(blk.title || blk.heading || ''), text: String(blk.text) };
+    }
+    return null;
+  }
+
   function score(p, answers) {
     var rows = [], bySection = {}, sc = 0, total = 0;
     if (!p) return { score: 0, total: 0, percent: 0, bySection: bySection, rows: rows };
@@ -144,7 +177,8 @@ window.SG_RESULTS = (function () {
         /* 보기 — 객관식의 정답은 팩 안에서 번호다. 번호만 들고 다니면 리뷰에
            "정답은 2번" 밖에 못 쓴다. 보기 문장을 함께 들고 다닌다. */
         choices: isArray(q.choices) ? q.choices : null,
-        given: given, key: key, ok: ok
+        given: given, key: key, ok: ok,
+        src: sourceOf(all[i])
       });
     }
     return {

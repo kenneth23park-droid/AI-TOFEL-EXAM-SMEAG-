@@ -17,9 +17,18 @@
  *                   /api/generate 의 강의 대본은 그 배가 든다. OpenAI 는 상한을
  *                   보내지 않는다 — 모델마다 받는 필드 이름이 달라서, 안 보내는 쪽이
  *                   새 모델이 나올 때마다 고치지 않아도 된다.
+ *   opts.temperature 채점은 같은 답안에 같은 점수를 내야 한다. 0 을 보내면 같은 글이
+ *                   같은 점수로 돌아올 확률이 높아진다(보장은 아니다). 온도를 아예
+ *                   안 받는 모델도 있어서, 거절당하면 온도만 떼고 한 번 더 부른다 —
+ *                   채점이 통째로 죽는 것보다 온도를 잃는 편이 낫다.
  *   truncated       상한에 걸려 잘렸다. 잘린 JSON 은 파싱만 실패하고 이유는 안 남아서,
  *                   호출자가 "모델이 이상한 걸 줬다" 와 "길이가 모자랐다" 를 구분하려면
  *                   이 값이 필요하다.
+ *
+ * 인용 검증(isVerbatim)
+ *   채점과 리뷰가 "학생이 이렇게 썼다" 고 인용할 때, 그 말이 실제 답안에 있는지는
+ *   모델에게 묻지 않고 여기서 문자로 확인한다. 지어낸 인용은 학생이 자기 답안에서
+ *   찾을 수 없는 지적이라, 리뷰 전체를 못 믿게 만든다.
  */
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://qrmidnmlethqvdbmnyun.supabase.co';
@@ -56,16 +65,28 @@ const PROVIDERS = {
         .reverse();   // 새 모델이 위로 — 고르는 사람이 먼저 보는 게 최신이어야 한다.
     },
     async chat(key, model, system, user, opts) {
-      const r = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const temp = opts && opts.temperature;
+      const ask = async (withTemp) => {
+        const body = {
           model,
           messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
           response_format: { type: 'json_object' }
-        })
-      });
-      const j = await r.json().catch(() => ({}));
+        };
+        if (withTemp) body.temperature = temp;
+        const rr = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        return { rr, jj: await rr.json().catch(() => ({})) };
+      };
+
+      let { rr: r, jj: j } = await ask(temp !== undefined && temp !== null);
+      /* 온도를 안 받는 모델(gpt-5 계열)은 400 으로 거절한다. 그 한 필드 때문에 채점이
+         멈추면 안 되므로, 온도만 떼고 한 번 더 부른다. */
+      if (!r.ok && r.status === 400 && /temperature/i.test(JSON.stringify(j.error || ''))) {
+        ({ rr: r, jj: j } = await ask(false));
+      }
       if (!r.ok) throw new Error((j.error && j.error.message) || 'OpenAI ' + r.status);
       const u = j.usage || {};
       const c0 = (j.choices && j.choices[0]) || {};
@@ -92,12 +113,13 @@ const PROVIDERS = {
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: JSON.stringify(Object.assign({
           model,
           max_tokens: (opts && opts.maxTokens) || 2000,
           system,
           messages: [{ role: 'user', content: user }]
-        })
+        }, (opts && opts.temperature !== undefined && opts.temperature !== null)
+             ? { temperature: opts.temperature } : {}))
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error((j.error && j.error.message) || 'Anthropic ' + r.status);
@@ -232,6 +254,49 @@ function parseJSON(text) {
   return null;
 }
 
+/* ── 인용 검증 ────────────────────────────────────────────────────────────
+ *
+ * "학생이 'has went' 라고 썼다" 는 확인할 수 있는 주장이다. 확인하지 않으면 모델이
+ * 그럴듯한 문장을 지어내고, 학생은 자기 답안에서 찾을 수 없는 지적을 받는다. 한 번
+ * 그런 일이 있으면 맞는 지적까지 못 믿게 된다 — 그래서 인용만은 문자로 확인한다.
+ *
+ * 느슨하게 볼 것과 엄하게 볼 것을 가른다. 대소문자·따옴표 모양·줄바꿈·겹공백은
+ * 옮겨 적는 과정에서 어차피 달라지므로 눌러서 본다. 단어는 눌러 주지 않는다. */
+function flatten(s) {
+  return String(s == null ? '' : s)
+    .replace(/[‘’ʼ′`]/g, "'")
+    .replace(/[“”″]/g, '"')
+    .replace(/[‐-―−]/g, '-')
+    .replace(/[ \s]+/g, ' ')
+    .toLowerCase()
+    .trim();
+}
+
+/** 인용 부호와 꼬리 문장부호를 뗀 알맹이. 모델은 "…" 를 붙여 오기도 한다. */
+function core(s) {
+  return flatten(s).replace(/^["'\s]+/, '').replace(/["'\s.,!?;:]+$/, '');
+}
+
+/**
+ * quote 가 hay 에 **글자 그대로** 들어 있는가.
+ * 가운데를 …/... 로 줄인 인용은 토막마다 순서대로 들어 있으면 인정한다.
+ * 빈 인용은 false — "인용이 없다" 와 "인용이 틀렸다" 는 호출자가 가른다.
+ */
+function isVerbatim(quote, hay) {
+  const H = flatten(hay);
+  if (!H) return false;
+  const parts = String(quote == null ? '' : quote)
+    .split(/\s*(?:\.\.\.|…)\s*/).map(core).filter(Boolean);
+  if (!parts.length) return false;
+  let at = 0;
+  for (const p of parts) {
+    const i = H.indexOf(p, at);
+    if (i < 0) return false;
+    at = i + p.length;
+  }
+  return true;
+}
+
 function json(res, status, body) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -288,6 +353,7 @@ module.exports = {
   SUPABASE_URL, SUPABASE_ANON,
   PROVIDERS, FALLBACK,
   env, listProviders, pickDefault, resolve, parseJSON,
+  flatten, isVerbatim,
   json, cors, readBody, whoIs, staffOf,
   STT_DEFAULT_MODEL, sttModel, sttReady, audioExt, transcribe
 };

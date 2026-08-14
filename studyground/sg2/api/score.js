@@ -29,6 +29,15 @@
  *   "AI 가 채점을 안 해 주네" 로 남는 것이 가장 나쁘다.
  *   Vercel 환경변수: SUPABASE_SERVICE_ROLE_KEY
  *
+ * 무엇으로 점수를 지키는가
+ *   1) 온도 0. 같은 답안에 같은 점수가 나와야 채점이라는 말이 성립한다.
+ *   2) 셈이 그은 선(Listen and Repeat). 원문과 전사문의 차이는 서버가 먼저 세고
+ *      (_rubric_toefl.compareRepeat), 루브릭이 그 셈에 허락하지 않는 점수는 내린다
+ *      (capFor). 그대로 따라 했으면 5, 한 글자라도 다르면 5 는 아니다. 무엇이
+ *      점수를 움직였는지는 ai_rubric.guard 에 남는다 — 선생님이 뒤집으려면 근거가 있어야 한다.
+ *   3) 인용 검증. 채점 근거로 붙는 인용은 답안에 글자 그대로 있는지 확인하고,
+ *      없으면 지운다(LLM.isVerbatim). 지어낸 근거는 없는 근거보다 나쁘다.
+ *
  * 절대 덮지 않는 것
  *   교사가 확정한 행(confirmed_at). 자동 재채점이 교사의 판단을 지우면 안 된다.
  *
@@ -63,21 +72,42 @@ const SYSTEM =
   'Do not invent criteria. In particular there is no word-count rule in the official ' +
   'guides: a short response is not penalised for being short, only for what the guide ' +
   'actually describes (relevance, elaboration, control of language, and for Listen and ' +
-  'Repeat, fidelity to the prompt sentence). Score strictly and consistently. ' +
+  'Repeat, fidelity to the prompt sentence). Score the response in front of you, not the ' +
+  'effort or ambition behind it. Every claim you make about the response must be something ' +
+  'a reader could point at in the text you were given: never describe an error the response ' +
+  'does not contain, and never quote words it does not use. Score strictly and consistently. ' +
   'Return only JSON.';
+
+/* 채점은 같은 글에 같은 점수를 내야 한다. 온도를 0 으로 못 박는 이유이고, 온도를 안 받는
+ * 모델이면 _llm.js 가 알아서 떼고 다시 부른다. */
+const TEMPERATURE = 0;
 
 function schemaFor(criteria) {
   return 'Return ONLY a JSON object, no prose, in this exact shape:\n' +
-    '{"score": <integer 0-5>, "summary": "<one or two sentences justifying the score, ' +
-    'quoting the guide\'s language>", "criteria": [' +
+    '{"score": <integer 0-5>,\n' +
+    ' "descriptor": "<the phrase you are matching, copied from the score band you chose>",\n' +
+    ' "summary": "<one or two sentences justifying the score, quoting the guide\'s language>",\n' +
+    ' "why_not_higher": "<what this response would have had to do to earn the next score up>",\n' +
+    ' "why_not_lower": "<what it does that the score below does not allow>",\n' +
+    ' "criteria": [' +
     criteria.map(function (c) {
-      return '{"name":"' + c + '","comment":"<one short sentence>"}';
+      return '{"name":"' + c + '","comment":"<one short sentence>","quote":"<see below>"}';
     }).join(',') + ']}\n' +
     'Rules:\n' +
     '- "score" is the holistic score from the guide. It is an integer 0-5, never a band.\n' +
+    '- Pick the score by matching descriptors, not by impression: find the band whose\n' +
+    '  description fits the response, and copy the phrase you matched into "descriptor".\n' +
+    '- "why_not_higher" and "why_not_lower" must name something in THIS response. If the\n' +
+    '  score is 5 write "" for "why_not_higher"; if it is 0 write "" for "why_not_lower".\n' +
     '- Use the whole range. Do not default to 3.\n' +
     '- Every criterion listed above appears exactly once, in that order.\n' +
-    '- Comment on what the response actually does; quote a phrase from it when useful.';
+    '- "quote" is the evidence for that criterion: words copied from the response ' +
+    'CHARACTER FOR CHARACTER, at most about 15 words. Do not paraphrase, do not correct ' +
+    'the grammar, do not translate. If you cannot copy an exact stretch of the response ' +
+    'that shows what you mean, write "" — an empty quote is fine, an invented one is not. ' +
+    'The server checks every quote against the response and deletes the ones that are not ' +
+    'in it, so a quote you did not copy is simply lost.\n' +
+    '- Comment on what the response actually does. Never comment on its length.';
 }
 
 /* ── Supabase (service_role) ─────────────────────────────────────────────── */
@@ -170,13 +200,22 @@ async function scoreOne(P, key, model, lang, task, text) {
     schemaFor(criteria),
     '',
     lang === 'ko'
-      ? 'Write "summary" and every criterion comment in Korean. Keep the criterion names in English.'
+      ? 'Write "summary", "why_not_higher", "why_not_lower" and every criterion comment in ' +
+        'Korean. Keep the criterion names, "descriptor" and every "quote" in English — a ' +
+        'quote is copied text, and translated text is no longer a quote.'
       : 'Write "summary" and every criterion comment in English.'
   ];
   if (task.prompt) parts.push('', 'PROMPT GIVEN TO THE TEST TAKER:\n' + task.prompt);
+
+  /* Listen and Repeat 는 원문과 견주면 셀 수 있는 과제다. 눈대중을 시키지 않고 서버가
+     먼저 센 뒤 그 사실을 넘긴다 — 그리고 셈이 허락하지 않는 점수는 아래에서 내린다. */
+  let facts = null;
   if (RUBRIC.isRepeat(task.task_kind) && task.reference) {
-    parts.push('', 'THE EXACT SENTENCE THE TEST TAKER HAD TO REPEAT:\n' + task.reference);
+    facts = RUBRIC.compareRepeat(task.reference, text);
+    parts.push('', 'THE EXACT SENTENCE THE TEST TAKER HAD TO REPEAT:\n' + task.reference,
+               '', RUBRIC.repeatFactsText(facts));
   }
+
   parts.push(
     '',
     task.skill === 'speaking'
@@ -185,7 +224,7 @@ async function scoreOne(P, key, model, lang, task, text) {
   );
 
   const started = Date.now();
-  const out = await P.chat(key, model, SYSTEM, parts.join('\n'));
+  const out = await P.chat(key, model, SYSTEM, parts.join('\n'), { temperature: TEMPERATURE });
   const parsed = LLM.parseJSON(out && out.text);
   if (!parsed || parsed.score === null || parsed.score === undefined) {
     throw new Error('the model did not return a usable score');
@@ -196,18 +235,55 @@ async function scoreOne(P, key, model, lang, task, text) {
   // 루브릭 밖의 값은 루브릭 안으로 접는다. 6점짜리 TOEFL 산출형 과제는 없다.
   score = Math.max(0, Math.min(RUBRIC.MAX_SCORE, Math.round(score)));
 
+  /* 셈이 그은 선. 그대로 따라 했으면 5 이고(모델이 뭐라 했든), 한 글자라도 다르면
+     5 일 수 없다. 무엇이 점수를 움직였는지는 guard 로 남긴다 — 선생님이 뒤집으려면
+     근거를 볼 수 있어야 한다. */
+  let guard = null;
+  if (facts) {
+    const cap = RUBRIC.capFor(facts);
+    const kept = facts.exact ? RUBRIC.MAX_SCORE : Math.min(score, cap);
+    guard = {
+      exact: facts.exact,
+      content_kept: facts.contentKept,
+      content_total: facts.contentTotal,
+      missing_content: facts.missingContent.slice(0, 12),
+      missing_function: facts.missingFunction.slice(0, 12),
+      added: facts.added.slice(0, 12),
+      cap: cap,
+      model_score: score,
+      applied: kept !== score
+    };
+    score = kept;
+  }
+
+  /* 인용은 확인한다. 답안에 없는 말을 "학생이 이렇게 썼다" 고 옮기면, 학생은 자기 글에서
+     찾을 수 없는 지적을 받는다 — 한 번 그러면 맞는 지적까지 못 믿는다. 지어낸 인용은
+     지우되 코멘트는 남긴다: 근거가 약해진 것이지 말이 틀렸다고 밝혀진 것은 아니다. */
+  let dropped = 0;
   const rows = criteria.map(function (name) {
     const hit = (parsed.criteria || []).find(function (c) {
       return c && String(c.name || '').toLowerCase() === name.toLowerCase();
     });
-    return { criterion: name, comment: (hit && String(hit.comment || '')) || '' };
+    const quote = (hit && String(hit.quote || '').trim()) || '';
+    const good = quote && LLM.isVerbatim(quote, text);
+    if (quote && !good) dropped++;
+    return {
+      criterion: name,
+      comment: (hit && String(hit.comment || '')) || '',
+      quote: good ? quote : ''
+    };
   });
 
   return {
     score: score,
     rubric: {
       summary: String(parsed.summary || ''),
+      descriptor: String(parsed.descriptor || ''),
+      why_not_higher: String(parsed.why_not_higher || ''),
+      why_not_lower: String(parsed.why_not_lower || ''),
       criteria: rows,
+      guard: guard || undefined,
+      unverified_quotes: dropped || undefined,
       task_kind: RUBRIC.normalizeKind(task.task_kind),
       source: 'ai_draft'
     },
@@ -357,7 +433,7 @@ module.exports = async function handler(req, res) {
         summary: isNotSubmit(record)
           ? 'No response was recorded for this task (NOT SUBMIT).'
           : 'The response is blank.',
-        criteria: criteria.map(function (c) { return { criterion: c, comment: '' }; }),
+        criteria: criteria.map(function (c) { return { criterion: c, comment: '', quote: '' }; }),
         task_kind: RUBRIC.normalizeKind(task.task_kind),
         source: 'rule'          // 모델을 부르지 않았다는 표시
       }, providerId, '', {}, '', speech));

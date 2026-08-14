@@ -178,11 +178,17 @@ async function reviewOne(row, who, picked, model, preTasks) {
       : 'Write every summary, comment and plan in English.\n') +
     FB.SCHEMA + '\n\nScored attempt:\n' + JSON.stringify(attempt);
 
-  var out = await picked.P.chat(picked.P.key(), model, FB.SYSTEM, user, { maxTokens: 8000 });
-  var parsed = LLM.parseJSON(out && out.text);
-  if (!parsed) {
+  var out = await picked.P.chat(picked.P.key(), model, FB.SYSTEM, user,
+                                { maxTokens: 8000, temperature: 0.2 });
+  var raw = LLM.parseJSON(out && out.text);
+  if (!raw) {
     throw new Error('the model did not return usable JSON' + (out && out.truncated ? ' (truncated)' : ''));
   }
+
+  /* 화면에서 부른 리뷰와 같은 검증을 지난다(api/feedback.js). 여기만 건너뛰면 한 반을
+     통째로 돌린 밤에만 지어낸 인용이 학생에게 나가고, 아무도 그걸 모른다. */
+  var checked = FB.verifyQuotes(raw, attempt);
+  var parsed = checked.parsed;
 
   var writes = FB.rowsFor(row.owner, row.session, model, LANG, parsed);
   var all = writes.rows.concat(writes.plan ? [writes.plan] : []);
@@ -208,6 +214,9 @@ async function reviewOne(row, who, picked, model, preTasks) {
     band: attempt.overall_band,
     saved: saved,
     questions: (parsed.questions || []).length,
+    /* 걷어 낸 인용 수. 한 반을 돌리고 나서 이 수가 눈에 띄면 모델이나 프롬프트를
+       손볼 때다 — 조용히 지우기만 하면 그 신호를 잃는다. */
+    dropped: checked.unverified.questions + checked.unverified.issues,
     planErr: planErr,
     usage: (out && out.usage) || {}
   };
@@ -293,7 +302,9 @@ async function main() {
         tokensIn += res.usage.in || 0;
         tokensOut += res.usage.out || 0;
         console.log('  ✓ ' + name + ' — band ' + res.band + ' · 코멘트 ' + res.saved +
-                    '행(문항 ' + res.questions + ')' + (res.planErr ? ' · 계획 저장 실패: ' + res.planErr : ''));
+                    '행(문항 ' + res.questions + ')' +
+                    (res.dropped ? ' · 근거 없는 인용 ' + res.dropped + '건 걷어 냄' : '') +
+                    (res.planErr ? ' · 계획 저장 실패: ' + res.planErr : ''));
         done++;
       }
     } catch (e) {

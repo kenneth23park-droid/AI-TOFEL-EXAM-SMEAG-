@@ -155,7 +155,11 @@ window.SG_COMMENTS = (function () {
    * 이미 빈칸마다 맞고 틀림과 정답을 나란히 보여 준다. AI 가 여기에 덧붙일 말은
    * 정답을 다시 읽어 주는 것뿐이고, 채점(sg_task_scores)에서도 이미 빠져 있다.
    *
-   * 맞은 문항도 보내지 않는다 — 할 말이 없고, 100문항이 프롬프트를 채울 뿐이다. */
+   * 맞은 문항도 보내지 않는다 — 할 말이 없고, 100문항이 프롬프트를 채울 뿐이다.
+   *
+   * 문항 쪽 사실에는 **원문(지문·대본)** 도 든다. 서버는 콘텐츠 팩을 모르기 때문에
+   * 여기서 보내지 않으면 서버도 모델도 지문을 못 본다. 지문 없이 쓴 해설은 근거를
+   * 지어내거나 하나 마나 한 말이 되고, 그건 리뷰가 아니라 소음이다. */
   function questionsFor(detail) {
     var out = [];
     ((detail && detail.rows) || []).forEach(function (r) {
@@ -178,6 +182,16 @@ window.SG_COMMENTS = (function () {
         ok: r.ok
       };
       if (choices) q.choices = choices;
+
+      /* 문항이 딛고 선 원문(리딩 지문 · 리스닝 대본)도 함께 보낸다.
+         이게 없으면 리뷰가 쓸 수 있는 말은 "정답은 B 입니다" 와 "지문을 다시 읽어
+         보세요" 뿐이다 — 학생이 이미 아는 말이다. 원문이 있어야 "3문단의 이 문장이
+         답을 정한다" 처럼 짚을 수 있고, 서버가 그 인용이 진짜인지 확인할 수도 있다.
+         같은 지문을 여러 문항이 함께 쓰므로 서버가 한 벌로 묶어 모델에 보낸다. */
+      if (r.src && r.src.text) {
+        q.source = { kind: r.src.kind, title: r.src.title,
+                     text: String(r.src.text).slice(0, 6000) };
+      }
       out.push(q);
     });
     return out;

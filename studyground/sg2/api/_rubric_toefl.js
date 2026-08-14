@@ -101,8 +101,130 @@ function isRepeat(kind) {
   return k === 'repeat' || k === 'listen_and_repeat';
 }
 
+/* ── Listen and Repeat: 세어서 알 수 있는 것 ──────────────────────────────
+ *
+ * 이 과제의 루브릭은 판단이 아니라 셈에 가깝다. "그대로 따라 했는가"(5), "내용어 하나가
+ * 빠졌는가"(4), "내용어의 과반은 남았는가"(3), "큰 덩어리가 빠졌는가"(2). 모델에게
+ * 눈대중으로 세게 하면 같은 녹음이 부를 때마다 다른 점수를 받는다.
+ *
+ * 그래서 원문과 전사문의 차이는 여기서 **먼저 세고**, 그 사실을 프롬프트에 실어 보낸다.
+ * 셈으로 못 넘는 선은 점수에도 씌운다(capFor) — 한 글자도 안 틀렸는데 4점을 주거나,
+ * 내용어의 4분의 3이 사라졌는데 5점을 주는 일은 루브릭이 허락하지 않는다.
+ *
+ * 단, 상한만 씌우고 하한은 두지 않는다(정확히 옮겼을 때의 5점만 예외다). 발음이
+ * 뭉개져 알아들을 수 없다거나 하는 것은 세어서 알 수 없고, 그건 모델이 낮출 몫이다. */
+
+const MAX_SCORE = 5;
+
+/* 기능어 — 빠지거나 바뀌어도 4점이 될 수 있는 말(루브릭의 "one or two function words").
+ * 내용어와 갈라야 "무엇이 빠졌는가" 가 점수의 언어로 셈이 된다. */
+const FUNCTION_WORDS = ('a an the and or but if so as at by for from in into of off on ' +
+  'onto out over to up with without is am are was were be been being do does did doing ' +
+  'have has had having will would shall should can could may might must not no nor than ' +
+  'that this these those there here it its he she him her they them we us you your my ' +
+  'his our their i me about after before when while because').split(' ');
+const FN = {};
+FUNCTION_WORDS.forEach(function (w) { FN[w] = 1; });
+
+/** 채점에 쓰는 낱말 목록. 문장부호·대소문자·겹공백은 말의 차이가 아니다. */
+function words(s) {
+  return String(s == null ? '' : s)
+    .replace(/[‘’ʼ′`]/g, "'")
+    .toLowerCase()
+    .replace(/[^a-z0-9' ]+/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+/** 두 낱말 목록의 최장 공통 부분수열 — 어느 낱말이 살아남았는지 자리까지 맞춰 센다. */
+function lcsFlags(a, b) {
+  const n = a.length, m = b.length;
+  const dp = [];
+  for (let i = 0; i <= n; i++) dp.push(new Int32Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const keptA = new Array(n).fill(false), keptB = new Array(m).fill(false);
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { keptA[i] = keptB[j] = true; i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else j++;
+  }
+  return { keptA, keptB };
+}
+
+/**
+ * 원문과 전사문을 견준 **사실**. 판단은 하나도 들어 있지 않다.
+ * @returns {{exact:boolean, refWords:number, saidWords:number,
+ *            contentTotal:number, contentKept:number, contentRatio:number,
+ *            missingContent:string[], missingFunction:string[], added:string[]}}
+ */
+function compareRepeat(reference, said) {
+  const a = words(reference), b = words(said);
+  const { keptA, keptB } = lcsFlags(a, b);
+
+  const missingContent = [], missingFunction = [], added = [];
+  let contentTotal = 0, contentKept = 0;
+  a.forEach(function (w, i) {
+    const isContent = !FN[w];
+    if (isContent) contentTotal++;
+    if (keptA[i]) { if (isContent) contentKept++; return; }
+    (isContent ? missingContent : missingFunction).push(w);
+  });
+  b.forEach(function (w, i) { if (!keptB[i]) added.push(w); });
+
+  return {
+    exact: a.join(' ') === b.join(' ') && a.length > 0,
+    refWords: a.length,
+    saidWords: b.length,
+    contentTotal: contentTotal,
+    contentKept: contentKept,
+    contentRatio: contentTotal ? contentKept / contentTotal : 0,
+    missingContent: missingContent,
+    missingFunction: missingFunction,
+    added: added
+  };
+}
+
+/**
+ * 위의 사실이 허락하는 최고점. 루브릭 문장을 그대로 옮긴 선이다.
+ *   그대로 따라 했다                    → 5 (상한이자 하한)
+ *   한 글자라도 다르다                  → 4 ("not an exact repetition")
+ *   내용어의 1/4 이상이 사라졌다        → 3 ("a majority of the content words")
+ *   내용어의 절반 이상이 사라졌다       → 2 ("a large portion is missing")
+ *   내용어의 3/4 이상이 사라졌다        → 1 ("captures very little")
+ * 원문을 모르면(reference 없음) 아무 선도 긋지 않는다 — 셀 것이 없으면 세지 않는다.
+ */
+function capFor(facts) {
+  if (!facts || !facts.contentTotal) return MAX_SCORE;
+  if (facts.exact) return MAX_SCORE;
+  if (facts.contentRatio < 0.25) return 1;
+  if (facts.contentRatio < 0.5) return 2;
+  if (facts.contentRatio < 0.75) return 3;
+  return 4;
+}
+
+/** 프롬프트에 싣는 사실 블록. 모델이 다시 세지 않게, 이미 센 것을 보여 준다. */
+function repeatFactsText(facts) {
+  const list = function (arr) { return arr.length ? arr.join(', ') : '(none)'; };
+  return 'OBJECTIVE COMPARISON (already computed by the server; do not recount, do not dispute):\n' +
+    '- Exact repetition: ' + (facts.exact ? 'YES' : 'NO') + '\n' +
+    '- Words in the prompt sentence: ' + facts.refWords + '; words spoken: ' + facts.saidWords + '\n' +
+    '- Content words kept: ' + facts.contentKept + ' of ' + facts.contentTotal +
+      ' (' + Math.round(facts.contentRatio * 100) + '%)\n' +
+    '- Content words missing or changed: ' + list(facts.missingContent) + '\n' +
+    '- Function words missing or changed: ' + list(facts.missingFunction) + '\n' +
+    '- Words spoken that are not in the prompt: ' + list(facts.added) + '\n' +
+    'Score from the guide using these counts. The server enforces the guide\'s own limits ' +
+    'on top of your score, so a score the counts cannot support will simply be lowered.';
+}
+
 module.exports = {
   EMAIL, DISCUSSION, REPEAT, INTERVIEW,
-  MAX_SCORE: 5,
-  normalizeKind, rubricFor, criteriaFor, isRepeat
+  MAX_SCORE,
+  normalizeKind, rubricFor, criteriaFor, isRepeat,
+  words, compareRepeat, capFor, repeatFactsText
 };

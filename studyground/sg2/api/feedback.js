@@ -21,6 +21,15 @@
  *   있어서 서버가 알 길이 없기 때문이고, 위조해도 점수는 1점도 움직이지 않는다.
  *   학생이 보낸 '내 답' 은 쓰지 않는다. DB 의 답안으로 덮어 쓴 뒤 모델에 보낸다.
  *
+ * 무엇을 근거로 쓰는가
+ *   틀린 문항에는 그 문항이 딛고 선 원문(리딩 지문 · 리스닝 대본)이 함께 실린다.
+ *   원문 없이 쓴 해설은 "정답은 B 입니다" 아니면 지어낸 근거뿐이다 — 학생이 배울
+ *   것이 없다. 원문은 브라우저(콘텐츠 팩)에서 오고, 같은 지문을 쓰는 문항끼리는
+ *   한 벌로 묶어 보낸다(sources).
+ *   그리고 모델이 옮겨 적었다고 말한 것은 옮겨 적었는지 확인한다(verifyQuotes):
+ *   학생의 말이라며 지어낸 인용은 그 해설째로 버리고, 지문 근거가 지문에 없으면
+ *   그 칸만 비운다. 지어낸 근거는 없는 근거보다 나쁘다.
+ *
  * 어디에 남는가
  *   sg_comments 에 source='ai' 로. 학생은 이 표에 못 쓴다(RLS) — 그래서 여기서
  *   service_role 로 쓴다. 자리는 셋이다.
@@ -39,8 +48,10 @@
  *   POST /api/feedback
  *     헤더 Authorization: Bearer <supabase access token>
  *     { session, owner?, provider?, model?, lang?, force?,
- *       questions:[{ question_id, section, kind, no?, prompt?, correct?, ok }] }
- *     → { session, owner, provider, model, lang, sections, questions, plan, saved }
+ *       questions:[{ question_id, section, kind, no?, prompt?, correct?, ok,
+ *                    choices?, source?:{ kind, title, text } }] }
+ *     → { session, owner, provider, model, lang, sections, questions, plan, saved,
+ *         unverified? }
  *     → { skipped:'already_reviewed' }  이미 리뷰가 있고 force 가 아닐 때
  *
  *   owner 는 staff 만 남의 것을 지정할 수 있다.
@@ -57,28 +68,55 @@ const SERVICE_KEY = LLM.env('SUPABASE_SERVICE_ROLE_KEY');
 const MAX_WRONG = 40;
 const MAX_OPEN = 10;
 
+/* 지문·대본을 함께 싣는 대신 총량에 선을 둔다. SET 9 한 벌이면 3만 자 안쪽이지만,
+ * 지문이 긴 세트에서 프롬프트가 끝없이 불어나면 안 된다. 선을 넘은 문항은 원문 없이
+ * 간다 — 그 문항의 해설이 얕아질 뿐, 리뷰 전체가 죽지는 않는다. */
+const MAX_SOURCE_CHARS = 30000;
+
+/* 리뷰 한 벌은 총평 다섯에 문항 해설 스물다섯, 거기에 학습 계획까지다. 기본 상한
+ * (2000 토큰)으로는 중간에 잘리고, 잘린 JSON 은 파싱만 실패해 리뷰가 통째로 사라진다.
+ * 인용 칸이 붙으면서 길이가 더 늘었으므로 넉넉히 잡는다. */
+const MAX_OUT_TOKENS = 8000;
+
 const SYSTEM =
   'You are an ESL assessment specialist at SMEAG writing a score report for one TOEFL-style ' +
   'mock test. You receive one scored attempt as JSON: band scores, section detail, the ' +
-  'questions the student missed, and the AI rubric scores for the productive tasks. ' +
+  'questions the student missed together with the passage or listening script each one came ' +
+  'from, and the AI rubric scores for the productive tasks. ' +
   'Be concrete and reference the numbers you are given. Never invent a score, a question, ' +
-  'or a fact that is not in the JSON. Speak to the student directly, plainly, and kindly. ' +
+  'or a fact that is not in the JSON. Everything you say about this student must be traceable ' +
+  'to the JSON: if you cannot point at the line that shows it, do not say it. Do not guess at ' +
+  'causes the evidence does not support, and do not soften a real problem into a generality. ' +
+  'Speak to the student directly, plainly, and kindly. ' +
   'Your job is not to praise — it is to make the next two weeks of study obvious. ' +
   'Return only JSON.';
 
+/* 리뷰도 같은 응시에 대해 매번 다른 글이 될 이유가 없다. 온도를 낮게 못 박는다. */
+const TEMPERATURE = 0.2;
+
 const SCHEMA = `Return ONLY a JSON object, no prose, in this exact shape:
 {"sections":[{"scope":"reading","summary":"...","strengths":["..."],"improvements":["..."],
-              "issues":[{"issue":"...","evidence":"...","fix":"..."}]},
+              "issues":[{"issue":"...","evidence":"...","quote":"...","fix":"..."}]},
              {"scope":"listening", ...},{"scope":"writing", ...},{"scope":"speaking", ...},
              {"scope":"overall", ...}],
  "questions":[{"question_id":"R1-7","problem":"what exactly went wrong in this answer",
-               "cause":"the underlying gap it points to","solution":"what to do instead, step by step"}],
+               "cause":"the underlying gap it points to","solution":"what to do instead, step by step",
+               "quote":"the student's own words, copied exactly, or \\"\\"",
+               "evidence":"the sentence from the passage or script that settles it, copied exactly, or \\"\\""}],
  "plan":{"summary":"one short paragraph: where this student stands and what changes it",
          "focus":[{"skill":"listening","why":"...","target":"..."}],
          "study":[{"title":"...","detail":"...","minutes":30,"how_often":"daily"}],
          "weeks":[{"week":1,"goal":"...","tasks":["...","..."]}],
          "next_test":"what to do differently on the next mock test"}}
 Rules:
+- COPIED TEXT. Two fields are quotations, not writing: "quote" (the student's own words,
+  from their answer, essay or transcript) and "evidence" on a question (the sentence from
+  that question's reading passage or listening script that decides the answer). Copy them
+  CHARACTER FOR CHARACTER from the JSON. Do not paraphrase, tidy up the grammar, translate,
+  or stitch together words from different places. Keep each under about 30 words; use "..."
+  if you skip the middle. If nothing in the JSON can be copied, write "" — the server checks
+  every one of these against the attempt and throws away what it cannot find, so an invented
+  quote does not reach the student, it only costs the comment that carried it.
 - Every scope in "sections" appears exactly once, in that order.
 - 2-3 sentences per summary; 1-3 short strings each for strengths and improvements.
 - Scores are TOEFL band scores from 1.0 (lowest) to 6.0 (highest), in 0.5 steps.
@@ -90,8 +128,10 @@ Rules:
   named, concrete problem — not a restatement of the score.
   * "issue": the problem in one clause ("misses negation in short conversations"), never
     a grade word ("weak listening") and never a generic label ("vocabulary").
-  * "evidence": the proof from the JSON — quote the question_id(s), the student's own
+  * "evidence": the proof from the JSON — name the question_id(s), the student's own
     wrong answer, or the rater's comment. If you cannot point at evidence, drop the issue.
+  * "quote": the student's own words that show it, copied exactly, or "". A pattern claimed
+    across several questions is stronger with one real quote than with none.
   * "fix": what the student does about it, specific enough to start today.
   A section that was not scored gets one issue explaining what is missing and how to get
   it scored next time, and nothing else.
@@ -105,10 +145,20 @@ Rules:
     multiple-choice item, quote the option text, never the option number. Never write
     "this was incorrect" or "chose the wrong option" — that is already on the screen.
   * "cause": the gap behind it, so the student sees the pattern, not one unlucky item.
+    Say why the answer they chose was tempting — which words in the passage or the option
+    pulled them there — because that is the trap they will meet again.
   * "solution": the repair. Give the rule, the correct answer restated in a full sentence,
     or the reading/listening move that would have caught it. One or two sentences.
+  * "evidence": for a question whose "source_id" points at a passage or script, copy the
+    one sentence from that source that makes the correct answer correct. This is the heart
+    of the explanation — the student should be able to find that sentence and see it. If
+    the question has no source, write "".
+  * "quote": the student's own words for an open answer, or the option they chose, copied
+    exactly. "" if there is nothing to copy (a blank answer).
   * For an open answer (writing/speaking), "problem" points at real sentences from the
     student's own text and "solution" rewrites or restructures one of them as a model.
+  * Do not claim the student misread or mishead something you cannot see. What you can see
+    is which option they chose and what the source says; build the explanation from that.
 - "plan" is the point of this report. It must follow from the weakest sections in the JSON,
   name the skill it fixes, and be doable by one student alone with no teacher:
   * "focus": 1-3 skills, weakest first. "target" is the band to aim for next time.
@@ -213,21 +263,39 @@ function attemptFor(row, taskRows, meta) {
     };
   });
 
-  /* 틀린 문항. 문제문·정답은 콘텐츠 팩(브라우저)에서 오고, '내 답' 은 DB 에서 온다.
+  /* 틀린 문항. 문제문·정답·원문은 콘텐츠 팩(브라우저)에서 오고, '내 답' 은 DB 에서 온다.
      Build a Sentence 는 빼고 보낸다 — 리뷰 화면이 이미 빈칸마다 정답을 펴 준다. */
-  const wrong = [], open = [];
+  const wrong = [], open = [], sources = [], seen = {};
+
+  /* 한 지문에 문항이 대여섯 개씩 붙는다. 문항마다 지문을 실으면 같은 글이 여섯 번
+     프롬프트에 들어가 돈만 나간다. 한 벌로 모으고 문항은 번호로 가리킨다. */
+  let sourceChars = 0;
+  function sourceId(src) {
+    if (!src || !src.text) return '';
+    const text = clip(src.text, 6000);
+    const key = text.slice(0, 200) + '|' + text.length;
+    if (seen[key]) return seen[key];
+    if (sourceChars + text.length > MAX_SOURCE_CHARS) return '';   // 선을 넘으면 원문 없이 간다
+    sourceChars += text.length;
+    const id = 'S' + (sources.length + 1);
+    seen[key] = id;
+    sources.push({ id: id, kind: src.kind || 'passage', title: clip(src.title, 120), text: text });
+    return id;
+  }
+
   (meta.questions || []).forEach(function (q) {
     if (!q || !q.question_id || q.kind === 'build') return;
     const given = choiceText(answers[q.question_id], q.choices);
     if (q.ok === false && wrong.length < MAX_WRONG) {
       wrong.push({
         question_id: q.question_id, no: q.no, section: q.section, kind: q.kind,
-        prompt: clip(q.prompt, 200),
+        prompt: clip(q.prompt, 300),
         choices: Array.isArray(q.choices)
           ? q.choices.slice(0, 8).map(function (c) { return clip(c, 200); })
           : undefined,
         given: clip(given, 200),
-        correct: clip(q.correct, 200)
+        correct: clip(q.correct, 200),
+        source_id: sourceId(q.source) || undefined
       });
     } else if (q.ok === null && given && open.length < MAX_OPEN) {
       open.push({
@@ -247,7 +315,119 @@ function attemptFor(row, taskRows, meta) {
     sections: sections,
     productive_tasks: tasks,
     wrong_questions: wrong,
-    open_answers: open
+    open_answers: open,
+    /* 리딩 지문·리스닝 대본. 오답 해설이 "지문의 이 문장이 답을 정한다" 고 짚으려면
+       그 문장이 여기 있어야 하고, 그 인용이 진짜인지 확인할 자리도 여기다. */
+    sources: sources
+  };
+}
+
+/* ── 인용 검증 ───────────────────────────────────────────────────────────
+ *
+ * 리뷰가 "너는 이렇게 썼다", "지문에 이렇게 적혀 있다" 고 말할 때, 그 말이 사실인지는
+ * 여기서 글자로 확인한다. 지어낸 인용은 학생이 자기 답안이나 지문에서 찾을 수 없는
+ * 지적이고, 한 번 그런 일이 있으면 맞는 지적까지 함께 못 믿게 된다.
+ *
+ * 검사하는 것은 **옮겨 적은 칸**(quote · evidence)뿐이다. 설명하는 문장까지 글자로
+ * 검사하면 "'gone' 을 써야 한다" 처럼 옳은 교정까지 지어낸 인용으로 몰린다 —
+ * 학생 글에 없는 것이 당연한 말이기 때문이다. 그래서 칸을 갈라 두었다. */
+
+/** 이 응시에서 인용해도 되는 글 전부. 학생이 쓴 것 + 문항이 딛고 선 원문. */
+function haystackOf(attempt) {
+  const parts = [];
+  (attempt.productive_tasks || []).forEach(function (t) { if (t.response) parts.push(t.response); });
+  (attempt.open_answers || []).forEach(function (o) { parts.push(o.answer); });
+  (attempt.wrong_questions || []).forEach(function (w) {
+    parts.push(w.given, w.correct, w.prompt);
+    (w.choices || []).forEach(function (c) { parts.push(c); });
+  });
+  (attempt.sources || []).forEach(function (s) { parts.push(s.text); });
+  return parts.filter(Boolean).join('\n');
+}
+
+/** 학생이 실제로 쓴 말만. "너는 이렇게 썼다" 는 지문에서 확인해 줄 수 없다. */
+function studentTextOf(attempt) {
+  const parts = [];
+  (attempt.productive_tasks || []).forEach(function (t) { if (t.response) parts.push(t.response); });
+  (attempt.open_answers || []).forEach(function (o) { parts.push(o.answer); });
+  (attempt.wrong_questions || []).forEach(function (w) { parts.push(w.given); });
+  return parts.filter(Boolean).join('\n');
+}
+
+/**
+ * 지어낸 인용을 걷어 낸다. 원본을 고치지 않고 새 객체를 돌려준다.
+ *
+ * 무엇을 지우고 무엇을 남기는가 — 두 가지 잘못을 갈라서 다룬다.
+ *   지어낸 말(응시 어디에도 없는 문장)
+ *     문항 해설이면 **통째로 버린다**. 학생이 쓰지도 않은 말을 인용해 놓고 그 위에
+ *     세운 설명은 고칠 곳을 엉뚱한 데로 가리킨다. 영역 총평의 문제점(issue)도 버린다 —
+ *     근거 없는 문제 제기다.
+ *   자리를 잘못 짚은 말(응시에는 있지만 학생이 쓴 말은 아닌 것 — 지문 문장, 정답 보기)
+ *     인용 칸만 비우고 설명은 남긴다. "네가 이렇게 썼다" 가 틀린 것이지, 지적이
+ *     틀렸다고 밝혀진 것은 아니다.
+ *   - evidence 가 지문에 없으면 그 칸만 비운다. 같은 이유다.
+ *
+ * @returns {{ parsed:object, unverified:{questions:number,evidence:number,issues:number} }}
+ */
+function verifyQuotes(parsed, attempt) {
+  const hay = haystackOf(attempt);
+  const mine = studentTextOf(attempt);
+  const byId = {};
+  (attempt.sources || []).forEach(function (s) { byId[s.id] = s.text; });
+  const srcOf = {};
+  (attempt.wrong_questions || []).forEach(function (w) {
+    srcOf[w.question_id] = w.source_id ? (byId[w.source_id] || '') : '';
+  });
+
+  const bad = { questions: 0, misquoted: 0, evidence: 0, issues: 0 };
+
+  /* '학생의 말' 인가 · 이 응시 안의 글이기는 한가 · 아무 데도 없는가. */
+  function judge(quote) {
+    if (LLM.isVerbatim(quote, mine)) return 'mine';
+    if (LLM.isVerbatim(quote, hay)) return 'misplaced';
+    return 'invented';
+  }
+
+  const sections = (parsed.sections || []).map(function (s) {
+    if (!s || !Array.isArray(s.issues)) return s;
+    const kept = [];
+    s.issues.forEach(function (x) {
+      const q = x && String(x.quote || '').trim();
+      if (!q) { kept.push(x); return; }          // 인용이 없는 문제 제기는 원래 있던 것이다
+      const verdict = judge(q);
+      if (verdict === 'mine') { kept.push(x); return; }
+      if (verdict === 'invented') { bad.issues++; return; }
+      bad.misquoted++;
+      kept.push(Object.assign({}, x, { quote: '' }));
+    });
+    return Object.assign({}, s, { issues: kept });
+  });
+
+  const questions = (parsed.questions || []).map(function (q) {
+    const quote = q && String(q.quote || '').trim();
+    if (!quote) return q;
+    /* 객관식이면 고른 보기가 곧 '내 말' 이라 mine 에 들어 있고, 서술형이면 답안 전문이
+       들어 있다. 지문 문장이나 정답 보기를 '내 말' 이라 붙여 온 것은 자리를 잘못 짚은
+       것이라 인용만 떼고, 아무 데도 없는 문장은 지어낸 것이라 해설째 버린다. */
+    const verdict = judge(quote);
+    if (verdict === 'mine') return q;
+    if (verdict === 'invented') { bad.questions++; return null; }
+    bad.misquoted++;
+    return Object.assign({}, q, { quote: '' });
+  }).filter(Boolean).map(function (q) {
+    const ev = String(q.evidence || '').trim();
+    if (!ev) return q;
+    const src = srcOf[q.question_id];
+    /* 지문이 있으면 그 지문에서, 없으면 이 응시의 글 어디에서든 찾아 준다 — 문항에
+       원문이 안 실린 세트(예전 팩)에서 근거를 통째로 잃지 않기 위한 것이다. */
+    if (LLM.isVerbatim(ev, src || hay)) return q;
+    bad.evidence++;
+    return Object.assign({}, q, { evidence: '' });
+  });
+
+  return {
+    parsed: Object.assign({}, parsed, { sections: sections, questions: questions }),
+    unverified: bad
   };
 }
 
@@ -297,6 +477,7 @@ function issueList(arr) {
     return {
       issue: clip(x.issue, 300),
       evidence: clip(x.evidence, 500),
+      quote: clip(x.quote, 300),
       fix: clip(x.fix, 600)
     };
   }).filter(Boolean);
@@ -354,12 +535,20 @@ function rowsFor(owner, session, model, lang, parsed) {
     const problem = clip(q.problem, 800);
     const cause = clip(q.cause, 500);
     const solution = clip(q.solution, 800);
-    const body = clip(joinText(problem, cause, solution) || q.body, 2000);
+    /* 확인된 인용은 글에도 넣는다. data 칸을 못 그리는 자리(인쇄, 예전 화면)에서
+       근거만 사라지면, 남는 것은 "이래서 틀렸다" 는 단정뿐이다. */
+    const quote = clip(q.quote, 300);
+    const evidence = clip(q.evidence, 500);
+    const body = clip(joinText(problem, cause, solution,
+      quote ? 'You wrote: “' + quote + '”' : '',
+      evidence ? 'The source says: “' + evidence + '”' : ''
+    ) || q.body, 2000);
     if (!body) return;
     out.push(commentRow(owner, session, 'question', String(q.question_id),
                         model, lang, body, {
       data: (problem || solution)
-        ? { problem: problem, cause: cause, solution: solution }
+        ? { problem: problem, cause: cause, solution: solution,
+            quote: quote, evidence: evidence }
         : {}
     }));
   });
@@ -462,12 +651,26 @@ module.exports = async function handler(req, res) {
 
   let out;
   try {
-    out = await P.chat(key, model, SYSTEM, user);
+    out = await P.chat(key, model, SYSTEM, user,
+                       { temperature: TEMPERATURE, maxTokens: MAX_OUT_TOKENS });
   } catch (e) {
     return LLM.json(res, 502, { error: String(e.message || e) });
   }
-  const parsed = LLM.parseJSON(out && out.text);
-  if (!parsed) return LLM.json(res, 502, { error: 'The model did not return usable JSON.' });
+  const raw = LLM.parseJSON(out && out.text);
+  if (!raw) {
+    /* 잘린 JSON 은 파싱만 실패하고 이유는 안 남는다. 그 둘을 갈라 말해야 다음 사람이
+       프롬프트를 의심할지 상한을 의심할지 안다. */
+    return LLM.json(res, 502, {
+      error: (out && out.truncated)
+        ? 'The review was cut off before it finished (the model hit its output limit).'
+        : 'The model did not return usable JSON.'
+    });
+  }
+
+  /* 저장하기 전에 인용을 확인한다. 지어낸 인용은 학생이 자기 답안에서 찾을 수 없는
+     지적이라, 남겨 두면 리뷰 전체의 신뢰를 갉아먹는다. */
+  const checked = verifyQuotes(raw, attempt);
+  const parsed = checked.parsed;
 
   /* 4) 남긴다. 같은 자리는 덮어쓴다 — 리뷰는 쌓이는 것이 아니라 최신 한 벌이다.
    *
@@ -507,6 +710,10 @@ module.exports = async function handler(req, res) {
     questions: Array.isArray(parsed.questions) ? parsed.questions : [],
     plan: parsed.plan || null,
     saved: saved,
+    /* 몇 개를 걷어 냈는지 숨기지 않는다. 늘 0 이 아니라면 프롬프트나 모델을 바꿀 때다. */
+    unverified: (checked.unverified.questions || checked.unverified.evidence ||
+                 checked.unverified.issues || checked.unverified.misquoted)
+      ? checked.unverified : undefined,
     saveError: saveError || undefined
   });
 };
@@ -515,6 +722,7 @@ module.exports = async function handler(req, res) {
  * 프롬프트는 여기 한 벌뿐이다 — 화면에서 부른 리뷰와 배치로 부른 리뷰가 다른 글이면
  * "AI 리뷰" 라는 말이 두 가지를 가리키게 된다. */
 module.exports.attemptFor = attemptFor;
+module.exports.verifyQuotes = verifyQuotes;
 module.exports.rowsFor = rowsFor;
 module.exports.putComments = putComments;
 module.exports.SYSTEM = SYSTEM;

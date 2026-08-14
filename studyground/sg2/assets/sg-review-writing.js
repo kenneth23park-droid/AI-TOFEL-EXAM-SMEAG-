@@ -283,9 +283,18 @@ window.SG_REVIEW_WRITING = (function () {
     if (t.ai_error) out += '<p class="muted">' + bi('AI scoring failed: ', 'AI 채점 실패: ') + esc(t.ai_error) + '</p>';
     if (rub.summary) out += '<p class="rw-body">' + esc(rub.summary) + '</p>';
     if (crit.length) {
+      /* 인용은 서버가 답안에서 글자 그대로 찾은 것만 남는다(api/score.js). 그래서 여기
+         보이는 말은 학생이 자기 글에서 반드시 찾을 수 있다 — 못 찾는 지적은 안 나온다. */
       out += '<ul class="rw-crit">' + crit.map(function (c) {
-        return '<li><b>' + esc(c.criterion) + '</b> — ' + esc(c.comment || '') + '</li>';
+        return '<li><b>' + esc(c.criterion) + '</b> — ' + esc(c.comment || '') +
+          (c.quote ? ' <q class="rw-quote">' + esc(c.quote) + '</q>' : '') + '</li>';
       }).join('') + '</ul>';
+    }
+    /* 한 칸 위·아래 점수와의 경계. "왜 4가 아니라 3인가" 가 다음에 무엇을 고쳐야
+       하는지를 가장 정확히 말해 준다 — 총평보다 이 한 줄이 실전에 가깝다. */
+    if (rub.why_not_higher) {
+      out += '<p class="rw-body"><b>' + bi('To score higher', '한 점 더 받으려면') + '</b> — ' +
+        esc(rub.why_not_higher) + '</p>';
     }
     if (t.teacher_note) {
       out += '<p class="rw-body"><b>' + bi('Teacher', '선생님') + '</b> — ' + esc(t.teacher_note) + '</p>';
