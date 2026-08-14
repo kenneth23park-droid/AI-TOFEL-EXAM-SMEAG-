@@ -32,10 +32,12 @@
     <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Student results</span><span data-ko>학생 응시 결과</span></h1>
     <span class="chip" id="who" style="margin-bottom:8px"></span>
     <a class="btn ghost sm" href="scoring-guide.html" style="margin-left:auto"><span data-en>How we score</span><span data-ko>채점 근거</span></a>
+    <button class="btn ghost sm" id="score-all"><span data-en>Score unscored</span><span data-ko>미채점 채점하기</span></button>
     <button class="btn ghost sm" id="csv"><span data-en>Download CSV</span><span data-ko>CSV 내려받기</span></button>
   </div>
 
   <div class="card mt-16 hide" id="notice"></div>
+  <div class="card mt-16 hide" id="score-note"></div>
 
   <div class="card mt-16 hide" id="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
     <input id="q" placeholder="Name, student ID, or date (2026-08-12)" style="flex:1;min-width:220px;padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:var(--cream)">
@@ -79,6 +81,11 @@
 
 <script src="assets/app.js"></script>
 <script src="assets/sg-auth.js"></script>
+<!-- 세트 팩. 채점할 과제가 무엇인지는 정답표가 아니라 문제지가 안다 —
+     SG_RESULTS.productive() 가 pack(set_code) 으로 W·S 문항을 골라내므로,
+     이게 없으면 '미채점 채점하기' 가 늘 0건을 세고 조용히 아무것도 안 한다. -->
+<script src="assets/set1.js"></script>
+<script src="assets/set9.js"></script>
 <script src="assets/sg-band.js"></script>
 <script src="assets/sg-results.js"></script>
 <script>
@@ -431,6 +438,109 @@
     a.click();
   }
 
+  /* ── 미채점 일괄 채점 ─────────────────────────────────────────────────
+   *
+   * 이 화면은 여태 읽기만 했다. 채점이 걸리는 자리는 둘뿐이었다 — 학생이 자기
+   * 대시보드를 열 때(dashboard.html)와, 누군가 그 응시를 리뷰로 열 때
+   * (review.html 의 autoScore). 학생이 제출하고 바로 나갔고 선생님은 이 목록만
+   * 봤다면 그 응시는 아무도 연 적이 없어 영영 미채점으로 남는다. 자료는 다
+   * 올라와 있는데 점수만 비는 자리가 정확히 여기다.
+   *
+   * 대상은 "지금 화면에 보이는 응시" 다 — 필터가 곧 범위여서, 한 반·하루치만
+   * 걸고 싶으면 먼저 걸러 놓으면 된다. 숨긴 응시는 성적이 아니므로 뺀다.
+   *
+   * 응시를 하나씩 순서대로 보낸다. 병렬로 던지면 전사와 채점이 한꺼번에 나가
+   * 요금과 rate limit 을 같이 때린다 — 급한 일이 아니다.
+   *
+   * auto 를 주지 않는다. 스로틀(응시당 4번·10분)은 화면이 스스로 거는 재의뢰를
+   * 막는 고삐지, 사람이 누른 버튼을 막으라고 둔 것이 아니다. */
+  var SCORING = false;
+
+  function scoreNote(en, ko) {
+    $('score-note').innerHTML = '<p>' + bi(en, ko) + '</p>';
+    $('score-note').classList.remove('hide');
+  }
+
+  function todoOf(r) { return SG_RESULTS.unscored(r, TASKS[r.session] || []); }
+
+  /* 건너뛴 까닭은 숫자로만 적으면 아무 도움이 안 된다. no_transcript 하나가
+     "녹음이 버킷에 없거나 서버에 STT 키가 없다" 는 뜻이고, 그 두 가지는 이 화면을
+     다시 눌러서는 절대 풀리지 않는다 — 그래서 사유를 그대로 이름으로 적는다. */
+  var WHY = {
+    no_transcript: ['no recording or transcript', '녹음·전사문 없음'],
+    no_answer: ['no answer', '답안 없음'],
+    already_scored: ['already scored', '이미 채점됨'],
+    confirmed: ['confirmed by a teacher', '선생님이 확정함'],
+    unknown_question: ['unknown question', '알 수 없는 문항']
+  };
+
+  function scoreAll() {
+    if (SCORING) return;
+    var rows = shown().filter(function (r) { return !r.hidden && todoOf(r).length; });
+    if (!rows.length) {
+      scoreNote('Every attempt in view is already scored.', '보이는 응시는 모두 채점되어 있습니다.');
+      return;
+    }
+    var tasks = rows.reduce(function (n, r) { return n + todoOf(r).length; }, 0);
+    if (!window.confirm(rows.length + ' attempt(s), ' + tasks + ' unscored task(s).\n' +
+                        '응시 ' + rows.length + '건, 미채점 과제 ' + tasks + '개를 AI 채점합니다.\n\n' +
+                        'This calls the scoring model and costs tokens. Continue?')) return;
+
+    SCORING = true;
+    $('score-all').disabled = true;
+    var done = 0, scored = 0, why = {}, stopped = '';
+
+    function step(i) {
+      if (i >= rows.length || stopped) return Promise.resolve();
+      var r = rows[i];
+      scoreNote('Scoring ' + (i + 1) + ' / ' + rows.length + ' — ' + nameOf(r) + '…',
+                '채점 중 ' + (i + 1) + ' / ' + rows.length + ' — ' + nameOf(r) + '…');
+      return SG_RESULTS.scoreMissing(r, { owner: r.owner, taskRows: TASKS[r.session] || [] })
+        .then(function (out) {
+          done += 1;
+          if (!out) return;
+          /* 서버가 이유를 대며 거절했으면(키 미설정 503, 권한 401) 나머지도 같은
+             이유로 거절당한다. 스무 번 더 물어 스무 번 같은 답을 받을 이유가 없다. */
+          if (out.error) { stopped = out.error; return; }
+          scored += (out.scored || []).length;
+          (out.skipped || []).forEach(function (s) {
+            var k = (s && s.reason) || 'unknown';
+            why[k] = (why[k] || 0) + 1;
+          });
+        }, function (e) { done += 1; stopped = String((e && e.message) || e); })
+        .then(function () { return step(i + 1); });
+    }
+
+    step(0).then(function () {
+      /* 채점 행을 다시 읽어 밴드를 그 자리에서 고쳐 그린다 — 새로고침을 시키면
+         방금 매긴 점수가 안 보인다고 한 번 더 누르게 된다. */
+      return SG_RESULTS.tasks().then(function (t) {
+        TASKS = SG_RESULTS.tasksBySession(t);
+        paint();
+      }, function () {});
+    }).then(function () {
+      SCORING = false;
+      $('score-all').disabled = false;
+      if (stopped) {
+        scoreNote('Scoring stopped after ' + done + ' attempt(s): ' + stopped,
+                  '응시 ' + done + '건을 처리한 뒤 멈췄습니다: ' + stopped);
+        return;
+      }
+      var tail = Object.keys(why).map(function (k) {
+        var w = WHY[k] || [k, k];
+        return w[0] + ' ×' + why[k];
+      }).join(', ');
+      var tailKo = Object.keys(why).map(function (k) {
+        var w = WHY[k] || [k, k];
+        return w[1] + ' ' + why[k] + '개';
+      }).join(', ');
+      scoreNote('Scored ' + scored + ' task(s) across ' + done + ' attempt(s).' +
+                  (tail ? ' Skipped: ' + tail + '.' : ''),
+                '응시 ' + done + '건에서 과제 ' + scored + '개를 채점했습니다.' +
+                  (tailKo ? ' 건너뜀: ' + tailKo + '.' : ''));
+    });
+  }
+
   function load() {
     /* 응시 목록과 W·S 채점을 각각 한 번씩만 읽는다. 채점 조회가 실패해도 목록은
        그린다 — 그때는 W·S 가 '아직 채점 전' 으로 보이고 리뷰에서 확인하면 된다. */
@@ -477,6 +587,7 @@
 
   function boot() {
     $('csv').onclick = csv;
+    $('score-all').onclick = scoreAll;
     if (!window.SG_AUTH || !SG_AUTH.user()) {
       SG_AUTH.require();
       return;

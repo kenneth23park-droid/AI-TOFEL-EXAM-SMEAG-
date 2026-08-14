@@ -291,7 +291,7 @@
 //      admin.html 이 잠긴 이유(계정이 아니라 이 브라우저에 관리자 비밀번호가 없다)를
 //      본문 맨 위에 큰 카드로 세우고, 거기서 바로 비밀번호를 넣게 한다. 허브는 셸
 //      자산이라 판올림하지 않으면 재방문 기기가 그 카드 없는 옛 화면을 계속 본다.
-const VERSION = 'sg-v72';
+const VERSION = 'sg-v73';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
