@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scoring diagnostics · SMEAG StudyGround</title>
+<!--
+  AI 채점이 "Sign-in is required" 로 거절당한 자리를 원격에서 가르기 위한 화면.
+
+  왜 별도 페이지인가. sw.js 의 fetch 는 cache-first 이고 캐시에 있으면 네트워크를
+  아예 보지 않는다 — 그래서 고친 파일이 기기에 도착했는지 그 기기 밖에서는 알 수 없다.
+  이 파일은 어느 판의 셸 목록에도 없어서 캐시에 없다. 열면 반드시 네트워크로 간다.
+
+  세션은 localStorage 에서 직접 읽는다. sg-auth.js 를 부르면 그 자체가 캐시된 옛
+  사본일 수 있어, 진단이 진단 대상에 기대는 꼴이 된다.
+
+  화면에 토큰 전문은 찍지 않는다 — 앞 10자와 만료 시각이면 가르는 데 충분하다.
+-->
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  body { max-width: 820px; margin: 0 auto; padding: 24px 18px 60px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .sub { color: #6b6357; font-size: 14px; margin: 0 0 22px; }
+  .row { border: 1px solid #e7e0d4; border-radius: 12px; padding: 14px 16px; margin: 10px 0; }
+  .row h2 { font-size: 15px; margin: 0 0 6px; }
+  .v { font-family: ui-monospace, Menlo, monospace; font-size: 13px; white-space: pre-wrap;
+       word-break: break-all; color: #3a342c; }
+  .ok   { color: #1a7f37; font-weight: 700; }
+  .bad  { color: #d1242f; font-weight: 700; }
+  .warn { color: #9a6700; font-weight: 700; }
+  .verdict { border: 2px solid #e8481f; border-radius: 12px; padding: 16px; margin: 18px 0;
+             font-size: 15px; line-height: 1.6; }
+  button { padding: 10px 18px; border-radius: 999px; border: 0; background: #e8481f;
+           color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>Scoring diagnostics</h1>
+<p class="sub">AI 채점이 거절당하는 이유를 가른다. 이 화면은 캐시를 타지 않는다.</p>
+
+<div class="row"><h2>1. 이 기기에 도착한 판 (build)</h2><div class="v" id="d-build">…</div></div>
+<div class="row"><h2>2. 서비스워커 캐시</h2><div class="v" id="d-sw">…</div></div>
+<div class="row"><h2>3. 저장된 세션</h2><div class="v" id="d-sess">…</div></div>
+<div class="row"><h2>4. Supabase 가 이 토큰을 받아 주는가</h2><div class="v" id="d-user">…</div></div>
+<div class="row"><h2>5. 채점 서버(/api/score)가 이 토큰을 받아 주는가</h2><div class="v" id="d-api">…</div></div>
+
+<div class="verdict" id="verdict">진단 중…</div>
+
+<p><button id="again" type="button">다시 검사</button>
+   <button id="nuke" type="button" style="background:#6b6357">캐시 비우고 새로 받기</button></p>
+
+<script>
+(function () {
+  'use strict';
+
+  var URL_ = 'https://qrmidnmlethqvdbmnyun.supabase.co';
+  var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybWlkbm1sZXRocXZkYm1ueXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg3NzQsImV4cCI6MjEwMTMxNDc3NH0.U2cprYXkpIS_1tSAiEjCFuHAztZRwIIK6DYCCowgxg4';
+
+  function $(id) { return document.getElementById(id); }
+  function set(id, html) { $(id).innerHTML = html; }
+  function tag(cls, s) { return '<span class="' + cls + '">' + s + '</span>'; }
+  function head(t) { return t ? String(t).slice(0, 10) + '…' : '(없음)'; }
+
+  var R = {};   // 단계별 결과 — 마지막에 이걸로 판정을 쓴다
+
+  /* 1. 이 기기가 들고 있는 판. 라이브의 version.json 과 견준다.
+        version.json 은 sw 가 캐시를 지나치게 두는 주소라 늘 네트워크에서 온다. */
+  function step1() {
+    var b = window.SG_BUILD_LOCAL || null;
+    return fetch('assets/build-version.js', { cache: 'no-store' })
+      .then(function (r) { return r.text(); })
+      .then(function (txt) {
+        var m = /"version":\s*"([^"]+)"/.exec(txt);
+        var served = m ? m[1] : '(못 읽음)';
+        return fetch('version.json', { cache: 'no-store' })
+          .then(function (r) { return r.json(); })
+          .then(function (live) {
+            R.served = served; R.live = live.version;
+            var same = served === live.version;
+            set('d-build',
+              '서버가 지금 주는 판 : ' + tag(same ? 'ok' : 'bad', served) + '\n' +
+              '라이브 최신 판      : ' + live.version + '\n' +
+              (same ? '' : tag('bad', '⚠ 서버 응답이 최신이 아니다 — 배포가 덜 끝났다.')));
+          });
+      })
+      .catch(function (e) { set('d-build', tag('bad', '읽기 실패: ' + e.message)); });
+  }
+
+  /* 2. 셸 캐시에 어떤 판이 남아 있는가. 여기에 옛 판 이름이 살아 있으면
+        review.html 은 그 안의 옛 사본으로 열리고 있다는 뜻이다. */
+  function step2() {
+    if (!window.caches) { set('d-sw', '(이 브라우저에 Cache API 가 없다)'); return Promise.resolve(); }
+    return caches.keys().then(function (keys) {
+      return caches.match('assets/sg-results.js').then(function (hit) {
+        return (hit ? hit.text() : Promise.resolve('')).then(function (body) {
+          var fixed = body.indexOf('SESSION_GONE') >= 0;
+          R.cachedFixed = !hit || fixed;
+          var reg = navigator.serviceWorker && navigator.serviceWorker.controller;
+          set('d-sw',
+            '캐시 이름          : ' + (keys.join(', ') || '(없음)') + '\n' +
+            '제어 중인 워커     : ' + (reg ? reg.scriptURL : '(없음 — 이 탭은 워커 제어 밖)') + '\n' +
+            '캐시된 sg-results  : ' + (!hit ? '(캐시에 없음)'
+                : fixed ? tag('ok', '고친 판(SESSION_GONE 있음)')
+                        : tag('bad', '옛 판 — 이 기기는 아직 옛 채점 코드를 쓴다')));
+        });
+      });
+    }).catch(function (e) { set('d-sw', '확인 실패: ' + e.message); });
+  }
+
+  /* 3. localStorage 의 세션. sg-auth.js 를 부르지 않고 직접 읽는다. */
+  function step3() {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem('sg2_auth_v1') || 'null'); } catch (e) {}
+    R.sess = s;
+    if (!s) {
+      set('d-sess', tag('bad', '세션 없음 — 이 브라우저는 로그아웃 상태다.'));
+      return;
+    }
+    var now = Math.floor(Date.now() / 1000);
+    var left = (s.expires_at || 0) - now;
+    R.left = left;
+    set('d-sess',
+      '사용자        : ' + ((s.user && (s.user.name || s.user.email)) || '(이름 없음)') +
+        '  role=' + ((s.user && s.user.role) || '(없음)') + '\n' +
+      'access token  : ' + head(s.access_token) + '\n' +
+      'refresh token : ' + head(s.refresh_token) + '\n' +
+      '만료까지      : ' + (left > 0 ? tag('ok', left + '초 (' + Math.round(left / 60) + '분)')
+                                     : tag('warn', Math.abs(left) + '초 전에 만료됨')) + '\n' +
+      '기기 시계     : ' + new Date().toISOString());
+  }
+
+  /* 4. Supabase 에 직접 물어본다 — 토큰이 살아 있는지의 진짜 답. */
+  function step4() {
+    var s = R.sess;
+    if (!s || !s.access_token) { set('d-user', '(토큰이 없어 건너뜀)'); return; }
+    return fetch(URL_ + '/auth/v1/user', {
+      headers: { apikey: ANON, Authorization: 'Bearer ' + s.access_token }
+    }).then(function (r) {
+      R.userStatus = r.status;
+      return r.text().then(function (t) {
+        set('d-user', 'HTTP ' + tag(r.ok ? 'ok' : 'bad', r.status) + '\n' + t.slice(0, 300));
+      });
+    }).catch(function (e) {
+      R.userStatus = 0;
+      set('d-user', tag('bad', '네트워크 실패: ' + e.message));
+    });
+  }
+
+  /* 5. 채점 서버에 같은 토큰으로 묻는다. GET 은 채점을 돌리지 않고 provider 목록만
+        돌려주므로(api/score.js), 토큰도 서버 설정도 돈 한 푼 없이 확인된다. */
+  function step5() {
+    var s = R.sess;
+    if (!s || !s.access_token) { set('d-api', '(토큰이 없어 건너뜀)'); return; }
+    return fetch('/api/score', {
+      headers: { Authorization: 'Bearer ' + s.access_token }
+    }).then(function (r) {
+      R.apiStatus = r.status;
+      return r.text().then(function (t) {
+        set('d-api', 'HTTP ' + tag(r.ok ? 'ok' : 'bad', r.status) + '\n' + t.slice(0, 400));
+      });
+    }).catch(function (e) {
+      R.apiStatus = 0;
+      set('d-api', tag('bad', '네트워크 실패: ' + e.message));
+    });
+  }
+
+  /* 판정. 네 가지 경우가 서로 다른 처방을 가진다. */
+  function verdict() {
+    var v = $('verdict'), out;
+    if (!R.sess) {
+      out = '<b>세션이 없다.</b> 이 브라우저는 로그아웃 상태다 — 로그인부터 하면 된다.';
+    } else if (R.userStatus === 200 && R.apiStatus === 200) {
+      out = '<b class="ok">토큰도 서버도 정상이다.</b> 지금 채점을 다시 걸면 통과한다. ' +
+            '그래도 실패한다면 남은 것은 이 기기에 옛 채점 코드가 남은 경우다 — 위 2번을 보라.';
+    } else if (R.userStatus === 200 && R.apiStatus !== 200) {
+      out = '<b class="bad">토큰은 살아 있는데 채점 서버가 거절했다.</b> ' +
+            '문제는 로그인이 아니라 서버 쪽이다 — Vercel 의 SUPABASE_ANON_KEY 가 ' +
+            '엉뚱한 값으로 덮여 있으면 서버가 멀쩡한 토큰을 못 알아본다. (5번의 본문을 보라.)';
+    } else if (R.userStatus === 401 || R.userStatus === 403) {
+      out = '<b class="bad">세션이 서버에서 끊겼다.</b> 만료 시각이 남아 있어도 소용없다 — ' +
+            '같은 계정을 쓰는 다른 기기에서 로그아웃했을 때 이렇게 된다. ' +
+            '로그아웃했다 다시 로그인하면 풀린다.';
+    } else {
+      out = '<b class="warn">네트워크가 막혀 판정할 수 없다.</b> 회선을 확인하고 다시 검사하라.';
+    }
+    if (R.cachedFixed === false) {
+      out += '<br><br><b class="bad">그리고 이 기기에는 옛 채점 코드가 남아 있다.</b> ' +
+             '아래 “캐시 비우고 새로 받기” 를 누르면 고친 판으로 갈아 끼운다.';
+    }
+    v.innerHTML = out;
+  }
+
+  function run() {
+    ['d-build', 'd-sw', 'd-sess', 'd-user', 'd-api'].forEach(function (id) { set(id, '…'); });
+    $('verdict').textContent = '진단 중…';
+    R = {};
+    Promise.resolve()
+      .then(step1).then(step2).then(step3).then(step4).then(step5).then(verdict)
+      .catch(function (e) { $('verdict').textContent = '진단 실패: ' + e.message; });
+  }
+
+  /* 캐시를 통째로 버리고 워커를 떼어 낸다. 지우는 것은 내려받아 둔 사본뿐 —
+     응시 기록도 답안도 localStorage 와 IndexedDB 에 그대로 남는다. */
+  $('nuke').onclick = function () {
+    var jobs = [];
+    if (window.caches) jobs.push(caches.keys().then(function (ks) {
+      return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+    }));
+    if (navigator.serviceWorker) jobs.push(
+      navigator.serviceWorker.getRegistrations().then(function (rs) {
+        return Promise.all(rs.map(function (r) { return r.unregister(); }));
+      }));
+    Promise.all(jobs).then(function () {
+      $('verdict').innerHTML = '<b class="ok">캐시를 비웠다.</b> 이 창을 닫고 채점 화면을 다시 열면 최신 판으로 열린다.';
+    });
+  };
+
+  $('again').onclick = run;
+  run();
+})();
+</script>
+</body>
+</html>
