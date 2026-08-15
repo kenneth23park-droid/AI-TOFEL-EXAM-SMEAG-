@@ -506,6 +506,8 @@
     if (SPEAK) { SPEAK.repaint(); return true; }
     SPEAK = SG_REVIEW_SPEAKING.mount(el, {
       pack: PACK, rows: ALL, tasks: TASKS, session: SESSION, staff: !!STAFF,
+      /* 채점 전이라 media_path 가 비어 있어도 {owner}/{session}/ 아래를 직접 찾게 한다. */
+      owner: OWNER_ID,
       extraFor: function (qid) {
         var notes = commentsFor('question', qid);
         if (!notes.length && !STAFF) return '';

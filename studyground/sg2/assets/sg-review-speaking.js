@@ -480,38 +480,69 @@ window.SG_REVIEW_SPEAKING = (function () {
     slot.appendChild(a);
   }
 
-  function wirePlayback(el, it, session, staff) {
+  /* 녹음이 놓일 수 있는 자리들. 앞에서부터 하나씩 서명을 시도한다.
+   *
+   * media_path 는 채점이 돌 때 api/score.js 가 채운다. 그래서 채점 전에는 비어 있고,
+   * 그 상태에서는 파일이 버킷에 멀쩡히 있어도 재생기가 붙지 않았다. 업로더가 쓰는
+   * 규칙({owner}/{session}/{qid}.{ext})은 알고 있으니, 경로가 비면 그 규칙으로
+   * 직접 찾아본다. 확장자는 기기마다 다르므로(MediaRecorder 가 고르는 대로) 후보를 돈다. */
+  var MEDIA_EXTS = ['webm', 'm4a', 'ogg', 'mp3', 'wav'];
+
+  function mediaPaths(task, owner, session, qid) {
+    var out = [];
+    var known = task && task.media_path;
+    if (known) out.push(known);
+    if (owner && session && qid) {
+      for (var i = 0; i < MEDIA_EXTS.length; i++) {
+        var guess = owner + '/' + session + '/' + qid + '.' + MEDIA_EXTS[i];
+        if (guess !== known) out.push(guess);
+      }
+    }
+    return out;
+  }
+
+  function wirePlayback(el, it, session, staff, owner) {
     var slot = el.querySelector('[data-play]');
     if (!slot) return;
-    var path = it.task && it.task.media_path;
-    if (!it.recorded && !path) {                       // 녹음 자체가 없다 — html() 이 이미 말했다
+    var paths = mediaPaths(it.task, owner, session, it.qid);
+    if (!it.recorded && !paths.length) {               // 녹음 자체가 없다 — html() 이 이미 말했다
       recoverInto(slot, session, staff);
       return;
     }
 
     function cloud() {
-      if (!path || !window.SG_AUTH) {
+      if (!paths.length || !window.SG_AUTH) {
         say(slot, 'The recording is not on this device.', '이 기기에는 녹음이 없습니다.');
         recoverInto(slot, session, staff);
         return;
       }
       SG_AUTH.token().then(function (tok) {
         if (!tok) { say(slot, 'Sign in to play the recording.', '녹음을 들으려면 로그인하세요.'); return; }
-        return fetch(SG_AUTH.url + '/storage/v1/object/sign/toefl-recordings/' +
-                     path.split('/').map(encodeURIComponent).join('/'), {
-          method: 'POST',
-          headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok,
-                     'Content-Type': 'application/json' },
-          body: JSON.stringify({ expiresIn: 3600 })
-        }).then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (j) {
-            if (j && j.signedURL) { playerInto(slot, SG_AUTH.url + '/storage/v1' + j.signedURL); return; }
-            /* 채점 행에는 경로가 적혀 있는데 버킷에서 열리지 않는다 — 파일이 그 자리에
-               없다는 뜻이다(업로드가 400 으로 거절당한 자리가 그랬다). 회수가 답이다. */
+
+        var i = 0;
+        function tryNext() {
+          if (i >= paths.length) {
+            /* 어느 자리에서도 열리지 않는다 — 파일이 버킷에 없다는 뜻이다
+               (업로드가 400 으로 거절당한 자리가 그랬다). 회수가 답이다. */
             say(slot, 'The recording could not be opened from this device.',
                 '이 기기에서는 녹음을 열 수 없습니다.');
             recoverInto(slot, session, staff);
-          });
+            return null;
+          }
+          var p = paths[i++];
+          return fetch(SG_AUTH.url + '/storage/v1/object/sign/toefl-recordings/' +
+                       p.split('/').map(encodeURIComponent).join('/'), {
+            method: 'POST',
+            headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok,
+                       'Content-Type': 'application/json' },
+            body: JSON.stringify({ expiresIn: 3600 })
+          }).then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (j) {
+              if (j && j.signedURL) { playerInto(slot, SG_AUTH.url + '/storage/v1' + j.signedURL); return null; }
+              return tryNext();
+            });
+        }
+        return tryNext();
       })['catch'](function () {
         say(slot, 'The recording could not be opened from this device.',
             '이 기기에서는 녹음을 열 수 없습니다.');
@@ -539,6 +570,7 @@ window.SG_REVIEW_SPEAKING = (function () {
    *   opts.rows      SG_RESULTS.detail(res).rows
    *   opts.tasks     sg_task_scores 행[] (늦게 와도 된다 — setTasks 로 갈아 끼운다)
    *   opts.session   녹음을 찾을 응시 세션 id
+   *   opts.owner     응시한 학생의 계정 id — media_path 가 아직 없을 때 버킷에서 직접 찾는다
    *   opts.staff     선생님·관리자면 true — 녹음이 없는 자리에 회수 도구 문을 세운다
    *   opts.extraFor  fn(qid) → 문항 아래 붙일 HTML(코멘트 등)
    *   opts.onPaint   fn(el) 다시 그린 뒤 부를 것(코멘트 편집기 배선 등)
@@ -561,7 +593,7 @@ window.SG_REVIEW_SPEAKING = (function () {
         try { window.SG_AUDIO.apply(el); } catch (e) {}
       }
       var it = current();
-      if (it) wirePlayback(el, it, opts.session, opts.staff);
+      if (it) wirePlayback(el, it, opts.session, opts.staff, opts.owner);
       if (typeof opts.onPaint === 'function') opts.onPaint(el);
     }
 
