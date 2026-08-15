@@ -190,6 +190,15 @@ tr.row-bad{background:var(--bad-soft)}
 .task .sc{font-size:17px;font-weight:900;letter-spacing:-.02em}
 .task .sc small{font-size:12px;color:var(--dim);font-weight:700}
 .task .ans{flex-basis:100%;font-size:13px;color:var(--muted);white-space:pre-wrap}
+/* 스피킹 한 줄은 누르면 소리가 난다 — 손가락이 그 사실을 먼저 알아야 한다. */
+.task.playable{cursor:pointer;border-radius:12px;padding-left:10px;padding-right:10px;margin:0 -10px}
+.task.playable:hover{background:var(--cream-2)}
+.task .play{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-size:12.5px;
+  font-weight:800;color:var(--brand-ink);background:var(--brand-soft);border-radius:999px;padding:5px 12px}
+.task .play svg{width:14px;height:14px}
+.task .rec:empty{display:none}
+.task .rec{flex-basis:100%;font-size:13px}
+.task .rec audio{width:100%;max-width:420px;margin-top:2px}
 
 /* ── 로그인 ────────────────────────────────────────────── */
 .field{display:block;margin-top:12px}
@@ -756,7 +765,9 @@ var BAND = (function () {
       if (!byTask[skill]) return;
       var score = (t.teacher_score === null || t.teacher_score === undefined) ? t.ai_score : t.teacher_score;
       if (score === null || score === undefined || score === '') return;
-      byTask[skill].push({ score: Number(score), confirmed: !!t.confirmed_at, question_id: t.question_id || '' });
+      byTask[skill].push({ score: Number(score), confirmed: !!t.confirmed_at, question_id: t.question_id || '',
+                           /* 스피킹은 녹음이 답이다. 채점기가 적어 둔 자리를 그대로 들고 간다. */
+                           media: t.media_path || '' });
     });
 
     var sections = {}, bands = {}, pending = [];
@@ -1202,23 +1213,112 @@ var BAND = (function () {
     });
   }
 
+  /* ── 녹음 ────────────────────────────────────────────────
+     스피킹의 답은 글이 아니라 소리다. 표에 남는 'idb:set9-S1-q01' 은 응시한 그 기기의
+     IndexedDB 를 가리키는 쪽지일 뿐이라, 다른 컴퓨터에서 여는 이 화면에서는 아무 뜻도
+     없다. 들려줄 수 있는 사본은 제출 때 올라간 비공개 버킷의 파일 하나고, 서명 URL 로만
+     열린다 — 자기 폴더만 서명할 수 있으므로 남의 녹음은 애초에 열리지 않는다(Storage RLS).
+
+     자리는 채점기(api/score.js)가 media_path 에 적어 둔다. 채점 전이거나 옛 행이라
+     비어 있으면 업로더의 규칙({owner}/{session}/{qid}.{ext})으로 직접 찾는다 —
+     확장자는 기기의 MediaRecorder 가 고르는 대로라 후보를 돈다. sg2 의
+     assets/sg-review-speaking.js 와 같은 규칙이다. */
+  var REC = (function () {
+    var EXTS = ['webm', 'm4a', 'ogg', 'mp3', 'wav'];
+
+    function paths(media, owner, session, qid) {
+      var out = [];
+      if (media) out.push(media);
+      if (owner && session && qid) {
+        EXTS.forEach(function (x) {
+          var guess = owner + '/' + session + '/' + qid + '.' + x;
+          if (guess !== media) out.push(guess);
+        });
+      }
+      return out;
+    }
+
+    function sign(path) {
+      return AUTH.token().then(function (tok) {
+        if (!tok) return null;
+        return fetch(CFG.url + '/storage/v1/object/sign/toefl-recordings/' +
+                     path.split('/').map(encodeURIComponent).join('/'), {
+          method: 'POST',
+          headers: { apikey: CFG.anon, Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ expiresIn: 3600 })
+        }).then(function (res) { return res.ok ? res.json().catch(function () { return null; }) : null; })
+          .then(function (j) { return j && j.signedURL ? CFG.url + '/storage/v1' + j.signedURL : null; });
+      }).catch(function () { return null; });
+    }
+
+    /** 후보를 앞에서부터 하나씩 열어 본다. 다 실패하면 null — 버킷에 파일이 없다는 뜻이다. */
+    function open(list) {
+      var i = 0;
+      function next() {
+        if (i >= list.length) return Promise.resolve(null);
+        return sign(list[i++]).then(function (url) { return url || next(); });
+      }
+      return next();
+    }
+
+    return { paths: paths, open: open };
+  })();
+
+  /** 한 스피킹 과제의 녹음을 그 자리에 편다. 두 번 눌러도 한 번만 부른다. */
+  function playRecording(r, t, slot) {
+    if (!slot || slot.getAttribute('data-on')) return;
+    slot.setAttribute('data-on', '1');
+    slot.innerHTML = '<span class="muted">' + bi('Looking for the recording…', '녹음을 찾는 중…') + '</span>';
+    REC.open(REC.paths(t.media, r.owner, r.session, t.question_id)).then(function (url) {
+      if (!url) {
+        slot.removeAttribute('data-on');       // 네트워크 탓일 수도 있다 — 다시 눌러 볼 수 있게 둔다
+        slot.innerHTML = '<span class="muted">' +
+          bi('The recording could not be opened. Ask an administrator.',
+             '녹음을 열 수 없습니다. 관리자에게 문의하세요.') + '</span>';
+        return;
+      }
+      slot.innerHTML = '';
+      var a = document.createElement('audio');
+      a.controls = true;
+      a.src = url;
+      slot.appendChild(a);
+      a.play().catch(function () {});          // 자동재생이 막히면 재생기는 그대로 남는다
+    });
+  }
+
   /* 한 영역의 속살 — 객관식은 문항 표, 산출형은 과제별 점수. */
   function sectionBody(r, s, host) {
     var v = viewOf(r);
     if (s === 'writing' || s === 'speaking') {
       var tasks = v.sections[s].tasks || [];
-      host.innerHTML = tasks.length ? tasks.map(function (t) {
+      var speak = s === 'speaking';
+      host.innerHTML = tasks.length ? tasks.map(function (t, i) {
         var given = (r.answers || {})[t.question_id];
         if (given && typeof given === 'object' && 'v' in given) given = given.v;
-        return '<div class="task">' +
+        /* 'idb:…' 는 답이 아니라 기기 안 녹음을 가리키는 쪽지다. 재생기가 그 자리를 대신한다. */
+        var note = /^idb:/.test(String(given || ''));
+        return '<div class="task' + (speak ? ' playable' : '') + '"' +
+            (speak ? ' data-task="' + i + '" title="Play my recording"' : '') + '>' +
           '<span class="qid">' + esc(t.question_id || '—') + '</span>' +
           '<span class="sc">' + Number(t.score).toFixed(2) + ' <small>/ ' + BAND.TASK_MAX + '</small></span>' +
           '<span class="status">' +
             (t.confirmed ? bi('teacher', '교사 확정') : bi('AI', 'AI 채점')) + '</span>' +
-          (given ? '<div class="ans">' + esc(cut(given, 400)) + '</div>' : '') +
+          (speak ? '<span class="play">' + icon('speaking', 14) +
+            bi('Play recording', '녹음 듣기') + '</span>' : '') +
+          (given && !note ? '<div class="ans">' + esc(cut(given, 400)) + '</div>' : '') +
+          (speak ? '<div class="rec"></div>' : '') +
         '</div>';
       }).join('') : '<p class="muted" style="padding:14px 0;font-size:13.5px">' +
         bi('No task score yet.', '아직 과제 점수가 없습니다.') + '</p>';
+      if (speak) {
+        [].forEach.call(host.querySelectorAll('[data-task]'), function (el) {
+          el.onclick = function (e) {
+            /* 재생기 자체를 누른 것(막대·버튼)은 재생기에게 맡긴다. */
+            if (e.target && e.target.closest && e.target.closest('audio')) return;
+            playRecording(r, tasks[Number(el.getAttribute('data-task'))], el.querySelector('.rec'));
+          };
+        });
+      }
       return;
     }
     host.innerHTML = '<p class="muted" style="padding:14px 0;font-size:13.5px">' + bi('Loading…', '불러오는 중…') + '</p>';
@@ -1796,7 +1896,7 @@ var BAND = (function () {
 
   /* ── 데이터 ── */
   var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers,scale';
-  var TASK_SELECT = 'session,question_id,skill,task_kind,ai_score,teacher_score,confirmed_at';
+  var TASK_SELECT = 'session,question_id,skill,task_kind,ai_score,teacher_score,confirmed_at,media_path';
   var SET_SELECT = 'id,label,set_code,picks,snapshot,approved_name,approved_note,created_at';
   function load() {
     var u = AUTH.user();

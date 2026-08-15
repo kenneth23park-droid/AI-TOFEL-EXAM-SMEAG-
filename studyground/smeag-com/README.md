@@ -71,6 +71,26 @@ sg2 응시 → 로컬 채점 → Supabase sg_results  ←── scores.html (본
   그것이 코멘트 칸의 정본이고, 누가 언제 썼는지까지 인쇄된다.
 - 판정: `studyground/tests/test_report_card.js`
 
+## 스피킹 녹음 듣기
+
+리뷰의 **Speaking** 줄(요약 카드의 `Details` 든 Speaking 탭이든)을 누르면 그 문항의
+녹음이 그 자리에서 열린다. 표에 남던 `idb:set9-S1-q01` 은 답이 아니라 **응시한 그 기기의
+IndexedDB 를 가리키는 쪽지**라, 이 화면에서는 아무 뜻도 없어 더 이상 답 자리에 쓰지 않는다.
+
+```
+sg_task_scores.media_path            ← 채점기(api/score.js)가 적어 둔 자리
+없으면 {owner}/{session}/{qid}.{ext} ← 업로더 규칙으로 직접 찾는다(webm·m4a·ogg·mp3·wav)
+      → POST /storage/v1/object/sign/toefl-recordings/…  (1시간짜리 서명 URL)
+```
+
+- 공개 주소가 아니다. 버킷은 비공개이고 서명은 **자기 폴더만** 된다(Storage RLS) —
+  화면 코드를 고쳐도 남의 녹음은 열리지 않는다. 선생님은 `recordings staff read` 정책으로 연다.
+- 녹음 보존은 90일. 지난 응시는 점수만 남고 재생은 "열 수 없습니다" 로 떨어진다.
+- 파일이 버킷에 아예 없으면(업로드 실패) 회수는 sg2 의 `recover-recordings.html` 몫이다 —
+  시험을 친 그 PC 에서 원본을 꺼내야 한다.
+- 같은 규칙이 sg2 리뷰 화면에도 있다(`sg2/assets/sg-review-speaking.js`).
+- 판정: `studyground/tests/test_scores_recording.js`
+
 ## 설정 (`scores.html` 상단 `CFG`)
 
 | 키 | 뜻 |
