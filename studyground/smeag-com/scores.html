@@ -334,14 +334,19 @@ footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font
   <section id="gate" class="hide">
     <div class="page-h"><h1><span data-en>My TOEFL scores</span><span data-ko>내 TOEFL 성적</span></h1></div>
     <p class="muted mt-8" style="font-size:14px">
-      <span data-en>Sign in with the student ID and password you used for the mock test.</span>
-      <span data-ko>모의고사에 사용한 학번과 비밀번호로 로그인하세요.</span>
+      <span data-en>Sign in with the student ID, the date you sat the test, and your password.</span>
+      <span data-ko>학번과 응시일, 비밀번호로 로그인하세요.</span>
     </p>
     <div class="card mt-16" style="max-width:420px">
       <form id="login">
         <div class="err hide" id="login-err"></div>
         <label class="field"><span data-en>Student ID or email</span><span data-ko>학번 또는 이메일</span>
           <input id="login-id" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
+        <!-- 같은 smeag### 는 시험일마다 다른 사람에게 다시 나간다. 아이디만으로는
+             어느 응시인지 정해지지 않으므로 응시일을 함께 받는다 — 이 둘이 성적표를
+             여는 열쇠다. 선생님·관리자 계정(이메일 로그인)은 시험일이 없어 비워 둔다. -->
+        <label class="field"><span data-en>Exam date</span><span data-ko>응시일</span>
+          <input id="login-date" type="date" autocomplete="off"></label>
         <label class="field"><span data-en>Password</span><span data-ko>비밀번호</span>
           <input id="login-pw" type="password" autocomplete="current-password" required></label>
         <button class="btn brand mt-16" style="width:100%;justify-content:center" id="login-go" type="submit">
@@ -510,14 +515,23 @@ var AUTH = (function () {
     return v + '@' + STAFF_DOMAIN;
   }
 
-  function signIn(login, password) {
+  /* examDate 를 실어 보내면 서버는 (아이디, 시험일) 그 계정 하나만 연다. 비워 두면
+     서버가 오늘 → 가까운 과거 → 가까운 미래 순으로 짐작하는데, 그 짐작은 같은 번호를
+     쓴 다른 사람의 성적으로 이어질 수 있다. 성적 조회에서는 짐작하지 않는다. */
+  function signIn(login, password, examDate) {
     return fetch(CFG.url + '/functions/v1/sg-auth', {
       method: 'POST',
       headers: { apikey: CFG.anon, Authorization: 'Bearer ' + CFG.anon, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'signin', login: loginId(login), password: password })
+      body: JSON.stringify({
+        action: 'signin', login: loginId(login), password: password, exam_date: examDate || ''
+      })
     }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) {
-        if (!r.ok) { var e = new Error(j.message || 'Sign-in failed'); e.messageKo = j.message_ko; throw e; }
+        if (!r.ok) {
+          var e = new Error(j.message || 'Sign-in failed');
+          e.messageKo = j.message_ko; e.code = j.error;
+          throw e;
+        }
         return store(j);
       });
     }, function () {
@@ -1848,12 +1862,31 @@ var BAND = (function () {
       e.preventDefault();
       var btn = $('login-go'); btn.disabled = true;
       $('login-err').classList.add('hide');
-      AUTH.signIn($('login-id').value, $('login-pw').value).then(function () {
+      var who = String($('login-id').value || '').trim().toLowerCase();
+      var when = String($('login-date').value || '').trim();
+      /* 수험생 아이디는 응시일이 있어야 어느 응시인지 정해진다. 여기서 막지 않으면
+         서버가 대신 짐작하고, 그 짐작은 남의 성적일 수 있다. */
+      if (/^smeag\d{3}$/.test(who) && !when) {
+        btn.disabled = false;
+        $('login-err').classList.remove('hide');
+        $('login-err').innerHTML = bi('Enter the date you sat the test.', '응시일을 입력하세요.');
+        return;
+      }
+      AUTH.signIn($('login-id').value, $('login-pw').value, when).then(function () {
         btn.disabled = false;
         showApp();
       }).catch(function (err) {
         btn.disabled = false;
         $('login-err').classList.remove('hide');
+        /* 서버는 아이디·시험일·비밀번호가 안 맞으면 똑같이 401 을 준다. 응시일까지
+           넣어 보낸 자리에서는 날짜도 후보라고 알려 준다 — 맞는 아이디로 날짜만
+           틀렸을 때 "비밀번호가 틀렸다"만 보이면 학생은 헤맨다. */
+        if (err.code === 'bad_credentials' && when) {
+          $('login-err').innerHTML = bi(
+            'No scores found for that ID on ' + when + '. Check the ID, the exam date, and the password.',
+            when + ' 응시 기록에서 그 아이디를 찾지 못했습니다. 아이디 · 응시일 · 비밀번호를 확인하세요.');
+          return;
+        }
         $('login-err').innerHTML = bi(err.message || 'Sign-in failed.', err.messageKo || err.message || '로그인하지 못했습니다.');
       });
     };
