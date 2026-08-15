@@ -31,6 +31,10 @@
   <div class="page-h mt-24" style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
     <h1 style="font-size:clamp(24px,3.4vw,36px)"><span data-en>Student results</span><span data-ko>학생 응시 결과</span></h1>
     <span class="chip" id="who" style="margin-bottom:8px"></span>
+    <!-- 남은 녹음 자리. 자세한 건 AI usage 화면에 있고, 여기서는 시험 전에 눈에
+         걸리기만 하면 된다 — 꽉 찬 채로 시험을 시작하면 녹음이 조용히 사라진다. -->
+    <a class="chip" id="cap-chip" href="admin-usage.html" hidden
+       style="margin-bottom:8px;text-decoration:none"></a>
     <a class="btn ghost sm" href="scoring-guide.html" style="margin-left:auto"><span data-en>How we score</span><span data-ko>채점 근거</span></a>
     <button class="btn ghost sm" id="score-all"><span data-en>Score unscored</span><span data-ko>미채점 채점하기</span></button>
     <button class="btn ghost sm" id="csv"><span data-en>Download CSV</span><span data-ko>CSV 내려받기</span></button>
@@ -669,6 +673,38 @@
     }).catch(function () {});
   }
 
+  /* 녹음 저장소 잔량 한 줄. 한도(1 GB)는 요금제 사실이라 서버가 모른다 — 자세한
+     내역과 같은 상수를 쓰는 화면은 admin-usage.html 이고, 여기는 그 요약이다.
+     읽지 못하면 아무것도 그리지 않는다. 잘못된 안심보다 침묵이 낫다. */
+  function loadCap() {
+    var LIMIT = 1000000000;
+    return SG_AUTH.token().then(function (tok) {
+      if (!tok) return;
+      return fetch(SG_AUTH.url + '/rest/v1/rpc/sg_storage_usage', {
+        method: 'POST',
+        headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok,
+                   'Content-Type': 'application/json' },
+        body: '{}'
+      }).then(function (r) { return r.ok ? r.json() : null; }).then(function (u) {
+        if (!u || !u.buckets) return;
+        var used = 0, files = 0;
+        u.buckets.forEach(function (b) {
+          used += Number(b.bytes || 0); files += Number(b.files || 0);
+        });
+        var left = Math.max(0, LIMIT - used), pct = used * 100 / LIMIT;
+        var mb = function (n) { return (n / 1000000).toFixed(n < 100000000 ? 1 : 0) + ' MB'; };
+        var el = $('cap-chip');
+        el.textContent = 'Recordings ' + (left >= 1000000000
+          ? (left / 1000000000).toFixed(2) + ' GB' : mb(left)) + ' left';
+        el.title = mb(used) + ' of 1 GB used · ' + files + ' recordings · ' +
+                   pct.toFixed(1) + '% full — open AI usage for detail';
+        if (pct >= 90) { el.style.background = '#fbe4df'; el.style.color = '#a12a13'; }
+        else if (pct >= 70) { el.style.background = '#fdf1dc'; el.style.color = '#8a5c00'; }
+        el.hidden = false;
+      });
+    })['catch'](function () {});
+  }
+
   function boot() {
     $('csv').onclick = csv;
     $('score-all').onclick = scoreAll;
@@ -689,6 +725,7 @@
         load();
         return;
       }
+      loadCap();   // 관리자에게만 답이 온다(sg_storage_usage 가 그렇게 막혀 있다).
       // 관리자만 담당 선생님 열을 얻는다. 이름을 못 읽어도 목록은 그대로 뜬다.
       Array.prototype.forEach.call(document.querySelectorAll('.col-teacher'), function (el) {
         el.classList.remove('hide');

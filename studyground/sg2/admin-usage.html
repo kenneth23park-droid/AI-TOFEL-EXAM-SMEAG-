@@ -65,6 +65,23 @@
   .day .fill { height:100%; background:var(--brand); border-radius:999px; }
   .day .amt { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
 
+  /* 남은 용량 막대. 토큰 막대(.day)와 달리 **한도가 있는** 자원이라 트랙 전체가
+     한도이고, 채워진 만큼이 쓴 몫이다. 색은 위험도를 말한다. */
+  .cap { display:grid; grid-template-columns:132px 1fr 190px; gap:12px; align-items:center;
+    margin:0 0 12px; font-size:12.5px; }
+  .cap .lab { font-weight:800; }
+  .cap .lab small { display:block; font-weight:600; color:var(--muted); font-size:10.5px; }
+  .cap .track { height:13px; background:var(--cream-2); border-radius:999px; overflow:hidden; }
+  .cap .fill { height:100%; border-radius:999px; background:var(--brand); }
+  .cap .fill.warn { background:#c98a00; }
+  .cap .fill.hot { background:#c2321a; }
+  .cap .amt { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
+  .cap .amt small { display:block; font-weight:600; color:var(--muted); }
+  @media (max-width:600px) {
+    .cap { grid-template-columns:1fr; gap:5px; margin-bottom:18px; }
+    .cap .amt { text-align:left; }
+  }
+
   .gate { max-width:520px; margin:60px auto; text-align:center; }
 </style>
 </head>
@@ -87,6 +104,17 @@
     <h1 style="font-size:clamp(25px,4vw,38px)"><span data-en>What the AI scoring actually costs</span><span data-ko>AI 채점이 실제로 쓴 비용</span></h1>
     <p class="sub"><span data-en>Every AI-scored task records the model it used and the tokens it burned. This reads that ledger and folds it by model and by day, priced with the published rate card.</span>
       <span data-ko>AI 채점 한 건마다 어떤 모델로 토큰을 얼마나 썼는지가 남습니다. 그 원장을 모델별·날짜별로 접고 공개 단가로 금액을 매깁니다.</span></p>
+  </div>
+
+  <!-- 남은 용량. 아래의 기간 선택과 무관한 '지금 이 순간' 의 숫자라 기간 막대보다
+       위에 둔다 — 7일/30일을 눌렀는데 이 값이 안 변하면 그게 버그로 보인다. -->
+  <div class="card mt-16" id="cap-card">
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+      <h2 style="margin:0;font-size:15px;font-weight:850"><span data-en>Storage &amp; database</span></h2>
+      <span class="muted" style="font-size:11.5px" id="cap-msg"></span>
+    </div>
+    <div id="cap"></div>
+    <p class="muted" style="font-size:11.5px;margin:10px 0 0" id="cap-note"></p>
   </div>
 
   <div class="bar">
@@ -377,6 +405,94 @@
       }).join(' · ');
   }
 
+  /* ── 남은 용량 ──────────────────────────────────────────────────────────
+   * Supabase 는 저장소를 둘로 나눠 세고 한도도 따로 준다.
+   *   · Storage — 스피킹 녹음(파일). 응시가 늘수록 선형으로 붇는 쪽이다.
+   *   · Database — 점수·밴드·답안 텍스트(행). 응시당 수십 KB라 훨씬 여유롭다.
+   * 한도는 서버가 모른다 — 요금제 사실이라 여기 상수로 둔다. 유료로 올리면
+   * 아래 두 줄만 고치면 된다. 단위는 청구서와 같은 10진 GB(1 GB = 10^9 B) 다.
+   * 값은 sg_storage_usage() 가 준다(관리자에게만; 아니면 null). */
+  var PLAN = 'Free', LIMIT_STORAGE = 1000000000, LIMIT_DB = 500000000;
+
+  function bytes(n) {
+    n = Number(n || 0);
+    if (n < 1000) return n + ' B';
+    var u = ['kB', 'MB', 'GB', 'TB'], i = -1;
+    do { n /= 1000; i++; } while (n >= 1000 && i < u.length - 1);
+    return (n < 10 ? n.toFixed(1) : Math.round(n)) + ' ' + u[i];
+  }
+
+  /** 한도 대비 한 줄. 남은 몫을 오른쪽에 크게 적는다 — 관리자가 실제로 묻는 건
+   *  "얼마 썼나" 가 아니라 "얼마 더 받을 수 있나" 다. */
+  function capRow(label, sub, used, limit, tail) {
+    var pct = limit ? Math.min(100, used * 100 / limit) : 0;
+    var cls = pct >= 90 ? ' hot' : pct >= 70 ? ' warn' : '';
+    return '<div class="cap">' +
+      '<span class="lab">' + esc(label) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' +
+      '<span class="track"><span class="fill' + cls + '" style="width:' +
+        Math.max(1, Math.round(pct)) + '%"></span></span>' +
+      '<span class="amt">' + bytes(Math.max(0, limit - used)) + ' left' +
+        '<small>' + bytes(used) + ' of ' + bytes(limit) + ' · ' + pct.toFixed(1) + '%</small>' +
+      '</span></div>' + (tail || '');
+  }
+
+  function loadCaps() {
+    $('cap-msg').textContent = 'reading…';
+    return SG_AUTH.token().then(function (tok) {
+      if (!tok) throw new Error('signed out');
+      return fetch(SG_AUTH.url + '/rest/v1/rpc/sg_storage_usage', {
+        method: 'POST',
+        headers: {
+          apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok,
+          'Content-Type': 'application/json'
+        },
+        body: '{}'
+      }).then(function (r) {
+        if (!r.ok) throw new Error('supabase ' + r.status);
+        return r.json();
+      });
+    }).then(function (u) {
+      // 관리자가 아니면 함수가 null 을 준다. 0 으로 그리면 '텅 비었다' 로 읽힌다.
+      if (!u) throw new Error('admin account required');
+
+      var buckets = u.buckets || [];
+      var used = 0, files = 0, stale = 0, staleFiles = 0;
+      buckets.forEach(function (b) {
+        used += Number(b.bytes || 0); files += Number(b.files || 0);
+        stale += Number(b.stale_bytes || 0); staleFiles += Number(b.stale_files || 0);
+      });
+
+      /* 남은 자리를 '몇 개 더' 로 옮긴다. 평균 파일 크기는 실제로 올라온 녹음에서
+         나온 값이라, 추정이 아니라 이 학원의 숫자다. 파일이 없으면 셈하지 않는다. */
+      var avg = files ? used / files : 0;
+      var room = avg ? Math.floor(Math.max(0, LIMIT_STORAGE - used) / avg) : 0;
+      var roomLine = avg
+        ? '<p class="muted" style="font-size:11.5px;margin:-4px 0 14px">' +
+            'Average recording ' + bytes(avg) + ' — room for about ' +
+            room.toLocaleString('en-US') + ' more' +
+            (stale ? ', plus ' + bytes(stale) + ' in ' + num(staleFiles) +
+                     ' recordings already past the 90-day keep window' : '') +
+          '.</p>'
+        : '';
+
+      $('cap').innerHTML =
+        capRow('Storage', files ? num(files) + ' recordings' : 'no files yet',
+               used, LIMIT_STORAGE, roomLine) +
+        capRow('Database', 'scores, answers, comments', Number(u.db_bytes || 0), LIMIT_DB, '');
+
+      $('cap-msg').textContent = PLAN + ' plan quota';
+      $('cap-note').textContent =
+        'Read live from the server, not from the billing API — files are summed from ' +
+        'storage.objects and the database from pg_database_size, so the figures can sit a ' +
+        'little under what Supabase bills. Quotas are the ' + PLAN + ' plan’s (' +
+        bytes(LIMIT_STORAGE) + ' storage, ' + bytes(LIMIT_DB) + ' database) and are set in this page.';
+    })['catch'](function (e) {
+      $('cap').innerHTML = '';
+      $('cap-msg').textContent = '';
+      $('cap-note').textContent = 'Could not read capacity — ' + String(e.message || e);
+    });
+  }
+
   /* ── 내보내기 ───────────────────────────────────────────────────────────
    * 접기 전의 한 줄 = 채점 한 건. 회계로 넘길 때 화면의 합계가 아니라 원장이 필요하다. */
   function csv() {
@@ -403,13 +519,14 @@
     this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
     render();
   });
-  $('reload').addEventListener('click', load);
+  $('reload').addEventListener('click', function () { load(); loadCaps(); });
   $('csv').addEventListener('click', csv);
 
   function open() {
     $('gate').hidden = true;
     $('main').hidden = false;
     load();
+    loadCaps();
   }
   $('signin').addEventListener('click', function () { A.openLogin('', open); });
   if (A.can()) open(); else A.openLogin('', open);
