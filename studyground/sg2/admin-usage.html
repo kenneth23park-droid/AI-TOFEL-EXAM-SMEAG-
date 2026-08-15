@@ -61,8 +61,8 @@
   /* 날짜별 막대 — 금액이 아니라 토큰 수로 그린다. 단가 미등록 모델이 섞여도 길이가 정직하다. */
   .day { display:grid; grid-template-columns:88px 1fr 96px; gap:10px; align-items:center; margin:0 0 6px; font-size:12px; }
   .day .lab { color:var(--muted); font-variant-numeric:tabular-nums; }
-  .day .track { height:9px; background:var(--cream-2); border-radius:999px; overflow:hidden; }
-  .day .fill { height:100%; background:var(--brand); border-radius:999px; }
+  .day .track { display:block; height:9px; background:var(--cream-2); border-radius:999px; overflow:hidden; }
+  .day .fill { display:block; height:100%; background:var(--brand); border-radius:999px; }
   .day .amt { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
 
   /* 남은 용량 막대. 토큰 막대(.day)와 달리 **한도가 있는** 자원이라 트랙 전체가
@@ -71,8 +71,9 @@
     margin:0 0 12px; font-size:12.5px; }
   .cap .lab { font-weight:800; }
   .cap .lab small { display:block; font-weight:600; color:var(--muted); font-size:10.5px; }
-  .cap .track { height:13px; background:var(--cream-2); border-radius:999px; overflow:hidden; }
-  .cap .fill { height:100%; border-radius:999px; background:var(--brand); }
+  /* span 인 채로 두면 inline 이라 height·width 가 먹지 않는다 — 막대가 사라진다. */
+  .cap .track { display:block; height:13px; background:var(--cream-2); border-radius:999px; overflow:hidden; }
+  .cap .fill { display:block; height:100%; border-radius:999px; background:var(--brand); }
   .cap .fill.warn { background:#c98a00; }
   .cap .fill.hot { background:#c2321a; }
   .cap .amt { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
