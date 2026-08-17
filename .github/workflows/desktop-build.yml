@@ -1,0 +1,108 @@
+# 데스크톱 앱(맥 universal dmg, Windows nsis exe)을 러너에서 굽는다.
+#
+# 왜 CI 인가. 맥에서 Windows 인스톨러를 구우려면 Wine 이 필요한데, brew 의
+# wine-stable 은 macOS Gatekeeper 를 통과하지 못해 deprecated 이고 2026-09-01 에
+# 비활성화된다. Windows 는 Windows 에서 굽는 것이 유일하게 수명이 있는 길이다.
+#
+# 사이트 사본은 ubuntu 에서 한 번만 만들어 아티팩트로 넘긴다. build_desktop_site.sh 가
+# rsync 와 python3 를 쓰는데 windows-latest 에는 rsync 가 없기 때문이고, 겸해서
+# 두 OS 가 굽는 판이 반드시 같아진다 — 각자 만들면 어긋날 자리가 생긴다.
+name: desktop-build
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: '구울 대상'
+        type: choice
+        default: both
+        options: [both, mac, win]
+  push:
+    tags: ['desktop-v*']
+
+concurrency:
+  group: desktop-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # sg2 → desktop/site. 한 번만 만들어 두 빌드 잡이 같은 것을 받는다.
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+
+      - name: Build desktop site copy
+        run: bash studyground/sg2/tools/build_desktop_site.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-site
+          path: studyground/desktop/site
+          retention-days: 1
+
+  mac:
+    needs: site
+    if: github.event_name == 'push' || inputs.platforms != 'win'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: desktop-site
+          path: studyground/desktop/site
+
+      - name: Install deps
+        working-directory: studyground/desktop
+        run: npm ci
+
+      # site/ 는 이미 아티팩트로 받았으므로 npm run dmg(= site 재생성)를 부르지 않는다.
+      # 서명하지 않는다 — 사내 배포용이고, 인증서가 없으면 electron-builder 는
+      # 자동 탐색에 실패해 빌드를 세운다.
+      - name: Build universal dmg
+        working-directory: studyground/desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npx electron-builder --mac --universal --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SMEAG-MockTest-mac
+          path: |
+            studyground/desktop/release/*.dmg
+            studyground/desktop/release/*.blockmap
+
+  win:
+    needs: site
+    if: github.event_name == 'push' || inputs.platforms != 'mac'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: desktop-site
+          path: studyground/desktop/site
+
+      - name: Install deps
+        working-directory: studyground/desktop
+        run: npm ci
+
+      # .ico 는 두지 않는다 — electron-builder 가 build/icon.png(512×512)에서 만든다.
+      - name: Build nsis installer
+        working-directory: studyground/desktop
+        run: npx electron-builder --win --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SMEAG-MockTest-win
+          path: |
+            studyground/desktop/release/*.exe
+            studyground/desktop/release/*.blockmap
