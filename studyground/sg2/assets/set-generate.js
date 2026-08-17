@@ -26,8 +26,11 @@
  *   SG_SET_GEN.fillAnswers(pack, opts)      -> Promise<{pack, gates, usage, filled}>
  *   SG_SET_GEN.avoidTopics(packs)           -> [string]   이미 쓴 주제 — 겹치지 않게 하려고
  *
- *   opts: { code, blueprint, provider, model, token, endpoint?, concurrency?,
+ *   opts: { code, blueprint, provider, model, token, adminToken?, endpoint?, concurrency?,
  *           avoid?, onProgress?(ev), fetch? }
+ *
+ *   token 은 선생님 Supabase 계정 토큰, adminToken 은 서버의 관리자 토큰(x-sg-token)이다.
+ *   둘 중 하나만 있으면 열린다 — 서버 쪽 사정은 api/_llm.js 의 adminToken 주석에 있다.
  *
  * ES5 문법만 쓴다(빌드 단계 없음).
  */
@@ -180,6 +183,7 @@
     if (!f) return Promise.reject(new Error('fetch is unavailable.'));
     var head = { 'Content-Type': 'application/json' };
     if (opts.token) head.Authorization = 'Bearer ' + opts.token;
+    if (opts.adminToken) head['x-sg-token'] = opts.adminToken;
     return f(opts.endpoint || ENDPOINT, { method: 'POST', headers: head, body: JSON.stringify(body) })
       .then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (j) {
@@ -194,9 +198,16 @@
     var f = o.fetch || (typeof fetch !== 'undefined' ? fetch : null);
     var head = {};
     if (o.token) head.Authorization = 'Bearer ' + o.token;
+    if (o.adminToken) head['x-sg-token'] = o.adminToken;
     return f(o.endpoint || ENDPOINT, { headers: head })
-      .then(function (r) { return r.json(); })
-      .then(function (j) { return (j && j.providers) || []; });
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          /* 거절은 거절이라고 말한다. 예전에는 401 도 빈 목록으로 흘러가서, 화면이
+             "서버에 AI 키가 없습니다" 라고 엉뚱한 곳을 가리켰다 — 열쇠가 틀린 것인데. */
+          if (!r.ok) throw new Error((j && j.error) || ('The server answered ' + r.status + '.'));
+          return (j && j.providers) || [];
+        });
+      });
   }
 
   /** 한 번 실패하면 한 번 더 부른다 — 모델이 이따금 JSON 을 깨뜨린다. */

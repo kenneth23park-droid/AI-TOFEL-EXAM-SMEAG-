@@ -349,11 +349,48 @@ async function staffOf(req) {
   return me && me.staff ? me : null;
 }
 
+/* ── 관리자 토큰 ────────────────────────────────────────────────────────
+ *
+ * 두 번째 문. 관리자 화면(assets/admin-session.js)의 비밀번호는 이 브라우저 안에서만
+ * 통하는 가림막이라 서버가 믿을 근거가 없다 — 계정표가 정적 파일에 그대로 들어 있기
+ * 때문이다. 그렇다고 선생님 Supabase 계정이 없으면 아무것도 못 하게 두면, 관리자
+ * 비밀번호만 아는 사람은 AI 생성을 영영 못 쓴다.
+ *
+ * 그래서 서버에만 있는 값을 하나 둔다. 관리자가 그 값을 화면에 한 번 붙여넣으면
+ * (이 브라우저에 남는다) 그 뒤로는 선생님 로그인 없이 열린다. /api/tts 가 이미
+ * 같은 방식으로 SG_TTS_TOKEN 을 쓰고 있어서, 따로 SG_ADMIN_TOKEN 을 두지 않았으면
+ * 그 토큰을 그대로 인정한다 — 관리자에게 열쇠를 두 개 쥐게 할 이유가 없다.
+ *
+ * 환경변수 (Vercel → Project → Settings → Environment Variables)
+ *   SG_ADMIN_TOKEN   AI 생성을 열어 주는 관리자 토큰. 없으면 SG_TTS_TOKEN 을 본다.
+ *                    둘 다 없으면 이 문은 닫힌 채다(선생님 계정 길만 남는다).
+ *
+ * 관리자 화면의 비밀번호(smeag2222 등)를 여기에 넣지 말 것 — 그 값은 정적 파일에
+ * 공개되어 있어서, 넣는 순간 누구나 이 함수의 AI 키로 청구서를 만들 수 있다.
+ */
+function adminToken() { return env('SG_ADMIN_TOKEN') || env('SG_TTS_TOKEN'); }
+
+/** x-sg-token 이 서버 토큰과 같으면 관리자로 친다. 아니면 null. */
+function byAdminToken(req) {
+  const want = adminToken();
+  if (!want) return null;
+  const got = String((req.headers && req.headers['x-sg-token']) || '').trim();
+  if (!got || got !== want) return null;
+  return { id: 'admin-token', token: '', name: 'Admin', role: 'admin', staff: true, viaToken: true };
+}
+
+/** 선생님·관리자 계정, 또는 관리자 토큰. Supabase 를 부르기 전에 토큰부터 본다. */
+async function staffOrToken(req) {
+  const byTok = byAdminToken(req);
+  if (byTok) return byTok;
+  return staffOf(req);
+}
+
 module.exports = {
   SUPABASE_URL, SUPABASE_ANON,
   PROVIDERS, FALLBACK,
   env, listProviders, pickDefault, resolve, parseJSON,
   flatten, isVerbatim,
-  json, cors, readBody, whoIs, staffOf,
+  json, cors, readBody, whoIs, staffOf, adminToken, byAdminToken, staffOrToken,
   STT_DEFAULT_MODEL, sttModel, sttReady, audioExt, transcribe
 };

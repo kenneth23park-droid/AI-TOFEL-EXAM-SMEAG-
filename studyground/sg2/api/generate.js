@@ -19,8 +19,11 @@
  *   본문에 있는지 대조한다. 없으면 지어낸 것이므로 stop 게이트다.
  *
  * 누가 부를 수 있나
- *   /api/feedback 과 같다 — Supabase 로그인 토큰을 확인하고 sg_profiles.role 이
- *   teacher·admin 일 때만. 학생 토큰은 401.
+ *   두 갈래다. (1) Supabase 로그인 토큰이 있고 sg_profiles.role 이 teacher·admin 일 때
+ *   (/api/feedback 과 같다). (2) 관리자 토큰 — 헤더 x-sg-token 이 서버의 SG_ADMIN_TOKEN
+ *   (없으면 SG_TTS_TOKEN)과 같을 때. 선생님 계정 없이 관리자 비밀번호만으로 들어온
+ *   화면을 위한 길이다. 자세한 사정은 _llm.js 의 adminToken 주석에 있다.
+ *   학생 토큰은 401.
  *
  * 계약
  *   GET  /api/generate   → { providers:[{id,label,ready,why,models:[…],default}] }
@@ -341,8 +344,14 @@ Rules:
 async function handler(req, res) {
   if (LLM.cors(req, res)) return;
 
-  const staff = await LLM.staffOf(req);
-  if (!staff) return LLM.json(res, 401, { error: 'Teacher or administrator sign-in is required.' });
+  const staff = await LLM.staffOrToken(req);
+  if (!staff) {
+    return LLM.json(res, 401, {
+      error: LLM.adminToken()
+        ? 'Sign in as a teacher, or enter the admin token (SG_ADMIN_TOKEN) on the set-import screen.'
+        : 'Teacher or administrator sign-in is required. The server has no SG_ADMIN_TOKEN set, so the admin-token door is closed.'
+    });
+  }
 
   if (req.method === 'GET') return LLM.json(res, 200, { providers: await LLM.listProviders(), tasks: Object.keys(TASKS) });
   if (req.method !== 'POST') return LLM.json(res, 405, { error: 'GET or POST only.' });

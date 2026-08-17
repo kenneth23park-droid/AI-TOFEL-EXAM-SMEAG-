@@ -151,6 +151,9 @@
     FALLBACK_VOICES: FALLBACK_VOICES,
 
     hasToken: function () { return !!token(); },
+    /** 이 브라우저에 저장된 공용 토큰. /api/generate 도 같은 토큰으로 열리므로
+     *  관리자 화면이 꺼내 쓴다(assets/set-generate.js 의 adminToken). */
+    getToken: function () { return token(); },
 
     /* 엔진 키 — 화면이 쓰는 표면. 값 자체는 이 모듈 밖으로 원문 그대로 나가지 않는다. */
     hasKey: function (pid) { return !!keyOf(pid); },

@@ -16,8 +16,10 @@
   세트에 대본이나 정답만 비어 있을 때는 그 빈 곳만 AI 로 채울 수도 있다.
 
   SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다. AI 생성은 거기에
-  더해 **선생님 계정(Supabase)** 로그인이 필요하다 — 관리자 비밀번호는 이 브라우저
-  안에서만 통하는 가림막이라 서버가 믿을 근거가 없다.
+  더해 서버가 믿을 열쇠가 하나 필요하다 — 관리자 비밀번호는 이 브라우저 안에서만
+  통하는 가림막이라 서버가 믿을 근거가 없기 때문이다. 열쇠는 둘 중 하나면 된다:
+  **선생님 계정(Supabase)** 로그인, 또는 서버 환경변수에만 있는 **관리자 토큰**
+  (SG_ADMIN_TOKEN, 없으면 SG_TTS_TOKEN)을 화면에 한 번 붙여넣는 것.
 -->
 <html lang="en">
 <head>
@@ -238,6 +240,9 @@
       <button class="btn brand" id="genBtn" disabled>Generate a set</button>
       <span class="busy" id="aibusy"></span>
     </div>
+    <!-- 누구로 서버를 여는가. 선생님 계정이 있으면 그것으로, 없으면 관리자 토큰으로.
+         값은 이 브라우저에만 남고 화면에는 마스킹만 그린다. -->
+    <div class="keyrow" id="aikey"></div>
     <div class="aiwhy" id="aiwhy" hidden></div>
     <div class="aiprog" id="aiprog" hidden>
       <div class="meter"><i id="aimeter" style="width:0"></i></div>
@@ -331,13 +336,16 @@
 <script src="assets/docx-read.js"></script>
 <script src="assets/set-import.js"></script>
 <!-- AI 생성. sg-auth.js 가 함께 필요하다 — 관리자 비밀번호(SG_ADMIN)는 이 브라우저 안에서만
-     통하는 가림막이라 서버가 믿지 않는다. /api/generate 는 Supabase 선생님 계정 토큰을 본다. -->
+     통하는 가림막이라 서버가 믿지 않는다. /api/generate 는 Supabase 선생님 계정 토큰을
+     보거나, 그게 없으면 서버 관리자 토큰(x-sg-token)을 본다. 토큰을 꺼내 쓰는 자리가
+     tts-client.js 라서 그 파일이 이 화면에서 먼저 떠 있어야 한다(아래에서 함께 싣는다). -->
 <script src="assets/sg-auth.js"></script>
 <script src="assets/set-generate.js"></script>
 <!-- 대본 → mp3. audio-config.js 가 만든 소리를 팩이 가리키는 경로에 걸어 주고,
      audio-index.js 는 그 경로를 다른 관리자 화면과 **같은 방식으로** 푼다(키가 어긋나면
      만들어 놓고도 시험 화면에서 안 걸린다). -->
 <script src="assets/tts-client.js"></script>
+<script src="assets/tts-plan.js"></script>
 <script src="assets/audio-config.js"></script>
 <script src="assets/audio-index.js"></script>
 <script src="assets/set-store.js"></script>
@@ -480,6 +488,91 @@
     return AUTH.token().catch(function () { return ''; });
   }
 
+  /* ── 서버를 여는 두 번째 열쇠 ────────────────────────────────────────
+   *
+   * 선생님 Supabase 계정이 첫 번째 길이다. 그것이 없는 사람 — 관리자 비밀번호만
+   * 아는 사람 — 을 위해 두 번째 길을 둔다: 서버 환경변수에만 있는 관리자 토큰
+   * (SG_ADMIN_TOKEN, 없으면 SG_TTS_TOKEN)을 여기 한 번 붙여넣으면 그 뒤로 열린다.
+   * 관리자 비밀번호 자체를 서버에 보내지 않는 이유는 그 값이 admin-session.js 에
+   * 그대로 적혀 있어서다 — 그걸 열쇠로 삼으면 누구나 이 사이트의 AI 키를 쓴다.
+   *
+   * 오디오 AI 가 쓰는 토큰과 같은 자리(this browser · sg2_tts_token)에 둔다.
+   * 관리자에게 열쇠를 두 개 쥐게 할 이유가 없다.
+   */
+  var aikeyBox = document.getElementById('aikey');
+  var aiCreds = { token: '', adminToken: '' };
+
+  function adminTok() {
+    var T = window.SG_TTS_GEN;
+    try { return (T && T.getToken && T.getToken()) || ''; } catch (e) { return ''; }
+  }
+  /** 토큰은 화면에 원문으로 그리지 않는다 — 앞뒤 몇 글자만. */
+  function maskTok(t) {
+    var s = String(t || '');
+    return s.length <= 8 ? '••••' : s.slice(0, 4) + '…' + s.slice(-3);
+  }
+
+  function paintAiKey() {
+    if (aikeyBox.dataset.editing) return;
+    if (aiCreds.token) {
+      aikeyBox.innerHTML = '<span class="kstate srv">🔒 선생님 계정</span>' +
+        '<span>로그인한 선생님 계정으로 서버가 열려 있습니다.</span>';
+      return;
+    }
+    if (aiCreds.adminToken) {
+      aikeyBox.innerHTML = '<span class="kstate loc">🔑 관리자 토큰</span>' +
+        '<code>' + esc(maskTok(aiCreds.adminToken)) + '</code>' +
+        '<button type="button" data-aikey="edit">변경</button>' +
+        '<button type="button" data-aikey="clear">삭제</button>';
+      return;
+    }
+    aikeyBox.innerHTML = '<span class="kstate none">열쇠 없음</span>' +
+      '<span>선생님 계정으로 로그인하거나, 서버의 관리자 토큰(SG_ADMIN_TOKEN)을 넣으면 관리자 로그인만으로도 AI 생성이 열립니다.</span>' +
+      '<button type="button" data-aikey="edit">관리자 토큰 입력</button>';
+  }
+
+  aikeyBox.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-aikey]');
+    if (!b) return;
+    var act = b.getAttribute('data-aikey');
+    if (act === 'edit') {
+      aikeyBox.dataset.editing = '1';
+      aikeyBox.innerHTML =
+        '<input type="password" data-aikey="input" autocomplete="off" spellcheck="false" ' +
+          'placeholder="서버의 관리자 토큰(SG_ADMIN_TOKEN) 붙여넣기">' +
+        '<button type="button" data-aikey="save">저장</button>' +
+        '<button type="button" data-aikey="cancel">취소</button>' +
+        '<span>이 브라우저에만 저장됩니다. 공용 PC 라면 넣지 마세요.</span>';
+      var inp = aikeyBox.querySelector('[data-aikey=input]');
+      if (inp) inp.focus();
+      return;
+    }
+    if (act === 'cancel') { delete aikeyBox.dataset.editing; paintAiKey(); return; }
+    if (act === 'clear') {
+      if (!confirm('이 브라우저에서 관리자 토큰을 지웁니다. 계속할까요?')) return;
+      if (window.SG_TTS_GEN) window.SG_TTS_GEN.setToken('');
+      delete aikeyBox.dataset.editing;
+      readyAI();
+      return;
+    }
+    if (act === 'save') {
+      var v = ((aikeyBox.querySelector('[data-aikey=input]') || {}).value || '').trim();
+      if (!v) { alert('토큰을 붙여넣어 주세요.'); return; }
+      if (window.SG_TTS_GEN) window.SG_TTS_GEN.setToken(v);
+      delete aikeyBox.dataset.editing;
+      readyAI();          /* 토큰이 맞는지는 서버가 답한다 — 다시 물어 본다. */
+    }
+  });
+
+  /** 지금 서버에 낼 열쇠. 선생님 토큰이 먼저, 없으면 관리자 토큰. */
+  function creds() {
+    return token().then(function (tok) {
+      aiCreds = { token: tok, adminToken: tok ? '' : adminTok() };
+      paintAiKey();
+      return aiCreds;
+    });
+  }
+
   function fillModels() {
     var p = providerList.filter(function (x) { return x.id === provSel.value; })[0];
     modelSel.innerHTML = '';
@@ -505,9 +598,11 @@
       .then(function (r) { if (!r.ok) throw new Error('blueprint ' + r.status); return r.json(); })
       .then(function (j) { blueprint = j; });
 
-    var pv = token().then(function (tok) {
-      if (!tok) throw new Error('Sign in with a teacher account to use AI generation — the admin password alone does not open the server.');
-      return GEN.providers({ token: tok });
+    var pv = creds().then(function (c) {
+      if (!c.token && !c.adminToken) {
+        throw new Error('Sign in with a teacher account, or paste the server admin token in the row above — the admin password alone does not open the server.');
+      }
+      return GEN.providers(c);
     }).then(function (list) {
       providerList = list || [];
       provSel.innerHTML = '';
@@ -562,13 +657,14 @@
     aiprog.hidden = false;
     aimeter.style.width = '0';
 
-    token().then(function (tok) {
+    creds().then(function (c) {
       return GEN.generate({
         code: code,
         blueprint: blueprint,
         provider: provSel.value,
         model: modelSel.value,
-        token: tok,
+        token: c.token,
+        adminToken: c.adminToken,
         /* 이미 있는 세트의 주제를 건네 겹치지 않게 한다. 겹침 검사(dup-core)는 만든
            뒤에 잡아내지만, 잡아내면 그 블록을 다시 만들어야 한다 — 미리 피하는 편이 싸다. */
         avoid: GEN.avoidTopics(rivalPacks(slugOf(code))),
@@ -633,9 +729,10 @@
     if (!built || !built.pack) return;
     fillScriptBtn.disabled = fillAnsBtn.disabled = true;
     fillbusy.textContent = label;
-    token().then(function (tok) {
+    creds().then(function (c) {
       return fn(built.pack, {
-        provider: provSel.value, model: modelSel.value, token: tok,
+        provider: provSel.value, model: modelSel.value,
+        token: c.token, adminToken: c.adminToken,
         onProgress: function (ev) { fillbusy.textContent = label + ' ' + ev.done + '/' + ev.total; }
       });
     }).then(function (out) {
@@ -814,6 +911,7 @@
       paintTtsProviders();
       paintTtsKey();
       renderAudioBar();
+      ensureVoices();
       if (!(c.providers || []).some(function (p) { return p.ready; })) {
         ttsWhy('No audio engine has a key yet — set one on the server (ELEVENLABS_API_KEY · ' +
           'OPENAI_API_KEY · GOOGLE_TTS_API_KEY · DEEPGRAM_API_KEY) or paste one below.', true);
@@ -822,7 +920,18 @@
     });
   }
 
-  ttsProvSel.addEventListener('change', function () { paintTtsModels(); paintTtsKey(); renderAudioBar(); });
+  ttsProvSel.addEventListener('change', function () {
+    paintTtsModels(); paintTtsKey(); renderAudioBar(); ensureVoices();
+  });
+
+  /* 이 기기의 키로만 열린 엔진은 서버가 목소리 목록을 채워 주지 못한다(서버는 그 키를
+     모른다). 지난번에 넣어 둔 키라 저장 화면을 거치지 않는 경우가 있어서, 목록이 비어
+     있으면 여기서 한 번 더 받아 온다. */
+  function ensureVoices() {
+    var P = ttsProvider();
+    if (!P || !P.ready || voicesOf(P.id).length) return Promise.resolve();
+    return TTS.loadVoicesWithKey(CAT, P.id, []).then(function () { renderAudioBar(); });
+  }
 
   function voicesOf(pid) {
     var list = (CAT && CAT.voices && CAT.voices[pid]) || [];
@@ -844,101 +953,16 @@
       : '<div class="muted" style="font-size:11.5px">No voice list — add the key first, or the key may lack read permission.</div>';
   });
 
-  /* ── 무엇을 읽어야 하는가 ────────────────────────────────────────────
-   * 팩을 훑어 "가리키는 mp3 경로가 있고 그 자리에 읽을 대본도 있는" 곳을 모은다.
-   * 경로가 없으면 만들어도 걸 데가 없고, 대본이 없으면 읽을 것이 없다. */
-  function audioJobs(pack) {
-    var out = [], seen = {};
-    function add(path, script, label) {
-      if (!path || !script || !String(script).trim()) return;
-      var key = SG_AUDIO_INDEX.resolve(path);
-      if (seen[key]) return;
-      seen[key] = 1;
-      out.push({ key: key, path: path, script: String(script), label: label, chars: String(script).length });
-    }
-    (pack.sections || []).forEach(function (sec) {
-      if (sec.id !== 'listening' && sec.id !== 'speaking') return;
-      (sec.modules || []).forEach(function (mod) {
-        (mod.blocks || []).forEach(function (blk) {
-          var head = (mod.label || mod.id) + ' · ' + (blk.heading || '');
-          add(blk.introAudio, blk.introScript || blk.script, head + ' Instructions');
-          add(blk.audio, blk.script, head);
-          (blk.questions || []).forEach(function (q) {
-            add(q.audio, q.script, head + ' ' + (q.id || ''));
-          });
-        });
-      });
-    });
-    return out;
-  }
+  /* 무엇을 읽고 · 누가 읽고 · 얼마씩 끊어 보내는지는 assets/tts-plan.js 에 있다.
+     화면 안에 두면 브라우저를 띄워야 확인할 수 있는데, 여기가 틀리면 돈이 나간 뒤에야
+     안다 — 그래서 판정만 떼어 node 로 검산한다(tests/test_tts_plan.js). */
+  var PLAN = window.SG_TTS_PLAN;
+
+  function audioJobs(pack) { return PLAN.jobsFrom(pack, SG_AUDIO_INDEX.resolve); }
 
   /** 이미 이 브라우저에 소리가 걸려 있는 자리는 다시 만들지 않는다(돈이 나간다). */
   function pendingJobs(pack) {
     return audioJobs(pack).filter(function (j) { return !SG_AUDIO.isOverridden(j.key); });
-  }
-
-  /* ── 배역 ────────────────────────────────────────────────────────────
-   * 화자 이름 → 목소리. 세트 전체에서 한 벌을 쓴다 — 같은 "M" 이 문항마다 다른
-   * 사람이면 리스닝이 성립하지 않는다. 남/여 표시가 있는 화자는 그 성별 풀에서 고른다. */
-  function caster(voices) {
-    var map = {}, pools = {}, at = {};
-    function pool(name) {
-      if (pools[name]) return pools[name];
-      var f = name === 'any' ? voices : voices.filter(function (v) {
-        return String(v.gender || '').toLowerCase().indexOf(name) === 0;
-      });
-      pools[name] = f.length ? f : voices;
-      at[name] = 0;
-      return pools[name];
-    }
-    return function (speaker) {
-      if (map[speaker]) return map[speaker];
-      var s = String(speaker || '').toLowerCase();
-      var name = /^(m|male|man|mr|boy|professor|prof)\b/.test(s) ? 'male'
-               : /^(w|f|female|woman|ms|mrs|girl)\b/.test(s) ? 'female' : 'any';
-      var p = pool(name);
-      map[speaker] = p[(at[name]++) % p.length].id;
-      return map[speaker];
-    };
-  }
-
-  /* ── 요청 단위로 자르기 ──────────────────────────────────────────────
-   * 서버는 한 번에 20토막·6000자까지 받는다(api/tts.js). 강의 대본은 그보다 길어서
-   * 잘라 보내고 받은 mp3 를 순서대로 이어 붙인다 — 같은 화자가 이어지는 줄은 먼저
-   * 합쳐서 요청 수를 줄인다. */
-  var MAX_SEG = 20, MAX_CHARS = 6000, MAX_ONE = 1200;
-
-  function segmentsFor(script, cast) {
-    var raw = TTS.parseScript(script), segs = [];
-    raw.forEach(function (s) {
-      var last = segs[segs.length - 1];
-      if (last && last.speaker === s.speaker && (last.text.length + s.text.length + 1) <= MAX_ONE) {
-        last.text += ' ' + s.text;
-        return;
-      }
-      // 한 토막이 상한을 넘으면 문장 경계에서 나눈다. 문장 중간에서 자르면 억양이 끊긴다.
-      var t = s.text;
-      while (t.length > MAX_ONE) {
-        var cut = t.lastIndexOf(' ', MAX_ONE);
-        var dot = t.lastIndexOf('. ', MAX_ONE);
-        if (dot > MAX_ONE * 0.5) cut = dot + 1;
-        if (cut <= 0) cut = MAX_ONE;
-        segs.push({ speaker: s.speaker, text: t.slice(0, cut).trim() });
-        t = t.slice(cut).trim();
-      }
-      if (t) segs.push({ speaker: s.speaker, text: t });
-    });
-    return segs.map(function (s) { return { text: s.text, voice: cast(s.speaker) }; });
-  }
-
-  function batches(segs) {
-    var out = [], cur = [], chars = 0;
-    segs.forEach(function (s) {
-      if (cur.length >= MAX_SEG || (chars + s.text.length) > MAX_CHARS) { out.push(cur); cur = []; chars = 0; }
-      cur.push(s); chars += s.text.length;
-    });
-    if (cur.length) out.push(cur);
-    return out;
   }
 
   function ensureTtsToken() {
@@ -984,7 +1008,7 @@
         '만든 mp3 는 이 브라우저에 저장됩니다(IndexedDB). 학생 기기에서도 들리게 하려면 ' +
         'media/audio/ 에 파일로 넣어 배포해야 합니다.\n\n계속할까요?')) return;
 
-    var cast = caster(voices);
+    var cast = PLAN.caster(voices);
     var model = ttsModelSel.value, rate = Number(ttsRateEl.value) || 1;
     ttsBtn.disabled = true;
     ttsProg.hidden = false;
@@ -1008,7 +1032,7 @@
       ttsProgLab.textContent = (done + 1) + ' / ' + todo.length + ' · ' + job.label;
       ttsMeter.style.width = Math.round(done / todo.length * 100) + '%';
 
-      var parts = batches(segmentsFor(job.script, cast));
+      var parts = PLAN.batches(PLAN.segmentsFor(job.script, cast));
       var blobs = [];
       var chain = parts.reduce(function (pr, segs) {
         return pr.then(function () {
