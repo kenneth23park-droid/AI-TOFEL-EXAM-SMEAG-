@@ -223,37 +223,37 @@ ok('지문에 없는 근거를 잡는다',
   (await gatesFor((d, t) => {
     if (t === 'reading-passage') d.questions[0].evidence = 'this sentence appears nowhere in the passage at all';
     return d;
-  })).includes('정답 근거가 지문'), '');
+  })).includes('evidence that is not in the passage'), '');
 
 ok('빠진 문항을 잡는다',
   (await gatesFor((d, t) => { if (t === 'listening-set') d.questions.pop(); return d; }))
-    .includes('청사진은'), '');
+    .includes('the blueprint asks for'), '');
 
 ok('힌트가 정답 앞글자가 아니면 잡는다',
   (await gatesFor((d, t) => { if (t === 'reading-cloze') d.blanks[0].hint = 'zz'; return d; }))
-    .includes('앞글자가 아닙니다'), '');
+    .includes('is not the opening of answer'), '');
 
 ok('빈칸 자리가 없으면 잡는다',
   (await gatesFor((d, t) => { if (t === 'reading-cloze') d.template = d.template.replace('{{1}}', 'word'); return d; }))
-    .includes('빈칸 자리'), '');
+    .includes('no blank slot'), '');
 
 ok('삽입 자리 표식이 없으면 잡는다',
   (await gatesFor((d, t, s) => {
     if (t === 'reading-passage' && s.questionKinds && s.questionKinds.insert) d.paragraphs[0] = d.paragraphs[0].replace('{{C}}', '');
     return d;
-  })).includes('삽입 자리'), '');
+  })).includes('no insertion slot'), '');
 
 ok('보기 범위를 벗어난 정답을 잡는다',
   (await gatesFor((d, t) => { if (t === 'listening-set') d.questions[0].answer = 9; return d; }))
-    .includes('보기 범위'), '');
+    .includes('outside their choice range'), '');
 
 ok('같은 보기가 두 번 있으면 잡는다',
   (await gatesFor((d, t) => { if (t === 'listening-drill') d.items[0].choices[1] = d.items[0].choices[0]; return d; }))
-    .includes('같은 보기'), '');
+    .includes('repeat the same choice'), '');
 
 ok('조각이 문장과 맞지 않으면 잡는다',
   (await gatesFor((d, t) => { if (t === 'writing-build') d.items[0].sentence = 'Something else entirely.'; return d; }))
-    .includes('정답 문장이 되지 않습니다'), '');
+    .includes('does not produce the answer sentence'), '');
 
 /* 정답 쏠림은 warn 이다 — 만들 수는 있지만 사람이 봐야 한다. */
 const skew = await GEN.generate({
@@ -266,8 +266,8 @@ const skew = await GEN.generate({
   })
 });
 ok('정답 쏠림은 경고로 올라온다',
-  skew.gates.some((g) => g.level === 'warn' && g.message.includes('몰려 있습니다')),
-  skew.gates.filter((g) => g.message.includes('몰려')).map((g) => g.message)[0] || '');
+  skew.gates.some((g) => g.level === 'warn' && g.message.includes('the answers pile up on')),
+  skew.gates.filter((g) => g.message.includes('pile up')).map((g) => g.message)[0] || '');
 
 /* 한 블록이 실패해도 나머지는 살아남는가 */
 const partial = await GEN.generate({
@@ -279,7 +279,7 @@ const partial = await GEN.generate({
 });
 ok('한 블록이 실패해도 나머지는 만들어진다',
   partial.stats.total === BP.questions - 1 &&
-  partial.gates.some((g) => g.level === 'stop' && g.message.includes('생성 실패')),
+  partial.gates.some((g) => g.level === 'stop' && g.message.includes('generation failed')),
   partial.stats.total + '문항');
 
 /* ─────────────────────────────────────────── 슬롯별: 대본만 · 정답만 */
@@ -315,7 +315,7 @@ const cf = await GEN.fillScripts(clash, {
   })
 });
 ok('대본이 정답지와 어긋나면 멈춘다',
-  cf.gates.some((g) => g.level === 'stop' && g.message.includes('대본은')),
+  cf.gates.some((g) => g.level === 'stop' && g.message.includes('the AI script makes')),
   cf.gates.filter((g) => g.level === 'stop').map((g) => g.message)[0] || '');
 
 const noAns = JSON.parse(JSON.stringify(good.pack));
@@ -343,7 +343,7 @@ const bf = await GEN.fillAnswers(bogus, {
 });
 ok('근거 없는 정답은 채우지 않는다',
   bf.filled === 0 && bb.questions[0].answer === undefined &&
-  bf.gates.some((g) => g.level === 'stop' && g.message.includes('근거가 본문에 없습니다')));
+  bf.gates.some((g) => g.level === 'stop' && g.message.includes('evidence the AI gave is not in the text')));
 
 /* ─────────────────────────────────────────── 겹침 회피 */
 

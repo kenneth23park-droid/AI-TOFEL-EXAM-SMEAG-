@@ -272,7 +272,7 @@
           if (isInsert && !item.choices.length) {
             item.choices = CHOICE_LETTERS.slice(0, 4).map(function (L) { return 'Position ' + L; });
             item.choicesOrigin = 'generated';
-            item.choicesNote = '원본 docx 에 보기 목록이 없어 삽입 위치 A~D 로 생성했습니다.';
+            item.choicesNote = 'The source docx had no choice list — insertion points A-D were generated.';
           }
           blk.questions.push(item);
           i = got.next;
@@ -399,7 +399,7 @@
         /* 머리글의 범위가 실제 문항 번호와 어긋나는 경우가 있다(SET 9 L2 'Questions 8-10' 에
            11번이 들어 있다). 본문에 적힌 번호를 믿되 어긋난 사실은 남긴다. */
         if (item.no != null && (no < head.range.from || no > head.range.to)) {
-          outOfRange.push(moduleId + '-' + no + ' (머리글 ' + head.range.from + '-' + head.range.to + ')');
+          outOfRange.push(moduleId + '-' + no + ' (heading ' + head.range.from + '-' + head.range.to + ')');
         } else if (item.no == null && (no < head.range.from || no > head.range.to)) {
           return;
         }
@@ -716,7 +716,7 @@
     var picsRel = 'media/pictures/' + codeSlug + '/';
 
     if (!input.questions || !input.questions.paragraphs) {
-      gate('stop', 'upload', '문항 파일을 읽지 못했습니다.');
+      gate('stop', 'upload', 'Could not read the question document.');
       return { pack: null, gates: gates, stats: {} };
     }
 
@@ -739,7 +739,7 @@
       listening.modules.push({ id: id, label: 'Listening Module ' + no, blocks: parseListeningModule(mod, id, outOfRange) });
     });
     if (outOfRange.length) {
-      gate('warn', 'listening', '문항 번호가 "Questions a-b" 머리글 범위 밖입니다 — 본문의 번호를 따랐습니다: ' + outOfRange.join(', '));
+      gate('warn', 'listening', 'Question numbers fall outside their "Questions a-b" heading range — the numbers printed in the body were used: ' + outOfRange.join(', '));
     }
 
     /* ---- writing / speaking ---- */
@@ -755,7 +755,7 @@
     var sections = [reading, listening, writing, speaking];
 
     sections.forEach(function (sec) {
-      if (!sec.modules.length) gate('stop', sec.id, sec.label + ' 섹션을 찾지 못했습니다 — 문서에 "' + sec.label.toUpperCase() + ' SECTION" 머리글이 있는지 확인해 주세요.');
+      if (!sec.modules.length) gate('stop', sec.id, sec.label + ' section not found — check that the document has a "' + sec.label.toUpperCase() + ' SECTION" heading.');
     });
 
     /* ---- 대본 붙이기 ----
@@ -788,7 +788,7 @@
           if (g.from == null || (g.from <= r.to && g.to >= r.from)) { hit = g; break; }
         }
         if (!hit) {
-          gate('warn', 'listening', mod.label + ' ' + (blk.heading || '') + ' — 대본을 찾지 못했습니다. 음성 생성 대상에서 빠집니다.');
+          gate('warn', 'listening', mod.label + ' ' + (blk.heading || '') + ' — no script found. It is left out of audio generation.');
           return;
         }
         if (hit.cue && !blk.instruction) blk.instruction = hit.cue;
@@ -819,7 +819,7 @@
              빠져 있다는 뜻이다(SET 9 리스닝 Module 2 가 그랬다). 지어내지 않고 알린다. */
           delete blk.scriptOrigin;
           gate('warn', 'listening', mod.label + ' ' + (blk.heading || '')
-            + ' — 문항은 있는데 들려줄 대사가 원본 대본에 없습니다. 음성이 만들어지지 않습니다.');
+            + ' — the questions are here, but the source script has no spoken lines for them. No audio will be made.');
         }
       });
     });
@@ -830,7 +830,7 @@
     var unmatched = [];
 
     if (!answers) {
-      gate('warn', 'answers', '정답지를 올리지 않았습니다 — 자동 채점 없이 문항만 만들어집니다.');
+      gate('warn', 'answers', 'No answer key was uploaded — the questions are built without automatic scoring.');
     } else {
       [reading, listening].forEach(function (sec) {
         sec.modules.forEach(function (mod) {
@@ -841,7 +841,7 @@
 
           if (list.length && list.length !== qs.length) {
             gate('stop', sec.id,
-              mod.label + ' — 문항 ' + qs.length + '개인데 정답은 ' + list.length + '개입니다. 정답지와 문항 문서의 번호가 어긋납니다.');
+              mod.label + ' — ' + qs.length + ' questions but ' + list.length + ' answers. The answer key and the question document are numbered differently.');
           }
           /* 정답지는 모듈 안에서 1번부터 순서대로다 — 배열 위치가 아니라 문항 번호로 잇는다.
              블록 순서가 문서 순서와 어긋나도 정답이 밀리지 않는다. */
@@ -854,7 +854,7 @@
                  (SET 9 R1-7 은 정답지에 'correct' 라고 적혀 있지만 힌트는 'th' 였다). */
               if (q.hint && String(q.answer).toLowerCase().indexOf(String(q.hint).toLowerCase()) !== 0) {
                 q.answerKeyRaw = q.answer;
-                gate('warn', sec.id, q.id + ' — 힌트 "' + q.hint + '" 과 정답 "' + q.answer + '" 이 맞지 않습니다. 정답지를 확인해 주세요.');
+                gate('warn', sec.id, q.id + ' — hint "' + q.hint + '" does not match answer "' + q.answer + '". Check the answer key.');
               }
             } else if (typeof v === 'number') {
               q.answer = v;
@@ -865,12 +865,12 @@
                 if (String(c).trim().toLowerCase() === String(v).trim().toLowerCase()) idx = ci;
               });
               if (idx >= 0) q.answer = idx;
-              else { q.answer = v; gate('warn', sec.id, q.id + ' — 정답 "' + v + '" 을 보기 번호로 읽지 못했습니다.'); }
+              else { q.answer = v; gate('warn', sec.id, q.id + ' — answer "' + v + '" could not be read as one of the choices.'); }
             }
             answerKey[q.id] = q.answer;
           });
           if (!list.length && qs.length) {
-            gate('warn', sec.id, mod.label + ' — 정답지에서 이 모듈을 찾지 못했습니다.');
+            gate('warn', sec.id, mod.label + ' — this module was not found in the answer key.');
           }
         });
       });
@@ -891,12 +891,12 @@
         }
       });
       if (buildQs.length && wList.length && buildQs.length > wList.length) {
-        gate('warn', 'writing', '문장 조립 ' + buildQs.length + '문항 중 ' + wList.length + '개만 정답이 있습니다.');
+        gate('warn', 'writing', 'Only ' + wList.length + ' of ' + buildQs.length + ' sentence-building questions have an answer.');
       }
     }
 
     if (unmatched.length) {
-      gate('warn', 'answers', unmatched.length + '개 문항에 정답이 붙지 않았습니다: ' + unmatched.slice(0, 8).join(', ') + (unmatched.length > 8 ? ' 외' : ''));
+      gate('warn', 'answers', unmatched.length + ' questions have no answer attached: ' + unmatched.slice(0, 8).join(', ') + (unmatched.length > 8 ? ' and more' : ''));
     }
 
     return finalize(sections, {
@@ -958,7 +958,7 @@
         });
       });
     });
-    if (thin.length) gate('warn', 'choices', thin.length + '개 문항의 보기가 3개 미만입니다: ' + thin.slice(0, 8).join(', ') + (thin.length > 8 ? ' 외' : ''));
+    if (thin.length) gate('warn', 'choices', thin.length + ' questions have fewer than 3 choices: ' + thin.slice(0, 8).join(', ') + (thin.length > 8 ? ' and more' : ''));
 
     /* ---- 그림 경로 정규화 ----
        파서마다 그림을 다른 모양으로 모은다(문서 내부 이름 'media/image7.png' 또는 파일명만).
@@ -997,7 +997,7 @@
     stats.answered = Object.keys(answerKey).length;
     stats.media = opt.mediaCount || 0;
 
-    if (!stats.total) gate('stop', 'questions', '문항을 하나도 찾지 못했습니다 — 문서 서식이 예상과 다릅니다.');
+    if (!stats.total) gate('stop', 'questions', 'No questions were found — the document formatting is not what the parser expects.');
 
     /* ---- 세트 특징 ----
        관리자 화면이 세트를 한눈에 설명할 수 있도록, 팩을 다시 훑지 않아도 되는 요약을

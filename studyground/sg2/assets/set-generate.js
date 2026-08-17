@@ -177,13 +177,13 @@
 
   function post(opts, body) {
     var f = opts.fetch || (typeof fetch !== 'undefined' ? fetch : null);
-    if (!f) return Promise.reject(new Error('fetch 를 쓸 수 없습니다.'));
+    if (!f) return Promise.reject(new Error('fetch is unavailable.'));
     var head = { 'Content-Type': 'application/json' };
     if (opts.token) head.Authorization = 'Bearer ' + opts.token;
     return f(opts.endpoint || ENDPOINT, { method: 'POST', headers: head, body: JSON.stringify(body) })
       .then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (j) {
-          if (!r.ok) throw new Error((j && j.error) || ('생성 요청이 ' + r.status + ' 로 돌아왔습니다.'));
+          if (!r.ok) throw new Error((j && j.error) || ('The generation request came back with ' + r.status + '.'));
           return j;
         });
       });
@@ -421,13 +421,13 @@
       if (norm(e.source).indexOf(norm(e.quote)) < 0) ghost.push(e.id);
     });
     if (ghost.length) {
-      gate('stop', 'evidence', ghost.length + '개 문항의 정답 근거가 지문·대본에 없습니다 — ' +
-        'AI 가 본문에 없는 것을 근거로 삼았습니다: ' + ghost.slice(0, 8).join(', ') +
-        (ghost.length > 8 ? ' 외' : ''));
+      gate('stop', 'evidence', ghost.length + ' questions cite evidence that is not in the passage or script — ' +
+        'the AI leaned on something the text does not say: ' + ghost.slice(0, 8).join(', ') +
+        (ghost.length > 8 ? ' and more' : ''));
     }
     if (noQuote.length) {
-      gate('warn', 'evidence', noQuote.length + '개 문항이 정답 근거 없이 왔습니다: ' +
-        noQuote.slice(0, 8).join(', ') + (noQuote.length > 8 ? ' 외' : ''));
+      gate('warn', 'evidence', noQuote.length + ' questions came back with no evidence for their answer: ' +
+        noQuote.slice(0, 8).join(', ') + (noQuote.length > 8 ? ' and more' : ''));
     }
 
     /* --- 2. 청사진 대조. 문항 수가 어긋나면 시간 배분이 어긋난다. --- */
@@ -448,8 +448,8 @@
     });
     Object.keys(want).forEach(function (id) {
       if ((got[id] || 0) !== want[id]) {
-        gate('stop', 'blueprint', id + ' — 청사진은 ' + want[id] + '문항인데 ' +
-          (got[id] || 0) + '개가 만들어졌습니다.');
+        gate('stop', 'blueprint', id + ' — the blueprint asks for ' + want[id] + ' questions but ' +
+          (got[id] || 0) + ' were made.');
       }
     });
 
@@ -471,10 +471,10 @@
         });
       });
     });
-    if (noAnswer.length) gate('stop', 'answers', noAnswer.length + '개 문항의 정답이 보기 범위를 벗어납니다: ' + noAnswer.slice(0, 8).join(', '));
-    if (thinChoice.length) gate('stop', 'choices', thinChoice.length + '개 문항의 보기가 3개 미만입니다: ' + thinChoice.slice(0, 8).join(', '));
-    if (dupChoice.length) gate('stop', 'choices', dupChoice.length + '개 문항에 같은 보기가 두 번 들어 있습니다: ' + dupChoice.slice(0, 8).join(', '));
-    if (emptyPrompt.length) gate('stop', 'questions', emptyPrompt.length + '개 문항에 문제문이 없습니다: ' + emptyPrompt.slice(0, 8).join(', '));
+    if (noAnswer.length) gate('stop', 'answers', noAnswer.length + ' questions have an answer outside their choice range: ' + noAnswer.slice(0, 8).join(', '));
+    if (thinChoice.length) gate('stop', 'choices', thinChoice.length + ' questions have fewer than 3 choices: ' + thinChoice.slice(0, 8).join(', '));
+    if (dupChoice.length) gate('stop', 'choices', dupChoice.length + ' questions repeat the same choice twice: ' + dupChoice.slice(0, 8).join(', '));
+    if (emptyPrompt.length) gate('stop', 'questions', emptyPrompt.length + ' questions have no prompt: ' + emptyPrompt.slice(0, 8).join(', '));
 
     /* --- 4. 정답 쏠림. 사람은 무작위를 못 만들고 모델은 B 를 좋아한다.
            보기 위치를 세어 보면 학생이 찍기로 점수를 얻을 수 있는지 알 수 있다. --- */
@@ -493,8 +493,8 @@
       var worst = 0, at = 0;
       counts.forEach(function (n, i) { if (n > worst) { worst = n; at = i; } });
       if (worst / total > 0.45) {
-        gate('warn', sec.id, sec.label + ' — 정답이 ' + 'ABCDE'.charAt(at) + ' 에 몰려 있습니다(' +
-          worst + '/' + total + '). 찍어도 맞는 시험이 됩니다.');
+        gate('warn', sec.id, sec.label + ' — the answers pile up on ' + 'ABCDE'.charAt(at) + ' (' +
+          worst + '/' + total + '). Guessing would pass this section.');
       }
     });
 
@@ -509,16 +509,16 @@
             if (str(blk.template).indexOf('{{' + (k + 1) + '}}') < 0) missing.push(k + 1);
             if (!q.answer) return;
             if (!q.hint || str(q.answer).toLowerCase().indexOf(str(q.hint).toLowerCase()) !== 0) {
-              gate('stop', 'reading', q.id + ' — 힌트 "' + q.hint + '" 이 정답 "' + q.answer +
-                '" 의 앞글자가 아닙니다.');
+              gate('stop', 'reading', q.id + ' — hint "' + q.hint + '" is not the opening of answer "' + q.answer +
+                '".');
             }
             if (/\s/.test(str(q.answer))) {
-              gate('stop', 'reading', q.id + ' — 빈칸 정답 "' + q.answer + '" 에 공백이 있습니다. 한 낱말이어야 합니다.');
+              gate('stop', 'reading', q.id + ' — blank answer "' + q.answer + '" contains a space. It must be one word.');
             }
           });
           if (missing.length) {
-            gate('stop', 'reading', mod.id + ' ' + blk.heading + ' — 본문에 빈칸 자리 {{' +
-              missing.join('}}, {{') + '}} 가 없습니다.');
+            gate('stop', 'reading', mod.id + ' ' + blk.heading + ' — the text has no blank slot {{' +
+              missing.join('}}, {{') + '}}.');
           }
         });
       });
@@ -533,10 +533,10 @@
           var body = (blk.paragraphs || []).join('\n');
           var gone = ['A', 'B', 'C', 'D'].filter(function (L) { return body.indexOf('{{' + L + '}}') < 0; });
           if (gone.length) {
-            gate('stop', 'reading', ins[0].id + ' — 지문에 삽입 자리 {{' + gone.join('}}, {{') +
-              '}} 가 없습니다. 삽입 문항이 성립하지 않습니다.');
+            gate('stop', 'reading', ins[0].id + ' — the passage has no insertion slot {{' + gone.join('}}, {{') +
+              '}}. The insert question does not hold together.');
           }
-          if (!str(ins[0].sentence)) gate('stop', 'reading', ins[0].id + ' — 끼워 넣을 문장이 없습니다.');
+          if (!str(ins[0].sentence)) gate('stop', 'reading', ins[0].id + ' — there is no sentence to insert.');
         });
       });
     });
@@ -550,10 +550,10 @@
             var joined = (q.slots || []).map(function (s) { return s.t === 'f' ? s.text : s.a; })
               .join(' ').replace(/\s+([.,!?;:])/g, '$1');
             if (norm(joined) !== norm(q.sentence)) {
-              gate('stop', 'writing', q.id + ' — 조각을 이어도 정답 문장이 되지 않습니다.');
+              gate('stop', 'writing', q.id + ' — joining the fragments does not produce the answer sentence.');
             }
             if ((q.answerTokens || []).length < 3) {
-              gate('stop', 'writing', q.id + ' — 학생이 놓을 조각이 3개 미만입니다.');
+              gate('stop', 'writing', q.id + ' — fewer than 3 fragments are left for the student to place.');
             }
           });
         });
@@ -568,13 +568,13 @@
       });
     });
     if (wantPics) {
-      gate('warn', 'pictures', '청사진의 ' + wantPics + '개 블록에는 그림이 붙습니다. ' +
-        'AI 는 그림을 만들지 않으므로 문항 편집기에서 따로 올려 주세요.');
+      gate('warn', 'pictures', wantPics + ' blocks in the blueprint carry a picture. ' +
+        'The AI does not draw, so upload them in the question editor.');
     }
 
     /* --- 9. 음성도 아직 없다 --- */
-    gate('warn', 'audio', '대본은 만들어졌지만 음성 파일은 아직 없습니다. ' +
-      '저장한 뒤 오디오 화면에서 TTS 로 생성해 주세요.');
+    gate('warn', 'audio', 'The scripts are written but there are no audio files yet. ' +
+      'Save the set, then generate them with TTS on the audio screen.');
 
     return gates;
   }
@@ -589,8 +589,8 @@
    */
   function generate(opts) {
     var bp = opts.blueprint;
-    if (!bp || !bp.sections) return Promise.reject(new Error('청사진(blueprint)이 없습니다.'));
-    if (!root_SG_SET_IMPORT()) return Promise.reject(new Error('set-import.js 가 먼저 실려 있어야 합니다.'));
+    if (!bp || !bp.sections) return Promise.reject(new Error('There is no blueprint.'));
+    if (!root_SG_SET_IMPORT()) return Promise.reject(new Error('set-import.js must be loaded first.'));
 
     var code = str(opts.code || 'SET ?').trim();
     var codeSlug = slug(code) || 'set';
@@ -632,13 +632,13 @@
       account(r);
       var byRef = {};
       ((r.data && r.data.topics) || []).forEach(function (t) { if (t && t.ref) byRef[t.ref] = t; });
-      tick('주제 배정');
+      tick('Assigning topics');
 
       var missing = topicSlots.filter(function (j) { return !byRef[j.ref]; });
       if (missing.length) {
         gates.push({
           level: 'warn', scope: 'topics',
-          message: missing.length + '개 블록에 주제가 배정되지 않았습니다 — 그 블록은 모델이 알아서 고릅니다.'
+          message: missing.length + ' blocks were given no topic — the model picks one for them.'
         });
       }
 
@@ -659,8 +659,8 @@
         }, function (e) {
           /* 한 블록이 실패해도 나머지는 살린다 — 120문항을 다시 만들 이유가 없다.
              빈 블록으로 두면 청사진 대조가 stop 을 올리므로 조용히 넘어가지 않는다. */
-          gates.push({ level: 'stop', scope: job.section, message: job.moduleLabel + ' ' + job.ref + ' — 생성 실패: ' + (e.message || e) });
-          tick(job.moduleLabel + ' · 실패');
+          gates.push({ level: 'stop', scope: job.section, message: job.moduleLabel + ' ' + job.ref + ' — generation failed: ' + (e.message || e) });
+          tick(job.moduleLabel + ' · failed');
           return { job: job, data: {}, failed: true };
         });
       });
@@ -748,12 +748,12 @@
           if (typeof a.answer === 'number' && typeof q.answer === 'number' && a.answer !== q.answer) {
             gates.push({
               level: 'stop', scope: 'listening',
-              message: q.id + ' — 정답지는 ' + 'ABCDE'.charAt(q.answer) + ' 인데 AI 가 쓴 대본은 ' +
-                'ABCDE'.charAt(a.answer) + ' 를 답으로 만듭니다. 대본이 문항과 맞지 않습니다.'
+              message: q.id + ' — the answer key says ' + 'ABCDE'.charAt(q.answer) + ' but the AI script makes ' +
+                'ABCDE'.charAt(a.answer) + ' the answer. The script does not match the question.'
             });
           }
           if (a.evidence && norm(str(d.script)).indexOf(norm(a.evidence)) < 0) {
-            gates.push({ level: 'stop', scope: 'listening', message: q.id + ' — 정답 근거가 대본에 없습니다.' });
+            gates.push({ level: 'stop', scope: 'listening', message: q.id + ' — the evidence for the answer is not in the script.' });
           }
         });
         filled++;
@@ -762,7 +762,7 @@
         return true;
       }, function (e) {
         done++;
-        gates.push({ level: 'warn', scope: 'listening', message: (j.blk.heading || '') + ' — 대본 생성 실패: ' + (e.message || e) });
+        gates.push({ level: 'warn', scope: 'listening', message: (j.blk.heading || '') + ' — script generation failed: ' + (e.message || e) });
         return false;
       });
     }).then(function () {
@@ -797,7 +797,7 @@
     jobs.filter(function (j) { return j.skip; }).forEach(function (j) {
       gates.push({
         level: 'warn', scope: 'answers',
-        message: j.mod.label + ' ' + (j.blk.heading || '') + ' — 지문도 대본도 없어 정답을 풀 수 없습니다(' + j.open.length + '문항).'
+        message: j.mod.label + ' ' + (j.blk.heading || '') + ' — no passage and no script, so the answers cannot be solved (' + j.open.length + ' questions).'
       });
     });
     if (!real.length) return Promise.resolve({ pack: pack, gates: gates, usage: usage, filled: 0 });
@@ -817,11 +817,11 @@
             var q = j.open[k];
             if (!q || a == null) return;
             if (a.evidence && norm(j.source).indexOf(norm(a.evidence)) < 0) {
-              gates.push({ level: 'stop', scope: 'answers', message: q.id + ' — AI 가 든 근거가 본문에 없습니다. 이 정답은 믿을 수 없습니다.' });
+              gates.push({ level: 'stop', scope: 'answers', message: q.id + ' — the evidence the AI gave is not in the text. This answer cannot be trusted.' });
               return;
             }
             if (a.confidence === 'low') {
-              gates.push({ level: 'warn', scope: 'answers', message: q.id + ' — AI 가 확신하지 못했습니다. 사람이 확인해 주세요.' });
+              gates.push({ level: 'warn', scope: 'answers', message: q.id + ' — the AI was not confident. A human should check this.' });
             }
             q.answer = a.answer;
             q.answerOrigin = 'ai';
@@ -832,7 +832,7 @@
           return true;
         }, function (e) {
           done++;
-          gates.push({ level: 'warn', scope: 'answers', message: (j.blk.heading || '') + ' — 정답 풀이 실패: ' + (e.message || e) });
+          gates.push({ level: 'warn', scope: 'answers', message: (j.blk.heading || '') + ' — answer solving failed: ' + (e.message || e) });
           return false;
         });
     }).then(function () {
