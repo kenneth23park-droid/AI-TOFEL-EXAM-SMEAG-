@@ -16,16 +16,18 @@
 
 /* 시험 전용 토큰. app.css 의 토큰은 재사용만 하고 재정의하지 않는다(--exam-* 접두).
    값은 녹화 프레임(docs/reference/screens/*)에서 눈으로 뜬 색이다:
-   상단바 연보라, 본문 흰 배경, Hide Time·RESPONSE TIME 헤더의 라벤더. */
+   상단바·Hide Time·RESPONSE TIME 헤더의 색조는 녹화 프레임에서는 라벤더였다.
+   브랜드가 블루그린으로 서면서 같은 자리를 같은 밝기의 블루그린으로 옮겼다 —
+   배치·명암 대비는 관찰값 그대로이고 색조만 브랜드를 따라간다. */
 :root {
   --exam-bg: #ffffff;            /* 관찰값: 시험 화면 배경은 흰색 (cream 아님) */
-  --exam-bar: #b8bef2;           /* 상단바 연보라 */
+  --exam-bar: #93cdc7;           /* 상단바 (녹화 프레임의 연보라 자리) */
   --exam-bar-ink: #ffffff;
   --exam-subbar: #ffffff;
-  --exam-accent: #8e96ea;        /* Hide Time 링크색 */
-  --exam-accent-soft: #eef0fd;
-  --exam-response: #a9b0ea;      /* RESPONSE TIME 카드 헤더 */
-  --exam-response-soft: #f4f5fe;
+  --exam-accent: #4fa89e;        /* Hide Time 링크색 */
+  --exam-accent-soft: #eaf6f4;
+  --exam-response: #6dbcb2;      /* RESPONSE TIME 카드 헤더 */
+  --exam-response-soft: #f2fbf9;
   --exam-topbar-h: 58px;
   --exam-subbar-h: 46px;
   --exam-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
@@ -77,11 +79,11 @@ body.exam-body {
 }
 .exam-btn[hidden] { display: none; }
 .exam-btn svg { width: 16px; height: 16px; flex: none; }
-.exam-btn:hover { background: #f4f4fb; }
+.exam-btn:hover { background: #f2f9f8; }
 .exam-btn:disabled { background: transparent; color: rgba(255, 255, 255, .72); cursor: not-allowed; }
 /* primary(Next/Continue)도 관찰값은 동일한 흰 알약이다 — 색 대비를 만들지 않는다. */
 .exam-btn.primary { background: #fff; color: var(--ink); font-weight: 750; }
-.exam-btn.primary:hover { background: #f4f4fb; }
+.exam-btn.primary:hover { background: #f2f9f8; }
 /* 오디오가 끝나기 전의 Next — 자리는 지키되 눌리지 않는 것이 보여야 한다.
    .primary 의 흰 알약이 위의 :disabled 를 덮으므로 여기서 따로 끈다. */
 .exam-btn.primary:disabled,
@@ -163,7 +165,7 @@ body.exam-body {
   opacity: .28;
 }
 .exam-meter i.on { opacity: 1; }
-.exam-vol-range { width: 100%; accent-color: #2f6fed; }
+.exam-vol-range { width: 100%; accent-color: #4fa89e; }
 
 /* ── RESPONSE TIME 카드 (speaking, HH:MM:SS) ────────────── */
 /* 카드 조립은 speaking 렌더러 소유. 여기서는 색·모서리·타이포 토큰만 준다.
@@ -285,7 +287,7 @@ body.exam-body {
    본문 배경은 흰색이라(--exam-bg) 상단바용 흰 알약은 여기서 보이지 않는다.
    .instr-card 가 같은 이유로 하는 것처럼 색을 뒤집는다. */
 .exam-done .exam-btn { background: var(--exam-accent-soft); color: var(--ink); }
-.exam-done .exam-btn:hover { background: #e3e6fb; }
+.exam-done .exam-btn:hover { background: #dcf0ed; }
 .exam-done .exam-btn.primary { background: var(--exam-response); color: #fff; }
 .exam-done .exam-btn.primary:hover { filter: brightness(1.05); background: var(--exam-response); }
 
@@ -379,7 +381,7 @@ body.exam-body {
   position: absolute; top: 10px; right: 8px;
   display: inline-flex; align-items: center; gap: 7px;
   padding: 6px 14px 6px 11px; border-radius: 999px;
-  background: var(--exam-accent-soft, #eef0fd); color: var(--exam-accent, #6b73d8);
+  background: var(--exam-accent-soft, #eaf6f4); color: var(--exam-accent, #34897f);
   font-size: 12.5px; font-weight: 700; letter-spacing: .01em;
 }
 .lst-play-badge::before {
@@ -940,7 +942,7 @@ body.exam-body {
 .instr-cta { padding: 11px 26px; font-size: 15px; }
 /* 카드 안 버튼은 흰 배경 위에 놓인다 — 상단바용 흰 알약 스타일을 여기서 뒤집는다. */
 .instr-card .exam-btn { background: var(--exam-accent-soft); color: var(--ink); }
-.instr-card .exam-btn:hover { background: #e3e6fb; }
+.instr-card .exam-btn:hover { background: #dcf0ed; }
 .instr-card .exam-btn.primary { background: var(--exam-response); color: #fff; }
 .instr-card .exam-btn.primary:hover { filter: brightness(1.05); background: var(--exam-response); }
 .instr-card .exam-btn:disabled { opacity: .55; color: inherit; }
