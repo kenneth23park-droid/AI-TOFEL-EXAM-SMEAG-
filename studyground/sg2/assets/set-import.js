@@ -560,6 +560,16 @@
         var lines = pendingStem ? [pendingStem].concat(g.lines) : g.lines;
         pendingStem = null;
 
+        /* 'Listen to a conversation.' 이 첫 문항과 같은 덩어리에 있는 세트가 있다
+           (SET 10 은 그 사이에 빈 줄이 없다). 먼저 떼지 않으면 그 줄이 15번 문두 앞에
+           붙어 "Listen to a conversation. 15. What are the speakers…" 가 화면에 뜬다.
+           안내 줄은 블록 전체의 것이지 문항의 것이 아니다. */
+        while (lines.length > 1 && !numbered(lines[0]) && !lettered(lines[0])
+               && (LISTEN_CUE.test(lines[0]) || /select the best response/i.test(lines[0]))) {
+          if (!blk.instruction) blk.instruction = lines[0];
+          lines = lines.slice(1);
+        }
+
         var joined = lines.join(' ');
         var got = itemsFromGroup(lines);
         if (!got.length) {

@@ -1,0 +1,647 @@
+{
+  "note": "verify_audio.py 신선도 기준. 스크립트/음성정책 해시 + 계층3 판정. 매니페스트별로 따로 둔다(한 폴더를 두 매니페스트가 선언할 수 있다). 손으로 고치지 말고 tools/audio_gate.py 로 다시 세워라.",
+  "manifest": ".verify-manifest.tts.json",
+  "sigVersion": 3,
+  "items": {
+    "set10-l1-q01": {
+      "scriptHash": "2135c271a11728bd130d40191e5a4e07054d128468e37a3d120843c1a47c82c0",
+      "sigVersion": 3,
+      "bytes": 64827,
+      "durationSec": 3.99,
+      "audioSha256": "2c59d32f0c9fb7cf9079fd39ff4b7047e4b63c9f5df840fa3a2f15403c95c96b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Who's giving the presentation about academic excellence?",
+        "audioSha256": "2c59d32f0c9fb7cf9079fd39ff4b7047e4b63c9f5df840fa3a2f15403c95c96b",
+        "scriptHash": "2135c271a11728bd130d40191e5a4e07054d128468e37a3d120843c1a47c82c0"
+      }
+    },
+    "set10-l1-q02": {
+      "scriptHash": "5067c294e25fd65bbd5b0d065608189ae86fc8d5cb619854291e19a9399727d3",
+      "sigVersion": 3,
+      "bytes": 52288,
+      "durationSec": 3.2,
+      "audioSha256": "b6c8e063c502a869dea3a1aef55542361335058b1830d7edd4af3a62096aeb50",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where is the honor society speech being held?",
+        "audioSha256": "b6c8e063c502a869dea3a1aef55542361335058b1830d7edd4af3a62096aeb50",
+        "scriptHash": "5067c294e25fd65bbd5b0d065608189ae86fc8d5cb619854291e19a9399727d3"
+      }
+    },
+    "set10-l1-q03": {
+      "scriptHash": "092571ae36f8e6ac90ed68604d149d80d58220a1c64aee108c791a93f434533a",
+      "sigVersion": 3,
+      "bytes": 47691,
+      "durationSec": 2.93,
+      "audioSha256": "3ed26af2dddb209485c2d78a15128a6d1179ac875e722c5ffb708ddf9c74a193",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I'm sorry I missed your class presentation.",
+        "audioSha256": "3ed26af2dddb209485c2d78a15128a6d1179ac875e722c5ffb708ddf9c74a193",
+        "scriptHash": "092571ae36f8e6ac90ed68604d149d80d58220a1c64aee108c791a93f434533a"
+      }
+    },
+    "set10-l1-q04": {
+      "scriptHash": "d2a2e70ad80989142b75773a266d2029a0f8d21ffff4d0a315aa493ac844793b",
+      "sigVersion": 3,
+      "bytes": 30137,
+      "durationSec": 1.81,
+      "audioSha256": "8c4c5db283d6fa2dbe7272ecd2670df9d010348852ed806c9671287ec141e934",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Did your presentation go well?",
+        "audioSha256": "8c4c5db283d6fa2dbe7272ecd2670df9d010348852ed806c9671287ec141e934",
+        "scriptHash": "d2a2e70ad80989142b75773a266d2029a0f8d21ffff4d0a315aa493ac844793b"
+      }
+    },
+    "set10-l1-q05": {
+      "scriptHash": "e70e3b4bca9e715b7ddb26f3fc5f69ca5edf96d755f85a8094fc18dd3b8e9d44",
+      "sigVersion": 3,
+      "bytes": 42675,
+      "durationSec": 2.6,
+      "audioSha256": "e97f0a8e64442588a2f4d7b2801f6376775f3394742a0e6fb4138fc2141c45d8",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Did you end up going to the seminar?",
+        "audioSha256": "e97f0a8e64442588a2f4d7b2801f6376775f3394742a0e6fb4138fc2141c45d8",
+        "scriptHash": "e70e3b4bca9e715b7ddb26f3fc5f69ca5edf96d755f85a8094fc18dd3b8e9d44"
+      }
+    },
+    "set10-l1-q06": {
+      "scriptHash": "c2d142e92631b9df30bebe313e396f77c95a177185386c31897a3ce9db8cf12b",
+      "sigVersion": 3,
+      "bytes": 74022,
+      "durationSec": 4.55,
+      "audioSha256": "3493ad585b1c03d8108820d1172a8e03e0d059acb1a42baaf987bdf7c0c15d21",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "How can I volunteer for technology education programs?",
+        "audioSha256": "3493ad585b1c03d8108820d1172a8e03e0d059acb1a42baaf987bdf7c0c15d21",
+        "scriptHash": "c2d142e92631b9df30bebe313e396f77c95a177185386c31897a3ce9db8cf12b"
+      }
+    },
+    "set10-l1-q07": {
+      "scriptHash": "26fb9ed5f513d4d867634ce150ea8c1ff18e3ad146126ee1f70517fed9568cb4",
+      "sigVersion": 3,
+      "bytes": 67753,
+      "durationSec": 4.18,
+      "audioSha256": "32434df7b6cd23e8275c9f234beb9a80796c4a7397226630bd2622673b54fff3",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "We should give a presentation about our research to the class.",
+        "audioSha256": "32434df7b6cd23e8275c9f234beb9a80796c4a7397226630bd2622673b54fff3",
+        "scriptHash": "26fb9ed5f513d4d867634ce150ea8c1ff18e3ad146126ee1f70517fed9568cb4"
+      }
+    },
+    "set10-l1-q08": {
+      "scriptHash": "91166fe084541219538a4746834a0817984b2656ee5d6a39f8d6ac5cd9b5b908",
+      "sigVersion": 3,
+      "bytes": 44765,
+      "durationSec": 2.74,
+      "audioSha256": "f8bf8e5f6387d767180de113406a2ed22447182bdc4db0deb6b920c680bccf90",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Do you ride a blue bike to campus?",
+        "audioSha256": "f8bf8e5f6387d767180de113406a2ed22447182bdc4db0deb6b920c680bccf90",
+        "scriptHash": "91166fe084541219538a4746834a0817984b2656ee5d6a39f8d6ac5cd9b5b908"
+      }
+    },
+    "set10-l1-q09": {
+      "scriptHash": "2c5537a53b9f8b0811ffe3acdeee18dec122dba6b460e7e71849d8c2e90c9e64",
+      "sigVersion": 3,
+      "bytes": 52288,
+      "durationSec": 3.2,
+      "audioSha256": "e5c7260df8f1799002823aa7208bb85fb6883265b3c29938f6539ccfb2350a0b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Do you know when the deadline for the proposal is?",
+        "audioSha256": "e5c7260df8f1799002823aa7208bb85fb6883265b3c29938f6539ccfb2350a0b",
+        "scriptHash": "2c5537a53b9f8b0811ffe3acdeee18dec122dba6b460e7e71849d8c2e90c9e64"
+      }
+    },
+    "set10-l1-q10": {
+      "scriptHash": "be54de9027973fd2880ca345c9653fb44e8e88d77cc0cb8d38299157dbe40d82",
+      "sigVersion": 3,
+      "bytes": 60648,
+      "durationSec": 3.72,
+      "audioSha256": "70ada0bc2522a2d695018ff7e5469e69036f58545854d6063215393b92b48e23",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Did you manage to talk to the professor about your research?",
+        "audioSha256": "70ada0bc2522a2d695018ff7e5469e69036f58545854d6063215393b92b48e23",
+        "scriptHash": "be54de9027973fd2880ca345c9653fb44e8e88d77cc0cb8d38299157dbe40d82"
+      }
+    },
+    "set10-l1-q11": {
+      "scriptHash": "9d218891a65265f2e94c2ef82731fac15a3d614b2b58ff41c57df1695fc5eafa",
+      "sigVersion": 3,
+      "bytes": 54378,
+      "durationSec": 3.34,
+      "audioSha256": "29e66f6d13f0b0e6871ed93ec44af4822a94087b238ba40449b83f14eac967b9",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I can't remember what Dr. James said during the meeting.",
+        "audioSha256": "29e66f6d13f0b0e6871ed93ec44af4822a94087b238ba40449b83f14eac967b9",
+        "scriptHash": "9d218891a65265f2e94c2ef82731fac15a3d614b2b58ff41c57df1695fc5eafa"
+      }
+    },
+    "set10-l1-q12": {
+      "scriptHash": "1b641ae11a3673acef14d17b23ad3dfef7d101db7f21cea881e12946a34fe19f",
+      "sigVersion": 3,
+      "bytes": 48527,
+      "durationSec": 2.97,
+      "audioSha256": "57413f7827e89fe1c33c86f532ee426bcf1b8569399105faaacbe330459e3a2d",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you applied for TA position yet?",
+        "audioSha256": "57413f7827e89fe1c33c86f532ee426bcf1b8569399105faaacbe330459e3a2d",
+        "scriptHash": "1b641ae11a3673acef14d17b23ad3dfef7d101db7f21cea881e12946a34fe19f"
+      }
+    },
+    "set10-l1-q13-14": {
+      "scriptHash": "cb513b80f75d9ca935a75d05859ecc24255f28f378cb8031a6365074831350a4",
+      "sigVersion": 3,
+      "bytes": 555706,
+      "durationSec": 54.51,
+      "audioSha256": "9095c966209f6a8e86a027065248d0e62be5a375cb61c716237390d73a78efe6",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0178,
+        "backend": "faster_whisper",
+        "reason": "WER 1.8%",
+        "transcript": "Hi, I'm looking for housing options for next semester. Do you have any rooms available with double beds? I'm hoping to find something on campus if possible. Yes, we have a few options right now. Our standard rooms come with double beds and shared bathroom facilities down the hall. Those are 1 to 800s per month and they fill up pretty quickly. That sounds reasonable. Are there any other options I should know about? We also have rooms with a view of the campus courtyard. They're a bit more spacious and come with newer furniture. Those are $2,080 a month. Hmm, over 2,000 is a bit out of my budget right now. I'm trying to keep my expenses down this year. Would it be possible to take a look at one of the standard rooms first? Of course. Let me just grab the keys from the back office and I'll take you up to see one on the third floor. That would be great. Thanks so much.",
+        "audioSha256": "9095c966209f6a8e86a027065248d0e62be5a375cb61c716237390d73a78efe6",
+        "scriptHash": "cb513b80f75d9ca935a75d05859ecc24255f28f378cb8031a6365074831350a4"
+      }
+    },
+    "set10-l1-q15-16": {
+      "scriptHash": "ab98af29d80192c056c11e136204eb2510a0e5b3487d2364a1a0ee5758d8dfc4",
+      "sigVersion": 3,
+      "bytes": 523272,
+      "durationSec": 50.37,
+      "audioSha256": "2cb680db82e93dada9d45ff6fdb922114b2f11f7e50914801d9d0238715997ea",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0132,
+        "backend": "faster_whisper",
+        "reason": "WER 1.3%",
+        "transcript": "Hey, have you read the announcement about the new book club they're starting on campus? Yeah, I saw it posted on the bulletin board this morning. It sounds pretty interesting actually. I thought so too. Apparently they're planning to invite published authors to come in and talk about their books. They wanna do it once a month or so. Really? That's exactly the kind of thing I've been looking for. I've always wanted to know how professional writers come up with their ideas and how they organize their thoughts when they're working on a story. Same here. I think it would be really inspiring to hear from people who actually do this for a living. So are you thinking what I'm thinking? Definitely. We should go sign up before all the spots are taken. I heard they're only accepting 30 members. Let's head over to the student center right now then.",
+        "audioSha256": "2cb680db82e93dada9d45ff6fdb922114b2f11f7e50914801d9d0238715997ea",
+        "scriptHash": "ab98af29d80192c056c11e136204eb2510a0e5b3487d2364a1a0ee5758d8dfc4"
+      }
+    },
+    "set10-l1-q17-18": {
+      "scriptHash": "987c6a64d464dcde7f7cee35a0d34d386a4949f92b4e391f3ad291671923fd06",
+      "sigVersion": 3,
+      "bytes": 490603,
+      "durationSec": 51.06,
+      "audioSha256": "19e4f50b482645e96848222663ec5a625439b3d6309fecc5046b693a842ae1e7",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Hey, I heard about the broken heater in your apartment. That's really unfortunate timing with the weather getting so cold. Have you been able to contact your landlord about it yet? Yeah, I called him first thing yesterday morning. But he said the repair company is backed up with requests right now. So it's going to take about a week for someone to come out and fix it. A whole week? That's a long time to go without heat, especially with temperatures dropping below freezing at night. Listen, if you need a warm place to stay or even just somewhere to hang out in the evenings, feel free to come over to my place. I already checked with my roommate and he said he's totally fine with it. That's really thoughtful of you to offer and I appreciate you asking your roommate first. I think I can manage with some extra blankets for now, but I'll definitely reach out if it gets too uncomfortable. Sounds good, just let me know whenever.",
+        "audioSha256": "19e4f50b482645e96848222663ec5a625439b3d6309fecc5046b693a842ae1e7",
+        "scriptHash": "987c6a64d464dcde7f7cee35a0d34d386a4949f92b4e391f3ad291671923fd06"
+      }
+    },
+    "set10-l1-q19-20": {
+      "scriptHash": "555ac77b52a6e58a64ca42a850abd7d5d42342f781deaacdd55a349e4c155e90",
+      "sigVersion": 3,
+      "bytes": 411315,
+      "durationSec": 25.63,
+      "audioSha256": "7ad099b4181d620216915147acf5c848cb7260ba2f7e822c2b0e5767f8070b4f",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Attention students! This is a reminder that submissions for the campus photography contest are due by 3 p.m. today. Please make sure to submit your entries to the Arts Building front desk before the deadline. A panel of selected students and professors will carefully evaluate all entries based on creativity and technique. Winners will be announced in next week's campus newspaper, and their photographs will be featured on the university website for the entire semester.",
+        "audioSha256": "7ad099b4181d620216915147acf5c848cb7260ba2f7e822c2b0e5767f8070b4f",
+        "scriptHash": "555ac77b52a6e58a64ca42a850abd7d5d42342f781deaacdd55a349e4c155e90"
+      }
+    },
+    "set10-l1-q21-22": {
+      "scriptHash": "d8739be3ff960372e4de9c4c7e2a26bc742cebcd08e3eb1bac85990527e45563",
+      "sigVersion": 3,
+      "bytes": 707648,
+      "durationSec": 44.16,
+      "audioSha256": "956bc0873f168df1c3d34e486a9103eb242d8980141965921d110287f3cc4bc8",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I'm pleased to announce that Dr. Harrison will be teaching a special course on time management this semester. Dr. Harrison has dedicated over 15 years to studying how we balance personal commitments, academic responsibilities, and extracurricular activities effectively. His interest in this topic began during his own undergraduate years when he double majored in psychology and biology while also working a part-time job to cover his tuition costs. During that demanding period, he frequently went without adequate sleep, struggling to keep up with everything. It was this challenging experience that sparked his lifelong passion for developing and teaching effective time management strategies to help others avoid the same difficulties.",
+        "audioSha256": "956bc0873f168df1c3d34e486a9103eb242d8980141965921d110287f3cc4bc8",
+        "scriptHash": "d8739be3ff960372e4de9c4c7e2a26bc742cebcd08e3eb1bac85990527e45563"
+      }
+    },
+    "set10-l1-q23-24": {
+      "scriptHash": "4fbc7f6f8f951e2226ce2de99a2a18f9ae4a16bfc6e05470cb3b4826dfc26235",
+      "sigVersion": 3,
+      "bytes": 713500,
+      "durationSec": 44.54,
+      "audioSha256": "edb86ec3c1f7c73cb1becf502835f907327d79a91fb86175b211d4164f282460",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I have an exciting announcement for all of you. Dr. Reyes, a renowned cosmologist who has published numerous groundbreaking papers on black hole dynamics and gravitational theory, will be visiting our university to deliver a guest lecture next Thursday afternoon. In fact, one of his influential theories on stellar collapse forms the foundation for our current unit. To help you prepare, I'll be uploading one of his recent papers to the course website, specifically the one he'll be discussing during his talk. So please take the time to read it carefully before attending the lecture. Your participation is strongly encouraged and I'd like to add that students who attend and submit a one page reflection paper on the lecture content will receive extra credit toward their final grade.",
+        "audioSha256": "edb86ec3c1f7c73cb1becf502835f907327d79a91fb86175b211d4164f282460",
+        "scriptHash": "4fbc7f6f8f951e2226ce2de99a2a18f9ae4a16bfc6e05470cb3b4826dfc26235"
+      }
+    },
+    "set10-l1-q25-28": {
+      "scriptHash": "4958901c091225c017d1f0074b9c5d1aeee1f0511101d3f0dba0835f277cab91",
+      "sigVersion": 3,
+      "bytes": 1803119,
+      "durationSec": 112.62,
+      "audioSha256": "feb8e1fa265cdd8b3f2da73eb9ab088b62bcb0b47261bbe2babb2fbf410cb6b8",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0132,
+        "backend": "faster_whisper",
+        "reason": "WER 1.3%",
+        "transcript": "Alright, so today we are going to talk about something you probably don't think much about – the light in this room. Now for decades we used incandescent bulbs, right? These traditional bulbs produce what we call a broad spectrum of light. That means they emit wavelengths across the entire visible range, plus they give off a significant amount of infrared radiation, basically heat. Now LED lights are different, they're designed to be efficient, so they emit light primarily in the visible spectrum – roughly 400 to 700 nanometers. But here's the thing – they produce almost no infrared light, and that matters more than you might think. So why should we care about infrared? Well infrared radiation, particularly in the near-infrared range, has been linked to several health benefits. Many suggest it can promote relaxation, reduce stress, and even support cellular repair processes. Some research indicates it may improve circulation and help with muscle recovery. Incandescent bulbs provided this naturally without us even realizing it. Now LED manufacturers have noticed this gap. There are now advanced LED systems that can emit some infrared wavelengths, however these specialized bulbs can cost 10 times more than standard LEDs. So for most consumers and businesses, regular LEDs remain the practical choice, despite missing these potential benefits. It's a trade-off between energy efficiency and what some researchers call light quality.",
+        "audioSha256": "feb8e1fa265cdd8b3f2da73eb9ab088b62bcb0b47261bbe2babb2fbf410cb6b8",
+        "scriptHash": "4958901c091225c017d1f0074b9c5d1aeee1f0511101d3f0dba0835f277cab91"
+      }
+    },
+    "set10-l1-q29-32": {
+      "scriptHash": "038596c4f9557f6fc8357d978c056ad7236ef925c9890f0ca12db5a1e9f65cb6",
+      "sigVersion": 3,
+      "bytes": 1533954,
+      "durationSec": 95.81,
+      "audioSha256": "8112f1e101818846979f2132185d8ef2c80328d35eafaeeb476c9fb42995b85c",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0331,
+        "backend": "faster_whisper",
+        "reason": "WER 3.3% — queue for a human listen",
+        "transcript": "So, let's dive into hip-hop today. Now, one technique that's absolutely central to this genre is sampling. What exactly is sampling? Basically, it's taking a portion of an existing recording, maybe a drum beat, a melody, or even just a few seconds of sound and incorporating it into a new piece of music. It's been part of hip-hop since the beginning. Okay, so let me give you an example. Beyoncé's 2003 hit, Crazy in Love, samples the horn section from a 1970s chai light to song. That's sampling in action. Another famous example is the Beastie Boys album, Paul's Boutique, from 1989, which used hundreds of samples layered together. Now, here's where things get interesting. In 1991, there was a landmark legal case, Grand Upright Music versus Warner Brothers. A federal judge ruled that sampling without permission was copyright infringement. This changed everything. Before this case, sampling was essentially unregulated. After, artists needed to clear every sample, which meant paying licensing fees. This made elaborate sample-based albums, like Paul's Boutique, nearly impossible to produce economically. Now, some critics argue that sampling isn't true creativity, it's just borrowing other people's work. But in my view, all art forms reference other art. Composers have always quoted other composers, painters reference earlier painters. Hip-hop producers are doing the same thing, just with technology. They're creating something genuinely new from existing materials.",
+        "audioSha256": "8112f1e101818846979f2132185d8ef2c80328d35eafaeeb476c9fb42995b85c",
+        "scriptHash": "038596c4f9557f6fc8357d978c056ad7236ef925c9890f0ca12db5a1e9f65cb6"
+      }
+    },
+    "set10-l2-q01": {
+      "scriptHash": "96449523c711dc35986159f8a69cbeb44f3940cf06531e89041a8f683d5c73b5",
+      "sigVersion": 3,
+      "bytes": 39750,
+      "durationSec": 2.41,
+      "audioSha256": "7341afd9ef7b1c0d8661e3e45ce7219cfd8ffbe239cc563cfffbac1a6e110b5b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Is there enough space for everyone?",
+        "audioSha256": "7341afd9ef7b1c0d8661e3e45ce7219cfd8ffbe239cc563cfffbac1a6e110b5b",
+        "scriptHash": "96449523c711dc35986159f8a69cbeb44f3940cf06531e89041a8f683d5c73b5"
+      }
+    },
+    "set10-l2-q02": {
+      "scriptHash": "e9c69f5fad179a7dcf7e3bbf7a7ca99fb56d37ab0cd06353b8f9ae90866018e7",
+      "sigVersion": 3,
+      "bytes": 33062,
+      "durationSec": 2.0,
+      "audioSha256": "a4a1d40651adb8b9b1c6509bf3a652b90e12cc6d28e6ac439fb154c5ad8270c2",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Why was the project renamed?",
+        "audioSha256": "a4a1d40651adb8b9b1c6509bf3a652b90e12cc6d28e6ac439fb154c5ad8270c2",
+        "scriptHash": "e9c69f5fad179a7dcf7e3bbf7a7ca99fb56d37ab0cd06353b8f9ae90866018e7"
+      }
+    },
+    "set10-l2-q03": {
+      "scriptHash": "1f40c7fbd803a120d900f2c3182c89c1f69aab7a6fa872d984cf17a512f2f3cf",
+      "sigVersion": 3,
+      "bytes": 73186,
+      "durationSec": 4.5,
+      "audioSha256": "0a66c95ce004f44279010baef697a7d1de59071089d4f21a36a919d6ebd004bd",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I want to be able to attend the academic awards banquet.",
+        "audioSha256": "0a66c95ce004f44279010baef697a7d1de59071089d4f21a36a919d6ebd004bd",
+        "scriptHash": "1f40c7fbd803a120d900f2c3182c89c1f69aab7a6fa872d984cf17a512f2f3cf"
+      }
+    },
+    "set10-l2-q04-05": {
+      "scriptHash": "e952bd353a70cbd1da68a724472d5711f7d20980389d528efcd7e1783357ff16",
+      "sigVersion": 3,
+      "bytes": 528839,
+      "durationSec": 52.03,
+      "audioSha256": "ba88c5c39b99636366637afc97268b87456607635d5fc3c080993a695fb15e93",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Excuse me, I'm looking for a gift for my brother. His birthday is coming up next week. Sure, I'd be happy to help. Does he have any particular hobbies? He's really into cooking. He makes dinner for his family almost every night and loves trying new recipes. In that case, have you considered a professional chef knife set? We have some excellent options here. A knife set? That seems like something he might already have. You'd be surprised. Most people never invest in quality knives for themselves, but a good set makes prepping ingredients so much easier. It's one of those things people appreciate but rarely buy on their own. That's a good point. He's always complaining about how long it takes to chop vegetables. Exactly. How about that one on the top shelf? It's one of our most popular sets.",
+        "audioSha256": "ba88c5c39b99636366637afc97268b87456607635d5fc3c080993a695fb15e93",
+        "scriptHash": "e952bd353a70cbd1da68a724472d5711f7d20980389d528efcd7e1783357ff16"
+      }
+    },
+    "set10-l2-q06-07": {
+      "scriptHash": "6e692b28f47a638326a5483b641e2a45c6274d7f8f3a018867bcbadb5993b652",
+      "sigVersion": 3,
+      "bytes": 404350,
+      "durationSec": 41.24,
+      "audioSha256": "cea8d69f479a7e9ed9edc785eca29b6bb5dd7afb34abd60bbbaeedd720feea09",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.015,
+        "backend": "faster_whisper",
+        "reason": "WER 1.5%",
+        "transcript": "So, our lease is up in two months. Are we gonna renew the contract or should we look for somewhere else? I think we should consider moving. The landlord has raised the rent every year since we moved in. It's basically doubled over the past three years. Yeah, the increases have been ridiculous, but apartment hunting is such a hassle. I know, I hate it too, but I don't think we have much of a choice. We can't keep paying more for the same apartment. You're right, and actually, if we move closer to downtown, it might cut down on my commute. I spend almost two hours a day just getting to and from work. That alone might make the whole process worth it. That's true. Let's start looking online this weekend.",
+        "audioSha256": "cea8d69f479a7e9ed9edc785eca29b6bb5dd7afb34abd60bbbaeedd720feea09",
+        "scriptHash": "6e692b28f47a638326a5483b641e2a45c6274d7f8f3a018867bcbadb5993b652"
+      }
+    },
+    "set10-l2-q08-11": {
+      "scriptHash": "ae8e5dde3f2e62cf9daf753caa01ba8db705a1bfe57260b1b6e2ddaeb2bf9878",
+      "sigVersion": 3,
+      "bytes": 1492158,
+      "durationSec": 93.2,
+      "audioSha256": "22c681c8433e222e070257fb2d4a8a5d20f9054ab7ab0ab68bf2476806015894",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0161,
+        "backend": "faster_whisper",
+        "reason": "WER 1.6%",
+        "transcript": "So today we're looking at how wind instruments evolved into their modern forms. Now, if you think about instruments like the trumpet or the trombone, these took centuries, sometimes three or 400 years to develop from their early ancestors into the standardized versions we use in orchestras today. It was a slow gradual process of refinement, but the tuba, that's a different story. The tuba reached its modern form in only about 180 years, which is remarkably fast by comparison. So let's talk about what came before it. The tuba's main ancestors were the serpent and the aphiclide. The serpent was a wooden instrument with an S-shaped body, hence the name. It had finger holes like a woodwind, but it was played with a brass mouthpiece. The problem? The tone was inconsistent and difficult to control, especially in ensemble settings. Then came the aphiclide in the early 1800s. This was made of brass and used keys instead of finger holes. Better, right? Well, it still had issues. Producing stable low notes was extremely challenging, and that was precisely what composers and performers wanted, a reliable bass voice for the brass section. Now, this is where Berlioz comes in. In his famous treatise on instrumentation, he specifically criticized the aphiclide's limitations and called for a more stable low brass instrument. His influence helped push instrument makers toward developing what became the modern tuba. Next, we'll look at how the tuba's design was finally standardized.",
+        "audioSha256": "22c681c8433e222e070257fb2d4a8a5d20f9054ab7ab0ab68bf2476806015894",
+        "scriptHash": "ae8e5dde3f2e62cf9daf753caa01ba8db705a1bfe57260b1b6e2ddaeb2bf9878"
+      }
+    },
+    "set10-l2-q12-15": {
+      "scriptHash": "6fae711304e5f6fa9f3cdf4f0fa8b520f51974276da5e428682aa9889c5ac0f3",
+      "sigVersion": 3,
+      "bytes": 1976991,
+      "durationSec": 123.48,
+      "audioSha256": "6d76a19c05afadd7deac642380fa34f34231070109e3b1fbac9172f1155a8a50",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0357,
+        "backend": "faster_whisper",
+        "reason": "WER 3.6% — queue for a human listen",
+        "transcript": "Alright, so kinship is one of the most fundamental concepts in anthropology. I mean, understanding how people define family relationships tells us so much about a society's structure, values, and social organization. Now how do anthropologists actually study kinship? Well, they typically conduct what we call participant observation. This means living within a community for extended periods, sometimes years, participating in daily life, attending rituals, observing family interactions, and documenting how relationships function. It's hands-on research. Okay, so kinship relationships generally fall into two categories. First, there's consanguineal kinship. These are relationships based on blood ties. Your parents, siblings, grandparents? That's consanguineal. Then there's affinal kinship, which refers to relationships created through marriage. Your spouse? In-laws, those are affinal connections. Now, different cultures trace dissent differently. In patrilineal societies, dissent is traced through the father's line. In matrilineal societies, it's through the mother's line. And in matrilineal systems, you see some interesting patterns. For example, the maternal uncle. Once your mother's brother often plays a crucial role, i.e. in childrearing, sometimes even more than the biological father. A mother's sister might be considered a second mother to the children. Now, you might think kinship charts are just fancy family tricies, but they're actually quite different. Family trees typically show biological ancestors going back generations. Kinship charts, however, map out the social relationships and obligations between living relatives. They show who has responsibilities to whom, who can marry whom, and how resources are shared. It's about social structure, not just genealogy.",
+        "audioSha256": "6d76a19c05afadd7deac642380fa34f34231070109e3b1fbac9172f1155a8a50",
+        "scriptHash": "6fae711304e5f6fa9f3cdf4f0fa8b520f51974276da5e428682aa9889c5ac0f3"
+      }
+    },
+    "set10-s1-instructions": {
+      "scriptHash": "8169c35c5ccbb8843af60f7a125016d468627270bdc2b0879ec19d47bbe21c17",
+      "sigVersion": 3,
+      "bytes": 79038,
+      "durationSec": 4.88,
+      "audioSha256": "b7ed2e7ab7940188bccc31f37e9ba9be25daf4ef34090f20e7ef8d329d956617",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You are training to work at a city central bank, listen to your manager and repeat what she says.",
+        "audioSha256": "b7ed2e7ab7940188bccc31f37e9ba9be25daf4ef34090f20e7ef8d329d956617",
+        "scriptHash": "8169c35c5ccbb8843af60f7a125016d468627270bdc2b0879ec19d47bbe21c17"
+      }
+    },
+    "set10-s1-q1": {
+      "scriptHash": "f22defd1aa0cffeab7e9d4b064a44c857017673783dceab4e0460479aafe6971",
+      "sigVersion": 3,
+      "bytes": 30973,
+      "durationSec": 1.86,
+      "audioSha256": "e667df400b17a19e96dabffd178413e8f9d2dcd6865ae36b8a2d436e7add24c6",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Welcome to City Central Bank.",
+        "audioSha256": "e667df400b17a19e96dabffd178413e8f9d2dcd6865ae36b8a2d436e7add24c6",
+        "scriptHash": "f22defd1aa0cffeab7e9d4b064a44c857017673783dceab4e0460479aafe6971"
+      }
+    },
+    "set10-s1-q2": {
+      "scriptHash": "3a086b8c671aa989d89844c77d924297e6a5423dbad82d34278fa6535a404d95",
+      "sigVersion": 3,
+      "bytes": 44765,
+      "durationSec": 2.74,
+      "audioSha256": "4aed6e1fd0813f5c37ea8f9c4fb0f73ce642df510e718b45438eeb3ff7da0518",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "The main teller windows are straight ahead.",
+        "audioSha256": "4aed6e1fd0813f5c37ea8f9c4fb0f73ce642df510e718b45438eeb3ff7da0518",
+        "scriptHash": "3a086b8c671aa989d89844c77d924297e6a5423dbad82d34278fa6535a404d95"
+      }
+    },
+    "set10-s1-q3": {
+      "scriptHash": "022d81f342440a3f37c983e4e15398812a79136db604027cafcb045396afa62b",
+      "sigVersion": 3,
+      "bytes": 67335,
+      "durationSec": 4.13,
+      "audioSha256": "5449f4b2913e15201155bd83ee285aa11aa35345342597cb3a4b58f0c15873de",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "There is a comfortable waiting area beside the entrance doors.",
+        "audioSha256": "5449f4b2913e15201155bd83ee285aa11aa35345342597cb3a4b58f0c15873de",
+        "scriptHash": "022d81f342440a3f37c983e4e15398812a79136db604027cafcb045396afa62b"
+      }
+    },
+    "set10-s1-q4": {
+      "scriptHash": "938c772abccd425b7d83f60d1292ae3f43a1ab46a8f9da5daf9b362e5bf796b6",
+      "sigVersion": 3,
+      "bytes": 87397,
+      "durationSec": 5.39,
+      "audioSha256": "47708143feea2f5885d9481141c67ad1247afa7b98de29812c1e13213de17e0d",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Customers can open new accounts, make deposits, or apply for loans.",
+        "audioSha256": "47708143feea2f5885d9481141c67ad1247afa7b98de29812c1e13213de17e0d",
+        "scriptHash": "938c772abccd425b7d83f60d1292ae3f43a1ab46a8f9da5daf9b362e5bf796b6"
+      }
+    },
+    "set10-s1-q5": {
+      "scriptHash": "255fc84a3f384a91068484991ca80197fa45530979b9943860bd7ab83d9da899",
+      "sigVersion": 3,
+      "bytes": 79874,
+      "durationSec": 4.92,
+      "audioSha256": "d046c8e0734d8435f559680217473c63b150d6a0b55a9a934b5a0390c06bd46f",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "We recommend asking customers to take a number and wait to be called.",
+        "audioSha256": "d046c8e0734d8435f559680217473c63b150d6a0b55a9a934b5a0390c06bd46f",
+        "scriptHash": "255fc84a3f384a91068484991ca80197fa45530979b9943860bd7ab83d9da899"
+      }
+    },
+    "set10-s1-q6": {
+      "scriptHash": "1bd48ec6da5e6fc843e18f426989ca8bffc1a609226fe75ee94846c3342aff96",
+      "sigVersion": 3,
+      "bytes": 126685,
+      "durationSec": 7.85,
+      "audioSha256": "58b7ead3d6518c6bdef171249dad030d3cd857e12ea236cde525b359ee474b20",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Please be aware that large cash withdrawals require a manager's approval and additional identification.",
+        "audioSha256": "58b7ead3d6518c6bdef171249dad030d3cd857e12ea236cde525b359ee474b20",
+        "scriptHash": "1bd48ec6da5e6fc843e18f426989ca8bffc1a609226fe75ee94846c3342aff96"
+      }
+    },
+    "set10-s1-q7": {
+      "scriptHash": "ac9cb94b038dd343ad77e83ce927ae0bb228208191f705b25e9ff16b76c8d522",
+      "sigVersion": 3,
+      "bytes": 107877,
+      "durationSec": 6.69,
+      "audioSha256": "d5e5dd3b45810f3e292ea97255440f0e5b6bda2c611600c40bafea791f61212d",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "If a customer needs their safe deposit box, escort them to the vault area downstairs.",
+        "audioSha256": "d5e5dd3b45810f3e292ea97255440f0e5b6bda2c611600c40bafea791f61212d",
+        "scriptHash": "ac9cb94b038dd343ad77e83ce927ae0bb228208191f705b25e9ff16b76c8d522"
+      }
+    },
+    "set10-s2-instructions": {
+      "scriptHash": "b97f12865e7152e12bf8e1c9bd4c653b3bcce5bffaa3bd17adc1701c37a1d8bd",
+      "sigVersion": 3,
+      "bytes": 232847,
+      "durationSec": 14.49,
+      "audioSha256": "88ce5b2dd534a7d2924c1feff7742e69932ab68eb97d2e4678819ca35cc90cbf",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You have volunteered for a research study about sports activities. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+        "audioSha256": "88ce5b2dd534a7d2924c1feff7742e69932ab68eb97d2e4678819ca35cc90cbf",
+        "scriptHash": "b97f12865e7152e12bf8e1c9bd4c653b3bcce5bffaa3bd17adc1701c37a1d8bd"
+      }
+    },
+    "set10-s2-q1": {
+      "scriptHash": "94ed85685be9d8567abe73d5c07bf9ff4b6a97cb0d89b4b45e93645a506118ac",
+      "sigVersion": 3,
+      "bytes": 208187,
+      "durationSec": 12.96,
+      "audioSha256": "06e9efceab7d677914cc2c59e16bb5bd31d71b84558a7d64f17ed9589a54e29b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Thank you for joining me today. I'd like to ask you some questions about sports activities. Do you currently participate in any sports activities either individually or as part of a team?",
+        "audioSha256": "06e9efceab7d677914cc2c59e16bb5bd31d71b84558a7d64f17ed9589a54e29b",
+        "scriptHash": "94ed85685be9d8567abe73d5c07bf9ff4b6a97cb0d89b4b45e93645a506118ac"
+      }
+    },
+    "set10-s2-q2": {
+      "scriptHash": "6852d7abda3e44e3eccb0ce096ea23fcf12da420fc01661b3b432a39145e88ff",
+      "sigVersion": 3,
+      "bytes": 98264,
+      "durationSec": 6.08,
+      "audioSha256": "ce47f2b72113f2e1743ec34414c765057d2559a35f59c08f76d49d7cccd483c2",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I see, what are the main reasons you do or do not participate in sports activities?",
+        "audioSha256": "ce47f2b72113f2e1743ec34414c765057d2559a35f59c08f76d49d7cccd483c2",
+        "scriptHash": "6852d7abda3e44e3eccb0ce096ea23fcf12da420fc01661b3b432a39145e88ff"
+      }
+    },
+    "set10-s2-q3": {
+      "scriptHash": "da256e15aa770beb31cf1318175f9b601b3bb16ff83466a8338096b67872133e",
+      "sigVersion": 3,
+      "bytes": 134208,
+      "durationSec": 8.31,
+      "audioSha256": "735cf4062039806d9d571f01e099ec2949fbc8f66161cddf2f73d43f2fb3fb5e",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Interesting, can you describe an unforgettable or memorable moment you've had while participating in or watching a sport?",
+        "audioSha256": "735cf4062039806d9d571f01e099ec2949fbc8f66161cddf2f73d43f2fb3fb5e",
+        "scriptHash": "da256e15aa770beb31cf1318175f9b601b3bb16ff83466a8338096b67872133e"
+      }
+    },
+    "set10-s2-q4": {
+      "scriptHash": "94f9dc10369a9af7fb71bdf04e04c080ce691c7958e228fb4c993e878ccc83fe",
+      "sigVersion": 3,
+      "bytes": 305154,
+      "durationSec": 18.99,
+      "audioSha256": "446e763565cb17b994cc4eee0b506189065d86c6db14d073d5007d9960bfa67e",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Good points. Lastly, some people believe children should not participate in contact sports like rugby or football because of the risk of injury. Others believe such sports teach valuable lessons about teamwork and cooperation. What is your opinion on this and why?",
+        "audioSha256": "446e763565cb17b994cc4eee0b506189065d86c6db14d073d5007d9960bfa67e",
+        "scriptHash": "94f9dc10369a9af7fb71bdf04e04c080ce691c7958e228fb4c993e878ccc83fe"
+      }
+    }
+  }
+}
