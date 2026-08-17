@@ -4,10 +4,11 @@
  * 환경변수)에만 있고, 브라우저는 공용 토큰(SG_TTS_TOKEN)만 들고 있다.
  * 토큰은 이 기기의 localStorage 에 남는다 — 관리자 로그인과 같은 성격의 가림막이다.
  *
- * 엔진은 ElevenLabs 하나다 — 시험 음성 정본이 전부 그 계정의 목소리로 만들어졌고,
- * 한 문항만 다른 엔진으로 다시 만들면 그 문항만 목소리가 튄다. 모델·목소리 목록은
- * 서버(api/tts.js)가 알려준다. 서버에 닿지 못하면 아래 FALLBACK 으로 화면만 서고,
- * 생성 버튼은 이유를 말해 준다.
+ * 엔진은 넷이고 기본은 ElevenLabs 다 — 시험 음성 정본이 전부 그 계정의 목소리로
+ * 만들어졌고, 이미 있는 세트의 한 문항만 다른 엔진으로 다시 만들면 그 문항만 목소리가
+ * 튄다. 새 세트를 통째로 지을 때는 어느 엔진이든 처음부터 끝까지 한 엔진으로 가면 된다
+ * (api/tts.js 머리말). 모델·목소리 목록은 서버가 알려준다. 서버에 닿지 못하면 아래
+ * FALLBACK 으로 화면만 서고, 생성 버튼은 이유를 말해 준다.
  *
  * 노출 전역: window.SG_TTS_GEN
  */
@@ -73,13 +74,31 @@
     { id: 'onwK4e9ZLuTAKqWW03F9', lang: 'en-GB', label: 'GB · Oliver (M) — Daniel' },
     { id: 'VyyyOgRmsqOzaZXnKWnI', lang: 'en-AU', label: 'AU · Lily (F) — Sunny' }
   ];
+  /* 서버가 안 뜬 상태에서도 화면이 서야 해서, 엔진 목록은 여기에도 한 벌 적어 둔다.
+     값은 api/tts.js 의 ENGINES 와 같아야 한다 — 어긋나면 화면이 없는 모델을 보여 준다.
+     ready:false 로 두는 것이 핵심이다. 서버에 닿아야 진짜 상태를 안다. */
   var FALLBACK = {
-    providers: [{ id: 'elevenlabs', label: 'ElevenLabs', mp3: 'native', gap: false,
-                  free: '가입 시 무료 크레딧, 이후 유료',
-                  models: ['eleven_flash_v2_5', 'eleven_multilingual_v2', 'eleven_turbo_v2_5', 'eleven_v3'],
-                  defaultModel: 'eleven_flash_v2_5', langs: [], acceptsKey: true,
-                  envVar: 'ELEVENLABS_API_KEY',
-                  ready: false, envReady: false, note: 'server unreachable' }],
+    providers: [
+      { id: 'elevenlabs', label: 'ElevenLabs',
+        models: ['eleven_flash_v2_5', 'eleven_multilingual_v2', 'eleven_turbo_v2_5', 'eleven_v3'],
+        defaultModel: 'eleven_flash_v2_5', langs: [], speed: { min: 0.7, max: 1.2 },
+        free: '가입 시 무료 크레딧, 이후 유료', envVar: 'ELEVENLABS_API_KEY' },
+      { id: 'openai', label: 'OpenAI',
+        models: ['gpt-4o-mini-tts', 'tts-1-hd', 'tts-1'],
+        defaultModel: 'gpt-4o-mini-tts', langs: [], speed: { min: 0.25, max: 4 },
+        free: '무료 없음 · 1M자 약 $12(gpt-4o-mini-tts)', envVar: 'OPENAI_API_KEY' },
+      { id: 'google', label: 'Google Cloud TTS',
+        models: ['v1'], defaultModel: 'v1',
+        langs: ['en-US', 'en-GB', 'en-AU', 'en-IN'], speed: { min: 0.25, max: 4 },
+        free: '월 100만자 무료(Standard)', envVar: 'GOOGLE_TTS_API_KEY' },
+      { id: 'deepgram', label: 'Deepgram Aura',
+        models: ['aura-2', 'aura'], defaultModel: 'aura-2', langs: [], speed: { min: 1, max: 1 },
+        free: '가입 시 $200 크레딧', envVar: 'DEEPGRAM_API_KEY' }
+    ].map(function (p) {
+      p.mp3 = 'native'; p.gap = false; p.acceptsKey = true;
+      p.ready = false; p.envReady = false; p.note = 'server unreachable';
+      return p;
+    }),
     voices: { elevenlabs: FALLBACK_VOICES },
     langs: []
   };

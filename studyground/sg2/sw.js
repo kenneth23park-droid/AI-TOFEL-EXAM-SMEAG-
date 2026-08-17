@@ -353,7 +353,14 @@
 //      떼어 --bad(빨강) 로 옮겼다: 브랜드가 teal 인 채로 오답을 브랜드색으로 칠하면
 //      정답 초록과 뒤섞여 맞은 문제로 읽힌다.
 //      CSS·아이콘·모든 셸 HTML 이 셸 자산이라 판올림해야 재방문 기기에 도착한다.
-const VERSION = 'sg-v80';
+// v81: 소리를 만드는 AI 를 고를 수 있다. /api/tts 가 ElevenLabs 하나에서 넷으로
+//      늘었고(OpenAI · Google Cloud TTS · Deepgram Aura), 엔진마다 목소리 이름·모델·
+//      속도 범위가 달라 그 판정이 전부 서버에서 끝난다. 기본은 그대로 ElevenLabs 다 —
+//      SET 9 정본이 그 계정의 목소리라, **있는 문항을 다시 만들 때** 다른 엔진을 쓰면
+//      그 문항만 목소리가 튄다(v51 에서 아예 막았던 이유). 새 세트를 통째로 지을 때만
+//      다른 엔진으로 처음부터 끝까지 간다. 셸에 든 assets/tts-client.js 의 엔진 폴백
+//      목록이 함께 바뀌므로, 캐시된 옛 사본이 남으면 그 기기만 엔진 하나를 계속 본다.
+const VERSION = 'sg-v81';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
