@@ -187,9 +187,9 @@ window.SG_AUTH = (function () {
     return v + '@' + STAFF_DOMAIN;
   }
 
-  /* examDate 는 QR 카드로 들어올 때만 넘어온다. 같은 아이디가 여러 시험일에 걸쳐
-   * 있을 수 있어서, 카드가 자기 날짜를 들고 오면 그 계정으로 정확히 들어간다.
-   * 손으로 칠 때는 비워 두고, 서버가 오늘 → 최근 과거 → 가까운 미래 순으로 고른다. */
+  /* 같은 아이디가 여러 시험일에 걸쳐 있을 수 있어서, 시험일을 함께 보내면 그 계정으로
+   * 정확히 들어간다. 로그인 화면이 날짜 칸을 세우고(QR 카드도 자기 날짜를 들고 온다)
+   * 그 값을 여기로 넘긴다. 비워서 보내면 서버가 오늘 → 최근 과거 → 가까운 미래 순으로 고른다. */
   function signIn(login, password, examDate) {
     return fn({
       action: 'signin', login: loginId(login), password: password, exam_date: examDate || ''

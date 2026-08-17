@@ -57,6 +57,12 @@
     <div class="divider" id="or-scan" hidden><span data-en>or type it</span><span data-ko>또는 직접 입력</span></div>
 
     <form id="f">
+      <div class="field"><label data-en>Exam date</label><label data-ko>시험일</label>
+        <input id="exam-date" type="date" name="exam_date" required>
+        <div class="scan-msg" style="text-align:left">
+          <span data-en>Select the exam day before you log in.</span>
+          <span data-ko>로그인 전에 시험일을 선택하세요.</span>
+        </div></div>
       <div class="field"><label data-en>ID or email</label><label data-ko>아이디 또는 이메일</label>
         <input id="login" type="text" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="smeag007" required>
         <div class="scan-msg" style="text-align:left"><span data-en>Students: smeag000–smeag999, or the email you registered with. Staff: your admin ID.</span><span data-ko>수험생은 smeag000~smeag999 또는 등록한 이메일, 관리자는 관리자 아이디.</span></div></div>
@@ -83,6 +89,7 @@
 (function () {
   'use strict';
   var f = document.getElementById('f'), go = document.getElementById('go'), err = document.getElementById('err');
+  var examDateEl = document.getElementById('exam-date');
 
   // ?next= 는 이 사이트 안의 페이지 이름만 받는다 — 외부 주소로 튕기지 않게.
   var raw = new URLSearchParams(location.search).get('next') || '';
@@ -95,6 +102,23 @@
   var SAFE = /^(?:[\w.-]+\/)*[\w.-]*(?:\.html)?(?:\?[^#]*)?$/;
   var safe = SAFE.test(raw) && raw.indexOf('..') === -1 && raw.indexOf('login.html') !== 0;
   var next = safe && raw ? raw : LANDING;
+  var DATE_KEY = 'sg2_exam_date_v1';
+
+  function todayISO() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+
+  function saveExamDate(date) {
+    try { localStorage.setItem(DATE_KEY, date); } catch (e) {}
+  }
+
+  function loadExamDate() {
+    var picked = '';
+    try { picked = localStorage.getItem(DATE_KEY) || ''; } catch (e) {}
+    examDateEl.value = picked || todayISO();
+  }
 
   /* ── 좌석이 정해 준 행선지 ──────────────────────────────────
    *
@@ -178,10 +202,14 @@
       });
   }
 
+  loadExamDate();
+
   f.addEventListener('submit', function (e) {
     e.preventDefault();
     if (window.SG_FS) SG_FS.armAndEnter();     // 누른 그 순간에만 전체화면이 열린다
-    enter(document.getElementById('login').value.trim(), document.getElementById('pw').value);
+    var date = examDateEl.value || todayISO();
+    saveExamDate(date);
+    enter(document.getElementById('login').value.trim(), document.getElementById('pw').value, date);
   });
 
   /* ── QR 카드 ────────────────────────────────────────────────
@@ -201,6 +229,8 @@
       return;
     }
     document.getElementById('login').value = c.id;
+    examDateEl.value = c.date;
+    saveExamDate(c.date);
     if (window.SG_FS) SG_FS.armAndEnter();     // QR 로 들어와도 학생 화면은 전체화면
     enter(c.id, '2222', c.date);   // 카드가 자기 시험일을 들고 온다
   }

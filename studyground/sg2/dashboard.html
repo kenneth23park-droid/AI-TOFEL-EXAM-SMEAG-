@@ -95,6 +95,9 @@
     <div class="pill" style="margin:0 auto"><span data-en>Get started</span><span data-ko>시작하기</span></div>
     <h2 class="title mt-16"><span data-en>Start your TOEFL journey today</span><span data-ko>오늘 TOEFL 여정을 시작하세요</span></h2>
     <p class="muted mt-8"><span data-en>No graded test yet. Take a mock test and your review will appear here.</span><span data-ko>아직 채점된 응시가 없습니다. 모의고사를 보면 이곳에 리뷰가 쌓입니다.</span></p>
+    <!-- 고른 시험일에만 아무것도 없고 다른 날엔 기록이 있을 때 — 빈 화면을
+         "성적이 없다"로 읽지 않게, 걸러 낸 날짜를 그대로 적어 준다. -->
+    <p class="muted mt-8" id="empty-date" hidden style="font-size:12.5px"></p>
     <div class="mt-24" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <a class="btn brand lg" id="empty-go" href="tests.html"><span data-en>Take the mock test</span><span data-ko>모의고사 응시</span></a>
     </div>
@@ -159,11 +162,17 @@
      세트 이름은 A–Z0–9 로만 줄여서 견준다 — 'SET 9' 도 'set-9' 도 같은 것으로 읽는다. */
   var SET = String(window.SG_STUDENT_SET || 'SET9').toUpperCase().replace(/[^A-Z0-9]/g, '');
   var EXAM = window.SG_STUDENT_EXAM || 'tests.html';
+  var DATE_KEY = 'sg2_exam_date_v1';
   var ONLY = '';                      // 학생으로 확인된 뒤에만 채워진다
+  var EXAM_DATE = '';
   function code(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
   function mine(list) {
     if (!ONLY) return list || [];
-    return (list || []).filter(function (r) { return code(r.set_code) === ONLY; });
+    return (list || []).filter(function (r) {
+      if (code(r.set_code) !== ONLY) return false;
+      if (!EXAM_DATE) return true;
+      return dayOf(r.submitted_at) === EXAM_DATE;
+    });
   }
 
   var LAB = { reading: ['Reading', '리딩'], listening: ['Listening', '리스닝'],
@@ -175,12 +184,15 @@
     });
   }
   function bi(en, ko) { return '<span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span>'; }
-  function when(iso) {
+  /* 응시 시각 → 그 날(YYYY-MM-DD). 시험일로 거르는 자와 표에 적는 자가 같은 눈금을
+     써야, 화면에 "08-17"이 적힌 줄이 08-17 필터에서 빠지는 일이 없다. */
+  function dayOf(iso) {
     var d = iso ? new Date(iso) : null;
-    if (!d || isNaN(d)) return '—';
+    if (!d || isNaN(d)) return '';
     function p(n) { return (n < 10 ? '0' : '') + n; }
     return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
   }
+  function when(iso) { return dayOf(iso) || '—'; }
 
   /* 계정 줄 */
   function paintAccount() {
@@ -193,6 +205,9 @@
     }
     $('acct-body').innerHTML = '<b style="font-size:14px;color:var(--ink)">' +
       esc(u.name || u.email) + '</b> · ' + esc(u.student_id || u.email);
+    if (EXAM_DATE) {
+      $('acct-body').innerHTML += ' · <span class="chip">' + esc(EXAM_DATE) + '</span>';
+    }
     // 학생에겐 목록을 거치지 않는 문을 준다 — 어차피 고를 세트가 하나다.
     $('acct-act').innerHTML = ONLY
       ? '<a class="btn ghost sm" href="' + esc(EXAM) + '">' + bi('Start SET 9', 'SET 9 응시') + '</a>'
@@ -301,11 +316,35 @@
   function decide() {
     var u = window.SG_AUTH && SG_AUTH.user();
     var cl = document.documentElement.classList;
-    if (!u) { ONLY = ''; cl.remove('sg-student'); return Promise.resolve(); }
+    if (!u) { ONLY = ''; EXAM_DATE = ''; cl.remove('sg-student'); return Promise.resolve(); }
     cl.add('sg-student');                         // 막는 쪽이 기본 — 확인되면 푼다
     ONLY = SET;
+    try { EXAM_DATE = localStorage.getItem(DATE_KEY) || ''; } catch (e) { EXAM_DATE = ''; }
+    if (!EXAM_DATE && u && u.exam_date) EXAM_DATE = u.exam_date;
     return SG_AUTH.isStaff().catch(function () { return false; })
-      .then(function (staff) { if (staff) { ONLY = ''; cl.remove('sg-student'); } });
+      .then(function (staff) { if (staff) { ONLY = ''; EXAM_DATE = ''; cl.remove('sg-student'); } });
+  }
+
+  /* 고른 시험일에 아무것도 없을 때, 다른 날에 남아 있는 응시가 있으면 그 날들을 적는다.
+     학생은 로그인 화면에서 날짜를 다시 고르면 그 성적을 본다. */
+  function sayOtherDays(all) {
+    var box = $('empty-date');
+    if (!box) return;
+    box.hidden = true;
+    if (!ONLY || !EXAM_DATE) return;
+    var days = [];
+    (all || []).forEach(function (r) {
+      var d = dayOf(r.submitted_at);
+      if (code(r.set_code) !== ONLY || !d || d === EXAM_DATE || days.indexOf(d) >= 0) return;
+      days.push(d);
+    });
+    if (!days.length) return;
+    days.sort().reverse();
+    box.innerHTML = bi('Showing the ' + EXAM_DATE + ' exam only. You also have results on ' +
+                         days.join(', ') + ' — log in again with that date to see them.',
+                       EXAM_DATE + ' 시험만 보이고 있습니다. ' + days.join(', ') +
+                         ' 에도 응시 기록이 있습니다 — 로그인 화면에서 그 날짜를 골라 주세요.');
+    box.hidden = false;
   }
 
   /* 이 화면의 다른 문구와 같은 방식으로 두 언어를 함께 심는다 — [data-ko] 는
@@ -368,7 +407,7 @@
       if (ONLY) $('empty-go').href = EXAM;
       paintBand(list, byS);
       paintBests(list, byS);
-      if (!list.length) { $('empty').classList.remove('hide'); return; }
+      if (!list.length) { sayOtherDays(out[1]); $('empty').classList.remove('hide'); return; }
       $('empty').classList.add('hide');      // 다시 그릴 때 빈 화면 안내가 남지 않게
       paintRows(list, byS);
       $('recent').classList.remove('hide');
