@@ -54,6 +54,31 @@
     return m ? { no: +m[1], text: m[2].trim() } : null;
   }
 
+  /* 한 문단 안에 줄바꿈(w:br)으로 여러 줄이 들어 있는 문서가 있다 — SET 10 은 보기 A~D 를
+     한 문단에 줄바꿈으로 넣었고, 이메일 과제의 To:/Subject: 도 한 문단이다. 그대로 두면
+     "A. …" 로 시작하는 줄 하나로만 보여 보기 3개가 통째로 사라진다. 문단을 줄 단위로
+     펴서 넘긴다 — 그림은 첫 줄이 들고 간다(원본 문단의 위치가 그림의 위치다). */
+  function explodeLines(paras) {
+    var out = [];
+    (paras || []).forEach(function (p) {
+      var t = txt(p);
+      if (t.indexOf('\n') < 0) { out.push(p); return; }
+      var parts = t.split('\n');
+      var first = true;
+      parts.forEach(function (line) {
+        var s = line.replace(/[ \t]+/g, ' ').trim();
+        if (!s && !first) return;
+        var q = {};
+        for (var k in p) if (Object.prototype.hasOwnProperty.call(p, k)) q[k] = p[k];
+        q.text = s;
+        if (!first) q.images = [];
+        out.push(q);
+        first = false;
+      });
+    });
+    return out;
+  }
+
   /** 'B. It’s on the second floor' → {letter:1, text:'It’s on…'}. 아니면 null. */
   function lettered(s) {
     var m = /^([A-E])\s*[.)]\s*(.*)$/.exec(s);
@@ -181,7 +206,10 @@
    */
   function parseCloze(source) {
     var questions = [];
-    var template = source.replace(/(\d{1,2})\s+([A-Za-z’']*)((?:\s*_)+)/g, function (all, no, hint) {
+    /* 번호와 힌트 글자 사이의 공백은 세트마다 다르다 — SET 9 는 '1 popul_ _ _',
+       SET 10 은 '1S_ _' 처럼 붙여 쓴다. 공백을 요구하면 SET 10 은 35문항 중 2개만
+       잡힌다. 밑줄이 뒤따르는 것만 빈칸으로 보므로 공백 없이도 안전하다. */
+    var template = source.replace(/(\d{1,2})\s*([A-Za-z’']*)((?:\s*_)+)/g, function (all, no, hint) {
       questions.push({ kind: 'blank', local: +no, hint: hint });
       return '{{' + no + '}}';
     });
@@ -204,100 +232,184 @@
     return cz;
   }
 
-  function parseReadingModule(mod, moduleId) {
-    var paras = mod.paras, blocks = [], i = 0;
-    var pendingCloze = [];
+  /** 빈칸 지문인가 — 번호 뒤에 밑줄이 이어지는 줄. */
+  function isClozeLine(t) { return !!t && /\d\s*[A-Za-z’']*(\s*_){2,}/.test(t); }
 
-    while (i < paras.length) {
-      var p = paras[i], t = txt(p);
+  /* 지문 앞에 붙는 안내 줄. 세트마다 문구가 달라 목록으로 둔다 — 지문 본문이 아니므로
+     제목으로 올라가면 안 된다. */
+  var READ_HEAD = /^(read (a|an|the|in daily life)|academic passage|reading passage)/i;
 
-      if (CLOZE_HEAD.test(t)) { i++; continue; }
+  /**
+   * 머리글이 말하는 번호와 본문에 찍힌 번호가 어긋나는 세트가 있다. 어느 쪽을 믿을지는
+   * "앞 블록에서 이어지는가"로 가른다 —
+   *   · 머리글이 앞 블록 다음 번호에서 시작하고 개수도 맞으면 머리글이 옳다
+   *     (SET 10 리딩 'Questions 21-22' 안의 번호는 22·23 으로 하나씩 밀려 있다).
+   *   · 그렇지 않으면 본문 번호가 옳다
+   *     (SET 10 리스닝은 머리글 'Questions 15-16' 이 세 번 되풀이되고 본문만 맞다).
+   * 어느 쪽으로 갔든 어긋난 사실은 남겨 사람이 보게 한다.
+   * @param {Array<number|null>} bodyNos 본문에 찍힌 번호(없으면 null)
+   * @return {number[]} 문항별 최종 번호
+   */
+  function reconcileNumbers(bodyNos, range, expected, mismatch, moduleId) {
+    var span = range.to - range.from + 1;
+    var n = bodyNos.length, out = [], k;
+    var headingWins = (span === n && range.from === expected);
 
-      /* cloze 지문은 'Questions a-b' 머리글보다 먼저 나온다 — 만나면 쌓아 둔다. */
-      if (t && /\d\s*[A-Za-z’']*(\s*_){2,}/.test(t)) {
-        var cz = parseCloze(t);
-        if (cz) { pendingCloze.push(cz); i++; continue; }
+    if (headingWins) {
+      for (k = 0; k < n; k++) out.push(range.from + k);
+    } else {
+      var next = expected || range.from;
+      for (k = 0; k < n; k++) {
+        var no = bodyNos[k];
+        if (no == null || no < next) no = next;
+        out.push(no);
+        next = no + 1;
       }
-
-      var range = questionRange(t);
-      if (range && pendingCloze.length) {
-        var c = shiftCloze(pendingCloze.shift(), moduleId, range.from);
-        blocks.push({
-          kind: 'cloze',
-          heading: t,
-          instruction: 'Fill in the blank.',
-          template: c.template,
-          questions: c.questions
-        });
-        i++; continue;
-      }
-
-      if (PASSAGE_HEAD.test(t)) {
-        var blk = { kind: 'passage', heading: t, instruction: '', title: '', paragraphs: [], questions: [] };
-        var images = [];
-        i++;
-        /* 지문 본문: 'Questions a-b' 를 만날 때까지. */
-        while (i < paras.length && !questionRange(txt(paras[i])) && !PASSAGE_HEAD.test(txt(paras[i]))) {
-          var bp = paras[i];
-          if (bp.images && bp.images.length) images = images.concat(bp.images);
-          if (txt(bp)) blk.paragraphs.push(txt(bp));
-          i++;
-        }
-        blk.title = blk.paragraphs.length ? blk.paragraphs[0] : '';
-        if (blk.paragraphs.length) blk.paragraphs = blk.paragraphs.slice(1);
-        if (images.length) blk.images = images;
-        if (questionRange(txt(paras[i]))) { blk.heading = txt(paras[i]); i++; }
-
-        /* 문항 + 선택지 */
-        while (i < paras.length) {
-          var q = numbered(txt(paras[i]));
-          if (!q) {
-            if (PASSAGE_HEAD.test(txt(paras[i])) || CLOZE_HEAD.test(txt(paras[i]))) break;
-            if (questionRange(txt(paras[i]))) break;
-            i++;
-            if (i > paras.length) break;
-            continue;
-          }
-          var got = collectChoices(paras, i + 1);
-          var isInsert = /look at the (four )?letters|indicate where/i.test(q.text);
-          var item = {
-            id: moduleId + '-' + q.no,
-            kind: isInsert ? 'insert' : 'mcq',
-            no: q.no,
-            prompt: q.text,
-            choices: got.choices
-          };
-          /* 삽입 문항의 보기는 원본에 없다 — 지문 안의 마커 A~D 가 곧 보기다.
-             여기서만 텍스트를 만들고, 만들었다는 사실을 팩에 남긴다. */
-          if (isInsert && !item.choices.length) {
-            item.choices = CHOICE_LETTERS.slice(0, 4).map(function (L) { return 'Position ' + L; });
-            item.choicesOrigin = 'generated';
-            item.choicesNote = 'The source docx had no choice list — insertion points A-D were generated.';
-          }
-          blk.questions.push(item);
-          i = got.next;
-        }
-        blocks.push(blk);
-        continue;
-      }
-      i++;
     }
+    for (k = 0; k < n; k++) {
+      if (bodyNos[k] != null && bodyNos[k] !== out[k]) {
+        mismatch.push(moduleId + '-' + out[k] + ' (printed ' + bodyNos[k]
+          + ' under heading ' + range.from + '-' + range.to + ')');
+      }
+    }
+    if (n && (out[0] !== range.from || out[n - 1] !== range.to)) {
+      mismatch.push(moduleId + ' heading "Questions ' + range.from + '-' + range.to
+        + '" holds ' + out[0] + '-' + out[n - 1]);
+    }
+    return out;
+  }
 
-    /* 짝을 못 찾은 cloze 지문도 버리지 않는다. */
-    pendingCloze.forEach(function (raw) {
-      var c = shiftCloze(raw, moduleId, 0);
-      blocks.push({
-        kind: 'cloze', heading: '', instruction: 'Fill in the blank.',
-        template: c.template, questions: c.questions
-      });
+  /**
+   * 리딩 모듈 하나 → 블록 배열.
+   *
+   * 블록의 경계는 'Questions a-b' 머리글이고, 지문은 머리글 **어느 쪽에도** 놓일 수 있다 —
+   * SET 9 는 지문을 머리글 위에, SET 10 은 아래에 둔다. 그래서 한 블록의 본문은
+   * "앞 블록의 문항이 끝난 자리 ~ 머리글" 과 "머리글 ~ 첫 문항 번호" 를 합친 구간이다.
+   * 지문 앞의 'Read a passage.' 같은 안내 줄에 기대지 않는 이유도 같다 — SET 10 리딩
+   * Module 2 에는 그 줄이 아예 없고, 그것에 기대면 15문항이 통째로 사라진다.
+   */
+  function parseReadingModule(mod, moduleId, mismatch) {
+    var paras = mod.paras, blocks = [];
+    mismatch = mismatch || [];
+
+    var heads = [];
+    paras.forEach(function (p, k) {
+      var r = questionRange(txt(p));
+      if (r) heads.push({ at: k, range: r, text: txt(p) });
     });
+    if (!heads.length) return blocks;
+
+    var prevEnd = 0;
+    var expected = heads[0].range.from;
+
+    for (var i = 0; i < heads.length; i++) {
+      var head = heads[i];
+      var bodyEnd = i + 1 < heads.length ? heads[i + 1].at : paras.length;
+
+      /* 문항이 시작되는 자리 = 머리글 아래 첫 번호 줄. */
+      var qStart = bodyEnd;
+      for (var k = head.at + 1; k < bodyEnd; k++) {
+        if (numbered(txt(paras[k]))) { qStart = k; break; }
+      }
+
+      /* 본문 구간의 원본 인덱스 — 어디까지 썼는지 다음 블록에 정확히 넘겨야 한다.
+         빈칸 지문 두 개가 나란히 놓인 SET 9 리딩 Module 1 에서, 첫 블록이 두 번째
+         지문까지 삼켜 버리면 11-20 이 통째로 빈다. */
+      var at = [], k2;
+      for (k2 = prevEnd; k2 < head.at; k2++) at.push(k2);
+      for (k2 = head.at + 1; k2 < qStart; k2++) at.push(k2);
+      var content = at.map(function (x) { return paras[x]; });
+
+      var images = [];
+      if (paras[head.at].images) images = images.concat(paras[head.at].images);
+      content.forEach(function (p) { if (p.images && p.images.length) images = images.concat(p.images); });
+
+      /* ---- 빈칸 지문 ---- */
+      var clozeSrc = null, clozeAt = -1;
+      at.forEach(function (x) {
+        if (clozeSrc === null && isClozeLine(txt(paras[x]))) { clozeSrc = txt(paras[x]); clozeAt = x; }
+      });
+      prevEnd = clozeSrc !== null ? clozeAt + 1 : bodyEnd;
+      if (clozeSrc) {
+        var cz = parseCloze(clozeSrc);
+        if (cz) {
+          var c = shiftCloze(cz, moduleId, head.range.from);
+          blocks.push({
+            kind: 'cloze', heading: head.text, instruction: 'Fill in the blank.',
+            template: c.template, questions: c.questions
+          });
+          expected = head.range.from + c.questions.length;
+          continue;
+        }
+      }
+
+      /* ---- 지문 + 객관식 ---- */
+      var lines = [];
+      content.forEach(function (p) {
+        var t = txt(p);
+        if (!t) return;
+        if (CLOZE_HEAD.test(t) || READ_HEAD.test(t)) return;
+        if (/^module\s+\d+\s*$/i.test(t)) return;
+        var isSection = false;
+        SECTION_HEAD.forEach(function (h) { if (h.re.test(t)) isSection = true; });
+        if (isSection) return;
+        lines.push(t);
+      });
+
+      var items = [], j = qStart;
+      while (j < bodyEnd) {
+        var q = numbered(txt(paras[j]));
+        if (!q) { j++; continue; }
+        var got = collectChoices(paras, j + 1);
+        var isInsert = /look at the (four )?letters|indicate where/i.test(q.text);
+        var item = {
+          bodyNo: q.no,
+          kind: isInsert ? 'insert' : 'mcq',
+          prompt: q.text,
+          choices: got.choices
+        };
+        /* 삽입 문항의 보기는 원본에 없다 — 지문 안의 마커 A~D 가 곧 보기다.
+           여기서만 텍스트를 만들고, 만들었다는 사실을 팩에 남긴다. */
+        if (isInsert && !item.choices.length) {
+          item.choices = CHOICE_LETTERS.slice(0, 4).map(function (L) { return 'Position ' + L; });
+          item.choicesOrigin = 'generated';
+          item.choicesNote = 'The source docx had no choice list — insertion points A-D were generated.';
+        }
+        items.push(item);
+        j = got.next > j ? got.next : j + 1;
+      }
+
+      if (!items.length && !lines.length && !images.length) continue;
+
+      var nos = reconcileNumbers(items.map(function (x) { return x.bodyNo; }),
+        head.range, expected, mismatch, moduleId);
+
+      var blk = {
+        kind: 'passage', heading: head.text, instruction: '',
+        title: lines.length ? lines[0] : '',
+        paragraphs: lines.slice(1),
+        questions: []
+      };
+      if (images.length) blk.images = images;
+      items.forEach(function (x, n) {
+        x.no = nos[n];
+        x.id = moduleId + '-' + nos[n];
+        delete x.bodyNo;
+        blk.questions.push(x);
+      });
+      blocks.push(blk);
+      if (nos.length) expected = nos[nos.length - 1] + 1;
+    }
 
     return blocks;
   }
 
   /* ------------------------------------------------------ 리스닝 파서 */
 
-  var LISTEN_CUE = /^(listen to (a|an|the)\s|instructions?\s*:)/i;
+  /* 대본과 문항 문서가 쓰는 안내 문구가 세트마다 다르다 — SET 9 는 'Listen to a…',
+     SET 10 은 안내 방송 대본에 'Read an announcement' 라고 적는다. 이 줄을 못 알아보면
+     그 아래 대사를 '문항 낭독'으로 오해해 음성이 만들어지지 않는다. */
+  var LISTEN_CUE = /^(listen to\s|read (a|an|the)\s|instructions?\s*:)/i;
   var SHORT_RESPONSE_PROMPT = 'Listen to the question and select the best response.';
 
   /**
@@ -321,6 +433,18 @@
     }
     if (cur) groups.push(cur);
     return groups;
+  }
+
+  /* '2. A. In the main auditorium' — 번호와 첫 보기가 한 줄에 붙어 있는 서식(SET 10
+     리스닝 짧은 응답). 번호 줄과 보기 줄 둘로 펴서 아래 로직이 그대로 보게 한다. */
+  function splitNumberedChoice(lines) {
+    var out = [];
+    lines.forEach(function (line) {
+      var m = /^(\d{1,3})\s*[.)]\s*([A-E]\s*[.)]\s.*)$/.exec(line);
+      if (m) { out.push(m[1] + '.'); out.push(m[2]); return; }
+      out.push(line);
+    });
+    return out;
   }
 
   /** 덩어리 하나 → {prompt, choices} 또는 null(문항이 아님). */
@@ -354,9 +478,41 @@
     };
   }
 
-  function parseListeningModule(mod, moduleId, outOfRange) {
+  /**
+   * 덩어리 하나 → 문항 여러 개.
+   *
+   * 문항 사이에 빈 줄이 없는 세트가 있다(SET 10 은 13번 보기 D 다음 줄이 바로 14번이다).
+   * 빈 줄만 믿으면 그런 블록은 문항 하나에 보기 8개로 뭉개진다. 보기를 한 번이라도 본
+   * 뒤에 번호 줄이 나오면 거기서 새 문항이 시작된 것으로 본다.
+   */
+  function itemsFromGroup(rawLines) {
+    var lines = splitNumberedChoice(rawLines);
+    var segs = [], cur = [], sawChoice = false;
+
+    lines.forEach(function (line) {
+      var L = lettered(line);
+      if (numbered(line) && cur.length && sawChoice) { segs.push(cur); cur = []; sawChoice = false; }
+      if (L && L.letter >= 0) sawChoice = true;
+      cur.push(line);
+    });
+    if (cur.length) segs.push(cur);
+
+    var out = [];
+    segs.forEach(function (seg) {
+      var item = itemFromGroup(seg);
+      if (item) out.push(item);
+    });
+    /* 쪼개서 아무것도 못 얻으면 통짜로 한 번 더 본다(번호 없는 SET 9 서식). */
+    if (!out.length) {
+      var one = itemFromGroup(lines);
+      if (one) out.push(one);
+    }
+    return out;
+  }
+
+  function parseListeningModule(mod, moduleId, mismatch) {
     var paras = mod.paras, blocks = [], i = 0;
-    outOfRange = outOfRange || [];
+    mismatch = mismatch || [];
 
     /* 'Questions a-b' 머리글 위치를 먼저 전부 찾는다. */
     var heads = [];
@@ -364,15 +520,38 @@
       var r = questionRange(txt(p));
       if (r) heads.push({ at: k, range: r, text: txt(p) });
     });
+    if (!heads.length) return blocks;
+
+    /* 첫 머리글 앞에 이미 문항이 있는 세트가 있다 — SET 10 리스닝 Module 2 는
+       'Questions 1-3' 머리글이 통째로 빠져 있다. 없는 머리글을 지어 넣지 않으면
+       3문항이 사라지고, 그러면 정답지와 개수가 어긋나 시험이 만들어지지 않는다. */
+    var firstItem = -1;
+    for (i = 0; i < heads[0].at; i++) {
+      if (lettered(txt(paras[i])) || numbered(txt(paras[i]))) { firstItem = i; break; }
+    }
+    if (firstItem >= 0 && heads[0].range.from > 1) {
+      heads.unshift({
+        at: firstItem - 1 >= 0 ? firstItem - 1 : 0,
+        range: { from: 1, to: heads[0].range.from - 1 },
+        text: 'Questions 1-' + (heads[0].range.from - 1),
+        headingOrigin: 'generated'
+      });
+    }
+
+    var expected = heads[0].range.from;
 
     for (i = 0; i < heads.length; i++) {
       var head = heads[i];
       var end = i + 1 < heads.length ? heads[i + 1].at : paras.length;
       var blk = { kind: 'audio-set', heading: head.text, instruction: '', questions: [] };
+      if (head.headingOrigin) {
+        blk.headingOrigin = 'generated';
+        blk.headingNote = 'The source docx had no "Questions a-b" heading here — the range was read from the answer key order.';
+      }
       var images = [];
+      var items = [];
 
       var groups = groupByBlankLine(paras, head.at + 1, end);
-      var next = head.range.from;
       var pendingStem = null;   /* 문두와 보기 사이에 빈 줄이 있는 서식을 위해 */
 
       groups.forEach(function (g) {
@@ -382,8 +561,8 @@
         pendingStem = null;
 
         var joined = lines.join(' ');
-        var item = itemFromGroup(lines);
-        if (!item) {
+        var got = itemsFromGroup(lines);
+        if (!got.length) {
           /* 한 줄짜리 문두는 버리지 않고 다음 덩어리(보기)에 붙인다. */
           if (lines.length === 1 && (numbered(lines[0]) || /[?？]$/.test(lines[0]))) {
             pendingStem = lines[0];
@@ -394,27 +573,24 @@
           }
           return;
         }
-
-        var no = item.no != null ? item.no : next;
-        /* 머리글의 범위가 실제 문항 번호와 어긋나는 경우가 있다(SET 9 L2 'Questions 8-10' 에
-           11번이 들어 있다). 본문에 적힌 번호를 믿되 어긋난 사실은 남긴다. */
-        if (item.no != null && (no < head.range.from || no > head.range.to)) {
-          outOfRange.push(moduleId + '-' + no + ' (heading ' + head.range.from + '-' + head.range.to + ')');
-        } else if (item.no == null && (no < head.range.from || no > head.range.to)) {
-          return;
-        }
-        next = no + 1;
-
-        blk.questions.push({
-          id: moduleId + '-' + no,
-          kind: 'mcq',
-          no: no,
-          prompt: item.prompt || SHORT_RESPONSE_PROMPT,
-          choices: item.choices
-        });
+        items = items.concat(got);
       });
 
       if (images.length) blk.images = images;
+
+      var nos = reconcileNumbers(items.map(function (x) { return x.no; }),
+        head.range, expected, mismatch, moduleId);
+      if (nos.length) expected = nos[nos.length - 1] + 1;
+
+      items.forEach(function (x, k) {
+        blk.questions.push({
+          id: moduleId + '-' + nos[k],
+          kind: 'mcq',
+          no: nos[k],
+          prompt: x.prompt || SHORT_RESPONSE_PROMPT,
+          choices: x.choices
+        });
+      });
 
       /* 문두 없이 보기만 있는 세트 = 문항마다 음성이 따로 붙는다. */
       var stemless = blk.questions.filter(function (q) { return q.prompt === SHORT_RESPONSE_PROMPT; });
@@ -450,6 +626,61 @@
     return { slots: slots, tiles: tiles };
   }
 
+
+  /* 문항 id 로 고정되는 뒤섞기. Math.random 을 쓰면 같은 docx 를 두 번 올릴 때 타일 순서가
+     달라져 문항이 달라진 것처럼 보인다. */
+  function seededShuffle(list, seed) {
+    var arr = list.slice(), h = 0, i;
+    for (i = 0; i < String(seed).length; i++) h = (h * 31 + String(seed).charCodeAt(i)) >>> 0;
+    for (i = arr.length - 1; i > 0; i--) {
+      h = (h * 1103515245 + 12345) >>> 0;
+      var j = h % (i + 1), t = arr[i];
+      arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  /**
+   * 타일 줄이 없는 세트를 위해 정답 문장에서 타일을 만든다.
+   *
+   * 만들지 않으면 학생 화면에 끌어다 놓을 낱말이 하나도 없어 문항이 성립하지 않는다.
+   * 낱말은 정답지에 적힌 그대로이고(새로 짓지 않는다) 순서만 뒤섞는다 — 만들었다는 사실은
+   * tilesOrigin 으로 팩에 남긴다. 앞뒤에만 고정 글이 있는 단순한 모양에서만 손댄다.
+   * @return {boolean} 만들었으면 true
+   */
+  function deriveTiles(q) {
+    var sentence = String(q.answerSentence || '').trim();
+    if (!sentence || (q.tiles && q.tiles.length)) return false;
+
+    var slots = q.slots || [];
+    var head = slots.length && slots[0].t === 'f' ? slots[0].text : '';
+    var tail = slots.length && slots[slots.length - 1].t === 'f' ? slots[slots.length - 1].text : '';
+    /* 가운데 낀 고정 글이 있으면(SET 9 '____ out of stock ____') 어느 자리에 무엇이 들어갈지
+       정답 문장만으로 가를 수 없다 — 손대지 않는다. 다만 쉼표처럼 문장부호뿐인 조각은
+       정답 문장의 낱말이 이미 달고 있으므로 그냥 흘려 보낸다. */
+    var mid = slots.slice(1, Math.max(1, slots.length - 1));
+    for (var i = 0; i < mid.length; i++) {
+      if (mid[i].t === 'f' && !/^[,.;:!?…—–-]+$/.test(String(mid[i].text || '').trim())) return false;
+    }
+
+    var body = sentence;
+    if (head && body.toLowerCase().indexOf(head.toLowerCase()) === 0) body = body.slice(head.length);
+    if (tail && /[.?!]$/.test(tail)) body = body.replace(/[.?!]+\s*$/, '');
+    var words = body.split(/\s+/).filter(function (w) { return w; });
+    if (words.length < 2) return false;
+
+    var out = [];
+    if (head) out.push({ t: 'f', text: head });
+    for (i = 0; i < words.length; i++) out.push({ t: 'b' });
+    if (tail) out.push({ t: 'f', text: tail });
+
+    q.slots = out;
+    q.tiles = seededShuffle(words, q.id);
+    q.tilesOrigin = 'derived-from-answer';
+    q.tilesNote = 'The source docx had no word tiles — the words of the answer sentence were used, in scrambled order.';
+    return true;
+  }
+
   function parseWriting(paras, codeSlug, startNo) {
     var modules = [], i = 0, no = startNo;
 
@@ -473,14 +704,18 @@
             /* context 줄 — 다음 두 줄이 slot/tiles 인지 본다. */
             var s1 = i + 1 < paras.length ? txt(paras[i + 1]) : '';
             if (/_{2,}/.test(s1)) {
-              var t1 = i + 2 < paras.length ? txt(paras[i + 2]) : '';
+              /* 타일 줄이 아예 없는 세트가 있다(SET 10). 타일 줄은 '자동번호 목록이 아니고
+                 밑줄도 없는 줄' 이다 — 다음 문항의 context 줄은 자동번호 목록이라 구분된다.
+                 이 검사 없이 3줄로 밀면 다음 문항의 지문을 타일로 먹어 10문항이 5문항이 된다. */
+              var p2 = i + 2 < paras.length ? paras[i + 2] : null;
+              var t1 = p2 && !p2.listed && !/_{2,}/.test(txt(p2)) ? txt(p2) : '';
               var built = parseBuildItem(s1, t1);
               qs.push({
                 id: codeSlug + '-W1-q' + pad2(qs.length + 1),
                 kind: 'build', no: no++,
                 context: line, slots: built.slots, tiles: built.tiles
               });
-              i += 3; continue;
+              i += t1 ? 3 : 2; continue;
             }
           }
           i++;
@@ -692,8 +927,20 @@
 
       if (!cur) open(null);
       if (!cur.cue && LISTEN_CUE.test(t)) { cur.cue = t; return; }
-      /* 'Interview' 같은 한 낱말 머리글은 대사가 아니다. */
-      if (!cur.lines.length && t.length < 20 && !/[.?!:]$/.test(t)) { cur.label = t; return; }
+
+      /* 'Interview' 같은 한 낱말 머리글은 대사가 아니다. 스피킹에서는 그 줄이 곧 다음
+         Task 의 시작이기도 하다 — SET 10 대본은 Task 2 앞에 'Questions a-b' 머리글이
+         없고 'Interview' 한 줄뿐이라, 여기서 끊지 않으면 두 Task 가 한 덩어리가 된다. */
+      var isLabel = t.length < 20 && !/[.?!:]$/.test(t);
+      if (isLabel && section === 'speaking' && cur.lines.length) { open(null); }
+      if (isLabel && !cur.lines.length) { cur.label = t; return; }
+
+      /* 딱지 바로 뒤의 첫 줄은 들려줄 대사가 아니라 안내문이다(SET 9 는 'Instructions:' 로
+         적었고, SET 10 은 아무 표시 없이 적는다). */
+      if (section === 'speaking' && cur.label && !cur.cue && !cur.lines.length) { cur.cue = t; return; }
+
+      /* 대본에 번호가 찍힌 세트가 있다 — 음성이 '일, 감사합니다' 로 읽히지 않게 뗀다. */
+      if (section === 'speaking') t = t.replace(/^\d{1,2}\s*[.)]\s*/, '');
       cur.lines.push(t);
     });
 
@@ -720,16 +967,20 @@
       return { pack: null, gates: gates, stats: {} };
     }
 
-    var qParas = input.questions.paragraphs;
+    var qParas = explodeLines(input.questions.paragraphs);
     var split = splitSections(qParas);
 
     /* ---- reading / listening ---- */
     var reading = { id: 'reading', label: 'Reading', labelKo: '리딩', timeLimitSec: 2100, modules: [] };
+    var rMismatch = [];
     splitModules(split.reading).forEach(function (mod, k) {
       var no = mod.no || (k + 1);
       var id = 'R' + no;
-      reading.modules.push({ id: id, label: 'Reading Module ' + no, blocks: parseReadingModule(mod, id) });
+      reading.modules.push({ id: id, label: 'Reading Module ' + no, blocks: parseReadingModule(mod, id, rMismatch) });
     });
+    if (rMismatch.length) {
+      gate('warn', 'reading', 'The numbers printed on these questions disagree with their "Questions a-b" heading — the numbering that keeps the module in order was used: ' + rMismatch.join(', '));
+    }
 
     var listening = { id: 'listening', label: 'Listening', labelKo: '리스닝', timeLimitSec: null, modules: [] };
     var outOfRange = [];
@@ -739,7 +990,7 @@
       listening.modules.push({ id: id, label: 'Listening Module ' + no, blocks: parseListeningModule(mod, id, outOfRange) });
     });
     if (outOfRange.length) {
-      gate('warn', 'listening', 'Question numbers fall outside their "Questions a-b" heading range — the numbers printed in the body were used: ' + outOfRange.join(', '));
+      gate('warn', 'listening', 'The numbers printed on these questions disagree with their "Questions a-b" heading — the numbering that keeps the module in order was used: ' + outOfRange.join(', '));
     }
 
     /* ---- writing / speaking ---- */
@@ -747,7 +998,7 @@
     var writing = { id: 'writing', label: 'Writing', labelKo: '라이팅', timeLimitSec: null, modules: wModules };
 
     var scripts = input.script && input.script.paragraphs
-      ? parseScript(input.script.paragraphs) : { listening: [], speaking: [] };
+      ? parseScript(explodeLines(input.script.paragraphs)) : { listening: [], speaking: [] };
 
     var sModules = parseSpeaking(split.speaking, codeSlug, picsRel, audioRel, 1, scripts.speaking);
     var speaking = { id: 'speaking', label: 'Speaking', labelKo: '스피킹', timeLimitSec: null, modules: sModules };
@@ -766,8 +1017,12 @@
       var groups = scripts.listening.filter(function (g) { return g.module === modNo; });
 
       mod.blocks.forEach(function (blk) {
-        var r = questionRange(blk.heading || '');
-        if (!r) return;
+        /* 머리글이 아니라 블록이 실제로 담고 있는 번호로 대본을 찾는다 — SET 10 리스닝
+           Module 1 은 머리글 'Questions 15-16' 이 세 번 되풀이돼 있어, 머리글을 믿으면
+           19-20·25-28 의 대본이 15-16 것으로 잘못 붙는다. */
+        var qnos = blk.questions.map(function (x) { return x.no; });
+        if (!qnos.length) return;
+        var r = { from: Math.min.apply(null, qnos), to: Math.max.apply(null, qnos) };
         /* 파일명 규칙은 SET 9 에 이미 있는 것을 그대로 따른다(l1-q13-14.mp3, l1-q01.mp3) —
            tools/verify_audio.py 와 tts 매니페스트가 이 이름으로 서로를 찾는다.
            문항마다 음성이 따로 붙는 세트는 블록 음성이 없다(SET 9 도 없다). */
@@ -775,11 +1030,8 @@
           /* 머리글이 아니라 실제로 들어 있는 문항 번호로 이름을 짓는다 — SET 9 의
              'Questions 8-10' 블록에는 11번까지 들어 있었고, 파일명이 내용과 어긋나면
              나중에 어느 음성이 어느 문항 것인지 아무도 알 수 없게 된다. */
-          var nos = blk.questions.map(function (x) { return x.no; });
-          var lo = Math.min.apply(null, nos.concat(r.from));
-          var hi = Math.max.apply(null, nos.concat(r.from));
-          blk.audio = audioRel + mod.id.toLowerCase() + '-q' + pad2(lo)
-            + (hi !== lo ? '-' + pad2(hi) : '') + '.mp3';
+          blk.audio = audioRel + mod.id.toLowerCase() + '-q' + pad2(r.from)
+            + (r.to !== r.from ? '-' + pad2(r.to) : '') + '.mp3';
         }
 
         var hit = null;
@@ -793,11 +1045,17 @@
         }
         if (hit.cue && !blk.instruction) blk.instruction = hit.cue;
 
-        /* 대본 덩어리가 두 종류다. 'Listen to a conversation.' 같은 안내 대사가 앞에 붙어
-           있으면 그 아래는 **들려줄 대사**이고, 안내 대사가 없으면 문항을 하나씩 읽어 주는
-           **문항 낭독**이다(짧은 응답 드릴). 줄 수로 가르면 4문항짜리 강의 대본이
-           문항 낭독으로 오해된다 — SET 9 의 l1-q25-28 이 정확히 그 경우였다. */
-        var isTranscript = !!hit.cue;
+        /* 대본 덩어리가 두 종류다 — 들려줄 **대사**(대화·강의)와, 문항을 하나씩 읽어 주는
+           **문항 낭독**(짧은 응답 드릴). 셋을 차례로 본다.
+             1) 'Listen to a conversation.' / 'Read an announcement' 안내가 앞에 붙어 있으면 대사다.
+             2) 문두 없이 보기만 있는 블록(perQuestionAudio)은 문항 낭독이다.
+             3) 남은 것은 줄 수로 가른다 — 덩어리가 덮는 문항 수와 줄 수가 똑같으면
+                문항마다 한 줄씩이라는 뜻이고(SET 9 리스닝 Module 2 는 1-15 를 15줄로 싣는다),
+                다르면 대사다. 줄 수만으로 가르면 4문항짜리 강의가 낭독으로 오해되므로
+                (SET 9 l1-q25-28) 반드시 1·2 를 먼저 본다. */
+        var span = (hit.to != null && hit.from != null) ? (hit.to - hit.from + 1) : blk.questions.length;
+        var isTranscript = !!hit.cue
+          || (!blk.perQuestionAudio && hit.lines.length !== span);
         blk.scriptOrigin = 'script-docx';
 
         if (isTranscript) {
@@ -825,7 +1083,7 @@
     });
 
     /* ---- 정답 붙이기 ---- */
-    var answers = input.answers && input.answers.paragraphs ? parseAnswerKey(input.answers.paragraphs) : null;
+    var answers = input.answers && input.answers.paragraphs ? parseAnswerKey(explodeLines(input.answers.paragraphs)) : null;
     var answerKey = {};
     var unmatched = [];
 
@@ -884,12 +1142,17 @@
           (b.questions || []).forEach(function (q) { if (q.kind === 'build') buildQs.push(q); });
         });
       });
+      var derived = [];
       buildQs.forEach(function (q, k) {
         if (k < wList.length && typeof wList[k] === 'string') {
           q.answerSentence = wList[k];
           answerKey[q.id] = wList[k];
+          if (deriveTiles(q)) derived.push(q.id);
         }
       });
+      if (derived.length) {
+        gate('warn', 'writing', derived.length + ' sentence-building questions had no word tiles in the docx — the words were taken from the answer key and scrambled (' + derived.slice(0, 3).join(', ') + (derived.length > 3 ? ' and more' : '') + '). Add a tile line, with decoys, if you want traps.');
+      }
       if (buildQs.length && wList.length && buildQs.length > wList.length) {
         gate('warn', 'writing', 'Only ' + wList.length + ' of ' + buildQs.length + ' sentence-building questions have an answer.');
       }
