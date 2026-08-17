@@ -694,192 +694,832 @@
       "origin": "tts-voices-set9exam-11labs.json"
     },
     {
-      "id": "set9-L2-04-05",
-      "text": "You will not believe my morning. Six a.m., and the registrar's system sends me a seat confirmation. Sociolinguistics. The Thursday seminar. I read it four times. You're in? That thing filled up before I finished typing my ID number. I'm fourteenth in the queue. I'd stopped watching it, honestly. Two students in the class dropped over the weekend, the queue ran overnight, and it took the next two names off the top. Mine was one of them. Overnight. So it's just the software moving people around. Start to finish. Hammond gets the roster from the registrar the Monday before classes open, and whoever's on it is who he teaches that term. Fourteenth. What are my odds here, realistically? Low enough that you want a second plan moving this week. Look at what else clears the same methods requirement and get yourself registered for one of those before Friday, because Friday is when add - drop shuts. There are two courses that count for it and both were down to single seats yesterday afternoon. If those fill, you're carrying that requirement into next year. And if my number does come up after I've signed for something? Then you release the other one and walk into the seminar. It doesn't meet until week three anyway, and the roster locks the Friday before that, so it's all settled before anyone's in a classroom. Two courses, one week. Right. There's a methods section Tuesday mornings. I'll register for it this afternoon.",
-      "out": "media/audio/set9/set9-L2-04-05.mp3",
+      "id": "set10-l1-q01",
+      "text": "Who’s giving the presentation about academic excellence?",
+      "out": "media/audio/set10/l1-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Who’s giving the presentation about academic excellence?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q02",
+      "text": "Where is the honor society speech being held?",
+      "out": "media/audio/set10/l1-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Where is the honor society speech being held?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q03",
+      "text": "I’m sorry I missed your class presentation?",
+      "out": "media/audio/set10/l1-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "I’m sorry I missed your class presentation?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q04",
+      "text": "Did your presentation go well?",
+      "out": "media/audio/set10/l1-q04.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Did your presentation go well?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q05",
+      "text": "Did you end up going to the seminar?",
+      "out": "media/audio/set10/l1-q05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|Xb7hH8MSUJpSbSDYk0k2",
+          "text": "Did you end up going to the seminar?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q06",
+      "text": "How can I volunteer for technology education programs?",
+      "out": "media/audio/set10/l1-q06.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "How can I volunteer for technology education programs?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q07",
+      "text": "We should give a presentation about our research to the class?",
+      "out": "media/audio/set10/l1-q07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "We should give a presentation about our research to the class?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q08",
+      "text": "Do you ride a blue bike to campus?",
+      "out": "media/audio/set10/l1-q08.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Do you ride a blue bike to campus?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q09",
+      "text": "Do you know when the deadline for the proposal is?",
+      "out": "media/audio/set10/l1-q09.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Do you know when the deadline for the proposal is?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q10",
+      "text": "Did you manage to talk to the professor about your research?",
+      "out": "media/audio/set10/l1-q10.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Did you manage to talk to the professor about your research?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q11",
+      "text": "I can’t remember what Dr. James said during the meeting.",
+      "out": "media/audio/set10/l1-q11.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "I can’t remember what Dr. James said during the meeting."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q12",
+      "text": "Have you applied for TA position yet?",
+      "out": "media/audio/set10/l1-q12.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Have you applied for TA position yet?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q13-14",
+      "text": "Hi, I'm looking for housing options for next semester. Do you have any rooms available with double beds? I'm hoping to find something on campus if possible. Yes, we have a few options right now. Our standard rooms come with double beds and shared bathroom facilities down the hall. Those are $1,800 per month, and they fill up pretty quickly. That sounds reasonable. Are there any other options I should know about? We also have rooms with a view of the campus courtyard. They're a bit more spacious and come with newer furniture. Those are $2,080 a month. Hmm, over two thousand is a bit out of my budget right now. I'm trying to keep my expenses down this year. Would it be possible to take a look at one of the standard rooms first? Of course. Let me just grab the keys from the back office, and I'll take you up to see one on the third floor. That would be great. Thanks so much.",
+      "out": "media/audio/set10/l1-q13-14.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Hi, I'm looking for housing options for next semester. Do you have any rooms available with double beds? I'm hoping to find something on campus if possible."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Yes, we have a few options right now. Our standard rooms come with double beds and shared bathroom facilities down the hall. Those are $1,800 per month, and they fill up pretty quickly."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "That sounds reasonable. Are there any other options I should know about?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "We also have rooms with a view of the campus courtyard. They're a bit more spacious and come with newer furniture. Those are $2,080 a month."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Hmm, over two thousand is a bit out of my budget right now. I'm trying to keep my expenses down this year. Would it be possible to take a look at one of the standard rooms first?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Of course. Let me just grab the keys from the back office, and I'll take you up to see one on the third floor."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "That would be great. Thanks so much."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q15-16",
+      "text": "Hey, have you read the announcement about the new book club they're starting on campus? Yeah, I saw it posted on the bulletin board this morning. It sounds pretty interesting, actually. I thought so too. Apparently, they're planning to invite published authors to come in and talk about their books. They want to do it once a month or so. Really? That's exactly the kind of thing I've been looking for. I've always wanted to know how professional writers come up with their ideas and how they organize their thoughts when they're working on a story. Same here. I think it would be really inspiring to hear from people who actually do this for a living. So, are you thinking what I'm thinking? Definitely. We should go sign up before all the spots are taken. I heard they're only accepting thirty members. Let's head over to the student center right now then.",
+      "out": "media/audio/set10/l1-q15-16.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Hey, have you read the announcement about the new book club they're starting on campus?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Yeah, I saw it posted on the bulletin board this morning. It sounds pretty interesting, actually."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "I thought so too. Apparently, they're planning to invite published authors to come in and talk about their books. They want to do it once a month or so."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Really? That's exactly the kind of thing I've been looking for. I've always wanted to know how professional writers come up with their ideas and how they organize their thoughts when they're working on a story."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Same here. I think it would be really inspiring to hear from people who actually do this for a living. So, are you thinking what I'm thinking?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Definitely. We should go sign up before all the spots are taken. I heard they're only accepting thirty members."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Let's head over to the student center right now then."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q17-18",
+      "text": "Hey, I heard about the broken heater in your apartment. That's really unfortunate timing with the weather getting so cold. Have you been able to contact your landlord about it yet? Yeah, I called him first thing yesterday morning. But he said the repair company is backed up with requests right now, so it's going to take about a week for someone to come out and fix it. A whole week? That's a long time to go without heat, especially with temperatures dropping below freezing at night. Listen, if you need a warm place to stay or even just somewhere to hang out in the evenings, feel free to come over to my place. I already checked with my roommate, and he said he's totally fine with it. That's really thoughtful of you to offer, and I appreciate you asking your roommate first. I think I can manage with some extra blankets for now, but I'll definitely reach out if it gets too uncomfortable. Sounds good. Just let me know whenever.",
+      "out": "media/audio/set10/l1-q17-18.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Hey, I heard about the broken heater in your apartment. That's really unfortunate timing with the weather getting so cold. Have you been able to contact your landlord about it yet?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Yeah, I called him first thing yesterday morning. But he said the repair company is backed up with requests right now, so it's going to take about a week for someone to come out and fix it."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "A whole week? That's a long time to go without heat, especially with temperatures dropping below freezing at night. Listen, if you need a warm place to stay or even just somewhere to hang out in the evenings, feel free to come over to my place. I already checked with my roommate, and he said he's totally fine with it."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "That's really thoughtful of you to offer, and I appreciate you asking your roommate first. I think I can manage with some extra blankets for now, but I'll definitely reach out if it gets too uncomfortable."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Sounds good. Just let me know whenever."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q19-20",
+      "text": "Attention, students. This is a reminder that submissions for the campus photography contest are due by 3 p.m. today. Please make sure to submit your entries to the Arts Building front desk before the deadline. A panel of selected students and professors will carefully evaluate all entries based on creativity and technique. Winners will be announced in next week's campus newspaper, and their photographs will be featured on the university website for the entire semester.",
+      "out": "media/audio/set10/l1-q19-20.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Attention, students. This is a reminder that submissions for the campus photography contest are due by 3 p.m. today. Please make sure to submit your entries to the Arts Building front desk before the deadline. A panel of selected students and professors will carefully evaluate all entries based on creativity and technique. Winners will be announced in next week's campus newspaper, and their photographs will be featured on the university website for the entire semester."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q21-22",
+      "text": "I'm pleased to announce that Dr. Harrison will be teaching a special course on time management this semester. Dr. Harrison has dedicated over fifteen years to studying how we balance personal commitments, academic responsibilities, and extracurricular activities effectively. His interest in this topic began during his own undergraduate years, when he double-majored in psychology and biology while also working a part-time job to cover his tuition costs. During that demanding period, he frequently went without adequate sleep, struggling to keep up with everything. It was this challenging experience that sparked his lifelong passion for developing and teaching effective time management strategies to help others avoid the same difficulties.",
+      "out": "media/audio/set10/l1-q21-22.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "I'm pleased to announce that Dr. Harrison will be teaching a special course on time management this semester. Dr. Harrison has dedicated over fifteen years to studying how we balance personal commitments, academic responsibilities, and extracurricular activities effectively. His interest in this topic began during his own undergraduate years, when he double-majored in psychology and biology while also working a part-time job to cover his tuition costs. During that demanding period, he frequently went without adequate sleep, struggling to keep up with everything. It was this challenging experience that sparked his lifelong passion for developing and teaching effective time management strategies to help others avoid the same difficulties."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q23-24",
+      "text": "I have an exciting announcement for all of you. Dr. Reyes, a renowned cosmologist who has published numerous groundbreaking papers on black hole dynamics and gravitational theory, will be visiting our university to deliver a guest lecture next Thursday afternoon. In fact, one of his influential theories on stellar collapse forms the foundation for our current unit. To help you prepare, I'll be uploading one of his recent papers to the course website, specifically the one he'll be discussing during his talk, so please take the time to read it carefully before attending the lecture. Your participation is strongly encouraged, and I'd like to add that students who attend and submit a one-page reflection paper on the lecture content will receive extra credit toward their final grade.",
+      "out": "media/audio/set10/l1-q23-24.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "I have an exciting announcement for all of you. Dr. Reyes, a renowned cosmologist who has published numerous groundbreaking papers on black hole dynamics and gravitational theory, will be visiting our university to deliver a guest lecture next Thursday afternoon. In fact, one of his influential theories on stellar collapse forms the foundation for our current unit. To help you prepare, I'll be uploading one of his recent papers to the course website, specifically the one he'll be discussing during his talk, so please take the time to read it carefully before attending the lecture. Your participation is strongly encouraged, and I'd like to add that students who attend and submit a one-page reflection paper on the lecture content will receive extra credit toward their final grade."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q25-28",
+      "text": "Alright, so today we're going to talk about something you probably don't think much about, the light in this room. Now, for decades, we used incandescent bulbs, right? These traditional bulbs produce what we call a broad spectrum of light. That means they emit wavelengths across the entire visible range, plus they give off a significant amount of infrared radiation, basically, heat. Now, LED lights are different. They're designed to be efficient, so they emit light primarily in the visible spectrum, roughly 400 to 700 nanometers. But here's the thing, they produce almost no infrared light. And that matters more than you might think. So why should we care about infrared? Well, infrared radiation, particularly in the near-infrared range, has been linked to several health benefits. Studies suggest it can promote relaxation, reduce stress, and even support cellular repair processes. Some research indicates it may improve circulation and help with muscle recovery. Incandescent bulbs provided this naturally, without us even realizing it. Now, LED manufacturers have noticed this gap. There are now advanced LED systems that can emit some infrared wavelengths. However, these specialized bulbs can cost ten times more than standard LEDs. So for most consumers and businesses, regular LEDs remain the practical choice despite missing these potential benefits. It's a trade-off between energy efficiency and what some researchers call \"light quality.\"",
+      "out": "media/audio/set10/l1-q25-28.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Alright, so today we're going to talk about something you probably don't think much about, the light in this room. Now, for decades, we used incandescent bulbs, right? These traditional bulbs produce what we call a broad spectrum of light. That means they emit wavelengths across the entire visible range, plus they give off a significant amount of infrared radiation, basically, heat. Now, LED lights are different. They're designed to be efficient, so they emit light primarily in the visible spectrum, roughly 400 to 700 nanometers. But here's the thing, they produce almost no infrared light. And that matters more than you might think. So why should we care about infrared? Well, infrared radiation, particularly in the near-infrared range, has been linked to several health benefits. Studies suggest it can promote relaxation, reduce stress, and even support cellular repair processes. Some research indicates it may improve circulation and help with muscle recovery. Incandescent bulbs provided this naturally, without us even realizing it. Now, LED manufacturers have noticed this gap. There are now advanced LED systems that can emit some infrared wavelengths. However, these specialized bulbs can cost ten times more than standard LEDs. So for most consumers and businesses, regular LEDs remain the practical choice despite missing these potential benefits. It's a trade-off between energy efficiency and what some researchers call \"light quality.\""
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l1-q29-32",
+      "text": "So, let's dive into hip-hop today. Now, one technique that's absolutely central to this genre is sampling. What exactly is sampling? Basically, it's taking a portion of an existing recording, maybe a drumbeat, a melody, or even just a few seconds of sound, and incorporating it into a new piece of music. It's been part of hip-hop since the beginning. OK, so let me give you an example. Beyonce's 2003 hit \"Crazy in Love\" samples the horn section from a 1970s Chi-Lites song. That's sampling in action. Another famous example is the Beastie Boys' album \"Paul's Boutique\" from 1989, which used hundreds of samples layered together. Now, here's where things get interesting. In 1991, there was a landmark legal case, Grand Upright Music versus Warner Brothers. A federal judge ruled that sampling without permission was copyright infringement. This changed everything. Before this case, sampling was essentially unregulated. After? Artists needed to clear every sample, which meant paying licensing fees. This made elaborate sample-based albums like \"Paul's Boutique\" nearly impossible to produce economically. Now, some critics argue that sampling isn't true creativity, it's just borrowing other people's work. But, in my view, all art forms reference other art. Composers have always quoted other composers. Painters reference earlier painters. Hip- hop producers are doing the same thing, just with technology. They're creating something genuinely new from existing materials.",
+      "out": "media/audio/set10/l1-q29-32.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "So, let's dive into hip-hop today. Now, one technique that's absolutely central to this genre is sampling. What exactly is sampling? Basically, it's taking a portion of an existing recording, maybe a drumbeat, a melody, or even just a few seconds of sound, and incorporating it into a new piece of music. It's been part of hip-hop since the beginning. OK, so let me give you an example. Beyonce's 2003 hit \"Crazy in Love\" samples the horn section from a 1970s Chi-Lites song. That's sampling in action. Another famous example is the Beastie Boys' album \"Paul's Boutique\" from 1989, which used hundreds of samples layered together. Now, here's where things get interesting. In 1991, there was a landmark legal case, Grand Upright Music versus Warner Brothers. A federal judge ruled that sampling without permission was copyright infringement. This changed everything. Before this case, sampling was essentially unregulated. After? Artists needed to clear every sample, which meant paying licensing fees. This made elaborate sample-based albums like \"Paul's Boutique\" nearly impossible to produce economically. Now, some critics argue that sampling isn't true creativity, it's just borrowing other people's work. But, in my view, all art forms reference other art. Composers have always quoted other composers. Painters reference earlier painters. Hip- hop producers are doing the same thing, just with technology. They're creating something genuinely new from existing materials."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l2-q01",
+      "text": "Is there enough space for everyone?",
+      "out": "media/audio/set10/l2-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Is there enough space for everyone?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l2-q02",
+      "text": "Why was the project renamed?",
+      "out": "media/audio/set10/l2-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Why was the project renamed?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l2-q03",
+      "text": "I want to be able to attend the Academic Awards banquet.",
+      "out": "media/audio/set10/l2-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "I want to be able to attend the Academic Awards banquet."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l2-q04-05",
+      "text": "Excuse me, I'm looking for a gift for my brother. His birthday is coming up next week. Sure, I'd be happy to help. Does he have any particular hobbies? He's really into cooking. He makes dinner for his family almost every night and loves trying new recipes. In that case, have you considered a professional chef knife set? We have some excellent options here. A knife set? That seems like something he might already have. You'd be surprised. Most people never invest in quality knives for themselves. But a good set makes prepping ingredients so much easier. It's one of those things people appreciate but rarely buy on their own. That's a good point. He's always complaining about how long it takes to chop vegetables. Exactly. How about that one on the top shelf? It's one of our most popular sets.",
+      "out": "media/audio/set10/l2-q04-05.mp3",
       "gap_ms": 400,
       "segments": [
         {
           "speaker": "W",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
-          "text": "You will not believe my morning. Six a.m., and the registrar's system sends me a seat confirmation. Sociolinguistics. The Thursday seminar. I read it four times."
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Excuse me, I'm looking for a gift for my brother. His birthday is coming up next week."
         },
         {
           "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Sure, I'd be happy to help. Does he have any particular hobbies?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "He's really into cooking. He makes dinner for his family almost every night and loves trying new recipes."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "In that case, have you considered a professional chef knife set? We have some excellent options here."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "A knife set? That seems like something he might already have."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "You'd be surprised. Most people never invest in quality knives for themselves. But a good set makes prepping ingredients so much easier. It's one of those things people appreciate but rarely buy on their own."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "That's a good point. He's always complaining about how long it takes to chop vegetables."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Exactly. How about that one on the top shelf? It's one of our most popular sets."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l2-q06-07",
+      "text": "So, our lease is up in two months. Are we going to renew the contract, or should we look for somewhere else? I think we should consider moving. The landlord has raised the rent every year since we moved in. It's basically doubled over the past three years. Yeah, the increases have been ridiculous. But apartment hunting is such a hassle. I know, I hate it too. But I don't think we have much of a choice. We can't keep paying more for the same apartment. You're right. And actually, if we move closer to downtown, it might cut down on my commute. I spend almost two hours a day just getting to and from work. That alone might make the whole process worth it. That's true. Let's start looking online this weekend.",
+      "out": "media/audio/set10/l2-q06-07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "So, our lease is up in two months. Are we going to renew the contract, or should we look for somewhere else?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "I think we should consider moving. The landlord has raised the rent every year since we moved in. It's basically doubled over the past three years."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Yeah, the increases have been ridiculous. But apartment hunting is such a hassle."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "I know, I hate it too. But I don't think we have much of a choice. We can't keep paying more for the same apartment."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "You're right. And actually, if we move closer to downtown, it might cut down on my commute. I spend almost two hours a day just getting to and from work. That alone might make the whole process worth it."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "That's true. Let's start looking online this weekend."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l2-q08-11",
+      "text": "So, today we're looking at how wind instruments evolved into their modern forms. Now, if you think about instruments like the trumpet or the trombone, these took centuries-sometimes three or four hundred years-to develop from their early ancestors into the standardized versions we use in orchestras today. It was a slow, gradual process of refinement. But the tuba? That's a different story. The tuba reached its modern form in only about one hundred and eighty years, which is remarkably fast by comparison. So let's talk about what came before it. The tuba's main ancestors were the serpent and the ophicleide. The serpent was a wooden instrument with an S-shaped body-hence the name. It had finger holes like a woodwind, but it was played with a brass mouthpiece. The problem? The tone was inconsistent and difficult to control, especially in ensemble settings. Then came the ophicleide in the early 1800s. This was made of brass and used keys instead of finger holes. Better, right? Well, it still had issues. Producing stable low notes was extremely challenging, and that was precisely what composers and performers wanted-a reliable bass voice for the brass section. Now, this is where Berlioz comes in. In his famous Treatise on Instrumentation, he specifically criticized the ophicleide's limitations and called for a more stable low brass instrument. His influence helped push instrument makers toward developing what became the modern tuba. Next, we'll look at how the tuba's design was finally standardized.",
+      "out": "media/audio/set10/l2-q08-11.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "So, today we're looking at how wind instruments evolved into their modern forms. Now, if you think about instruments like the trumpet or the trombone, these took centuries-sometimes three or four hundred years-to develop from their early ancestors into the standardized versions we use in orchestras today. It was a slow, gradual process of refinement. But the tuba? That's a different story. The tuba reached its modern form in only about one hundred and eighty years, which is remarkably fast by comparison. So let's talk about what came before it. The tuba's main ancestors were the serpent and the ophicleide. The serpent was a wooden instrument with an S-shaped body-hence the name. It had finger holes like a woodwind, but it was played with a brass mouthpiece. The problem? The tone was inconsistent and difficult to control, especially in ensemble settings. Then came the ophicleide in the early 1800s. This was made of brass and used keys instead of finger holes. Better, right? Well, it still had issues. Producing stable low notes was extremely challenging, and that was precisely what composers and performers wanted-a reliable bass voice for the brass section. Now, this is where Berlioz comes in. In his famous Treatise on Instrumentation, he specifically criticized the ophicleide's limitations and called for a more stable low brass instrument. His influence helped push instrument makers toward developing what became the modern tuba. Next, we'll look at how the tuba's design was finally standardized."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-l2-q12-15",
+      "text": "Alright, so kinship is one of the most fundamental concepts in anthropology. I mean, understanding how people define family relationships tells us so much about a society's structure, values, and social organization. Now, how do anthropologists actually study kinship? Well, they typically conduct what we call participant observation. This means living within a community for extended periods-sometimes years—participating in daily life, attending rituals, observing family interactions, and documenting how relationships function. It's hands-on research. OK, so kinship relationships generally fall into two categories. First, there's consanguineal kinship-these are relationships based on blood ties. Your parents, siblings, grandparents-that's consanguineal. Then there's affinal kinship, which refers to relationships created through marriage. Your spouse, in- laws-those are affinal connections. Now, different cultures trace descent differently. In patrilineal societies, descent is traced through the father's line. In matrilineal societies, it's through the mother's line. And in matrilineal systems, you see some interesting patterns. For example, the maternal uncle-that's your mother's brother-often plays a crucial role in child-rearing, sometimes even more than the biological father. A mother's sister might be considered a \"second mother\" to the children. Now, you might think kinship charts are just fancy family trees, but they're actually quite different. Family trees typically show biological ancestors going back generations. Kinship charts, however, map out the social relationships and obligations between living relatives. They show who has responsibilities to whom, who can marry whom, and how resources are shared. It's about social structure, not just genealogy.",
+      "out": "media/audio/set10/l2-q12-15.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Alright, so kinship is one of the most fundamental concepts in anthropology. I mean, understanding how people define family relationships tells us so much about a society's structure, values, and social organization. Now, how do anthropologists actually study kinship? Well, they typically conduct what we call participant observation. This means living within a community for extended periods-sometimes years—participating in daily life, attending rituals, observing family interactions, and documenting how relationships function. It's hands-on research. OK, so kinship relationships generally fall into two categories. First, there's consanguineal kinship-these are relationships based on blood ties. Your parents, siblings, grandparents-that's consanguineal. Then there's affinal kinship, which refers to relationships created through marriage. Your spouse, in- laws-those are affinal connections. Now, different cultures trace descent differently. In patrilineal societies, descent is traced through the father's line. In matrilineal societies, it's through the mother's line. And in matrilineal systems, you see some interesting patterns. For example, the maternal uncle-that's your mother's brother-often plays a crucial role in child-rearing, sometimes even more than the biological father. A mother's sister might be considered a \"second mother\" to the children. Now, you might think kinship charts are just fancy family trees, but they're actually quite different. Family trees typically show biological ancestors going back generations. Kinship charts, however, map out the social relationships and obligations between living relatives. They show who has responsibilities to whom, who can marry whom, and how resources are shared. It's about social structure, not just genealogy."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s1-instructions",
+      "text": "You are training to work at a City Central Bank. Listen to your manager and repeat what she says.",
+      "out": "media/audio/set10/s1-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "You are training to work at a City Central Bank. Listen to your manager and repeat what she says."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s1-q1",
+      "text": "Welcome to City Central Bank",
+      "out": "media/audio/set10/s1-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Welcome to City Central Bank"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s1-q2",
+      "text": "The main teller windows are straight ahead",
+      "out": "media/audio/set10/s1-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "The main teller windows are straight ahead"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s1-q3",
+      "text": "There is a comfortable waiting area beside the entrance doors.",
+      "out": "media/audio/set10/s1-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "There is a comfortable waiting area beside the entrance doors."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s1-q4",
+      "text": "Customers can open new accounts, make deposits, or apply for loans.",
+      "out": "media/audio/set10/s1-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Customers can open new accounts, make deposits, or apply for loans."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s1-q5",
+      "text": "We recommend asking customers to take a number and wait to be called",
+      "out": "media/audio/set10/s1-q5.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "We recommend asking customers to take a number and wait to be called"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s1-q6",
+      "text": "Please be aware that large cash withdrawals require a manager’s approval and additional identification.",
+      "out": "media/audio/set10/s1-q6.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Please be aware that large cash withdrawals require a manager’s approval and additional identification."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s1-q7",
+      "text": "If a customer needs their safe deposit box, escort them to the vault area downstairs.",
+      "out": "media/audio/set10/s1-q7.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "If a customer needs their safe deposit box, escort them to the vault area downstairs."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s2-instructions",
+      "text": "You have volunteered for a research study about sports activities. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer’s questions.",
+      "out": "media/audio/set10/s2-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "You have volunteered for a research study about sports activities. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer’s questions."
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s2-q1",
+      "text": "Thank you for joining me today. I’d like to ask you some questions about sports activities. Do you currently participate in any sports activities, either individually or as part of a team?",
+      "out": "media/audio/set10/s2-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Thank you for joining me today. I’d like to ask you some questions about sports activities. Do you currently participate in any sports activities, either individually or as part of a team?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s2-q2",
+      "text": "I see. What are the main reasons you do or do not participate in sports activities?",
+      "out": "media/audio/set10/s2-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "I see. What are the main reasons you do or do not participate in sports activities?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s2-q3",
+      "text": "Interesting. Can you describe an unforgettable or memorable moment you’ve had while participating in or watching a sport?",
+      "out": "media/audio/set10/s2-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Interesting. Can you describe an unforgettable or memorable moment you’ve had while participating in or watching a sport?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set10-s2-q4",
+      "text": "Good points. Lastly, some people believe children should not participate in contact sports like rugby or football because of the risk of injury. Others believe such sports teach valuable lessons about teamwork and cooperation. What is your opinion on this, and why?",
+      "out": "media/audio/set10/s2-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Good points. Lastly, some people believe children should not participate in contact sports like rugby or football because of the risk of injury. Others believe such sports teach valuable lessons about teamwork and cooperation. What is your opinion on this, and why?"
+        }
+      ],
+      "origin": "tts-voices-set10exam-11labs.json"
+    },
+    {
+      "id": "set9-L2-04-05",
+      "text": "Hey, did you manage to get into Professor Hammond's linguistics seminar? I know it fills up fast. Not initially. I was number four on the waitlist, but I just got an email saying a spot opened up. That's great news! I'm still stuck at number seven. I'm keeping my fingers crossed, but I'm not holding my breath. You might want to have a backup plan. The add-drop deadline is next Friday, and the list doesn't usually move that quickly. Yeah, I've been looking at a sociolinguistics course as an alternative. It fits my schedule, but it's not my first choice. Well, sometimes those unexpected courses turn out to be the best ones.",
+      "out": "media/audio/set9/set9-L2-04-05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
-          "text": "You're in? That thing filled up before I finished typing my ID number. I'm fourteenth in the queue."
+          "text": "Hey, did you manage to get into Professor Hammond's linguistics seminar? I know it fills up fast."
         },
         {
           "speaker": "W",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
-          "text": "I'd stopped watching it, honestly. Two students in the class dropped over the weekend, the queue ran overnight, and it took the next two names off the top. Mine was one of them."
+          "text": "Not initially. I was number four on the waitlist, but I just got an email saying a spot opened up."
         },
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
-          "text": "Overnight. So it's just the software moving people around."
+          "text": "That's great news! I'm still stuck at number seven. I'm keeping my fingers crossed, but I'm not holding my breath."
         },
         {
           "speaker": "W",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
-          "text": "Start to finish. Hammond gets the roster from the registrar the Monday before classes open, and whoever's on it is who he teaches that term."
+          "text": "You might want to have a backup plan. The add-drop deadline is next Friday, and the list doesn't usually move that quickly."
         },
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
-          "text": "Fourteenth. What are my odds here, realistically?"
+          "text": "Yeah, I've been looking at a sociolinguistics course as an alternative. It fits my schedule, but it's not my first choice."
         },
         {
           "speaker": "W",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
-          "text": "Low enough that you want a second plan moving this week. Look at what else clears the same methods requirement and get yourself registered for one of those before Friday, because Friday is when add - drop shuts. There are two courses that count for it and both were down to single seats yesterday afternoon. If those fill, you're carrying that requirement into next year."
-        },
-        {
-          "speaker": "M",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
-          "text": "And if my number does come up after I've signed for something?"
-        },
-        {
-          "speaker": "W",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
-          "text": "Then you release the other one and walk into the seminar. It doesn't meet until week three anyway, and the roster locks the Friday before that, so it's all settled before anyone's in a classroom."
-        },
-        {
-          "speaker": "M",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
-          "text": "Two courses, one week. Right. There's a methods section Tuesday mornings. I'll register for it this afternoon."
+          "text": "Well, sometimes those unexpected courses turn out to be the best ones."
         }
       ],
       "origin": "tts-voices-set9exam-11labs.json"
     },
     {
       "id": "set9-L2-06-07",
-      "text": "My landlord slid an envelope under my door yesterday. I've read it about nine times since. Nine times. What was in it? Two things. The renewal form for September, which I'd sign tonight if you handed me a pen. And a new figure. Four hundred dollars more a month. Four hundred? On what the lab pays you? It's about a third on top of what I pay now. Four hundred is my groceries, my bus pass, and whatever's left over at the end, all of it. I stood in the kitchen running the arithmetic until two in the morning and it never came out. And you like that apartment. Ten minutes on foot to the lab. I've been in that lab since sophomore year and I've never once had to think about how I'd get there. Then go talk to her before you sign anything. Four years in that unit, and in four years I've never seen you counting days at the end of the month, or peeling one of those yellow notices off your door. That goes in a file somewhere. Two empty months would cost her more than four hundred. Huh. I'd been picturing it as begging. It's the opposite. Call her tonight. She's downstairs at the desk until eight, same as always. I did scroll listings across the river for ten minutes last night, out of spite, and closed the tab. Dana took in two roommates when hers went up. Sign nothing until you've talked to her.",
+      "text": "My landlord just sent me a notice about renewing my lease. The rent is going up by fifteen percent. Ouch. That's a pretty steep increase. Are you going to stay? I'm torn. The location is perfect - it's a stone's throw from my office - but that's a lot more money every month. Have you thought about negotiating? Sometimes landlords are willing to meet you halfway, especially if you've been a reliable tenant. That's not a bad idea. I've never missed a payment in three years. Maybe I can use that as leverage. Exactly. The worst they can say is no.",
       "out": "media/audio/set9/set9-L2-06-07.mp3",
       "gap_ms": 400,
       "segments": [
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
-          "text": "My landlord slid an envelope under my door yesterday. I've read it about nine times since."
+          "text": "My landlord just sent me a notice about renewing my lease. The rent is going up by fifteen percent."
         },
         {
           "speaker": "W",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
-          "text": "Nine times. What was in it?"
+          "text": "Ouch. That's a pretty steep increase. Are you going to stay?"
         },
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
-          "text": "Two things. The renewal form for September, which I'd sign tonight if you handed me a pen. And a new figure. Four hundred dollars more a month."
+          "text": "I'm torn. The location is perfect - it's a stone's throw from my office - but that's a lot more money every month."
         },
         {
           "speaker": "W",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
-          "text": "Four hundred? On what the lab pays you?"
+          "text": "Have you thought about negotiating? Sometimes landlords are willing to meet you halfway, especially if you've been a reliable tenant."
         },
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
-          "text": "It's about a third on top of what I pay now. Four hundred is my groceries, my bus pass, and whatever's left over at the end, all of it. I stood in the kitchen running the arithmetic until two in the morning and it never came out."
+          "text": "That's not a bad idea. I've never missed a payment in three years. Maybe I can use that as leverage."
         },
         {
           "speaker": "W",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
-          "text": "And you like that apartment."
-        },
-        {
-          "speaker": "M",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
-          "text": "Ten minutes on foot to the lab. I've been in that lab since sophomore year and I've never once had to think about how I'd get there."
-        },
-        {
-          "speaker": "W",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
-          "text": "Then go talk to her before you sign anything. Four years in that unit, and in four years I've never seen you counting days at the end of the month, or peeling one of those yellow notices off your door. That goes in a file somewhere. Two empty months would cost her more than four hundred."
-        },
-        {
-          "speaker": "M",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
-          "text": "Huh. I'd been picturing it as begging."
-        },
-        {
-          "speaker": "W",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
-          "text": "It's the opposite. Call her tonight. She's downstairs at the desk until eight, same as always."
-        },
-        {
-          "speaker": "M",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
-          "text": "I did scroll listings across the river for ten minutes last night, out of spite, and closed the tab. Dana took in two roommates when hers went up."
-        },
-        {
-          "speaker": "W",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
-          "text": "Sign nothing until you've talked to her."
+          "text": "Exactly. The worst they can say is no."
         }
       ],
       "origin": "tts-voices-set9exam-11labs.json"
     },
     {
       "id": "set9-L2-08-11",
-      "text": "A blackpoll warbler weighs less than a candy bar. Some evening in September it lifts out of a spruce forest in northern Canada, and weeks later it drops into the same few acres of Central America where it spent the previous winter. So let's take up the steering. By day a migrant has references we would recognize. The sun's position, read against an internal clock that stays accurate to within minutes. And the ground underneath: a coastline, a river cut, a ridge running the right way, which a bird can follow the way you would follow a highway. Underneath both of those is a magnetic sense, and the Earth's field gives a rough bearing even through heavy cloud. Most songbirds, though, do their traveling between dusk and dawn. Two thousand meters up at midnight, what lies below is one unbroken dark, and the shoreline that served so well at noon is somewhere down inside it. What the bird still has is overhead. In the planetarium work of the sixties, warblers kept indoors settled onto their normal autumn heading under a projected sky, and when the projector was turned, the birds swung around with it and held the new bearing. It was the arrangement above them they were steering by. Now, a tower sheathed in glass does two things to a night migrant. In daylight the glass hands back a copy of the sky and the trees behind the bird, and the bird flies hard into what it reads as open air. Collisions with buildings kill birds by the hundreds of millions a year in North America alone. On an overcast night the lit floors of that same tower pull migrants off their line, and they circle the glow for hours, spending fuel they were carrying for a thousand kilometers of flight. Walk downtown at sunrise in May and you will find a warbler on a window ledge too spent to lift itself off the stone. Volunteers pick those birds up by hand, one at a time, and carry them out in paper bags. There is one more pressure, and it works more slowly. The trip north runs off the same clock. Day length starts them out of the wintering grounds, and April day length is exactly what it was a century ago, so they reach the boreal forest on the old date and their chicks hatch on the old date. That forest, though, is warming. Spring there now opens a week or two ahead of where it sat forty years ago, and caterpillars take their cue from temperature. They hatch, and they peak, on the new spring.",
+      "text": "Alright, so today we're going to look at one of the most remarkable phenomena in the animal kingdom - bird migration. Now, many bird species travel thousands of miles each year, and the question is, how exactly do they do this? Well, birds rely on several different navigation systems working together. They use the sun's position during the day to orient themselves, tracking how it moves across the sky. At night, they actually follow star patterns - particularly the North Star and surrounding constellations. Additionally, many species can detect Earth's magnetic field through special proteins in their eyes, which essentially gives them a built-in compass. Some researchers believe birds may even use smell to recognize familiar landscapes, though this is still being studied. Now, why do birds go through all this trouble? Basically, it comes down to survival. They're moving between breeding grounds in temperate regions and feeding areas in warmer climates. This seasonal movement allows them to take advantage of food resources that vary throughout the year. For instance, insects are abundant in northern areas during summer but disappear in winter, so insect-eating birds must travel south to find food. However, here's where things get problematic. Human activities are increasingly disrupting these ancient migration routes. Light pollution from cities confuses birds that navigate by starlight, causing them to become disoriented and exhausted as they circle illuminated buildings. Building designs, particularly glass structures, pose another serious threat - birds can't see glass and fly directly into windows, leading to millions of collisions annually. Climate change is also shifting the timing of food availability, which means birds may arrive at their destinations only to find their food sources, like certain insects or plants, haven't appeared yet. These disruptions can have serious ecological consequences, potentially threatening entire populations that have followed the same routes for thousands of years.",
       "out": "media/audio/set9/set9-L2-08-11.mp3",
       "gap_ms": 400,
       "segments": [
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
-          "text": "A blackpoll warbler weighs less than a candy bar. Some evening in September it lifts out of a spruce forest in northern Canada, and weeks later it drops into the same few acres of Central America where it spent the previous winter. So let's take up the steering."
+          "text": "Alright, so today we're going to look at one of the most remarkable phenomena in the animal kingdom - bird migration. Now, many bird species travel thousands of miles each year, and the question is, how exactly do they do this? Well, birds rely on several different navigation systems working together. They use the sun's position during the day to orient themselves, tracking how it moves across the sky. At night, they actually follow star patterns - particularly the North Star and surrounding constellations. Additionally, many species can detect Earth's magnetic field through special proteins in their eyes, which essentially gives them a built-in compass. Some researchers believe birds may even use smell to recognize familiar landscapes, though this is still being studied."
         },
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
-          "text": "By day a migrant has references we would recognize. The sun's position, read against an internal clock that stays accurate to within minutes. And the ground underneath: a coastline, a river cut, a ridge running the right way, which a bird can follow the way you would follow a highway. Underneath both of those is a magnetic sense, and the Earth's field gives a rough bearing even through heavy cloud."
+          "text": "Now, why do birds go through all this trouble? Basically, it comes down to survival. They're moving between breeding grounds in temperate regions and feeding areas in warmer climates. This seasonal movement allows them to take advantage of food resources that vary throughout the year. For instance, insects are abundant in northern areas during summer but disappear in winter, so insect-eating birds must travel south to find food."
         },
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
-          "text": "Most songbirds, though, do their traveling between dusk and dawn. Two thousand meters up at midnight, what lies below is one unbroken dark, and the shoreline that served so well at noon is somewhere down inside it. What the bird still has is overhead. In the planetarium work of the sixties, warblers kept indoors settled onto their normal autumn heading under a projected sky, and when the projector was turned, the birds swung around with it and held the new bearing. It was the arrangement above them they were steering by."
-        },
-        {
-          "speaker": "M",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
-          "text": "Now, a tower sheathed in glass does two things to a night migrant. In daylight the glass hands back a copy of the sky and the trees behind the bird, and the bird flies hard into what it reads as open air. Collisions with buildings kill birds by the hundreds of millions a year in North America alone. On an overcast night the lit floors of that same tower pull migrants off their line, and they circle the glow for hours, spending fuel they were carrying for a thousand kilometers of flight. Walk downtown at sunrise in May and you will find a warbler on a window ledge too spent to lift itself off the stone. Volunteers pick those birds up by hand, one at a time, and carry them out in paper bags."
-        },
-        {
-          "speaker": "M",
-          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
-          "text": "There is one more pressure, and it works more slowly. The trip north runs off the same clock. Day length starts them out of the wintering grounds, and April day length is exactly what it was a century ago, so they reach the boreal forest on the old date and their chicks hatch on the old date. That forest, though, is warming. Spring there now opens a week or two ahead of where it sat forty years ago, and caterpillars take their cue from temperature. They hatch, and they peak, on the new spring."
+          "text": "However, here's where things get problematic. Human activities are increasingly disrupting these ancient migration routes. Light pollution from cities confuses birds that navigate by starlight, causing them to become disoriented and exhausted as they circle illuminated buildings. Building designs, particularly glass structures, pose another serious threat - birds can't see glass and fly directly into windows, leading to millions of collisions annually. Climate change is also shifting the timing of food availability, which means birds may arrive at their destinations only to find their food sources, like certain insects or plants, haven't appeared yet. These disruptions can have serious ecological consequences, potentially threatening entire populations that have followed the same routes for thousands of years."
         }
       ],
       "origin": "tts-voices-set9exam-11labs.json"
     },
     {
       "id": "set9-L2-12-15",
-      "text": "Every book on jazz gets to the same word by about page three. Improvisation. It gets used loosely, so let's look at where it actually happens: the bandstand. So picture the second set. The tune comes around and it is your turn to step out. That afternoon, in your apartment, you worked something out that you liked, a climbing figure you were saving for the fifth bar. You get eight bars in and the bass player starts placing the beat later than you expected. The drummer leans ahead of him. The pianist arrives at the fifth bar and substitutes a chord from somewhere else entirely, and your climbing figure now belongs to a bar that has stopped existing. Whatever comes out of your horn next has to come out in the same second all of that reaches you; you are still holding a note while you decide. That is the job up there. You are taking in four other people continuously and bending the line you are already in the middle of so that it fits what they just did to it. Now, students hear the word improvisation and take it to mean anything goes. So consider breakfast. You sit down and start telling your roommate about your weekend. Nobody handed you those sentences in advance. You pick the words as you go, and starting a sentence you have no clear idea how you will land it. And yet the grammar holds all the way through, and you finish the thought you opened, or your roommate stops following you. The freedom lives inside a set of things you keep. On the bandstand those things are the key, the chord changes, the form, and how many bars before the whole thing comes around again. All of it is settled before anyone plays. What goes inside it is yours. Made up as you go, yes. Made up out of thin air, no. And because what goes inside is yours, a strong improviser is recognizable in about four notes. The phrasing is as particular as handwriting. This way of working also spread outward. Picture a dance band in 1935, before recordings circulated widely. You played the arrangement. The arrangement was the point. Tuesday's version and Saturday's version were the same version, and what a listener weighed was how cleanly a settled piece had been executed. The concert hall ran on that same principle and largely still does. Then the records got around, and by the sixties you had rock and blues bands leaving whole stretches of a song open, a chorus where the notes had been fixed by nobody in advance and the thing came out different every night.",
+      "text": "So, let's talk about something that makes jazz really unique as a musical form - improvisation. In other words, the ability of musicians to create music spontaneously during a performance. Now, this might sound like musicians are just playing whatever comes to mind, but actually, there's a lot of structure involved. It's not random at all. Jazz improvisation typically works within a framework. Musicians follow chord progressions and melodic themes established at the beginning of a piece, but within those boundaries, they have freedom to create original phrases and explore different musical ideas. Think of it like a conversation where you know the topic but choose your own words. A saxophone player, for example, might take a familiar melody and transform it through variations in rhythm, pitch, and phrasing. A trumpet player might respond by building on that variation, adding their own interpretation. Each musician brings something personal to the performance. One interesting challenge with improvisation is that it requires musicians to listen very carefully to each other. They need to respond in real time to what their fellow performers are doing, adjusting their playing moment by moment. If the drummer shifts the rhythm slightly, everyone else has to notice and adapt. This means a jazz performance is never quite the same twice, which is part of what attracts audiences to live jazz. You're witnessing something being created right in front of you. What makes this particularly significant is how improvisation influenced other music genres over time. Rock musicians began incorporating guitar solos that weren't strictly scripted. Blues artists embraced spontaneous vocal variations. Even some classical composers started leaving room for performer interpretation in their works. So jazz didn't just develop its own tradition - it fundamentally changed how we think about musical creativity altogether, encouraging musicians across genres to see performance as an act of creation, not just reproduction.",
       "out": "media/audio/set9/set9-L2-12-15.mp3",
       "gap_ms": 400,
       "segments": [
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
-          "text": "Every book on jazz gets to the same word by about page three. Improvisation. It gets used loosely, so let's look at where it actually happens: the bandstand."
+          "text": "So, let's talk about something that makes jazz really unique as a musical form - improvisation. In other words, the ability of musicians to create music spontaneously during a performance. Now, this might sound like musicians are just playing whatever comes to mind, but actually, there's a lot of structure involved. It's not random at all."
         },
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
-          "text": "So picture the second set. The tune comes around and it is your turn to step out. That afternoon, in your apartment, you worked something out that you liked, a climbing figure you were saving for the fifth bar. You get eight bars in and the bass player starts placing the beat later than you expected. The drummer leans ahead of him. The pianist arrives at the fifth bar and substitutes a chord from somewhere else entirely, and your climbing figure now belongs to a bar that has stopped existing. Whatever comes out of your horn next has to come out in the same second all of that reaches you; you are still holding a note while you decide. That is the job up there. You are taking in four other people continuously and bending the line you are already in the middle of so that it fits what they just did to it."
+          "text": "Jazz improvisation typically works within a framework. Musicians follow chord progressions and melodic themes established at the beginning of a piece, but within those boundaries, they have freedom to create original phrases and explore different musical ideas. Think of it like a conversation where you know the topic but choose your own words. A saxophone player, for example, might take a familiar melody and transform it through variations in rhythm, pitch, and phrasing. A trumpet player might respond by building on that variation, adding their own interpretation. Each musician brings something personal to the performance."
         },
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
-          "text": "Now, students hear the word improvisation and take it to mean anything goes. So consider breakfast. You sit down and start telling your roommate about your weekend. Nobody handed you those sentences in advance. You pick the words as you go, and starting a sentence you have no clear idea how you will land it. And yet the grammar holds all the way through, and you finish the thought you opened, or your roommate stops following you. The freedom lives inside a set of things you keep. On the bandstand those things are the key, the chord changes, the form, and how many bars before the whole thing comes around again. All of it is settled before anyone plays. What goes inside it is yours. Made up as you go, yes. Made up out of thin air, no."
+          "text": "One interesting challenge with improvisation is that it requires musicians to listen very carefully to each other. They need to respond in real time to what their fellow performers are doing, adjusting their playing moment by moment. If the drummer shifts the rhythm slightly, everyone else has to notice and adapt. This means a jazz performance is never quite the same twice, which is part of what attracts audiences to live jazz. You're witnessing something being created right in front of you."
         },
         {
           "speaker": "M",
           "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
-          "text": "And because what goes inside is yours, a strong improviser is recognizable in about four notes. The phrasing is as particular as handwriting. This way of working also spread outward. Picture a dance band in 1935, before recordings circulated widely. You played the arrangement. The arrangement was the point. Tuesday's version and Saturday's version were the same version, and what a listener weighed was how cleanly a settled piece had been executed. The concert hall ran on that same principle and largely still does. Then the records got around, and by the sixties you had rock and blues bands leaving whole stretches of a song open, a chorus where the notes had been fixed by nobody in advance and the thing came out different every night."
+          "text": "What makes this particularly significant is how improvisation influenced other music genres over time. Rock musicians began incorporating guitar solos that weren't strictly scripted. Blues artists embraced spontaneous vocal variations. Even some classical composers started leaving room for performer interpretation in their works. So jazz didn't just develop its own tradition - it fundamentally changed how we think about musical creativity altogether, encouraging musicians across genres to see performance as an act of creation, not just reproduction."
         }
       ],
       "origin": "tts-voices-set9exam-11labs.json"
