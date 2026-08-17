@@ -23,7 +23,7 @@
 <title>Script ↔ audio check (admin) · SMEAG MockTest</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#e8481f">
+<meta name="theme-color" content="#0e8f82">
 <meta name="robots" content="noindex,nofollow">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <style>
@@ -63,8 +63,8 @@
     max-height:74vh; overflow-y:auto; }
   .clip { display:block; width:100%; text-align:left; font:inherit; background:transparent; border:0;
     border-bottom:1px solid var(--line); padding:10px 12px; cursor:pointer; }
-  .clip:hover { background:var(--cream-2); }
-  .clip.on { background:var(--peach); }
+  .clip:hover { background:var(--surface-2); }
+  .clip.on { background:var(--brand-tint); }
   .clip b { display:block; font-size:12.5px; font-weight:800; }
   .clip small { display:block; font-size:11px; color:var(--muted); margin-top:2px; }
   .clip .ownrate { font-weight:850; color:#a86b00; }   /* 이 클립만 따로 정한 배속 */
@@ -72,7 +72,7 @@
   .pct.ok { background:#e6f5ec; color:#1f7a44; }
   .pct.warn { background:#fdf1dc; color:#a86b00; }
   .pct.bad { background:#fdeeee; color:#c62828; }
-  .pct.none { background:var(--cream-2); color:var(--muted); }
+  .pct.none { background:var(--surface-2); color:var(--muted); }
 
   .panel { border:1px solid var(--line); border-radius:13px; background:var(--card); padding:15px 17px; }
   .phead { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:4px; }
@@ -86,7 +86,7 @@
     cursor:pointer; border:1px solid var(--line-2); background:var(--paper,#fff); color:var(--ink); }
   .tpb.primary { background:var(--brand); border-color:var(--brand); color:#fff; }
   .time { font-variant-numeric:tabular-nums; font-size:12px; font-weight:750; color:var(--muted); }
-  .track { height:8px; border-radius:999px; background:var(--cream-2); margin:11px 0 4px; cursor:pointer; position:relative; }
+  .track { height:8px; border-radius:999px; background:var(--surface-2); margin:11px 0 4px; cursor:pointer; position:relative; }
   .track .fill { position:absolute; inset:0 auto 0 0; width:0; background:var(--brand); border-radius:999px; }
 
   /* 교체 */
@@ -102,7 +102,7 @@
   .col > h3 { font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
     color:var(--muted); margin:0 0 7px; }
   .sent { font-size:14px; line-height:1.85; padding:5px 7px; border-radius:8px; cursor:pointer; margin-bottom:3px; }
-  .sent:hover { background:var(--cream-2); }
+  .sent:hover { background:var(--surface-2); }
   .sent .spk { font-size:10.5px; font-weight:800; color:var(--brand-ink); margin-right:6px; letter-spacing:.03em; }
   .sent.now { background:#fff59d; box-shadow:0 0 0 2px #f9a825 inset; }   /* 재생 위치 형광 */
   .asrbox { font-size:13.5px; line-height:1.85; }
@@ -112,7 +112,7 @@
   mark.extra { background:#ff8a80; color:#5c0a02; padding:0 2px; border-radius:3px; }  /* 음성에만 */
   .legend { display:flex; gap:12px; flex-wrap:wrap; font-size:11.5px; color:var(--muted); margin-top:10px; }
   .legend i { font-style:normal; padding:1px 6px; border-radius:4px; }
-  .noasr { font-size:12.5px; color:var(--muted); background:var(--cream-2); border-radius:9px; padding:9px 11px; }
+  .noasr { font-size:12.5px; color:var(--muted); background:var(--surface-2); border-radius:9px; padding:9px 11px; }
   .gate { max-width:520px; margin:60px auto; text-align:center; }
   .flash { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:var(--paper);
     padding:10px 18px; border-radius:999px; font-size:13px; font-weight:700; opacity:0; transition:opacity .2s;

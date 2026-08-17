@@ -6,7 +6,7 @@
 <title>SET 1 · Exam · SMEAG MockTest</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#e8481f">
+<meta name="theme-color" content="#0e8f82">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MockTest">
@@ -23,7 +23,7 @@
   .opt input { margin-top:3px; accent-color:var(--brand); }
   .opt.correct { background:var(--ok-soft); border-color:var(--ok); }
   .opt.wrong { background:#fdeeee; border-color:var(--no,#dc2626); }
-  .passage { background:var(--cream-2); border-radius:12px; padding:14px 16px; font-size:14px; line-height:1.7; margin-bottom:14px; white-space:pre-wrap; }
+  .passage { background:var(--surface-2); border-radius:12px; padding:14px 16px; font-size:14px; line-height:1.7; margin-bottom:14px; white-space:pre-wrap; }
   .blank-in { border:none; border-bottom:2px solid var(--brand); background:transparent; font-size:14px; width:110px; font-family:inherit; padding:2px 4px; }
   audio { width:100%; margin:8px 0; }
   .qinstr { font-size:13px; color:var(--muted); margin:2px 0 6px; }
@@ -44,11 +44,11 @@
   }
   /* 모듈 제목 옆 타임 리밋 배지 — config/timing.<exam>.json 의 allocatedSec 이 정본이다. */
   .mod-time { display:inline-block; margin-left:10px; padding:3px 10px; border-radius:999px;
-    background:var(--peach, #fbe3d8); color:var(--brand-ink, #b8391a);
+    background:var(--brand-tint, #d3ece9); color:var(--brand-ink, #0a6b62);
     font-size:12px; font-weight:800; letter-spacing:.02em; vertical-align:middle; }
   /* 시간 조정 — 값이 보이는 자리에서 바로 고친다. 조정된 값은 점선 밑줄로 표시한다. */
   .t-edit { cursor:pointer; }
-  .t-edit:hover { box-shadow:0 0 0 2px rgba(232,72,31,.2); border-radius:6px; }
+  .t-edit:hover { box-shadow:0 0 0 2px rgba(14, 143, 130,.2); border-radius:6px; }
   .t-edit.edited { text-decoration:underline dotted; text-underline-offset:3px; }
   .t-box { display:inline-flex; align-items:center; gap:4px; vertical-align:middle; }
   .t-box input { width:64px; font:inherit; font-size:12px; padding:2px 5px; text-align:right;
@@ -60,14 +60,14 @@
     color:var(--muted); cursor:pointer; text-decoration:underline; }
   /* character page + countdown */
   .audio-unit { margin:10px 0 12px; }
-  .au-stage { position:relative; background:linear-gradient(160deg,#fbe3d8,#f7d3c2); border:1px solid var(--peach-2);
+  .au-stage { position:relative; background:linear-gradient(160deg,#d3ece9,#b6ddd8); border:1px solid var(--brand-tint-2);
     border-radius:14px; padding:14px; display:flex; align-items:center; gap:16px; min-height:120px; }
   .au-stage .speaker { width:120px; height:120px; object-fit:contain; border-radius:12px; background:#fff;
     padding:6px; box-shadow:var(--shadow); flex:none; }
   .au-timer { display:flex; flex-direction:column; }
   .au-count { font-size:34px; font-weight:850; color:var(--brand-ink); font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
   .au-cap { font-size:12px; font-weight:700; color:var(--muted); }
-  .au-stage.playing { box-shadow:0 0 0 3px rgba(232,72,31,.25) inset; }
+  .au-stage.playing { box-shadow:0 0 0 3px rgba(14, 143, 130,.25) inset; }
   .au-stage.playing .au-count { color:var(--brand); animation:pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
   .au-audio { margin:8px 0 0; }

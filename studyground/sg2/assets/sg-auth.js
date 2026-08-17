@@ -313,18 +313,18 @@ window.SG_AUTH = (function () {
     var box = document.createElement('div');
     box.id = 'sg-auth-block';
     box.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;' +
-      'align-items:center;justify-content:center;padding:24px;background:#fffdf8;' +
+      'align-items:center;justify-content:center;padding:24px;background:#fbfefd;' +
       'font-family:inherit;text-align:center';
     box.innerHTML =
       '<div style="max-width:420px">' +
         '<div style="font-size:40px;line-height:1">🔒</div>' +
         '<h1 style="margin:14px 0 8px;font-size:22px;font-weight:800">Please log in</h1>' +
-        '<p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#6b6357">' +
+        '<p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#6b8083">' +
           'The test is saved to your account. Without a login your answers stay on ' +
           'this computer only, and leave with it. Enter your ID and password to ' +
           'continue — anything already saved is untouched.</p>' +
         '<a href="' + href + '" style="display:inline-block;padding:12px 22px;border-radius:999px;' +
-          'background:#e8481f;color:#fff;font-weight:800;font-size:15px;text-decoration:none">Log in</a>' +
+          'background:#0e8f82;color:#fff;font-weight:800;font-size:15px;text-decoration:none">Log in</a>' +
       '</div>';
     function mount() { (document.body || document.documentElement).appendChild(box); }
     if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);

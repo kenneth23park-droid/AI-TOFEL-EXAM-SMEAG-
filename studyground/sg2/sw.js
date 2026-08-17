@@ -346,7 +346,14 @@
 //      sg-review-writing.js · sg-review-speaking.js · app.css 가 모두 셸 자산이라
 //      판올림해야 재방문 기기에 도착한다. 시험 셸에 audio-script-check.js 가 새로
 //      실린다 — 문항마다 음원이 따로 붙는 리스닝은 학생이 들은 말이 그 인덱스에만 있다.
-const VERSION = 'sg-v79';
+// v80: 브랜드색이 산호에서 블루그린(teal)으로 바뀌었다 — 로고(assets/icon.svg ·
+//      favicon.svg · icon-192/512.png · apple-touch-icon.png), 디자인 토큰(app.css),
+//      시험 스타일(exam.css), theme-color 메타까지 함께 옮겼다. 토큰 이름도 색을 따라
+//      갔다 — --cream → --surface, --peach → --brand-tint. 오답 표시는 브랜드에서
+//      떼어 --bad(빨강) 로 옮겼다: 브랜드가 teal 인 채로 오답을 브랜드색으로 칠하면
+//      정답 초록과 뒤섞여 맞은 문제로 읽힌다.
+//      CSS·아이콘·모든 셸 HTML 이 셸 자산이라 판올림해야 재방문 기기에 도착한다.
+const VERSION = 'sg-v80';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

@@ -6,7 +6,7 @@
 <title>Student results · MockTest</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#e8481f">
+<meta name="theme-color" content="#0e8f82">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <style>
   /* 점수 칸은 데스크톱 표에서만 오른쪽 정렬 — 카드에서는 이름표 옆에 붙는다. */
@@ -56,7 +56,7 @@
   </div>
 
   <div class="card mt-16 hide" id="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-    <input id="q" placeholder="Name, student ID, or date (2026-08-12)" style="flex:1;min-width:220px;padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:var(--cream)">
+    <input id="q" placeholder="Name, student ID, or date (2026-08-12)" style="flex:1;min-width:220px;padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:var(--surface)">
     <select id="set" style="padding:10px 13px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;font-size:14px;background:#fff"></select>
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap">
       <input type="checkbox" id="show-hidden"><span data-en>Show hidden</span><span data-ko>숨긴 응시 보기</span>
@@ -698,7 +698,7 @@
           ? (left / 1000000000).toFixed(2) + ' GB' : mb(left)) + ' left';
         el.title = mb(used) + ' of 1 GB used · ' + files + ' recordings · ' +
                    pct.toFixed(1) + '% full — open AI usage for detail';
-        if (pct >= 90) { el.style.background = '#fbe4df'; el.style.color = '#a12a13'; }
+        if (pct >= 90) { el.style.background = '#fdeceb'; el.style.color = '#c62828'; }
         else if (pct >= 70) { el.style.background = '#fdf1dc'; el.style.color = '#8a5c00'; }
         el.hidden = false;
       });

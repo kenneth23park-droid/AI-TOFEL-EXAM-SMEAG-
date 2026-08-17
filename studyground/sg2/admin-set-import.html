@@ -26,14 +26,14 @@
 <title>Set import (admin) · SMEAG MockTest</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#e8481f">
+<meta name="theme-color" content="#0e8f82">
 <meta name="robots" content="noindex,nofollow">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <style>
   .drops { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin:16px 0 6px; }
   .drop { position:relative; border:1.5px dashed var(--line-2); border-radius:13px; background:var(--card);
     padding:16px 15px; cursor:pointer; transition:border-color .12s, background .12s; }
-  .drop:hover, .drop.over { border-color:var(--brand); background:var(--brand-soft,#fcece6); }
+  .drop:hover, .drop.over { border-color:var(--brand); background:var(--brand-soft,#e6f5f3); }
   .drop.has { border-style:solid; border-color:var(--ok,#1f9d55); }
   .drop input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
   .drop .role { font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--brand); }
@@ -50,7 +50,7 @@
   @media (max-width:720px){ .secs { grid-template-columns:repeat(2,1fr); } }
   .seccard { border:1px solid var(--line); border-top:3px solid var(--sc); border-radius:12px;
     background:var(--card); padding:12px 13px; }
-  .seccard[data-s=reading]{ --sc:#e8481f } .seccard[data-s=listening]{ --sc:#2563c9 }
+  .seccard[data-s=reading]{ --sc:#0e8f82 } .seccard[data-s=listening]{ --sc:#2563c9 }
   .seccard[data-s=writing]{ --sc:#7a4bc4 } .seccard[data-s=speaking]{ --sc:#1f9d55 }
   .seccard .st { font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--sc); }
   .seccard .sn { display:block; font-size:26px; font-weight:800; color:var(--ink); line-height:1.1; margin-top:4px;
@@ -59,7 +59,7 @@
 
   /* 겹침 검사 패널 — 목록 자체의 모양은 assets/dup-view.js 가 들고 있다. */
   .dupbox { border:1px solid var(--line); border-radius:14px; padding:13px 15px 15px; margin:14px 0; background:var(--card); }
-  .dupbox.bad  { border-color:#e0796a; background:var(--peach,#fde5da); }
+  .dupbox.bad  { border-color:#e0796a; background:var(--brand-tint,#d3ece9); }
   .dupbox.warn { border-color:#e6c15a; background:#fdf6e3; }
   .dupbox.ok   { border-color:#8fc6a3; background:#eef8f1; }
   .dupbox .duph { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:11px; }
@@ -77,7 +77,7 @@
   .gt.stop .lv { color:#c62828 } .gt.warn .lv { color:#a86400 }
 
   .preview { border:1px solid var(--line); border-radius:12px; background:var(--card); overflow:hidden; }
-  .preview .ph { display:flex; gap:10px; align-items:center; padding:10px 14px; background:var(--cream-2);
+  .preview .ph { display:flex; gap:10px; align-items:center; padding:10px 14px; background:var(--surface-2);
     border-bottom:1px solid var(--line); font-size:11.5px; font-weight:800; letter-spacing:.05em;
     text-transform:uppercase; color:var(--muted); }
   .preview .pb { max-height:420px; overflow:auto; }
@@ -102,8 +102,8 @@
   .mchips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:11px; }
   .mchip { display:inline-flex; align-items:baseline; gap:6px; font-size:11.5px; font-weight:700;
     border:1px solid var(--line); border-left:3px solid var(--mc); border-radius:8px;
-    padding:4px 9px; color:var(--muted); background:var(--cream-2); }
-  .mchip[data-s=reading]{ --mc:#e8481f } .mchip[data-s=listening]{ --mc:#2563c9 }
+    padding:4px 9px; color:var(--muted); background:var(--surface-2); }
+  .mchip[data-s=reading]{ --mc:#0e8f82 } .mchip[data-s=listening]{ --mc:#2563c9 }
   .mchip[data-s=writing]{ --mc:#7a4bc4 } .mchip[data-s=speaking]{ --mc:#1f9d55 }
   .mchip b { font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums; }
   .mchip i { font-style:normal; font-size:10.5px; color:var(--dim); }
@@ -116,7 +116,7 @@
     font-variant-numeric:tabular-nums; }
   .facts2 .fn { font-size:11px; color:var(--dim); margin-top:1px; line-height:1.4; }
 
-  .meter { height:5px; border-radius:3px; background:var(--lock,#efeadf); margin-top:12px; overflow:hidden; }
+  .meter { height:5px; border-radius:3px; background:var(--lock,#e5eeed); margin-top:12px; overflow:hidden; }
   .meter i { display:block; height:100%; background:var(--ok,#1f9d55); border-radius:3px; }
   .meterlab { font-size:10.5px; font-weight:700; color:var(--muted); margin-top:4px; }
 
@@ -128,7 +128,7 @@
   .gatebox { margin-top:10px; display:grid; gap:6px; }
 
   /* AI 생성 — 업로드 경로와 나란히 두되 눈에 덜 띄게. 문서가 있으면 문서가 먼저다. */
-  .aibox { border:1px solid var(--line); border-radius:14px; background:var(--cream-2);
+  .aibox { border:1px solid var(--line); border-radius:14px; background:var(--surface-2);
     padding:14px 16px 15px; margin-top:12px; }
   .aihead b { display:block; font-size:13.5px; color:var(--ink); }
   .aihead .aisub { display:block; font-size:11.5px; color:var(--muted); margin-top:4px; max-width:74ch; line-height:1.55; }
@@ -138,10 +138,30 @@
   .aifield select { font:inherit; font-size:12.5px; font-weight:700; padding:8px 10px; min-width:170px;
     border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
   .aifield select:focus { outline:none; border-color:var(--brand); }
-  .aifield select:disabled { color:var(--dim); background:var(--lock,#efeadf); }
+  .aifield select:disabled { color:var(--dim); background:var(--lock,#e5eeed); }
   .aiprog { margin-top:12px; }
   .aiwhy { font-size:11.5px; font-weight:700; color:#a86400; margin-top:9px; }
   .aiwhy.bad { color:#c62828; }
+
+  /* 오디오 엔진 — 글을 쓰는 AI 와 소리를 만드는 AI 는 다른 회사다. 한 상자 안에
+     두되 줄을 갈라, 위가 시험지·아래가 음성이라는 것이 보이게 한다. */
+  .aisplit { border-top:1px dashed var(--line-2); margin-top:14px; padding-top:12px; }
+  .aisplit .aitag { font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--brand); }
+  .aisplit .aisub2 { display:block; font-size:11.5px; color:var(--muted); margin-top:4px;
+    max-width:74ch; line-height:1.55; }
+  .aifield input[type=number] { font:inherit; font-size:12.5px; font-weight:700; padding:8px 10px; width:82px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .keyrow { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:10px; font-size:11.5px; }
+  .keyrow code { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; color:var(--muted); }
+  .keyrow input[type=password] { font:inherit; font-size:12px; padding:7px 10px; min-width:250px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .keyrow button { font:inherit; font-size:11px; font-weight:800; padding:5px 10px; cursor:pointer;
+    border:1px solid var(--line-2); border-radius:8px; background:var(--paper,#fff); color:var(--ink); }
+  .keyrow .kstate { font-weight:800; }
+  .keyrow .kstate.srv { color:var(--ok,#1f9d55); }
+  .keyrow .kstate.loc { color:#a86400; }
+  .keyrow .kstate.none { color:#c62828; }
 </style>
 </head>
 <body>
@@ -223,6 +243,34 @@
       <div class="meter"><i id="aimeter" style="width:0"></i></div>
       <div class="meterlab" id="aiproglab"></div>
     </div>
+
+    <!-- 소리를 만드는 AI. 위(글)와는 다른 회사다 — 시험지를 쓰는 모델은 mp3 를 못 만들고,
+         읽어 주는 엔진은 문항을 못 쓴다. 여기서 고른 엔진 하나로 그 세트의 모든 트랙을
+         만든다. 섞으면 문항마다 목소리가 튄다. -->
+    <div class="aisplit">
+      <span class="aitag">Audio</span>
+      <b style="display:block;font-size:13.5px;color:var(--ink);margin-top:3px">Which AI reads the scripts aloud</b>
+      <span class="aisub2">The written set has no sound yet — every listening and speaking clip is a script
+        waiting for a voice. Pick one engine and it voices the whole set, so the voices stay the same from
+        the first question to the last. ElevenLabs is the default: SET 9's audio was made with it.</span>
+      <div class="airow">
+        <label class="aifield"><span>Audio AI</span>
+          <select id="ttsprov"><option value="">Loading…</option></select></label>
+        <label class="aifield"><span>Voice model</span>
+          <select id="ttsmodel"><option value="">—</option></select></label>
+        <label class="aifield"><span>Speed</span>
+          <input type="number" id="ttsrate" value="0.9" min="0.5" max="1.5" step="0.05"></label>
+        <button class="btn ghost sm" id="ttsVoicesBtn" type="button">Voices…</button>
+        <span class="busy" id="ttsbusy"></span>
+      </div>
+      <div class="keyrow" id="ttskey"></div>
+      <div class="aiwhy" id="ttswhy" hidden></div>
+      <div class="aiprog" id="ttsprog" hidden>
+        <div class="meter"><i id="ttsmeter" style="width:0"></i></div>
+        <div class="meterlab" id="ttsproglab"></div>
+      </div>
+      <div id="ttscast" hidden style="margin-top:10px"></div>
+    </div>
   </div>
 
   <div id="result" hidden>
@@ -247,6 +295,13 @@
       <button class="btn ghost sm" id="fillScriptBtn" hidden>Write the missing scripts with AI</button>
       <button class="btn ghost sm" id="fillAnsBtn" hidden>Solve the missing answers with AI</button>
       <span class="busy" id="fillbusy"></span>
+    </div>
+
+    <!-- 대본은 있고 소리가 없는 세트를 여기서 끝낸다. 저장한 뒤에 눌러야 한다 —
+         만든 mp3 는 팩이 가리키는 경로에 걸리고, 그 경로는 저장된 세트의 것이다. -->
+    <div class="bar" id="audiobar" hidden>
+      <button class="btn ghost sm" id="ttsBtn">Voice the scripts with the audio AI</button>
+      <span class="busy" id="ttsbar"></span>
     </div>
 
     <div class="bar">
@@ -279,6 +334,12 @@
      통하는 가림막이라 서버가 믿지 않는다. /api/generate 는 Supabase 선생님 계정 토큰을 본다. -->
 <script src="assets/sg-auth.js"></script>
 <script src="assets/set-generate.js"></script>
+<!-- 대본 → mp3. audio-config.js 가 만든 소리를 팩이 가리키는 경로에 걸어 주고,
+     audio-index.js 는 그 경로를 다른 관리자 화면과 **같은 방식으로** 푼다(키가 어긋나면
+     만들어 놓고도 시험 화면에서 안 걸린다). -->
+<script src="assets/tts-client.js"></script>
+<script src="assets/audio-config.js"></script>
+<script src="assets/audio-index.js"></script>
 <script src="assets/set-store.js"></script>
 <script src="assets/set-media.js"></script>
 <!-- 겹침 검사: 판정(dup-core) 과 목록 UI(dup-view) 는 admin-dup.html · CI 와 같은 파일이다.
@@ -596,6 +657,382 @@
   fillScriptBtn.addEventListener('click', function () { runFill(GEN.fillScripts, 'Writing the scripts…'); });
   fillAnsBtn.addEventListener('click', function () { runFill(GEN.fillAnswers, 'Solving the answers…'); });
 
+  /* ─────────────────────────────────────────────── 오디오 AI (대본 → mp3)
+   *
+   * 위의 AI 는 시험지를 쓴다. 그것으로 끝나지 않는다 — 리스닝·스피킹은 대본만으로는
+   * 시험이 되지 않고, 누군가 읽어 줘야 한다. 그 일을 하는 것이 여기다.
+   *
+   * 엔진은 세트 하나에 하나다. 문항마다 다른 엔진으로 만들면 목소리가 튀고, 리스닝에서
+   * 목소리가 튀는 것은 취향이 아니라 결함이다. 기본은 ElevenLabs — SET 9 정본이 그것으로
+   * 만들어졌다. 다른 엔진(OpenAI · Google · Deepgram)은 새 세트를 통째로 지을 때, 혹은
+   * 그 계정 키가 막혔을 때를 위한 것이다(api/tts.js 머리말).
+   *
+   * 키는 서버 환경변수가 먼저다. 없으면 이 화면에서 붙여넣을 수 있고, 그 키는 이
+   * 브라우저에만 남는다(assets/tts-client.js). 공용 PC 에는 넣지 말 것.
+   *
+   * 만들어진 mp3 가 어디로 가는가 — 팩이 가리키는 경로에 덮어쓰기로 걸린다
+   * (SG_AUDIO, IndexedDB). **이 브라우저 안이다.** 학생 기기에서도 들리게 하려면
+   * media/audio/<코드>/ 에 파일로 넣어 배포해야 한다. 아래 안내가 그 사실을 말해 준다.
+   */
+  var TTS = window.SG_TTS_GEN;
+  var ttsProvSel = document.getElementById('ttsprov'), ttsModelSel = document.getElementById('ttsmodel');
+  var ttsRateEl = document.getElementById('ttsrate'), ttsKeyBox = document.getElementById('ttskey');
+  var ttsWhyEl = document.getElementById('ttswhy'), ttsBusy = document.getElementById('ttsbusy');
+  var ttsProg = document.getElementById('ttsprog'), ttsMeter = document.getElementById('ttsmeter');
+  var ttsProgLab = document.getElementById('ttsproglab'), ttsCast = document.getElementById('ttscast');
+  var audiobar = document.getElementById('audiobar'), ttsBtn = document.getElementById('ttsBtn');
+  var ttsBar = document.getElementById('ttsbar');
+  var CAT = null;
+
+  /* 대략의 단가($/1000자). 청구서가 아니라 "얼마쯤 나가는가" 를 누르기 전에 보여 주려는
+     값이다 — 세트 하나는 4만 자가 넘어서, 모르고 누르면 놀란다. 공급자가 값을 바꾸면
+     여기도 바뀌어야 한다(2026-08 기준). */
+  var USD1K = { elevenlabs: 0.06, openai: 0.012, google: 0.016, deepgram: 0.03 };
+
+  function ttsWhy(msg, bad) {
+    ttsWhyEl.hidden = !msg;
+    ttsWhyEl.textContent = msg || '';
+    ttsWhyEl.className = 'aiwhy' + (bad ? ' bad' : '');
+  }
+
+  function ttsProvider() {
+    var list = (CAT && CAT.providers) || [];
+    var id = ttsProvSel.value;
+    return list.filter(function (p) { return p.id === id; })[0] ||
+           list.filter(function (p) { return p.ready; })[0] || list[0] || null;
+  }
+
+  function paintTtsModels() {
+    var P = ttsProvider();
+    ttsModelSel.innerHTML = '';
+    if (!P) { ttsModelSel.innerHTML = '<option>—</option>'; ttsModelSel.disabled = true; return; }
+    ttsModelSel.disabled = false;
+    (P.models || []).forEach(function (m) {
+      var o = document.createElement('option');
+      o.value = m; o.textContent = m;
+      if (m === P.defaultModel) o.selected = true;
+      ttsModelSel.appendChild(o);
+    });
+    /* 속도는 엔진마다 받는 범위가 다르다(ElevenLabs 0.7–1.2, Deepgram 은 아예 없다).
+       입력칸의 범위를 그 엔진에 맞춰 두면, 서버가 조용히 접기 전에 화면이 먼저 말한다. */
+    var sp = P.speed || { min: 0.5, max: 1.5 };
+    ttsRateEl.min = sp.min; ttsRateEl.max = sp.max;
+    ttsRateEl.disabled = sp.min === sp.max;
+    var v = Number(ttsRateEl.value) || 1;
+    ttsRateEl.value = Math.max(sp.min, Math.min(sp.max, v));
+    ttsWhy(P.ready ? (P.note || '') : (P.note || P.why || ''), !P.ready);
+  }
+
+  function paintTtsProviders() {
+    var list = (CAT && CAT.providers) || [];
+    var keep = ttsProvSel.value;
+    ttsProvSel.innerHTML = list.map(function (p) {
+      var tail = p.ready ? (p.byLocalKey ? ' — 이 기기 키' : '') : ' — 키 필요';
+      return '<option value="' + esc(p.id) + '">' + esc(p.label) + tail + '</option>';
+    }).join('') || '<option value="">—</option>';
+    if (list.some(function (p) { return p.id === keep; })) ttsProvSel.value = keep;
+    else {
+      /* 고르지 않았다면 ElevenLabs 가 먼저다 — SET 9 정본과 같은 목소리이기 때문이다.
+         그것이 안 열려 있으면 열려 있는 아무 엔진. */
+      var xi = list.filter(function (p) { return p.id === 'elevenlabs' && p.ready; })[0];
+      var any = list.filter(function (p) { return p.ready; })[0];
+      if (xi || any) ttsProvSel.value = (xi || any).id;
+    }
+    paintTtsModels();
+  }
+
+  /** 키 상태 한 줄. 값은 절대 원문으로 그리지 않는다 — 마스킹만 보여준다. */
+  function paintTtsKey() {
+    var P = ttsProvider();
+    if (!P) { ttsKeyBox.innerHTML = ''; return; }
+    if (ttsKeyBox.dataset.editing === P.id) return;      // 입력 중이면 다시 그리지 않는다
+    var envName = P.envVar ? ' (' + esc(P.envVar) + ')' : '';
+    if (P.envReady) {
+      ttsKeyBox.innerHTML = '<span class="kstate srv">🔒 서버에 설정됨</span>' +
+        '<span>이 엔진의 키는 서버 환경변수에 있습니다' + envName + '. 브라우저에 저장하지 않습니다.</span>' +
+        '<button type="button" data-key="edit">이 기기 키로 바꾸기</button>';
+      return;
+    }
+    if (TTS.hasKey(P.id)) {
+      ttsKeyBox.innerHTML = '<span class="kstate loc">🔑 이 기기의 키</span>' +
+        '<code>' + esc(TTS.keyMask(P.id)) + '</code>' +
+        '<button type="button" data-key="edit">변경</button>' +
+        '<button type="button" data-key="clear">삭제</button>';
+      return;
+    }
+    ttsKeyBox.innerHTML = '<span class="kstate none">키 없음</span>' +
+      '<span>' + esc(P.label) + ' 키' + envName + '를 넣으면 이 기기에서 바로 만들 수 있습니다.</span>' +
+      '<button type="button" data-key="edit">키 입력</button>';
+  }
+
+  function paintTtsKeyForm() {
+    var P = ttsProvider();
+    if (!P) return;
+    ttsKeyBox.dataset.editing = P.id;
+    ttsKeyBox.innerHTML =
+      '<input type="password" data-key="input" autocomplete="off" spellcheck="false" ' +
+        'placeholder="' + esc(P.label) + ' API key 붙여넣기">' +
+      '<button type="button" data-key="save">저장</button>' +
+      '<button type="button" data-key="cancel">취소</button>' +
+      '<span>이 브라우저에만 저장됩니다. 공용 PC 라면 넣지 마세요.</span>';
+    var inp = ttsKeyBox.querySelector('[data-key=input]');
+    if (inp) inp.focus();
+  }
+
+  ttsKeyBox.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-key]');
+    if (!b) return;
+    var P = ttsProvider(); if (!P) return;
+    var act = b.getAttribute('data-key');
+    if (act === 'edit') { paintTtsKeyForm(); return; }
+    if (act === 'cancel') { delete ttsKeyBox.dataset.editing; paintTtsKey(); return; }
+    if (act === 'clear') {
+      if (!confirm(P.label + ' 키를 이 브라우저에서 지웁니다. 계속할까요?')) return;
+      TTS.clearKey(P.id);
+      delete ttsKeyBox.dataset.editing;
+      CAT = null; loadTtsCatalog();
+      return;
+    }
+    if (act === 'save') {
+      var v = (ttsKeyBox.querySelector('[data-key=input]') || {}).value || '';
+      if (!v.trim()) { alert('키를 붙여넣어 주세요.'); return; }
+      TTS.setKey(P.id, v);
+      delete ttsKeyBox.dataset.editing;
+      CAT = null;
+      /* 새 키로 목소리 목록을 받아 온다 — 서버는 이 키를 모르므로 카탈로그가 비어 있다. */
+      loadTtsCatalog().then(function () { return TTS.loadVoicesWithKey(CAT, P.id, []); })
+        .then(function () { renderAudioBar(); });
+      return;
+    }
+  });
+
+  function loadTtsCatalog() {
+    ttsBusy.textContent = 'Reading the engine list…';
+    return TTS.catalog().then(function (c) {
+      CAT = c;
+      ttsBusy.textContent = '';
+      paintTtsProviders();
+      paintTtsKey();
+      renderAudioBar();
+      if (!(c.providers || []).some(function (p) { return p.ready; })) {
+        ttsWhy('No audio engine has a key yet — set one on the server (ELEVENLABS_API_KEY · ' +
+          'OPENAI_API_KEY · GOOGLE_TTS_API_KEY · DEEPGRAM_API_KEY) or paste one below.', true);
+      }
+      return c;
+    });
+  }
+
+  ttsProvSel.addEventListener('change', function () { paintTtsModels(); paintTtsKey(); renderAudioBar(); });
+
+  function voicesOf(pid) {
+    var list = (CAT && CAT.voices && CAT.voices[pid]) || [];
+    if (list.length) return list;
+    // 목록을 못 받은 ElevenLabs 는 SET 9 배역표 13인으로 선다. 다른 엔진은 대역이 없다.
+    return pid === 'elevenlabs' ? TTS.FALLBACK_VOICES : [];
+  }
+
+  document.getElementById('ttsVoicesBtn').addEventListener('click', function () {
+    var P = ttsProvider(); if (!P) return;
+    if (!ttsCast.hidden) { ttsCast.hidden = true; return; }
+    var list = voicesOf(P.id);
+    ttsCast.hidden = false;
+    ttsCast.innerHTML = list.length
+      ? '<div class="muted" style="font-size:11.5px;line-height:1.7">' +
+        '<b>' + esc(P.label) + ' · ' + list.length + ' voices</b><br>' +
+        list.map(function (v) { return esc(v.label || v.name || v.id); }).join(' · ') +
+        '</div>'
+      : '<div class="muted" style="font-size:11.5px">No voice list — add the key first, or the key may lack read permission.</div>';
+  });
+
+  /* ── 무엇을 읽어야 하는가 ────────────────────────────────────────────
+   * 팩을 훑어 "가리키는 mp3 경로가 있고 그 자리에 읽을 대본도 있는" 곳을 모은다.
+   * 경로가 없으면 만들어도 걸 데가 없고, 대본이 없으면 읽을 것이 없다. */
+  function audioJobs(pack) {
+    var out = [], seen = {};
+    function add(path, script, label) {
+      if (!path || !script || !String(script).trim()) return;
+      var key = SG_AUDIO_INDEX.resolve(path);
+      if (seen[key]) return;
+      seen[key] = 1;
+      out.push({ key: key, path: path, script: String(script), label: label, chars: String(script).length });
+    }
+    (pack.sections || []).forEach(function (sec) {
+      if (sec.id !== 'listening' && sec.id !== 'speaking') return;
+      (sec.modules || []).forEach(function (mod) {
+        (mod.blocks || []).forEach(function (blk) {
+          var head = (mod.label || mod.id) + ' · ' + (blk.heading || '');
+          add(blk.introAudio, blk.introScript || blk.script, head + ' Instructions');
+          add(blk.audio, blk.script, head);
+          (blk.questions || []).forEach(function (q) {
+            add(q.audio, q.script, head + ' ' + (q.id || ''));
+          });
+        });
+      });
+    });
+    return out;
+  }
+
+  /** 이미 이 브라우저에 소리가 걸려 있는 자리는 다시 만들지 않는다(돈이 나간다). */
+  function pendingJobs(pack) {
+    return audioJobs(pack).filter(function (j) { return !SG_AUDIO.isOverridden(j.key); });
+  }
+
+  /* ── 배역 ────────────────────────────────────────────────────────────
+   * 화자 이름 → 목소리. 세트 전체에서 한 벌을 쓴다 — 같은 "M" 이 문항마다 다른
+   * 사람이면 리스닝이 성립하지 않는다. 남/여 표시가 있는 화자는 그 성별 풀에서 고른다. */
+  function caster(voices) {
+    var map = {}, pools = {}, at = {};
+    function pool(name) {
+      if (pools[name]) return pools[name];
+      var f = name === 'any' ? voices : voices.filter(function (v) {
+        return String(v.gender || '').toLowerCase().indexOf(name) === 0;
+      });
+      pools[name] = f.length ? f : voices;
+      at[name] = 0;
+      return pools[name];
+    }
+    return function (speaker) {
+      if (map[speaker]) return map[speaker];
+      var s = String(speaker || '').toLowerCase();
+      var name = /^(m|male|man|mr|boy|professor|prof)\b/.test(s) ? 'male'
+               : /^(w|f|female|woman|ms|mrs|girl)\b/.test(s) ? 'female' : 'any';
+      var p = pool(name);
+      map[speaker] = p[(at[name]++) % p.length].id;
+      return map[speaker];
+    };
+  }
+
+  /* ── 요청 단위로 자르기 ──────────────────────────────────────────────
+   * 서버는 한 번에 20토막·6000자까지 받는다(api/tts.js). 강의 대본은 그보다 길어서
+   * 잘라 보내고 받은 mp3 를 순서대로 이어 붙인다 — 같은 화자가 이어지는 줄은 먼저
+   * 합쳐서 요청 수를 줄인다. */
+  var MAX_SEG = 20, MAX_CHARS = 6000, MAX_ONE = 1200;
+
+  function segmentsFor(script, cast) {
+    var raw = TTS.parseScript(script), segs = [];
+    raw.forEach(function (s) {
+      var last = segs[segs.length - 1];
+      if (last && last.speaker === s.speaker && (last.text.length + s.text.length + 1) <= MAX_ONE) {
+        last.text += ' ' + s.text;
+        return;
+      }
+      // 한 토막이 상한을 넘으면 문장 경계에서 나눈다. 문장 중간에서 자르면 억양이 끊긴다.
+      var t = s.text;
+      while (t.length > MAX_ONE) {
+        var cut = t.lastIndexOf(' ', MAX_ONE);
+        var dot = t.lastIndexOf('. ', MAX_ONE);
+        if (dot > MAX_ONE * 0.5) cut = dot + 1;
+        if (cut <= 0) cut = MAX_ONE;
+        segs.push({ speaker: s.speaker, text: t.slice(0, cut).trim() });
+        t = t.slice(cut).trim();
+      }
+      if (t) segs.push({ speaker: s.speaker, text: t });
+    });
+    return segs.map(function (s) { return { text: s.text, voice: cast(s.speaker) }; });
+  }
+
+  function batches(segs) {
+    var out = [], cur = [], chars = 0;
+    segs.forEach(function (s) {
+      if (cur.length >= MAX_SEG || (chars + s.text.length) > MAX_CHARS) { out.push(cur); cur = []; chars = 0; }
+      cur.push(s); chars += s.text.length;
+    });
+    if (cur.length) out.push(cur);
+    return out;
+  }
+
+  function ensureTtsToken() {
+    if (TTS.hasToken()) return true;
+    var t = prompt('서버의 공용 TTS 토큰(SG_TTS_TOKEN)을 입력하세요:');
+    if (!t) return false;
+    TTS.setToken(t);
+    return true;
+  }
+
+  /** 저장된 세트에만 붙는다 — 만든 mp3 는 저장된 팩의 경로에 걸리기 때문이다. */
+  function renderAudioBar() {
+    if (!built || !built.pack) { audiobar.hidden = true; return; }
+    var jobs = audioJobs(built.pack);
+    var todo = pendingJobs(built.pack);
+    if (!jobs.length) { audiobar.hidden = true; return; }
+    audiobar.hidden = false;
+    var P = ttsProvider();
+    var chars = todo.reduce(function (n, j) { return n + j.chars; }, 0);
+    var usd = (USD1K[P && P.id] || 0.06) * chars / 1000;
+    ttsBtn.disabled = !P || !P.ready || !todo.length;
+    ttsBtn.textContent = todo.length
+      ? 'Voice ' + todo.length + ' clips with ' + ((P && P.label) || 'the audio AI') +
+        ' · ' + chars.toLocaleString() + ' chars ≈ $' + usd.toFixed(2)
+      : 'All ' + jobs.length + ' clips already have audio on this device';
+    ttsBar.textContent = P && !P.ready ? (P.note || P.why || '') : '';
+  }
+
+  ttsBtn.addEventListener('click', function () {
+    if (!built || !built.pack) return;
+    var P = ttsProvider();
+    if (!P || !P.ready) { ttsWhy(P ? (P.note || P.why) : 'No audio engine.', true); return; }
+    var voices = voicesOf(P.id);
+    if (!voices.length) { ttsWhy(P.label + ' gave no voice list — check the key.', true); return; }
+    if (!ensureTtsToken()) return;
+
+    var todo = pendingJobs(built.pack);
+    if (!todo.length) return;
+    var chars = todo.reduce(function (n, j) { return n + j.chars; }, 0);
+    var usd = (USD1K[P.id] || 0.06) * chars / 1000;
+    if (!confirm(todo.length + ' clips · ' + chars.toLocaleString() + ' characters with ' + P.label +
+        ' ≈ $' + usd.toFixed(2) + '.\n\n' +
+        '만든 mp3 는 이 브라우저에 저장됩니다(IndexedDB). 학생 기기에서도 들리게 하려면 ' +
+        'media/audio/ 에 파일로 넣어 배포해야 합니다.\n\n계속할까요?')) return;
+
+    var cast = caster(voices);
+    var model = ttsModelSel.value, rate = Number(ttsRateEl.value) || 1;
+    ttsBtn.disabled = true;
+    ttsProg.hidden = false;
+    ttsWhy('');
+    var done = 0, madeOk = 0, failed = [];
+
+    /* 한 번에 하나씩 만든다. 병렬로 던지면 공급자가 429 로 끊고, 어디까지 됐는지도
+       알 수 없게 된다 — 이건 돈이 나가는 일이라 진행을 눈으로 볼 수 있어야 한다. */
+    function step(i) {
+      if (i >= todo.length) {
+        ttsBtn.disabled = false;
+        ttsProgLab.textContent = 'Done · ' + madeOk + ' clips voiced' +
+          (failed.length ? ' · ' + failed.length + ' failed' : '');
+        if (failed.length) ttsWhy('Could not voice: ' + failed.slice(0, 3).join(' · ') +
+          (failed.length > 3 ? ' …' : ''), true);
+        renderAudioBar();
+        toast(madeOk + ' clips voiced with ' + P.label + '.');
+        return;
+      }
+      var job = todo[i];
+      ttsProgLab.textContent = (done + 1) + ' / ' + todo.length + ' · ' + job.label;
+      ttsMeter.style.width = Math.round(done / todo.length * 100) + '%';
+
+      var parts = batches(segmentsFor(job.script, cast));
+      var blobs = [];
+      var chain = parts.reduce(function (pr, segs) {
+        return pr.then(function () {
+          return TTS.generate({
+            provider: P.id, model: model, segments: segs, rate: rate,
+            filename: job.path.split('/').pop().replace(/\.mp3$/i, '')
+          }).then(function (out) { blobs.push(out.blob); });
+        });
+      }, Promise.resolve());
+
+      chain.then(function () {
+        var name = job.path.split('/').pop() || 'clip.mp3';
+        var file = new File(blobs, name, { type: 'audio/mpeg' });
+        return SG_AUDIO.setFile(job.key, file);
+      }).then(function () {
+        madeOk++; done++; step(i + 1);
+      })['catch'](function (err) {
+        failed.push(job.label + ' (' + (err && err.message ? err.message : 'failed') + ')');
+        done++; step(i + 1);
+      });
+    }
+    step(0);
+  });
+
   /* -------------------------------------------------------------- 표시 */
 
   var SEC_LABEL = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
@@ -703,6 +1140,8 @@
     /* 겹침 검사를 검산의 일부로 올린다. set-import.js 가 낸 gates 를 건드리지 않고
      * 이 자리에서 덧붙인다 — 파싱 검산(문서를 못 읽었다)과 내용 검산(남의 문항이다)은
      * 원인도 대처도 다르지만, 저장을 막는 조건은 하나로 합쳐져야 한다. */
+    renderAudioBar();
+
     dupRes = runDupCheck(pack);
     var dupGates = [];
     if (!dupRes) {
@@ -947,6 +1386,9 @@
     renderSaved();
     refresh();
     readyAI();   /* 청사진과 AI 프로바이더 목록은 화면이 열린 뒤에 받아 온다 */
+    /* 오디오 엔진도 같다. 이미 걸려 있는 소리를 먼저 읽어야 "무엇이 아직 없는가" 를
+       셀 수 있으므로, 덮어쓰기 저장소가 준비된 뒤에 목록을 받는다. */
+    SG_AUDIO.ready().then(loadTtsCatalog, loadTtsCatalog);
   }
 
   /* 이 화면은 특정 SET 에 매이지 않는다 — 아무 SET 이라도 관리 권한이 있으면 연다.
