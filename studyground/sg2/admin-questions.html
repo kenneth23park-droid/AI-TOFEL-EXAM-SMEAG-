@@ -426,8 +426,8 @@
     '<div class="fld gen">' +
       '<label>🎙 <span data-en>Generate the audio from a script</span><span data-ko>스크립트로 음성 생성</span></label>' +
       '<p class="muted" style="font-size:11.5px;line-height:1.55;margin:0 0 7px">' +
-        '<span data-en>One line per turn — write <b>Speaker 1: …</b> to split speakers; each gets its own voice. ElevenLabs only, so a re-made clip matches the rest of the set. No silence is inserted between turns — for that, rebuild the clip with tools/tts_multivoice.py.</span>' +
-        '<span data-ko>한 줄에 한 대사 — <b>Speaker 1: …</b> 형식으로 쓰면 화자별로 다른 목소리가 배정됩니다. 엔진은 ElevenLabs 하나이며, 그래야 다시 만든 문항도 나머지와 같은 목소리로 들립니다. 화자 사이 무음은 넣지 않습니다 — 필요하면 tools/tts_multivoice.py 로 다시 만드세요.</span></p>' +
+        '<span data-en>One line per turn — write <b>Speaker 1: …</b> to split speakers; each gets its own voice. Keep ElevenLabs here: this set\'s other clips were made with it, and a clip from another engine is the one that sounds wrong. No silence is inserted between turns — for that, rebuild the clip with tools/tts_multivoice.py.</span>' +
+        '<span data-ko>한 줄에 한 대사 — <b>Speaker 1: …</b> 형식으로 쓰면 화자별로 다른 목소리가 배정됩니다. 여기서는 ElevenLabs 를 쓰세요 — 이 세트의 나머지 음원이 그것으로 만들어졌고, 다른 엔진으로 만든 문항만 목소리가 튑니다. 화자 사이 무음은 넣지 않습니다 — 필요하면 tools/tts_multivoice.py 로 다시 만드세요.</span></p>' +
       '<textarea rows="4" data-f="script" placeholder="Speaker 1: Where is the student lounge?&#10;Speaker 2: It&#39;s on the second floor, near the elevators.">' +
         esc(scriptFor(it)) + '</textarea>' +
       /* 엔진 · 언어 · 모델 — mp3 를 그대로 내주는 엔진만 서버가 싣는다. */
@@ -711,8 +711,9 @@
         note = row.querySelector('.engnote');
     if (!ps) return;
     if (!ps.options.length) {
-      // 엔진은 ElevenLabs 하나다. 그래도 드롭다운을 남긴 건 무엇으로 만드는지가
-      // 화면에 적혀 있어야 하기 때문이고, 키가 없으면 그 사실도 여기에 붙는다.
+      // 서버가 아는 엔진 전부(api/tts.js). 이 화면은 **이미 있는 세트의 한 문항**을
+      // 다시 만드는 자리라 ElevenLabs 가 맞지만, 그 계정이 막혔을 때 손이 묶이지
+      // 않도록 나머지도 고를 수 있게 둔다. 키가 없는 엔진은 그 사실이 옆에 붙는다.
       ps.innerHTML = CAT.providers.map(function (p) {
         var tail = p.ready ? (p.byLocalKey ? ' — 이 기기 키' : '') : ' — 키 필요';
         return '<option value="' + esc(p.id) + '">' + esc(p.label) + tail + '</option>';
@@ -738,6 +739,14 @@
     }).join('');
     if ((P.models || []).indexOf(keepM) >= 0) ms.value = keepM;
     else if (P.defaultModel) ms.value = P.defaultModel;
+    /* 속도 — 엔진마다 받는 범위가 다르다(ElevenLabs 0.7–1.2, Deepgram 은 아예 없다).
+       칸의 범위를 엔진에 맞춰 둔다. 서버도 접지만, 접힌 뒤에 알면 왜 안 느려졌는지 모른다. */
+    var rs = row.querySelector('[data-f=rate]'), sp = P.speed;
+    if (rs && sp) {
+      rs.min = sp.min; rs.max = sp.max;
+      rs.disabled = sp.min === sp.max;
+      rs.value = Math.max(sp.min, Math.min(sp.max, Number(rs.value) || 1));
+    }
     note.innerHTML = esc('mp3 ' + P.mp3 + (P.free ? ' · ' + P.free : '') +
       (P.gap ? '' : ' · gap not supported')) + (P.ready ? '' : ' · <b>' + esc(P.note || '') + '</b>');
     /* 계정 목소리 목록을 못 받았을 때. 합성 자체는 되므로 화면은 SET 9 배역표로 서고,
