@@ -11,7 +11,10 @@
     "//": "site/ 는 sg2 의 사본이며 빌드 산출물이다(저장소에 없다). 굽기 전에 반드시 다시 만든다 — 손으로 복사하던 시절 이 사본은 sw.js v1 에 멈춰 있었고, 라이브는 v45 였다.",
     "site": "bash ../sg2/tools/build_desktop_site.sh",
     "dist": "npm run site && electron-builder --mac --dir",
-    "dmg": "npm run site && electron-builder --mac"
+    "//universal": "dmg 는 universal 로 굽는다 — arm64 전용으로 굽던 시절 인텔 맥 학생은 앱을 열지 못했다.",
+    "dmg": "npm run site && electron-builder --mac --universal",
+    "win": "npm run site && electron-builder --win",
+    "all": "npm run site && electron-builder --mac --universal --win"
   },
   "build": {
     "appId": "ai.smeag.studyground",
