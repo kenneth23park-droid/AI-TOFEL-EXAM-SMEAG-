@@ -8,26 +8,22 @@
  *   읽은 채 남는다. 여기서는 팩을 만드는 바로 그 파서(set-import.js)로 대본을 얻으므로
  *   두 벌이 어긋날 길이 없다.
  *
- * 배역
- *   SET 9 에서 계정 라이브러리 실조회로 확정된 13명(config/set9-voice-casting.json)을
- *   그대로 물려받는다. 새 voice_id 를 고르지 않는 이유는 두 가지다 — 이미 검증된 ID 이고,
- *   두 세트를 이어 치르는 학생에게 목소리 세계가 바뀌지 않는다.
+ * 배역은 세트마다 적지 않는다
+ *   자리의 **종류와 순서** 만 보고 규칙(RULES)으로 정한다. 세트가 늘어도 이 파일을
+ *   고치지 않는다 — 그것이 "문서만 넣으면 문항과 음성이 나온다" 의 마지막 조각이다.
+ *   손으로 적은 SET 10 배역표를 규칙으로 바꾼 뒤 --check 로 대조해, 같은 결과가
+ *   나오는 것을 확인하고 표를 지웠다. 규칙은 SET 9 의 designNotes 를 그대로 옮긴 것이다.
  *
- *   배정 원칙은 SET 9 의 designNotes 를 따른다.
- *     · 짧은 응답은 문항마다 다른 사람이다 — 12문항이 한 목소리면 드릴이 단조로워진다.
- *     · 대화는 남녀 한 쌍이고, 쌍은 블록마다 다르다. 같은 두 사람이 세 대화를 다 하면
- *       "누가 말하는가" 를 묻는 문항이 성립하지 않는다.
- *     · 강의·안내는 긴 지문이라 서로 음색이 뚜렷이 갈리는 화자에게만 준다.
- *     · Listen & Repeat 은 세트에서 가장 또렷한 목소리 하나가 끝까지 맡는다.
+ *   목소리 13명은 SET 9 에서 계정 라이브러리 실조회로 확정된 것을 물려받는다
+ *   (config/set9-voice-casting.json). 새 voice_id 를 고르지 않는 이유는 두 가지다 —
+ *   이미 검증된 ID 이고, 두 세트를 이어 치르는 학생에게 목소리 세계가 바뀌지 않는다.
  *
  * 실행
- *   node studyground/sg2/tools/build_voices_manifest.mjs --set 10
- *   node studyground/sg2/tools/build_voices_manifest.mjs --set 10 --check   (쓰지 않고 대조만)
+ *   node studyground/sg2/tools/build_voices_manifest.mjs --set 11
+ *   node studyground/sg2/tools/build_voices_manifest.mjs --set 11 --check   (쓰지 않고 대조만)
  *
- * 만든 뒤 음성 생성
- *   cd studyground/sg2
- *   ELEVENLABS_API_KEY=... python3 tools/tts_multivoice.py \
- *       --manifest tts-voices-set10exam-11labs.json --dry-run
+ * 문서에서 음성까지 한 번에
+ *   cd studyground/sg2 && ELEVENLABS_API_KEY=... sh tools/make_set_audio.sh 11
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -66,44 +62,44 @@ const CAST = {
    값이 없는 종류는 엔진 기본 속도다. */
 const SPEED = { short: 0.75, conversation: 0.9, repeat: 0.7 };
 
-/* SET 10 배역표. 왼쪽은 팩이 만드는 파일 이름(= 그 자리가 무엇인지)이다.
-   대화는 {W, M} 으로 화자별 배역을 적는다. */
-const CASTING = {
-  10: {
-    /* 짧은 응답 — SET 9 Module 1 과 같은 순서로 12명을 한 바퀴 돈다. */
-    'l1-q01': 'US-Ava',   'l1-q02': 'US-Liam',  'l1-q03': 'US-Mia',
-    'l1-q04': 'US-Mason', 'l1-q05': 'GB-Alice', 'l1-q06': 'GB-Henry',
-    'l1-q07': 'AU-Lily',  'l1-q08': 'US-Noah',  'l1-q09': 'US-Emma',
-    'l1-q10': 'US-Ethan', 'l1-q11': 'US-Zoe',   'l1-q12': 'GB-Oliver',
-
-    /* 대화 세 개 — 쌍이 겹치지 않는다. */
-    'l1-q13-14': { W: 'US-Emma', M: 'US-Liam' },
-    'l1-q15-16': { W: 'US-Mia',  M: 'US-Ethan' },
-    'l1-q17-18': { W: 'US-Zoe',  M: 'US-Mason' },
-
-    /* 안내 방송 셋 · 강의 둘 — 긴 지문이라 음색이 가장 멀리 떨어진 화자에게 준다. */
-    'l1-q19-20': 'US-Liam',
-    'l1-q21-22': 'US-Ethan',
-    'l1-q23-24': 'US-Mason',
-    'l1-q25-28': 'GB-Oliver',
-    'l1-q29-32': 'GB-Henry',
-
-    /* Module 2 짧은 응답 — SET 9 Module 2 와 같은 셋. */
-    'l2-q01': 'US-Ava', 'l2-q02': 'US-Emma', 'l2-q03': 'GB-Ivy',
-
-    /* Module 2 대화 — Module 1 에서 이미 짝지은 네 쌍과 겹치지 않게 고른다. */
-    'l2-q04-05': { W: 'GB-Ivy',  M: 'US-Noah' },
-    'l2-q06-07': { W: 'AU-Lily', M: 'US-Mason' },
-
-    /* Module 2 강의 둘 — Module 1 의 두 강의(GB 남성 둘)와 갈리도록 US 남/여로 둔다. */
-    'l2-q08-11': 'US-Ethan',
-    'l2-q12-15': 'US-Mia',
-
-    /* 스피킹 — 따라 읽기는 가장 또렷한 목소리, 면접은 SET 9 과 같은 진행자. */
-    's1': 'US-Emma',
-    's2': 'GB-Oliver'
-  }
+/* 배역 배정 규칙.
+ *
+ * 세트마다 표를 손으로 적으면 "문서만 넣으면 끝" 이 되지 않는다. 자리의 **종류와 순서**만
+ * 보고 정하는 규칙으로 둔다 — SET 11, 12 도 이 파일을 고치지 않고 돌아간다.
+ * 순서는 팩이 만드는 순서(문서 순서)이므로 같은 문서를 두 번 넣어도 배역이 흔들리지 않는다.
+ *
+ * 규칙은 SET 9 의 designNotes 를 그대로 옮긴 것이다.
+ *   · 짧은 응답은 문항마다 다른 사람 — 모듈마다 목록을 처음부터 돈다.
+ *   · 대화는 남녀 한 쌍이고, 쌍 목록을 순서대로 쓴다. 세트 안에서 앞 대화와 겹치지 않는다.
+ *   · 강의·안내는 음색이 가장 멀리 떨어진 화자부터 돌려 쓴다.
+ *   · Listen & Repeat 은 세트에서 가장 또렷한 목소리 하나가 끝까지 맡는다.
+ *   · 면접은 진행자 한 명이 끝까지 맡는다.
+ */
+const RULES = {
+  /* 짧은 응답 — 모듈별로 다른 목록을 쓴다. Module 2 는 문항이 적어 셋만 돈다. */
+  short: {
+    1: ['US-Ava', 'US-Liam', 'US-Mia', 'US-Mason', 'GB-Alice', 'GB-Henry',
+        'AU-Lily', 'US-Noah', 'US-Emma', 'US-Ethan', 'US-Zoe', 'GB-Oliver'],
+    2: ['US-Ava', 'US-Emma', 'GB-Ivy']
+  },
+  /* 대화 — 세트 안에서 나온 순서대로. 다섯 쌍이면 대화 다섯 개까지 서로 겹치지 않는다. */
+  conversation: [
+    { W: 'US-Emma', M: 'US-Liam' },
+    { W: 'US-Mia',  M: 'US-Ethan' },
+    { W: 'US-Zoe',  M: 'US-Mason' },
+    { W: 'GB-Ivy',  M: 'US-Noah' },
+    { W: 'AU-Lily', M: 'US-Mason' }
+  ],
+  /* 안내 방송·강의 — 긴 지문이라 음색 대비가 가장 큰 순서로 돌린다. */
+  announcement: ['US-Liam', 'US-Ethan', 'US-Mason', 'GB-Oliver', 'GB-Henry', 'US-Ethan', 'US-Mia'],
+  /* 스피킹 — 따라 읽기는 가장 또렷한 목소리, 면접은 진행자 한 명. */
+  repeat: 'US-Emma',
+  interview: 'GB-Oliver'
 };
+
+/* 규칙으로 정하기 어려운 자리만 세트별로 덮어쓴다. 비어 있는 것이 정상이다 —
+   여기에 무언가 적히기 시작하면 규칙이 현실을 못 따라간다는 신호다. */
+const OVERRIDE = {};
 
 /* ------------------------------------------------------------------ */
 
@@ -117,11 +113,29 @@ function readDocx(name) {
 /** 'media/audio/set10/l1-q13-14.mp3' → 'l1-q13-14' */
 function slotOf(p) { return String(p).split('/').pop().replace(/\.mp3$/, ''); }
 
-/** 배역표에서 이 자리의 배역을 찾는다. 스피킹은 Task 단위로 한 명이다. */
-function roleFor(casting, slot) {
-  if (casting[slot]) return casting[slot];
-  const task = /^(s\d)-/.exec(slot);
-  return task ? casting[task[1]] : null;
+/**
+ * 이 자리의 배역을 정한다. 종류마다 셈틀(cursor)을 따로 두고 문서 순서대로 돌린다 —
+ * 자리의 이름이 아니라 **몇 번째 그 종류인가** 로 정하므로 세트가 바뀌어도 규칙이 산다.
+ * @param {object} cur {short:{모듈번호:n}, conversation:n, announcement:n}
+ */
+function roleFor(setNo, slot, kind, cur) {
+  const over = (OVERRIDE[setNo] || {})[slot];
+  if (over) return over;
+
+  if (kind === 'repeat' || kind === 'interview') return RULES[kind];
+  /* 안내 방송(instructions)은 그 Task 를 맡은 사람이 그대로 읽는다 — 안내와 문항이
+     다른 목소리면 학생은 둘을 다른 사람으로 듣는다. */
+  if (kind === 'instructions') return /^s1-/.test(slot) ? RULES.repeat : RULES.interview;
+
+  if (kind === 'short') {
+    const mod = (/^l(\d)-/.exec(slot) || [, '1'])[1];
+    const list = RULES.short[mod] || RULES.short[1];
+    const n = (cur.short[mod] = (cur.short[mod] || 0));
+    cur.short[mod] = n + 1;
+    return list[n % list.length];
+  }
+  if (kind === 'conversation') return RULES.conversation[cur.conversation++ % RULES.conversation.length];
+  return RULES.announcement[cur.announcement++ % RULES.announcement.length];
 }
 
 function kindOf(slot, speakers) {
@@ -136,12 +150,6 @@ const main = async () => {
   const argv = process.argv.slice(2);
   const setNo = +(argv[argv.indexOf('--set') + 1] || 10);
   const checkOnly = argv.includes('--check');
-  const casting = CASTING[setNo];
-  if (!casting) {
-    console.error(`SET ${setNo} 배역표가 없습니다 — 이 파일의 CASTING 에 먼저 적어 주세요.`);
-    process.exit(2);
-  }
-
   const sources = {
     questions: `NEW TOEFL MOCK TEST SET ${setNo} Questions.docx`,
     script: `SET ${setNo} SCRIPT.docx`,
@@ -166,6 +174,7 @@ const main = async () => {
   const jobs = PLAN.jobsFrom(result.pack);
   const items = [];
   const unknown = [];
+  const cur = { short: {}, conversation: 0, announcement: 0 };
   let chars = 0;
 
   jobs.forEach((job) => {
@@ -173,7 +182,7 @@ const main = async () => {
     const lines = PLAN.parseScript(job.script);
     const speakers = [...new Set(lines.map((l) => l.speaker))];
     const kind = kindOf(slot, speakers);
-    const role = roleFor(casting, slot);
+    const role = roleFor(setNo, slot, kind, cur);
     if (!role) { unknown.push(slot); return; }
 
     const segments = lines.map((l) => {
@@ -193,7 +202,7 @@ const main = async () => {
   });
 
   if (unknown.length) {
-    console.error('배역이 정해지지 않은 자리가 있습니다 — CASTING 에 적어 주세요:\n  ' + unknown.join('\n  '));
+    console.error('배역이 정해지지 않은 자리가 있습니다 — RULES 나 OVERRIDE 를 보태 주세요:\n  ' + unknown.join('\n  '));
     process.exit(1);
   }
 
