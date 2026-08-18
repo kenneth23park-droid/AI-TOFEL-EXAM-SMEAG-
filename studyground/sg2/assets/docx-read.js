@@ -47,6 +47,20 @@
   }
 
   function inflateRaw(bytes) {
+    /* Node's DecompressionStream currently does not expose deflate-raw on all
+       supported runtimes. Keep the browser path dependency-free, but use the
+       built-in zlib path for the import regression tests and CLI tools. */
+    if (typeof module !== 'undefined' && module.exports && typeof require === 'function') {
+      try {
+        var zlib = require('node:zlib');
+        return new Promise(function (resolve, reject) {
+          zlib.inflateRaw(Buffer.from(bytes), function (err, out) {
+            if (err) reject(err);
+            else resolve(new Uint8Array(out));
+          });
+        });
+      } catch (e) { /* use the browser implementation below */ }
+    }
     if (typeof DecompressionStream !== 'function') {
       return Promise.reject(new Error('이 브라우저는 DecompressionStream 을 지원하지 않습니다 — 최신 Chrome/Edge/Safari 에서 열어 주세요.'));
     }

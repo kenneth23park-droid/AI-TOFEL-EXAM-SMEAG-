@@ -366,7 +366,12 @@
 //      1.80 → 1.78 로 같은 자리). v80 에서 나머지 화면만 옮겨 두어, 시험에 들어가는
 //      순간 색이 갈라지고 있었다. exam.css 는 셸 자산이라 판올림해야 재방문 기기에
 //      도착한다.
-const VERSION = 'sg-v82';
+// v83: SET 10 이 저장소에 들어왔다 — assets/set10.js. 여태 이 세트는 가져오기를 한
+//      브라우저의 localStorage 에만 있어서, 배포된 사이트에서는 카드도 자료도 없었다.
+//      이제 set9.js 와 같은 자리에 커밋된 파일로 서고(tools/build_set10.mjs 가 원본
+//      docx 3종에서 굽는다), tests.html 에 SET 10 카드가 선다. 둘 다 셸 자산이라
+//      판올림해야 재방문 기기가 옛 목록을 계속 보지 않는다.
+const VERSION = 'sg-v83';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -426,7 +431,7 @@ const SHELL_ASSETS = [
   // 검사기는 오프라인이면 조용히 물러나므로 프리캐시해도 시험장에서 걸리지 않는다.
   'assets/build-version.js', 'assets/sg-update-check.js',
 
-  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js',
+  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',
   'manifest.webmanifest',
 

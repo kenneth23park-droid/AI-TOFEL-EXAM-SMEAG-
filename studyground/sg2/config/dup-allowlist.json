@@ -6,7 +6,7 @@
     "pair 는 리포트의 key 를 그대로 쓴다(양쪽 순서는 바뀌어도 인식한다).",
     "새 SET 을 넣기 전에 이 파일을 먼저 읽을 것: 여기 있는 판정은 그 시점의 말뭉치 기준이다."
   ],
-  "reviewedAt": "2026-08-10",
+  "reviewedAt": "2026-08-18",
   "allow": [
     {
       "pair": "SET1::R2-11 | SET9::R2-11",
@@ -23,6 +23,30 @@
     {
       "pair": "SET9::R1-25 | SET9::R1-26",
       "reason": "같은 수업 안내표(Class A~G) 하나를 공유하는 문항 쌍이다. 선택지가 표의 항목 라벨이라 'Class C'/'Class D' 가 겹치는 것이 정상이며, 조건(Michael vs Alex)과 정답이 다르다. 표를 공유하는 문항 묶음은 리딩에서 의도된 설계다."
+    },
+    {
+      "pair": "SET10::blk:S2:0 | SET9::blk:S2:0",
+      "reason": "스피킹 Task 2 의 지시문 틀이다 — 문항이 아니라 안내문이다. 'You have volunteered for a research study about X. You will have a short online interview with a researcher…' 는 이 과제 유형의 고정 문구이고, 다른 것은 연구 주제뿐이다(SET 9 = Exercise and Physical activity, SET 10 = sports activities). 뒤따르는 인터뷰 질문 4개는 양쪽이 전부 다르다."
+    },
+    {
+      "pair": "SET10::R1-27 | SET9::R1-31",
+      "reason": "어휘 문항(vocabulary in context) 의 고정 발문 'The word “X” in paragraph 1 is closest in meaning to' 만 같다. 묻는 단어(penetrate vs revolutionizing)도 선택지 4개도 전부 다르다."
+    },
+    {
+      "pair": "SET10::R1-31 | SET9::R1-31",
+      "reason": "같은 어휘 문항 틀. 묻는 단어(paramount vs revolutionizing)와 선택지가 전부 다르다."
+    },
+    {
+      "pair": "SET10::R2-12 | SET9::R2-11",
+      "reason": "같은 어휘 문항 틀. 묻는 단어(proxy vs diminishing)와 선택지가 전부 다르다."
+    },
+    {
+      "pair": "SET1::R2-11 | SET10::R2-12",
+      "reason": "같은 어휘 문항 틀. 묻는 단어(equitable vs proxy)와 선택지가 전부 다르다."
+    },
+    {
+      "pair": "SET10::R1-27 | SET10::R1-31",
+      "reason": "SET 10 안에서 같은 어휘 문항 틀이 두 번 쓰였다(penetrate · paramount). 한 세트에 어휘 문항이 여럿인 것은 정상이며 지문 문단도 선택지도 다르다."
     }
   ]
 }

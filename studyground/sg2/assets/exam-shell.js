@@ -42,10 +42,10 @@ window.SG_RUNTIME = (function () {
 
   /* 컴파일러(exam-compile.js)·타이밍 로더(exam-timing.js)가 아직 없어도 셸이 동작하도록
      선택적으로 로드한다. 404 여도 진행한다(F12: 시험을 멈추지 않는다). */
-  /* 어떤 콘텐츠 팩을 실을지 — `?set=set1|set9`, 없으면 `?testId=` 에서 유추한다.
-     알 수 없는 값은 조용히 set1 로 떨어뜨린다(F12: 시험을 멈추지 않는다).
+  /* 어떤 콘텐츠 팩을 실을지 — `?set=set1|set9|set10`, 없으면 `?testId=` 에서 유추한다.
+     선택한 세트가 없으면 다른 세트로 조용히 떨어뜨리지 않는다.
      exam-engine.js 의 parseUrl 은 이 파라미터를 모르므로 여기서 직접 읽는다. */
-  var SET_IDS = { set1: 'SMEAG_SET1', set9: 'SMEAG_SET9' };
+  var SET_IDS = { set1: 'SMEAG_SET1', set9: 'SMEAG_SET9', set10: 'SMEAG_SET10' };
 
   /* 업로드로 만든 세트(admin-set-import.html)는 저장소에 커밋된 파일이 없고
      assets/set-store.js 가 부팅할 때 window.SMEAG_<SLUG> 로 올린다. 그래서 여기서는
@@ -74,14 +74,39 @@ window.SG_RUNTIME = (function () {
 
   var SET_ID = currentSetId();
 
-  /* 선택된 팩의 전역. 로드 실패 시 set1 로 폴백한다. */
+  /* 선택된 팩의 전역. 로드 실패 시 오류 화면으로 멈춘다. */
   function contentPack() {
-    var p = window[globalFor(SET_ID)] || window.SMEAG_SET1 || null;
+    // An explicitly selected set must never silently become another set.
+    var p = window[globalFor(SET_ID)] || null;
     /* 렌더러들은 문항 본문을 콘텐츠 팩에서 되찾는다. 어떤 팩이 활성인지 알려주는
-       유일한 채널이 이 전역이다. 설정하지 않으면 렌더러가 SMEAG_SET1 로 폴백하므로
-       set9 에서 listening/writing 화면이 placeholder 로 떨어진다. */
+       유일한 채널이 이 전역이다. */
     window.SG_CONTENT_PACK = p;
     return p;
+  }
+
+  function validContentPack(pack) {
+    if (!pack || !Array.isArray(pack.sections) || !pack.sections.length) return false;
+    var required = { reading: true, listening: true, writing: true, speaking: true };
+    for (var i = 0; i < pack.sections.length; i++) {
+      var sec = pack.sections[i];
+      if (!sec || !required[sec.id] || !Array.isArray(sec.modules)) return false;
+      for (var j = 0; j < sec.modules.length; j++) {
+        var mod = sec.modules[j];
+        if (!mod || !mod.id || !Array.isArray(mod.blocks)) return false;
+        for (var k = 0; k < mod.blocks.length; k++) {
+          if (!mod.blocks[k] || !Array.isArray(mod.blocks[k].questions)) return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function contentErrorScreens(message) {
+    return [{ id: 'content.error', screenType: 'instruction', section: routeSection() || 'reading',
+      advance: 'manual', timer: null,
+      copy: { titleEn: 'Test content unavailable', titleKo: '시험 자료를 불러오지 못했습니다.',
+        bodyEn: message, bodyKo: '선택한 시험 세트의 자료가 없거나 손상되었습니다. 관리자에게 문의하세요.',
+        ctaEn: 'Exit Test', ctaKo: '시험 종료' } }];
   }
 
   var OPTIONAL = ['assets/exam-types.js', 'assets/exam-timing.js', 'assets/exam-media.js',
@@ -177,6 +202,11 @@ window.SG_RUNTIME = (function () {
 
   function buildScreens(t) {
     var pack = contentPack();
+    if (!validContentPack(pack)) {
+      var missing = SET_ID.toUpperCase();
+      if (window.console) window.console.error('[content] missing or invalid pack:', missing);
+      return contentErrorScreens('The selected test set ' + missing + ' is missing or invalid.');
+    }
     if (window.SG_COMPILE && typeof window.SG_COMPILE.compileScreens === 'function' && pack) {
       try {
         // profile 은 'toefl' | 'ielts' 두 값만 — exam.id 는 'toefl-nt' 같은 식별자라 그대로 넘기면 안 된다.
@@ -187,9 +217,14 @@ window.SG_RUNTIME = (function () {
           if (out.warnings && out.warnings.length && window.console) window.console.warn('[compile]', out.warnings);
           return out.screens;
         }
-      } catch (e) { if (window.console) window.console.warn('[compile] failed; using fallback screens', e); }
+        if (window.console) window.console.error('[compile] produced no screens for', SET_ID, out && out.warnings);
+      } catch (e) {
+        if (window.console) window.console.error('[compile] failed for ' + SET_ID, e);
+        return contentErrorScreens('The selected test set could not be compiled.');
+      }
     }
-    return fallbackScreens(t);
+    if (window.console) window.console.error('[compile] compiler unavailable for', SET_ID);
+    return contentErrorScreens('The test content compiler is unavailable.');
   }
 
   /* ── 섹션 범위 ─────────────────────────────────────────────
