@@ -1,0 +1,49 @@
+{
+  "_note": [
+    "재활용을 심어 둔 세트. 두 가지가 들어 있다.",
+    "  1) 'Why Cities Are Planting Trees Again' 지문의 두 문단을 글자 그대로 옮긴 것",
+    "  2) 11번 문항의 선택지 4개 중 3개를 그대로 쓰고 발문만 다시 쓴 것",
+    "dup_gate 가 이 둘을 stop 으로 잡지 못하면 게이트가 죽어 있는 것이다."
+  ],
+  "code": "SET F2",
+  "title": "Fixture set — recycled on purpose",
+  "sections": [
+    {
+      "id": "reading",
+      "label": "Reading",
+      "modules": [
+        {
+          "id": "R1",
+          "label": "Reading Practice 1",
+          "blocks": [
+            {
+              "kind": "passage",
+              "heading": "Questions 1-2",
+              "instruction": "Read a passage.",
+              "title": "Trees in the Modern City",
+              "paragraphs": [
+                "The job is mainly cooling. A mature tree moves water from the soil into the air, and that process removes heat in the same way that sweat cools skin. Measurements in several European cities show that a shaded street can be four degrees cooler than a similar street nearby without trees. The difference matters most on summer nights, when heat stored in concrete keeps flats warm long after sunset. Similar results appear in a survey of North American cities.",
+                "Trees also slow rainfall. Leaves hold part of a storm and release it gradually, so less water reaches the drains at once. Councils that once paid to enlarge underground pipes now find that planting is cheaper. The catch is patience: a young tree gives little shade, and the benefit that pays for the work arrives twenty years later, usually after the council that planted it has left office."
+              ],
+              "questions": [
+                {
+                  "id": "setf2-R1-q01",
+                  "kind": "mcq",
+                  "no": 1,
+                  "prompt": "Before a volunteer session begins, what is required of the volunteer?",
+                  "choices": [
+                    "Bring a set of tools from home",
+                    "Sign up a week in advance",
+                    "Arrive before nine in the morning",
+                    "Show a valid student card"
+                  ],
+                  "answer": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

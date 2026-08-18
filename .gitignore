@@ -44,3 +44,11 @@ studyground/sg2/media/audio/_set9_backup_say/
 
 # ── Supabase 백업 (tools/backup_supabase.py 가 받는 실데이터 · 학생 개인정보) ──
 studyground/backups/
+
+# ── 커밋기록집 PDF 굽기의 중간·최종 산출물 (tmp/pdfs/build_*.py 가 재생성) ──
+tmp/
+output/
+
+# ── 파이썬 바이트코드 ─────────────────────────────────────────────
+__pycache__/
+*.pyc

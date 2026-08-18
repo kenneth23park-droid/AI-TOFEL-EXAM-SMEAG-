@@ -1,0 +1,198 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>{{DOC_TITLE}}</title>
+<!--
+  build_book.py 가 채워 넣는 조판 템플릿. 손으로 열어 고치는 파일이 아니다.
+
+  왜 페이지를 브라우저에 맡기지 않고 여기서 직접 나누나.
+  색인 때문이다. Chrome 이 알아서 흘려 나눈 페이지는 밖에서 번호를 알 방법이 없다
+  (PDF 라이브러리 없이 PDF 를 되읽을 수 없다). 그래서 아래 스크립트가 A4 본문 상자를
+  직접 만들고 덩어리(.atom)를 하나씩 담는다. 우리가 만든 상자의 순번이 곧 인쇄 페이지
+  번호이므로, 색인에 적히는 숫자는 추정이 아니라 실측이다.
+
+  앞붙이(표지·목차)는 로마숫자로 따로 센다. 목차가 길어져 한 장 늘어도 본문 1쪽이
+  밀리지 않게 하려는 것이다 — 밀리면 1차 패스에서 잰 색인 번호가 2차 패스에서 전부
+  틀어진다. 색인은 책 뒤에 붙으므로 본문 번호에 영향을 주지 않는다.
+-->
+<style>{{PRINT_CSS}}</style>
+
+<div id="src-front">{{FRONT}}</div>
+<div id="src">{{BODY}}</div>
+<div id="src-back">{{BACK}}</div>
+<script id="page-map" type="application/json">null</script>
+<script>
+(function () {
+  var META = {{META}};
+
+  function roman(n) {
+    var map = [[1000,'m'],[900,'cm'],[500,'d'],[400,'cd'],[100,'c'],[90,'xc'],
+               [50,'l'],[40,'xl'],[10,'x'],[9,'ix'],[5,'v'],[4,'iv'],[1,'i']];
+    var out = '';
+    for (var i = 0; i < map.length; i++) {
+      while (n >= map[i][0]) { out += map[i][1]; n -= map[i][0]; }
+    }
+    return out;
+  }
+
+  /* #src 의 자손을 조판 단위로 편다.
+     .split 은 "안쪽으로 들어가서 나눠도 되는 그릇"(지문·모듈), 그 외는 통째로
+     한 페이지에 들어가야 하는 덩어리(.atom)다. 문항이 페이지 경계에서 잘리면
+     학생이 선택지 일부를 못 본 채 답을 고르게 되므로 문항은 늘 덩어리다. */
+  function flatten(root) {
+    var out = [];
+    (function walk(node, head, cont) {
+      var kids = node.children;
+      for (var i = 0; i < kids.length; i++) {
+        var el = kids[i];
+        var h = el.getAttribute('data-head') || head;
+        var c = el.getAttribute('data-cont') || cont;
+        if (el.className && (' ' + el.className + ' ').indexOf(' split ') >= 0) {
+          walk(el, h, c);
+        } else {
+          out.push({
+            el: el,
+            head: h || '',
+            cont: c || '',
+            keepNext: el.hasAttribute('data-keepnext'),
+            breakBefore: el.hasAttribute('data-break')
+          });
+        }
+      }
+    })(root, '', '');
+    return out;
+  }
+
+  var book = document.createElement('div');
+  book.id = 'book';
+  document.body.appendChild(book);
+
+  var overflow = [];
+  var pages = [];      /* {el, flow, label, arabic} */
+
+  function newPage(label, headText, contText) {
+    var p = document.createElement('div');
+    p.className = 'page';
+    var h = document.createElement('div');
+    h.className = 'page-head';
+    h.innerHTML = '<span>' + (headText || '') + '</span><span>' + (META.runhead || '') + '</span>';
+    var f = document.createElement('div');
+    f.className = 'page-flow';
+    var ft = document.createElement('div');
+    ft.className = 'page-foot';
+    ft.innerHTML = '<span>' + (META.footLeft || '') + '</span>' +
+                   '<span class="page-no">' + label + '</span>';
+    p.appendChild(h); p.appendChild(f); p.appendChild(ft);
+    if (contText) {
+      var note = document.createElement('h3');
+      note.className = 'passage-t';
+      note.innerHTML = contText + ' <span class="cont">(continued)</span>';
+      f.appendChild(note);
+    }
+    book.appendChild(p);
+    pages.push({ el: p, flow: f, label: label });
+    return f;
+  }
+
+  function fits(flow) { return flow.scrollHeight <= flow.clientHeight + 1; }
+
+  /* 한 흐름(앞붙이 / 본문 / 뒤붙이)을 페이지에 담는다.
+     numbering: 'roman' 또는 'arabic'. arabic 은 본문과 뒤붙이가 이어서 센다. */
+  var arabic = 0, romanN = 0;
+  function paginate(srcId, numbering) {
+    var src = document.getElementById(srcId);
+    var items = flatten(src);
+    if (!items.length) return;
+    var flow = null, curHead = null, curCont = null;
+
+    function open(head, cont) {
+      var label;
+      if (numbering === 'roman') { romanN++; label = roman(romanN); }
+      else { arabic++; label = String(arabic); }
+      curHead = head; curCont = cont;
+      flow = newPage(label, head, cont);
+    }
+
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (!flow || it.breakBefore || it.head !== curHead) open(it.head, '');
+      flow.appendChild(it.el);
+      var ok = fits(flow);
+      /* 제목만 페이지 끝에 홀로 남는 것을 막는다 — 다음 덩어리와 함께 넘긴다. */
+      if (ok && it.keepNext && items[i + 1]) {
+        flow.appendChild(items[i + 1].el);
+        if (!fits(flow)) {
+          flow.removeChild(items[i + 1].el);
+          flow.removeChild(it.el);
+          ok = false;
+        } else {
+          flow.removeChild(items[i + 1].el);
+        }
+      }
+      if (!ok) {
+        if (flow.childNodes.length && flow.contains(it.el)) flow.removeChild(it.el);
+        var wasEmptyPage = !flow.querySelector('.atom');
+        open(it.head, it.cont || curCont);
+        flow.appendChild(it.el);
+        if (!fits(flow) || wasEmptyPage) {
+          /* 빈 페이지에도 안 들어가는 덩어리다. 자르지 않고 넘치게 두되
+             무엇이 넘쳤는지는 반드시 알린다 — 조용히 잘리면 인쇄 후에 안다. */
+          overflow.push(it.el.id || it.el.className || 'unnamed block');
+        }
+      }
+    }
+  }
+
+  paginate('src-front', 'roman');
+  paginate('src', 'arabic');
+  var bodyPages = arabic;          /* 본문만의 마지막 번호. 색인은 이 뒤에 붙는다. */
+  paginate('src-back', 'arabic');
+
+  /* ── 실측 수집 ──────────────────────────────────────────────────────── */
+  function pageOf(el) {
+    var n = el;
+    while (n && n !== document.body) {
+      if (n.className && (' ' + n.className + ' ').indexOf(' page ') >= 0) {
+        for (var i = 0; i < pages.length; i++) if (pages[i].el === n) return pages[i].label;
+      }
+      n = n.parentNode;
+    }
+    return null;
+  }
+
+  var terms = {};
+  var marks = document.querySelectorAll('#book .ix');
+  for (var i = 0; i < marks.length; i++) {
+    var t = marks[i].getAttribute('data-t');
+    var p = pageOf(marks[i]);
+    if (!t || p === null) continue;
+    if (!terms[t]) terms[t] = [];
+    if (terms[t].indexOf(p) < 0) terms[t].push(p);
+  }
+
+  var toc = [];
+  var tocEls = document.querySelectorAll('#book [data-toc]');
+  for (var j = 0; j < tocEls.length; j++) {
+    var spec = tocEls[j].getAttribute('data-toc').split('|');
+    toc.push({ id: tocEls[j].id, level: Number(spec[0]), label: spec[1], page: pageOf(tocEls[j]) });
+  }
+
+  var anchors = {};
+  var anch = document.querySelectorAll('#book [data-anchor]');
+  for (var k = 0; k < anch.length; k++) {
+    anchors[anch[k].getAttribute('data-anchor')] = pageOf(anch[k]);
+  }
+
+  document.getElementById('page-map').textContent = JSON.stringify({
+    pass: META.pass,
+    frontPages: romanN,
+    bodyPages: bodyPages,
+    backPages: arabic - bodyPages,
+    totalPages: pages.length,
+    terms: terms,
+    toc: toc,
+    anchors: anchors,
+    overflow: overflow
+  });
+  document.documentElement.setAttribute('data-paginated', '1');
+})();
+</script>

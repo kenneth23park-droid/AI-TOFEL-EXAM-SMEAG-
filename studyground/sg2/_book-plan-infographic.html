@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOEFL Practice Book — Build Plan</title>
+<style>
+  :root{
+    --ink:#14171b; --ink2:#3b434d; --mut:#79828f; --line:#dde2e9; --line2:#eef1f5;
+    --paper:#fff; --bg:#eef1f5; --soft:#f7f9fb;
+    --a1:#1f5c8b; --a1s:#e4edf4;
+    --a2:#8a5a12; --a2s:#f7efdd;
+    --a3:#2f6b4f; --a3s:#e4f0ea;
+    --a4:#6b3f6e; --a4s:#f0e8f1;
+    --bad:#8d2f2f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    -webkit-font-smoothing:antialiased}
+  header.bar{position:sticky;top:0;z-index:9;background:rgba(255,255,255,.93);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);padding:12px 22px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .bar h1{font-size:14px;margin:0;font-weight:650;letter-spacing:-.01em}
+  .bar .sub{font-size:11.5px;color:var(--mut)}
+  .bar .sp{flex:1}
+  button{font:inherit;font-size:12px;padding:6px 12px;border:1px solid var(--line);background:#fff;
+    border-radius:7px;cursor:pointer;color:var(--ink2)}
+  button:hover{border-color:var(--a1);color:var(--a1)}
+
+  main{max-width:1120px;margin:0 auto;padding:30px 22px 90px}
+
+  .hero{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:30px 30px 26px;margin-bottom:16px}
+  .hero .eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--a1);font-weight:700}
+  .hero h2{font-size:34px;margin:8px 0 4px;letter-spacing:-.02em;line-height:1.1}
+  .hero .h2ko{font-size:16px;color:var(--mut);font-weight:500;margin-bottom:18px}
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:20px}
+  .stat{background:#fff;padding:14px 16px}
+  .stat b{display:block;font-size:26px;letter-spacing:-.02em;line-height:1}
+  .stat span{display:block;font-size:11px;color:var(--ink2);margin-top:6px;font-weight:600}
+  .stat em{display:block;font-size:10.5px;color:var(--mut);font-style:normal;margin-top:2px}
+
+  section{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px 30px 28px;margin-bottom:16px}
+  .sh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  .sn{font-size:10.5px;font-weight:700;color:#fff;background:var(--ink);border-radius:5px;padding:3px 7px;letter-spacing:.05em}
+  .sh h3{font-size:20px;margin:0;letter-spacing:-.02em}
+  .shko{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .lede{font-size:13.5px;color:var(--ink2);line-height:1.65;margin:0 0 20px;max-width:78ch}
+  .lede .ko{color:var(--mut)}
+
+  svg{width:100%;height:auto;display:block}
+  svg text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+  .t-lab{font-size:13.5px;font-weight:650;fill:var(--ink)}
+  .t-labko{font-size:11px;font-weight:400;fill:var(--mut)}
+  .t-bd{font-size:11.5px;fill:var(--ink2)}
+  .t-bdko{font-size:11px;fill:var(--mut)}
+  .t-tiny{font-size:9.5px;fill:var(--mut);letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+  .t-num{font-size:10.5px;font-weight:700;fill:#fff}
+  .t-mono{font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--ink2)}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);
+    font-weight:700;padding:0 12px 8px 0;border-bottom:1px solid var(--line)}
+  td{padding:11px 12px 11px 0;border-bottom:1px solid var(--line2);vertical-align:top;color:var(--ink2)}
+  td b{color:var(--ink);font-weight:650}
+  td .ko{display:block;color:var(--mut);font-size:11.5px;margin-top:3px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;
+    background:var(--soft);border:1px solid var(--line2);border-radius:4px;padding:1px 5px;color:var(--ink)}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--soft)}
+  .card h4{margin:0;font-size:13.5px;letter-spacing:-.01em}
+  .card .ko{display:block;font-size:11px;color:var(--mut);font-weight:400;margin-top:3px}
+  .card p{margin:10px 0 0;font-size:12px;color:var(--ink2);line-height:1.6}
+
+  .note{margin-top:18px;padding:14px 16px;border-left:3px solid var(--a2);background:var(--a2s);
+    border-radius:0 8px 8px 0;font-size:12.5px;color:var(--ink2);line-height:1.6}
+  .note b{color:var(--ink)}
+  .note .ko{color:#7a6231}
+
+  .ask{background:var(--ink);color:#e9edf2;border-color:var(--ink)}
+  .ask h3,.ask .sh h3{color:#fff}
+  .ask .shko{color:#98a3b0}
+  .ask .sn{background:#fff;color:var(--ink)}
+  .ask ol{margin:6px 0 0;padding-left:20px;font-size:13px;line-height:1.9;color:#cfd7e0}
+  .ask ol b{color:#fff}
+  .ask ol .ko{color:#98a3b0;font-size:11.5px}
+
+  body.no-ko .ko{display:none}
+  @media (max-width:840px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .grid3,.grid2{grid-template-columns:1fr}
+    .hero h2{font-size:26px}
+  }
+  @media print{body{background:#fff}header.bar{display:none}section,.hero{break-inside:avoid;box-shadow:none}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <h1>TOEFL Practice Book — Build Plan</h1>
+  <span class="sub">what we are building, and how it gets built · 제작 계획 인포그래픽</span>
+  <span class="sp"></span>
+  <button id="tko">Hide Korean</button>
+  <button onclick="print()">Print / PDF</button>
+</header>
+
+<main>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="eyebrow">Admin site · new module</div>
+  <h2>TOEFL Practice Book “B2 Level Up”</h2>
+  <div class="h2ko ko">섹션별 10장 연습북 — 검색되는 PDF, 인덱스, 리스닝 오디오까지 한 소스에서</div>
+  <p class="lede">
+    Four books, one per section. Each book is ten chapters. Every chapter is authored once as JSON and then
+    printed as a searchable PDF, published as a runnable exam set, and indexed for site-wide search.
+    <span class="ko">네 권을 섹션별로 나누고 각 권을 10장으로 만든다. 장 하나를 JSON으로 한 번만 저작하면
+    검색되는 PDF, 실제 응시 가능한 세트, 사이트 검색 색인이 함께 나온다.</span>
+  </p>
+  <div class="stats">
+    <div class="stat"><b>4</b><span>Books</span><em class="ko">권 · 섹션별</em></div>
+    <div class="stat"><b>40</b><span>Chapters</span><em class="ko">장 · 권당 10장</em></div>
+    <div class="stat"><b>3</b><span>Editions each</span><em class="ko">학생 / 정답 / 교사</em></div>
+    <div class="stat"><b>120</b><span>PDF outputs</span><em class="ko">최종 산출 PDF</em></div>
+    <div class="stat"><b>1</b><span>Source of truth</span><em class="ko">정본은 장 JSON 하나</em></div>
+  </div>
+</div>
+
+<!-- 0. FORMAT CORRECTION -->
+<section>
+  <div class="sh"><span class="sn">00</span><h3>First, what this test actually is</h3></div>
+  <p class="shko ko">먼저 — 이 시험의 실제 포맷</p>
+  <p class="lede">
+    Read from the live set data in <code>config/_set9_fragments/</code>. This is <b>New TOEFL</b>, not classic iBT.
+    The book must be built against these task types, not the ones people usually assume.
+    <span class="ko">세트 원본에서 직접 확인한 값이다. 고전 iBT가 아니라 New TOEFL 포맷이므로,
+    연습북은 아래 과제 유형에만 맞춰 설계한다.</span>
+  </p>
+  <table>
+    <thead><tr><th style="width:15%">Section</th><th style="width:47%">Actual tasks</th><th>Shape / timing</th></tr></thead>
+    <tbody>
+      <tr><td><b>Reading</b><span class="ko">리딩</span></td>
+          <td><code>cloze</code> fill-in-the-blank with hint letters + <code>passage</code> MCQ
+              <span class="ko">힌트 글자가 주어진 빈칸 채우기 + 지문 선다형</span></td>
+          <td>R1 · R2 modules — <b>2100s</b> total<span class="ko">두 모듈 합쳐 35분</span></td></tr>
+      <tr><td><b>Listening</b><span class="ko">리스닝</span></td>
+          <td><code>audio-set</code> blocks, questions grouped 2–4 at a time
+              <span class="ko">오디오 세트 단위, 문항이 2~4개씩 묶여 나온다</span></td>
+          <td>L1 <b>32</b> + L2 <b>15</b> = 47 items<span class="ko">재생은 1회뿐</span></td></tr>
+      <tr><td><b>Speaking</b><span class="ko">스피킹</span></td>
+          <td><b>S1 Listen and Repeat</b> (7) · <b>S2 Interview</b> (4)
+              <span class="ko">따라 말하기 7문항 · 인터뷰 4문항</span></td>
+          <td><b>600s</b> each<span class="ko">과제당 10분</span></td></tr>
+      <tr><td><b>Writing</b><span class="ko">라이팅</span></td>
+          <td><b>W1 Build a Sentence</b> (10) · <b>W2 Write an Email</b> · <b>W3 Academic Discussion</b>
+              <span class="ko">문장 조립 10문항 · 이메일 · 학술 토론 답글</span></td>
+          <td><b>600s</b> × 3<span class="ko">각 10분, 시간 이월 없음</span></td></tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <b>Why this matters:</b> chapter topics like “Prose Summary” or “integrated speaking” do not exist in this test.
+    The 40 chapters are anchored to the four task families above.
+    <span class="ko"><b>이 확인이 중요한 이유:</b> 흔히 쓰는 iBT식 장 구성은 이 시험에 없다. 40개 장은 위 과제 유형에서만 도출한다.</span>
+  </div>
+</section>
+
+<!-- 1. ONE SOURCE -->
+<section>
+  <div class="sh"><span class="sn">01</span><h3>One source, five outputs</h3></div>
+  <p class="shko ko">하나를 저작하면 다섯 갈래로 나간다</p>
+  <p class="lede">
+    A chapter is stored in the <b>same JSON schema the exam engine already reads</b>
+    (<code>modules → blocks → questions</code>). No new content format is invented, so every existing tool —
+    duplicate check, TTS, scoring — keeps working.
+    <span class="ko">장 하나를 기존 세트 스키마 그대로 저장한다. 새 포맷을 만들지 않으므로 중복검사·TTS·채점 도구가 그대로 재사용된다.</span>
+  </p>
+
+  <svg viewBox="0 0 1040 300" role="img" aria-label="One source five outputs">
+    <!-- source -->
+    <rect x="0" y="86" width="228" height="128" rx="10" fill="var(--a1s)" stroke="var(--a1)" stroke-width="1.4"/>
+    <text class="t-tiny" x="20" y="112">Source of truth</text>
+    <text class="t-lab" x="20" y="136">chapter.json</text>
+    <text class="t-labko ko" x="20" y="153">장 정본 — 이것만 고친다</text>
+    <text class="t-mono" x="20" y="176">modules → blocks →</text>
+    <text class="t-mono" x="20" y="192">questions + answers</text>
+    <text class="t-mono" x="20" y="208">+ cefr, indexTerms</text>
+
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--a1)"/></marker>
+    </defs>
+
+    <!-- fan lines -->
+    <path d="M228 150 C300 150 300 30 372 30"   fill="none" stroke="var(--a1)" stroke-width="1.3" marker-end="url(#a)"/>
+    <path d="M228 150 C300 150 300 90 372 90"   fill="none" stroke="var(--a1)" stroke-width="1.3" marker-end="url(#a)"/>
+    <path d="M228 150 L372 150"                  fill="none" stroke="var(--a1)" stroke-width="1.3" marker-end="url(#a)"/>
+    <path d="M228 150 C300 150 300 210 372 210" fill="none" stroke="var(--a1)" stroke-width="1.3" marker-end="url(#a)"/>
+    <path d="M228 150 C300 150 300 270 372 270" fill="none" stroke="var(--a1)" stroke-width="1.3" marker-end="url(#a)"/>
+
+    <g>
+      <rect x="382" y="8"   width="658" height="44" rx="8" fill="#fff" stroke="var(--line)"/>
+      <text class="t-lab" x="400" y="27">Student PDF</text>
+      <text class="t-bd"  x="520" y="27">questions only · printable · searchable</text>
+      <text class="t-labko ko" x="400" y="43">학생용 PDF</text>
+      <text class="t-bdko ko"  x="520" y="43">문제만 · 인쇄용 · 검색 가능</text>
+
+      <rect x="382" y="68"  width="658" height="44" rx="8" fill="#fff" stroke="var(--line)"/>
+      <text class="t-lab" x="400" y="87">Answer key + Teacher PDF</text>
+      <text class="t-bd"  x="580" y="87">rubrics, scripts — staff only</text>
+      <text class="t-labko ko" x="400" y="103">정답지 · 교사용 PDF</text>
+      <text class="t-bdko ko"  x="580" y="103">루브릭·스크립트 포함 · 스태프 전용</text>
+
+      <rect x="382" y="128" width="658" height="44" rx="8" fill="var(--a3s)" stroke="var(--a3)" stroke-width="1.2"/>
+      <text class="t-lab" x="400" y="147">Runnable exam set</text>
+      <text class="t-bd"  x="560" y="147">any chapter can be assigned as a real test</text>
+      <text class="t-labko ko" x="400" y="163">응시 가능한 세트</text>
+      <text class="t-bdko ko"  x="560" y="163">아무 장이나 그대로 시험으로 출제할 수 있다</text>
+
+      <rect x="382" y="188" width="658" height="44" rx="8" fill="#fff" stroke="var(--line)"/>
+      <text class="t-lab" x="400" y="207">Listening audio</text>
+      <text class="t-bd"  x="530" y="207">multivoice TTS + manifest + QR in the PDF</text>
+      <text class="t-labko ko" x="400" y="223">리스닝 오디오</text>
+      <text class="t-bdko ko"  x="530" y="223">멀티보이스 TTS · 매니페스트 · PDF에 QR</text>
+
+      <rect x="382" y="248" width="658" height="44" rx="8" fill="#fff" stroke="var(--line)"/>
+      <text class="t-lab" x="400" y="267">book-index.json</text>
+      <text class="t-bd"  x="530" y="267">powers in-site search — PDFs alone cannot</text>
+      <text class="t-labko ko" x="400" y="283">검색 색인 사이드카</text>
+      <text class="t-bdko ko"  x="530" y="283">사이트 내 검색용 — PDF만으로는 안 된다</text>
+    </g>
+  </svg>
+</section>
+
+<!-- 2. AUTHORING PIPELINE -->
+<section>
+  <div class="sh"><span class="sn">02</span><h3>Authoring pipeline — LangGraph with quality gates</h3></div>
+  <p class="shko ko">저작 파이프라인 — 게이트를 통과해야 사람 검수로 올라간다</p>
+  <p class="lede">
+    A chapter is not “generated and accepted.” It is drafted, then attacked by four independent gates in parallel.
+    Any failure sends it back to revise, up to three rounds; only survivors reach the human review queue.
+    <span class="ko">생성하고 끝이 아니다. 초안을 네 개의 게이트가 동시에 검증하고, 하나라도 걸리면 최대 3회까지 되돌려 고친다.
+    통과한 것만 사람 검수 큐로 올라간다.</span>
+  </p>
+
+  <svg viewBox="0 0 1040 320" role="img" aria-label="LangGraph authoring pipeline">
+    <defs>
+      <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--a4)"/></marker>
+      <marker id="bx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--bad)"/></marker>
+    </defs>
+
+    <!-- plan / draft -->
+    <rect x="0" y="112" width="128" height="62" rx="9" fill="#fff" stroke="var(--a4)" stroke-width="1.3"/>
+    <text class="t-lab" x="16" y="140">plan</text>
+    <text class="t-labko ko" x="16" y="158">장 명세 확정</text>
+
+    <path d="M132 143 L166 143" stroke="var(--a4)" stroke-width="1.4" marker-end="url(#b)"/>
+
+    <rect x="172" y="112" width="128" height="62" rx="9" fill="var(--a4s)" stroke="var(--a4)" stroke-width="1.3"/>
+    <text class="t-lab" x="188" y="140">draft</text>
+    <text class="t-labko ko" x="188" y="158">지문·문항 생성</text>
+
+    <path d="M304 143 C336 143 336 42 368 42"   fill="none" stroke="var(--a4)" stroke-width="1.3" marker-end="url(#b)"/>
+    <path d="M304 143 C336 143 336 110 368 110" fill="none" stroke="var(--a4)" stroke-width="1.3" marker-end="url(#b)"/>
+    <path d="M304 143 C336 143 336 178 368 178" fill="none" stroke="var(--a4)" stroke-width="1.3" marker-end="url(#b)"/>
+    <path d="M304 143 C336 143 336 246 368 246" fill="none" stroke="var(--a4)" stroke-width="1.3" marker-end="url(#b)"/>
+
+    <!-- gates -->
+    <g>
+      <rect x="378" y="20"  width="356" height="48" rx="8" fill="#fff" stroke="var(--line)"/>
+      <text class="t-lab" x="396" y="39">CEFR gate — is it really B2?</text>
+      <text class="t-bd"  x="396" y="58">vocab profile · sentence length · AWL ratio</text>
+      <text class="t-labko ko" x="742" y="39">B2 판정</text>
+      <text class="t-bdko ko"  x="742" y="58">B1·C1이면 반려</text>
+
+      <rect x="378" y="88"  width="356" height="48" rx="8" fill="#fff" stroke="var(--line)"/>
+      <text class="t-lab" x="396" y="107">Answer gate</text>
+      <text class="t-bd"  x="396" y="126">one correct answer · distractors plausible</text>
+      <text class="t-labko ko" x="742" y="107">정답 유일성</text>
+      <text class="t-bdko ko"  x="742" y="126">오답 매력도 · 근거 위치 확인</text>
+
+      <rect x="378" y="156" width="356" height="48" rx="8" fill="#fff" stroke="var(--line)"/>
+      <text class="t-lab" x="396" y="175">Duplicate gate</text>
+      <text class="t-bd"  x="396" y="194">reuses existing dup-core vs. SET 1–9</text>
+      <text class="t-labko ko" x="742" y="175">중복 검사</text>
+      <text class="t-bdko ko"  x="742" y="194">기존 세트·기 생성 장과 대조</text>
+
+      <rect x="378" y="224" width="356" height="48" rx="8" fill="#fff" stroke="var(--line)"/>
+      <text class="t-lab" x="396" y="243">Fact gate</text>
+      <text class="t-bd"  x="396" y="262">claims in the passage must hold up</text>
+      <text class="t-labko ko" x="742" y="243">사실 검증</text>
+      <text class="t-bdko ko"  x="742" y="262">지문 속 주장이 사실인지</text>
+    </g>
+
+    <!-- pass -->
+    <path d="M844 44 C880 44 880 143 916 143"   fill="none" stroke="var(--a3)" stroke-width="1.3"/>
+    <path d="M844 112 C880 112 880 143 916 143" fill="none" stroke="var(--a3)" stroke-width="1.3"/>
+    <path d="M844 180 C880 180 880 143 916 143" fill="none" stroke="var(--a3)" stroke-width="1.3"/>
+    <path d="M844 248 C880 248 880 143 916 143" fill="none" stroke="var(--a3)" stroke-width="1.3"/>
+
+    <rect x="916" y="112" width="124" height="62" rx="9" fill="var(--a3s)" stroke="var(--a3)" stroke-width="1.4"/>
+    <text class="t-lab" x="932" y="138">human review</text>
+    <text class="t-labko ko" x="932" y="156">사람 검수 · 최종 승인</text>
+
+    <!-- fail loop -->
+    <path d="M556 276 C556 306 236 306 236 180" fill="none" stroke="var(--bad)" stroke-width="1.3"
+          stroke-dasharray="5 4" marker-end="url(#bx)"/>
+    <text class="t-bd" x="566" y="300" fill="var(--bad)">fail → revise (max 3)</text>
+    <text class="t-bdko ko" x="700" y="300">하나라도 실패하면 되돌린다 — 최대 3회</text>
+  </svg>
+
+  <div class="note">
+    <b>BMAD holds the contract.</b> The plan, stories and acceptance criteria for this module live in
+    <code>docs/bmad/</code> alongside the existing set, and <code>architecture.md</code> stays the tiebreaker
+    when documents disagree.
+    <span class="ko"><b>BMAD가 계약을 잡는다.</b> 이 모듈의 PRD·스토리·인수조건을 기존 <code>docs/bmad/</code>에 추가하고,
+    문서 간 충돌 시 <code>architecture.md</code>가 이긴다는 기존 규칙을 그대로 따른다.</span>
+  </div>
+</section>
+
+<!-- 3. SEARCHABLE PDF -->
+<section>
+  <div class="sh"><span class="sn">03</span><h3>“Searchable” means three things</h3></div>
+  <p class="shko ko">검색 가능 — 세 층으로 보장한다</p>
+  <div class="grid3">
+    <div class="card">
+      <h4>1 · Text layer<span class="ko">텍스트 레이어</span></h4>
+      <p>HTML with print CSS → headless Chrome <code>--print-to-pdf</code>. Never a rendered image, so
+      <b>Ctrl+F works inside the PDF</b>. Diagrams are inline SVG for the same reason.
+      <span class="ko">이미지로 굽지 않으므로 PDF 안에서 그대로 검색된다. 그림도 같은 이유로 SVG.</span></p>
+    </div>
+    <div class="card">
+      <h4>2 · PDF outline<span class="ko">북마크 3단</span></h4>
+      <p>Book → chapter → part, injected after the build, plus document title and keyword metadata.
+      <span class="ko">권 → 장 → 파트 3단 북마크와 문서 메타를 빌드 후 주입한다.</span></p>
+    </div>
+    <div class="card">
+      <h4>3 · Back-of-book index<span class="ko">권말 색인</span></h4>
+      <p>Term → page, built in <b>two passes</b>: first build emits anchor positions, second build prints
+      real page numbers.
+      <span class="ko">용어→페이지 표를 2-pass로 만든다. 1차에서 좌표를 뽑고 2차에서 페이지 번호를 확정.</span></p>
+    </div>
+  </div>
+  <div class="note">
+    Plus a sidecar <code>book-index.json</code> so the <b>site</b> can search the books too — a PDF text layer
+    is invisible to the web app.
+    <span class="ko">여기에 사이드카 색인을 더한다. PDF 텍스트 레이어는 웹앱이 못 읽으므로, 사이트 검색은 이 JSON이 담당한다.</span>
+  </div>
+</section>
+
+<!-- 4. AUDIO + ADMIN -->
+<section>
+  <div class="sh"><span class="sn">04</span><h3>Audio route &amp; admin surface</h3></div>
+  <p class="shko ko">오디오 경로와 어드민 화면</p>
+  <div class="grid2">
+    <div class="card">
+      <h4>Listening audio<span class="ko">리스닝 오디오</span></h4>
+      <p>Script lives inside the chapter JSON → rendered by the existing <code>tts_multivoice.py</code> with the
+      voice-casting config. The printed page carries a <b>QR + short URL + track number</b>; an offline bundle
+      ships the same tracks with a manifest.
+      <span class="ko">스크립트를 장 JSON에 정본으로 두고 기존 멀티보이스 TTS로 렌더한다. 종이에는 QR·짧은 URL·트랙번호를
+      싣고, 오프라인용으로 같은 트랙을 매니페스트와 함께 묶는다.</span></p>
+    </div>
+    <div class="card">
+      <h4><code>admin-books.html</code><span class="ko">새 어드민 화면 1장</span></h4>
+      <p>Chapter list with status badges (draft → gates passed → reviewed → built), preview, gate report,
+      build button, version tag, download, and <b>“publish as exam set.”</b> Answer-key and teacher editions
+      stay behind staff permission.
+      <span class="ko">장 목록·상태 배지·미리보기·게이트 리포트·빌드·버전·다운로드, 그리고 '시험으로 출제' 버튼.
+      정답지와 교사용은 스태프 권한 뒤에 둔다.</span></p>
+    </div>
+  </div>
+  <div class="note">
+    <b>Where the build runs:</b> headless Chrome cannot run in a Vercel function, so PDFs are baked by a local
+    script (<code>tools/build_book.py</code>) and only the finished files go to Supabase Storage.
+    The admin page manages artifacts; it does not compile them.
+    <span class="ko"><b>빌드 위치:</b> 헤드리스 크롬은 서버리스에서 못 돌리므로 PDF는 로컬 스크립트로 굽고
+    결과 파일만 Storage에 올린다. 어드민 화면은 산출물 관리자다.</span>
+  </div>
+</section>
+
+<!-- 5. PHASES -->
+<section>
+  <div class="sh"><span class="sn">05</span><h3>Order of work</h3></div>
+  <p class="shko ko">실행 순서 — P1까지가 위험 구간</p>
+
+  <svg viewBox="0 0 1040 210" role="img" aria-label="Phases P0 to P6">
+    <line x1="14" y1="46" x2="1026" y2="46" stroke="var(--line)" stroke-width="2"/>
+    <g id="ph">
+      <!-- P0 -->
+      <circle cx="86" cy="46" r="11" fill="var(--a1)"/><text class="t-num" x="86" y="50" text-anchor="middle">P0</text>
+      <text class="t-lab" x="30" y="84">Schema + BMAD docs</text>
+      <text class="t-labko ko" x="30" y="101">스키마·문서 확정</text>
+      <text class="t-bd" x="30" y="122">round-trip SET 9</text>
+      <text class="t-bdko ko" x="30" y="138">기존 세트로 왕복 검증</text>
+      <!-- P1 -->
+      <circle cx="242" cy="46" r="11" fill="var(--a2)"/><text class="t-num" x="242" y="50" text-anchor="middle">P1</text>
+      <text class="t-lab" x="186" y="84">Build pipeline</text>
+      <text class="t-labko ko" x="186" y="101">빌드 뼈대 — 1개 장</text>
+      <text class="t-bd" x="186" y="122">searchable PDF proven</text>
+      <text class="t-bdko ko" x="186" y="138">검색·북마크 실물 확인</text>
+      <!-- P2 -->
+      <circle cx="398" cy="46" r="11" fill="var(--a1)"/><text class="t-num" x="398" y="50" text-anchor="middle">P2</text>
+      <text class="t-lab" x="342" y="84">Reading ×10</text>
+      <text class="t-labko ko" x="342" y="101">리딩 10장 저작</text>
+      <text class="t-bd" x="342" y="122">gates live</text>
+      <text class="t-bdko ko" x="342" y="138">게이트 가동·검수</text>
+      <!-- P3 -->
+      <circle cx="554" cy="46" r="11" fill="var(--a1)"/><text class="t-num" x="554" y="50" text-anchor="middle">P3</text>
+      <text class="t-lab" x="498" y="84">Listening ×10</text>
+      <text class="t-labko ko" x="498" y="101">리스닝 10장 + 오디오</text>
+      <text class="t-bd" x="498" y="122">QR tested on device</text>
+      <text class="t-bdko ko" x="498" y="138">실기기 재생 확인</text>
+      <!-- P4 -->
+      <circle cx="710" cy="46" r="11" fill="var(--a1)"/><text class="t-num" x="710" y="50" text-anchor="middle">P4</text>
+      <text class="t-lab" x="654" y="84">Speaking · Writing</text>
+      <text class="t-labko ko" x="654" y="101">각 10장 + 모범답안</text>
+      <text class="t-bd" x="654" y="122">rubric cross-check</text>
+      <text class="t-bdko ko" x="654" y="138">공식 루브릭 대조</text>
+      <!-- P5 -->
+      <circle cx="866" cy="46" r="11" fill="var(--a1)"/><text class="t-num" x="866" y="50" text-anchor="middle">P5</text>
+      <text class="t-lab" x="810" y="84">Admin + DB</text>
+      <text class="t-labko ko" x="810" y="101">어드민 화면·권한</text>
+      <text class="t-bd" x="810" y="122">live check</text>
+      <text class="t-bdko ko" x="810" y="138">배포 후 라이브 확인</text>
+      <!-- P6 -->
+      <circle cx="1000" cy="46" r="11" fill="var(--a3)"/><text class="t-num" x="1000" y="50" text-anchor="middle">P6</text>
+      <text class="t-lab" x="944" y="84">Index + ship</text>
+      <text class="t-labko ko" x="944" y="101">색인·최종 빌드</text>
+      <text class="t-bd" x="944" y="122">4 books out</text>
+      <text class="t-bdko ko" x="944" y="138">4권 배포</text>
+    </g>
+    <rect x="180" y="18" width="130" height="56" rx="8" fill="none" stroke="var(--a2)" stroke-width="1.4" stroke-dasharray="5 4"/>
+    <text class="t-bd" x="14" y="184" fill="var(--a2)">Stop at P1 and look at a real PDF before authoring the other 39 chapters.</text>
+    <text class="t-bdko ko" x="560" y="184">P1에서 실물 PDF를 먼저 보고 나머지 39장을 돌린다.</text>
+  </svg>
+</section>
+
+<!-- 6. DECISIONS -->
+<section class="ask">
+  <div class="sh"><span class="sn">06</span><h3>Three decisions needed before P0</h3></div>
+  <p class="shko ko">착수 전에 정해야 할 세 가지</p>
+  <ol>
+    <li><b>Book shape</b> — four books × 10 chapters (assumed), or one combined 10-chapter book covering all four sections?
+        <span class="ko">4권×10장으로 잡았는데, 4섹션을 한 권 10장에 합칠 수도 있다. 분량이 1/4로 준다.</span></li>
+    <li><b>Who gets the PDF</b> — admin download only, or students too? Students means watermark + expiry.
+        <span class="ko">어드민 전용인지 학생 배포까지인지. 배포하면 워터마크·기간 제한이 필요하다.</span></li>
+    <li><b>Print spec</b> — A4, and is black-and-white printing assumed? It changes how every diagram is coloured.
+        <span class="ko">A4 여부와 흑백 인쇄 전제. 도해 색 설계가 여기서 갈린다.</span></li>
+  </ol>
+</section>
+
+</main>
+<script>
+  var b=document.body,t=document.getElementById('tko');
+  t.onclick=function(){b.classList.toggle('no-ko');
+    t.textContent=b.classList.contains('no-ko')?'Show Korean':'Hide Korean';};
+</script>
+</body>
+</html>

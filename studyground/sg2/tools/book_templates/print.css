@@ -1,0 +1,470 @@
+/* 교재 PDF 조판 스타일 — A4 흑백 전용.
+ *
+ * 왜 app.css 를 쓰지 않나. app.css 의 토큰은 화면용이고 다크 모드에서 값이 뒤집힌다.
+ * 인쇄 파이프라인이 그 토큰을 물면, 빌드를 돌린 사람의 OS 테마에 따라 같은 원고에서
+ * 다른 회색 농도의 PDF 가 나온다. 그런 사고가 실제로 나면 "어제 뽑은 것과 오늘 뽑은
+ * 것이 다르다"는 말로 돌아오고, 원인을 찾는 데 하루가 든다. 그래서 인쇄면은 화면과
+ * 완전히 분리된 자기 토큰을 쓰고, 값은 전부 흑백으로 고정한다.
+ *
+ * 교실 복사기 현실 — 학원 복사기는 흑백이고, 원본을 다시 복사한 2세대 복사본이
+ * 학생 손에 간다. 그래서 이 파일의 규칙은 두 가지다.
+ *   1) 색은 절대 유일한 신호가 아니다. 정답·화자·난이도는 굵기/테두리/기호/라벨 중
+ *      최소 하나를 겹쳐 쓴다. 회색 20% 와 30% 는 2세대 복사본에서 같은 색이 된다.
+ *   2) 얇은 선(0.25pt 미만)과 옅은 회색 배경(#f5 이상)은 복사에서 사라지므로 쓰지 않는다.
+ *
+ * 페이지 상자를 CSS 가 아니라 조판기(chapter.html.tmpl 의 JS)가 직접 만든다.
+ * 이유는 색인 때문이다 — 브라우저가 알아서 흘려 나눈 페이지는 우리가 번호를 알 수
+ * 없다. 우리가 .page 를 직접 만들어 담으면 그 번호가 곧 인쇄 페이지 번호가 된다.
+ * 따라서 여기서 정하는 .page 의 높이는 "장식"이 아니라 조판의 계약이다. 값을 바꾸면
+ * 색인 페이지 번호가 통째로 바뀐다.
+ */
+
+:root {
+  /* 인쇄 전용 토큰. 전부 무채색이다. */
+  --p-ink: #000;
+  --p-ink-2: #2b2b2b;      /* 본문 부속 — 지시문, 캡션 */
+  --p-mut: #555;           /* 2세대 복사본에서 살아남는 가장 옅은 값 */
+  --p-line: #000;
+  --p-line-2: #777;
+  --p-fill: #e2e2e2;       /* 배지·표 머리. 이보다 옅으면 복사에서 날아간다 */
+
+  --p-body: 10.5pt;
+  --p-lead: 1.5;
+
+  /* A4 210×297mm. 높이를 296.9mm 로 두는 것은 반올림 여백이다 — 297.0 으로 두면
+     Chrome 이 페이지마다 1px 를 넘겨 빈 페이지를 한 장씩 더 뱉는 일이 있다. */
+  --p-w: 210mm;
+  --p-h: 296.9mm;
+  --p-margin-x: 18mm;
+  --p-margin-top: 13mm;
+  --p-head-h: 9mm;
+  --p-foot-h: 11mm;
+  --p-flow-h: 262mm;       /* 13 + 9 + 262 + 11 = 295mm, 아래로 1.9mm 여유 */
+}
+
+@page {
+  size: 210mm 297mm;
+  margin: 0;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  color: var(--p-ink);
+}
+
+body {
+  font-family: "Times New Roman", Times, Georgia, serif;
+  font-size: var(--p-body);
+  line-height: var(--p-lead);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* 폰트는 로컬 자산만 쓴다. @font-face 로 외부 URL 을 부르면 캠퍼스 오프라인 장비에서
+   빌드가 멈추거나(네트워크 차단) 대체 폰트로 조판이 밀려 색인 번호가 어긋난다. */
+
+/* ── 페이지 상자 ───────────────────────────────────────────────────────── */
+
+#src, #src-front, #src-back { display: none; }   /* 조판 전 원본 흐름은 감춘다 */
+
+.page {
+  position: relative;
+  width: var(--p-w);
+  height: var(--p-h);
+  padding: var(--p-margin-top) var(--p-margin-x) 0;
+  overflow: hidden;
+  background: #fff;
+  break-after: page;
+  page-break-after: always;
+}
+.page:last-child { break-after: auto; page-break-after: auto; }
+
+.page-head {
+  height: var(--p-head-h);
+  border-bottom: 0.6pt solid var(--p-line-2);
+  font-size: 8pt;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--p-mut);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-family: Helvetica, Arial, sans-serif;
+}
+.page:first-child .page-head, .page.no-head .page-head { visibility: hidden; }
+
+.page-flow {
+  height: var(--p-flow-h);
+  padding-top: 5mm;
+  overflow: hidden;
+}
+
+.page-foot {
+  position: absolute;
+  left: var(--p-margin-x);
+  right: var(--p-margin-x);
+  bottom: 6mm;
+  height: var(--p-foot-h);
+  font-size: 8.5pt;
+  font-family: Helvetica, Arial, sans-serif;
+  color: var(--p-mut);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.page-no { font-weight: 700; color: var(--p-ink); }
+
+/* ── 조판 단위 ─────────────────────────────────────────────────────────
+   .atom 하나가 페이지를 넘지 않는 최소 덩어리다. 문항이 페이지 경계에서
+   잘리면 학생이 선택지 두 개를 보지 못한 채 답을 고르게 된다. */
+.atom {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ── 챕터 오프너 ───────────────────────────────────────────────────────── */
+
+.opener { margin-bottom: 6mm; }
+.opener .kicker {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 9pt;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--p-mut);
+}
+.opener h1 {
+  font-size: 21pt;
+  line-height: 1.25;
+  margin: 2mm 0 3mm;
+  font-weight: 700;
+}
+.badges { margin: 0 0 4mm; }
+.badge {
+  display: inline-block;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 8pt;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 1pt 5pt;
+  margin: 0 4pt 3pt 0;
+  border: 0.8pt solid var(--p-line);
+  border-radius: 2pt;
+}
+.badge.fill { background: var(--p-fill); font-weight: 700; }
+
+.objective {
+  font-size: 12pt;
+  line-height: 1.45;
+  margin: 0 0 4mm;
+}
+
+/* 상자. 테두리 + 대문자 라벨 두 겹으로 구분한다 — 배경만으로 구분하면
+   2세대 복사본에서 본문과 뒤섞인다. */
+.box {
+  border: 0.8pt solid var(--p-line);
+  padding: 3.5mm 4mm 3mm;
+  margin: 0 0 5mm;
+}
+.box > .box-t {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin: 0 0 2mm;
+}
+.box.teacher-only { border-style: dashed; }
+.box ol, .box ul { margin: 0; padding-left: 5mm; }
+.box li { margin-bottom: 1.2mm; }
+
+/* ── 모듈 / 블록 ───────────────────────────────────────────────────────── */
+
+h2.module-h {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13pt;
+  font-weight: 700;
+  margin: 6mm 0 3mm;
+  padding-bottom: 1.5mm;
+  border-bottom: 1.6pt solid var(--p-line);
+}
+h2.module-h .mod-time {
+  float: right;
+  font-size: 9pt;
+  font-weight: 400;
+  color: var(--p-mut);
+}
+
+.block-h {
+  margin: 4.5mm 0 2.5mm;
+  border-left: 2.4pt solid var(--p-line);
+  padding-left: 3mm;
+}
+.block-h .bh-title {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11pt;
+  font-weight: 700;
+}
+.block-h .bh-kind {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 7.5pt;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border: 0.7pt solid var(--p-line-2);
+  padding: 0 3pt;
+  margin-left: 4pt;
+  vertical-align: 1pt;
+}
+.block-h .bh-inst {
+  display: block;
+  font-style: italic;
+  color: var(--p-ink-2);
+  margin-top: 1mm;
+}
+
+/* ── 지문 ─────────────────────────────────────────────────────────────── */
+
+h3.passage-t {
+  font-size: 12pt;
+  font-weight: 700;
+  margin: 3mm 0 1.5mm;
+}
+h3.passage-t .cont {
+  font-size: 8.5pt;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--p-mut);
+}
+p.para {
+  margin: 0 0 2mm;
+  text-align: justify;
+  hyphens: none;
+}
+p.para .pno {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 7.5pt;
+  color: var(--p-mut);
+  margin-right: 2pt;
+  vertical-align: 2pt;
+}
+
+/* 클로즈 본문. 빈칸은 밑줄 + 번호 + 힌트 글자로 세 겹 표시한다. */
+.cloze-body { margin: 0 0 3mm; line-height: 2.1; text-align: justify; }
+.blank {
+  display: inline-block;
+  min-width: 26mm;
+  border-bottom: 0.9pt solid var(--p-ink);
+  text-align: center;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 9pt;
+}
+.blank .bno { font-weight: 700; }
+.blank .bhint { font-style: italic; color: var(--p-ink-2); }
+.blank.filled {
+  border-bottom-style: solid;
+  font-weight: 700;
+  font-family: "Times New Roman", Times, serif;
+  font-size: inherit;
+}
+
+/* ── 문항 ─────────────────────────────────────────────────────────────── */
+
+.q {
+  margin: 0 0 3.5mm;
+  padding-left: 9mm;
+  position: relative;
+}
+.q .qno {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 7mm;
+  text-align: right;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 10pt;
+}
+.q .prompt { margin: 0 0 1.5mm; }
+.q ol.choices { list-style: none; margin: 0; padding: 0; }
+.q ol.choices li {
+  margin: 0 0 0.8mm;
+  padding-left: 7mm;
+  position: relative;
+}
+.q ol.choices li .lt {
+  position: absolute;
+  left: 0;
+  font-family: Helvetica, Arial, sans-serif;
+}
+/* 정답 표시는 세 겹이다 — 굵게 + 채운 상자 + '✓' 글리프. 어느 하나가
+   복사에서 죽어도 나머지가 남는다. 색은 쓰지 않는다. */
+.q ol.choices li.correct { font-weight: 700; }
+.q ol.choices li.correct .lt::after { content: "\2713"; margin-left: 1pt; }
+.q ol.choices li.correct::before {
+  content: "";
+  position: absolute;
+  left: -3mm;
+  top: 1.1mm;
+  width: 1.6mm;
+  height: 1.6mm;
+  background: var(--p-ink);
+}
+
+.answer-line {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 9pt;
+  margin-top: 1mm;
+  padding: 0.8mm 2mm;
+  border: 0.7pt solid var(--p-line);
+  background: var(--p-fill);
+  display: inline-block;
+}
+.answer-line b { letter-spacing: .02em; }
+
+.write-lines {
+  margin: 2mm 0 0;
+  border-top: 0.6pt solid var(--p-line-2);
+}
+.write-lines div {
+  height: 8mm;
+  border-bottom: 0.6pt solid var(--p-line-2);
+}
+
+.tiles { margin: 1.5mm 0 0; }
+.tile {
+  display: inline-block;
+  border: 0.8pt solid var(--p-line);
+  padding: 0.6mm 2mm;
+  margin: 0 2pt 2pt 0;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 9.5pt;
+}
+.slots { letter-spacing: .02em; }
+.slot {
+  display: inline-block;
+  min-width: 16mm;
+  border-bottom: 0.9pt solid var(--p-ink);
+  margin-right: 2pt;
+}
+
+.timing {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 8.5pt;
+  color: var(--p-ink-2);
+  border: 0.7pt solid var(--p-line-2);
+  padding: 0 3pt;
+  display: inline-block;
+  margin-bottom: 1mm;
+}
+
+/* ── 대본 · 모범답안 (정답판 · 교사판 전용) ──────────────────────────── */
+
+.script {
+  margin: 2mm 0 3mm;
+  padding-left: 4mm;
+  border-left: 0.8pt solid var(--p-line-2);
+}
+.script .sp {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.script p { margin: 0 0 1.5mm; }
+
+.model {
+  margin: 0 0 4mm;
+  border: 0.8pt solid var(--p-line);
+  padding: 3mm;
+}
+.model .band {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border: 0.8pt solid var(--p-line);
+  padding: 0 4pt;
+  margin-right: 4pt;
+}
+/* 밴드는 라벨(HIGH/MID/LOW)로 이미 구분된다. 테두리 굵기를 겹쳐 준다. */
+.model.high .band { background: var(--p-ink); color: #fff; }
+.model.mid .band { background: var(--p-fill); }
+.model.low .band { border-style: dashed; }
+.model .notes {
+  margin-top: 2mm;
+  padding-top: 2mm;
+  border-top: 0.6pt dashed var(--p-line-2);
+  font-size: 9.5pt;
+  color: var(--p-ink-2);
+}
+
+/* ── 용어 · 목차 · 색인 ────────────────────────────────────────────────── */
+
+.gloss dl { margin: 0; }
+.gloss dt {
+  font-weight: 700;
+  float: left;
+  clear: left;
+  width: 42mm;
+  padding-right: 3mm;
+}
+.gloss dd { margin: 0 0 1.5mm 42mm; }
+
+.front h1.ft {
+  font-size: 16pt;
+  font-family: Helvetica, Arial, sans-serif;
+  margin: 0 0 5mm;
+  padding-bottom: 2mm;
+  border-bottom: 1.6pt solid var(--p-line);
+}
+.toc-row {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 1.6mm;
+}
+.toc-row .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toc-row .dots {
+  flex: 1;
+  border-bottom: 0.6pt dotted var(--p-line-2);
+  margin: 0 2mm 1mm;
+  min-width: 6mm;
+}
+.toc-row .pg { font-variant-numeric: tabular-nums; font-weight: 700; }
+.toc-row.l1 { font-weight: 700; font-size: 11.5pt; margin-top: 3mm; }
+.toc-row.l2 { padding-left: 5mm; }
+.toc-row.l3 { padding-left: 10mm; font-size: 9.5pt; color: var(--p-ink-2); }
+
+.ix-cols { column-count: 2; column-gap: 8mm; column-rule: 0.6pt solid var(--p-line-2); }
+.ix-row { break-inside: avoid; margin-bottom: 1mm; font-size: 9.5pt; }
+.ix-row .term { font-weight: 700; }
+.ix-row .pgs { font-variant-numeric: tabular-nums; }
+.ix-letter {
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+  margin: 3mm 0 1.5mm;
+  border-bottom: 0.8pt solid var(--p-line);
+  break-after: avoid;
+}
+
+/* 색인어 표시는 인쇄면에 아무 자국도 남기지 않는다 — 위치 수집용 앵커일 뿐이다. */
+.ix { }
+
+/* 도표는 인라인 SVG 이고 글자는 <text> 로 남는다. path 로 변환하면 PDF 검색에서
+   그 글자가 통째로 사라진다. */
+svg { max-width: 100%; }
+svg text { font-family: Helvetica, Arial, sans-serif; font-size: 9px; fill: #000; }
+
+/* ── 화면 미리보기 ─────────────────────────────────────────────────────
+   빌드 중간 HTML 을 브라우저로 그냥 열어 볼 때만 쓰인다. 인쇄에는 영향이 없다. */
+@media screen {
+  body { background: #6b7075; padding: 12mm 0; }
+  .page {
+    margin: 0 auto 8mm;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .45);
+  }
+}

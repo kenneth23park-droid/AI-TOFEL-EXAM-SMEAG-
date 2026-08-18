@@ -1,0 +1,249 @@
+{
+  "_note": [
+    "--selftest 의 스텁 LLM 대본. 키는 nodes.plan 이 만든 fillKey 다.",
+    "R1#0 의 3번 문항 힌트와 R1#2 의 13번 문항 정답은 **일부러 틀려 있다**.",
+    "게이트가 실제로 물어서 decide -> revise 로 되돌아가는지 확인하려면 실패가",
+    "재현되어야 한다. revise#1 이 그 두 곳만 고친다."
+  ],
+  "chapter": {
+    "chapter": {
+      "title": "Cities That Cool Themselves",
+      "targetSkills": [
+        "Scanning a public notice for one required instruction",
+        "Following a cause-and-effect explanation across paragraphs",
+        "Choosing the word that fits a grammatical slot"
+      ],
+      "teaching": {
+        "objective": "Read a short public notice and an explanatory passage for detail, and say why the writer includes a particular fact.",
+        "strategy": [
+          "Read the question stem before the passage, then look only for the sentence that answers it.",
+          "In a cloze, decide the part of speech first; the hint letters confirm the word, they do not choose it.",
+          "For a why-does-the-writer question, look at the sentence before and after the detail, not at the detail itself."
+        ],
+        "commonErrors": [
+          "Choosing a word that matches the hint letters but not the grammar of the sentence.",
+          "Answering a detail question from memory of the topic instead of from the passage.",
+          "Treating an example as the writer's main point."
+        ]
+      },
+      "glossary": [
+        {"term": "waterproof layer", "gloss": "a sheet that stops water passing through"},
+        {"term": "installation", "gloss": "the work of putting equipment in place"},
+        {"term": "timetable", "gloss": "a list of the times at which buses or trains run"},
+        {"term": "drain", "gloss": "a pipe that carries rainwater away from a street"},
+        {"term": "aisle", "gloss": "a narrow passage between rows of shelves or seats"},
+        {"term": "council", "gloss": "the elected body that governs a town or city"},
+        {"term": "pavement", "gloss": "the hard surface of a street or footpath"}
+      ],
+      "indexTerms": ["green roof", "urban heat", "street trees", "public transport", "library noise"]
+    }
+  },
+  "R1#0": {
+    "blocks": [
+      {
+        "module": "R1",
+        "index": 0,
+        "template": "Many cities now {{1}} rooftop gardens. A green roof {{2}} of soil, plants and a waterproof layer. It can {{3}} the temperature of a building in summer and {{4}} rainwater during heavy storms. Because the plants {{5}} dust, the air near the street becomes {{6}}. Owners also {{7}} that the roof lasts longer. The main {{8}} is the cost of the first {{9}}, but the savings {{10}} after ten years.",
+        "questions": [
+          {"no": 1, "hint": "bu", "answer": "build"},
+          {"no": 2, "hint": "con", "answer": "consists"},
+          {"no": 3, "hint": "xz", "answer": "lower"},
+          {"no": 4, "hint": "st", "answer": "store"},
+          {"no": 5, "hint": "tr", "answer": "trap"},
+          {"no": 6, "hint": "cl", "answer": "cleaner"},
+          {"no": 7, "hint": "rep", "answer": "report"},
+          {"no": 8, "hint": "pro", "answer": "problem"},
+          {"no": 9, "hint": "inst", "answer": "installation"},
+          {"no": 10, "hint": "app", "answer": "appear"}
+        ]
+      }
+    ]
+  },
+  "R1#1": {
+    "blocks": [
+      {
+        "module": "R1",
+        "index": 1,
+        "title": "Riverside Community Garden — Volunteer Notice",
+        "paragraphs": [
+          "Riverside Community Garden welcomes new volunteers this spring.",
+          "The garden is open for volunteering on Saturdays, from nine in the morning until one in the afternoon.",
+          "Volunteers plant vegetables, water the raised beds and repair the wooden fence along the river path.",
+          "No experience is required. Tools and gloves are provided at the shed beside the gate.",
+          "Please wear closed shoes, because the soil near the beds stays wet until noon.",
+          "Sign up at the front desk one week before the Saturday you choose, so that the staff can order enough seedlings.",
+          "Members who volunteer three times receive a free packet of seeds for their own garden."
+        ],
+        "questions": [
+          {
+            "no": 11,
+            "prompt": "What must a volunteer do before coming to the garden?",
+            "choices": [
+              "Bring a set of tools from home",
+              "Sign up a week in advance",
+              "Arrive before nine in the morning",
+              "Pay a membership fee at the desk"
+            ],
+            "answer": 1
+          },
+          {
+            "no": 12,
+            "prompt": "What does a volunteer receive after three visits?",
+            "choices": [
+              "A packet of seeds",
+              "A pair of gloves",
+              "A raised bed of their own",
+              "A free lunch at the shed"
+            ],
+            "answer": 0
+          }
+        ]
+      }
+    ]
+  },
+  "R1#2": {
+    "blocks": [
+      {
+        "module": "R1",
+        "index": 2,
+        "title": "Why Cities Are Planting Trees Again",
+        "paragraphs": [
+          "For most of the twentieth century, city planners treated trees as decoration. Streets were widened for cars, and the shade that had once cooled the pavement disappeared. Only in the last two decades have engineers begun to describe a street tree as a piece of equipment with a measurable function.",
+          "The job is mainly cooling. A mature tree moves water from the soil into the air, and that process removes heat in the same way that sweat cools skin. Measurements in several European cities show that a shaded street can be four degrees cooler than a similar street nearby without trees. The difference matters most on summer nights, when heat stored in concrete keeps flats warm long after sunset. Similar results appear in a survey of North American cities.",
+          "Trees also slow rainfall. Leaves hold part of a storm and release it gradually, so less water reaches the drains at once. Councils that once paid to enlarge underground pipes now find that planting is cheaper. The catch is patience: a young tree gives little shade, and the benefit that pays for the work arrives twenty years later, usually after the council that planted it has left office."
+        ],
+        "questions": [
+          {
+            "no": 13,
+            "prompt": "According to the passage, how does a street tree cool the air?",
+            "choices": [
+              "By blocking the wind between buildings",
+              "By moving water from the soil into the air",
+              "By reflecting sunlight from its leaves",
+              "By storing heat inside its trunk"
+            ],
+            "answer": 9
+          },
+          {
+            "no": 14,
+            "prompt": "Why do some councils now prefer planting to building pipes?",
+            "choices": [
+              "Planting costs less than enlarging the drains",
+              "Underground pipes are no longer permitted",
+              "Trees clean the water before it reaches the river",
+              "Residents voted against new building work"
+            ],
+            "answer": 0
+          },
+          {
+            "no": 15,
+            "prompt": "What difficulty with planting does the writer point out?",
+            "choices": [
+              "Young trees are expensive to buy",
+              "The benefit arrives long after the work",
+              "City soil is too dry for most species",
+              "Few workers know how to plant correctly"
+            ],
+            "answer": 1
+          }
+        ]
+      }
+    ]
+  },
+  "R2#0": {
+    "blocks": [
+      {
+        "module": "R2",
+        "index": 0,
+        "template": "Public transport {{16}} on trust. A passenger who cannot {{17}} on the timetable will drive instead, even when the fare is {{18}}. For that reason, several cities now {{19}} the real position of every bus and {{20}} it to a public map. The change did not {{21}} the buses faster, but complaints {{22}} by a third in the first year. Drivers say the map also {{23}} arguments at the stop, because the waiting crowd can {{24}} for itself when the next bus will {{25}}.",
+        "questions": [
+          {"no": 16, "hint": "dep", "answer": "depends"},
+          {"no": 17, "hint": "re", "answer": "rely"},
+          {"no": 18, "hint": "lo", "answer": "low"},
+          {"no": 19, "hint": "tr", "answer": "track"},
+          {"no": 20, "hint": "se", "answer": "send"},
+          {"no": 21, "hint": "ma", "answer": "make"},
+          {"no": 22, "hint": "fe", "answer": "fell"},
+          {"no": 23, "hint": "pre", "answer": "prevents"},
+          {"no": 24, "hint": "se", "answer": "see"},
+          {"no": 25, "hint": "arr", "answer": "arrive"}
+        ]
+      }
+    ]
+  },
+  "R2#1": {
+    "blocks": [
+      {
+        "module": "R2",
+        "index": 1,
+        "title": "Measuring Noise in a Reading Room",
+        "paragraphs": [
+          "Every university library faces the same complaint: the reading room is too noisy. Until recently the only evidence was the complaint itself, which told the staff nothing about when the noise happened or where it came from.",
+          "[A] In 2019 a library in Manchester attached small sound meters to eight shelves. [B] The method was deliberately simple: the meters recorded loudness once a minute for a full term, and no recording of speech was kept, so nobody could be identified from the data.",
+          "[C] The result surprised the staff. The loudest hour was not the evening, when the room was full, but the middle of the morning, when it was half empty. [D] Groups arriving together talked in the aisles before they sat down.",
+          "Two changes followed. The entrance was moved to the far end of the room, so that arriving groups no longer walked past the desks, and a small discussion area was opened next door. Noise in the reading room then dropped by about a quarter.",
+          "The research is often quoted as proof that measurement beats guessing. That is fair, but the meters answered only the question they were asked. They could not say whether students left the library because of the noise, and nobody counted them."
+        ],
+        "questions": [
+          {
+            "no": 26,
+            "prompt": "What evidence did the staff have before the meters were installed?",
+            "choices": [
+              "Only the complaints themselves",
+              "A record of student conversations",
+              "A count of visitors for each hour",
+              "A survey of the neighbouring departments"
+            ],
+            "answer": 0
+          },
+          {
+            "no": 27,
+            "prompt": "Why does the writer mention that no speech was recorded?",
+            "choices": [
+              "To explain why the study was inexpensive",
+              "To show that no individual could be identified",
+              "To argue that the meters were inaccurate",
+              "To describe a fault in the equipment"
+            ],
+            "answer": 1
+          },
+          {
+            "no": 28,
+            "prompt": "What surprised the staff about the results?",
+            "choices": [
+              "The evening was noisier than expected",
+              "The noise came from outside the building",
+              "The loudest hour was the middle of the morning",
+              "The meters stopped working during the term"
+            ],
+            "answer": 2
+          },
+          {
+            "no": 29,
+            "prompt": "What limitation does the last paragraph describe?",
+            "choices": [
+              "The meters were placed on too few shelves",
+              "One term was too short to show a pattern",
+              "The study could not say whether students left",
+              "The staff ignored what the meters showed"
+            ],
+            "answer": 2
+          },
+          {
+            "no": 30,
+            "prompt": "Look at the four positions marked [A], [B], [C] and [D]. Where does the following sentence best fit? \"Eight meters cost less than a single new shelf.\"",
+            "sentence": "Eight meters cost less than a single new shelf.",
+            "choices": ["Position A", "Position B", "Position C", "Position D"],
+            "answer": 1
+          }
+        ]
+      }
+    ]
+  },
+  "revise#1": {
+    "patches": [
+      {"questionId": "reading-01-R1-q03", "field": "hint", "value": "lo"},
+      {"questionId": "reading-01-R1-q13", "field": "answer", "value": 1}
+    ]
+  }
+}

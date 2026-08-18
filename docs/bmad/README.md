@@ -14,6 +14,18 @@
 
 정본 우선순위: **architecture.md > prd.md > timing-spec.md > epics-and-stories.md**. 구현 중 불일치를 발견하면 architecture.md에 맞추고, architecture.md 자체가 틀렸다면 문서를 고친 뒤 코드를 쓴다.
 
+## 교재(Practice Book) 모듈
+
+같은 시험을 **연습북**으로 내보내는 갈래다. 런타임 문서와 한 묶음으로 두는 이유는, 교재의 장(chapter)이 시험 세트와 **같은 콘텐츠 스키마**를 쓰기 때문이다 — 장 하나를 저작하면 PDF도 되고 응시 가능한 세트도 된다. 새 포맷을 만들지 않았으므로 위 다섯 문서의 계약이 그대로 적용된다.
+
+| # | 문서 | 역할 | 언제 보는가 |
+|---|---|---|---|
+| 6 | [book-prd.md](book-prd.md) | **교재 요구사항 정본.** BFR / BNFR, 권별 10장 주제표, 범위 밖 항목 | 연습북이 무엇을 만족해야 하는지 확인할 때 |
+| 7 | [book-schema.md](book-schema.md) | **챕터 스키마 정본.** 기존 섹션 조각의 상위집합, `SG_BOOK_SCHEMA` API, gate 모양, 파일명 규약, 트랙별 소유 파일 | 교재 관련 코드를 쓰기 직전 |
+| 8 | [book-epics-and-stories.md](book-epics-and-stories.md) | 교재 실행 백로그. 스토리별 AC·Files·Verification + 병렬 실행 그룹 | 교재 작업을 배분·착수할 때 |
+
+교재 모듈도 **architecture.md가 최종 우선**이다. 특히 저작 파이프라인은 8.4절의 `graph_spec` + `_SequentialGraph` 폴백 패턴을 그대로 따른다 — 캠퍼스 장비가 에어갭이라 langgraph는 선택 의존성이어야 한다.
+
 ## 신뢰도 표기 규약
 
 명세 7절의 구분을 문서 전반에서 유지한다.

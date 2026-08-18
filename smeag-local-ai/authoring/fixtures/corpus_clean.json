@@ -1,0 +1,57 @@
+{
+  "_note": "겹치지 않는 기존 세트 한 장. dup_gate 가 '무고한 챕터를 물지 않는가' 를 본다.",
+  "code": "SET F1",
+  "title": "Fixture set — no overlap",
+  "sections": [
+    {
+      "id": "reading",
+      "label": "Reading",
+      "modules": [
+        {
+          "id": "R1",
+          "label": "Reading Practice 1",
+          "blocks": [
+            {
+              "kind": "passage",
+              "heading": "Questions 1-2",
+              "instruction": "Read a passage.",
+              "title": "The Last Ferry of the Season",
+              "paragraphs": [
+                "The ferry between the island and the mainland runs from April until the middle of October. After that the crossing is left to a small mail boat, which carries letters and, if there is room, two or three passengers.",
+                "Islanders plan the winter around that boat. Heavy goods, from timber to washing machines, arrive in September, and a family that forgets to order fuel before the last ferry pays for a helicopter or waits until spring."
+              ],
+              "questions": [
+                {
+                  "id": "setf1-R1-q01",
+                  "kind": "mcq",
+                  "no": 1,
+                  "prompt": "What happens after the middle of October?",
+                  "choices": [
+                    "Only a small mail boat crosses",
+                    "The island is closed to visitors",
+                    "The ferry runs twice a week",
+                    "Fuel is delivered by helicopter"
+                  ],
+                  "answer": 0
+                },
+                {
+                  "id": "setf1-R1-q02",
+                  "kind": "mcq",
+                  "no": 2,
+                  "prompt": "Why do islanders order heavy goods in September?",
+                  "choices": [
+                    "Prices are lower at the end of summer",
+                    "The last ferry can still carry them",
+                    "The mail boat refuses large parcels",
+                    "Storms make the harbour unusable"
+                  ],
+                  "answer": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

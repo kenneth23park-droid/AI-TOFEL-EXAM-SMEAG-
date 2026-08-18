@@ -1,0 +1,313 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "toefl-b2-levelup",
+  "label": "TOEFL Practice Book — B2 Level Up",
+  "cefr": "B2",
+  "derivedFrom": "blueprint.toefl.json",
+  "note": [
+    "구조만 담는다. 지문·문항 내용은 여기 없다 — 사람 또는 AI 가 이 빈 칸을 채운다.",
+    "blueprint.toefl.json 이 '모의고사 1회분'의 뼈대라면 이 파일은 '교재 한 챕터'의 뼈대다.",
+    "블록 종류(kind)와 문항 종류(questionKinds)는 blueprint.toefl.json 에 실재하는 것만 쓴다.",
+    "새 과제 유형을 여기서 발명하면 시험 엔진(assets/exam-render-*.js)이 그리지 못한다.",
+    "챕터는 시험보다 짧다. 한 챕터를 통으로 응시 가능한 세트로 내보낼 수 있어야 하므로",
+    "섹션 조각(config/_set9_fragments/*.json)과 같은 모양을 유지한다 — 키를 더할 뿐 빼지 않는다.",
+    "이 파일이 문항 수의 정본이다. assets/book-schema.js 안에 같은 표의 사본이 있고",
+    "(브라우저가 fetch 없이 검산해야 해서) SG_BOOK_SCHEMA.useBlueprint(json) 로 이 파일을",
+    "실어 주면 사본 대신 이 파일이 이긴다. 숫자를 고칠 때는 두 곳을 같이 고친다."
+  ],
+  "chapters": {
+    "perBook": 10,
+    "editions": 3,
+    "chapterNoRange": [1, 10]
+  },
+  "conventions": {
+    "slugPattern": "{book}-{NN}",
+    "slugExample": "reading-03",
+    "questionIdPattern": "{slug}-{moduleId}-q{NN}",
+    "questionIdExample": "reading-03-R1-q07",
+    "questionNo": "챕터 전체에서 1..questions 로 연속. 모듈이 바뀌어도 다시 1로 돌아가지 않는다.",
+    "headingPattern": "Questions {from}-{to}",
+    "audioTrackIdPattern": "{slug}-{moduleId}-{from}-{to}",
+    "audioTrackIdExample": "listening-03-L1-07-08",
+    "storeKey": "sg2:book:{slug}",
+    "storeIndex": "sg2:book-index"
+  },
+  "editorial": {
+    "glossary": { "min": 6, "max": 14 },
+    "indexTerms": { "min": 3, "max": 12 },
+    "targetSkills": { "min": 2, "max": 5 },
+    "teaching": {
+      "strategy": { "min": 2, "max": 6 },
+      "commonErrors": { "min": 2, "max": 6 }
+    }
+  },
+  "books": [
+    {
+      "id": "reading",
+      "label": "Reading",
+      "labelKo": "리딩",
+      "timeLimitSec": 1050,
+      "questions": 30,
+      "modelAnswers": "none",
+      "audio": false,
+      "modules": [
+        {
+          "id": "R1",
+          "label": "Reading Practice 1",
+          "timeLimitSec": 600,
+          "blocks": [
+            {
+              "kind": "cloze",
+              "instruction": "Fill in the blank.",
+              "questions": 10,
+              "questionKinds": { "blank": 10 },
+              "templateWords": { "min": 40, "max": 60 }
+            },
+            {
+              "kind": "passage",
+              "instruction": "Read a webpage.",
+              "questions": 2,
+              "questionKinds": { "mcq": 2 },
+              "paragraphs": 7,
+              "passageWords": { "min": 70, "max": 110 },
+              "choices": 4
+            },
+            {
+              "kind": "passage",
+              "instruction": "Read a passage.",
+              "questions": 3,
+              "questionKinds": { "mcq": 3 },
+              "paragraphs": 3,
+              "passageWords": { "min": 160, "max": 240 },
+              "choices": 4
+            }
+          ]
+        },
+        {
+          "id": "R2",
+          "label": "Reading Practice 2",
+          "timeLimitSec": 450,
+          "blocks": [
+            {
+              "kind": "cloze",
+              "instruction": "Fill in the blank.",
+              "questions": 10,
+              "questionKinds": { "blank": 10 },
+              "templateWords": { "min": 60, "max": 80 }
+            },
+            {
+              "kind": "passage",
+              "instruction": "Read a passage.",
+              "questions": 5,
+              "questionKinds": { "mcq": 4, "insert": 1 },
+              "paragraphs": 5,
+              "passageWords": { "min": 170, "max": 250 },
+              "choices": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "listening",
+      "label": "Listening",
+      "labelKo": "리스닝",
+      "timeLimitSec": null,
+      "questions": 22,
+      "modelAnswers": "none",
+      "audio": true,
+      "modules": [
+        {
+          "id": "L1",
+          "label": "Listening Practice 1",
+          "timeLimitSec": null,
+          "blocks": [
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to the question and select the best response from the choices.",
+              "questions": 6,
+              "questionKinds": { "mcq": 6 },
+              "perQuestionAudio": true,
+              "choices": 4,
+              "scriptWords": { "min": 6, "max": 22 }
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a conversation.",
+              "questions": 2,
+              "questionKinds": { "mcq": 2 },
+              "image": true,
+              "choices": 4,
+              "scriptWords": { "min": 210, "max": 310 }
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to an announcement.",
+              "questions": 2,
+              "questionKinds": { "mcq": 2 },
+              "image": true,
+              "choices": 4,
+              "scriptWords": { "min": 210, "max": 310 }
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a talk.",
+              "questions": 4,
+              "questionKinds": { "mcq": 4 },
+              "image": true,
+              "choices": 4,
+              "scriptWords": { "min": 350, "max": 530 }
+            }
+          ]
+        },
+        {
+          "id": "L2",
+          "label": "Listening Practice 2",
+          "timeLimitSec": null,
+          "blocks": [
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to the question and select the best response from the choices.",
+              "questions": 2,
+              "questionKinds": { "mcq": 2 },
+              "perQuestionAudio": true,
+              "choices": 4,
+              "scriptWords": { "min": 6, "max": 22 }
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a conversation.",
+              "questions": 2,
+              "questionKinds": { "mcq": 2 },
+              "image": true,
+              "choices": 4,
+              "scriptWords": { "min": 210, "max": 310 }
+            },
+            {
+              "kind": "audio-set",
+              "instruction": "Listen to a talk.",
+              "questions": 4,
+              "questionKinds": { "mcq": 4 },
+              "image": true,
+              "choices": 4,
+              "scriptWords": { "min": 350, "max": 530 }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "speaking",
+      "label": "Speaking",
+      "labelKo": "스피킹",
+      "timeLimitSec": null,
+      "questions": 11,
+      "modelAnswers": "interview",
+      "audio": false,
+      "modules": [
+        {
+          "id": "S1",
+          "label": "Task 1 · Listen and Repeat",
+          "timeLimitSec": 600,
+          "blocks": [
+            {
+              "kind": "record-set",
+              "instruction": "Listen and Repeat",
+              "questions": 7,
+              "questionKinds": { "repeat": 7 },
+              "scriptWords": { "min": 10, "max": 20 },
+              "perQuestionAudio": true,
+              "introScript": true,
+              "prepSec": 3,
+              "respondSec": 20
+            }
+          ]
+        },
+        {
+          "id": "S2",
+          "label": "Task 2 · Interview",
+          "timeLimitSec": 600,
+          "blocks": [
+            {
+              "kind": "record-set",
+              "instruction": "Answer the interviewer’s questions.",
+              "questions": 4,
+              "questionKinds": { "interview": 4 },
+              "scriptWords": { "min": 20, "max": 40 },
+              "perQuestionAudio": true,
+              "introScript": true,
+              "prepSec": 3,
+              "respondSec": 45
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "writing",
+      "label": "Writing",
+      "labelKo": "라이팅",
+      "timeLimitSec": null,
+      "questions": 12,
+      "modelAnswers": "free-write",
+      "audio": false,
+      "modules": [
+        {
+          "id": "W1",
+          "label": "Build a Sentence",
+          "timeLimitSec": 600,
+          "blocks": [
+            {
+              "kind": "build-set",
+              "instruction": "Make an appropriate sentence.",
+              "questions": 10,
+              "questionKinds": { "build": 10 },
+              "slots": { "min": 6, "max": 12 }
+            }
+          ]
+        },
+        {
+          "id": "W2",
+          "label": "Write an Email",
+          "timeLimitSec": 600,
+          "blocks": [
+            {
+              "kind": "free-write",
+              "instruction": "",
+              "questions": 1,
+              "questionKinds": { "email": 1 },
+              "bullets": 3,
+              "minWords": 80
+            }
+          ]
+        },
+        {
+          "id": "W3",
+          "label": "Write for an Academic Discussion",
+          "timeLimitSec": 600,
+          "blocks": [
+            {
+              "kind": "free-write",
+              "instruction": "",
+              "questions": 1,
+              "questionKinds": { "discussion": 1 },
+              "posts": 2,
+              "minWords": 100
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "modelAnswerBands": [
+    { "id": "high", "label": "High", "note": "만점권 응답. 교사판 PDF 의 기준 샘플." },
+    { "id": "mid", "label": "Mid", "note": "합격선. 무엇이 모자란지 설명하는 데 쓴다." },
+    { "id": "low", "label": "Low", "note": "흔한 실패 응답. teaching.commonErrors 와 짝지어 읽힌다." }
+  ],
+  "provenanceLevels": {
+    "authored": "사람이 직접 쓴 원고",
+    "generated": "api/generate.js 가 이 blueprint 의 빈 칸을 채운 것",
+    "adapted": "기존 SET 문항을 B2 로 손본 것",
+    "assumed": "⚠️ 근거 미확정 — 검토 전"
+  }
+}

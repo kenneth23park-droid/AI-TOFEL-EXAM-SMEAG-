@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<!--
+  admin-books.html — 교재("TOEFL Practice Book — B2 Level Up") 40챕터의 관제탑.
+
+  왜 이 화면이 따로 있나
+    교재는 책 4권 × 챕터 10장이고, 챕터 한 장에서 학생용 PDF · 정답판 · 교사판 ·
+    응시 가능한 세트 · 리스닝 음원 · 색인이 전부 갈라져 나온다. 원고가 하나라는 것은
+    "어디가 비었는지"도 한 곳에서만 보인다는 뜻이다. 진행 상황을 사람이 스프레드시트로
+    따로 적기 시작하면 그 표와 실제 원고가 이틀 만에 어긋난다 — 그 표를 여기가 대신한다.
+
+  이 화면이 하는 일과 하지 않는 일
+    한다   — 목록·진행률, 챕터를 인쇄될 모양 그대로 미리보기, 검산(gate) 결과 보기,
+             챕터 JSON 내려받기·올리기, 상태 표시(draft→gated→reviewed→built),
+             챕터를 시험 세트로 내보내기.
+    안 한다 — PDF 를 브라우저에서 만들지 않는다. 조판은 tools/build_book.py 가 로컬에서
+             굽는다. 화면이 PDF 를 만드는 척하면, 폰트·페이지 번호·색인이 사람마다 다른
+             결과로 나와 "같은 입력에 같은 바이트" 라는 약속이 깨진다. 그래서 여기서는
+             실행할 명령만 정확히 보여 준다.
+
+  gate 모양은 set-import.js 와 완전히 같다: { level:'stop'|'warn', scope, message }.
+  'stop' 이 하나라도 있으면 build/publish 버튼이 잠긴다 — 세트 만들기 화면과 같은 규칙이다.
+
+  데이터는 window.SG_BOOK_STORE(저장) 와 window.SG_BOOK_SCHEMA(검산) 두 전역에서만 온다.
+  둘 중 하나가 없으면 예외를 던지지 않고 화면에 "not available" 안내를 그린다 —
+  스크립트 하나가 빠졌다고 관리자가 빈 화면 앞에서 원인을 추측하게 두지 않는다.
+
+  SET 별 관리자 로그인(assets/admin-session.js)을 통과해야 열린다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice book (admin) · SMEAG MockTest</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e8f82">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:14px 0 10px; }
+  .bar input[type=search] { flex:1; min-width:180px; font:inherit; font-size:12.5px; padding:9px 12px;
+    border:1px solid var(--line-2); border-radius:9px; background:var(--paper,#fff); color:var(--ink); }
+  .chk { font-size:12px; font-weight:700; color:var(--ink-2); display:inline-flex; align-items:center; gap:6px; }
+
+  /* ── 책 4권 카드 ─────────────────────────────────────────
+     10칸짜리 눈금이 곧 진행률이다. 색만으로 구분하지 않는다 — 칸 안에 글자가 있고
+     카드 아래에 같은 내용을 문장으로 다시 쓴다(흑백 인쇄에서도 읽혀야 한다). */
+  .bookgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px; margin:4px 0 20px; }
+  .bookcard { text-align:left; font:inherit; cursor:pointer; background:var(--card); border:1px solid var(--line);
+    border-radius:13px; padding:13px 15px 14px; color:var(--ink); }
+  .bookcard.on { border-color:var(--brand); box-shadow:0 0 0 1px var(--brand) inset; }
+  .bookcard b { display:block; font-size:15px; font-weight:850; }
+  .bookcard .bsub { display:block; font-size:11px; font-weight:700; color:var(--muted); margin-top:2px;
+    text-transform:uppercase; letter-spacing:.04em; }
+  .bookcard .bcount { display:block; font-size:22px; font-weight:850; line-height:1.15; margin-top:8px;
+    font-variant-numeric:tabular-nums; }
+  .bookcard .bnote { display:block; font-size:11px; color:var(--muted); margin-top:2px; }
+  .track { display:flex; gap:3px; margin-top:10px; }
+  .track i { flex:1; height:16px; border-radius:3px; border:1px solid var(--line-2); background:var(--lock);
+    font-style:normal; font-size:9px; font-weight:800; line-height:14px; text-align:center; color:var(--muted); }
+  .track i.s-draft    { background:var(--surface-2); color:var(--ink-2); }
+  .track i.s-gated    { background:#fdf6e3; border-color:var(--warn); color:#a86400; }
+  .track i.s-reviewed { background:var(--brand-tint); border-color:var(--brand); color:var(--brand-ink); }
+  .track i.s-built    { background:var(--ok-soft); border-color:var(--ok); color:#14653a; }
+
+  /* ── 챕터 표 ───────────────────────────────────────────── */
+  .tablewrap { overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--line);
+    border-radius:13px; background:var(--card); }
+  table.chs { width:100%; min-width:640px; border-collapse:collapse; font-size:12.5px; }
+  table.chs th, table.chs td { border-bottom:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:middle; }
+  table.chs th { background:var(--surface-2); font-size:10px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.05em; color:var(--muted); white-space:nowrap; }
+  table.chs tr:last-child td { border-bottom:0; }
+  table.chs tr.on td { background:var(--brand-soft); }
+  table.chs tr.empty td { color:var(--dim); }
+  table.chs td.no, table.chs td.qn, table.chs td.ver { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  table.chs td.ti { font-weight:750; color:var(--ink); }
+  table.chs td.act { white-space:nowrap; text-align:right; }
+
+  .badge { display:inline-block; font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+    padding:2px 8px; border-radius:999px; border:1px solid var(--line-2); background:var(--surface-2); color:var(--muted); }
+  .badge.draft    { border-color:var(--line-2); background:var(--surface-2); color:var(--ink-2); }
+  .badge.gated    { border-color:var(--warn); background:#fdf6e3; color:#a86400; }
+  .badge.reviewed { border-color:var(--brand); background:var(--brand-tint); color:var(--brand-ink); }
+  .badge.built    { border-color:var(--ok); background:var(--ok-soft); color:#14653a; }
+  .badge.none     { border-style:dashed; color:var(--dim); background:transparent; }
+
+  .mini { font:inherit; font-size:11.5px; font-weight:750; padding:5px 10px; border-radius:8px; cursor:pointer;
+    border:1px solid var(--line-2); background:var(--paper,#fff); color:var(--ink); }
+  .mini + .mini { margin-left:5px; }
+  .mini:disabled { color:var(--dim); background:var(--lock); cursor:not-allowed; }
+
+  /* ── 게이트 패널 — set-import.js 와 같은 모양, 같은 규칙 ── */
+  .panel { border:1px solid var(--line); border-radius:13px; background:var(--card); padding:14px 16px 15px; margin-top:16px; }
+  .panel > h2 { font-size:14px; font-weight:850; margin:0 0 3px; }
+  .panel > p.psub { font-size:11.5px; color:var(--muted); margin:0 0 11px; line-height:1.55; max-width:78ch; }
+  .gates { display:grid; gap:8px; }
+  .gt { display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:baseline;
+    border:1px solid var(--line); border-left:3px solid var(--gc,var(--line-2)); border-radius:10px;
+    background:var(--card); padding:10px 13px; font-size:12.5px; color:var(--ink); }
+  .gt.stop { --gc:#c62828 } .gt.warn { --gc:#d97706 } .gt.pass { --gc:#1f9d55 }
+  .gt .lv { font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+  .gt.stop .lv { color:#c62828 } .gt.warn .lv { color:#a86400 } .gt.pass .lv { color:#1f9d55 }
+  .gt .sc { font-size:10.5px; color:var(--dim); }
+  .why { font-size:11.5px; font-weight:700; color:#c62828; margin-top:9px; }
+
+  .acts { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  .acts .sep { width:1px; height:20px; background:var(--line); }
+
+  /* ── 챕터 미리보기 — 인쇄될 모양 그대로 ─────────────────── */
+  .ch-h { border-bottom:2px solid var(--ink); padding-bottom:8px; margin-bottom:14px; }
+  .ch-h b { display:block; font-size:19px; font-weight:850; }
+  .ch-h span { display:block; font-size:11.5px; color:var(--muted); margin-top:3px; }
+  .mod { margin-top:18px; }
+  .mod > h3 { font-size:12px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--muted); margin:0 0 8px; }
+  .blk { border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin-bottom:11px; background:var(--card); }
+  .blk-h { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:4px; }
+  .blk-h b { font-size:14px; font-weight:850; }
+  .blk-i { font-size:12.5px; color:var(--ink-2); margin:0 0 10px; }
+  .tagx { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; text-transform:uppercase;
+    letter-spacing:.04em; background:var(--surface-2); color:var(--muted); }
+  .tagx.aud { background:#e2eef6; color:#2f6f9f; }
+  .body { border-left:3px solid var(--brand-tint-2,#b6ddd8); background:var(--surface-2); border-radius:0 10px 10px 0;
+    padding:10px 12px; margin:0 0 12px; font-size:13px; line-height:1.75; white-space:pre-wrap; }
+  .q { border-top:1px dashed var(--line); padding-top:11px; margin-top:11px; }
+  .q-h { font-size:11px; font-weight:800; letter-spacing:.04em; color:var(--muted); text-transform:uppercase; }
+  .q-p { font-size:13.5px; line-height:1.6; margin:4px 0 8px; }
+  .opt { font-size:13px; line-height:1.7; padding:2px 6px; border-radius:6px; display:block; }
+  .opt .k { display:inline-block; width:20px; font-weight:800; color:var(--muted); }
+  .opt.is-key { background:#fff59d; }                 /* 정답 형광 — admin-set-view.html 과 같은 표시 */
+  .opt.is-key .k { color:#7a5a00; }
+  body.hide-key .opt.is-key { background:transparent; }
+  body.hide-key .opt.is-key .k { color:var(--muted); }
+  body.hide-key .keyonly { display:none; }
+  .keyonly { font-size:12.5px; margin-top:6px; }
+  .keyonly b { color:var(--brand-ink); }
+  .tiles { display:flex; flex-wrap:wrap; gap:5px; margin:6px 0; }
+  .tiles span { font-size:12px; font-weight:700; border:1px solid var(--line-2); border-radius:7px;
+    padding:3px 8px; background:var(--surface-2); }
+  ul.bul { margin:4px 0 4px 18px; font-size:12.5px; line-height:1.65; }
+
+  /* ── 빌드 패널 ─────────────────────────────────────────── */
+  pre.cmd { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; line-height:1.7;
+    background:var(--ink); color:#e7f2f1; border-radius:10px; padding:12px 14px; overflow-x:auto; margin:0 0 9px; }
+
+  .note { border:1px dashed var(--line-2); border-radius:12px; padding:14px 16px; font-size:12.5px;
+    color:var(--ink-2); line-height:1.65; background:var(--surface); }
+  .gate { max-width:520px; margin:60px auto; text-align:center; }
+
+  @media (max-width:520px) {
+    .acts .sep { display:none; }
+    table.chs th, table.chs td { padding:8px 9px; }
+  }
+  @media print {
+    .nav, .bar, .foot, .bookgrid, .acts, .mini, .tablewrap, #buildPanel, #gatePanel { display:none !important; }
+    .panel { border:0; padding:0; }
+    .blk { break-inside:avoid; border-color:#ddd; }
+    .opt.is-key { background:#ffe08a !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="admin.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Admin · Practice book</small></span></a>
+    <div class="nav-right">
+      <a class="btn ghost sm" href="admin.html">Admin home</a>
+      <a class="btn ghost sm" href="admin-set-view.html">Set overview</a>
+      <a class="btn ghost sm" href="admin-set-import.html">Build a set</a>
+      <a class="btn ghost sm" href="admin-log.html">Change log</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main" hidden>
+  <div class="page-h" style="padding-top:24px">
+    <span class="pill" style="margin-bottom:8px">Admin · Practice book</span>
+    <h1 style="font-size:clamp(25px,4vw,38px)">Forty chapters, one page</h1>
+    <p class="sub">TOEFL Practice Book — B2 Level Up. Four books of ten chapters. Each chapter is authored once and
+      becomes the student PDF, the answer key and teacher edition, a runnable exam set, the listening audio and the
+      search index. This page shows what exists, what the checks caught, and the exact command that bakes the files.</p>
+  </div>
+
+  <div id="deps"></div>
+
+  <div id="workspace" hidden>
+    <div class="bookgrid" id="books"></div>
+
+    <div class="bar">
+      <input type="search" id="q" placeholder="Filter chapters by title, index term or question text…">
+      <label class="chk"><input type="checkbox" id="showKey" checked> Answer key</label>
+      <button class="btn ghost sm" id="importBtn">Import book JSON</button>
+      <button class="btn ghost sm" id="exportBtn">Export book JSON</button>
+      <button class="btn ghost sm" id="printBtn">Print</button>
+    </div>
+
+    <div class="tablewrap">
+      <table class="chs">
+        <thead><tr>
+          <th style="width:44px">No</th><th>Title</th><th style="width:70px">Questions</th>
+          <th style="width:96px">Status</th><th style="width:74px">Version</th><th style="width:210px"></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <section class="panel" id="gatePanel">
+      <h2>Checks</h2>
+      <p class="psub">Every gate is one of two levels. <b>Stop</b> means the chapter cannot become a working exam —
+        build and publish stay locked until it is gone. <b>Check</b> means a human should look, but the chapter still
+        saves. This is the same rule the set importer uses.</p>
+      <div class="gates" id="gates"></div>
+      <div class="acts" id="acts"></div>
+      <p class="why" id="why" hidden></p>
+    </section>
+
+    <section class="panel" id="detailPanel">
+      <h2>Chapter preview</h2>
+      <p class="psub">The chapter as it will print — headings, instructions, questions, in page order. The correct
+        choice is highlighted; turn off <b>Answer key</b> above to see the student edition.</p>
+      <div id="detail"></div>
+    </section>
+
+    <section class="panel" id="buildPanel">
+      <h2>Build the files</h2>
+      <p class="psub">PDFs are not made in the browser. They are baked locally by <b>tools/build_book.py</b> so that the
+        same chapter always produces the same bytes — same fonts, same page breaks, same index page numbers. Run this
+        from the repository root:</p>
+      <pre class="cmd" id="buildCmd"></pre>
+      <div class="acts">
+        <button class="mini" id="copyCmd">Copy command</button>
+        <button class="mini" id="checkCmd">Copy check command</button>
+      </div>
+      <p class="psub" style="margin-top:11px">Editions are <b>student</b>, <b>answerKey</b> and <b>teacher</b>. The
+        answer key and teacher editions are staff downloads — they are never handed to students.</p>
+    </section>
+  </div>
+
+  <input type="file" id="file" accept="application/json,.json" hidden>
+</main>
+
+<div class="wrap gate" id="gate">
+  <p class="muted">Admin sign-in required.</p>
+  <button class="btn brand" id="signin">Sign in</button>
+</div>
+
+<script src="assets/book-schema.js"></script>
+<script src="assets/book-store.js"></script>
+<script src="assets/admin-session.js"></script>
+<script src="assets/sg-auth.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/book-admin.js"></script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>
