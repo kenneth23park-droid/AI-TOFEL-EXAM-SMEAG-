@@ -22,13 +22,15 @@
   var ACCOUNTS = [
     { id: 'admin', pw: 'smeag2222', sets: ['*'],     label: 'Master admin',  labelKo: '전체 관리자' },
     { id: 'set1',  pw: 'set1-2222', sets: ['set1'],  label: 'SET 1 admin',   labelKo: 'SET 1 관리자' },
-    { id: 'set9',  pw: 'set9-2222', sets: ['set9'],  label: 'SET 9 admin',   labelKo: 'SET 9 관리자' }
+    { id: 'set9',  pw: 'set9-2222', sets: ['set9'],  label: 'SET 9 admin',   labelKo: 'SET 9 관리자' },
+    { id: 'set10', pw: 'set10-2222', sets: ['set10'], label: 'SET 10 admin', labelKo: 'SET 10 관리자' }
   ];
 
   /* 이 사이트가 아는 SET 목록 — 관리자 페이지의 SET 선택기가 이걸 쓴다. */
   var SETS = [
     { id: 'set1', label: 'SET 1', global: 'SMEAG_SET1' },
-    { id: 'set9', label: 'SET 9', global: 'SMEAG_SET9' }
+    { id: 'set9', label: 'SET 9', global: 'SMEAG_SET9' },
+    { id: 'set10', label: 'SET 10', global: 'SMEAG_SET10' }
   ];
 
   var listeners = [];

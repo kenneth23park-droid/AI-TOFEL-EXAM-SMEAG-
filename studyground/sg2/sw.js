@@ -371,7 +371,7 @@
 //      이제 set9.js 와 같은 자리에 커밋된 파일로 서고(tools/build_set10.mjs 가 원본
 //      docx 3종에서 굽는다), tests.html 에 SET 10 카드가 선다. 둘 다 셸 자산이라
 //      판올림해야 재방문 기기가 옛 목록을 계속 보지 않는다.
-const VERSION = 'sg-v83';
+const VERSION = 'sg-v84';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

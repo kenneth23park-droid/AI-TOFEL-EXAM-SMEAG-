@@ -2,8 +2,8 @@
  *
  * 학생이 로그인한 뒤(그리고 로그인해 있는 채로 index.html 로 들어왔을 때) 도착할 주소다.
  * 세트를 고르는 목록(tests.html)을 지나지 않고 자기 화면 — 대시보드로 간다.
- * 대시보드에는 지금 치를 시험 한 벌(SET 9)만 문으로 열려 있고, 자기 성적도 SET 9 만
- * 보인다(dashboard.html). 시험은 그 화면의 큰 버튼으로 들어간다.
+ * 대시보드에는 학생이 응시할 수 있는 모든 공개 세트가 보이고, 자기 성적도 세트별로
+ * 보인다(dashboard.html). 시험은 각 세트 카드의 버튼으로 들어간다.
  *
  *   dashboard.html · 내 성적 + SET 9 시작 버튼
  *
@@ -18,5 +18,5 @@
  * 시험장 좌석 배정(sg-seats.js)이 있으면 그쪽이 이긴다 — login.html 의 landing() 참고.
  */
 window.SG_STUDENT_LANDING = 'dashboard.html';
-window.SG_STUDENT_EXAM = 'exam-runtime.html?mode=exam&profile=toefl&set=set9';
-window.SG_STUDENT_SET = 'SET9';   // 학생 화면에 남기는 세트(set_code 를 A–Z0–9 로만 줄인 꼴)
+window.SG_STUDENT_EXAM = 'tests.html';
+window.SG_STUDENT_SETS = ['SET1', 'SET9', 'SET10'];

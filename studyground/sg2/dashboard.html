@@ -11,10 +11,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MockTest">
 
-<!-- ── 수험생 계정으로 들어오면 시험 한 벌만 남긴다 ──────────────────────────
+<!-- ── 수험생 계정으로 들어오면 공개된 모든 세트를 남긴다 ─────────────────────
      로그인한 학생이 도착하는 화면이다(assets/student-landing.js). 여기서는
-     지금 치를 시험(SET 9) 하나만 문으로 열고, 성적도 SET 9 만 센다 —
-     밴드 · 영역별 최고 · 최근 성적 모두. 비로그인 방문자와 선생님/관리자는 전체를 본다.
+     학생은 모든 공개 세트를 응시하고 본인 성적과 리뷰를 세트별로 본다.
      tests.html 의 같은 판정을 쓴다(admin-session.js 의 studentSignedIn()). -->
 <script>
 (function () {
@@ -71,17 +70,10 @@
     <a class="btn brand sm" href="admin-results.html" style="margin-left:auto"><span data-en>All students' results</span><span data-ko>전체 학생 결과</span></a>
   </div>
 
-  <!-- 학생이 로그인해 도착하는 자리 — 지금 치를 시험 한 벌(SET 9)만 문으로 연다.
-       주소는 tests.html 의 Full Test 버튼과 같다(assets/student-landing.js). -->
+  <!-- 학생이 로그인해 도착하는 자리 — 공개된 모든 세트를 연다. -->
   <div class="card mt-16" data-student-only id="mytest">
-    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
-      <div>
-        <div class="muted" style="font-size:12px"><span data-en>Your test</span><span data-ko>내 시험</span></div>
-        <div style="font-size:20px;font-weight:800">NEW TOEFL SET 9</div>
-        <div class="muted" style="font-size:12.5px"><span data-en>Full 4-section mock · Reading · Listening · Speaking · Writing</span><span data-ko>4영역 전체 모의고사 · 리딩 · 리스닝 · 스피킹 · 라이팅</span></div>
-      </div>
-      <a class="btn brand lg" style="margin-left:auto" id="mytest-go" href="exam-runtime.html?mode=exam&amp;profile=toefl&amp;set=set9"><span data-en>Start SET 9</span><span data-ko>SET 9 응시</span></a>
-    </div>
+    <div class="muted" style="font-size:12px"><span data-en>Your mock tests</span><span data-ko>내 목테스트</span></div>
+    <div id="student-set-links" style="display:grid;gap:10px;margin-top:10px"></div>
   </div>
 
   <!-- 최고 성적의 TOEFL 밴드 (1.0~6.0, ETS 2026 눈금) -->
@@ -157,21 +149,15 @@
 
   var $ = function (id) { return document.getElementById(id); };
 
-  /* 학생 화면은 한 세트만 센다. <head> 는 기기에 저장된 프로필만 보고 먼저 접어 두고,
-     여기서 서버 사본으로 되짚는다(선생님·관리자면 다시 편다).
-     세트 이름은 A–Z0–9 로만 줄여서 견준다 — 'SET 9' 도 'set-9' 도 같은 것으로 읽는다. */
-  var SET = String(window.SG_STUDENT_SET || 'SET9').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  /* 학생은 서버가 허용한 본인 응시 기록을 모든 공개 세트에 걸쳐 본다. */
+  var SETS = (window.SG_STUDENT_SETS || ['SET1', 'SET9', 'SET10']).map(code);
   var EXAM = window.SG_STUDENT_EXAM || 'tests.html';
-  var DATE_KEY = 'sg2_exam_date_v1';
   var ONLY = '';                      // 학생으로 확인된 뒤에만 채워진다
-  var EXAM_DATE = '';
   function code(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
   function mine(list) {
     if (!ONLY) return list || [];
     return (list || []).filter(function (r) {
-      if (code(r.set_code) !== ONLY) return false;
-      if (!EXAM_DATE) return true;
-      return dayOf(r.submitted_at) === EXAM_DATE;
+      return !ONLY || code(r.set_code) === ONLY;
     });
   }
 
@@ -205,16 +191,25 @@
     }
     $('acct-body').innerHTML = '<b style="font-size:14px;color:var(--ink)">' +
       esc(u.name || u.email) + '</b> · ' + esc(u.student_id || u.email);
-    if (EXAM_DATE) {
-      $('acct-body').innerHTML += ' · <span class="chip">' + esc(EXAM_DATE) + '</span>';
-    }
     // 학생에겐 목록을 거치지 않는 문을 준다 — 어차피 고를 세트가 하나다.
-    $('acct-act').innerHTML = ONLY
-      ? '<a class="btn ghost sm" href="' + esc(EXAM) + '">' + bi('Start SET 9', 'SET 9 응시') + '</a>'
-      : '<a class="btn ghost sm" href="tests.html">' + bi('Take a test', '응시하기') + '</a>';
+    $('acct-act').innerHTML = '<a class="btn ghost sm" href="tests.html">' + bi('Take a test', '응시하기') + '</a>';
     if (SG_AUTH.isStaff) {
       SG_AUTH.isStaff().then(function (yes) { if (yes) $('staff').classList.remove('hide'); });
     }
+  }
+
+  function paintStudentSets() {
+    var box = $('student-set-links');
+    if (!box) return;
+    box.innerHTML = SETS.map(function (set) {
+      var lower = set.toLowerCase();
+      return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line-2);border-radius:10px">' +
+        '<b style="min-width:150px">NEW TOEFL ' + esc(set) + '</b>' +
+        '<span class="muted" style="font-size:12.5px">' + bi('Full 4-section mock', '4영역 전체 모의고사') + '</span>' +
+        '<a class="btn brand sm" style="margin-left:auto" href="exam-runtime.html?mode=exam&amp;profile=toefl&amp;set=' + lower + '">' +
+          bi('Start test', '응시하기') + '</a>' +
+      '</div>';
+    }).join('');
   }
 
   /* 응시 한 건 → 밴드 관점(SG_BAND.of). 채점 행은 미리 받아 둔 것을 나눠 쓴다. */
@@ -311,40 +306,16 @@
     }).join('');
   }
 
-  /* 누구로 로그인했는지 먼저 매듭짓는다 — 학생이면 SET 9 만 남기고, 선생님·관리자면
+  /* 누구로 로그인했는지 먼저 매듭짓는다 — 학생이면 본인 기록만 남기고, 선생님·관리자면
      <head> 가 접어 둔 것을 다시 편다. 비로그인은 이 기기의 기록을 전부 본다. */
   function decide() {
     var u = window.SG_AUTH && SG_AUTH.user();
     var cl = document.documentElement.classList;
-    if (!u) { ONLY = ''; EXAM_DATE = ''; cl.remove('sg-student'); return Promise.resolve(); }
+    if (!u) { ONLY = ''; cl.remove('sg-student'); return Promise.resolve(); }
     cl.add('sg-student');                         // 막는 쪽이 기본 — 확인되면 푼다
-    ONLY = SET;
-    try { EXAM_DATE = localStorage.getItem(DATE_KEY) || ''; } catch (e) { EXAM_DATE = ''; }
-    if (!EXAM_DATE && u && u.exam_date) EXAM_DATE = u.exam_date;
+    ONLY = '';
     return SG_AUTH.isStaff().catch(function () { return false; })
-      .then(function (staff) { if (staff) { ONLY = ''; EXAM_DATE = ''; cl.remove('sg-student'); } });
-  }
-
-  /* 고른 시험일에 아무것도 없을 때, 다른 날에 남아 있는 응시가 있으면 그 날들을 적는다.
-     학생은 로그인 화면에서 날짜를 다시 고르면 그 성적을 본다. */
-  function sayOtherDays(all) {
-    var box = $('empty-date');
-    if (!box) return;
-    box.hidden = true;
-    if (!ONLY || !EXAM_DATE) return;
-    var days = [];
-    (all || []).forEach(function (r) {
-      var d = dayOf(r.submitted_at);
-      if (code(r.set_code) !== ONLY || !d || d === EXAM_DATE || days.indexOf(d) >= 0) return;
-      days.push(d);
-    });
-    if (!days.length) return;
-    days.sort().reverse();
-    box.innerHTML = bi('Showing the ' + EXAM_DATE + ' exam only. You also have results on ' +
-                         days.join(', ') + ' — log in again with that date to see them.',
-                       EXAM_DATE + ' 시험만 보이고 있습니다. ' + days.join(', ') +
-                         ' 에도 응시 기록이 있습니다 — 로그인 화면에서 그 날짜를 골라 주세요.');
-    box.hidden = false;
+      .then(function (staff) { if (staff) { ONLY = ''; cl.remove('sg-student'); } });
   }
 
   /* 이 화면의 다른 문구와 같은 방식으로 두 언어를 함께 심는다 — [data-ko] 는
@@ -362,6 +333,7 @@
   }
 
   function boot() {
+    paintStudentSets();
     paintAccount();
     /* 이 기기에 남아 있고 아직 안 올라간 응시가 있으면 올린다. 답안은 조용히 가도
        되지만 녹음은 아니다 — 못 올라간 녹음은 이 기기를 떠나는 순간 없어지므로,
@@ -404,16 +376,16 @@
       var list = mine(out[1]), byS = SG_RESULTS.tasksBySession(out[2]);
       paintAccount();                       // 누구인지 매듭지어졌으니 버튼의 행선지도 정해진다
       // 아직 아무것도 안 친 학생도 목록을 거치지 않는다 — 빈 화면의 버튼도 같은 문이다.
-      if (ONLY) $('empty-go').href = EXAM;
+      $('empty-go').href = EXAM;
       paintBand(list, byS);
       paintBests(list, byS);
-      if (!list.length) { sayOtherDays(out[1]); $('empty').classList.remove('hide'); return; }
+      if (!list.length) { $('empty').classList.remove('hide'); return; }
       $('empty').classList.add('hide');      // 다시 그릴 때 빈 화면 안내가 남지 않게
       paintRows(list, byS);
       $('recent').classList.remove('hide');
     }).catch(function () {
       paintAccount();
-      if (ONLY) $('empty-go').href = EXAM;
+      $('empty-go').href = EXAM;
       paintBests([], {});
       $('empty').classList.remove('hide');
     });
