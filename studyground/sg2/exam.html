@@ -24,6 +24,7 @@
   .opt.correct { background:var(--ok-soft); border-color:var(--ok); }
   .opt.wrong { background:#fdeeee; border-color:var(--no,#dc2626); }
   .passage { background:var(--surface-2); border-radius:12px; padding:14px 16px; font-size:14px; line-height:1.7; margin-bottom:14px; white-space:pre-wrap; }
+  .rd-hit { background:#fff1a8; color:inherit; border-radius:4px; padding:0 2px; box-shadow:0 0 0 1px rgba(140,110,0,.08) inset; }
   .blank-in { border:none; border-bottom:2px solid var(--brand); background:transparent; font-size:14px; width:110px; font-family:inherit; padding:2px 4px; }
   audio { width:100%; margin:8px 0; }
   .qinstr { font-size:13px; color:var(--muted); margin:2px 0 6px; }
@@ -314,6 +315,30 @@
 
   function esc(t){ var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
   function slug(s){ return (s||'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase(); }
+  function escapeRegExp(s){ return String(s||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+  function targetWordFromPrompt(prompt){
+    var s=String(prompt||'');
+    var m=s.match(/[“"']([^“”"']+)[”"']/);
+    if(m && m[1]) return m[1];
+    m=s.match(/The word\s+([A-Za-z][A-Za-z'-]*)/i);
+    return m && m[1] ? m[1] : '';
+  }
+  function renderHighlightedText(text, word){
+    var src=String(text==null ? '' : text);
+    var key=String(word||'').trim();
+    if(!key) return document.createTextNode(src);
+    var re=new RegExp('('+escapeRegExp(key)+')','ig');
+    var frag=document.createDocumentFragment();
+    var last=0, m;
+    while((m=re.exec(src))){
+      if(m.index>last) frag.appendChild(document.createTextNode(src.slice(last,m.index)));
+      var mark=document.createElement('mark'); mark.className='rd-hit'; mark.textContent=m[1];
+      frag.appendChild(mark);
+      last=m.index+m[1].length;
+    }
+    if(last<src.length) frag.appendChild(document.createTextNode(src.slice(last)));
+    return frag;
+  }
 
   // Reading passage text from whichever field the block uses.
   function passageText(blk){
@@ -322,21 +347,13 @@
     if(blk.messages) return blk.messages.map(function(m){ return (m.from||m.sender||'')+': '+(m.text||m); }).join('\n');
     return '';
   }
-  // Passage block + a Read-aloud button (bundled ElevenLabs mp3 → browser voice fallback).
-  function makePassage(mod, blk){
+  // Passage block for reading sections.
+  function makePassage(mod, blk, highlightWord){
     var text=passageText(blk); if(!text) return null;
     var wrap=document.createElement('div');
-    var ttsId='read-'+mod.id+'-'+slug(blk.title||blk.heading);
     var bar=document.createElement('div'); bar.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:6px';
-    var btn=document.createElement('button'); btn.className='btn ghost sm'; btn.type='button';
-    btn.innerHTML='🔊 <span data-en>Read aloud</span><span data-ko>읽어주기</span>';
-    btn.addEventListener('click', function(){
-      if(btn.dataset.state==='playing'){ window.SG_TTS.stop(); btn.dataset.state=''; return; }
-      window.SG_TTS && window.SG_TTS.speak(ttsId, text, btn);
-    });
     if(blk.title){ var ti=document.createElement('b'); ti.textContent=blk.title; ti.style.cssText='font-size:15px'; bar.appendChild(ti); }
-    bar.appendChild(btn);
-    var p=document.createElement('div'); p.className='passage'; p.textContent=text;
+    var p=document.createElement('div'); p.className='passage'; p.appendChild(renderHighlightedText(text, highlightWord));
     wrap.appendChild(bar); wrap.appendChild(p);
     return wrap;
   }
@@ -395,7 +412,7 @@
       }
       // MCQ / audio-set with choices
       else if(blk.questions && blk.questions.some(function(q){return q.choices;})){
-        var pass=makePassage(mod, blk);
+        var pass=makePassage(mod, blk, targetWordFromPrompt((blk.questions && blk.questions[0] && blk.questions[0].prompt) || ''));
         // 스펙(Reading Task 2): 지문은 왼쪽, 문항은 오른쪽. 지문이 있는 리딩 블록만 2단으로 쪼갠다.
         // 지문이 없거나(리스닝 등) 다른 섹션이면 종전처럼 카드에 그대로 쌓는다.
         var qHost=card;

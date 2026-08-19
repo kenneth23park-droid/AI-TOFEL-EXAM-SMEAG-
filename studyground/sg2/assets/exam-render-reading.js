@@ -229,20 +229,34 @@
     return textEl(tag || 'p', null, en);
   }
 
-  /* Read aloud — 번들 mp3(media/tts/*.mp3) 우선, 없으면 브라우저 음성. SG_TTS 미로드면 버튼 자체를 만들지 않는다. */
-  function readAloudBtn(ttsId, text) {
-    if (!root.SG_TTS || !text) return null;
-    var b = el('button', 'btn ghost sm');
-    b.type = 'button';
-    b.appendChild(doc.createTextNode('🔊 '));
-    b.appendChild(bi('span', 'Read aloud', '읽어주기'));
-    b.onclick = function () {
-      try {
-        if (b.getAttribute('data-state') === 'playing') { root.SG_TTS.stop(); b.setAttribute('data-state', ''); return; }
-        root.SG_TTS.speak(ttsId, text, b);
-      } catch (e) { warn('tts failed', e); }
-    };
-    return b;
+  function escapeRegExp(s) {
+    return String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function targetWordFromPrompt(prompt) {
+    var s = String(prompt || '');
+    var m = s.match(/[“"']([^“”"']+)[”"']/);
+    if (m && m[1]) return m[1];
+    m = s.match(/The word\s+([A-Za-z][A-Za-z'-]*)/i);
+    return m && m[1] ? m[1] : '';
+  }
+
+  function wrapHighlightedText(text, word) {
+    var src = String(text == null ? '' : text);
+    var key = String(word || '').trim();
+    if (!key) return doc.createTextNode(src);
+    var re = new RegExp('(' + escapeRegExp(key) + ')', 'ig');
+    var frag = doc.createDocumentFragment();
+    var last = 0, m;
+    while ((m = re.exec(src))) {
+      if (m.index > last) frag.appendChild(doc.createTextNode(src.slice(last, m.index)));
+      var mark = el('mark', 'rd-hit');
+      mark.appendChild(doc.createTextNode(m[1]));
+      frag.appendChild(mark);
+      last = m.index + m[1].length;
+    }
+    if (last < src.length) frag.appendChild(doc.createTextNode(src.slice(last)));
+    return frag;
   }
 
   /* ── 블록별 렌더 ─────────────────────────────────────────── */
@@ -407,7 +421,7 @@
 
   /* passage 본문 — {{A}}~{{D}} 마커는 클릭 가능한 삽입 지점 버튼이 된다(insert 문항 있을 때만).
      선택 시 sentence 를 그 자리에 미리보기로 넣는다. 라디오와의 동기화는 api.setInsert 가 맡는다. */
-  function renderPassageBody(blk, insertQ, api) {
+  function renderPassageBody(blk, insertQ, api, highlightWord) {
     var box = el('div', 'rd-passage-body');
     if (blk.title) box.appendChild(textEl('h3', 'rd-passage-title', blk.title));
     var ps = blk.paragraphs || (blk.passage ? [blk.passage] : []), i, j;
@@ -415,7 +429,10 @@
       var para = el('p', 'rd-para');
       var toks = insertQ ? markerTokens(ps[i]) : [{ text: ps[i] }];
       for (j = 0; j < toks.length; j++) {
-        if (toks[j].text !== undefined) { para.appendChild(doc.createTextNode(toks[j].text)); continue; }
+        if (toks[j].text !== undefined) {
+          para.appendChild(wrapHighlightedText(toks[j].text, highlightWord));
+          continue;
+        }
         var letter = toks[j].token;
         var idx = -1, k;
         for (k = 0; k < MARKERS.length; k++) { if (MARKERS[k] === letter) idx = k; }
@@ -509,6 +526,7 @@
 
     var qs = questionsOf(blk, screen && screen.questionIds);
     var insertQ = insertQuestionOf(blk, qs);
+    var currentWord = targetWordFromPrompt(qs[0] && qs[0].prompt);
 
     // 렌더 지역 상태 — 마커/라디오/그리드가 서로를 갱신한다.
     var cards = {};                    // qid → 문항 카드(한 개만 펴 둔다)
@@ -596,7 +614,7 @@
     if (bar.firstChild) left.appendChild(bar);
 
     var scroller = el('div', 'rd-scroll');
-    scroller.appendChild(kind === 'chat' ? renderChat(blk) : renderPassageBody(blk, insertQ, api));
+    scroller.appendChild(kind === 'chat' ? renderChat(blk) : renderPassageBody(blk, insertQ, api, currentWord));
     left.appendChild(scroller);
 
     var right = el('div', 'rd-right');
