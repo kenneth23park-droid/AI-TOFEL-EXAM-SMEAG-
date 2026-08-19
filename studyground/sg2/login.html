@@ -57,12 +57,11 @@
     <div class="divider" id="or-scan" hidden><span data-en>or type it</span><span data-ko>또는 직접 입력</span></div>
 
     <form id="f">
-      <div class="field"><label data-en>Exam date</label><label data-ko>시험일</label>
-        <select id="exam-date" name="exam_date" aria-label="Exam date"></select>
-        <div class="scan-msg" style="text-align:left">
-          <span data-en>Select the exam day before you log in.</span>
-          <span data-ko>로그인 전에 시험일을 선택하세요.</span>
-        </div></div>
+      <input type="hidden" id="exam-date" name="exam_date" value="">
+      <div class="scan-msg" style="text-align:left;margin-bottom:14px">
+        <span data-en>Your account name and exam date are found automatically.</span>
+        <span data-ko>계정 이름과 시험일은 자동으로 찾습니다.</span>
+      </div>
       <div class="field"><label data-en>ID or email</label><label data-ko>아이디 또는 이메일</label>
         <input id="login" type="text" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="smeag007" required>
         <div class="scan-msg" style="text-align:left"><span data-en>Students: smeag000–smeag999, or the email you registered with. Staff: your admin ID.</span><span data-ko>수험생은 smeag000~smeag999 또는 등록한 이메일, 관리자는 관리자 아이디.</span></div></div>
@@ -114,23 +113,7 @@
     try { localStorage.setItem(DATE_KEY, date); } catch (e) {}
   }
 
-  function loadExamDate() {
-    var picked = '';
-    try { picked = localStorage.getItem(DATE_KEY) || ''; } catch (e) {}
-    var today = new Date();
-    var dates = [];
-    for (var offset = -90; offset <= 30; offset += 1) {
-      var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
-      var value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
-        String(d.getDate()).padStart(2, '0');
-      dates.push(value);
-    }
-    examDateEl.innerHTML = '<option value="">Auto-detect account date / 계정 날짜 자동 찾기</option>' + dates.map(function (value) {
-      var label = value === todayISO() ? value + ' (Today)' : value;
-      return '<option value="' + value + '">' + label + '</option>';
-    }).join('');
-    examDateEl.value = dates.indexOf(picked) >= 0 ? picked : '';
-  }
+  function loadExamDate() { examDateEl.value = ''; }
 
   /* ── 좌석이 정해 준 행선지 ──────────────────────────────────
    *
@@ -219,9 +202,7 @@
   f.addEventListener('submit', function (e) {
     e.preventDefault();
     if (window.SG_FS) SG_FS.armAndEnter();     // 누른 그 순간에만 전체화면이 열린다
-    var date = examDateEl.value || todayISO();
-    saveExamDate(date);
-    enter(document.getElementById('login').value.trim(), document.getElementById('pw').value, date);
+    enter(document.getElementById('login').value.trim(), document.getElementById('pw').value, '');
   });
 
   /* ── QR 카드 ────────────────────────────────────────────────
