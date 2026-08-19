@@ -195,6 +195,11 @@
 <script src="assets/exam-sync.js"></script>
 <script src="assets/exam-sync-boot.js"></script>
 <script src="assets/exam-live-boot.js"></script>
+<!-- 모든 커밋된 세트 팩을 시험 셸보다 먼저 준비한다. 이렇게 해야 오프라인 재방문이나
+     오래된 서비스워커에서도 SET 10 Reading/Listening 본문이 빈 화면으로 떨어지지 않는다. -->
+<script src="assets/set1.js"></script>
+<script src="assets/set9.js"></script>
+<script src="assets/set10.js"></script>
 <script src="assets/offline-prep.js" data-mode="check"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
