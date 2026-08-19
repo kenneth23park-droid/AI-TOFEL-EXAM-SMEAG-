@@ -25,6 +25,9 @@
   .scan.on { display:block; }
   .scan video { width:100%; border-radius:12px; background:#111; aspect-ratio:4/3; object-fit:cover; }
   .scan-msg { font-size:12px; color:var(--dim); margin-top:6px; text-align:center; }
+  .drop-account { margin:4px 0 14px; padding:12px; border:1px dashed #159b8e; border-radius:10px;
+                  color:var(--muted); font-size:12px; text-align:center; background:#f3fbfa; }
+  .drop-account.over, .drop-account.filled { background:#dff5f1; border-style:solid; color:var(--ink); }
 </style>
 </head>
 <body>
@@ -65,6 +68,10 @@
       <div class="field"><label data-en>ID or email</label><label data-ko>아이디 또는 이메일</label>
         <input id="login" type="text" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="smeag007" required>
         <div class="scan-msg" style="text-align:left"><span data-en>Students: smeag000–smeag999, or the email you registered with. Staff: your admin ID.</span><span data-ko>수험생은 smeag000~smeag999 또는 등록한 이메일, 관리자는 관리자 아이디.</span></div></div>
+      <div id="account-drop" class="drop-account" tabindex="0">
+        <span data-en>Drag the account ID here to find the account name</span>
+        <span data-ko>계정 ID를 여기에 끌어 놓으면 계정 이름을 찾습니다</span>
+      </div>
       <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
         <input id="pw" type="password" name="password" autocomplete="current-password" value="2222" required></div>
       <button class="btn brand block lg" id="go" type="submit"><span data-en>Log in</span><span data-ko>로그인</span></button>
@@ -89,6 +96,8 @@
   'use strict';
   var f = document.getElementById('f'), go = document.getElementById('go'), err = document.getElementById('err');
   var examDateEl = document.getElementById('exam-date');
+  var loginEl = document.getElementById('login');
+  var drop = document.getElementById('account-drop');
 
   // ?next= 는 이 사이트 안의 페이지 이름만 받는다 — 외부 주소로 튕기지 않게.
   var raw = new URLSearchParams(location.search).get('next') || '';
@@ -198,6 +207,19 @@
   }
 
   loadExamDate();
+
+  loginEl.addEventListener('dragstart', function (e) {
+    e.dataTransfer.setData('text/plain', loginEl.value.trim());
+  });
+  loginEl.setAttribute('draggable', 'true');
+  drop.addEventListener('dragover', function (e) { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', function () { drop.classList.remove('over'); });
+  drop.addEventListener('drop', function (e) {
+    e.preventDefault();
+    drop.classList.remove('over');
+    var value = e.dataTransfer.getData('text/plain').trim();
+    if (value) { loginEl.value = value; drop.classList.add('filled'); }
+  });
 
   f.addEventListener('submit', function (e) {
     e.preventDefault();
