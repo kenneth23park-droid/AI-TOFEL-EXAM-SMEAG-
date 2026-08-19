@@ -102,10 +102,10 @@
     <div class="grid" style="gap:12px">
       <div class="testcard" data-set="SET1"><div class="code">01</div><div class="body"><h4>NEW TOEFL SET 1</h4><p data-en>Full 4-section mock · real SET 1 audio</p><p data-ko>4영역 전체 모의고사 · SET 1 실제 오디오</p>
         <div class="scope"><span class="scope-lab"><span data-en>One section</span><span data-ko>한 영역만</span></span>
-          <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=reading&amp;profile=toefl&amp;set=set1"><span data-en>Reading</span><span data-ko>리딩</span></a>
-          <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=listening&amp;profile=toefl&amp;set=set1"><span data-en>Listening</span><span data-ko>리스닝</span></a>
-          <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=speaking&amp;profile=toefl&amp;set=set1"><span data-en>Speaking</span><span data-ko>스피킹</span></a>
-          <a class="btn ghost sm" href="exam-runtime.html?mode=section&amp;section=writing&amp;profile=toefl&amp;set=set1"><span data-en>Writing</span><span data-ko>라이팅</span></a>
+          <a class="btn ghost sm" data-sec="reading" data-sec-set="set1" href="exam-runtime.html?mode=section&amp;section=reading&amp;profile=toefl&amp;set=set1"><span data-en>Reading</span><span data-ko>리딩</span></a>
+          <a class="btn ghost sm" data-sec="listening" data-sec-set="set1" href="exam-runtime.html?mode=section&amp;section=listening&amp;profile=toefl&amp;set=set1"><span data-en>Listening</span><span data-ko>리스닝</span></a>
+          <a class="btn ghost sm" data-sec="speaking" data-sec-set="set1" href="exam-runtime.html?mode=section&amp;section=speaking&amp;profile=toefl&amp;set=set1"><span data-en>Speaking</span><span data-ko>스피킹</span></a>
+          <a class="btn ghost sm" data-sec="writing" data-sec-set="set1" href="exam-runtime.html?mode=section&amp;section=writing&amp;profile=toefl&amp;set=set1"><span data-en>Writing</span><span data-ko>라이팅</span></a>
         </div></div><a class="btn brand" href="exam-runtime.html?mode=exam&amp;profile=toefl&amp;set=set1"><span data-en>Full test</span><span data-ko>전체 과정</span></a></div>
       <div class="testcard" data-set="SET9"><div class="code">09</div><div class="body"><h4>NEW TOEFL SET 9</h4><p data-en>Full 4-section mock · 120 questions (R 50 · L 47 · W 12 · S 11)</p><p data-ko>4영역 전체 모의고사 · 120문항 (리딩 50 · 리스닝 47 · 라이팅 12 · 스피킹 11)</p><div class="chips"><span class="chip">🔊 34 audio clips</span><span class="chip">12 voices · US/GB/AU</span></div>
         <!-- 영역 네 칸은 학생에게도 보이고, 학생이 그대로 연다 — 관리자 승인 칸은 없앴다. -->
@@ -231,6 +231,27 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+})();
+</script>
+<script>
+/* 영역별 응시는 관리자 permit 후에만 연다. 전체 시험은 기존처럼 학생이 바로 시작한다. */
+(function () {
+  'use strict';
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest && e.target.closest('a[data-sec]');
+    if (!link || !window.SG_ADMIN || !SG_ADMIN.verify) return;
+    e.preventDefault();
+    var setId = (link.getAttribute('data-sec-set') || 'set9').toLowerCase();
+    var id = window.prompt('Admin ID / 관리자 ID');
+    if (id === null) return;
+    var pw = window.prompt('Admin password / 관리자 비밀번호');
+    if (pw === null) return;
+    if (!SG_ADMIN.verify(id, pw, setId)) {
+      window.alert('Admin permit required for this section.\n이 영역은 관리자 승인 후 응시할 수 있습니다.');
+      return;
+    }
+    window.location.href = link.href;
+  });
 })();
 </script>
 <script src="assets/offline-prep.js"></script>
