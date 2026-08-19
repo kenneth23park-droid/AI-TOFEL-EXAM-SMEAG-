@@ -2,11 +2,11 @@
    No CDN, no webfonts: system font stack only, so LOCAL mode needs zero network. */
 
 :root {
-  --brand: #6d4aff;
-  --brand-ink: #4c31c9;
-  --brand-soft: #f0ecff;
+  --brand: #0e8f82;
+  --brand-ink: #0a6b62;
+  --brand-soft: #e6f5f3;
   --local: #16a34a;
-  --cloud: #4f46e5;
+  --cloud: #0b6f7d;
   --bg: #f6f6fb;
   --card: #ffffff;
   --text: #1b1b28;
@@ -19,7 +19,7 @@
   --no-soft: #fdeeee;
   --warn: #d97706;
   --warn-soft: #fff6e8;
-  --reading: #6d4aff;
+  --reading: #0e8f82;
   --listening: #2f9bd8;
   --speaking: #e0743a;
   --writing: #21a179;
@@ -45,7 +45,7 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; justify-content: space-between;
   gap: 16px; flex-wrap: wrap;
   padding: 14px 24px;
-  background: linear-gradient(120deg, var(--brand) 0%, #8b5cf6 55%, var(--cloud) 100%);
+  background: linear-gradient(120deg, var(--brand) 0%, #1aa79a 55%, var(--cloud) 100%);
   color: #fff;
 }
 .brand { display: flex; align-items: center; gap: 12px; }
