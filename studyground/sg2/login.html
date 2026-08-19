@@ -58,7 +58,7 @@
 
     <form id="f">
       <div class="field"><label data-en>Exam date</label><label data-ko>시험일</label>
-        <input id="exam-date" type="date" name="exam_date" required>
+        <select id="exam-date" name="exam_date" required aria-label="Exam date"></select>
         <div class="scan-msg" style="text-align:left">
           <span data-en>Select the exam day before you log in.</span>
           <span data-ko>로그인 전에 시험일을 선택하세요.</span>
@@ -117,7 +117,19 @@
   function loadExamDate() {
     var picked = '';
     try { picked = localStorage.getItem(DATE_KEY) || ''; } catch (e) {}
-    examDateEl.value = picked || todayISO();
+    var today = new Date();
+    var dates = [];
+    for (var offset = -90; offset <= 30; offset += 1) {
+      var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
+      var value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+      dates.push(value);
+    }
+    examDateEl.innerHTML = dates.map(function (value) {
+      var label = value === todayISO() ? value + ' (Today)' : value;
+      return '<option value="' + value + '">' + label + '</option>';
+    }).join('');
+    examDateEl.value = dates.indexOf(picked) >= 0 ? picked : todayISO();
   }
 
   /* ── 좌석이 정해 준 행선지 ──────────────────────────────────
