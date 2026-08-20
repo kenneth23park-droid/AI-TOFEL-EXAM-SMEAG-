@@ -373,7 +373,7 @@
 //      판올림해야 재방문 기기가 옛 목록을 계속 보지 않는다.
 // v86: SET 10 mock-test card and pack must replace any v85 shell cached on a
 // returning device. Keep this bump whenever the published shell changes.
-const VERSION = 'sg-v86';
+const VERSION = 'sg-v87';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
