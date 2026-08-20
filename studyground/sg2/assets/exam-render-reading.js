@@ -424,6 +424,16 @@
   function renderPassageBody(blk, insertQ, api, highlightWord) {
     var box = el('div', 'rd-passage-body');
     if (blk.title) box.appendChild(textEl('h3', 'rd-passage-title', blk.title));
+    var images = blk.images || [], imageRef, img;
+    for (var imageIndex = 0; imageIndex < images.length; imageIndex++) {
+      imageRef = typeof images[imageIndex] === 'string' ? images[imageIndex] : images[imageIndex] && images[imageIndex].src;
+      if (!imageRef) continue;
+      img = el('img', 'rd-passage-image');
+      img.src = imageRef;
+      img.alt = blk.title || blk.heading || 'Reading passage';
+      img.loading = 'eager';
+      box.appendChild(img);
+    }
     var ps = blk.paragraphs || (blk.passage ? [blk.passage] : []), i, j;
     for (i = 0; i < ps.length; i++) {
       var para = el('p', 'rd-para');
