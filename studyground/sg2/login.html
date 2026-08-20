@@ -28,6 +28,14 @@
   .drop-account { margin:4px 0 14px; padding:12px; border:1px dashed #159b8e; border-radius:10px;
                   color:var(--muted); font-size:12px; text-align:center; background:#f3fbfa; }
   .drop-account.over, .drop-account.filled { background:#dff5f1; border-style:solid; color:var(--ink); }
+  .login-look { margin-top:8px; border:1px solid var(--line-2); border-radius:12px; background:#fff; overflow:hidden; }
+  .login-look[hidden] { display:none; }
+  .login-look button { width:100%; border:0; background:transparent; padding:9px 12px; text-align:left;
+                       font:inherit; cursor:pointer; border-top:1px solid var(--line); }
+  .login-look button:first-child { border-top:0; }
+  .login-look button:hover, .login-look button:focus { background:#f3fbfa; outline:none; }
+  .login-look .k { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:800; margin-right:10px; }
+  .login-look .v { color:var(--muted); font-size:12px; }
 </style>
 </head>
 <body>
@@ -66,7 +74,11 @@
         <span data-ko>계정 이름과 시험일은 자동으로 찾습니다.</span>
       </div>
       <div class="field"><label data-en>Student account</label><label data-ko>학생 계정 이름</label>
-        <select id="login" name="username" autocomplete="username" required aria-label="Student account"></select>
+        <input id="login" name="username" type="text" autocomplete="username" autocapitalize="none"
+               autocorrect="off" spellcheck="false" list="login-list" required aria-label="Student account"
+               placeholder="smeag007 or admin">
+        <datalist id="login-list"></datalist>
+        <div id="login-look" class="login-look" hidden></div>
         <div class="scan-msg" style="text-align:left"><span data-en>Students: smeag000–smeag999, or the email you registered with. Staff: your admin ID.</span><span data-ko>수험생은 smeag000~smeag999 또는 등록한 이메일, 관리자는 관리자 아이디.</span></div></div>
       <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
         <input id="pw" type="password" name="password" autocomplete="current-password" value="2222" required></div>
@@ -93,6 +105,10 @@
   var f = document.getElementById('f'), go = document.getElementById('go'), err = document.getElementById('err');
   var examDateEl = document.getElementById('exam-date');
   var loginEl = document.getElementById('login');
+  var loginLook = document.getElementById('login-look');
+  var lookupTimer = null;
+  var lookupNonce = 0;
+  var AUTH_URL = 'https://qrmidnmlethqvdbmnyun.supabase.co/functions/v1/sg-auth';
 
   // ?next= 는 이 사이트 안의 페이지 이름만 받는다 — 외부 주소로 튕기지 않게.
   var raw = new URLSearchParams(location.search).get('next') || '';
@@ -123,12 +139,55 @@
     var picked = '';
     try { picked = localStorage.getItem('sg2_login_id') || ''; } catch (e) {}
     var options = ['<option value="">Select account / 계정 선택</option>'];
+    var data = ['<option value="admin">admin</option>', '<option value="set1">set1</option>',
+      '<option value="set9">set9</option>', '<option value="set10">set10</option>'];
     for (var i = 0; i <= 999; i += 1) {
       var id = 'smeag' + String(i).padStart(3, '0');
       options.push('<option value="' + id + '">' + id + '</option>');
+      data.push('<option value="' + id + '">' + id + '</option>');
     }
-    loginEl.innerHTML = options.join('');
+    loginEl.setAttribute('list', 'login-list');
     loginEl.value = picked || '';
+    var dl = document.getElementById('login-list');
+    if (dl) dl.innerHTML = data.join('');
+  }
+
+  function lookupAccounts(q) {
+    var v = String(q || '').trim();
+    if (lookupTimer) clearTimeout(lookupTimer);
+    if (!v || v.length < 2) {
+      loginLook.hidden = true;
+      loginLook.innerHTML = '';
+      return;
+    }
+    var my = ++lookupNonce;
+    lookupTimer = setTimeout(function () {
+      fetch(AUTH_URL, {
+        method: 'POST',
+        headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybWlkbm1sZXRocXZkYm1ueXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg3NzQsImV4cCI6MjEwMTMxNDc3NH0.U2cprYXkpIS_1tSAiEjCFuHAztZRwIIK6DYCCowgxg4', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybWlkbm1sZXRocXZkYm1ueXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg3NzQsImV4cCI6MjEwMTMxNDc3NH0.U2cprYXkpIS_1tSAiEjCFuHAztZRwIIK6DYCCowgxg4', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'lookup', q: v, limit: 8 })
+      }).then(function (r) { return r.ok ? r.json() : { matches: [] }; }).then(function (j) {
+        if (my !== lookupNonce) return;
+        var rows = (j && j.matches) || [];
+        if (!rows.length) {
+          loginLook.hidden = true;
+          loginLook.innerHTML = '';
+          return;
+        }
+        loginLook.hidden = false;
+        loginLook.innerHTML = rows.map(function (r) {
+          return '<button type="button" data-login="' + String(r.student_id || '').replace(/"/g, '&quot;') + '">' +
+            '<span class="k">' + String(r.student_id || '') + '</span>' +
+            '<span>' + String(r.name || '—') + '</span>' +
+            (r.exam_date ? '<span class="v"> · ' + String(r.exam_date) + '</span>' : '') +
+            '</button>';
+        }).join('');
+      }).catch(function () {
+        if (my !== lookupNonce) return;
+        loginLook.hidden = true;
+        loginLook.innerHTML = '';
+      });
+    }, 160);
   }
 
   /* ── 좌석이 정해 준 행선지 ──────────────────────────────────
@@ -215,6 +274,16 @@
 
   loadExamDate();
   loadAccounts();
+  lookupAccounts(loginEl.value);
+
+  loginEl.addEventListener('input', function () { lookupAccounts(loginEl.value); });
+  loginLook.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-login]');
+    if (!b) return;
+    loginEl.value = b.getAttribute('data-login') || '';
+    loginEl.focus();
+    lookupAccounts(loginEl.value);
+  });
 
   f.addEventListener('submit', function (e) {
     e.preventDefault();

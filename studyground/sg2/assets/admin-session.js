@@ -198,9 +198,15 @@
           '<span data-ko>오디오 정지·일시정지, 오디오 교체, 문항 교체는 관리자 전용입니다. 학생 화면은 그대로입니다.</span></p>' +
         '<div class="sga-err"><span data-en>Wrong ID or password — or this account has no rights for this set.</span>' +
           '<span data-ko>아이디·비밀번호가 틀렸거나 이 SET 권한이 없는 계정입니다.</span></div>' +
+        '<datalist id="sga-ids">' +
+          '<option value="admin"></option>' +
+          '<option value="set1"></option>' +
+          '<option value="set9"></option>' +
+          '<option value="set10"></option>' +
+        '</datalist>' +
         '<form autocomplete="off">' +
           '<label class="sga-lb"><span data-en>Admin ID</span><span data-ko>관리자 아이디</span>' +
-            '<input name="sga-id" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" required></label>' +
+            '<input name="sga-id" type="text" list="sga-ids" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required></label>' +
           '<label class="sga-lb"><span data-en>Password</span><span data-ko>비밀번호</span>' +
             '<input name="sga-pw" type="password" required></label>' +
           '<div class="sga-acts">' +

@@ -98,6 +98,14 @@
   .find-res .ft { margin-left:auto; font-size:12px; color:var(--dim); }
   .ok-t { color:#1f6f45; font-weight:750; }
   .bad-t { color:#b3261e; font-weight:750; }
+  .lookup-drop { margin-top:8px; border:1px solid var(--line-2); border-radius:12px; background:#fff; overflow:hidden; }
+  .lookup-drop[hidden] { display:none; }
+  .lookup-drop button { width:100%; border:0; background:transparent; padding:9px 12px; text-align:left;
+                        font:inherit; cursor:pointer; border-top:1px solid var(--line); }
+  .lookup-drop button:first-child { border-top:0; }
+  .lookup-drop button:hover, .lookup-drop button:focus { background:#f3fbfa; outline:none; }
+  .lookup-drop .k { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:800; margin-right:10px; }
+  .lookup-drop .v { color:var(--muted); font-size:12px; }
   .scroll { max-height:62vh; overflow:auto; border:1px solid var(--line-2); border-radius:12px; }
   .acts { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .acts .grow { margin-left:auto; }
@@ -146,6 +154,7 @@
           <input id="find" placeholder="smeag007 or Kenneth" autocapitalize="none" spellcheck="false"></div>
         <div class="note" id="findsum" style="margin-left:auto;padding-bottom:10px"></div>
       </div>
+      <div class="lookup-drop" id="finddrop" hidden></div>
       <div class="find-res" id="findres"></div>
       <p class="note mt-8" id="hint"></p>
     </section>
@@ -404,9 +413,11 @@
 
   function showFind() {
     var q = $('find').value.trim(), d = $('date').value;
-    var sum = $('findsum'), res = $('findres');
+    var sum = $('findsum'), res = $('findres'), drop = $('finddrop');
     if (!q) {
       res.innerHTML = '';
+      drop.hidden = true;
+      drop.innerHTML = '';
       sum.textContent = heldKnown && d
         ? heldCount + ' registered on ' + d
         : '';
@@ -414,6 +425,8 @@
     }
     if (!heldKnown) {
       res.innerHTML = '';
+      drop.hidden = true;
+      drop.innerHTML = '';
       sum.innerHTML = '<span class="bad-t">The roster for this date could not be read.</span>';
       return;
     }
@@ -429,6 +442,15 @@
 
     if (hits.length) {
       sum.textContent = hits.length + ' of ' + heldCount + ' on ' + d;
+      drop.hidden = false;
+      drop.innerHTML = hits.slice(0, FIND_MAX).map(function (r) {
+        return '<button type="button" data-id="' + esc(r.student_id) + '"><span class="k">' +
+          esc(r.student_id) + '</span><span>' + esc(r.name || '—') + '</span>' +
+          (r.teacher_id ? '<span class="v"> · ' + esc(teacherName(r.teacher_id) || '') + '</span>' : '') +
+          '</button>';
+      }).join('') + (hits.length > FIND_MAX
+          ? '<div style="padding:8px 12px;font-size:12px;color:var(--muted)">Showing ' +
+            FIND_MAX + ' of ' + hits.length + ' matches.</div>' : '');
       res.innerHTML = hits.slice(0, FIND_MAX).map(findRow).join('') +
         (hits.length > FIND_MAX
           ? '<div class="r"><span class="fid">…</span><span>' +
@@ -436,6 +458,8 @@
       return;
     }
 
+    drop.hidden = true;
+    drop.innerHTML = '';
     if (id) {
       var at = pinnedInSheet(id);
       sum.innerHTML = '<span class="ok-t">' + esc(id) + ' is free</span>';
@@ -842,7 +866,14 @@
     $('stop').addEventListener('click', function () { halt = true; });
     $('csv').addEventListener('click', csv);
     $('date').addEventListener('change', refreshAvail);
-    $('find').addEventListener('input', showFind);
+  $('find').addEventListener('input', showFind);
+  $('finddrop').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-id]');
+    if (!b) return;
+    $('find').value = b.getAttribute('data-id') || '';
+    showFind();
+    $('find').focus();
+  });
     $('rows').addEventListener('input', onInput);
     $('rows').addEventListener('paste', onPaste);
     $('rows').addEventListener('keydown', onKey);

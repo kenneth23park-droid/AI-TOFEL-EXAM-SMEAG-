@@ -33,6 +33,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  *
  * POST { action: "next_id",  exam_date? }   → { student_id, used, free }
  * POST { action: "teachers" }               → { teachers: [{ id, name, student_id }] }
+ * POST { action: "lookup", q, limit?, exam_date? } → { matches: [{ student_id, name, exam_date }] }
  * POST { action: "register", name, email, teacher_id?, exam_date?, student_id?, force? }
  * POST { action: "signin",   login, password?, exam_date? }
  * POST { action: "create_staff", token, name, login, password?, email?, role? }  ← 관리자만
@@ -144,6 +145,32 @@ async function teacherList() {
 
 async function handleTeachers() {
   return json({ teachers: await teacherList() });
+}
+
+async function handleLookup(b: Record<string, unknown>) {
+  const q = String(b.q ?? "").trim().toLowerCase();
+  const limit = Math.min(Math.max(parseInt(String(b.limit ?? "8"), 10) || 8, 1), 12);
+  if (!q) return json({ matches: [] });
+
+  const safe = q.replace(/[^a-z0-9@\s._-]/g, "");
+  let orClause = "";
+  if (/^smeag\d{0,3}$/.test(safe)) {
+    orClause = `or=(student_id.ilike.${encodeURIComponent(safe + '%')},name.ilike.${encodeURIComponent('%' + safe + '%')})`;
+  } else if (/^\d{1,3}$/.test(safe)) {
+    const id = 'smeag' + safe.padStart(3, '0');
+    orClause = `or=(student_id.eq.${encodeURIComponent(id)},student_id.ilike.${encodeURIComponent('%' + safe + '%')},name.ilike.${encodeURIComponent('%' + safe + '%')})`;
+  } else if (safe.length >= 2) {
+    orClause = `or=(name.ilike.${encodeURIComponent('%' + safe + '%')},student_id.ilike.${encodeURIComponent('%' + safe.replace(/\s+/g, '') + '%')})`;
+  } else {
+    return json({ matches: [] });
+  }
+  const date = String(b.exam_date ?? "").trim();
+  const datePart = date ? `&exam_date=eq.${encodeURIComponent(date)}` : '';
+  const r = await admin(
+    `/rest/v1/sg_exam_accounts?${orClause}${datePart}&select=student_id,name,exam_date&order=student_id.asc&limit=${limit}`,
+  );
+  const rows = await r.json().catch(() => []);
+  return json({ matches: Array.isArray(rows) ? rows.slice(0, limit) : [] });
 }
 
 async function handleRegister(b: Record<string, unknown>) {
@@ -428,10 +455,11 @@ Deno.serve(async (req) => {
 
   if (b.action === "next_id") return await handleNextId(b);
   if (b.action === "teachers") return await handleTeachers();
+  if (b.action === "lookup") return await handleLookup(b);
   if (b.action === "register" || b.action === "signup") return await handleRegister(b);
   if (b.action === "signin") return await handleSignin(b);
   if (b.action === "create_staff") return await handleCreateStaff(b);
   return fail(400, "unknown_action",
-    'action must be "next_id", "teachers", "register", "signin" or "create_staff".',
-    'action 은 "next_id" · "teachers" · "register" · "signin" · "create_staff" 중 하나여야 합니다.');
+    'action must be "next_id", "teachers", "lookup", "register", "signin" or "create_staff".',
+    'action 은 "next_id" · "teachers" · "lookup" · "register" · "signin" · "create_staff" 중 하나여야 합니다.');
 });
