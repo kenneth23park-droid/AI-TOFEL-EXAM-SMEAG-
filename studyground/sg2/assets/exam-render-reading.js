@@ -246,7 +246,7 @@
     var key = String(word || '').trim();
     if (!key) return doc.createTextNode(src);
     var re = new RegExp('(' + escapeRegExp(key) + ')', 'ig');
-    var frag = doc.createDocumentFragment();
+    var frag = el('span');
     var last = 0, m;
     while ((m = re.exec(src))) {
       if (m.index > last) frag.appendChild(doc.createTextNode(src.slice(last, m.index)));
@@ -608,9 +608,6 @@
     var cols = el('div', 'rd-cols');
     var left = el('div', 'rd-left');
     var bar = el('div', 'rd-toolbar');
-    var text = passageText(blk);
-    var btn = readAloudBtn(ttsIdOf(screen && screen.moduleId ? screen.moduleId : 'R', blk), text);
-    if (btn) bar.appendChild(btn);
     if (bar.firstChild) left.appendChild(bar);
 
     var scroller = el('div', 'rd-scroll');
