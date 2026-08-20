@@ -373,7 +373,9 @@
 //      판올림해야 재방문 기기가 옛 목록을 계속 보지 않는다.
 // v87: SET 10 렌더러 / 로그인 보강 뒤에도 returning device 가 옛 shell 을 계속
 //      쓰지 않게 캐시를 끊는다. 새 배포가 들어오면 반드시 같이 올린다.
-const VERSION = 'sg-v88';
+// v89: SET 10 팩에 helper가 없어도 셸이 문항과 원본 블록을 직접 연결한다.
+//      캐시된 exam-shell.js를 교체해 Reading의 offline fallback 화면을 제거한다.
+const VERSION = 'sg-v89';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

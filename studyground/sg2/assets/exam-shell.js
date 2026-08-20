@@ -54,9 +54,11 @@ window.SG_RUNTIME = (function () {
     return SET_IDS[id] || 'SMEAG_' + String(id || '').toUpperCase();
   }
 
-  /* 원본 사이트의 시험 코드 → 콘텐츠 팩. T-016 은 SET 1(=NT-016), T-009 는 SET 9 이다. */
+  /* 원본 사이트의 시험 코드 → 콘텐츠 팩.
+     T-016 은 SET 1(=NT-016), T-009 는 SET 9, T-010 / SET10 은 SET 10 이다. */
   function setFromTestId(testId) {
     var t = String(testId || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (/(^|[A-Z])0*10$/.test(t) || t === 'SET10') return 'set10';
     if (/(^|[A-Z])0*9$/.test(t) || t === 'SET9') return 'set9';
     return 'set1';
   }
@@ -74,10 +76,47 @@ window.SG_RUNTIME = (function () {
 
   var SET_ID = currentSetId();
 
+  /* 저장소에 직접 생성된 팩과 관리자 업로드 팩은 helper 유무가 다를 수 있다.
+     렌더러의 공통 계약을 셸에서 보장해 특정 세트가 본문 없는 화면으로 떨어지지 않게 한다. */
+  function ensurePackHelpers(pack) {
+    if (!pack || !Array.isArray(pack.sections)) return pack;
+    if (typeof pack.allQuestions !== 'function') {
+      pack.allQuestions = function () {
+        var out = [];
+        for (var si = 0; si < this.sections.length; si++) {
+          var sec = this.sections[si];
+          var mods = sec && Array.isArray(sec.modules) ? sec.modules : [];
+          for (var mi = 0; mi < mods.length; mi++) {
+            var mod = mods[mi];
+            var blocks = mod && Array.isArray(mod.blocks) ? mod.blocks : [];
+            for (var bi = 0; bi < blocks.length; bi++) {
+              var blk = blocks[bi];
+              var qs = blk && Array.isArray(blk.questions) ? blk.questions : [];
+              for (var qi = 0; qi < qs.length; qi++) {
+                out.push({ q: qs[qi], question: qs[qi], block: blk, module: mod, section: sec });
+              }
+            }
+          }
+        }
+        return out;
+      };
+    }
+    if (typeof pack.findQuestion !== 'function') {
+      pack.findQuestion = function (id) {
+        var all = this.allQuestions();
+        for (var i = 0; i < all.length; i++) {
+          if (all[i].q && all[i].q.id === id) return all[i];
+        }
+        return null;
+      };
+    }
+    return pack;
+  }
+
   /* 선택된 팩의 전역. 로드 실패 시 오류 화면으로 멈춘다. */
   function contentPack() {
     // An explicitly selected set must never silently become another set.
-    var p = window[globalFor(SET_ID)] || null;
+    var p = ensurePackHelpers(window[globalFor(SET_ID)] || null);
     /* 렌더러들은 문항 본문을 콘텐츠 팩에서 되찾는다. 어떤 팩이 활성인지 알려주는
        유일한 채널이 이 전역이다. */
     window.SG_CONTENT_PACK = p;

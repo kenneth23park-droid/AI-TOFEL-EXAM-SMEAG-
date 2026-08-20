@@ -2337,3 +2337,7 @@ window.SMEAG_SET10 = {
   "importedAt": "2026-08-18T00:00:00.000Z",
   "source": "set-import"
 };
+
+if (window.SG_SET_IMPORT && typeof window.SG_SET_IMPORT.withHelpers === 'function') {
+  window.SG_SET_IMPORT.withHelpers(window.SMEAG_SET10);
+}
