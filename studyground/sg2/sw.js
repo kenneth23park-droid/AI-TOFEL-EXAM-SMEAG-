@@ -376,7 +376,8 @@
 // v89: SET 10 팩에 helper가 없어도 셸이 문항과 원본 블록을 직접 연결한다.
 //      캐시된 exam-shell.js를 교체해 Reading의 offline fallback 화면을 제거한다.
 // v90: SET 10 Reading 21-25의 이미지형 지문을 왼쪽 지문 패널에 표시한다.
-const VERSION = 'sg-v90';
+// v91: SET 10 Reading 26-30의 머리글 앞 Twin Stars 지문을 팩에 복원한다.
+const VERSION = 'sg-v91';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

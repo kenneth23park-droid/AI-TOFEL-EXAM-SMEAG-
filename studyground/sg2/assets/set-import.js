@@ -356,7 +356,7 @@
         lines.push(t);
       });
 
-      var items = [], j = qStart;
+      var items = [], j = qStart, questionEnd = qStart;
       while (j < bodyEnd) {
         var q = numbered(txt(paras[j]));
         if (!q) { j++; continue; }
@@ -377,7 +377,12 @@
         }
         items.push(item);
         j = got.next > j ? got.next : j + 1;
+        questionEnd = j;
       }
+
+      /* 마지막 문항의 선택지 뒤부터 다음 머리글 앞까지는 다음 블록의 선행 지문이다.
+         bodyEnd 로 넘기면 SET 10의 Twin Stars처럼 머리글 위 지문이 이미 소비되어 사라진다. */
+      prevEnd = questionEnd;
 
       if (!items.length && !lines.length && !images.length) continue;
 

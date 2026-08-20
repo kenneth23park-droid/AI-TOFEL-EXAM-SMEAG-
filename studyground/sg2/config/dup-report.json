@@ -17,7 +17,7 @@
       "title": "SET 10",
       "file": "sg2/assets/set10.js",
       "items": 67,
-      "texts": 22,
+      "texts": 23,
       "scripts": 0,
       "isCandidate": false
     },
@@ -31,9 +31,9 @@
       "isCandidate": false
     }
   ],
-  "unitCount": 283,
+  "unitCount": 284,
   "frameOnlyUnits": 0,
-  "candidatePairs": 259,
+  "candidatePairs": 260,
   "thresholds": {
     "shingleK": 4,
     "jaccardHigh": 0.55,

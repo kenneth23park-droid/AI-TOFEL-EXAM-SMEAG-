@@ -267,8 +267,12 @@ window.SMEAG_SET10 = {
               "kind": "passage",
               "heading": "Questions 26-30",
               "instruction": "",
-              "title": "",
-              "paragraphs": [],
+              "title": "Twin Stars",
+              "paragraphs": [
+                "Stars form within dense clouds of gas and dust where visible light cannot penetrate. Optical telescopes directed at these regions reveal nothing but dark voids.",
+                "Radio and infrared observations have shown that star formation within molecular clouds follows predictable patterns. The Perseus cloud, approximately one thousand light-years distant, has proven particularly instructive for understanding these processes. Studies of young stellar objects in this region demonstrate that nearly all stars emerge as gravitationally bound binary pairs rather than solitary bodies. The orbital separation between companions correlates strongly with stellar age, as younger pairs maintain tight orbits while older systems have drifted substantially farther apart through millions of years of gravitational perturbation.",
+                "These observations have prompted researchers to reexamine assumptions about our own solar system. If binary formation represents the dominant mode of stellar birth, the Sun may have possessed a companion that subsequently migrated beyond detection. Scientists have attempted to reconstruct the trajectories such a companion might have followed after separating from our infant solar system. Their estimates place this hypothetical twin thousands of light-years distant. Such a discovery would substantially revise models depicting the Sun as having formed in isolation."
+              ],
               "questions": [
                 {
                   "kind": "mcq",
@@ -2269,14 +2273,20 @@ window.SMEAG_SET10 = {
     "set10-W1-q10": "I forgot to pick up a few things at the store."
   },
   "buildWarnings": [
-    "warn: The numbers printed on these questions disagree with their \"Questions a-b\" heading — the numbering that keeps the module in order was used: L1 heading \"Questions 19-20\" holds 15-16, L1 heading \"Questions 25-28\" holds 19-20, L1 heading \"Questions 15-16\" holds 25-28",
+    "warn: The numbers printed on these questions disagree with their \"Questions a-b\" heading — the numbering that keeps the module in order was used: R1-21 (printed 22 under heading 21-22), R1-22 (printed 23 under heading 21-22)",
+    "warn: The numbers printed on these questions disagree with their \"Questions a-b\" heading — the numbering that keeps the module in order was used: L1 heading \"Questions 15-16\" holds 19-20, L1 heading \"Questions 15-16\" holds 25-28",
     "warn: 10 sentence-building questions had no word tiles in the docx — the words were taken from the answer key and scrambled (set10-W1-q01, set10-W1-q02, set10-W1-q03 and more). Add a tile line, with decoys, if you want traps."
   ],
   "gates": [
     {
       "level": "warn",
+      "scope": "reading",
+      "message": "The numbers printed on these questions disagree with their \"Questions a-b\" heading — the numbering that keeps the module in order was used: R1-21 (printed 22 under heading 21-22), R1-22 (printed 23 under heading 21-22)"
+    },
+    {
+      "level": "warn",
       "scope": "listening",
-      "message": "The numbers printed on these questions disagree with their \"Questions a-b\" heading — the numbering that keeps the module in order was used: L1 heading \"Questions 19-20\" holds 15-16, L1 heading \"Questions 25-28\" holds 19-20, L1 heading \"Questions 15-16\" holds 25-28"
+      "message": "The numbers printed on these questions disagree with their \"Questions a-b\" heading — the numbering that keeps the module in order was used: L1 heading \"Questions 15-16\" holds 19-20, L1 heading \"Questions 15-16\" holds 25-28"
     },
     {
       "level": "warn",
@@ -2326,7 +2336,7 @@ window.SMEAG_SET10 = {
     ],
     "gates": {
       "stop": 0,
-      "warn": 2
+      "warn": 3
     },
     "sources": [
       "NEW TOEFL MOCK TEST SET 10 Questions.docx",

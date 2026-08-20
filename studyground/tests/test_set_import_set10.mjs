@@ -101,6 +101,15 @@ const main = async () => {
     });
   }
 
+  /* 머리글 위에 놓인 지문도 다음 블록으로 넘어가야 한다(SET10 R1 26-30). */
+  {
+    const r1 = modulesOf(pack, 'reading').find((m) => m.id === 'R1');
+    const twin = r1 && r1.blocks.find((b) => (b.questions || []).some((q) => q.id === 'R1-26'));
+    check('R1 26-30 Twin Stars 지문', !!twin && twin.title === 'Twin Stars'
+      && twin.paragraphs && twin.paragraphs.length === 3,
+      twin ? `${twin.title || '제목 없음'} / ${twin.paragraphs.length}문단` : '블록 없음');
+  }
+
   /* ---- 3. 리스닝 블록마다 들려줄 것이 있는가 ---- */
   {
     const naked = [];
