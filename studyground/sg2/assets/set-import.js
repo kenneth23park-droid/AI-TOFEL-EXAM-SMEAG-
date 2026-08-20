@@ -1238,6 +1238,28 @@
     });
     if (thin.length) gate('warn', 'choices', thin.length + ' questions have fewer than 3 choices: ' + thin.slice(0, 8).join(', ') + (thin.length > 8 ? ' and more' : ''));
 
+    /* ---- 리딩 본문 존재 검산 ----
+       문항과 선택지만 있으면 시험 화면 오른쪽은 정상처럼 보여도 왼쪽 지문이 빈다.
+       passage는 텍스트 또는 이미지, chat은 메시지가 반드시 있어야 한다. */
+    var emptyReading = [];
+    sections.forEach(function (sec) {
+      if (sec.id !== 'reading') return;
+      sec.modules.forEach(function (mod) {
+        mod.blocks.forEach(function (blk) {
+          var hasQuestions = !!(blk.questions && blk.questions.length);
+          var hasPassage = !!(blk.passage || (blk.paragraphs && blk.paragraphs.length)
+            || (blk.images && blk.images.length));
+          var hasChat = !!(blk.messages && blk.messages.length);
+          if (hasQuestions && ((blk.kind === 'passage' && !hasPassage)
+            || (blk.kind === 'chat' && !hasChat))) {
+            emptyReading.push(mod.id + ' ' + (blk.heading || blk.questions[0].id));
+          }
+        });
+      });
+    });
+    if (emptyReading.length) gate('stop', 'reading-content',
+      'Reading blocks have questions but no passage, image, or messages: ' + emptyReading.join(', '));
+
     /* ---- 그림 경로 정규화 ----
        파서마다 그림을 다른 모양으로 모은다(문서 내부 이름 'media/image7.png' 또는 파일명만).
        화면이 찾을 수 있는 경로는 하나뿐이므로 여기서 한 번에 맞춘다. */

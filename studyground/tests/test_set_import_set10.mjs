@@ -110,6 +110,19 @@ const main = async () => {
       twin ? `${twin.title || '제목 없음'} / ${twin.paragraphs.length}문단` : '블록 없음');
   }
 
+  {
+    const empty = [];
+    modulesOf(pack, 'reading').forEach((mod) => mod.blocks.forEach((b) => {
+      if (!(b.questions || []).length) return;
+      const hasPassage = !!(b.passage || (b.paragraphs || []).length || (b.images || []).length);
+      const hasChat = !!(b.messages || []).length;
+      if ((b.kind === 'passage' && !hasPassage) || (b.kind === 'chat' && !hasChat)) {
+        empty.push(`${mod.id} ${b.heading || ''}`.trim());
+      }
+    }));
+    check('리딩 본문·이미지 빠짐없음', empty.length === 0, empty.join(', '));
+  }
+
   /* ---- 3. 리스닝 블록마다 들려줄 것이 있는가 ---- */
   {
     const naked = [];
