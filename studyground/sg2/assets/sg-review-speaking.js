@@ -230,7 +230,7 @@ window.SG_REVIEW_SPEAKING = (function () {
   /* 녹음 자리는 비워 두고 mount() 가 채운다 — 기기의 IndexedDB 든 버킷의 서명 URL 이든
      비동기라서 html() 이 만들 수 없다. html() 은 순수 함수로 남겨 둔다(테스트가 본다). */
   function recordingHtml(it) {
-    return '<div class="rs-panel">' +
+    return '<div class="rs-panel rs-step rs-step-recording">' +
       '<div class="lr-lab">' + bi('Your recording', '내 녹음') + '</div>' +
       '<div class="rs-play" data-play="' + esc(it.qid) + '">' +
         '<span class="muted">' + (it.recorded || (it.task && it.task.media_path)
@@ -268,7 +268,7 @@ window.SG_REVIEW_SPEAKING = (function () {
   function accuracyHtml(it) {
     var c = it.compare;
     if (!c) return '';
-    return '<div class="rs-panel">' +
+    return '<div class="rs-panel rs-step rs-step-accuracy">' +
       '<div class="lr-lab">' + bi('Word by word', '낱말 대조') + '</div>' +
       '<div class="rs-stats">' +
         '<div class="rs-stat"><b>' + c.accuracy + '%</b><span>' + bi('Accuracy', '정확도') + '</span></div>' +
@@ -339,7 +339,7 @@ window.SG_REVIEW_SPEAKING = (function () {
     }
     if (t.ai_model) out += '<p class="rw-model">' + esc(t.ai_model) + '</p>';
     if (!out) return '';
-    return '<div class="rs-panel"><div class="lr-lab">' +
+    return '<div class="rs-panel rs-step rs-step-rubric"><div class="lr-lab">' +
       bi('Why this score', '채점 근거') + '</div>' + out + '</div>';
   }
 
@@ -415,7 +415,7 @@ window.SG_REVIEW_SPEAKING = (function () {
         '<div class="lr-left">' + taskHtml(it) + '</div>' +
         /* 점수가 먼저다 — 학생이 이 화면을 여는 이유가 그것이고, 그 밑의 녹음·전사·대조는
            전부 "왜 그 점수인가" 에 대한 답이라 점수 뒤에 와야 순서가 맞는다. */
-        '<div class="lr-right">' +
+        '<div class="lr-right rs-flow">' +
           verdictHtml(it) + recordingHtml(it) + accuracyHtml(it) + rubricHtml(it) +
           (opts.extraFor ? opts.extraFor(it.qid) : '') +
         '</div>' +

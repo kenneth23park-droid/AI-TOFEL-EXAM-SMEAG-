@@ -922,8 +922,7 @@
         }).join('') + '</ul>';
     }
     /* 선생님이 점수를 뒤집으려면 그 점수가 어디서 왔는지 보여야 한다.
-       - guard: 서버가 원문과 견주어 센 것. AI 가 부른 점수를 이 셈이 내렸으면 그 사실까지.
-       - why_not_higher/lower: AI 가 위아래 밴드와 그은 경계. */
+       - guard: 서버가 원문과 견주어 센 것. AI 가 부른 점수를 이 셈이 내렸으면 그 사실까지. */
     if (rub.guard && rub.guard.content_total) {
       var g = rub.guard;
       body += '<div class="muted" style="font-size:12px;margin-top:6px">' +
@@ -934,13 +933,6 @@
                      ? ' · ' + bi('missing ', '빠짐 ') + esc(g.missing_content.join(', ')) : '')) +
         (g.applied ? ' · ' + bi('AI said ' + g.model_score + ', capped at ' + g.cap + ' by the guide',
                                 'AI 는 ' + g.model_score + ', 루브릭 상한 ' + g.cap + ' 적용') : '') +
-      '</div>';
-    }
-    if (rub.why_not_higher || rub.why_not_lower) {
-      body += '<div class="muted" style="font-size:12px;margin-top:6px">' +
-        (rub.why_not_higher ? bi('Not higher: ', '더 높지 않은 이유: ') + esc(rub.why_not_higher) : '') +
-        (rub.why_not_higher && rub.why_not_lower ? '<br>' : '') +
-        (rub.why_not_lower ? bi('Not lower: ', '더 낮지 않은 이유: ') + esc(rub.why_not_lower) : '') +
       '</div>';
     }
     if (ai !== null && mine !== null && mine !== ai) {

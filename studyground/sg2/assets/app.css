@@ -561,6 +561,82 @@ tr.is-wrong td { background: rgba(198, 40, 40, .045); }
    (들려준 문장 · 녹음 자리 · 낱말 대조)만 여기서 더한다. */
 .rs-panel { margin-top: 14px; }
 .rs .lr-right > :first-child { margin-top: 0; }
+.rs .lr-pane {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.rs .lr-right.rs-flow {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding-left: 28px;
+}
+.rs .lr-right.rs-flow::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 11px;
+  width: 2px;
+  background: linear-gradient(var(--brand), var(--line));
+  border-radius: 99px;
+}
+.rs .rs-flow > .rw-verdict,
+.rs .rs-flow > .rs-step {
+  position: relative;
+  z-index: 1;
+  margin-top: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(10, 40, 42, .055);
+}
+.rs .rs-flow > .rw-verdict::before,
+.rs .rs-flow > .rs-step::before {
+  position: absolute;
+  left: -28px;
+  top: 16px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 850;
+  box-shadow: 0 0 0 1px var(--brand);
+}
+.rs .rs-flow > .rw-verdict::before { content: '1'; }
+.rs .rs-flow > .rs-step-recording::before { content: '2'; }
+.rs .rs-flow > .rs-step:not(.rs-step-recording)::before { content: '3'; }
+.rs .rs-flow > .rs-step-rubric::before { content: '4'; }
+.rs .rs-flow > .rw-verdict.rated {
+  border-color: var(--brand);
+  background: linear-gradient(135deg, #f2fbfa, #fff);
+}
+.rs .rs-flow > .rw-verdict .rw-score {
+  display: block;
+  font-size: 28px;
+}
+.rs .rs-flow > .rs-panel > .lr-lab:first-child,
+.rs .rs-flow > .rw-verdict small {
+  letter-spacing: .01em;
+}
+.rs .rs-flow > .rs-step .rs-panel {
+  margin-top: 14px;
+}
+.rs .rs-flow > .rs-step .rs-panel:first-child {
+  margin-top: 0;
+}
+.rs .lr-left {
+  border-right: 0;
+  padding-right: 0;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 16px;
+}
 .rs-body { font-size: 14px; color: var(--ink-2); margin-top: 5px; white-space: pre-wrap; }
 .rs-meta { font-size: 12px; color: var(--muted); margin-top: 10px; }
 
@@ -610,6 +686,7 @@ tr.is-wrong td { background: rgba(198, 40, 40, .045); }
 
 @media (max-width: 820px) {
   .rs-dots { max-width: none; }
+  .rs .lr-img { max-height: 200px; }
 }
 
 /* ── 코멘트 (선생님 · AI) ─────────────────────────────────────

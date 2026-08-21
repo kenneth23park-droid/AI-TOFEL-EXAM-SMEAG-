@@ -62,8 +62,30 @@ window.SG_RESULTS = (function () {
   }
 
   function pack(setCode) {
-    var code = String(setCode || '').toUpperCase().replace(/[^0-9]/g, '');
-    return window['SMEAG_SET' + code] || window.SMEAG_SET9 || window.SMEAG_SET1 || null;
+    /* DB 결과는 SET10, SET 010, T-010처럼 서로 다른 표기로 남을 수 있다.
+     * 숫자 부분을 정수로 정규화해 모두 SMEAG_SET10을 가리키게 한다. 다른 SET으로
+     * 떨어지면 학생 답을 엉뚱한 정답지와 비교하므로, 없는 팩은 반드시 null이다. */
+    var digits = String(setCode || '').replace(/\D/g, '');
+    var code = digits ? String(Number(digits)) : '';
+    return code ? (window['SMEAG_SET' + code] || null) : null;
+  }
+
+  /* SET10처럼 importer가 만든 팩은 helper보다 먼저 리뷰 화면에 실릴 수 있다.
+   * 그 경우에도 원본 sections 구조에서 문항을 직접 펼쳐 Review·Scoring을 만든다. */
+  function allQuestions(p) {
+    if (!p) return [];
+    if (typeof p.allQuestions === 'function') return p.allQuestions();
+    var out = [];
+    (p.sections || []).forEach(function (sec) {
+      (sec.modules || []).forEach(function (mod) {
+        (mod.blocks || []).forEach(function (block) {
+          (block.questions || []).forEach(function (q) {
+            out.push({ q: q, block: block, module: mod, section: sec });
+          });
+        });
+      });
+    });
+    return out;
   }
 
   /* 채점 비교. 대소문자·앞뒤 공백·중복 공백·끝의 마침표는 무시한다.
@@ -148,7 +170,7 @@ window.SG_RESULTS = (function () {
     var rows = [], bySection = {}, sc = 0, total = 0;
     if (!p) return { score: 0, total: 0, percent: 0, bySection: bySection, rows: rows };
 
-    var all = typeof p.allQuestions === 'function' ? p.allQuestions() : [];
+    var all = allQuestions(p);
     var keys = p.answerKey || {};
 
     for (var i = 0; i < all.length; i++) {
@@ -346,7 +368,7 @@ window.SG_RESULTS = (function () {
   function productive(row) {
     var p = pack(row && row.set_code), out = [];
     if (!p) return out;
-    var all = typeof p.allQuestions === 'function' ? p.allQuestions() : [];
+    var all = allQuestions(p);
     for (var i = 0; i < all.length; i++) {
       var q = all[i].q || all[i];
       var skill = PRODUCTIVE[q.kind];

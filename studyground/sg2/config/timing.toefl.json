@@ -117,7 +117,15 @@
           "listenReplays": 1,
           "prepSec": 2,
           "responseSec": 12,
-          "responseSecByIndex": [8, 8, 10, 10, 10, 12, 12],
+          "responseSecByIndex": [
+            8,
+            8,
+            10,
+            10,
+            10,
+            12,
+            12
+          ],
           "responseSecMin": null,
           "responseSecMax": null,
           "recording": true,
@@ -253,23 +261,6 @@
       "maxSec": null,
       "advance": "manual",
       "controls": [
-        "continue"
-      ]
-    },
-    {
-      "id": "hardwareCheck",
-      "label": "Hardware Check",
-      "screenType": "hardwareCheck",
-      "insertAt": {
-        "position": "beforeSection",
-        "section": "speaking",
-        "module": null
-      },
-      "maxSec": null,
-      "advance": "manual",
-      "controls": [
-        "micTest",
-        "speakerTest",
         "continue"
       ]
     },

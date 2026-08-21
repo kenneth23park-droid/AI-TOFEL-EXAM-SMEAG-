@@ -246,6 +246,6 @@
 
   window.SG_QUESTIONS = API;
 
-  /* 이 사이트의 팩 두 개는 항상 후킹해 둔다. 파일이 없으면 아무 일도 없다. */
-  API.hookGlobals({ SMEAG_SET1: 'set1', SMEAG_SET9: 'set9' });
+  /* 이 사이트의 팩은 항상 후킹해 둔다. 파일이 없으면 아무 일도 없다. */
+  API.hookGlobals({ SMEAG_SET1: 'set1', SMEAG_SET9: 'set9', SMEAG_SET10: 'set10' });
 })();
