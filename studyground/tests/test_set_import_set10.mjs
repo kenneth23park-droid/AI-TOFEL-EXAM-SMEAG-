@@ -111,6 +111,19 @@ const main = async () => {
   }
 
   {
+    const r1 = modulesOf(pack, 'reading').find((m) => m.id === 'R1');
+    const q35 = r1 && questionsOfModule(r1).find((q) => q.id === 'R1-35');
+    const block = r1 && r1.blocks.find((b) => (b.questions || []).includes(q35));
+    const passage = block ? [block.title].concat(block.paragraphs || []).join(' ') : '';
+    check('R1-35 insertion sentence', !!q35 && q35.kind === 'insert'
+      && q35.sentence === '"This technological shift has enabled smaller theaters and independent productions to achieve professional-quality lighting effects more easily."'
+      && JSON.stringify(q35.choices) === JSON.stringify(['Position A', 'Position B', 'Position C', 'Position D'])
+      && q35.answer === 0,
+      q35 ? q35.sentence || 'empty sentence' : 'missing question');
+    check('R1-35 insertion markers', ['A', 'B', 'C', 'D'].every((m) => passage.includes(`{{${m}}}`)), passage);
+  }
+
+  {
     const empty = [];
     modulesOf(pack, 'reading').forEach((mod) => mod.blocks.forEach((b) => {
       if (!(b.questions || []).length) return;
@@ -207,6 +220,28 @@ const main = async () => {
   }
 
   /* ---- 6. 스피킹 ---- */
+  {
+    const builds = [];
+    modulesOf(pack, 'writing').forEach((mod) => {
+      mod.blocks.forEach((b) => (b.questions || []).forEach((q) => { if (q.kind === 'build') builds.push(q); }));
+    });
+    const noBlankAnswers = builds.filter((q) => {
+      const blanks = (q.slots || []).filter((s) => s.t === 'b');
+      return !blanks.length || blanks.some((s) => typeof s.a !== 'string' || !s.a)
+        || JSON.stringify(q.answerTokens) !== JSON.stringify(blanks.map((s) => s.a))
+        || q.sentence !== q.answerSentence;
+    }).map((q) => q.id);
+    check('Build answer schema complete', noBlankAnswers.length === 0, noBlankAnswers.join(', '));
+
+    const first = builds[0];
+    check('W1 Q11 exact answer tokens', !!first
+      && JSON.stringify(first.answerTokens) === JSON.stringify([
+        'showed', 'me', 'how', 'to', 'use', 'the', 'online', 'database'
+      ])
+      && first.sentence === 'Yes, the librarian showed me how to use the online database.',
+      first ? JSON.stringify(first.answerTokens) : 'missing question');
+  }
+
   {
     const mods = modulesOf(pack, 'speaking');
     const counts = mods.map((m) => questionsOfModule(m).length);

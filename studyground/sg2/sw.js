@@ -383,7 +383,11 @@
 //      email situation card is restored from its pre-heading DOCX position.
 // v94: SET 10 discussion names, complete posts, and 100-word minimum are restored;
 //      AI scoring requests now time out instead of leaving submission stuck forever.
-const VERSION = 'sg-v94';
+// v95: generated SET 10 Build-a-Sentence items now carry per-slot answer keys
+//      for autoscore and the Correct Answer review panel.
+// v96: SET 10 Reading R1-35 restores its sentence-to-insert and normalizes
+//      the four passage positions into interactive A–D markers.
+const VERSION = 'sg-v96';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

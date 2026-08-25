@@ -349,8 +349,8 @@ window.SMEAG_SET10 = {
               "paragraphs": [
                 "Theatrical performance in ancient Greece relied entirely upon natural daylight, with plays staged in open-air amphitheaters during afternoon hours. As drama moved indoors during subsequent centuries, the need for artificial illumination that was stable, safe, and capable of sustained operation became paramount.",
                 "During the Renaissance, theaters employed oil lamps and candles to illuminate stages and auditoriums. These sources provided only modest brightness and required constant attention from attendants who trimmed wicks and replaced spent candles throughout performances. The introduction of gas lighting in the early nineteenth century represented a substantial improvement. Gas jets produced significantly greater luminosity than their predecessors and could be controlled from a centralized location, allowing operators to adjust light levels across an entire theater simultaneously.",
-                "The incandescent bulb, perfected by Thomas Edison in 1879, transformed theatrical illumination once again. Electric lighting eliminated the combustion hazards that had plagued earlier systems, as stages no longer risked ignition from open flames. Operating costs declined substantially because electric bulbs lasted far longer than gas mantles and required less maintenance. Furthermore, incandescent lights could be dimmed smoothly using rheostats, granting directors unprecedented control over dramatic atmosphere. The transition from gas to electricity marked a turning point in theatrical history. (A)",
-                "Contemporary productions increasingly utilize light-emitting diodes for stage illumination. (B) LED fixtures consume far less electricity than incandescent bulbs while generating minimal heat. (C) These characteristics have proven especially valuable for large commercial theaters and touring productions, where the reduced heat output allows for more elaborate overhead rigging systems. (D)"
+                "The incandescent bulb, perfected by Thomas Edison in 1879, transformed theatrical illumination once again. Electric lighting eliminated the combustion hazards that had plagued earlier systems, as stages no longer risked ignition from open flames. Operating costs declined substantially because electric bulbs lasted far longer than gas mantles and required less maintenance. Furthermore, incandescent lights could be dimmed smoothly using rheostats, granting directors unprecedented control over dramatic atmosphere. The transition from gas to electricity marked a turning point in theatrical history. {{A}}",
+                "Contemporary productions increasingly utilize light-emitting diodes for stage illumination. {{B}} LED fixtures consume far less electricity than incandescent bulbs while generating minimal heat. {{C}} These characteristics have proven especially valuable for large commercial theaters and touring productions, where the reduced heat output allows for more elaborate overhead rigging systems. {{D}}"
               ],
               "questions": [
                 {
@@ -414,8 +414,7 @@ window.SMEAG_SET10 = {
                     "Position C",
                     "Position D"
                   ],
-                  "choicesOrigin": "generated",
-                  "choicesNote": "The source docx had no choice list — insertion points A-D were generated.",
+                  "sentence": "\"This technological shift has enabled smaller theaters and independent productions to achieve professional-quality lighting effects more easily.\"",
                   "no": 35,
                   "id": "R1-35",
                   "answer": 0
@@ -1420,28 +1419,36 @@ window.SMEAG_SET10 = {
                       "text": "Yes, the librarian"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "showed"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "me"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "how"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "use"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "online"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "database"
                     },
                     {
                       "t": "f",
@@ -1459,6 +1466,17 @@ window.SMEAG_SET10 = {
                     "showed"
                   ],
                   "answerSentence": "Yes, the librarian showed me how to use the online database.",
+                  "answerTokens": [
+                    "showed",
+                    "me",
+                    "how",
+                    "to",
+                    "use",
+                    "the",
+                    "online",
+                    "database"
+                  ],
+                  "sentence": "Yes, the librarian showed me how to use the online database.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1469,31 +1487,40 @@ window.SMEAG_SET10 = {
                   "context": "Why was the lecture hall so crowded today?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "have"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "no"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "clue"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "what"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "event"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "was"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "happening"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "there"
                     },
                     {
                       "t": "f",
@@ -1512,6 +1539,18 @@ window.SMEAG_SET10 = {
                     "I"
                   ],
                   "answerSentence": "I have no clue what event was happening there.",
+                  "answerTokens": [
+                    "I",
+                    "have",
+                    "no",
+                    "clue",
+                    "what",
+                    "event",
+                    "was",
+                    "happening",
+                    "there"
+                  ],
+                  "sentence": "I have no clue what event was happening there.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1526,25 +1565,32 @@ window.SMEAG_SET10 = {
                       "text": "She asked"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "if"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "could"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "wear"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "headphones"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "after"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "ten"
                     },
                     {
                       "t": "f",
@@ -1561,6 +1607,16 @@ window.SMEAG_SET10 = {
                     "if"
                   ],
                   "answerSentence": "She asked if I could wear headphones after ten.",
+                  "answerTokens": [
+                    "if",
+                    "I",
+                    "could",
+                    "wear",
+                    "headphones",
+                    "after",
+                    "ten"
+                  ],
+                  "sentence": "She asked if I could wear headphones after ten.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1571,37 +1627,48 @@ window.SMEAG_SET10 = {
                   "context": "How do you get to campus every day?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "usually"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "take"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "bus"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "that"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "stops"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "near"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "main"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "gate"
                     },
                     {
                       "t": "f",
@@ -1622,6 +1689,20 @@ window.SMEAG_SET10 = {
                     "the"
                   ],
                   "answerSentence": "I usually take the bus that stops near the main gate.",
+                  "answerTokens": [
+                    "I",
+                    "usually",
+                    "take",
+                    "the",
+                    "bus",
+                    "that",
+                    "stops",
+                    "near",
+                    "the",
+                    "main",
+                    "gate"
+                  ],
+                  "sentence": "I usually take the bus that stops near the main gate.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1632,37 +1713,48 @@ window.SMEAG_SET10 = {
                   "context": "What did the tutor say about your solution?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "He"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "wanted"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "know"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "why"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "had"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "skipped"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "so"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "many"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "steps"
                     },
                     {
                       "t": "f",
@@ -1683,6 +1775,20 @@ window.SMEAG_SET10 = {
                     "wanted"
                   ],
                   "answerSentence": "He wanted to know why I had skipped so many steps.",
+                  "answerTokens": [
+                    "He",
+                    "wanted",
+                    "to",
+                    "know",
+                    "why",
+                    "I",
+                    "had",
+                    "skipped",
+                    "so",
+                    "many",
+                    "steps"
+                  ],
+                  "sentence": "He wanted to know why I had skipped so many steps.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1697,31 +1803,40 @@ window.SMEAG_SET10 = {
                       "text": "The vet"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "explained"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "what"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "kind"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "of"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "exercise"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "would"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "help"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "him"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "relax"
                     },
                     {
                       "t": "f",
@@ -1740,6 +1855,18 @@ window.SMEAG_SET10 = {
                     "explained"
                   ],
                   "answerSentence": "The vet explained what kind of exercise would help him relax.",
+                  "answerTokens": [
+                    "explained",
+                    "what",
+                    "kind",
+                    "of",
+                    "exercise",
+                    "would",
+                    "help",
+                    "him",
+                    "relax"
+                  ],
+                  "sentence": "The vet explained what kind of exercise would help him relax.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1754,28 +1881,36 @@ window.SMEAG_SET10 = {
                       "text": "I still"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "need"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "decide"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "which"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "courses"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "fit"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "my"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "schedule"
                     },
                     {
                       "t": "f",
@@ -1793,6 +1928,17 @@ window.SMEAG_SET10 = {
                     "need"
                   ],
                   "answerSentence": "I still need to decide which courses fit my schedule.",
+                  "answerTokens": [
+                    "need",
+                    "to",
+                    "decide",
+                    "which",
+                    "courses",
+                    "fit",
+                    "my",
+                    "schedule"
+                  ],
+                  "sentence": "I still need to decide which courses fit my schedule.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1803,25 +1949,32 @@ window.SMEAG_SET10 = {
                   "context": "Do you know when the laundry room closes?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "It"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "stays"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "open"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "until"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "eleven"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "on"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "weekdays"
                     },
                     {
                       "t": "f",
@@ -1838,6 +1991,16 @@ window.SMEAG_SET10 = {
                     "on"
                   ],
                   "answerSentence": "It stays open until eleven on weekdays.",
+                  "answerTokens": [
+                    "It",
+                    "stays",
+                    "open",
+                    "until",
+                    "eleven",
+                    "on",
+                    "weekdays"
+                  ],
+                  "sentence": "It stays open until eleven on weekdays.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1848,34 +2011,44 @@ window.SMEAG_SET10 = {
                   "context": "Did your study group pick a time to meet?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "Yes,"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "we"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "ended"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "up"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "choosing"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "Thursday"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "afternoon"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "at"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "library"
                     },
                     {
                       "t": "f",
@@ -1895,6 +2068,19 @@ window.SMEAG_SET10 = {
                     "choosing"
                   ],
                   "answerSentence": "Yes, we ended up choosing Thursday afternoon at the library.",
+                  "answerTokens": [
+                    "Yes,",
+                    "we",
+                    "ended",
+                    "up",
+                    "choosing",
+                    "Thursday",
+                    "afternoon",
+                    "at",
+                    "the",
+                    "library"
+                  ],
+                  "sentence": "Yes, we ended up choosing Thursday afternoon at the library.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1905,37 +2091,48 @@ window.SMEAG_SET10 = {
                   "context": "Did you remember to buy everything on the list?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "forgot"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "pick"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "up"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "a"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "few"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "things"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "at"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "store"
                     },
                     {
                       "t": "f",
@@ -1956,6 +2153,20 @@ window.SMEAG_SET10 = {
                     "forgot"
                   ],
                   "answerSentence": "I forgot to pick up a few things at the store.",
+                  "answerTokens": [
+                    "I",
+                    "forgot",
+                    "to",
+                    "pick",
+                    "up",
+                    "a",
+                    "few",
+                    "things",
+                    "at",
+                    "the",
+                    "store"
+                  ],
+                  "sentence": "I forgot to pick up a few things at the store.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 }

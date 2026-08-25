@@ -368,6 +368,28 @@
           prompt: q.text,
           choices: got.choices
         };
+        if (isInsert) {
+          var insertSentence = '', insertChoices = [], sawInsertLabel = false, iz = j + 1, insertNext = iz;
+          while (iz < bodyEnd) {
+            var ip = paras[iz], it = txt(ip);
+            if (numbered(it)) break;
+            var iLetter = lettered(it);
+            if (iLetter && iLetter.letter >= 0) insertChoices.push(iLetter.text);
+            else if (ip.listed && /^position\s+[A-D]$/i.test(it)) insertChoices.push(it);
+            var im = /^sentence to insert\s*:\s*(.*)$/i.exec(it);
+            if (im) {
+              sawInsertLabel = true;
+              if (im[1]) insertSentence = im[1].trim();
+            } else if (sawInsertLabel && !insertSentence && it && !lettered(it)
+                       && !(ip.listed && /^position\s+[A-D]$/i.test(it))) {
+              insertSentence = it;
+            }
+            iz++; insertNext = iz;
+          }
+          item.sentence = insertSentence;
+          if (insertChoices.length === 4) item.choices = insertChoices;
+          if (insertNext > got.next) got.next = insertNext;
+        }
         /* 삽입 문항의 보기는 원본에 없다 — 지문 안의 마커 A~D 가 곧 보기다.
            여기서만 텍스트를 만들고, 만들었다는 사실을 팩에 남긴다. */
         if (isInsert && !item.choices.length) {
@@ -388,6 +410,12 @@
 
       var nos = reconcileNumbers(items.map(function (x) { return x.bodyNo; }),
         head.range, expected, mismatch, moduleId);
+
+      /* 렌더러가 클릭할 수 있는 삽입 자리라고 {{A}}…{{D}} 마커만 버튼을 누른다.
+         삽입 문항이 있는 지문 블록에서만 원본의 (A)…(D)를 그 형식으로 바꾼다. */
+      if (items.some(function (x) { return x.kind === 'insert'; })) {
+        lines = lines.map(function (line) { return line.replace(/\(([A-D])\)/g, '{{$1}}'); });
+      }
 
       var blk = {
         kind: 'passage', heading: head.text, instruction: '',
@@ -694,10 +722,14 @@
 
     var out = [];
     if (head) out.push({ t: 'f', text: head });
-    for (i = 0; i < words.length; i++) out.push({ t: 'b' });
+    for (i = 0; i < words.length; i++) out.push({ t: 'b', a: words[i] });
     if (tail) out.push({ t: 'f', text: tail });
 
     q.slots = out;
+    /* Build-a-Sentence review and autoscore use slots[].a as the canonical key.
+       Keep the companion fields in sync so every runtime sees the same answer. */
+    q.answerTokens = words.slice();
+    q.sentence = sentence;
     q.tiles = seededShuffle(words, q.id);
     q.tilesOrigin = 'derived-from-answer';
     q.tilesNote = 'The source docx had no word tiles — the words of the answer sentence were used, in scrambled order.';
@@ -1288,6 +1320,19 @@
       });
     });
     if (thin.length) gate('warn', 'choices', thin.length + ' questions have fewer than 3 choices: ' + thin.slice(0, 8).join(', ') + (thin.length > 8 ? ' and more' : ''));
+
+    var emptyInsertSentences = [];
+    sections.forEach(function (sec) {
+      sec.modules.forEach(function (mod) {
+        mod.blocks.forEach(function (blk) {
+          (blk.questions || []).forEach(function (q) {
+            if (q.kind === 'insert' && !String(q.sentence || '').trim()) emptyInsertSentences.push(q.id);
+          });
+        });
+      });
+    });
+    if (emptyInsertSentences.length) gate('stop', 'reading-content',
+      'Sentence-insertion questions have no sentence to insert: ' + emptyInsertSentences.join(', '));
 
     /* ---- 리딩 본문 존재 검산 ----
        문항과 선택지만 있으면 시험 화면 오른쪽은 정상처럼 보여도 왼쪽 지문이 빈다.
