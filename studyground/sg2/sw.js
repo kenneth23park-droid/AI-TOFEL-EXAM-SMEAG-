@@ -379,7 +379,11 @@
 // v91: SET 10 Reading 26-30의 머리글 앞 Twin Stars 지문을 팩에 복원한다.
 // v92: 결과 리뷰가 SET10/T-010/SET 010을 같은 콘텐츠 팩으로 찾아, 저장된
 //      SET10 응시의 자동 채점과 문항별 정답 검토가 빈 화면으로 끝나지 않게 한다.
-const VERSION = 'sg-v92';
+// v93: SET 10 listening headings now follow the actual question ranges, and the
+//      email situation card is restored from its pre-heading DOCX position.
+// v94: SET 10 discussion names, complete posts, and 100-word minimum are restored;
+//      AI scoring requests now time out instead of leaving submission stuck forever.
+const VERSION = 'sg-v94';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

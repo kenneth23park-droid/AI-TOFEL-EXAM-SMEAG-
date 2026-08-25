@@ -826,7 +826,7 @@ window.SMEAG_SET10 = {
             },
             {
               "kind": "audio-set",
-              "heading": "Questions 19-20",
+              "heading": "Questions 15-16",
               "instruction": "Listen to a conversation.",
               "questions": [
                 {
@@ -898,7 +898,7 @@ window.SMEAG_SET10 = {
             },
             {
               "kind": "audio-set",
-              "heading": "Questions 25-28",
+              "heading": "Questions 19-20",
               "instruction": "Listen to an announcement.",
               "questions": [
                 {
@@ -928,6 +928,8 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "headingOrigin": "corrected-from-source",
+              "headingNote": "The source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.",
               "audio": "media/audio/set10/l1-q19-20.mp3",
               "scriptOrigin": "script-docx",
               "script": "Attention, students. This is a reminder that submissions for the campus photography contest are due by 3 p.m. today. Please make sure to submit your entries to the Arts Building front desk before the deadline. A panel of selected students and professors will carefully evaluate all entries based on creativity and technique. Winners will be announced in next week's campus newspaper, and their photographs will be featured on the university website for the entire semester."
@@ -1006,7 +1008,7 @@ window.SMEAG_SET10 = {
             },
             {
               "kind": "audio-set",
-              "heading": "Questions 15-16",
+              "heading": "Questions 25-28",
               "instruction": "Listen to a conversation.",
               "questions": [
                 {
@@ -1062,6 +1064,8 @@ window.SMEAG_SET10 = {
                   "answer": 0
                 }
               ],
+              "headingOrigin": "corrected-from-source",
+              "headingNote": "The source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.",
               "audio": "media/audio/set10/l1-q25-28.mp3",
               "scriptOrigin": "script-docx",
               "script": "Alright, so today we're going to talk about something you probably don't think much about, the light in this room. Now, for decades, we used incandescent bulbs, right? These traditional bulbs produce what we call a broad spectrum of light. That means they emit wavelengths across the entire visible range, plus they give off a significant amount of infrared radiation, basically, heat.\nNow, LED lights are different. They're designed to be efficient, so they emit light primarily in the visible spectrum, roughly 400 to 700 nanometers. But here's the thing, they produce almost no infrared light. And that matters more than you might think.\nSo why should we care about infrared? Well, infrared radiation, particularly in the near-infrared range, has been linked to several health benefits. Studies suggest it can promote relaxation, reduce stress, and even support cellular repair processes. Some research indicates it may improve circulation and help with muscle recovery. Incandescent bulbs provided this naturally, without us even realizing it.\nNow, LED manufacturers have noticed this gap. There are now advanced LED systems that can emit some infrared wavelengths. However, these specialized bulbs can cost ten times more than standard LEDs. So for most consumers and businesses, regular LEDs remain the practical choice despite missing these potential benefits. It's a trade-off between energy efficiency and what some researchers call \"light quality.\""
@@ -1971,11 +1975,18 @@ window.SMEAG_SET10 = {
                   "id": "set10-W2-email",
                   "kind": "email",
                   "no": 21,
-                  "to": "",
-                  "subject": "",
-                  "situationLabel": "",
-                  "situation": "",
-                  "requirements": []
+                  "to": "Lisa",
+                  "subject": "Thank You for Your Contributions",
+                  "situationLabel": "SITUATION",
+                  "situation": "You have recently completed a group project with several classmates for a course. Your friend Lisa was one of the group members, and she made excellent contributions that helped the project succeed. You want to express your appreciation to her and discuss the possibility of working together again in the future.",
+                  "bulletsLabel": "YOUR EMAIL SHOULD",
+                  "bullets": [
+                    "Thank Lisa for her contributions to the group project.",
+                    "Describe what aspects of her work were particularly helpful and how they contributed to the project's success.",
+                    "Suggest the possibility of working together on future projects and ask for her opinion."
+                  ],
+                  "minWords": 80,
+                  "prompt": "You have recently completed a group project with several classmates for a course. Your friend Lisa was one of the group members, and she made excellent contributions that helped the project succeed. You want to express your appreciation to her and discuss the possibility of working together again in the future. Thank Lisa for her contributions to the group project. Describe what aspects of her work were particularly helpful and how they contributed to the project's success. Suggest the possibility of working together on future projects and ask for her opinion."
                 }
               ]
             }
@@ -1997,14 +2008,15 @@ window.SMEAG_SET10 = {
                   "prompt": "In this class, we are exploring different methods educators use to assess student performance. Approaches such as project-based assessments, class participation, and traditional exams all aim to measure learning, but they emphasize different skills and outcomes. Each method has strengths and limitations depending on fairness, depth of learning, and preparation for real-world tasks. What do you think is the best way to assess student performance? Why?",
                   "posts": [
                     {
-                      "author": "& Claire",
+                      "name": "Claire",
                       "text": "I believe that project-based assessments and class participation are the best ways to evaluate student performance. These methods allow students to apply knowledge in practical situations and demonstrate understanding through collaboration and creativity. They also encourage continuous effort throughout the course rather than relying on a single exam. In addition, this approach reflects real- world skills such as teamwork, communication, and problem-solving, which are valuable beyond the classroom."
                     },
                     {
-                      "author": "& Mark",
-                      "text": "I believe traditional exams and quizzes are a better way to assess student performance. Exams offer a standardized and objective way to measure what all students have learned using the same criteria. They focus on individual understanding, which avoids issues of unequal contribution in group work. Furthermore, exams help"
+                      "name": "Mark",
+                      "text": "I believe traditional exams and quizzes are a better way to assess student performance. Exams offer a standardized and objective way to measure what all students have learned using the same criteria. They focus on individual understanding, which avoids issues of unequal contribution in group work. Furthermore, exams help students develop important skills such as time management and the ability to think clearly under pressure."
                     }
-                  ]
+                  ],
+                  "minWords": 100
                 }
               ]
             }

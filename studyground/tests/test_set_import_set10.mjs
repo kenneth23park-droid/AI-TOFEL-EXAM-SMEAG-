@@ -136,6 +136,47 @@ const main = async () => {
   }
 
   /* ---- 4. 리스닝 음성 파일 이름이 겹치지 않는가 ---- */
+  /* The source's duplicated listening headings must not reach the exam UI. */
+  {
+    const l1 = modulesOf(pack, 'listening').find((m) => m.id === 'L1');
+    const headings = (l1 ? l1.blocks : []).map((b) => b.heading);
+    check('listening headings follow actual ranges', headings.includes('Questions 19-20')
+      && headings.includes('Questions 25-28')
+      && headings.filter((h) => h === 'Questions 15-16').length === 1, headings.join(' / '));
+  }
+
+  /* SET 10 places the email card before its heading; it must still be imported. */
+  {
+    const w2 = modulesOf(pack, 'writing').find((m) => m.id === 'W2');
+    const email = w2 && questionsOfModule(w2)[0];
+    const expectedBullets = [
+      'Thank Lisa for her contributions to the group project.',
+      "Describe what aspects of her work were particularly helpful and how they contributed to the project's success.",
+      'Suggest the possibility of working together on future projects and ask for her opinion.'
+    ];
+    check('email task card complete', !!email && email.to === 'Lisa'
+      && email.subject === 'Thank You for Your Contributions'
+      && /group project/i.test(email.situation) && /Lisa/i.test(email.situation)
+      && email.bulletsLabel === 'YOUR EMAIL SHOULD'
+      && JSON.stringify(email.bullets) === JSON.stringify(expectedBullets)
+      && email.prompt === [email.situation].concat(email.bullets).join(' ')
+      && email.minWords === 80,
+      email ? `${email.to} / ${email.subject} / ${email.bullets.length} bullets` : 'missing question');
+  }
+
+  {
+    const w3 = modulesOf(pack, 'writing').find((m) => m.id === 'W3');
+    const discussion = w3 && questionsOfModule(w3)[0];
+    const names = discussion ? discussion.posts.map((p) => p.name) : [];
+    check('academic discussion card complete', !!discussion
+      && discussion.professor === 'Doctor Martinez – Education'
+      && JSON.stringify(names) === JSON.stringify(['Claire', 'Mark'])
+      && /valuable beyond the classroom\.$/.test(discussion.posts[0].text)
+      && /think clearly under pressure\.$/.test(discussion.posts[1].text)
+      && discussion.minWords === 100,
+      discussion ? `${names.join(', ')} / ${discussion.posts.map((p) => p.text.length).join(', ')} chars` : 'missing question');
+  }
+
   {
     const seen = new Set(), dup = [];
     modulesOf(pack, 'listening').forEach((mod) => {

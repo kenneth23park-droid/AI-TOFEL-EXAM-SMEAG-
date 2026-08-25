@@ -597,6 +597,14 @@
         head.range, expected, mismatch, moduleId);
       if (nos.length) expected = nos[nos.length - 1] + 1;
 
+      /* 원본 머리글이 복사 실수로 틀려도 응시 화면에는 실제 문항 범위룰 보여 준다.
+         잘못된 원문은 mismatch 경고와 note 에 남는다. */
+      if (nos.length && (nos[0] !== head.range.from || nos[nos.length - 1] !== head.range.to)) {
+        blk.headingOrigin = 'corrected-from-source';
+        blk.headingNote = 'The source heading was "' + head.text + '"; the displayed range follows the questions in this block.';
+        blk.heading = 'Questions ' + nos[0] + '-' + nos[nos.length - 1];
+      }
+
       items.forEach(function (x, k) {
         blk.questions.push({
           id: moduleId + '-' + nos[k],
@@ -699,6 +707,36 @@
   function parseWriting(paras, codeSlug, startNo) {
     var modules = [], i = 0, no = startNo;
 
+    /* 어떤 DOCX는 이메일 카드(SITUATION / YOUR EMAIL SHOULD)를
+       "Write an email" 머리글보다 앞에 둔다(SET 10). 주 루프가 그 앞 구간을 W1의 꼬리로
+       지나가므로, 먼저 문서 전체에서 카드 내용을 모아 둔다. */
+    var emailLead = { to: '', subject: '', situationLabel: '', situation: '', bullets: [] };
+    var emailAt = -1, leadMode = '';
+    for (var ep = 0; ep < paras.length; ep++) {
+      if (EMAIL_HEAD.test(txt(paras[ep]))) { emailAt = ep; break; }
+    }
+    if (emailAt >= 0) {
+      for (ep = 0; ep < emailAt; ep++) {
+        var eline = txt(paras[ep]);
+        if (/^to:/i.test(eline)) {
+          emailLead.to = eline.replace(/^to:\s*/i, '');
+          leadMode = '';
+        } else if (/^subject:/i.test(eline)) {
+          emailLead.subject = eline.replace(/^subject:\s*/i, '');
+          leadMode = '';
+        } else if (/^situation\b/i.test(eline)) {
+          emailLead.situationLabel = eline;
+          leadMode = 'sit';
+        } else if (/^your email should\b/i.test(eline)) {
+          leadMode = 'req';
+        } else if (eline && leadMode === 'sit') {
+          emailLead.situation += (emailLead.situation ? ' ' : '') + eline;
+        } else if (eline && leadMode === 'req') {
+          emailLead.bullets.push(eline.replace(/^\d+\s*[.)]\s*/, ''));
+        }
+      }
+    }
+
     while (i < paras.length) {
       var t = txt(paras[i]);
 
@@ -743,7 +781,10 @@
       }
 
       if (EMAIL_HEAD.test(t)) {
-        var em = { id: codeSlug + '-W2-email', kind: 'email', no: no++, to: '', subject: '', situationLabel: '', situation: '', requirements: [] };
+        var em = { id: codeSlug + '-W2-email', kind: 'email', no: no++,
+          to: emailLead.to, subject: emailLead.subject,
+          situationLabel: emailLead.situationLabel, situation: emailLead.situation,
+          bulletsLabel: 'YOUR EMAIL SHOULD', bullets: emailLead.bullets.slice(), minWords: 80 };
         i++;
         var mode = '';
         while (i < paras.length && !DISC_HEAD.test(txt(paras[i]))) {
@@ -751,19 +792,24 @@
           if (/^to:/i.test(l)) { if (!em.to) em.to = l.replace(/^to:\s*/i, ''); mode = ''; }
           else if (/^subject:/i.test(l)) { if (!em.subject) em.subject = l.replace(/^subject:\s*/i, ''); mode = ''; }
           else if (/^situation/i.test(l)) { em.situationLabel = l; mode = 'sit'; }
-          else if (/^your email should/i.test(l)) { mode = 'req'; }
+          else if (/^your email should/i.test(l)) { em.bulletsLabel = l; mode = 'req'; }
           else if (l) {
             if (mode === 'sit' && !em.situation) em.situation = l;
-            else if (mode === 'req' && em.requirements.indexOf(l) < 0) em.requirements.push(l);
+            else if (mode === 'req') {
+              l = l.replace(/^\d+\s*[.)]\s*/, '');
+              if (em.bullets.indexOf(l) < 0) em.bullets.push(l);
+            }
           }
           i++;
         }
+        em.prompt = [em.situation].concat(em.bullets).filter(function (x) { return x; }).join(' ');
         modules.push({ id: 'W2', label: 'Write an Email', blocks: [{ kind: 'free-write', heading: t, questions: [em] }] });
         continue;
       }
 
       if (DISC_HEAD.test(t)) {
-        var dc = { id: codeSlug + '-W3-disc', kind: 'discussion', no: no++, professor: '', prompt: '', posts: [] };
+        var dc = { id: codeSlug + '-W3-disc', kind: 'discussion', no: no++, professor: '', prompt: '',
+          posts: [], minWords: 100 };
         i++;
         var cur = null, seen = {};
         while (i < paras.length) {
@@ -771,15 +817,20 @@
           if (d) {
             if (!dc.professor && /[–—-]/.test(d) && d.length < 70) dc.professor = d;
             else if (!dc.prompt && d.length > 80) dc.prompt = d;
-            else if (d.length < 30 && !/[.?!]$/.test(d)) { cur = { author: d, text: '' }; }
-            else if (cur && !cur.text) {
-              cur.text = d;
-              if (!seen[cur.author + '|' + cur.text]) { seen[cur.author + '|' + cur.text] = 1; dc.posts.push(cur); }
-              cur = null;
+            else if (/^&\s*\S+/.test(d) || (d.length < 30 && !/[.?!]$/.test(d))) {
+              if (cur && cur.text && !seen[cur.name + '|' + cur.text]) {
+                seen[cur.name + '|' + cur.text] = 1; dc.posts.push(cur);
+              }
+              cur = { name: d.replace(/^&\s*/, '').trim(), text: '' };
+            } else if (cur) {
+              /* 장문이 여러 줄로 나눠도 다음 문단의 전이 아니다.
+                 다음 화자 이름이 나올 때까지 글을 누적한다. */
+              cur.text += (cur.text ? ' ' : '') + d;
             }
           }
           i++;
         }
+        if (cur && cur.text && !seen[cur.name + '|' + cur.text]) dc.posts.push(cur);
         modules.push({ id: 'W3', label: 'Write for an Academic Discussion', blocks: [{ kind: 'free-write', heading: t, questions: [dc] }] });
         continue;
       }
