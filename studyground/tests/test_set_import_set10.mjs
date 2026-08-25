@@ -29,6 +29,7 @@ const SOURCES = {
   script: 'SET 10 SCRIPT.docx',
   answers: 'SET 10 ANSWER KEY.docx'
 };
+const LISTENING_IMAGES = JSON.parse(fs.readFileSync(path.join(SG2, 'config/set10-listening-images.json'), 'utf8'));
 
 /* 원본 문서가 스스로 틀린 곳 — 파서가 고른 번호가 맞고, 경고로 남는 것이 정상이다.
  * 다음에 이 목록보다 경고가 늘면 그건 새 회귀다. */
@@ -71,7 +72,7 @@ const main = async () => {
     readDocx(SOURCES.questions), readDocx(SOURCES.script), readDocx(SOURCES.answers)
   ]);
 
-  const result = IMPORT.build({ code: 'SET 10', questions, script, answers });
+  const result = IMPORT.build({ code: 'SET 10', questions, script, answers, listeningImages: LISTENING_IMAGES });
   const pack = result.pack;
   if (!pack) {
     console.error('팩을 만들지 못했습니다.');
@@ -146,6 +147,28 @@ const main = async () => {
       });
     });
     check('리스닝 대본 빠짐없음', naked.length === 0, naked.join(' / '));
+  }
+
+  /* SET10 원본 DOCX에는 리스닝 인물 그림이 없으므로 음성 배역표에서 보완한다. */
+  {
+    const missing = [];
+    const images = [];
+    modulesOf(pack, 'listening').forEach((mod) => mod.blocks.forEach((b) => {
+      if (b.perQuestionAudio) {
+        (b.questions || []).forEach((q) => {
+          if (!q.image) missing.push(q.id);
+          else images.push(q.image);
+        });
+      } else {
+        const first = (b.questions || [])[0];
+        if (!b.image) missing.push(first ? first.id : `${mod.id}:${b.heading || 'block'}`);
+        else images.push(b.image);
+      }
+    }));
+    const absent = images.filter((ref) => !fs.existsSync(path.join(SG2, ref)));
+    check('리스닝 그림 27개 연결', missing.length === 0 && images.length === 27,
+      `연결 ${images.length}, 누락 ${missing.join(', ') || '없음'}`);
+    check('리스닝 그림 파일 존재', absent.length === 0, absent.join(', '));
   }
 
   /* ---- 4. 리스닝 음성 파일 이름이 겹치지 않는가 ---- */

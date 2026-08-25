@@ -42,8 +42,9 @@ async function read(name) {
 const questions = await read(FILES.questions);
 const script = await read(FILES.script);
 const answers = await read(FILES.answers);
+const listeningImages = JSON.parse(fs.readFileSync(path.join(SG2, 'config/set10-listening-images.json'), 'utf8'));
 
-const out = IMPORT.build({ code: 'SET 10', questions, script, answers });
+const out = IMPORT.build({ code: 'SET 10', questions, script, answers, listeningImages });
 const stop = out.gates.filter((g) => g.level === 'stop');
 if (stop.length) {
   stop.forEach((g) => console.error('STOP [' + g.scope + '] ' + g.message));

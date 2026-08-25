@@ -1087,6 +1087,21 @@
       var id = 'L' + no;
       listening.modules.push({ id: id, label: 'Listening Module ' + no, blocks: parseListeningModule(mod, id, outOfRange) });
     });
+    /* Speaker illustrations can live outside the source DOCX. Accept a verified,
+       explicit voice-casting map so exam and review render the same image. */
+    var listeningImages = input.listeningImages || {};
+    listening.modules.forEach(function (mod) {
+      mod.blocks.forEach(function (blk) {
+        var first = blk.questions && blk.questions[0];
+        if (blk.perQuestionAudio) {
+          (blk.questions || []).forEach(function (q) {
+            if (listeningImages.questions && listeningImages.questions[q.id]) q.image = listeningImages.questions[q.id];
+          });
+        } else if (first && listeningImages.blocks && listeningImages.blocks[first.id]) {
+          blk.image = listeningImages.blocks[first.id];
+        }
+      });
+    });
     if (outOfRange.length) {
       gate('warn', 'listening', 'The numbers printed on these questions disagree with their "Questions a-b" heading — the numbering that keeps the module in order was used: ' + outOfRange.join(', '));
     }
@@ -1360,21 +1375,24 @@
        파서마다 그림을 다른 모양으로 모은다(문서 내부 이름 'media/image7.png' 또는 파일명만).
        화면이 찾을 수 있는 경로는 하나뿐이므로 여기서 한 번에 맞춘다. */
     var picFiles = {};
+    function normalizedPic(ref) {
+      var s = String(ref || '');
+      var name = picName(s);
+      picFiles[name] = 1;
+      return /^media\/pictures\//.test(s) ? s : picsRel + name;
+    }
     sections.forEach(function (sec) {
       sec.modules.forEach(function (mod) {
         mod.blocks.forEach(function (blk) {
           if (blk.images) {
             blk.images = blk.images.map(function (ref) {
-              var name = picName(ref);
-              picFiles[name] = 1;
-              return picsRel + name;
+              return normalizedPic(ref);
             });
           }
+          if (blk.image) blk.image = normalizedPic(blk.image);
           (blk.questions || []).forEach(function (q) {
             if (!q.image) return;
-            var n = picName(q.image);
-            picFiles[n] = 1;
-            q.image = picsRel + n;
+            q.image = normalizedPic(q.image);
           });
         });
       });

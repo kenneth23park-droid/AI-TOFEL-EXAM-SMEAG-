@@ -614,6 +614,7 @@ window.SMEAG_SET10 = {
                     "The auditorium can hold about 300 people.",
                     "Academic excellence is important for scholarships."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "Who’s giving the presentation about academic excellence?",
                   "audio": "media/audio/set10/l1-q01.mp3",
                   "answer": 1
@@ -629,6 +630,7 @@ window.SMEAG_SET10 = {
                     "It’s scheduled for next Friday.",
                     "Only members can attend the ceremony."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
                   "script": "Where is the honor society speech being held?",
                   "audio": "media/audio/set10/l1-q02.mp3",
                   "answer": 0
@@ -644,6 +646,7 @@ window.SMEAG_SET10 = {
                     "It’s okay, I’ve recorded it.",
                     "The professor gave us the assignment last month."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
                   "script": "I’m sorry I missed your class presentation?",
                   "audio": "media/audio/set10/l1-q03.mp3",
                   "answer": 2
@@ -659,6 +662,7 @@ window.SMEAG_SET10 = {
                     "I used PowerPoint for slides.",
                     "the classroom was pretty crowded."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male).webp",
                   "script": "Did your presentation go well?",
                   "audio": "media/audio/set10/l1-q04.mp3",
                   "answer": 0
@@ -674,6 +678,7 @@ window.SMEAG_SET10 = {
                     "Professor Kim organized the event.",
                     "It was held in the conference room."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
                   "script": "Did you end up going to the seminar?",
                   "audio": "media/audio/set10/l1-q05.mp3",
                   "answer": 1
@@ -689,6 +694,7 @@ window.SMEAG_SET10 = {
                     "You should contact the community outreach office.",
                     "I volunteered there last semester."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male).webp",
                   "script": "How can I volunteer for technology education programs?",
                   "audio": "media/audio/set10/l1-q06.mp3",
                   "answer": 2
@@ -704,6 +710,7 @@ window.SMEAG_SET10 = {
                     "The class meets on Tuesdays and Thursdays.",
                     "Professor Lee assigned the project."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "We should give a presentation about our research to the class?",
                   "audio": "media/audio/set10/l1-q07.mp3",
                   "answer": 1
@@ -719,6 +726,7 @@ window.SMEAG_SET10 = {
                     "No, I have a silver one.",
                     "Biking is good exercise."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
                   "script": "Do you ride a blue bike to campus?",
                   "audio": "media/audio/set10/l1-q08.mp3",
                   "answer": 2
@@ -734,6 +742,7 @@ window.SMEAG_SET10 = {
                     "I talked to the professor yesterday.",
                     "Professor yesterday."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Academic, Single female).webp",
                   "script": "Do you know when the deadline for the proposal is?",
                   "audio": "media/audio/set10/l1-q09.mp3",
                   "answer": 1
@@ -749,6 +758,7 @@ window.SMEAG_SET10 = {
                     "Her office is on the third floor.",
                     "I started the project last month."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
                   "script": "Did you manage to talk to the professor about your research?",
                   "audio": "media/audio/set10/l1-q10.mp3",
                   "answer": 0
@@ -764,6 +774,7 @@ window.SMEAG_SET10 = {
                     "I took notes if you want to borrow them.",
                     "The meeting room was too cold."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "I can’t remember what Dr. James said during the meeting.",
                   "audio": "media/audio/set10/l1-q11.mp3",
                   "answer": 2
@@ -779,6 +790,7 @@ window.SMEAG_SET10 = {
                     "teaching assistants earn a small stipend.",
                     "The position requires good grades."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
                   "script": "Have you applied for TA position yet?",
                   "audio": "media/audio/set10/l1-q12.mp3",
                   "answer": 0
@@ -819,6 +831,7 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set10/l1-q13-14.mp3",
               "scriptOrigin": "script-docx",
               "script": "M: Hi, I'm looking for housing options for next semester. Do you have any rooms available with double beds? I'm hoping to find something on campus if possible.\nW: Yes, we have a few options right now. Our standard rooms come with double beds and shared bathroom facilities down the hall. Those are $1,800 per month, and they fill up pretty quickly.\nM: That sounds reasonable. Are there any other options I should know about?\nW: We also have rooms with a view of the campus courtyard. They're a bit more spacious and come with newer furniture. Those are $2,080 a month.\nM: Hmm, over two thousand is a bit out of my budget right now. I'm trying to keep my expenses down this year. Would it be possible to take a look at one of the standard rooms first?\nW: Of course. Let me just grab the keys from the back office, and I'll take you up to see one on the third floor.\nM: That would be great. Thanks so much."
@@ -855,6 +868,7 @@ window.SMEAG_SET10 = {
                   "answer": 1
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 Persons).webp",
               "audio": "media/audio/set10/l1-q15-16.mp3",
               "scriptOrigin": "script-docx",
               "script": "M: Hey, have you read the announcement about the new book club they're starting on campus?\nW: Yeah, I saw it posted on the bulletin board this morning. It sounds pretty interesting, actually.\nM: I thought so too. Apparently, they're planning to invite published authors to come in and talk about their books. They want to do it once a month or so.\nW: Really? That's exactly the kind of thing I've been looking for. I've always wanted to know how professional writers come up with their ideas and how they organize their thoughts when they're working on a story.\nM: Same here. I think it would be really inspiring to hear from people who actually do this for a living. So, are you thinking what I'm thinking?\nW: Definitely. We should go sign up before all the spots are taken. I heard they're only accepting thirty members.\nM: Let's head over to the student center right now then."
@@ -891,6 +905,7 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set10/l1-q17-18.mp3",
               "scriptOrigin": "script-docx",
               "script": "M: Hey, I heard about the broken heater in your apartment. That's really unfortunate timing with the weather getting so cold. Have you been able to contact your landlord about it yet?\nW: Yeah, I called him first thing yesterday morning. But he said the repair company is backed up with requests right now, so it's going to take about a week for someone to come out and fix it.\nM: A whole week? That's a long time to go without heat, especially with temperatures dropping below freezing at night. Listen, if you need a warm place to stay or even just somewhere to hang out in the evenings, feel free to come over to my place. I already checked with my roommate, and he said he's totally fine with it.\nW: That's really thoughtful of you to offer, and I appreciate you asking your roommate first. I think I can manage with some extra blankets for now, but I'll definitely reach out if it gets too uncomfortable.\nM: Sounds good. Just let me know whenever."
@@ -929,6 +944,7 @@ window.SMEAG_SET10 = {
               ],
               "headingOrigin": "corrected-from-source",
               "headingNote": "The source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.",
+              "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
               "audio": "media/audio/set10/l1-q19-20.mp3",
               "scriptOrigin": "script-docx",
               "script": "Attention, students. This is a reminder that submissions for the campus photography contest are due by 3 p.m. today. Please make sure to submit your entries to the Arts Building front desk before the deadline. A panel of selected students and professors will carefully evaluate all entries based on creativity and technique. Winners will be announced in next week's campus newspaper, and their photographs will be featured on the university website for the entire semester."
@@ -965,6 +981,7 @@ window.SMEAG_SET10 = {
                   "answer": 1
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
               "audio": "media/audio/set10/l1-q21-22.mp3",
               "scriptOrigin": "script-docx",
               "script": "I'm pleased to announce that Dr. Harrison will be teaching a special course on time management this semester. Dr. Harrison has dedicated over fifteen years to studying how we balance personal commitments, academic responsibilities, and extracurricular activities effectively. His interest in this topic began during his own undergraduate years, when he double-majored in psychology and biology while also working a part-time job to cover his tuition costs. During that demanding period, he frequently went without adequate sleep, struggling to keep up with everything. It was this challenging experience that sparked his lifelong passion for developing and teaching effective time management strategies to help others avoid the same difficulties."
@@ -1001,6 +1018,7 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male).webp",
               "audio": "media/audio/set10/l1-q23-24.mp3",
               "scriptOrigin": "script-docx",
               "script": "I have an exciting announcement for all of you. Dr. Reyes, a renowned cosmologist who has published numerous groundbreaking papers on black hole dynamics and gravitational theory, will be visiting our university to deliver a guest lecture next Thursday afternoon. In fact, one of his influential theories on stellar collapse forms the foundation for our current unit. To help you prepare, I'll be uploading one of his recent papers to the course website, specifically the one he'll be discussing during his talk, so please take the time to read it carefully before attending the lecture. Your participation is strongly encouraged, and I'd like to add that students who attend and submit a one-page reflection paper on the lecture content will receive extra credit toward their final grade."
@@ -1065,6 +1083,7 @@ window.SMEAG_SET10 = {
               ],
               "headingOrigin": "corrected-from-source",
               "headingNote": "The source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.",
+              "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
               "audio": "media/audio/set10/l1-q25-28.mp3",
               "scriptOrigin": "script-docx",
               "script": "Alright, so today we're going to talk about something you probably don't think much about, the light in this room. Now, for decades, we used incandescent bulbs, right? These traditional bulbs produce what we call a broad spectrum of light. That means they emit wavelengths across the entire visible range, plus they give off a significant amount of infrared radiation, basically, heat.\nNow, LED lights are different. They're designed to be efficient, so they emit light primarily in the visible spectrum, roughly 400 to 700 nanometers. But here's the thing, they produce almost no infrared light. And that matters more than you might think.\nSo why should we care about infrared? Well, infrared radiation, particularly in the near-infrared range, has been linked to several health benefits. Studies suggest it can promote relaxation, reduce stress, and even support cellular repair processes. Some research indicates it may improve circulation and help with muscle recovery. Incandescent bulbs provided this naturally, without us even realizing it.\nNow, LED manufacturers have noticed this gap. There are now advanced LED systems that can emit some infrared wavelengths. However, these specialized bulbs can cost ten times more than standard LEDs. So for most consumers and businesses, regular LEDs remain the practical choice despite missing these potential benefits. It's a trade-off between energy efficiency and what some researchers call \"light quality.\""
@@ -1127,6 +1146,7 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male).webp",
               "audio": "media/audio/set10/l1-q29-32.mp3",
               "scriptOrigin": "script-docx",
               "script": "So, let's dive into hip-hop today. Now, one technique that's absolutely central to this genre is sampling. What exactly is sampling? Basically, it's taking a portion of an existing recording, maybe a drumbeat, a melody, or even just a few seconds of sound, and incorporating it into a new piece of music. It's been part of hip-hop since the beginning.\nOK, so let me give you an example. Beyonce's 2003 hit \"Crazy in Love\" samples the horn section from a 1970s Chi-Lites song. That's sampling in action. Another famous example is the Beastie Boys' album \"Paul's Boutique\" from 1989, which used hundreds of samples layered together.\nNow, here's where things get interesting. In 1991, there was a landmark legal case, Grand Upright Music versus Warner Brothers. A federal judge ruled that sampling without permission was copyright infringement. This changed everything. Before this case, sampling was essentially unregulated. After? Artists needed to clear every sample, which meant paying licensing fees. This made elaborate sample-based albums like \"Paul's Boutique\" nearly impossible to produce economically.\nNow, some critics argue that sampling isn't true creativity, it's just borrowing other people's work. But, in my view, all art forms reference other art. Composers have always quoted other composers. Painters reference earlier painters. Hip- hop producers are doing the same thing, just with technology. They're creating something genuinely new from existing materials."
@@ -1153,6 +1173,7 @@ window.SMEAG_SET10 = {
                     "The event starts at three o’clock.",
                     "I think about twenty people signed up."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "Is there enough space for everyone?",
                   "audio": "media/audio/set10/l2-q01.mp3",
                   "answer": 1
@@ -1168,6 +1189,7 @@ window.SMEAG_SET10 = {
                     "The team has five members now.",
                     "We submitted the final report yesterday."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Academic, Single female).webp",
                   "script": "Why was the project renamed?",
                   "audio": "media/audio/set10/l2-q02.mp3",
                   "answer": 1
@@ -1183,6 +1205,7 @@ window.SMEAG_SET10 = {
                     "Several students received scholarships.",
                     "Have you read the announcement about the awards yet?"
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
                   "script": "I want to be able to attend the Academic Awards banquet.",
                   "audio": "media/audio/set10/l2-q03.mp3",
                   "answer": 1
@@ -1225,6 +1248,7 @@ window.SMEAG_SET10 = {
                   "answer": 3
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set10/l2-q04-05.mp3",
               "scriptOrigin": "script-docx",
               "script": "W: Excuse me, I'm looking for a gift for my brother. His birthday is coming up next week.\nM: Sure, I'd be happy to help. Does he have any particular hobbies?\nW: He's really into cooking. He makes dinner for his family almost every night and loves trying new recipes.\nM: In that case, have you considered a professional chef knife set? We have some excellent options here.\nW: A knife set? That seems like something he might already have.\nM: You'd be surprised. Most people never invest in quality knives for themselves. But a good set makes prepping ingredients so much easier. It's one of those things people appreciate but rarely buy on their own.\nW: That's a good point. He's always complaining about how long it takes to chop vegetables.\nM: Exactly. How about that one on the top shelf? It's one of our most popular sets."
@@ -1261,6 +1285,7 @@ window.SMEAG_SET10 = {
                   "answer": 0
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 Persons).webp",
               "audio": "media/audio/set10/l2-q06-07.mp3",
               "scriptOrigin": "script-docx",
               "script": "M: So, our lease is up in two months. Are we going to renew the contract, or should we look for somewhere else?\nW: I think we should consider moving. The landlord has raised the rent every year since we moved in. It's basically doubled over the past three years.\nM: Yeah, the increases have been ridiculous. But apartment hunting is such a hassle.\nW: I know, I hate it too. But I don't think we have much of a choice. We can't keep paying more for the same apartment.\nM: You're right. And actually, if we move closer to downtown, it might cut down on my commute. I spend almost two hours a day just getting to and from work. That alone might make the whole process worth it.\nW: That's true. Let's start looking online this weekend."
@@ -1323,6 +1348,7 @@ window.SMEAG_SET10 = {
                   "answer": 0
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
               "audio": "media/audio/set10/l2-q08-11.mp3",
               "scriptOrigin": "script-docx",
               "script": "So, today we're looking at how wind instruments evolved into their modern forms. Now, if you think about instruments like the trumpet or the trombone, these took centuries-sometimes three or four hundred years-to develop from their early ancestors into the standardized versions we use in orchestras today. It was a slow, gradual process of refinement.\nBut the tuba? That's a different story. The tuba reached its modern form in only about one hundred and eighty years, which is remarkably fast by comparison. So let's talk about what came before it.\nThe tuba's main ancestors were the serpent and the ophicleide. The serpent was a wooden instrument with an S-shaped body-hence the name. It had finger holes like a woodwind, but it was played with a brass mouthpiece. The problem? The tone was inconsistent and difficult to control, especially in ensemble settings.\nThen came the ophicleide in the early 1800s. This was made of brass and used keys instead of finger holes. Better, right? Well, it still had issues. Producing stable low notes was extremely challenging, and that was precisely what composers and performers wanted-a reliable bass voice for the brass section.\nNow, this is where Berlioz comes in. In his famous Treatise on Instrumentation, he specifically criticized the ophicleide's limitations and called for a more stable low brass instrument. His influence helped push instrument makers toward developing what became the modern tuba.\nNext, we'll look at how the tuba's design was finally standardized."
@@ -1385,6 +1411,7 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
               "audio": "media/audio/set10/l2-q12-15.mp3",
               "scriptOrigin": "script-docx",
               "script": "Alright, so kinship is one of the most fundamental concepts in anthropology. I mean, understanding how people define family relationships tells us so much about a society's structure, values, and social organization.\nNow, how do anthropologists actually study kinship? Well, they typically conduct what we call participant observation. This means living within a community for extended periods-sometimes years—participating in daily life, attending rituals, observing family interactions, and documenting how relationships function. It's hands-on research.\nOK, so kinship relationships generally fall into two categories. First, there's consanguineal kinship-these are relationships based on blood ties. Your parents, siblings, grandparents-that's consanguineal. Then there's affinal kinship, which refers to relationships created through marriage. Your spouse, in- laws-those are affinal connections.\nNow, different cultures trace descent differently. In patrilineal societies, descent is traced through the father's line. In matrilineal societies, it's through the mother's line. And in matrilineal systems, you see some interesting patterns. For example, the maternal uncle-that's your mother's brother-often plays a crucial role in child-rearing, sometimes even more than the biological father. A mother's sister might be considered a \"second mother\" to the children.\nNow, you might think kinship charts are just fancy family trees, but they're actually quite different. Family trees typically show biological ancestors going back generations. Kinship charts, however, map out the social relationships and obligations between living relatives. They show who has responsibilities to whom, who can marry whom, and how resources are shared. It's about social structure, not just genealogy."
@@ -2527,7 +2554,7 @@ window.SMEAG_SET10 = {
     },
     "autoScored": 107,
     "humanScored": 13,
-    "pictures": 10,
+    "pictures": 18,
     "audioClips": 40,
     "audioWithScript": 40,
     "scriptChars": 14644,
