@@ -368,14 +368,19 @@ footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font
   <section id="gate" class="hide">
     <div class="page-h"><h1><span data-en>My TOEFL scores</span><span data-ko>내 TOEFL 성적</span></h1></div>
     <p class="muted mt-8" style="font-size:14px">
-      <span data-en>Sign in with the student ID or email and your password.</span>
-      <span data-ko>학번 또는 이메일과 비밀번호로 로그인하세요.</span>
+      <span data-en>Sign in with the student ID, the date you sat the test, and your password.</span>
+      <span data-ko>학번과 응시일, 비밀번호로 로그인하세요.</span>
     </p>
     <div class="card mt-16" style="max-width:420px">
       <form id="login">
         <div class="err hide" id="login-err"></div>
         <label class="field"><span data-en>Student ID or email</span><span data-ko>학번 또는 이메일</span>
           <input id="login-id" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
+        <!-- 같은 smeag### 는 시험일마다 다른 사람에게 다시 나간다. 아이디만으로는
+             어느 응시인지 정해지지 않으므로 응시일을 함께 받는다. 선생님·관리자
+             계정(이메일 로그인)은 시험일이 없어 비워 둔다. -->
+        <label class="field"><span data-en>Exam date</span><span data-ko>응시일</span>
+          <input id="login-date" type="date" autocomplete="off"></label>
         <label class="field"><span data-en>Password</span><span data-ko>비밀번호</span>
           <input id="login-pw" type="password" autocomplete="current-password" required></label>
         <button class="btn brand mt-16" style="width:100%;justify-content:center" id="login-go" type="submit">
@@ -537,6 +542,11 @@ var AUTH = (function () {
     return read().user;
   }
 
+  function adopt(payload) {
+    if (!payload || !payload.access_token || !payload.refresh_token) return null;
+    return store(payload);
+  }
+
   /* 수험생 아이디(smeag###)는 서버가 시험일과 묶어 이메일을 만든다.
      선생님·관리자 상주 계정은 아이디@도메인이 곧 이메일이다. */
   function loginId(raw) {
@@ -545,8 +555,7 @@ var AUTH = (function () {
     return v + '@' + STAFF_DOMAIN;
   }
 
-  /* examDate 는 예전 학생번호 재사용 방지용이었다. 현재 로그인 화면은 날짜를 받지
-     않으므로 서버의 기본 계정 해석에 맡긴다. */
+  /* examDate 를 실어 보내면 서버는 (아이디, 시험일) 그 계정 하나만 연다. */
   function signIn(login, password, examDate) {
     return fetch(CFG.url + '/functions/v1/sg-auth', {
       method: 'POST',
@@ -639,6 +648,7 @@ var AUTH = (function () {
   }
 
   return { signIn: signIn, signOut: signOut, token: token, user: user, profile: profile,
+           adopt: adopt,
            rest: rest, fn: fn };
 })();
 
@@ -1934,6 +1944,17 @@ var BAND = (function () {
   var SET_SELECT = 'id,label,set_code,picks,snapshot,approved_name,approved_note,created_at';
   var ACCOUNT_SELECT = 'user_id,student_id,name,exam_date';
 
+  function qs(name) {
+    try { return new URLSearchParams(location.search || '').get(name) || ''; } catch (e) { return ''; }
+  }
+  function targetOwner() {
+    var id = String(qs('owner') || '').trim();
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ? id : '';
+  }
+  function canViewOwner() {
+    var r = ME && (ME.role || (ME.is_admin ? 'admin' : ''));
+    return r === 'admin' || r === 'teacher';
+  }
   function normText(v) { return String(v || '').trim().replace(/\s+/g, ' ').toLowerCase(); }
   function dayOf(v) { return String(v || '').slice(0, 10); }
   function authEmailDate() {
@@ -1967,32 +1988,47 @@ var BAND = (function () {
     });
   }
 
+  function profileForOwner(owner) {
+    if (!owner || (AUTH.user() && owner === AUTH.user().id)) return Promise.resolve(ME || AUTH.user());
+    if (!canViewOwner()) return Promise.resolve(null);
+    return AUTH.rest('sg_profiles?select=id,email,name,student_id,role,teacher_id&id=eq.' + encodeURIComponent(owner))
+      .then(function (rows) { return rows && rows[0] ? rows[0] : null; })
+      .catch(function () { return null; });
+  }
+
   function load() {
     var u = AUTH.user();
+    var owner = targetOwner() || (u && u.id);
+    if (!owner) return Promise.resolve();
     /* 응시와 W·S 채점을 함께 읽는다. 밴드는 둘이 다 있어야 완성된다.
        채점 조회가 실패해도 목록은 그린다 — 그때 W·S 는 '아직 채점 전' 으로 남는다. */
     return Promise.all([
-      AUTH.rest('sg_results?select=' + SELECT + '&owner=eq.' + u.id + '&order=submitted_at.desc'),
-      AUTH.rest('sg_task_scores?select=' + TASK_SELECT + '&owner=eq.' + u.id)
+      profileForOwner(owner),
+      AUTH.rest('sg_results?select=' + SELECT + '&owner=eq.' + encodeURIComponent(owner) + '&order=submitted_at.desc'),
+      AUTH.rest('sg_task_scores?select=' + TASK_SELECT + '&owner=eq.' + encodeURIComponent(owner))
         .catch(function () { return []; }),
       AUTH.rest('sg_exam_accounts?select=' + ACCOUNT_SELECT +
-                '&user_id=eq.' + encodeURIComponent(u.id))
+                '&user_id=eq.' + encodeURIComponent(owner))
         .catch(function () { return []; }),
       /* 확정 성적 세트. 없는 게 보통이다 — 다시 친 학생에게만 생긴다.
          무효로 돌린 것은 빼고 최신 한 벌만 보여 준다. */
-      AUTH.rest('sg_score_sets?select=' + SET_SELECT + '&owner=eq.' + u.id +
+      AUTH.rest('sg_score_sets?select=' + SET_SELECT + '&owner=eq.' + encodeURIComponent(owner) +
                 '&voided_at=is.null&order=created_at.desc')
         .catch(function () { return []; })
     ])
       .then(function (out) {
+        if (targetOwner() && !canViewOwner()) {
+          AUTH.signOut(); showGate(); return;
+        }
+        if (out[0]) ME = out[0];
         TASKS = {}; VIEW = {}; ROWS = {};
-        (out[1] || []).forEach(function (t) {
+        (out[2] || []).forEach(function (t) {
           if (!t || !t.session) return;
           (TASKS[t.session] = TASKS[t.session] || []).push(t);
         });
-        MATCHED_ACCOUNTS = matchedAccountRows(out[2] || []);
-        ALL = (out[0] || []).filter(accountMatchedResult);
-        SETS = (out[3] || []).filter(function (set) {
+        MATCHED_ACCOUNTS = matchedAccountRows(out[3] || []);
+        ALL = (out[1] || []);
+        SETS = (out[4] || []).filter(function (set) {
           var picks = (set && set.picks) || {};
           return Object.keys(picks).some(function (s) {
             var p = picks[s], sess = p && (typeof p === 'string' ? p : p.session);
@@ -2023,7 +2059,10 @@ var BAND = (function () {
       if (OPEN) $('rev-me').textContent = (ME && (ME.email || ME.student_id || ME.name)) || '';
       /* 성적표에는 이름이 인쇄된다 — 프로필이 늦게 와도 빈칸으로 남겨 두지 않는다. */
       if (OPEN && route().view === 'report') paintCard(OPEN);
-      return load();
+      return load().then(function () {
+        $('who').textContent = '👤 ' + [(ME && ME.name), (ME && ME.student_id) || (ME && ME.email)]
+          .filter(Boolean).join(' · ');
+      });
     }).catch(function () {
       ME = AUTH.user();
       return load();
@@ -2040,18 +2079,36 @@ var BAND = (function () {
   }
 
   function boot() {
+    window.addEventListener('message', function (e) {
+      var d = e && e.data;
+      if (!d || d.type !== 'smeag-admin-score-session') return;
+      if (!targetOwner() || d.owner !== targetOwner()) return;
+      if (AUTH.adopt(d.session)) showApp();
+    });
     $('login').onsubmit = function (e) {
       e.preventDefault();
       var btn = $('login-go'); btn.disabled = true;
       $('login-err').classList.add('hide');
       var who = String($('login-id').value || '').trim().toLowerCase();
-      var when = '';
+      var when = String($('login-date').value || '').trim();
+      if (/^smeag\d{3}$/.test(who) && !when) {
+        btn.disabled = false;
+        $('login-err').classList.remove('hide');
+        $('login-err').innerHTML = bi('Enter the date you sat the test.', '응시일을 입력하세요.');
+        return;
+      }
       AUTH.signIn($('login-id').value, $('login-pw').value, when).then(function () {
         btn.disabled = false;
         showApp();
       }).catch(function (err) {
         btn.disabled = false;
         $('login-err').classList.remove('hide');
+        if (err.code === 'bad_credentials' && when) {
+          $('login-err').innerHTML = bi(
+            'No scores found for that ID on ' + when + '. Check the ID, the exam date, and the password.',
+            when + ' 응시 기록에서 그 아이디를 찾지 못했습니다. 아이디 · 응시일 · 비밀번호를 확인하세요.');
+          return;
+        }
         $('login-err').innerHTML = bi(err.message || 'Sign-in failed.', err.messageKo || err.message || '로그인하지 못했습니다.');
       });
     };
