@@ -648,6 +648,9 @@ window.SG_RESULTS = (function () {
    * 보내면 상한을 넘겨 통째로 날아간다 — 나눠 보내면 앞의 묶음은 이미 저장돼 있고
    * 뒤에서 끊겨도 다음 방문 때 못 매긴 것만 이어서 매긴다(서버가 already_scored 로 거른다). */
   var SCORE_BATCH = 3;
+  /* API 함수보다 야간 너꺼ᄇ게 잡는다. 응답이 아예 꽈나지 않는 요청이
+   * 이 시간이 지나도로 무한 대기 화면을 막는다. */
+  var SCORE_TIMEOUT_MS = 70000;
 
   /* 세션이 죽었을 때 화면에 세울 말. 서버의 'Sign-in is required.' 를 그대로 옮기면
    * 로그인해 있는 사람에게는 거짓말로 읽힌다 — 문제는 로그인을 안 한 게 아니라
@@ -686,9 +689,12 @@ window.SG_RESULTS = (function () {
             SG_AUTH.invalidate();
             return { _fail: SESSION_GONE, _status: 401, _expired: true };
           }
-          return fetch('/api/score', {
+          var ctl = window.AbortController ? new window.AbortController() : null;
+          var timer = null;
+          var request = fetch('/api/score', {
             method: 'POST',
             headers: { Authorization: 'Bearer ' + tok2, 'Content-Type': 'application/json' },
+            signal: ctl ? ctl.signal : undefined,
             body: JSON.stringify({
               session: row.session,
               owner: opts.owner || undefined,
@@ -698,7 +704,19 @@ window.SG_RESULTS = (function () {
               force: !!opts.force,
               tasks: list.slice(i, i + SCORE_BATCH)
             })
-          }).then(function (r) {
+          });
+          var raced = request;
+          if (ctl && window.setTimeout && window.clearTimeout) {
+            var timeout = new Promise(function (_, reject) {
+              timer = window.setTimeout(function () {
+                ctl.abort();
+                reject(new Error('AI scoring request timed out. Please open My results to retry.'));
+              }, SCORE_TIMEOUT_MS);
+            });
+            raced = Promise.race([request, timeout]);
+          }
+          return raced.then(function (r) {
+            if (timer && window.clearTimeout) window.clearTimeout(timer);
             if (r.ok) return r.json();
             if (r.status === 401 && !retried) return post(i, true);
             /* 서버가 왜 거절했는지는 본문에 있다(키 미설정 503, 권한 401, …).
@@ -712,6 +730,9 @@ window.SG_RESULTS = (function () {
               }
               return fail;
             });
+          }, function (err) {
+            if (timer && window.clearTimeout) window.clearTimeout(timer);
+            throw err;
           });
         });
       }

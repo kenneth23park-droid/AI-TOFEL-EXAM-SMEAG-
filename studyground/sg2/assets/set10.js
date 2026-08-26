@@ -349,8 +349,8 @@ window.SMEAG_SET10 = {
               "paragraphs": [
                 "Theatrical performance in ancient Greece relied entirely upon natural daylight, with plays staged in open-air amphitheaters during afternoon hours. As drama moved indoors during subsequent centuries, the need for artificial illumination that was stable, safe, and capable of sustained operation became paramount.",
                 "During the Renaissance, theaters employed oil lamps and candles to illuminate stages and auditoriums. These sources provided only modest brightness and required constant attention from attendants who trimmed wicks and replaced spent candles throughout performances. The introduction of gas lighting in the early nineteenth century represented a substantial improvement. Gas jets produced significantly greater luminosity than their predecessors and could be controlled from a centralized location, allowing operators to adjust light levels across an entire theater simultaneously.",
-                "The incandescent bulb, perfected by Thomas Edison in 1879, transformed theatrical illumination once again. Electric lighting eliminated the combustion hazards that had plagued earlier systems, as stages no longer risked ignition from open flames. Operating costs declined substantially because electric bulbs lasted far longer than gas mantles and required less maintenance. Furthermore, incandescent lights could be dimmed smoothly using rheostats, granting directors unprecedented control over dramatic atmosphere. The transition from gas to electricity marked a turning point in theatrical history. (A)",
-                "Contemporary productions increasingly utilize light-emitting diodes for stage illumination. (B) LED fixtures consume far less electricity than incandescent bulbs while generating minimal heat. (C) These characteristics have proven especially valuable for large commercial theaters and touring productions, where the reduced heat output allows for more elaborate overhead rigging systems. (D)"
+                "The incandescent bulb, perfected by Thomas Edison in 1879, transformed theatrical illumination once again. Electric lighting eliminated the combustion hazards that had plagued earlier systems, as stages no longer risked ignition from open flames. Operating costs declined substantially because electric bulbs lasted far longer than gas mantles and required less maintenance. Furthermore, incandescent lights could be dimmed smoothly using rheostats, granting directors unprecedented control over dramatic atmosphere. The transition from gas to electricity marked a turning point in theatrical history. {{A}}",
+                "Contemporary productions increasingly utilize light-emitting diodes for stage illumination. {{B}} LED fixtures consume far less electricity than incandescent bulbs while generating minimal heat. {{C}} These characteristics have proven especially valuable for large commercial theaters and touring productions, where the reduced heat output allows for more elaborate overhead rigging systems. {{D}}"
               ],
               "questions": [
                 {
@@ -414,8 +414,7 @@ window.SMEAG_SET10 = {
                     "Position C",
                     "Position D"
                   ],
-                  "choicesOrigin": "generated",
-                  "choicesNote": "The source docx had no choice list — insertion points A-D were generated.",
+                  "sentence": "\"This technological shift has enabled smaller theaters and independent productions to achieve professional-quality lighting effects more easily.\"",
                   "no": 35,
                   "id": "R1-35",
                   "answer": 0
@@ -615,6 +614,7 @@ window.SMEAG_SET10 = {
                     "The auditorium can hold about 300 people.",
                     "Academic excellence is important for scholarships."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "Who’s giving the presentation about academic excellence?",
                   "audio": "media/audio/set10/l1-q01.mp3",
                   "answer": 1
@@ -630,6 +630,7 @@ window.SMEAG_SET10 = {
                     "It’s scheduled for next Friday.",
                     "Only members can attend the ceremony."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
                   "script": "Where is the honor society speech being held?",
                   "audio": "media/audio/set10/l1-q02.mp3",
                   "answer": 0
@@ -645,6 +646,7 @@ window.SMEAG_SET10 = {
                     "It’s okay, I’ve recorded it.",
                     "The professor gave us the assignment last month."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
                   "script": "I’m sorry I missed your class presentation?",
                   "audio": "media/audio/set10/l1-q03.mp3",
                   "answer": 2
@@ -660,6 +662,7 @@ window.SMEAG_SET10 = {
                     "I used PowerPoint for slides.",
                     "the classroom was pretty crowded."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male).webp",
                   "script": "Did your presentation go well?",
                   "audio": "media/audio/set10/l1-q04.mp3",
                   "answer": 0
@@ -675,6 +678,7 @@ window.SMEAG_SET10 = {
                     "Professor Kim organized the event.",
                     "It was held in the conference room."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
                   "script": "Did you end up going to the seminar?",
                   "audio": "media/audio/set10/l1-q05.mp3",
                   "answer": 1
@@ -690,6 +694,7 @@ window.SMEAG_SET10 = {
                     "You should contact the community outreach office.",
                     "I volunteered there last semester."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male).webp",
                   "script": "How can I volunteer for technology education programs?",
                   "audio": "media/audio/set10/l1-q06.mp3",
                   "answer": 2
@@ -705,6 +710,7 @@ window.SMEAG_SET10 = {
                     "The class meets on Tuesdays and Thursdays.",
                     "Professor Lee assigned the project."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "We should give a presentation about our research to the class?",
                   "audio": "media/audio/set10/l1-q07.mp3",
                   "answer": 1
@@ -720,6 +726,7 @@ window.SMEAG_SET10 = {
                     "No, I have a silver one.",
                     "Biking is good exercise."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
                   "script": "Do you ride a blue bike to campus?",
                   "audio": "media/audio/set10/l1-q08.mp3",
                   "answer": 2
@@ -735,6 +742,7 @@ window.SMEAG_SET10 = {
                     "I talked to the professor yesterday.",
                     "Professor yesterday."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Academic, Single female).webp",
                   "script": "Do you know when the deadline for the proposal is?",
                   "audio": "media/audio/set10/l1-q09.mp3",
                   "answer": 1
@@ -750,6 +758,7 @@ window.SMEAG_SET10 = {
                     "Her office is on the third floor.",
                     "I started the project last month."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
                   "script": "Did you manage to talk to the professor about your research?",
                   "audio": "media/audio/set10/l1-q10.mp3",
                   "answer": 0
@@ -765,6 +774,7 @@ window.SMEAG_SET10 = {
                     "I took notes if you want to borrow them.",
                     "The meeting room was too cold."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "I can’t remember what Dr. James said during the meeting.",
                   "audio": "media/audio/set10/l1-q11.mp3",
                   "answer": 2
@@ -780,6 +790,7 @@ window.SMEAG_SET10 = {
                     "teaching assistants earn a small stipend.",
                     "The position requires good grades."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
                   "script": "Have you applied for TA position yet?",
                   "audio": "media/audio/set10/l1-q12.mp3",
                   "answer": 0
@@ -820,13 +831,14 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set10/l1-q13-14.mp3",
               "scriptOrigin": "script-docx",
               "script": "M: Hi, I'm looking for housing options for next semester. Do you have any rooms available with double beds? I'm hoping to find something on campus if possible.\nW: Yes, we have a few options right now. Our standard rooms come with double beds and shared bathroom facilities down the hall. Those are $1,800 per month, and they fill up pretty quickly.\nM: That sounds reasonable. Are there any other options I should know about?\nW: We also have rooms with a view of the campus courtyard. They're a bit more spacious and come with newer furniture. Those are $2,080 a month.\nM: Hmm, over two thousand is a bit out of my budget right now. I'm trying to keep my expenses down this year. Would it be possible to take a look at one of the standard rooms first?\nW: Of course. Let me just grab the keys from the back office, and I'll take you up to see one on the third floor.\nM: That would be great. Thanks so much."
             },
             {
               "kind": "audio-set",
-              "heading": "Questions 19-20",
+              "heading": "Questions 15-16",
               "instruction": "Listen to a conversation.",
               "questions": [
                 {
@@ -856,6 +868,7 @@ window.SMEAG_SET10 = {
                   "answer": 1
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 Persons).webp",
               "audio": "media/audio/set10/l1-q15-16.mp3",
               "scriptOrigin": "script-docx",
               "script": "M: Hey, have you read the announcement about the new book club they're starting on campus?\nW: Yeah, I saw it posted on the bulletin board this morning. It sounds pretty interesting, actually.\nM: I thought so too. Apparently, they're planning to invite published authors to come in and talk about their books. They want to do it once a month or so.\nW: Really? That's exactly the kind of thing I've been looking for. I've always wanted to know how professional writers come up with their ideas and how they organize their thoughts when they're working on a story.\nM: Same here. I think it would be really inspiring to hear from people who actually do this for a living. So, are you thinking what I'm thinking?\nW: Definitely. We should go sign up before all the spots are taken. I heard they're only accepting thirty members.\nM: Let's head over to the student center right now then."
@@ -892,13 +905,14 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set10/l1-q17-18.mp3",
               "scriptOrigin": "script-docx",
               "script": "M: Hey, I heard about the broken heater in your apartment. That's really unfortunate timing with the weather getting so cold. Have you been able to contact your landlord about it yet?\nW: Yeah, I called him first thing yesterday morning. But he said the repair company is backed up with requests right now, so it's going to take about a week for someone to come out and fix it.\nM: A whole week? That's a long time to go without heat, especially with temperatures dropping below freezing at night. Listen, if you need a warm place to stay or even just somewhere to hang out in the evenings, feel free to come over to my place. I already checked with my roommate, and he said he's totally fine with it.\nW: That's really thoughtful of you to offer, and I appreciate you asking your roommate first. I think I can manage with some extra blankets for now, but I'll definitely reach out if it gets too uncomfortable.\nM: Sounds good. Just let me know whenever."
             },
             {
               "kind": "audio-set",
-              "heading": "Questions 25-28",
+              "heading": "Questions 19-20",
               "instruction": "Listen to an announcement.",
               "questions": [
                 {
@@ -928,6 +942,9 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "headingOrigin": "corrected-from-source",
+              "headingNote": "The source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.",
+              "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
               "audio": "media/audio/set10/l1-q19-20.mp3",
               "scriptOrigin": "script-docx",
               "script": "Attention, students. This is a reminder that submissions for the campus photography contest are due by 3 p.m. today. Please make sure to submit your entries to the Arts Building front desk before the deadline. A panel of selected students and professors will carefully evaluate all entries based on creativity and technique. Winners will be announced in next week's campus newspaper, and their photographs will be featured on the university website for the entire semester."
@@ -964,6 +981,7 @@ window.SMEAG_SET10 = {
                   "answer": 1
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
               "audio": "media/audio/set10/l1-q21-22.mp3",
               "scriptOrigin": "script-docx",
               "script": "I'm pleased to announce that Dr. Harrison will be teaching a special course on time management this semester. Dr. Harrison has dedicated over fifteen years to studying how we balance personal commitments, academic responsibilities, and extracurricular activities effectively. His interest in this topic began during his own undergraduate years, when he double-majored in psychology and biology while also working a part-time job to cover his tuition costs. During that demanding period, he frequently went without adequate sleep, struggling to keep up with everything. It was this challenging experience that sparked his lifelong passion for developing and teaching effective time management strategies to help others avoid the same difficulties."
@@ -1000,13 +1018,14 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male).webp",
               "audio": "media/audio/set10/l1-q23-24.mp3",
               "scriptOrigin": "script-docx",
               "script": "I have an exciting announcement for all of you. Dr. Reyes, a renowned cosmologist who has published numerous groundbreaking papers on black hole dynamics and gravitational theory, will be visiting our university to deliver a guest lecture next Thursday afternoon. In fact, one of his influential theories on stellar collapse forms the foundation for our current unit. To help you prepare, I'll be uploading one of his recent papers to the course website, specifically the one he'll be discussing during his talk, so please take the time to read it carefully before attending the lecture. Your participation is strongly encouraged, and I'd like to add that students who attend and submit a one-page reflection paper on the lecture content will receive extra credit toward their final grade."
             },
             {
               "kind": "audio-set",
-              "heading": "Questions 15-16",
+              "heading": "Questions 25-28",
               "instruction": "Listen to a conversation.",
               "questions": [
                 {
@@ -1062,6 +1081,9 @@ window.SMEAG_SET10 = {
                   "answer": 0
                 }
               ],
+              "headingOrigin": "corrected-from-source",
+              "headingNote": "The source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.",
+              "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
               "audio": "media/audio/set10/l1-q25-28.mp3",
               "scriptOrigin": "script-docx",
               "script": "Alright, so today we're going to talk about something you probably don't think much about, the light in this room. Now, for decades, we used incandescent bulbs, right? These traditional bulbs produce what we call a broad spectrum of light. That means they emit wavelengths across the entire visible range, plus they give off a significant amount of infrared radiation, basically, heat.\nNow, LED lights are different. They're designed to be efficient, so they emit light primarily in the visible spectrum, roughly 400 to 700 nanometers. But here's the thing, they produce almost no infrared light. And that matters more than you might think.\nSo why should we care about infrared? Well, infrared radiation, particularly in the near-infrared range, has been linked to several health benefits. Studies suggest it can promote relaxation, reduce stress, and even support cellular repair processes. Some research indicates it may improve circulation and help with muscle recovery. Incandescent bulbs provided this naturally, without us even realizing it.\nNow, LED manufacturers have noticed this gap. There are now advanced LED systems that can emit some infrared wavelengths. However, these specialized bulbs can cost ten times more than standard LEDs. So for most consumers and businesses, regular LEDs remain the practical choice despite missing these potential benefits. It's a trade-off between energy efficiency and what some researchers call \"light quality.\""
@@ -1124,6 +1146,7 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male).webp",
               "audio": "media/audio/set10/l1-q29-32.mp3",
               "scriptOrigin": "script-docx",
               "script": "So, let's dive into hip-hop today. Now, one technique that's absolutely central to this genre is sampling. What exactly is sampling? Basically, it's taking a portion of an existing recording, maybe a drumbeat, a melody, or even just a few seconds of sound, and incorporating it into a new piece of music. It's been part of hip-hop since the beginning.\nOK, so let me give you an example. Beyonce's 2003 hit \"Crazy in Love\" samples the horn section from a 1970s Chi-Lites song. That's sampling in action. Another famous example is the Beastie Boys' album \"Paul's Boutique\" from 1989, which used hundreds of samples layered together.\nNow, here's where things get interesting. In 1991, there was a landmark legal case, Grand Upright Music versus Warner Brothers. A federal judge ruled that sampling without permission was copyright infringement. This changed everything. Before this case, sampling was essentially unregulated. After? Artists needed to clear every sample, which meant paying licensing fees. This made elaborate sample-based albums like \"Paul's Boutique\" nearly impossible to produce economically.\nNow, some critics argue that sampling isn't true creativity, it's just borrowing other people's work. But, in my view, all art forms reference other art. Composers have always quoted other composers. Painters reference earlier painters. Hip- hop producers are doing the same thing, just with technology. They're creating something genuinely new from existing materials."
@@ -1150,6 +1173,7 @@ window.SMEAG_SET10 = {
                     "The event starts at three o’clock.",
                     "I think about twenty people signed up."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "Is there enough space for everyone?",
                   "audio": "media/audio/set10/l2-q01.mp3",
                   "answer": 1
@@ -1165,6 +1189,7 @@ window.SMEAG_SET10 = {
                     "The team has five members now.",
                     "We submitted the final report yesterday."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Academic, Single female).webp",
                   "script": "Why was the project renamed?",
                   "audio": "media/audio/set10/l2-q02.mp3",
                   "answer": 1
@@ -1180,6 +1205,7 @@ window.SMEAG_SET10 = {
                     "Several students received scholarships.",
                     "Have you read the announcement about the awards yet?"
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
                   "script": "I want to be able to attend the Academic Awards banquet.",
                   "audio": "media/audio/set10/l2-q03.mp3",
                   "answer": 1
@@ -1222,6 +1248,7 @@ window.SMEAG_SET10 = {
                   "answer": 3
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set10/l2-q04-05.mp3",
               "scriptOrigin": "script-docx",
               "script": "W: Excuse me, I'm looking for a gift for my brother. His birthday is coming up next week.\nM: Sure, I'd be happy to help. Does he have any particular hobbies?\nW: He's really into cooking. He makes dinner for his family almost every night and loves trying new recipes.\nM: In that case, have you considered a professional chef knife set? We have some excellent options here.\nW: A knife set? That seems like something he might already have.\nM: You'd be surprised. Most people never invest in quality knives for themselves. But a good set makes prepping ingredients so much easier. It's one of those things people appreciate but rarely buy on their own.\nW: That's a good point. He's always complaining about how long it takes to chop vegetables.\nM: Exactly. How about that one on the top shelf? It's one of our most popular sets."
@@ -1258,6 +1285,7 @@ window.SMEAG_SET10 = {
                   "answer": 0
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 Persons).webp",
               "audio": "media/audio/set10/l2-q06-07.mp3",
               "scriptOrigin": "script-docx",
               "script": "M: So, our lease is up in two months. Are we going to renew the contract, or should we look for somewhere else?\nW: I think we should consider moving. The landlord has raised the rent every year since we moved in. It's basically doubled over the past three years.\nM: Yeah, the increases have been ridiculous. But apartment hunting is such a hassle.\nW: I know, I hate it too. But I don't think we have much of a choice. We can't keep paying more for the same apartment.\nM: You're right. And actually, if we move closer to downtown, it might cut down on my commute. I spend almost two hours a day just getting to and from work. That alone might make the whole process worth it.\nW: That's true. Let's start looking online this weekend."
@@ -1320,6 +1348,7 @@ window.SMEAG_SET10 = {
                   "answer": 0
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
               "audio": "media/audio/set10/l2-q08-11.mp3",
               "scriptOrigin": "script-docx",
               "script": "So, today we're looking at how wind instruments evolved into their modern forms. Now, if you think about instruments like the trumpet or the trombone, these took centuries-sometimes three or four hundred years-to develop from their early ancestors into the standardized versions we use in orchestras today. It was a slow, gradual process of refinement.\nBut the tuba? That's a different story. The tuba reached its modern form in only about one hundred and eighty years, which is remarkably fast by comparison. So let's talk about what came before it.\nThe tuba's main ancestors were the serpent and the ophicleide. The serpent was a wooden instrument with an S-shaped body-hence the name. It had finger holes like a woodwind, but it was played with a brass mouthpiece. The problem? The tone was inconsistent and difficult to control, especially in ensemble settings.\nThen came the ophicleide in the early 1800s. This was made of brass and used keys instead of finger holes. Better, right? Well, it still had issues. Producing stable low notes was extremely challenging, and that was precisely what composers and performers wanted-a reliable bass voice for the brass section.\nNow, this is where Berlioz comes in. In his famous Treatise on Instrumentation, he specifically criticized the ophicleide's limitations and called for a more stable low brass instrument. His influence helped push instrument makers toward developing what became the modern tuba.\nNext, we'll look at how the tuba's design was finally standardized."
@@ -1382,6 +1411,7 @@ window.SMEAG_SET10 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
               "audio": "media/audio/set10/l2-q12-15.mp3",
               "scriptOrigin": "script-docx",
               "script": "Alright, so kinship is one of the most fundamental concepts in anthropology. I mean, understanding how people define family relationships tells us so much about a society's structure, values, and social organization.\nNow, how do anthropologists actually study kinship? Well, they typically conduct what we call participant observation. This means living within a community for extended periods-sometimes years—participating in daily life, attending rituals, observing family interactions, and documenting how relationships function. It's hands-on research.\nOK, so kinship relationships generally fall into two categories. First, there's consanguineal kinship-these are relationships based on blood ties. Your parents, siblings, grandparents-that's consanguineal. Then there's affinal kinship, which refers to relationships created through marriage. Your spouse, in- laws-those are affinal connections.\nNow, different cultures trace descent differently. In patrilineal societies, descent is traced through the father's line. In matrilineal societies, it's through the mother's line. And in matrilineal systems, you see some interesting patterns. For example, the maternal uncle-that's your mother's brother-often plays a crucial role in child-rearing, sometimes even more than the biological father. A mother's sister might be considered a \"second mother\" to the children.\nNow, you might think kinship charts are just fancy family trees, but they're actually quite different. Family trees typically show biological ancestors going back generations. Kinship charts, however, map out the social relationships and obligations between living relatives. They show who has responsibilities to whom, who can marry whom, and how resources are shared. It's about social structure, not just genealogy."
@@ -1416,28 +1446,36 @@ window.SMEAG_SET10 = {
                       "text": "Yes, the librarian"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "showed"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "me"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "how"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "use"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "online"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "database"
                     },
                     {
                       "t": "f",
@@ -1455,6 +1493,17 @@ window.SMEAG_SET10 = {
                     "showed"
                   ],
                   "answerSentence": "Yes, the librarian showed me how to use the online database.",
+                  "answerTokens": [
+                    "showed",
+                    "me",
+                    "how",
+                    "to",
+                    "use",
+                    "the",
+                    "online",
+                    "database"
+                  ],
+                  "sentence": "Yes, the librarian showed me how to use the online database.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1465,31 +1514,40 @@ window.SMEAG_SET10 = {
                   "context": "Why was the lecture hall so crowded today?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "have"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "no"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "clue"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "what"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "event"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "was"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "happening"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "there"
                     },
                     {
                       "t": "f",
@@ -1508,6 +1566,18 @@ window.SMEAG_SET10 = {
                     "I"
                   ],
                   "answerSentence": "I have no clue what event was happening there.",
+                  "answerTokens": [
+                    "I",
+                    "have",
+                    "no",
+                    "clue",
+                    "what",
+                    "event",
+                    "was",
+                    "happening",
+                    "there"
+                  ],
+                  "sentence": "I have no clue what event was happening there.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1522,25 +1592,32 @@ window.SMEAG_SET10 = {
                       "text": "She asked"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "if"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "could"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "wear"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "headphones"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "after"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "ten"
                     },
                     {
                       "t": "f",
@@ -1557,6 +1634,16 @@ window.SMEAG_SET10 = {
                     "if"
                   ],
                   "answerSentence": "She asked if I could wear headphones after ten.",
+                  "answerTokens": [
+                    "if",
+                    "I",
+                    "could",
+                    "wear",
+                    "headphones",
+                    "after",
+                    "ten"
+                  ],
+                  "sentence": "She asked if I could wear headphones after ten.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1567,37 +1654,48 @@ window.SMEAG_SET10 = {
                   "context": "How do you get to campus every day?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "usually"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "take"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "bus"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "that"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "stops"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "near"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "main"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "gate"
                     },
                     {
                       "t": "f",
@@ -1618,6 +1716,20 @@ window.SMEAG_SET10 = {
                     "the"
                   ],
                   "answerSentence": "I usually take the bus that stops near the main gate.",
+                  "answerTokens": [
+                    "I",
+                    "usually",
+                    "take",
+                    "the",
+                    "bus",
+                    "that",
+                    "stops",
+                    "near",
+                    "the",
+                    "main",
+                    "gate"
+                  ],
+                  "sentence": "I usually take the bus that stops near the main gate.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1628,37 +1740,48 @@ window.SMEAG_SET10 = {
                   "context": "What did the tutor say about your solution?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "He"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "wanted"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "know"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "why"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "had"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "skipped"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "so"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "many"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "steps"
                     },
                     {
                       "t": "f",
@@ -1679,6 +1802,20 @@ window.SMEAG_SET10 = {
                     "wanted"
                   ],
                   "answerSentence": "He wanted to know why I had skipped so many steps.",
+                  "answerTokens": [
+                    "He",
+                    "wanted",
+                    "to",
+                    "know",
+                    "why",
+                    "I",
+                    "had",
+                    "skipped",
+                    "so",
+                    "many",
+                    "steps"
+                  ],
+                  "sentence": "He wanted to know why I had skipped so many steps.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1693,31 +1830,40 @@ window.SMEAG_SET10 = {
                       "text": "The vet"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "explained"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "what"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "kind"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "of"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "exercise"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "would"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "help"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "him"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "relax"
                     },
                     {
                       "t": "f",
@@ -1736,6 +1882,18 @@ window.SMEAG_SET10 = {
                     "explained"
                   ],
                   "answerSentence": "The vet explained what kind of exercise would help him relax.",
+                  "answerTokens": [
+                    "explained",
+                    "what",
+                    "kind",
+                    "of",
+                    "exercise",
+                    "would",
+                    "help",
+                    "him",
+                    "relax"
+                  ],
+                  "sentence": "The vet explained what kind of exercise would help him relax.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1750,28 +1908,36 @@ window.SMEAG_SET10 = {
                       "text": "I still"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "need"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "decide"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "which"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "courses"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "fit"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "my"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "schedule"
                     },
                     {
                       "t": "f",
@@ -1789,6 +1955,17 @@ window.SMEAG_SET10 = {
                     "need"
                   ],
                   "answerSentence": "I still need to decide which courses fit my schedule.",
+                  "answerTokens": [
+                    "need",
+                    "to",
+                    "decide",
+                    "which",
+                    "courses",
+                    "fit",
+                    "my",
+                    "schedule"
+                  ],
+                  "sentence": "I still need to decide which courses fit my schedule.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1799,25 +1976,32 @@ window.SMEAG_SET10 = {
                   "context": "Do you know when the laundry room closes?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "It"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "stays"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "open"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "until"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "eleven"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "on"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "weekdays"
                     },
                     {
                       "t": "f",
@@ -1834,6 +2018,16 @@ window.SMEAG_SET10 = {
                     "on"
                   ],
                   "answerSentence": "It stays open until eleven on weekdays.",
+                  "answerTokens": [
+                    "It",
+                    "stays",
+                    "open",
+                    "until",
+                    "eleven",
+                    "on",
+                    "weekdays"
+                  ],
+                  "sentence": "It stays open until eleven on weekdays.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1844,34 +2038,44 @@ window.SMEAG_SET10 = {
                   "context": "Did your study group pick a time to meet?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "Yes,"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "we"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "ended"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "up"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "choosing"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "Thursday"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "afternoon"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "at"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "library"
                     },
                     {
                       "t": "f",
@@ -1891,6 +2095,19 @@ window.SMEAG_SET10 = {
                     "choosing"
                   ],
                   "answerSentence": "Yes, we ended up choosing Thursday afternoon at the library.",
+                  "answerTokens": [
+                    "Yes,",
+                    "we",
+                    "ended",
+                    "up",
+                    "choosing",
+                    "Thursday",
+                    "afternoon",
+                    "at",
+                    "the",
+                    "library"
+                  ],
+                  "sentence": "Yes, we ended up choosing Thursday afternoon at the library.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 },
@@ -1901,37 +2118,48 @@ window.SMEAG_SET10 = {
                   "context": "Did you remember to buy everything on the list?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "forgot"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "pick"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "up"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "a"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "few"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "things"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "at"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "store"
                     },
                     {
                       "t": "f",
@@ -1952,6 +2180,20 @@ window.SMEAG_SET10 = {
                     "forgot"
                   ],
                   "answerSentence": "I forgot to pick up a few things at the store.",
+                  "answerTokens": [
+                    "I",
+                    "forgot",
+                    "to",
+                    "pick",
+                    "up",
+                    "a",
+                    "few",
+                    "things",
+                    "at",
+                    "the",
+                    "store"
+                  ],
+                  "sentence": "I forgot to pick up a few things at the store.",
                   "tilesOrigin": "derived-from-answer",
                   "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
                 }
@@ -1971,11 +2213,18 @@ window.SMEAG_SET10 = {
                   "id": "set10-W2-email",
                   "kind": "email",
                   "no": 21,
-                  "to": "",
-                  "subject": "",
-                  "situationLabel": "",
-                  "situation": "",
-                  "requirements": []
+                  "to": "Lisa",
+                  "subject": "Thank You for Your Contributions",
+                  "situationLabel": "SITUATION",
+                  "situation": "You have recently completed a group project with several classmates for a course. Your friend Lisa was one of the group members, and she made excellent contributions that helped the project succeed. You want to express your appreciation to her and discuss the possibility of working together again in the future.",
+                  "bulletsLabel": "YOUR EMAIL SHOULD",
+                  "bullets": [
+                    "Thank Lisa for her contributions to the group project.",
+                    "Describe what aspects of her work were particularly helpful and how they contributed to the project's success.",
+                    "Suggest the possibility of working together on future projects and ask for her opinion."
+                  ],
+                  "minWords": 80,
+                  "prompt": "You have recently completed a group project with several classmates for a course. Your friend Lisa was one of the group members, and she made excellent contributions that helped the project succeed. You want to express your appreciation to her and discuss the possibility of working together again in the future. Thank Lisa for her contributions to the group project. Describe what aspects of her work were particularly helpful and how they contributed to the project's success. Suggest the possibility of working together on future projects and ask for her opinion."
                 }
               ]
             }
@@ -1997,14 +2246,15 @@ window.SMEAG_SET10 = {
                   "prompt": "In this class, we are exploring different methods educators use to assess student performance. Approaches such as project-based assessments, class participation, and traditional exams all aim to measure learning, but they emphasize different skills and outcomes. Each method has strengths and limitations depending on fairness, depth of learning, and preparation for real-world tasks. What do you think is the best way to assess student performance? Why?",
                   "posts": [
                     {
-                      "author": "& Claire",
+                      "name": "Claire",
                       "text": "I believe that project-based assessments and class participation are the best ways to evaluate student performance. These methods allow students to apply knowledge in practical situations and demonstrate understanding through collaboration and creativity. They also encourage continuous effort throughout the course rather than relying on a single exam. In addition, this approach reflects real- world skills such as teamwork, communication, and problem-solving, which are valuable beyond the classroom."
                     },
                     {
-                      "author": "& Mark",
-                      "text": "I believe traditional exams and quizzes are a better way to assess student performance. Exams offer a standardized and objective way to measure what all students have learned using the same criteria. They focus on individual understanding, which avoids issues of unequal contribution in group work. Furthermore, exams help"
+                      "name": "Mark",
+                      "text": "I believe traditional exams and quizzes are a better way to assess student performance. Exams offer a standardized and objective way to measure what all students have learned using the same criteria. They focus on individual understanding, which avoids issues of unequal contribution in group work. Furthermore, exams help students develop important skills such as time management and the ability to think clearly under pressure."
                     }
-                  ]
+                  ],
+                  "minWords": 100
                 }
               ]
             }
@@ -2304,7 +2554,7 @@ window.SMEAG_SET10 = {
     },
     "autoScored": 107,
     "humanScored": 13,
-    "pictures": 10,
+    "pictures": 18,
     "audioClips": 40,
     "audioWithScript": 40,
     "scriptChars": 14644,

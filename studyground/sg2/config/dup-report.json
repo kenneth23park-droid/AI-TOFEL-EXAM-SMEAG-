@@ -16,7 +16,7 @@
       "code": "SET10",
       "title": "SET 10",
       "file": "sg2/assets/set10.js",
-      "items": 67,
+      "items": 79,
       "texts": 23,
       "scripts": 0,
       "isCandidate": false
@@ -31,9 +31,9 @@
       "isCandidate": false
     }
   ],
-  "unitCount": 284,
+  "unitCount": 296,
   "frameOnlyUnits": 0,
-  "candidatePairs": 260,
+  "candidatePairs": 262,
   "thresholds": {
     "shingleK": 4,
     "jaccardHigh": 0.55,
@@ -96,11 +96,96 @@
   },
   "counts": {
     "high": 0,
-    "watch": 0,
+    "watch": 1,
     "info": 10,
     "allowlisted": 10
   },
   "pairs": [
+    {
+      "key": "SET10::blk:L1:4 | SET10::blk:L1:7",
+      "severity": "watch",
+      "allowlisted": false,
+      "allowReason": null,
+      "scope": "intra",
+      "role": "text",
+      "score": 0.1739,
+      "metrics": {
+        "jaccard": 0.0505,
+        "containment": 0.1739,
+        "sharedShingles": 16,
+        "longestRun": 19,
+        "sharedChoices": 0,
+        "exact": false,
+        "sameStem": false
+      },
+      "reasons": [
+        "연속 19단어가 그대로 일치."
+      ],
+      "a": {
+        "uid": "SET10::blk:L1:4",
+        "role": "text",
+        "qid": null,
+        "no": null,
+        "qkind": null,
+        "policy": null,
+        "title": "Questions 19-20",
+        "set": "SET10",
+        "setId": "set10",
+        "section": "listening",
+        "sectionLabel": "Listening",
+        "module": "L1",
+        "moduleLabel": "Listening Module 1",
+        "blockKind": "audio-set",
+        "blockHeading": "Questions 19-20",
+        "text": "corrected-from-source\nThe source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.\nAttention, students. This is a reminder that submissions for the campus photography contest are due by 3 p.m. today. Please make sure to submit your entries to the Arts Building front desk before the deadline. A panel of selected students and professors will carefully evaluate all entries based on creativity and technique. Winners will be announced in next week's campus newspaper, and their photographs will be featured on the university website for the entire semester.",
+        "choices": [],
+        "answerText": "",
+        "payload": "corrected-from-source\nThe source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.\nAttention, students. This is a reminder that submissions for the campus photography contest are due by 3 p.m. today. Please make sure to submit your entries to the Arts Building front desk before the deadline. A panel of selected students and professors will carefully evaluate all entries based on creativity and technique. Winners will be announced in next week's campus newspaper, and their photographs will be featured on the university website for the entire semester.",
+        "framedOut": [],
+        "tokenCount": 95,
+        "meta": {
+          "scriptOrigin": "script-docx",
+          "questionIds": [
+            "L1-19",
+            "L1-20"
+          ]
+        },
+        "href": "admin-questions.html?set=set10&q=L1-19"
+      },
+      "b": {
+        "uid": "SET10::blk:L1:7",
+        "role": "text",
+        "qid": null,
+        "no": null,
+        "qkind": null,
+        "policy": null,
+        "title": "Questions 25-28",
+        "set": "SET10",
+        "setId": "set10",
+        "section": "listening",
+        "sectionLabel": "Listening",
+        "module": "L1",
+        "moduleLabel": "Listening Module 1",
+        "blockKind": "audio-set",
+        "blockHeading": "Questions 25-28",
+        "text": "corrected-from-source\nThe source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.\nAlright, so today we're going to talk about something you probably don't think much about, the light in this room. Now, for decades, we used incandescent bulbs, right? These traditional bulbs produce what we call a broad spectrum of light. That means they emit wavelengths across the entire visible range, plus they give off a significant amount of infrared radiation, basically, heat.\nNow, LED lights are different. They're designed to be efficient, so they emit light primarily in the visible spectrum, roughly 400 to 700 nanometers. But here's the thing, they produce almost no infrared light. And that matters more than you might think.\nSo why should we care about infrared? Well, infrared radiation, particularly in the near-infrared range, has been linked to several health benefits. Studies suggest it can promote relaxation, reduce stress, and even support cellular repair processes. Some research indicates it may improve circulation and help with muscle recovery. Incandescent bulbs provided this naturally, without us even realizing it.\nNow, LED manufacturers have noticed this gap. There are now advanced LED systems that can emit some infrared wavelengths. However, these specialized bulbs can cost ten times more than standard LEDs. So for most consumers and businesses, regular LEDs remain the practical choice despite missing these potential benefits. It's a trade-off between energy efficiency and what some researchers call \"light quality.\"",
+        "choices": [],
+        "answerText": "",
+        "payload": "corrected-from-source\nThe source heading was \"Questions 15-16\"; the displayed range follows the questions in this block.\nAlright, so today we're going to talk about something you probably don't think much about, the light in this room. Now, for decades, we used incandescent bulbs, right? These traditional bulbs produce what we call a broad spectrum of light. That means they emit wavelengths across the entire visible range, plus they give off a significant amount of infrared radiation, basically, heat.\nNow, LED lights are different. They're designed to be efficient, so they emit light primarily in the visible spectrum, roughly 400 to 700 nanometers. But here's the thing, they produce almost no infrared light. And that matters more than you might think.\nSo why should we care about infrared? Well, infrared radiation, particularly in the near-infrared range, has been linked to several health benefits. Studies suggest it can promote relaxation, reduce stress, and even support cellular repair processes. Some research indicates it may improve circulation and help with muscle recovery. Incandescent bulbs provided this naturally, without us even realizing it.\nNow, LED manufacturers have noticed this gap. There are now advanced LED systems that can emit some infrared wavelengths. However, these specialized bulbs can cost ten times more than standard LEDs. So for most consumers and businesses, regular LEDs remain the practical choice despite missing these potential benefits. It's a trade-off between energy efficiency and what some researchers call \"light quality.\"",
+        "framedOut": [],
+        "tokenCount": 244,
+        "meta": {
+          "scriptOrigin": "script-docx",
+          "questionIds": [
+            "L1-25",
+            "L1-26",
+            "L1-27",
+            "L1-28"
+          ]
+        },
+        "href": "admin-questions.html?set=set10&q=L1-25"
+      }
+    },
     {
       "key": "SET10::blk:S2:0 | SET9::blk:S2:0",
       "severity": "info",

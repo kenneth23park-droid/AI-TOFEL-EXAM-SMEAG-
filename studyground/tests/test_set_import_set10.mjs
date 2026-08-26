@@ -29,6 +29,7 @@ const SOURCES = {
   script: 'SET 10 SCRIPT.docx',
   answers: 'SET 10 ANSWER KEY.docx'
 };
+const LISTENING_IMAGES = JSON.parse(fs.readFileSync(path.join(SG2, 'config/set10-listening-images.json'), 'utf8'));
 
 /* 원본 문서가 스스로 틀린 곳 — 파서가 고른 번호가 맞고, 경고로 남는 것이 정상이다.
  * 다음에 이 목록보다 경고가 늘면 그건 새 회귀다. */
@@ -71,7 +72,7 @@ const main = async () => {
     readDocx(SOURCES.questions), readDocx(SOURCES.script), readDocx(SOURCES.answers)
   ]);
 
-  const result = IMPORT.build({ code: 'SET 10', questions, script, answers });
+  const result = IMPORT.build({ code: 'SET 10', questions, script, answers, listeningImages: LISTENING_IMAGES });
   const pack = result.pack;
   if (!pack) {
     console.error('팩을 만들지 못했습니다.');
@@ -111,6 +112,19 @@ const main = async () => {
   }
 
   {
+    const r1 = modulesOf(pack, 'reading').find((m) => m.id === 'R1');
+    const q35 = r1 && questionsOfModule(r1).find((q) => q.id === 'R1-35');
+    const block = r1 && r1.blocks.find((b) => (b.questions || []).includes(q35));
+    const passage = block ? [block.title].concat(block.paragraphs || []).join(' ') : '';
+    check('R1-35 insertion sentence', !!q35 && q35.kind === 'insert'
+      && q35.sentence === '"This technological shift has enabled smaller theaters and independent productions to achieve professional-quality lighting effects more easily."'
+      && JSON.stringify(q35.choices) === JSON.stringify(['Position A', 'Position B', 'Position C', 'Position D'])
+      && q35.answer === 0,
+      q35 ? q35.sentence || 'empty sentence' : 'missing question');
+    check('R1-35 insertion markers', ['A', 'B', 'C', 'D'].every((m) => passage.includes(`{{${m}}}`)), passage);
+  }
+
+  {
     const empty = [];
     modulesOf(pack, 'reading').forEach((mod) => mod.blocks.forEach((b) => {
       if (!(b.questions || []).length) return;
@@ -135,7 +149,70 @@ const main = async () => {
     check('리스닝 대본 빠짐없음', naked.length === 0, naked.join(' / '));
   }
 
+  /* SET10 원본 DOCX에는 리스닝 인물 그림이 없으므로 음성 배역표에서 보완한다. */
+  {
+    const missing = [];
+    const images = [];
+    modulesOf(pack, 'listening').forEach((mod) => mod.blocks.forEach((b) => {
+      if (b.perQuestionAudio) {
+        (b.questions || []).forEach((q) => {
+          if (!q.image) missing.push(q.id);
+          else images.push(q.image);
+        });
+      } else {
+        const first = (b.questions || [])[0];
+        if (!b.image) missing.push(first ? first.id : `${mod.id}:${b.heading || 'block'}`);
+        else images.push(b.image);
+      }
+    }));
+    const absent = images.filter((ref) => !fs.existsSync(path.join(SG2, ref)));
+    check('리스닝 그림 27개 연결', missing.length === 0 && images.length === 27,
+      `연결 ${images.length}, 누락 ${missing.join(', ') || '없음'}`);
+    check('리스닝 그림 파일 존재', absent.length === 0, absent.join(', '));
+  }
+
   /* ---- 4. 리스닝 음성 파일 이름이 겹치지 않는가 ---- */
+  /* The source's duplicated listening headings must not reach the exam UI. */
+  {
+    const l1 = modulesOf(pack, 'listening').find((m) => m.id === 'L1');
+    const headings = (l1 ? l1.blocks : []).map((b) => b.heading);
+    check('listening headings follow actual ranges', headings.includes('Questions 19-20')
+      && headings.includes('Questions 25-28')
+      && headings.filter((h) => h === 'Questions 15-16').length === 1, headings.join(' / '));
+  }
+
+  /* SET 10 places the email card before its heading; it must still be imported. */
+  {
+    const w2 = modulesOf(pack, 'writing').find((m) => m.id === 'W2');
+    const email = w2 && questionsOfModule(w2)[0];
+    const expectedBullets = [
+      'Thank Lisa for her contributions to the group project.',
+      "Describe what aspects of her work were particularly helpful and how they contributed to the project's success.",
+      'Suggest the possibility of working together on future projects and ask for her opinion.'
+    ];
+    check('email task card complete', !!email && email.to === 'Lisa'
+      && email.subject === 'Thank You for Your Contributions'
+      && /group project/i.test(email.situation) && /Lisa/i.test(email.situation)
+      && email.bulletsLabel === 'YOUR EMAIL SHOULD'
+      && JSON.stringify(email.bullets) === JSON.stringify(expectedBullets)
+      && email.prompt === [email.situation].concat(email.bullets).join(' ')
+      && email.minWords === 80,
+      email ? `${email.to} / ${email.subject} / ${email.bullets.length} bullets` : 'missing question');
+  }
+
+  {
+    const w3 = modulesOf(pack, 'writing').find((m) => m.id === 'W3');
+    const discussion = w3 && questionsOfModule(w3)[0];
+    const names = discussion ? discussion.posts.map((p) => p.name) : [];
+    check('academic discussion card complete', !!discussion
+      && discussion.professor === 'Doctor Martinez – Education'
+      && JSON.stringify(names) === JSON.stringify(['Claire', 'Mark'])
+      && /valuable beyond the classroom\.$/.test(discussion.posts[0].text)
+      && /think clearly under pressure\.$/.test(discussion.posts[1].text)
+      && discussion.minWords === 100,
+      discussion ? `${names.join(', ')} / ${discussion.posts.map((p) => p.text.length).join(', ')} chars` : 'missing question');
+  }
+
   {
     const seen = new Set(), dup = [];
     modulesOf(pack, 'listening').forEach((mod) => {
@@ -166,6 +243,28 @@ const main = async () => {
   }
 
   /* ---- 6. 스피킹 ---- */
+  {
+    const builds = [];
+    modulesOf(pack, 'writing').forEach((mod) => {
+      mod.blocks.forEach((b) => (b.questions || []).forEach((q) => { if (q.kind === 'build') builds.push(q); }));
+    });
+    const noBlankAnswers = builds.filter((q) => {
+      const blanks = (q.slots || []).filter((s) => s.t === 'b');
+      return !blanks.length || blanks.some((s) => typeof s.a !== 'string' || !s.a)
+        || JSON.stringify(q.answerTokens) !== JSON.stringify(blanks.map((s) => s.a))
+        || q.sentence !== q.answerSentence;
+    }).map((q) => q.id);
+    check('Build answer schema complete', noBlankAnswers.length === 0, noBlankAnswers.join(', '));
+
+    const first = builds[0];
+    check('W1 Q11 exact answer tokens', !!first
+      && JSON.stringify(first.answerTokens) === JSON.stringify([
+        'showed', 'me', 'how', 'to', 'use', 'the', 'online', 'database'
+      ])
+      && first.sentence === 'Yes, the librarian showed me how to use the online database.',
+      first ? JSON.stringify(first.answerTokens) : 'missing question');
+  }
+
   {
     const mods = modulesOf(pack, 'speaking');
     const counts = mods.map((m) => questionsOfModule(m).length);

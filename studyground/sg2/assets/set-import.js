@@ -368,6 +368,28 @@
           prompt: q.text,
           choices: got.choices
         };
+        if (isInsert) {
+          var insertSentence = '', insertChoices = [], sawInsertLabel = false, iz = j + 1, insertNext = iz;
+          while (iz < bodyEnd) {
+            var ip = paras[iz], it = txt(ip);
+            if (numbered(it)) break;
+            var iLetter = lettered(it);
+            if (iLetter && iLetter.letter >= 0) insertChoices.push(iLetter.text);
+            else if (ip.listed && /^position\s+[A-D]$/i.test(it)) insertChoices.push(it);
+            var im = /^sentence to insert\s*:\s*(.*)$/i.exec(it);
+            if (im) {
+              sawInsertLabel = true;
+              if (im[1]) insertSentence = im[1].trim();
+            } else if (sawInsertLabel && !insertSentence && it && !lettered(it)
+                       && !(ip.listed && /^position\s+[A-D]$/i.test(it))) {
+              insertSentence = it;
+            }
+            iz++; insertNext = iz;
+          }
+          item.sentence = insertSentence;
+          if (insertChoices.length === 4) item.choices = insertChoices;
+          if (insertNext > got.next) got.next = insertNext;
+        }
         /* 삽입 문항의 보기는 원본에 없다 — 지문 안의 마커 A~D 가 곧 보기다.
            여기서만 텍스트를 만들고, 만들었다는 사실을 팩에 남긴다. */
         if (isInsert && !item.choices.length) {
@@ -388,6 +410,12 @@
 
       var nos = reconcileNumbers(items.map(function (x) { return x.bodyNo; }),
         head.range, expected, mismatch, moduleId);
+
+      /* 렌더러가 클릭할 수 있는 삽입 자리라고 {{A}}…{{D}} 마커만 버튼을 누른다.
+         삽입 문항이 있는 지문 블록에서만 원본의 (A)…(D)를 그 형식으로 바꾼다. */
+      if (items.some(function (x) { return x.kind === 'insert'; })) {
+        lines = lines.map(function (line) { return line.replace(/\(([A-D])\)/g, '{{$1}}'); });
+      }
 
       var blk = {
         kind: 'passage', heading: head.text, instruction: '',
@@ -597,6 +625,14 @@
         head.range, expected, mismatch, moduleId);
       if (nos.length) expected = nos[nos.length - 1] + 1;
 
+      /* 원본 머리글이 복사 실수로 틀려도 응시 화면에는 실제 문항 범위룰 보여 준다.
+         잘못된 원문은 mismatch 경고와 note 에 남는다. */
+      if (nos.length && (nos[0] !== head.range.from || nos[nos.length - 1] !== head.range.to)) {
+        blk.headingOrigin = 'corrected-from-source';
+        blk.headingNote = 'The source heading was "' + head.text + '"; the displayed range follows the questions in this block.';
+        blk.heading = 'Questions ' + nos[0] + '-' + nos[nos.length - 1];
+      }
+
       items.forEach(function (x, k) {
         blk.questions.push({
           id: moduleId + '-' + nos[k],
@@ -686,10 +722,14 @@
 
     var out = [];
     if (head) out.push({ t: 'f', text: head });
-    for (i = 0; i < words.length; i++) out.push({ t: 'b' });
+    for (i = 0; i < words.length; i++) out.push({ t: 'b', a: words[i] });
     if (tail) out.push({ t: 'f', text: tail });
 
     q.slots = out;
+    /* Build-a-Sentence review and autoscore use slots[].a as the canonical key.
+       Keep the companion fields in sync so every runtime sees the same answer. */
+    q.answerTokens = words.slice();
+    q.sentence = sentence;
     q.tiles = seededShuffle(words, q.id);
     q.tilesOrigin = 'derived-from-answer';
     q.tilesNote = 'The source docx had no word tiles — the words of the answer sentence were used, in scrambled order.';
@@ -698,6 +738,36 @@
 
   function parseWriting(paras, codeSlug, startNo) {
     var modules = [], i = 0, no = startNo;
+
+    /* 어떤 DOCX는 이메일 카드(SITUATION / YOUR EMAIL SHOULD)를
+       "Write an email" 머리글보다 앞에 둔다(SET 10). 주 루프가 그 앞 구간을 W1의 꼬리로
+       지나가므로, 먼저 문서 전체에서 카드 내용을 모아 둔다. */
+    var emailLead = { to: '', subject: '', situationLabel: '', situation: '', bullets: [] };
+    var emailAt = -1, leadMode = '';
+    for (var ep = 0; ep < paras.length; ep++) {
+      if (EMAIL_HEAD.test(txt(paras[ep]))) { emailAt = ep; break; }
+    }
+    if (emailAt >= 0) {
+      for (ep = 0; ep < emailAt; ep++) {
+        var eline = txt(paras[ep]);
+        if (/^to:/i.test(eline)) {
+          emailLead.to = eline.replace(/^to:\s*/i, '');
+          leadMode = '';
+        } else if (/^subject:/i.test(eline)) {
+          emailLead.subject = eline.replace(/^subject:\s*/i, '');
+          leadMode = '';
+        } else if (/^situation\b/i.test(eline)) {
+          emailLead.situationLabel = eline;
+          leadMode = 'sit';
+        } else if (/^your email should\b/i.test(eline)) {
+          leadMode = 'req';
+        } else if (eline && leadMode === 'sit') {
+          emailLead.situation += (emailLead.situation ? ' ' : '') + eline;
+        } else if (eline && leadMode === 'req') {
+          emailLead.bullets.push(eline.replace(/^\d+\s*[.)]\s*/, ''));
+        }
+      }
+    }
 
     while (i < paras.length) {
       var t = txt(paras[i]);
@@ -743,7 +813,10 @@
       }
 
       if (EMAIL_HEAD.test(t)) {
-        var em = { id: codeSlug + '-W2-email', kind: 'email', no: no++, to: '', subject: '', situationLabel: '', situation: '', requirements: [] };
+        var em = { id: codeSlug + '-W2-email', kind: 'email', no: no++,
+          to: emailLead.to, subject: emailLead.subject,
+          situationLabel: emailLead.situationLabel, situation: emailLead.situation,
+          bulletsLabel: 'YOUR EMAIL SHOULD', bullets: emailLead.bullets.slice(), minWords: 80 };
         i++;
         var mode = '';
         while (i < paras.length && !DISC_HEAD.test(txt(paras[i]))) {
@@ -751,19 +824,24 @@
           if (/^to:/i.test(l)) { if (!em.to) em.to = l.replace(/^to:\s*/i, ''); mode = ''; }
           else if (/^subject:/i.test(l)) { if (!em.subject) em.subject = l.replace(/^subject:\s*/i, ''); mode = ''; }
           else if (/^situation/i.test(l)) { em.situationLabel = l; mode = 'sit'; }
-          else if (/^your email should/i.test(l)) { mode = 'req'; }
+          else if (/^your email should/i.test(l)) { em.bulletsLabel = l; mode = 'req'; }
           else if (l) {
             if (mode === 'sit' && !em.situation) em.situation = l;
-            else if (mode === 'req' && em.requirements.indexOf(l) < 0) em.requirements.push(l);
+            else if (mode === 'req') {
+              l = l.replace(/^\d+\s*[.)]\s*/, '');
+              if (em.bullets.indexOf(l) < 0) em.bullets.push(l);
+            }
           }
           i++;
         }
+        em.prompt = [em.situation].concat(em.bullets).filter(function (x) { return x; }).join(' ');
         modules.push({ id: 'W2', label: 'Write an Email', blocks: [{ kind: 'free-write', heading: t, questions: [em] }] });
         continue;
       }
 
       if (DISC_HEAD.test(t)) {
-        var dc = { id: codeSlug + '-W3-disc', kind: 'discussion', no: no++, professor: '', prompt: '', posts: [] };
+        var dc = { id: codeSlug + '-W3-disc', kind: 'discussion', no: no++, professor: '', prompt: '',
+          posts: [], minWords: 100 };
         i++;
         var cur = null, seen = {};
         while (i < paras.length) {
@@ -771,15 +849,20 @@
           if (d) {
             if (!dc.professor && /[–—-]/.test(d) && d.length < 70) dc.professor = d;
             else if (!dc.prompt && d.length > 80) dc.prompt = d;
-            else if (d.length < 30 && !/[.?!]$/.test(d)) { cur = { author: d, text: '' }; }
-            else if (cur && !cur.text) {
-              cur.text = d;
-              if (!seen[cur.author + '|' + cur.text]) { seen[cur.author + '|' + cur.text] = 1; dc.posts.push(cur); }
-              cur = null;
+            else if (/^&\s*\S+/.test(d) || (d.length < 30 && !/[.?!]$/.test(d))) {
+              if (cur && cur.text && !seen[cur.name + '|' + cur.text]) {
+                seen[cur.name + '|' + cur.text] = 1; dc.posts.push(cur);
+              }
+              cur = { name: d.replace(/^&\s*/, '').trim(), text: '' };
+            } else if (cur) {
+              /* 장문이 여러 줄로 나눠도 다음 문단의 전이 아니다.
+                 다음 화자 이름이 나올 때까지 글을 누적한다. */
+              cur.text += (cur.text ? ' ' : '') + d;
             }
           }
           i++;
         }
+        if (cur && cur.text && !seen[cur.name + '|' + cur.text]) dc.posts.push(cur);
         modules.push({ id: 'W3', label: 'Write for an Academic Discussion', blocks: [{ kind: 'free-write', heading: t, questions: [dc] }] });
         continue;
       }
@@ -1003,6 +1086,21 @@
       var no = mod.no || (k + 1);
       var id = 'L' + no;
       listening.modules.push({ id: id, label: 'Listening Module ' + no, blocks: parseListeningModule(mod, id, outOfRange) });
+    });
+    /* Speaker illustrations can live outside the source DOCX. Accept a verified,
+       explicit voice-casting map so exam and review render the same image. */
+    var listeningImages = input.listeningImages || {};
+    listening.modules.forEach(function (mod) {
+      mod.blocks.forEach(function (blk) {
+        var first = blk.questions && blk.questions[0];
+        if (blk.perQuestionAudio) {
+          (blk.questions || []).forEach(function (q) {
+            if (listeningImages.questions && listeningImages.questions[q.id]) q.image = listeningImages.questions[q.id];
+          });
+        } else if (first && listeningImages.blocks && listeningImages.blocks[first.id]) {
+          blk.image = listeningImages.blocks[first.id];
+        }
+      });
     });
     if (outOfRange.length) {
       gate('warn', 'listening', 'The numbers printed on these questions disagree with their "Questions a-b" heading — the numbering that keeps the module in order was used: ' + outOfRange.join(', '));
@@ -1238,6 +1336,19 @@
     });
     if (thin.length) gate('warn', 'choices', thin.length + ' questions have fewer than 3 choices: ' + thin.slice(0, 8).join(', ') + (thin.length > 8 ? ' and more' : ''));
 
+    var emptyInsertSentences = [];
+    sections.forEach(function (sec) {
+      sec.modules.forEach(function (mod) {
+        mod.blocks.forEach(function (blk) {
+          (blk.questions || []).forEach(function (q) {
+            if (q.kind === 'insert' && !String(q.sentence || '').trim()) emptyInsertSentences.push(q.id);
+          });
+        });
+      });
+    });
+    if (emptyInsertSentences.length) gate('stop', 'reading-content',
+      'Sentence-insertion questions have no sentence to insert: ' + emptyInsertSentences.join(', '));
+
     /* ---- 리딩 본문 존재 검산 ----
        문항과 선택지만 있으면 시험 화면 오른쪽은 정상처럼 보여도 왼쪽 지문이 빈다.
        passage는 텍스트 또는 이미지, chat은 메시지가 반드시 있어야 한다. */
@@ -1264,21 +1375,24 @@
        파서마다 그림을 다른 모양으로 모은다(문서 내부 이름 'media/image7.png' 또는 파일명만).
        화면이 찾을 수 있는 경로는 하나뿐이므로 여기서 한 번에 맞춘다. */
     var picFiles = {};
+    function normalizedPic(ref) {
+      var s = String(ref || '');
+      var name = picName(s);
+      picFiles[name] = 1;
+      return /^media\/pictures\//.test(s) ? s : picsRel + name;
+    }
     sections.forEach(function (sec) {
       sec.modules.forEach(function (mod) {
         mod.blocks.forEach(function (blk) {
           if (blk.images) {
             blk.images = blk.images.map(function (ref) {
-              var name = picName(ref);
-              picFiles[name] = 1;
-              return picsRel + name;
+              return normalizedPic(ref);
             });
           }
+          if (blk.image) blk.image = normalizedPic(blk.image);
           (blk.questions || []).forEach(function (q) {
             if (!q.image) return;
-            var n = picName(q.image);
-            picFiles[n] = 1;
-            q.image = picsRel + n;
+            q.image = normalizedPic(q.image);
           });
         });
       });
