@@ -482,6 +482,28 @@ footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font
         <span data-ko>점선 칸은 인쇄 전에 직접 채우는 자리입니다 — 이 기기에만 남습니다.</span>
       </span>
     </div>
+
+    <!-- 학생 ID로 성적표 조회 -->
+    <div class="card mt-16 no-print" id="student-lookup">
+      <div class="eyebrow"><span data-en>Search by Student ID</span><span data-ko>학번으로 조회</span></div>
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;align-items:flex-end">
+        <label class="field" style="flex:1;min-width:200px;margin-top:0">
+          <span><span data-en>Student ID</span><span data-ko>학번</span></span>
+          <input id="lookup-student-id" type="text" placeholder="smeag000" style="width:100%">
+        </label>
+        <button class="btn brand sm" id="lookup-search" style="margin-bottom:0">
+          <span data-en>Search</span><span data-ko>조회</span>
+        </button>
+      </div>
+
+      <!-- 드래그드롭 날짜 리스트 -->
+      <div id="date-list" style="margin-top:16px;display:none">
+        <div class="eyebrow" style="margin-bottom:8px"><span data-en>Test Dates (drag to select)</span><span data-ko>시험 날짜 (드래그로 선택)</span></div>
+        <div id="dates-container" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px">
+        </div>
+      </div>
+    </div>
+
     <div class="sheet" id="sheet"></div>
   </section>
 
@@ -2046,6 +2068,55 @@ var BAND = (function () {
       });
   }
 
+  /* ── 학생 ID로 성적표 조회 ── */
+  function searchStudentById() {
+    var studentId = String($('lookup-student-id').value || '').trim().toUpperCase();
+    if (!studentId) {
+      alert(bi('Please enter a student ID.', '학번을 입력하세요.'));
+      return;
+    }
+
+    /* 해당 학번의 모든 응시 기록 찾기 */
+    var results = ALL.filter(function (r) {
+      var profile = ALL.find(function (x) { return x.owner; }) || {};
+      return String((r.student_id || '')).toUpperCase().includes(studentId);
+    });
+
+    if (!results.length) {
+      $('date-list').style.display = 'none';
+      alert(bi('No results found for: ' + studentId, '해당 학번의 응시 기록이 없습니다: ' + studentId));
+      return;
+    }
+
+    /* 날짜 목록 표시 */
+    var dates = results.map(function (r) {
+      return { session: r.session, date: when(r.submitted_at), submitted_at: r.submitted_at };
+    }).sort(function (a, b) { return new Date(b.submitted_at) - new Date(a.submitted_at); });
+
+    var container = $('dates-container');
+    container.innerHTML = dates.map(function (d, i) {
+      return '<div class="date-btn" draggable="true" data-session="' + esc(d.session) + '" ' +
+        'style="padding:12px;border:1px solid var(--line);border-radius:8px;text-align:center;' +
+        'cursor:pointer;background:#fff;transition:all 0.2s" ' +
+        'onmouseover="this.style.background=\'var(--surface-2)\';this.style.borderColor=\'var(--brand)\';" ' +
+        'onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'var(--line)\';" ' +
+        'ondragstart="event.dataTransfer.setData(\'session\', this.dataset.session)">' +
+        '<div style="font-weight:900;color:var(--brand)">' + esc(d.date) + '</div>' +
+        '</div>';
+    }).join('');
+
+    $('date-list').style.display = 'block';
+
+    /* 날짜 클릭 시 성적표 표시 */
+    [].forEach.call(container.querySelectorAll('.date-btn'), function (btn) {
+      btn.onclick = function () {
+        var session = btn.getAttribute('data-session');
+        var row = rowOf(session);
+        if (row) paintCard(row);
+      };
+    });
+  }
+
   /* ── 부팅 ── */
   function showApp() {
     $('gate').classList.add('hide');
@@ -2114,6 +2185,12 @@ var BAND = (function () {
     };
     $('out').onclick = function () {
       AUTH.signOut(); OPEN = null; ALL = []; SETS = []; location.hash = '#/'; showGate();
+    };
+
+    /* 학생 ID 조회 버튼 */
+    $('lookup-search').onclick = searchStudentById;
+    $('lookup-student-id').onkeypress = function (e) {
+      if (e.key === 'Enter') searchStudentById();
     };
     $('f-set').onchange = paintList;
     $('refresh').onclick = function () {
