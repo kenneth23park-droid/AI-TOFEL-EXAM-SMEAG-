@@ -25,20 +25,24 @@ vercel-live-feedback,
 #vercel-toolbar,
 iframe[src*="vercel.live"]{ display:none !important; }
 :root{
-  --ink:#0e1a1c; --ink-2:#33474a; --muted:#6b8083; --dim:#96a9ab;
-  --surface:#f1f7f6; --surface-2:#e3eeed; --track:#dcebe9; --card:#fff;
-  --line:#d5e4e2; --line-2:#c2d6d4;
-  --brand:#0e8f82; --brand-ink:#0a6b62; --brand-soft:#e6f5f3;
+  --ink:#132326; --ink-2:#31464a; --muted:#687d82; --dim:#92a4a8;
+  --surface:#eef5f4; --surface-2:#e1ecea; --track:#d7e8e5; --card:#fff;
+  --line:#d3e0de; --line-2:#b9cfcc;
+  --brand:#0b8f81; --brand-ink:#07675f; --brand-soft:#e3f4f1;
+  --accent:#f2b84b; --accent-soft:#fff4da;
   --ok:#1f9d55; --ok-soft:#e7f6ec; --bad:#c62828; --bad-soft:#fdeceb;
-  --radius:18px; --shadow:0 1px 2px rgba(10, 40, 42,.04),0 10px 30px rgba(10, 40, 42,.05);
+  --radius:14px; --shadow:0 1px 2px rgba(10, 40, 42,.05),0 14px 38px rgba(10, 40, 42,.08);
   --maxw:1180px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",
     "Pretendard","Malgun Gothic",Roboto,Arial,sans-serif;
-  background:var(--surface); color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased;
-  letter-spacing:-.011em;
+  background:
+    radial-gradient(circle at 18% -12%, rgba(11,143,129,.12), transparent 34%),
+    linear-gradient(180deg,#f7fbfa 0,#eef5f4 340px,#eef5f4 100%);
+  color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased;
+  letter-spacing:0;
 }
 a{color:inherit;text-decoration:none}
 button,input,select{font-family:inherit;font-size:inherit}
@@ -52,11 +56,11 @@ svg{flex:none}
 [data-ko]{display:none!important}
 
 /* ── 머리글 ─────────────────────────────────────────────── */
-header.nav{position:sticky;top:0;z-index:50;background:rgba(241,247,246,.9);
-  backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
-.nav-in{max-width:var(--maxw);margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header.nav{position:sticky;top:0;z-index:50;background:rgba(247,251,250,.88);
+  backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid rgba(211,224,222,.82)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800}
-.brand-logo{width:34px;height:34px;border-radius:10px;background:var(--brand);color:#fff;
+.brand-logo{width:36px;height:36px;border-radius:10px;background:#132326;color:#fff;
   display:grid;place-items:center;font-weight:900;flex:none}
 .brand small{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
   color:var(--muted);font-weight:700}
@@ -66,8 +70,9 @@ header.nav{position:sticky;top:0;z-index:50;background:rgba(241,247,246,.9);
 
 /* ── 알갱이들 ───────────────────────────────────────────── */
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);
-  background:#fff;border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:700;color:var(--ink)}
-.btn:hover{border-color:var(--ink)}
+  background:#fff;border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:750;color:var(--ink);
+  box-shadow:0 1px 0 rgba(10,40,42,.03)}
+.btn:hover{border-color:var(--brand);color:var(--brand-ink)}
 .btn.brand{background:var(--brand);border-color:var(--brand);color:#fff}
 .btn.brand:hover{background:var(--brand-ink);border-color:var(--brand-ink)}
 .btn.sm{padding:6px 12px;font-size:12.5px}
@@ -75,13 +80,16 @@ header.nav{position:sticky;top:0;z-index:50;background:rgba(241,247,246,.9);
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
   padding:22px;box-shadow:var(--shadow)}
 .mt-8{margin-top:8px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}
-h1{font-size:clamp(24px,3.4vw,34px);letter-spacing:-.03em;line-height:1.1}
+h1{font-size:clamp(26px,3.4vw,38px);letter-spacing:0;line-height:1.06}
 h2{font-size:18px;letter-spacing:-.02em}
-.page-h{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-top:26px}
+.page-h{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-top:32px}
 .page-h .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .chip{display:inline-block;background:var(--surface-2);border-radius:999px;
   padding:3px 10px;font-size:12px;font-weight:700;color:var(--ink-2)}
-.eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:850}
+#dash .page-h h1:after,#gate .page-h h1:after{
+  content:"";display:block;width:54px;height:4px;background:var(--accent);border-radius:99px;margin-top:13px
+}
 
 /* ── 점수 눈금(막대) ────────────────────────────────────── */
 .score-row{display:grid;grid-template-columns:repeat(4,1fr) auto minmax(200px,1.15fr);
@@ -92,16 +100,16 @@ h2{font-size:18px;letter-spacing:-.02em}
 .meter-h{display:flex;align-items:center;justify-content:center;gap:7px;
   font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
 .meter-h svg{opacity:.6}
-.meter{position:relative;height:9px;border-radius:999px;background:var(--track);margin:14px 9px 0}
+.meter{position:relative;height:10px;border-radius:999px;background:var(--track);margin:14px 9px 0;overflow:visible}
 .meter i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;
-  background:linear-gradient(90deg,#b79bf6,var(--brand))}
+  background:linear-gradient(90deg,var(--accent),var(--brand))}
 .meter b{position:absolute;top:50%;width:19px;height:19px;margin:-9.5px 0 0 -9.5px;border-radius:50%;
-  background:#fff;border:3px solid var(--brand);box-shadow:0 1px 5px rgba(10, 40, 42,.22)}
+  background:#fff;border:3px solid var(--brand);box-shadow:0 1px 6px rgba(10, 40, 42,.24)}
 .meter.flat i{background:var(--brand)}
-.val{margin-top:12px;text-align:center;font-size:26px;font-weight:900;letter-spacing:-.03em;line-height:1}
+.val{margin-top:12px;text-align:center;font-size:27px;font-weight:900;letter-spacing:0;line-height:1}
 .val small{font-size:14px;font-weight:700;color:var(--muted);letter-spacing:0}
 .val .cefr{font-size:13px;font-weight:800;color:var(--muted);margin-left:4px}
-.sub{margin-top:7px;text-align:center;font-size:12.5px;color:var(--dim);font-weight:600}
+.sub{margin-top:8px;text-align:center;font-size:12.5px;color:var(--dim);font-weight:650}
 .sub .conv{letter-spacing:.1em;text-transform:uppercase;font-size:10.5px;margin-left:5px}
 .total-cell .val{font-size:32px}
 
@@ -109,19 +117,22 @@ h2{font-size:18px;letter-spacing:-.02em}
 .bigtabs{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px}
 .bigtab{display:flex;align-items:center;justify-content:center;gap:12px;
   background:#fff;border:1px solid var(--line);border-radius:var(--radius);
-  padding:20px;font-size:18px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+  padding:18px;font-size:17px;font-weight:850;letter-spacing:0;color:var(--ink);
+  box-shadow:0 8px 28px rgba(10,40,42,.04)}
 .bigtab .ic{width:38px;height:38px;border-radius:11px;background:var(--surface-2);color:var(--muted);
   display:grid;place-items:center}
 .bigtab:hover{border-color:var(--line-2)}
-.bigtab.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-ink)}
+.bigtab.on{border-color:var(--brand);background:linear-gradient(180deg,#fff,var(--brand-soft));color:var(--brand-ink)}
 .bigtab.on .ic{background:var(--brand);color:#fff}
 
 /* ── 표 ────────────────────────────────────────────────── */
 .list-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:26px 0 12px}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th{text-align:center;font-size:11px;letter-spacing:.11em;text-transform:uppercase;
-  color:var(--muted);padding:16px 12px;border-bottom:1px solid var(--line);white-space:nowrap;font-weight:800}
-td{padding:16px 12px;border-bottom:1px solid var(--line);vertical-align:middle;text-align:center}
+th{text-align:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);padding:15px 12px;border-bottom:1px solid var(--line);white-space:nowrap;font-weight:850;
+  background:#f8fbfa}
+td{padding:15px 12px;border-bottom:1px solid var(--line);vertical-align:middle;text-align:center;background:#fff}
+tbody tr:hover td{background:#fbfdfd}
 tr:last-child td{border-bottom:0}
 th.left,td.left{text-align:left}
 th.right,td.right{text-align:right}
@@ -132,7 +143,7 @@ th.right,td.right{text-align:right}
 .band{font-size:19px;font-weight:900;letter-spacing:-.02em;white-space:nowrap}
 .band small{font-size:12.5px;font-weight:700;color:var(--dim)}
 .band.tot{color:var(--brand);font-size:23px}
-.status{display:inline-block;background:var(--surface-2);border-radius:8px;padding:4px 10px;
+.status{display:inline-block;background:var(--surface-2);border-radius:8px;padding:5px 10px;
   font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);white-space:nowrap}
 .status.wait{background:#fff6e6;color:#8a6100}
 .ok{color:var(--ok);font-weight:800}
@@ -140,7 +151,7 @@ th.right,td.right{text-align:right}
 tr.row-bad{background:var(--bad-soft)}
 
 /* ── 리뷰 화면 ─────────────────────────────────────────── */
-.rev-bar{position:sticky;top:0;z-index:50;background:rgba(241,247,246,.92);
+.rev-bar{position:sticky;top:0;z-index:50;background:rgba(247,251,250,.92);
   backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
 /* 리뷰 머리글은 본문보다 넓게 쓴다 — 탭 다섯 개와 계정이 한 줄에 서야 한다. */
 .rev-in{max-width:1420px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -150,7 +161,7 @@ tr.row-bad{background:var(--bad-soft)}
 .rev-when{font-size:13px;color:var(--muted);font-weight:600}
 .rev-tabs{display:flex;align-items:center;gap:4px;margin-left:14px;flex-wrap:wrap}
 .rev-tab{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;
-  border-radius:11px;padding:9px 14px;font-size:14px;font-weight:700;color:var(--ink-2)}
+  border-radius:10px;padding:9px 14px;font-size:14px;font-weight:750;color:var(--ink-2)}
 .rev-tab:hover{background:var(--surface-2)}
 .rev-tab.on{background:var(--brand);color:#fff}
 .rev-tab[disabled]{opacity:.38;cursor:default;background:transparent}
@@ -160,6 +171,7 @@ tr.row-bad{background:var(--bad-soft)}
 .sec-card{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   background:#fff;border:1px solid var(--line);border-radius:var(--radius);
   padding:18px 22px;box-shadow:var(--shadow);margin-top:16px}
+.sec-card:hover{border-color:var(--line-2)}
 .sec-card .disc{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;
   color:var(--muted);font-size:13.5px;font-weight:700;padding:2px 0}
 .sec-card .disc svg{transition:transform .15s}
@@ -216,56 +228,61 @@ tr.row-bad{background:var(--bad-soft)}
 .card-bar .note{font-size:12.5px;color:var(--muted);font-weight:600;margin-left:auto}
 .sheet{width:210mm;max-width:100%;margin:16px auto 50px;background:#fff;color:#111;
   border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);
-  padding:13mm 11mm 15mm;line-height:1.32;letter-spacing:0;
+  padding:10mm 9mm 12mm;line-height:1.28;letter-spacing:0;
   font-family:Arial,"Helvetica Neue",Helvetica,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
-.sh-top{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
-.sh-mark{display:flex;align-items:baseline;font-weight:900;font-size:42px;letter-spacing:-.045em;color:#111}
-.sh-mark .st{font-size:30px;margin-right:1px}
-.sh-mark .mt{color:#e8102b;font-size:24px;font-weight:800;margin-left:1px;letter-spacing:-.02em}
-.sh-date{font-size:18px;font-weight:700;padding-bottom:5px}
-.sh-who{display:flex;gap:30px;flex-wrap:wrap;margin-top:16px;font-size:15px;font-weight:700;color:#e8102b}
-.sh-who .v{display:inline-block;min-width:96px;padding:0 5px;color:#111;
-  border-bottom:1px dotted #b9b9b9}
+.sheet.mock-report{padding:7mm 8mm 10mm;background:#fff}
+.mr-topline{height:30px;background:#a884f5;margin:-4mm -5mm 8px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 10px;color:#111;font-weight:900}
+.mr-brand{display:flex;align-items:center;gap:10px;font-size:18px}
+.mr-brand .seal{width:28px;height:18px;border-radius:50%;border:1px solid #777;background:#fff;
+  display:grid;place-items:center;font-size:8px;color:#e5442f}
+.mr-brand small{font-size:12px;color:#333;margin-left:-8px}
+.mr-report-title{font-size:12px}
+.mr-head{display:grid;grid-template-columns:1fr 260px;gap:28px;align-items:start}
+.mr-name{font-size:26px;font-weight:900;letter-spacing:.02em}
+.mr-sub{font-size:18px;margin-top:10px}
+.mr-id{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:center;margin-top:26px}
+.mr-qr{width:82px;height:82px;background:
+  linear-gradient(90deg,#111 50%,transparent 0) 0 0/10px 10px,
+  linear-gradient(#111 50%,transparent 0) 0 0/10px 10px,#fff;border:7px solid #fff;box-shadow:0 0 0 1px #ddd}
+.mr-address{font-size:13px;line-height:1.3}
+.mr-photo{height:190px;border:1.5px solid #111;background:#fafafa}
+.mr-meta{display:grid;grid-template-columns:1.2fr 1fr;gap:12px 36px;margin-top:18px;font-size:18px}
+.mr-meta b{font-weight:900}
+.mr-scorebox{border:1.5px solid #111;margin-top:10px;padding:12px 22px 18px}
+.mr-scorebox.best{margin-top:28px}
+.mr-scorebox h3{text-align:center;font-size:18px;margin:0 0 8px}
+.mr-scorebox.best h3{text-align:left;font-size:17px}
+.mr-scorebox.best h3 span{font-weight:400}
+.mr-rule{border-top:2px solid #111;margin:6px 6px 18px}
+.mr-scores{display:grid;grid-template-columns:210px repeat(4,1fr);gap:12px;align-items:center}
+.mr-overall-title,.mr-sec-title{text-align:center;font-weight:900;font-size:14px;margin-bottom:8px}
+.mr-overall{display:flex;align-items:center;gap:8px}
+.mr-overall svg{width:132px;height:86px}
+.mr-overall-num{font-size:28px;font-weight:900;line-height:1.25;text-align:center}
+.mr-overall-num small{display:block;font-size:22px;font-weight:400}
+.mr-overall-num .cefr{font-size:17px;margin-top:4px}
+.mr-pill{height:42px;display:grid;place-items:center;font-size:22px;font-weight:900;background:#bca8e9}
+.mr-scorebox.best .mr-pill{background:#ffdb58}
+.mr-date{display:inline-block;margin-top:8px;background:#e9e9e9;border-radius:999px;padding:3px 12px;font-size:13px}
+.mr-security{display:grid;grid-template-columns:235px 1fr;gap:16px;margin-top:20px;font-size:14px;line-height:1.35}
+.mr-security h3{font-size:14px;margin-bottom:4px}
+.mr-site{text-align:center;font-weight:900;margin-top:6px;font-size:14px}
+.sh-who .v,.sh-v{display:inline-block;min-width:86px;padding:0 4px;color:#111;border-bottom:1px dotted #aaa}
 [contenteditable]:empty:before{content:attr(data-ph);color:#c6c6c6;font-weight:400}
 [contenteditable]:focus{outline:2px solid #b6ddd8;border-radius:3px}
 
-table.rc{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px;color:#111}
-table.rc th,table.rc td{border:1px solid #111;padding:9px 6px;text-align:center;vertical-align:middle}
-/* 앱의 th 는 작은 대문자로 늘어놓는 눈금 글씨다. 성적표의 머리글은 그냥 낱말이라
-   그 규칙을 여기서 되돌린다 — 'Scaled score' 는 라벨이 아니라 열 이름이다. */
-table.rc th{font-weight:700;font-size:12.5px;line-height:1.25;
-  text-transform:none;letter-spacing:0;color:#111}
-/* 칸 색은 종이 성적표의 눈금이다 — 어느 칸이 환산점수이고 어느 칸이 원점수인지
-   글자를 읽기 전에 색으로 갈린다. 인쇄에서도 같아야 해서 print-color-adjust 를 쓴다. */
-.rc .c-scaled{background:#d9e5d2}
-.rc .c-correct{background:#daeaf3}
-.rc .c-avg{background:#f4e3e3}
-.rc .c-cefr{background:#ff0}
-.rc td.c-cefr{font-size:30px;font-weight:900;letter-spacing:-.02em}
-.rc .sec{font-weight:800;font-size:15px}
-.rc td.c-scaled,.rc td.c-avg{font-weight:700;font-size:14px}
-.rc .tot td{font-weight:900;font-size:15px}
-.rc .part{font-size:13px}
-.rc .dim{color:#8e8e8e}
-.sh-foot{margin-top:8px;font-size:11px;color:#7a7a7a;line-height:1.5}
-
-.sh-gauge{margin-top:26px;border:2px solid #e2761b;border-radius:14px;padding:18px 20px 20px}
-.sh-gauge svg{display:block;margin:0 auto}
-.sh-sum{margin-top:14px;border:1px solid #cfcfcf;border-radius:6px;min-height:96px;
-  padding:13px 15px;font-size:13.5px;line-height:1.6}
-.sh-sum b{font-size:15px}
+.sh-foot{margin-top:12px;font-size:10px;color:#333;line-height:1.45}
 .sh-cmt-h{margin-top:20px;font-size:15px;font-weight:900}
-.sh-cmt{margin-top:7px;border:1px solid #cfcfcf;border-radius:6px;min-height:118px;
+.sh-cmt{margin-top:7px;border:1px solid #cfcfcf;border-radius:6px;min-height:92px;
   padding:13px 15px;font-size:13.5px;line-height:1.7;white-space:pre-wrap}
 .sh-cmt .cmt{display:block;min-height:88px}
 .sh-cmt .by{display:block;margin-top:10px;font-size:11.5px;color:#8e8e8e}
 
 @media (max-width:640px){
   .sheet{padding:16px 14px}
-  .sh-mark{font-size:32px}.sh-mark .mt{font-size:18px}.sh-date{font-size:15px}
-  table.rc{font-size:11.5px}
-  table.rc th,table.rc td{padding:7px 3px}
-  .rc td.c-cefr{font-size:22px}
+  .mr-head,.mr-meta,.mr-security{grid-template-columns:1fr}.mr-photo{display:none}
+  .mr-scores{grid-template-columns:1fr 1fr}.mr-overall-wrap{grid-column:1/-1}
 }
 
 footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font-size:12.5px;color:var(--muted)}
@@ -343,19 +360,14 @@ footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font
   <section id="gate" class="hide">
     <div class="page-h"><h1><span data-en>My TOEFL scores</span><span data-ko>내 TOEFL 성적</span></h1></div>
     <p class="muted mt-8" style="font-size:14px">
-      <span data-en>Sign in with the student ID, the date you sat the test, and your password.</span>
-      <span data-ko>학번과 응시일, 비밀번호로 로그인하세요.</span>
+      <span data-en>Sign in with the student ID or email and your password.</span>
+      <span data-ko>학번 또는 이메일과 비밀번호로 로그인하세요.</span>
     </p>
     <div class="card mt-16" style="max-width:420px">
       <form id="login">
         <div class="err hide" id="login-err"></div>
         <label class="field"><span data-en>Student ID or email</span><span data-ko>학번 또는 이메일</span>
           <input id="login-id" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
-        <!-- 같은 smeag### 는 시험일마다 다른 사람에게 다시 나간다. 아이디만으로는
-             어느 응시인지 정해지지 않으므로 응시일을 함께 받는다 — 이 둘이 성적표를
-             여는 열쇠다. 선생님·관리자 계정(이메일 로그인)은 시험일이 없어 비워 둔다. -->
-        <label class="field"><span data-en>Exam date</span><span data-ko>응시일</span>
-          <input id="login-date" type="date" autocomplete="off"></label>
         <label class="field"><span data-en>Password</span><span data-ko>비밀번호</span>
           <input id="login-pw" type="password" autocomplete="current-password" required></label>
         <button class="btn brand mt-16" style="width:100%;justify-content:center" id="login-go" type="submit">
@@ -509,6 +521,7 @@ var AUTH = (function () {
     var s = payload.session || payload;
     write({
       user: payload.user || (s.user ? { id: s.user.id, email: s.user.email } : null),
+      account_email: s.user && s.user.email,
       access_token: s.access_token,
       refresh_token: s.refresh_token,
       expires_at: s.expires_at || (Math.floor(Date.now() / 1000) + (s.expires_in || 3600))
@@ -524,9 +537,8 @@ var AUTH = (function () {
     return v + '@' + STAFF_DOMAIN;
   }
 
-  /* examDate 를 실어 보내면 서버는 (아이디, 시험일) 그 계정 하나만 연다. 비워 두면
-     서버가 오늘 → 가까운 과거 → 가까운 미래 순으로 짐작하는데, 그 짐작은 같은 번호를
-     쓴 다른 사람의 성적으로 이어질 수 있다. 성적 조회에서는 짐작하지 않는다. */
+  /* examDate 는 예전 학생번호 재사용 방지용이었다. 현재 로그인 화면은 날짜를 받지
+     않으므로 서버의 기본 계정 해석에 맡긴다. */
   function signIn(login, password, examDate) {
     return fetch(CFG.url + '/functions/v1/sg-auth', {
       method: 'POST',
@@ -830,7 +842,7 @@ var BAND = (function () {
   var LAB = { reading: ['Reading', '리딩'], listening: ['Listening', '리스닝'],
               writing: ['Writing', '라이팅'], speaking: ['Speaking', '스피킹'], other: ['Other', '기타'] };
   var SHORT = { reading: 'R', listening: 'L', writing: 'W', speaking: 'S' };
-  var ALL = [], SETS = [], ME = null, OPEN = null, KIND = 'full', TAB = 'summary';
+  var ALL = [], SETS = [], MATCHED_ACCOUNTS = [], ME = null, OPEN = null, KIND = 'full', TAB = 'summary';
 
   /* 영역 아이콘 — 화면 어디서나 같은 그림이어야 한 영역으로 읽힌다. */
   var ICON = {
@@ -1519,17 +1531,13 @@ var BAND = (function () {
   /* 반원 눈금 — 밴드 1.0 이 왼쪽 끝, 6.0 이 오른쪽 끝이다. 숫자를 못 읽는 사람에게도
      "어디쯤" 이 먼저 가 닿아야 해서 표보다 크게 그린다. */
   function gaugeSvg(band) {
-    var R = 92, cx = 130, cy = 112, w = 30, len = Math.PI * R;
+    var R = 50, cx = 62, cy = 64, w = 18, len = Math.PI * R;
     var frac = (band === null || band === undefined) ? 0 : Math.max(0, Math.min(1, (band - 1) / 5));
     var arc = 'M' + (cx - R) + ' ' + cy + ' A ' + R + ' ' + R + ' 0 0 1 ' + (cx + R) + ' ' + cy;
-    return '<svg width="260" height="132" viewBox="0 0 260 132" role="img" aria-label="Overall band">' +
-      '<path d="' + arc + '" fill="none" stroke="#ececec" stroke-width="' + w + '"/>' +
-      (frac > 0 ? '<path d="' + arc + '" fill="none" stroke="#4a7f96" stroke-width="' + w + '" ' +
+    return '<svg viewBox="0 0 124 78" role="img" aria-label="Overall band">' +
+      '<path d="' + arc + '" fill="none" stroke="#eee" stroke-width="' + w + '"/>' +
+      (frac > 0 ? '<path d="' + arc + '" fill="none" stroke="#050505" stroke-width="' + w + '" ' +
         'stroke-dasharray="' + (len * frac).toFixed(2) + ' ' + len.toFixed(2) + '"/>' : '') +
-      '<text x="' + cx + '" y="102" text-anchor="middle" font-size="34" font-weight="900" fill="#111">' +
-        (band === null || band === undefined ? '—' : BAND.fmt(band)) + '</text>' +
-      '<text x="' + (cx - R) + '" y="128" text-anchor="middle" font-size="11" fill="#9a9a9a">1.0</text>' +
-      '<text x="' + (cx + R) + '" y="128" text-anchor="middle" font-size="11" fill="#9a9a9a">6.0</text>' +
       '</svg>';
   }
 
@@ -1551,80 +1559,64 @@ var BAND = (function () {
   }
 
   function paintCard(r) {
-    var v = viewOf(r), rows = cardRows(r);
+    var v = viewOf(r);
     var name = (ME && (ME.name || ME.student_id)) || '';
-    var say = CEFR_SAY[v.cefr] || null;
+    var submitted = when(r.submitted_at);
+    var overall120 = v.conventional === null ? '—' : v.conventional;
+    $('sheet').className = 'sheet mock-report';
+    function band(s) {
+      var sec = v.sections[s] || {};
+      return sec.band === null || sec.band === undefined ? '—' : BAND.fmt(sec.band);
+    }
+    function scorePill(s, dated) {
+      return '<div><div class="mr-sec-title">' + LAB[s][0] + '</div>' +
+        '<div class="mr-pill">' + band(s) + ' of 6</div>' +
+        (dated ? '<div style="text-align:center"><span class="mr-date">' + esc(submitted) + '</span></div>' : '') +
+        '</div>';
+    }
+    function overall(dated) {
+      return '<div class="mr-overall-wrap"><div class="mr-overall-title">Overall Score</div>' +
+        '<div class="mr-overall">' + gaugeSvg(v.overall) +
+        '<div class="mr-overall-num">' + (v.overall === null ? '—' : BAND.fmt(v.overall).replace('.0', '')) + ' of 6' +
+        '<small>' + overall120 + ' of 120</small><small class="cefr">CEFR: ' + esc(v.cefr || '—') + '</small>' +
+        (dated ? '<span class="mr-date">' + esc(submitted) + '</span>' : '') +
+        '</div></div></div>';
+    }
 
-    /* CEFR 칸 하나가 표 전체를 세로로 가른다 — 등급은 한 영역의 성질이 아니라
-       이 응시 전체의 성질이기 때문이다. 그래서 rowspan 은 파트 수 + 총점 줄이다. */
-    var span = rows.reduce(function (n, x) { return n + x.parts.length; }, 0) + 1;
-    var first = true, body = '';
-
-    rows.forEach(function (sec) {
-      sec.parts.forEach(function (p, i) {
-        body += '<tr>' +
-          (i === 0 ? '<td class="sec" rowspan="' + sec.parts.length + '">' + sec.short + '</td>' : '') +
-          '<td class="part">' + esc(p.label) + '</td>' +
-          '<td class="c-scaled">' + (p.band === null || p.band === undefined
-            ? '<span class="dim">—</span>' : BAND.fmt(p.band)) + '</td>' +
-          '<td class="c-correct">' + (p.correct === undefined ? '<span class="dim">–</span>' : p.correct) + '</td>' +
-          '<td>' + (p.items ? p.items : '<span class="dim">–</span>') + '</td>' +
-          (i === 0 ? '<td class="c-avg" rowspan="' + sec.parts.length + '">' +
-            (sec.band === null ? '<span class="dim">—</span>' : BAND.fmt(sec.band)) + '</td>' : '') +
-          (first ? '<td class="c-cefr" rowspan="' + span + '">' + (v.cefr || '—') + '</td>' : '') +
-          '</tr>';
-        first = false;
-      });
-    });
-
-    var head = '<div class="sh-top">' +
-        '<span class="sh-mark"><span class="st">✻</span>toefl<span class="mt">Mock Test</span></span>' +
-        '<span class="sh-date">' + when(r.submitted_at) + '</span>' +
+    var head = '<div class="mr-topline"><div class="mr-brand"><span class="seal">SMEAG</span><span>TOEFL ibt</span><small>GLOBAL EDUCATION</small></div>' +
+      '<div class="mr-report-title">Mock Test Taker Score Report</div></div>' +
+      '<div class="mr-head"><div>' +
+        '<div class="mr-name">' + (name ? esc(name) : editable(r.session, 'name', 'HUANG, KEQIN', 'sh-v')) + '</div>' +
+        '<div class="mr-sub">Last (Family/Surname) Name, First (Given) Name Middle Name</div>' +
+        '<div class="mr-id"><div class="mr-qr"></div><div class="mr-address">' +
+          editable(r.session, 'address1', 'Emilio Osmeña St. Guadalupe, Cebu City', 'sh-v') + '<br>' +
+          editable(r.session, 'address2', 'SMEAG Global Education Inc.', 'sh-v') + '<br>CEBU, Philippines' +
+        '</div></div></div><div class="mr-photo"></div></div>' +
+      '<div class="mr-meta">' +
+        '<div><b>Mock Test Date:</b> ' + esc(submitted) + '</div>' +
+        '<div><b>Gender:</b> ' + editable(r.session, 'gender', 'Female', 'sh-v') + '</div>' +
+        '<div><b>Appointment #:</b> ' + editable(r.session, 'appointment', '6835 5032 6290 2862', 'sh-v') + '</div>' +
+        '<div><b>Date of Birth:</b> ' + editable(r.session, 'dob', 'August 18, 1997', 'sh-v') + '</div>' +
+        '<div><b>Native Language:</b> ' + editable(r.session, 'native', 'Chinese', 'sh-v') + '</div>' +
+        '<div><b>Country of Birth:</b> ' + editable(r.session, 'birthCountry', 'China', 'sh-v') + '</div>' +
+        '<div><b>Test Center Country:</b> Philippines</div>' +
+        '<div><b>Test Center:</b> SMEAG GLOBAL EDUCATION INC.</div>' +
       '</div>' +
-      '<div class="sh-who">' +
-        '<span>Name : ' + (name ? '<span class="v">' + esc(name) + '</span>'
-                                : editable(r.session, 'name', 'name')) + '</span>' +
-        '<span>E-name: ' + editable(r.session, 'ename', 'english name') + '</span>' +
-        '<span>S.A Teacher: ' + editable(r.session, 'teacher', 'teacher') + '</span>' +
-      '</div>';
+      '<div class="mr-scorebox"><h3>Test Date: ' + esc(submitted) + '</h3><div class="mr-rule"></div>' +
+        '<div class="mr-scores">' + overall(false) + scorePill('reading', false) + scorePill('listening', false) +
+        scorePill('writing', false) + scorePill('speaking', false) + '</div></div>' +
+      '<div class="mr-scorebox best"><h3><b>MyBest Scores</b> | <span>Your highest section scores from all valid test dates, as of ' +
+        esc(submitted) + '</span></h3><div class="mr-rule"></div>' +
+        '<div class="mr-scores">' + overall(false) + scorePill('reading', true) + scorePill('listening', true) +
+        scorePill('writing', true) + scorePill('speaking', true) + '</div></div>' +
+      '<div class="mr-security"><div><h3>SECURITY IDENTIFICATION</h3>' +
+        '<b>ID Type:</b> PASSPORT<br><b>ID No.:</b> ' + editable(r.session, 'idNo', 'xxxxxxxxxxxxxxxx3389', 'sh-v') + '</div>' +
+        '<div>A total score is not reported when one or more sections have not been administered. ' +
+        'Section scores from tests taken before January 21, 2026, will be reported using the concordant 1-6 scale. ' +
+        'For more information, please visit www.smeag.com</div></div>' +
+      '<div class="mr-site">www.smeag.com</div>';
 
-    var table = '<table class="rc"><thead><tr>' +
-        '<th>Section</th><th>Part</th>' +
-        '<th class="c-scaled">Scaled score</th>' +
-        '<th class="c-correct">Correct<br>Answer</th>' +
-        '<th>Total<br>Items</th>' +
-        '<th class="c-avg">Average</th>' +
-        '<th class="c-cefr">CEFR</th>' +
-      '</tr></thead><tbody>' + body +
-      '<tr class="tot"><td>Total</td><td></td><td></td><td></td><td></td>' +
-        '<td class="c-avg">' + (v.overall === null ? '—' : BAND.fmt(v.overall)) + '</td></tr>' +
-      '</tbody></table>';
-
-    /* 눈금이 둘이라는 사실을 성적표가 스스로 밝힌다. 파트 점수를 평균 내도 영역
-       점수가 안 나오는 이유가 여기 적혀 있지 않으면, 읽는 사람은 오타로 본다. */
-    var foot = '<p class="sh-foot">' +
-      esc('Scaled score and Average are TOEFL bands (1.0–6.0); Total is the average of the scored sections. ' +
-          'Writing and Speaking averages follow the ETS rubric for the productive tasks — ' +
-          'Build a Sentence is reported for diagnosis.') +
-      (v.pending.length ? '<br>' + esc('Still being scored: ' +
-        v.pending.map(function (s) { return LAB[s][0]; }).join(', ') + '.') : '') +
-      '</p>';
-
-    var sum = '<div class="sh-gauge">' + gaugeSvg(v.overall) +
-      '<div class="sh-sum" id="sh-sum">' +
-        '<b>' + (v.overall === null ? 'Not scored yet'
-          : 'Overall ' + BAND.fmt(v.overall) + ' / 6.0' + (v.cefr ? ' · CEFR ' + v.cefr : '')) + '</b>' +
-        (say ? '<br>' + esc(say[0]) : '') +
-        '<br>' + esc(r.set_code || '') + (r.set_code ? ' · ' : '') +
-        esc(isFull(r) ? 'Full test' : 'Section test') +
-      '</div></div>';
-
-    var cmt = '<div class="sh-cmt-h">SA Teacher\'s Comments</div>' +
-      '<div class="sh-cmt" id="sh-cmt">' +
-        editable(r.session, 'comment', "Type the teacher's comments here, or leave blank to write by hand.", 'cmt') +
-      '</div>';
-
-    $('sheet').innerHTML = head + table + foot + sum + cmt;
+    $('sheet').innerHTML = head;
 
     /* 고친 자리는 그 자리에서 이 기기에 남는다 — 인쇄 버튼을 누르기 전에 화면을
        떠나도 다시 왔을 때 그대로여야 하기 때문이다. */
@@ -1898,6 +1890,41 @@ var BAND = (function () {
   var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers,scale';
   var TASK_SELECT = 'session,question_id,skill,task_kind,ai_score,teacher_score,confirmed_at,media_path';
   var SET_SELECT = 'id,label,set_code,picks,snapshot,approved_name,approved_note,created_at';
+  var ACCOUNT_SELECT = 'user_id,student_id,name,exam_date';
+
+  function normText(v) { return String(v || '').trim().replace(/\s+/g, ' ').toLowerCase(); }
+  function dayOf(v) { return String(v || '').slice(0, 10); }
+  function authEmailDate() {
+    var saved = read();
+    var jwtEmail = '';
+    try {
+      var tok = saved && saved.access_token;
+      var part = tok && tok.split('.')[1];
+      jwtEmail = part ? (JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/'))) || {}).email || '' : '';
+    } catch (e) {}
+    var email = String((saved && saved.account_email) || jwtEmail || (AUTH.user() && AUTH.user().email) || (ME && ME.email) || '');
+    var m = email.match(/^smeag\d{3}\.(\d{4})(\d{2})(\d{2})@/i);
+    return m ? m[1] + '-' + m[2] + '-' + m[3] : '';
+  }
+  function matchedAccountRows(rows) {
+    var id = normText(ME && ME.student_id);
+    var name = normText(ME && ME.name);
+    var matched = (rows || []).filter(function (a) {
+      return normText(a.student_id) === id && normText(a.name) === name && !!a.exam_date;
+    });
+    var emailDate = authEmailDate();
+    if (!matched.length && id && name && emailDate) {
+      matched.push({ student_id: ME.student_id, name: ME.name, exam_date: emailDate });
+    }
+    return matched;
+  }
+  function accountMatchedResult(r) {
+    var d = dayOf(r.submitted_at);
+    return MATCHED_ACCOUNTS.some(function (a) {
+      return d === dayOf(a.exam_date);
+    });
+  }
+
   function load() {
     var u = AUTH.user();
     /* 응시와 W·S 채점을 함께 읽는다. 밴드는 둘이 다 있어야 완성된다.
@@ -1905,6 +1932,9 @@ var BAND = (function () {
     return Promise.all([
       AUTH.rest('sg_results?select=' + SELECT + '&owner=eq.' + u.id + '&order=submitted_at.desc'),
       AUTH.rest('sg_task_scores?select=' + TASK_SELECT + '&owner=eq.' + u.id)
+        .catch(function () { return []; }),
+      AUTH.rest('sg_exam_accounts?select=' + ACCOUNT_SELECT +
+                '&user_id=eq.' + encodeURIComponent(u.id))
         .catch(function () { return []; }),
       /* 확정 성적 세트. 없는 게 보통이다 — 다시 친 학생에게만 생긴다.
          무효로 돌린 것은 빼고 최신 한 벌만 보여 준다. */
@@ -1918,14 +1948,21 @@ var BAND = (function () {
           if (!t || !t.session) return;
           (TASKS[t.session] = TASKS[t.session] || []).push(t);
         });
-        ALL = out[0] || [];
-        SETS = out[2] || [];
+        MATCHED_ACCOUNTS = matchedAccountRows(out[2] || []);
+        ALL = (out[0] || []).filter(accountMatchedResult);
+        SETS = (out[3] || []).filter(function (set) {
+          var picks = (set && set.picks) || {};
+          return Object.keys(picks).some(function (s) {
+            var p = picks[s], sess = p && (typeof p === 'string' ? p : p.session);
+            return !!sess && ALL.some(function (r) { return r.session === sess; });
+          });
+        });
         fillSets();
         $('notice').classList.toggle('hide', !!ALL.length);
         if (!ALL.length) {
           $('notice').innerHTML = '<p class="muted">' +
-            bi('No test result has been uploaded to your account yet.',
-               '아직 계정에 올라온 응시 결과가 없습니다.') + '</p>';
+            bi('No test result matches both your student ID and name.',
+               '학번과 이름이 모두 일치하는 응시 결과가 없습니다.') + '</p>';
         }
         render();
       });
@@ -1944,8 +1981,11 @@ var BAND = (function () {
       if (OPEN) $('rev-me').textContent = (ME && (ME.email || ME.student_id || ME.name)) || '';
       /* 성적표에는 이름이 인쇄된다 — 프로필이 늦게 와도 빈칸으로 남겨 두지 않는다. */
       if (OPEN && route().view === 'report') paintCard(OPEN);
+      return load();
+    }).catch(function () {
+      ME = AUTH.user();
+      return load();
     });
-    load();
   }
   function showGate() {
     $('dash').classList.add('hide');
@@ -1963,30 +2003,13 @@ var BAND = (function () {
       var btn = $('login-go'); btn.disabled = true;
       $('login-err').classList.add('hide');
       var who = String($('login-id').value || '').trim().toLowerCase();
-      var when = String($('login-date').value || '').trim();
-      /* 수험생 아이디는 응시일이 있어야 어느 응시인지 정해진다. 여기서 막지 않으면
-         서버가 대신 짐작하고, 그 짐작은 남의 성적일 수 있다. */
-      if (/^smeag\d{3}$/.test(who) && !when) {
-        btn.disabled = false;
-        $('login-err').classList.remove('hide');
-        $('login-err').innerHTML = bi('Enter the date you sat the test.', '응시일을 입력하세요.');
-        return;
-      }
+      var when = '';
       AUTH.signIn($('login-id').value, $('login-pw').value, when).then(function () {
         btn.disabled = false;
         showApp();
       }).catch(function (err) {
         btn.disabled = false;
         $('login-err').classList.remove('hide');
-        /* 서버는 아이디·시험일·비밀번호가 안 맞으면 똑같이 401 을 준다. 응시일까지
-           넣어 보낸 자리에서는 날짜도 후보라고 알려 준다 — 맞는 아이디로 날짜만
-           틀렸을 때 "비밀번호가 틀렸다"만 보이면 학생은 헤맨다. */
-        if (err.code === 'bad_credentials' && when) {
-          $('login-err').innerHTML = bi(
-            'No scores found for that ID on ' + when + '. Check the ID, the exam date, and the password.',
-            when + ' 응시 기록에서 그 아이디를 찾지 못했습니다. 아이디 · 응시일 · 비밀번호를 확인하세요.');
-          return;
-        }
         $('login-err').innerHTML = bi(err.message || 'Sign-in failed.', err.messageKo || err.message || '로그인하지 못했습니다.');
       });
     };
