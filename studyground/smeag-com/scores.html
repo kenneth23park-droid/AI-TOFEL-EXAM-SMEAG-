@@ -246,7 +246,14 @@ tr.row-bad{background:var(--bad-soft)}
   linear-gradient(90deg,#111 50%,transparent 0) 0 0/10px 10px,
   linear-gradient(#111 50%,transparent 0) 0 0/10px 10px,#fff;border:7px solid #fff;box-shadow:0 0 0 1px #ddd}
 .mr-address{font-size:13px;line-height:1.3}
-.mr-photo{height:190px;border:1.5px solid #111;background:#fafafa}
+.mr-photo{height:190px;border:1.5px solid #111;background:#fafafa;position:relative;overflow:hidden;
+  display:grid;place-items:center}
+.mr-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.mr-photo-tools{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:6px;justify-content:center}
+.mr-photo-tools label,.mr-photo-tools button{border:1px solid #111;background:rgba(255,255,255,.9);
+  border-radius:6px;padding:4px 8px;font-size:11px;font-weight:800;cursor:pointer}
+.mr-photo-tools input{display:none}
+.mr-photo-empty{font-size:12px;color:#777;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .mr-meta{display:grid;grid-template-columns:1.2fr 1fr;gap:12px 36px;margin-top:18px;font-size:18px}
 .mr-meta b{font-weight:900}
 .mr-scorebox{border:1.5px solid #111;margin-top:10px;padding:12px 22px 18px}
@@ -310,6 +317,7 @@ footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font
 }
 @media print{
   header.nav,.rev-bar,footer.foot,.no-print{display:none !important}
+  .mr-photo-tools{display:none !important}
   body{background:#fff}
   .card,.sec-card{box-shadow:none;break-inside:avoid}
 
@@ -1582,6 +1590,15 @@ var BAND = (function () {
         (dated ? '<span class="mr-date">' + esc(submitted) + '</span>' : '') +
         '</div></div></div>';
     }
+    function photoBox() {
+      var src = memGet(r.session, 'photo');
+      return '<div class="mr-photo" id="mr-photo">' +
+        (src ? '<img src="' + esc(src) + '" alt="Student photo">' : '<span class="mr-photo-empty">Photo</span>') +
+        '<div class="mr-photo-tools no-print">' +
+          '<label>Upload<input id="mr-photo-input" type="file" accept="image/*"></label>' +
+          (src ? '<button type="button" id="mr-photo-clear">Remove</button>' : '') +
+        '</div></div>';
+    }
 
     var head = '<div class="mr-topline"><div class="mr-brand"><span class="seal">SMEAG</span><span>TOEFL ibt</span><small>GLOBAL EDUCATION</small></div>' +
       '<div class="mr-report-title">Mock Test Taker Score Report</div></div>' +
@@ -1591,7 +1608,7 @@ var BAND = (function () {
         '<div class="mr-id"><div class="mr-qr"></div><div class="mr-address">' +
           editable(r.session, 'address1', 'Emilio Osmeña St. Guadalupe, Cebu City', 'sh-v') + '<br>' +
           editable(r.session, 'address2', 'SMEAG Global Education Inc.', 'sh-v') + '<br>CEBU, Philippines' +
-        '</div></div></div><div class="mr-photo"></div></div>' +
+        '</div></div></div>' + photoBox() + '</div>' +
       '<div class="mr-meta">' +
         '<div><b>Mock Test Date:</b> ' + esc(submitted) + '</div>' +
         '<div><b>Gender:</b> ' + editable(r.session, 'gender', 'Female', 'sh-v') + '</div>' +
@@ -1623,6 +1640,31 @@ var BAND = (function () {
     [].forEach.call($('sheet').querySelectorAll('[data-mem]'), function (el) {
       el.onblur = function () { memSet(r.session, el.getAttribute('data-mem'), el.textContent.trim()); };
     });
+    var photoInput = $('mr-photo-input');
+    if (photoInput) {
+      photoInput.onchange = function () {
+        var f = photoInput.files && photoInput.files[0];
+        if (!f) return;
+        if (f.size > 1500000) {
+          alert('Please choose an image under 1.5 MB.');
+          photoInput.value = '';
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function () {
+          memSet(r.session, 'photo', String(reader.result || ''));
+          paintCard(r);
+        };
+        reader.readAsDataURL(f);
+      };
+    }
+    var clearPhoto = $('mr-photo-clear');
+    if (clearPhoto) {
+      clearPhoto.onclick = function () {
+        memSet(r.session, 'photo', '');
+        paintCard(r);
+      };
+    }
     $('card-review').href = '#/review/' + encodeURIComponent(r.session);
 
     teacherWord(r);
