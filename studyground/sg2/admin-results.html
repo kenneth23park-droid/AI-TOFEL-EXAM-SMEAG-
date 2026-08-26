@@ -202,6 +202,23 @@
       : '<button class="btn ghost sm" data-hide="' + esc(r.id) + '">' + bi('Hide', '숨기기') + '</button>';
   }
 
+  function scoreReportHref(r) {
+    return 'https://smeag-scores.vercel.app/scores.html?owner=' + encodeURIComponent(r.owner || '') + '&handoff=1';
+  }
+
+  function openScoreReport(r) {
+    var w = window.open(scoreReportHref(r), '_blank', 'noopener');
+    var s = window.SG_AUTH && SG_AUTH.session ? SG_AUTH.session() : null;
+    if (!w || !s || !s.access_token) return;
+    var msg = { type: 'smeag-admin-score-session', owner: r.owner || '', session: s };
+    var tries = 0;
+    var t = setInterval(function () {
+      tries += 1;
+      try { w.postMessage(msg, 'https://smeag-scores.vercel.app'); } catch (e) {}
+      if (tries >= 20) clearInterval(t);
+    }, 250);
+  }
+
   function paint() {
     var list = shown();
     /* 예전에는 "확정 대기" 를 셌다. AI 점수가 곧 성적이 된 뒤로 기다리는 것은
@@ -225,7 +242,8 @@
         '<td class="score" ' + SG_LABEL('Overall', '종합') + '>' +
           (viewOf(r).overall === null ? '—' : 'Band ' + SG_BAND.fmt(viewOf(r).overall)) + '</td>' +
         '<td ' + SG_LABEL('Review window', '리뷰 열람') + '>' + windowCell(r) + '</td>' +
-        '<td class="card-actions"><a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) +
+        '<td class="card-actions"><button class="btn ghost sm" data-score-report="' + esc(r.owner || '') + '">' +
+          bi('Scores', '성적표') + '</button> <a class="btn ghost sm" href="review.html?session=' + encodeURIComponent(r.session) +
           '&owner=' + encodeURIComponent(r.owner) + '">' + bi('Review', '리뷰') + '</a>' + hideCell(r) + '</td>' +
       '</tr>';
     }).join('') : '<tr><td colspan="' + (ROLE === 'admin' ? 8 : 7) + '" class="muted" style="padding:24px;text-align:center">' +
@@ -234,6 +252,17 @@
     wireWindowButtons();
     wireArchiveButtons();
     wireHideButtons();
+    wireScoreButtons();
+  }
+
+  function wireScoreButtons() {
+    Array.prototype.forEach.call($('rows').querySelectorAll('[data-score-report]'), function (b) {
+      b.onclick = function () {
+        var owner = b.getAttribute('data-score-report');
+        var r = ALL.filter(function (x) { return x.owner === owner; })[0];
+        if (r) openScoreReport(r);
+      };
+    });
   }
 
   /* ── 백업본 · 숨김 ────────────────────────────────────────────────────

@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My TOEFL Scores · SMEAG</title>
+<!--
+  SMEAG · 학생 성적 조회 · 다운로드 (smeag.com 배포용)
+
+  sg2(응시 앱)와 같은 Supabase 프로젝트(smeag-mocktest)를 직접 읽는다. 학생은
+  본인 응시만 볼 수 있고, 그 경계는 이 화면이 아니라 서버의 RLS 가 쥐고 있다.
+
+  화면은 둘이다. 주소의 해시가 어느 쪽인지 정한다.
+    #/                    대시보드 — 최고 점수 + 응시 목록
+    #/review/<session>    리뷰    — 한 응시의 요약과 영역별 문항
+
+  이 파일은 통째로 자립형이다 — 외부 CSS/JS/CDN 없음, 빌드 없음. smeag.com 어디에든
+  이 HTML 하나만 올리면 동작한다(예: https://smeag.com/toefl/scores.html).
+  자세한 배포 절차는 옆의 README.md 참고.
+-->
+<style>
+/* Vercel 이 스스로 붙이는 코멘트 위젯(Toolbar)을 가린다 — 우리 코드에는 없다. */
+vercel-live-feedback,
+[data-vercel-toolbar],
+#vercel-toolbar,
+iframe[src*="vercel.live"]{ display:none !important; }
+:root{
+  --ink:#0e1a1c; --ink-2:#33474a; --muted:#6b8083; --dim:#96a9ab;
+  --surface:#f1f7f6; --surface-2:#e3eeed; --track:#dcebe9; --card:#fff;
+  --line:#d5e4e2; --line-2:#c2d6d4;
+  --brand:#0e8f82; --brand-ink:#0a6b62; --brand-soft:#e6f5f3;
+  --ok:#1f9d55; --ok-soft:#e7f6ec; --bad:#c62828; --bad-soft:#fdeceb;
+  --radius:18px; --shadow:0 1px 2px rgba(10, 40, 42,.04),0 10px 30px rgba(10, 40, 42,.05);
+  --maxw:1180px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",
+    "Pretendard","Malgun Gothic",Roboto,Arial,sans-serif;
+  background:var(--surface); color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased;
+  letter-spacing:-.011em;
+}
+a{color:inherit;text-decoration:none}
+button,input,select{font-family:inherit;font-size:inherit}
+button{cursor:pointer}
+svg{flex:none}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+.hide{display:none !important}
+.muted{color:var(--muted)}
+
+/* 화면은 영어 하나로 — KO 토글은 없앴다. */
+[data-ko]{display:none!important}
+
+/* ── 머리글 ─────────────────────────────────────────────── */
+header.nav{position:sticky;top:0;z-index:50;background:rgba(241,247,246,.9);
+  backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800}
+.brand-logo{width:34px;height:34px;border-radius:10px;background:var(--brand);color:#fff;
+  display:grid;place-items:center;font-weight:900;flex:none}
+.brand small{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);font-weight:700}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.who{font-size:13px;font-weight:700;color:var(--ink-2);max-width:38vw;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+
+/* ── 알갱이들 ───────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);
+  background:#fff;border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:700;color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.btn.brand{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.brand:hover{background:var(--brand-ink);border-color:var(--brand-ink)}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.btn[disabled]{opacity:.5;cursor:default}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;box-shadow:var(--shadow)}
+.mt-8{margin-top:8px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}
+h1{font-size:clamp(24px,3.4vw,34px);letter-spacing:-.03em;line-height:1.1}
+h2{font-size:18px;letter-spacing:-.02em}
+.page-h{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-top:26px}
+.page-h .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-block;background:var(--surface-2);border-radius:999px;
+  padding:3px 10px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:800}
+
+/* ── 점수 눈금(막대) ────────────────────────────────────── */
+.score-row{display:grid;grid-template-columns:repeat(4,1fr) auto minmax(200px,1.15fr);
+  gap:26px;align-items:start}
+/* 리뷰에서는 종합이 맨 앞이다 — 한 응시를 볼 때 먼저 읽는 수가 종합이기 때문. */
+.score-row.rev{grid-template-columns:minmax(200px,1.15fr) auto repeat(4,1fr)}
+.score-row .sep{width:1px;background:var(--line);align-self:stretch}
+.meter-h{display:flex;align-items:center;justify-content:center;gap:7px;
+  font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.meter-h svg{opacity:.6}
+.meter{position:relative;height:9px;border-radius:999px;background:var(--track);margin:14px 9px 0}
+.meter i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;
+  background:linear-gradient(90deg,#b79bf6,var(--brand))}
+.meter b{position:absolute;top:50%;width:19px;height:19px;margin:-9.5px 0 0 -9.5px;border-radius:50%;
+  background:#fff;border:3px solid var(--brand);box-shadow:0 1px 5px rgba(10, 40, 42,.22)}
+.meter.flat i{background:var(--brand)}
+.val{margin-top:12px;text-align:center;font-size:26px;font-weight:900;letter-spacing:-.03em;line-height:1}
+.val small{font-size:14px;font-weight:700;color:var(--muted);letter-spacing:0}
+.val .cefr{font-size:13px;font-weight:800;color:var(--muted);margin-left:4px}
+.sub{margin-top:7px;text-align:center;font-size:12.5px;color:var(--dim);font-weight:600}
+.sub .conv{letter-spacing:.1em;text-transform:uppercase;font-size:10.5px;margin-left:5px}
+.total-cell .val{font-size:32px}
+
+/* ── 큰 탭 두 개 ───────────────────────────────────────── */
+.bigtabs{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px}
+.bigtab{display:flex;align-items:center;justify-content:center;gap:12px;
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;font-size:18px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.bigtab .ic{width:38px;height:38px;border-radius:11px;background:var(--surface-2);color:var(--muted);
+  display:grid;place-items:center}
+.bigtab:hover{border-color:var(--line-2)}
+.bigtab.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-ink)}
+.bigtab.on .ic{background:var(--brand);color:#fff}
+
+/* ── 표 ────────────────────────────────────────────────── */
+.list-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:26px 0 12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:center;font-size:11px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);padding:16px 12px;border-bottom:1px solid var(--line);white-space:nowrap;font-weight:800}
+td{padding:16px 12px;border-bottom:1px solid var(--line);vertical-align:middle;text-align:center}
+tr:last-child td{border-bottom:0}
+th.left,td.left{text-align:left}
+th.right,td.right{text-align:right}
+.table-wrap{overflow-x:auto}
+/* 응시 목록은 칸을 접지 않는다 — 좁으면 표가 옆으로 구르지, 글자가 부러지지 않는다. */
+#list-card th,#list-card td{white-space:nowrap}
+.test-no{font-size:17px;font-weight:900;letter-spacing:-.02em}
+.band{font-size:19px;font-weight:900;letter-spacing:-.02em;white-space:nowrap}
+.band small{font-size:12.5px;font-weight:700;color:var(--dim)}
+.band.tot{color:var(--brand);font-size:23px}
+.status{display:inline-block;background:var(--surface-2);border-radius:8px;padding:4px 10px;
+  font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);white-space:nowrap}
+.status.wait{background:#fff6e6;color:#8a6100}
+.ok{color:var(--ok);font-weight:800}
+.bad{color:var(--bad);font-weight:800}
+tr.row-bad{background:var(--bad-soft)}
+
+/* ── 리뷰 화면 ─────────────────────────────────────────── */
+.rev-bar{position:sticky;top:0;z-index:50;background:rgba(241,247,246,.92);
+  backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+/* 리뷰 머리글은 본문보다 넓게 쓴다 — 탭 다섯 개와 계정이 한 줄에 서야 한다. */
+.rev-in{max-width:1420px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rev-set{background:var(--brand-soft);color:var(--brand-ink);border-radius:8px;
+  padding:4px 10px;font-size:12.5px;font-weight:900;letter-spacing:.02em}
+.rev-title{font-size:17px;font-weight:900;letter-spacing:-.02em}
+.rev-when{font-size:13px;color:var(--muted);font-weight:600}
+.rev-tabs{display:flex;align-items:center;gap:4px;margin-left:14px;flex-wrap:wrap}
+.rev-tab{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;
+  border-radius:11px;padding:9px 14px;font-size:14px;font-weight:700;color:var(--ink-2)}
+.rev-tab:hover{background:var(--surface-2)}
+.rev-tab.on{background:var(--brand);color:#fff}
+.rev-tab[disabled]{opacity:.38;cursor:default;background:transparent}
+.rev-me{margin-left:auto;font-size:13px;color:var(--ink-2);font-weight:700;
+  max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.sec-card{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 22px;box-shadow:var(--shadow);margin-top:16px}
+.sec-card .disc{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;
+  color:var(--muted);font-size:13.5px;font-weight:700;padding:2px 0}
+.sec-card .disc svg{transition:transform .15s}
+.sec-card.open .disc svg{transform:rotate(90deg)}
+.sec-card .name{display:flex;align-items:center;gap:9px;font-size:19px;font-weight:900;letter-spacing:-.02em}
+.raw{background:var(--surface-2);border-radius:10px;padding:8px 14px;font-size:14px;font-weight:800;color:var(--ink-2)}
+.sec-card .go{margin-left:auto}
+.sec-body{flex-basis:100%;border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
+
+/* 닫힌 리뷰 — 점수는 그대로 두고 문항 자리만 이 안내로 바뀐다. */
+.locked{background:var(--surface-2);border:1px solid var(--line-2);border-radius:14px;
+  padding:18px 20px;margin:14px 0}
+.locked b{display:flex;align-items:center;gap:7px;font-size:15px;letter-spacing:-.01em}
+.locked p{margin-top:7px;font-size:13.5px;color:var(--muted)}
+.rev-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  padding:12px 18px;margin-top:16px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.rev-note.shut{background:var(--surface-2);border-color:var(--line-2)}
+.rev-note svg{opacity:.55}
+.rev-note .when{color:var(--muted);font-weight:700}
+
+.qtable td{text-align:left}
+.qtable th{text-align:left}
+.qtable th.right,.qtable td.right{text-align:right}
+.task{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.task .qid{font-weight:900;min-width:74px}
+.task .sc{font-size:17px;font-weight:900;letter-spacing:-.02em}
+.task .sc small{font-size:12px;color:var(--dim);font-weight:700}
+.task .ans{flex-basis:100%;font-size:13px;color:var(--muted);white-space:pre-wrap}
+/* 스피킹 한 줄은 누르면 소리가 난다 — 손가락이 그 사실을 먼저 알아야 한다. */
+.task.playable{cursor:pointer;border-radius:12px;padding-left:10px;padding-right:10px;margin:0 -10px}
+.task.playable:hover{background:var(--surface-2)}
+.task .play{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-size:12.5px;
+  font-weight:800;color:var(--brand-ink);background:var(--brand-soft);border-radius:999px;padding:5px 12px}
+.task .play svg{width:14px;height:14px}
+.task .rec:empty{display:none}
+.task .rec{flex-basis:100%;font-size:13px}
+.task .rec audio{width:100%;max-width:420px;margin-top:2px}
+
+/* ── 로그인 ────────────────────────────────────────────── */
+.field{display:block;margin-top:12px}
+.field span{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:5px}
+.field input{width:100%;padding:11px 13px;border:1px solid var(--line-2);border-radius:11px;background:#fff}
+.field input:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+.err{background:var(--bad-soft);border:1px solid #f5c6c2;color:var(--bad);
+  border-radius:11px;padding:10px 13px;font-size:13px;font-weight:700}
+
+/* ── 성적표 한 장 ───────────────────────────────────────
+   화면에 보이는 그대로가 종이에 나와야 한다. 그래서 이 구역만 앱의 크림색·둥근
+   모서리에서 벗어나 A4 한 장(210mm)을 흉내 낸다 — 글꼴도 화면용이 아니라
+   인쇄용(Arial 계열)이고, 표의 선은 프린터가 흐리게 먹지 않도록 검정 1px 이다. */
+.card-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:22px}
+.card-bar .note{font-size:12.5px;color:var(--muted);font-weight:600;margin-left:auto}
+.sheet{width:210mm;max-width:100%;margin:16px auto 50px;background:#fff;color:#111;
+  border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);
+  padding:13mm 11mm 15mm;line-height:1.32;letter-spacing:0;
+  font-family:Arial,"Helvetica Neue",Helvetica,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+.sh-top{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.sh-mark{display:flex;align-items:baseline;font-weight:900;font-size:42px;letter-spacing:-.045em;color:#111}
+.sh-mark .st{font-size:30px;margin-right:1px}
+.sh-mark .mt{color:#e8102b;font-size:24px;font-weight:800;margin-left:1px;letter-spacing:-.02em}
+.sh-date{font-size:18px;font-weight:700;padding-bottom:5px}
+.sh-who{display:flex;gap:30px;flex-wrap:wrap;margin-top:16px;font-size:15px;font-weight:700;color:#e8102b}
+.sh-who .v{display:inline-block;min-width:96px;padding:0 5px;color:#111;
+  border-bottom:1px dotted #b9b9b9}
+[contenteditable]:empty:before{content:attr(data-ph);color:#c6c6c6;font-weight:400}
+[contenteditable]:focus{outline:2px solid #b6ddd8;border-radius:3px}
+
+table.rc{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px;color:#111}
+table.rc th,table.rc td{border:1px solid #111;padding:9px 6px;text-align:center;vertical-align:middle}
+/* 앱의 th 는 작은 대문자로 늘어놓는 눈금 글씨다. 성적표의 머리글은 그냥 낱말이라
+   그 규칙을 여기서 되돌린다 — 'Scaled score' 는 라벨이 아니라 열 이름이다. */
+table.rc th{font-weight:700;font-size:12.5px;line-height:1.25;
+  text-transform:none;letter-spacing:0;color:#111}
+/* 칸 색은 종이 성적표의 눈금이다 — 어느 칸이 환산점수이고 어느 칸이 원점수인지
+   글자를 읽기 전에 색으로 갈린다. 인쇄에서도 같아야 해서 print-color-adjust 를 쓴다. */
+.rc .c-scaled{background:#d9e5d2}
+.rc .c-correct{background:#daeaf3}
+.rc .c-avg{background:#f4e3e3}
+.rc .c-cefr{background:#ff0}
+.rc td.c-cefr{font-size:30px;font-weight:900;letter-spacing:-.02em}
+.rc .sec{font-weight:800;font-size:15px}
+.rc td.c-scaled,.rc td.c-avg{font-weight:700;font-size:14px}
+.rc .tot td{font-weight:900;font-size:15px}
+.rc .part{font-size:13px}
+.rc .dim{color:#8e8e8e}
+.sh-foot{margin-top:8px;font-size:11px;color:#7a7a7a;line-height:1.5}
+
+.sh-gauge{margin-top:26px;border:2px solid #e2761b;border-radius:14px;padding:18px 20px 20px}
+.sh-gauge svg{display:block;margin:0 auto}
+.sh-sum{margin-top:14px;border:1px solid #cfcfcf;border-radius:6px;min-height:96px;
+  padding:13px 15px;font-size:13.5px;line-height:1.6}
+.sh-sum b{font-size:15px}
+.sh-cmt-h{margin-top:20px;font-size:15px;font-weight:900}
+.sh-cmt{margin-top:7px;border:1px solid #cfcfcf;border-radius:6px;min-height:118px;
+  padding:13px 15px;font-size:13.5px;line-height:1.7;white-space:pre-wrap}
+.sh-cmt .cmt{display:block;min-height:88px}
+.sh-cmt .by{display:block;margin-top:10px;font-size:11.5px;color:#8e8e8e}
+
+@media (max-width:640px){
+  .sheet{padding:16px 14px}
+  .sh-mark{font-size:32px}.sh-mark .mt{font-size:18px}.sh-date{font-size:15px}
+  table.rc{font-size:11.5px}
+  table.rc th,table.rc td{padding:7px 3px}
+  .rc td.c-cefr{font-size:22px}
+}
+
+footer.foot{margin-top:60px;border-top:1px solid var(--line);padding:22px 0;font-size:12.5px;color:var(--muted)}
+
+@media (max-width:900px){
+  .score-row,.score-row.rev{grid-template-columns:repeat(2,1fr);gap:22px}
+  .score-row .sep{display:none}
+  .score-row .total-cell{grid-column:1/-1;border-top:1px solid var(--line);padding-top:18px}
+  /* 좁은 화면에서도 종합은 리뷰에서 맨 위, 대시보드에서 맨 아래다. */
+  .score-row.rev .total-cell{order:-1;border-top:0;border-bottom:1px solid var(--line);
+    padding-top:0;padding-bottom:18px}
+  .bigtabs{grid-template-columns:1fr;gap:12px}
+  .bigtab{font-size:16px;padding:16px}
+}
+@media (max-width:640px){
+  .nav-in{padding:10px 16px;gap:10px}
+  .brand small{display:none}
+  .wrap{padding:0 16px}
+  .card{padding:16px}
+  .page-h .acts{width:100%;margin-left:0}
+  .rev-tabs{order:3;margin-left:0;width:100%;overflow-x:auto}
+  .rev-me{display:none}
+  .sec-card{padding:16px}
+  .sec-card .go{margin-left:0;flex-basis:100%}
+}
+@media print{
+  header.nav,.rev-bar,footer.foot,.no-print{display:none !important}
+  body{background:#fff}
+  .card,.sec-card{box-shadow:none;break-inside:avoid}
+
+  /* 성적표는 A4 한 장으로 떨어져야 한다. 종이에는 여백이 이미 있으므로 화면에서
+     쓰던 210mm 폭과 그림자·테두리를 걷어낸다 — 안 걷으면 한 장이 두 장이 된다. */
+  @page{size:A4 portrait;margin:12mm}
+  .wrap{padding:0;max-width:none}
+  .sheet{width:auto;max-width:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none}
+  .sh-gauge,.sh-cmt,table.rc{break-inside:avoid}
+  /* 색이 곧 눈금이라 브라우저가 배경을 지우면 성적표가 아니라 표가 된다. */
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* 비어 있는 칸의 안내 글씨는 종이에 남기지 않는다 — 빈칸은 손으로 채우는 자리다. */
+  [contenteditable]:empty:before{content:"" !important}
+}
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="nav-in">
+    <a class="brand" href="#/"><span class="brand-logo">S</span>
+      <span>SMEAG<small>TOEFL Mock Test</small></span></a>
+    <div class="nav-right">
+      <span class="who hide" id="who"></span>
+      <button class="btn sm hide" id="out"><span data-en>Log out</span><span data-ko>로그아웃</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ── 리뷰 화면의 머리글 ───────────────────────────────── -->
+<div class="rev-bar hide no-print" id="rev-bar">
+  <div class="rev-in">
+    <a class="btn brand sm" href="#/" id="rev-back">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+           stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-en>Dashboard</span><span data-ko>대시보드</span></a>
+    <span class="rev-set" id="rev-set"></span>
+    <span class="rev-title"><span data-en>Review</span><span data-ko>리뷰</span></span>
+    <span class="rev-when" id="rev-when"></span>
+    <nav class="rev-tabs" id="rev-tabs"></nav>
+    <span class="rev-me" id="rev-me"></span>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- ── 로그인 ─────────────────────────────────────────── -->
+  <section id="gate" class="hide">
+    <div class="page-h"><h1><span data-en>My TOEFL scores</span><span data-ko>내 TOEFL 성적</span></h1></div>
+    <p class="muted mt-8" style="font-size:14px">
+      <span data-en>Sign in with the student ID, the date you sat the test, and your password.</span>
+      <span data-ko>학번과 응시일, 비밀번호로 로그인하세요.</span>
+    </p>
+    <div class="card mt-16" style="max-width:420px">
+      <form id="login">
+        <div class="err hide" id="login-err"></div>
+        <label class="field"><span data-en>Student ID or email</span><span data-ko>학번 또는 이메일</span>
+          <input id="login-id" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
+        <!-- 같은 smeag### 는 시험일마다 다른 사람에게 다시 나간다. 아이디만으로는
+             어느 응시인지 정해지지 않으므로 응시일을 함께 받는다 — 이 둘이 성적표를
+             여는 열쇠다. 선생님·관리자 계정(이메일 로그인)은 시험일이 없어 비워 둔다. -->
+        <label class="field"><span data-en>Exam date</span><span data-ko>응시일</span>
+          <input id="login-date" type="date" autocomplete="off"></label>
+        <label class="field"><span data-en>Password</span><span data-ko>비밀번호</span>
+          <input id="login-pw" type="password" autocomplete="current-password" required></label>
+        <button class="btn brand mt-16" style="width:100%;justify-content:center" id="login-go" type="submit">
+          <span data-en>Sign in</span><span data-ko>로그인</span></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── 대시보드 ───────────────────────────────────────── -->
+  <section id="dash" class="hide">
+    <div class="page-h">
+      <h1><span data-en>My TOEFL scores</span><span data-ko>내 TOEFL 성적</span></h1>
+      <div class="acts no-print">
+        <button class="btn sm" id="dl-csv"><span data-en>Download CSV</span><span data-ko>CSV 내려받기</span></button>
+        <button class="btn sm" id="print"><span data-en>Print / PDF</span><span data-ko>인쇄 · PDF</span></button>
+      </div>
+    </div>
+
+    <!-- 확정 성적 세트 — 여러 회차에서 영역별로 하나씩 골라 관리자가 확정한 한 벌.
+         아래 「내 최고 점수」와 다르다. 저쪽은 기계가 집은 참고값이고, 이쪽은 사람이
+         고른 성적이다(선생님 동의 + 관리자 확정). 그래서 위에 둔다. -->
+    <div class="card mt-16 hide" id="official-card">
+      <div class="eyebrow"><span data-en>My score set</span><span data-ko>확정 성적 세트</span></div>
+      <div class="score-row mt-16" id="official-row"></div>
+      <p class="muted mt-8" style="font-size:12.5px" id="official-note"></p>
+    </div>
+
+    <div class="card mt-16" id="best-card">
+      <div class="eyebrow"><span data-en>My best score</span><span data-ko>내 최고 점수</span></div>
+      <div class="score-row mt-16" id="best-row"></div>
+    </div>
+
+    <div class="card mt-16 hide" id="notice"></div>
+
+    <div class="bigtabs no-print" id="bigtabs">
+      <button class="bigtab on" data-kind="full">
+        <span class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>
+        <span data-en>Full Test Records</span><span data-ko>전체 시험 기록</span>
+      </button>
+      <button class="bigtab" data-kind="section">
+        <span class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 6h10M11 12h10M11 18h10M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg></span>
+        <span data-en>Section Test Records</span><span data-ko>영역별 시험 기록</span>
+      </button>
+    </div>
+
+    <div class="list-h">
+      <span class="eyebrow" id="list-h"></span>
+      <button class="btn sm no-print" id="refresh">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        <span data-en>Refresh</span><span data-ko>새로 고침</span></button>
+      <select class="btn sm no-print" id="f-set" style="padding-right:10px"></select>
+    </div>
+
+    <div class="card" id="list-card" style="padding:0;overflow:hidden">
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th><span data-en>Test #</span><span data-ko>시험</span></th>
+          <th><span data-en>Date</span><span data-ko>날짜</span></th>
+          <th><span data-en>Total</span><span data-ko>종합</span></th>
+          <th>R</th><th>L</th><th>W</th><th>S</th>
+          <th><span data-en>Status</span><span data-ko>상태</span></th>
+          <th class="no-print"><span data-en>Action</span><span data-ko>보기</span></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- ── 리뷰 ───────────────────────────────────────────── -->
+  <section id="review" class="hide">
+    <div class="card mt-24" id="rev-scores">
+      <div class="score-row rev" id="rev-row"></div>
+    </div>
+    <div class="acts no-print mt-16" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <a class="btn brand sm" id="go-card"><span data-en>Report card</span><span data-ko>성적표 한 장</span></a>
+      <button class="btn sm" id="dl-one"><span data-en>Download this test (CSV)</span><span data-ko>이 응시 CSV</span></button>
+      <button class="btn sm hide" id="dl-report"><span data-en>Score report</span><span data-ko>성적 보고서</span></button>
+    </div>
+    <div id="rev-body"></div>
+  </section>
+
+  <!-- ── 성적표 한 장 ───────────────────────────────────── -->
+  <section id="report" class="hide">
+    <div class="card-bar no-print">
+      <a class="btn brand sm" href="#/" id="card-back">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span data-en>Dashboard</span><span data-ko>대시보드</span></a>
+      <a class="btn sm" id="card-review"><span data-en>Answer review</span><span data-ko>답안 리뷰</span></a>
+      <button class="btn sm" id="card-print">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+        <span data-en>Print / PDF</span><span data-ko>인쇄 · PDF</span></button>
+      <span class="note">
+        <span data-en>Dotted fields are yours to type in before printing — they stay on this device only.</span>
+        <span data-ko>점선 칸은 인쇄 전에 직접 채우는 자리입니다 — 이 기기에만 남습니다.</span>
+      </span>
+    </div>
+    <div class="sheet" id="sheet"></div>
+  </section>
+
+</main>
+
+<footer class="foot"><div class="wrap">
+  © SMEAG · <span data-en>TOEFL mock test results</span><span data-ko>TOEFL 모의고사 성적</span>
+</div></footer>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   설정 — 배포 환경에 맞춰 여기만 고치면 된다.
+   ───────────────────────────────────────────────────────────── */
+var CFG = {
+  /* sg2(응시 앱)가 쓰는 그 Supabase 프로젝트. anon 키는 공개 키이고,
+     실제 접근 경계는 sg_results 의 RLS 가 쥔다 — 학생은 자기 행만 읽는다. */
+  url: 'https://qrmidnmlethqvdbmnyun.supabase.co',
+  anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybWlkbm1sZXRocXZkYm1ueXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg3NzQsImV4cCI6MjEwMTMxNDc3NH0.U2cprYXkpIS_1tSAiEjCFuHAztZRwIIK6DYCCowgxg4',
+
+  /* 문항과 정답은 이 화면이 들고 있지 않다. Edge Function `sg-review` 에게
+     물어야 하고, 그 함수가 소유·기한·관리자 해제를 확인한 뒤에만 내려준다.
+     기한이 지나면 questions 는 빈 배열로 온다 — 화면이 감추는 것이 아니라
+     서버가 주지 않는다. 규칙은 supabase/review_window.sql 에 있다.
+
+     예전에는 여기 packBase 에 공개 팩 주소를 적었다. 그 길은 닫았다 —
+     주소를 아는 학생이 화면과 무관하게 정답을 통째로 받을 수 있었기 때문이다. */
+  reviewFn: 'sg-review',
+
+  /* 학생용 문항별 정답 공개 여부. false 면 정답 열을 감추고 O/X 만 남긴다.
+     ⚠️ 이건 화면의 예의이지 경계가 아니다. 진짜 경계는 sg-review 의 기한이다. */
+  showAnswerKey: true,
+
+  /* 성적 보고서(Word·PDF·Excel) 생성기 주소. 비워 두면 '성적 보고서' 버튼이
+     아예 나오지 않는다 — 조회·CSV 까지만 쓰는 배포에서도 그대로 올라간다. */
+  reportUrl: 'https://smeag-report-alpha.vercel.app/'
+};
+
+/* ─────────────────────────────────────────────────────────────
+   세션 — sg2 와 같은 Edge Function(sg-auth)으로 로그인한다.
+   supabase-js 를 붙이지 않는 이유도 sg2 와 같다: fetch 몇 번이면 된다.
+   ───────────────────────────────────────────────────────────── */
+var AUTH = (function () {
+  var KEY = 'smeag_scores_v1';
+  var STAFF_DOMAIN = 'smeagstudyground.com';
+
+  function read() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  function write(v) { try { v ? localStorage.setItem(KEY, JSON.stringify(v)) : localStorage.removeItem(KEY); } catch (e) {} }
+
+  function store(payload) {
+    var s = payload.session || payload;
+    write({
+      user: payload.user || (s.user ? { id: s.user.id, email: s.user.email } : null),
+      access_token: s.access_token,
+      refresh_token: s.refresh_token,
+      expires_at: s.expires_at || (Math.floor(Date.now() / 1000) + (s.expires_in || 3600))
+    });
+    return read().user;
+  }
+
+  /* 수험생 아이디(smeag###)는 서버가 시험일과 묶어 이메일을 만든다.
+     선생님·관리자 상주 계정은 아이디@도메인이 곧 이메일이다. */
+  function loginId(raw) {
+    var v = String(raw || '').trim().toLowerCase();
+    if (!v || v.indexOf('@') >= 0 || /^smeag\d{3}$/.test(v)) return v;
+    return v + '@' + STAFF_DOMAIN;
+  }
+
+  /* examDate 를 실어 보내면 서버는 (아이디, 시험일) 그 계정 하나만 연다. 비워 두면
+     서버가 오늘 → 가까운 과거 → 가까운 미래 순으로 짐작하는데, 그 짐작은 같은 번호를
+     쓴 다른 사람의 성적으로 이어질 수 있다. 성적 조회에서는 짐작하지 않는다. */
+  function signIn(login, password, examDate) {
+    return fetch(CFG.url + '/functions/v1/sg-auth', {
+      method: 'POST',
+      headers: { apikey: CFG.anon, Authorization: 'Bearer ' + CFG.anon, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'signin', login: loginId(login), password: password, exam_date: examDate || ''
+      })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) {
+          var e = new Error(j.message || 'Sign-in failed');
+          e.messageKo = j.message_ko; e.code = j.error;
+          throw e;
+        }
+        return store(j);
+      });
+    }, function () {
+      var e = new Error('Cannot reach the server. Check your connection.');
+      e.messageKo = '서버에 연결할 수 없습니다. 네트워크를 확인하세요.';
+      throw e;
+    });
+  }
+
+  function signOut() {
+    var s = read();
+    if (s && s.access_token) {
+      fetch(CFG.url + '/auth/v1/logout', {
+        method: 'POST', headers: { apikey: CFG.anon, Authorization: 'Bearer ' + s.access_token }
+      }).catch(function () {});
+    }
+    write(null);
+  }
+
+  var refreshing = null;
+  function token() {
+    var s = read();
+    if (!s) return Promise.resolve(null);
+    if (s.expires_at - 60 > Math.floor(Date.now() / 1000)) return Promise.resolve(s.access_token);
+    if (refreshing) return refreshing;
+    refreshing = fetch(CFG.url + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST', headers: { apikey: CFG.anon, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    }).then(function (r) { if (!r.ok) throw new Error('refresh failed'); return r.json(); })
+      .then(function (j) { var u = s.user; store(j); var c = read(); c.user = u; write(c); return c.access_token; })
+      .catch(function () { write(null); return null; })
+      .then(function (t) { refreshing = null; return t; });
+    return refreshing;
+  }
+
+  function user() { var s = read(); return s ? s.user : null; }
+
+  /* 로컬에 저장된 프로필에는 이름·학번이 없을 수 있어 서버 사본으로 채운다. */
+  function profile() {
+    var u = user();
+    if (!u) return Promise.resolve(null);
+    if (u.name || u.student_id) return Promise.resolve(u);
+    return rest('sg_profiles?select=id,email,name,student_id,role&id=eq.' + u.id).then(function (rows) {
+      var p = rows && rows[0];
+      if (!p) return u;
+      var c = read(); if (c) { c.user = p; write(c); }
+      return p;
+    });
+  }
+
+  function rest(path) {
+    return token().then(function (tok) {
+      if (!tok) return null;
+      return fetch(CFG.url + '/rest/v1/' + path, {
+        headers: { apikey: CFG.anon, Authorization: 'Bearer ' + tok }
+      }).then(function (r) { return r.ok ? r.json().catch(function () { return null; }) : null; });
+    }).catch(function () { return null; });
+  }
+
+  /* Edge Function 호출. rest() 와 달리 실패를 삼키지 않는다 — 리뷰가 닫힌 것과
+     서버에 못 닿은 것은 학생에게 다른 말이어야 하기 때문이다. */
+  function fn(name, body) {
+    return token().then(function (tok) {
+      if (!tok) throw new Error('signed out');
+      return fetch(CFG.url + '/functions/v1/' + name, {
+        method: 'POST',
+        headers: { apikey: CFG.anon, Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {})
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok) { var e = new Error(j.message || ('HTTP ' + r.status)); e.code = j.error; throw e; }
+          return j;
+        });
+      });
+    });
+  }
+
+  return { signIn: signIn, signOut: signOut, token: token, user: user, profile: profile,
+           rest: rest, fn: fn };
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   채점 — 저장된 답안 + 서버가 내려준 문항으로 문항별 결과를 다시 편다.
+   sg2 의 assets/sg-results.js 와 같은 규칙을 쓴다(대소문자·공백·끝 마침표 무시).
+
+   문항과 정답은 sg-review 가 준다. 기한이 지나면 빈 배열이 오고, 그때 이 화면은
+   '내 답' 조차 문항에 붙이지 못한다 — 붙일 문항이 없기 때문이다.
+   ───────────────────────────────────────────────────────────── */
+var GRADE = (function () {
+  var SECTION = { R: 'reading', L: 'listening', S: 'speaking', W: 'writing' };
+  var KNOWN = { reading: 1, listening: 1, speaking: 1, writing: 1 };
+
+  function norm(v) {
+    return String(v == null ? '' : v).trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.]$/, '');
+  }
+  function hit(given, key) {
+    if (key == null) return null;                     // 채점 기준 없음 = 사람이 채점하는 문항
+    var list = Object.prototype.toString.call(key) === '[object Array]' ? key : [key];
+    for (var i = 0; i < list.length; i++) if (norm(given) === norm(list[i])) return true;
+    return false;
+  }
+  function sectionOf(qid) { return SECTION[String(qid).charAt(0).toUpperCase()] || 'other'; }
+  function valueOf(a, qid) {
+    var rec = a && a[qid];
+    if (rec == null) return '';
+    return (typeof rec === 'object' && 'v' in rec) ? rec.v : rec;
+  }
+
+  /**
+   * 서버가 준 문항 + 저장된 답안 → 화면이 그릴 행.
+   * @param questions sg-review 의 questions (기한이 지났으면 빈 배열)
+   * @param answers   sg_results.answers
+   */
+  function rows(questions, answers) {
+    return (questions || []).map(function (q, i) {
+      var qid = q.question_id;
+      var key = (q.answer === undefined) ? null : q.answer;
+      var name = String(q.section || '').toLowerCase();
+      return {
+        qid: qid,
+        no: q.ord || q.no || (i + 1),
+        section: KNOWN[name] ? name : sectionOf(qid),
+        prompt: q.prompt || '',
+        given: valueOf(answers, qid),
+        key: key,
+        ok: hit(valueOf(answers, qid), key)
+      };
+    });
+  }
+
+  return { rows: rows, sectionOf: sectionOf };
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   TOEFL 1~6 밴드 — sg2/assets/sg-band.js 의 사본
+   ─────────────────────────────────────────────────────────────
+   ETS 는 2026-01 부터 네 영역과 종합을 1.0~6.0(0.5 단위)로 보고한다. 종합은 옛
+   스케일처럼 합이 아니라 **평균**이다.
+
+   두 단계를 지나며 근거의 등급이 다르다.
+     1) 원점수 → 0~30 환산   ⚠️가설(검증필요). 정답률 비례.
+     2) 0~30 → 1~6 밴드      ✅ETS 공식 표.
+
+   ⚠️ 이 표는 세 곳에 있다 — 여기 · sg2/assets/sg-band.js ·
+   app/scoring/toefl6_band_table.json. 고칠 때는 셋을 함께 고칠 것.
+   studyground/tests/test_band_table.js 가 어긋나면 실패한다.
+   ───────────────────────────────────────────────────────────── */
+var BAND = (function () {
+  /* 출처: ETS, TOEFL iBT Score Scale Update (2026-08-11 확인)
+     https://www.ets.org/toefl/institutions/ibt/score-scale-update.html
+     각 행은 [해당 밴드의 하한, 밴드]. 높은 구간부터 훑는다. */
+  var TOEFL6 = {
+    reading:   [[29,6],[27,5.5],[24,5],[22,4.5],[18,4],[12,3.5],[6,3],[4,2.5],[3,2],[2,1.5],[0,1]],
+    listening: [[28,6],[26,5.5],[22,5],[20,4.5],[17,4],[13,3.5],[9,3],[6,2.5],[4,2],[2,1.5],[0,1]],
+    writing:   [[29,6],[27,5.5],[24,5],[21,4.5],[17,4],[15,3.5],[13,3],[11,2.5],[7,2],[3,1.5],[0,1]],
+    speaking:  [[28,6],[27,5.5],[25,5],[23,4.5],[20,4],[18,3.5],[16,3],[13,2.5],[10,2],[5,1.5],[0,1]]
+  };
+  var CEFR6 = { '6.0':'C2','5.5':'C1','5.0':'C1','4.5':'B2','4.0':'B2','3.5':'B1',
+                '3.0':'B1','2.5':'A2','2.0':'A2','1.5':'A1','1.0':'A1' };
+  var SCALED_MAX = 30, TASK_MAX = 5;
+  var SKILLS = ['reading', 'listening', 'writing', 'speaking'];
+
+  function halfUp(x) { return Math.floor(Number(x) + 0.5); }
+  function toHalf(x) { return Math.floor(Number(x) * 2 + 0.5) / 2; }
+  function num(v) { return typeof v === 'number' && isFinite(v); }
+
+  /** ⚠️가설(검증필요) — 정답률을 그대로 0~30 으로 편다. */
+  function scaledFromRaw(correct, total) {
+    var t = Number(total) || 0;
+    if (!t) return 0;
+    var ratio = Number(correct) / t;
+    if (!(ratio > 0)) ratio = 0;
+    if (ratio > 1) ratio = 1;
+    return halfUp(ratio * SCALED_MAX);
+  }
+
+  /** 0~30 → 밴드. 바닥은 1.0 이다(ETS 표에서 0점도 밴드 1). */
+  function bandForScaled(scaled, skill) {
+    var rows = TOEFL6[String(skill || '').toLowerCase()];
+    var n = num(Number(scaled)) ? Number(scaled) : 0;
+    if (!rows) return toHalf(1 + Math.max(0, Math.min(1, n / SCALED_MAX)) * 5);
+    for (var i = 0; i < rows.length; i++) if (n >= rows[i][0]) return rows[i][1];
+    return rows[rows.length - 1][1];
+  }
+
+  /** 문항이 0 개면 밴드 1 이 아니라 null 이다 — 채점 전과 전부 오답은 다른 말이다. */
+  function sectionBand(correct, total, skill) {
+    if (!(Number(total) > 0)) return null;
+    return bandForScaled(scaledFromRaw(correct, total), skill);
+  }
+
+  /** 산출형: 과제 점수(0~5) 목록 → 밴드. */
+  function taskBand(tasks, skill) {
+    var got = 0, top = 0, n = 0;
+    (tasks || []).forEach(function (t) {
+      if (!t || !num(Number(t.score))) return;
+      got += Number(t.score); top += TASK_MAX; n += 1;
+    });
+    if (!n || top <= 0) return null;
+    return bandForScaled(halfUp(Math.max(0, Math.min(1, got / top)) * SCALED_MAX), skill);
+  }
+
+  /** 종합 = 채점된 영역 밴드의 평균, 0.5 단위(.25 는 올림). */
+  function overall(bands) {
+    var sum = 0, n = 0;
+    SKILLS.forEach(function (s) {
+      if (bands[s] === null || bands[s] === undefined || !num(Number(bands[s]))) return;
+      sum += Number(bands[s]); n += 1;
+    });
+    return n ? toHalf(sum / n) : null;
+  }
+
+  function fmt(b) { return (b === null || b === undefined || !num(Number(b))) ? '—' : Number(b).toFixed(1); }
+  function cefr(b) { return CEFR6[fmt(b)] || ''; }
+
+  /** 응시 한 건 + W·S 채점 행 → 화면이 그릴 전부. sg-band.js 의 of() 와 같은 모양. */
+  function of(r, taskRows) {
+    r = r || {};
+    var by = r.by_section || {}, byTask = { writing: [], speaking: [] };
+    (taskRows || []).forEach(function (t) {
+      var skill = String((t && t.skill) || '').toLowerCase();
+      if (!byTask[skill]) return;
+      var score = (t.teacher_score === null || t.teacher_score === undefined) ? t.ai_score : t.teacher_score;
+      if (score === null || score === undefined || score === '') return;
+      byTask[skill].push({ score: Number(score), confirmed: !!t.confirmed_at, question_id: t.question_id || '',
+                           /* 스피킹은 녹음이 답이다. 채점기가 적어 둔 자리를 그대로 들고 간다. */
+                           media: t.media_path || '' });
+    });
+
+    var sections = {}, bands = {}, pending = [];
+    SKILLS.forEach(function (s) {
+      var band = null, status = 'pending', detail = null;
+      if (s === 'writing' || s === 'speaking') {
+        var list = byTask[s];
+        band = taskBand(list, s);
+        if (band !== null) {
+          /* AI 점수가 곧 성적이다. confirmed 는 선생님이 손본 자리를 세는 값일 뿐,
+             성적표에 점수를 실을지 말지를 가르지 않는다(sg-band.js 와 같은 규칙). */
+          var ok = list.filter(function (t) { return t.confirmed; }).length;
+          status = ok === list.length ? 'final' : 'scored';
+          /* 산출형의 원점수는 '받은 점수 / 만점' 이다 — 과제 하나가 5점. */
+          var got = list.reduce(function (a, t) { return a + Number(t.score); }, 0);
+          detail = { tasks: list.length, confirmed: ok, got: got, top: list.length * TASK_MAX,
+                     scaled: halfUp(Math.max(0, Math.min(1, got / (list.length * TASK_MAX))) * SCALED_MAX) };
+        }
+      } else if (by[s]) {
+        band = sectionBand(by[s].score, by[s].total, s);
+        if (band !== null) {
+          status = 'scored';
+          detail = { correct: Number(by[s].score) || 0, total: Number(by[s].total) || 0,
+                     scaled: scaledFromRaw(by[s].score, by[s].total) };
+        }
+      }
+      if (band === null) pending.push(s); else bands[s] = band;
+      sections[s] = { band: band, status: status, detail: detail,
+                      tasks: (s === 'writing' || s === 'speaking') ? byTask[s] : null };
+    });
+
+    var total = overall(bands);
+    return { sections: sections, overall: total, cefr: total === null ? '' : cefr(total),
+             pending: pending, conventional: conventional(sections) };
+  }
+
+  /** 옛 눈금(/120) — 네 영역이 모두 채점된 응시에서만 말이 된다. 아니면 null. */
+  function conventional(sections) {
+    var sum = 0;
+    for (var i = 0; i < SKILLS.length; i++) {
+      var d = sections[SKILLS[i]] && sections[SKILLS[i]].detail;
+      if (!d || !num(Number(d.scaled))) return null;
+      sum += Number(d.scaled);
+    }
+    return sum;
+  }
+
+  return { SKILLS: SKILLS, TOEFL6: TOEFL6, TASK_MAX: TASK_MAX, scaledFromRaw: scaledFromRaw,
+           bandForScaled: bandForScaled, sectionBand: sectionBand, taskBand: taskBand,
+           overall: overall, fmt: fmt, cefr: cefr, of: of, conventional: conventional };
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   화면
+   ───────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var LAB = { reading: ['Reading', '리딩'], listening: ['Listening', '리스닝'],
+              writing: ['Writing', '라이팅'], speaking: ['Speaking', '스피킹'], other: ['Other', '기타'] };
+  var SHORT = { reading: 'R', listening: 'L', writing: 'W', speaking: 'S' };
+  var ALL = [], SETS = [], ME = null, OPEN = null, KIND = 'full', TAB = 'summary';
+
+  /* 영역 아이콘 — 화면 어디서나 같은 그림이어야 한 영역으로 읽힌다. */
+  var ICON = {
+    reading: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+    listening: '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>',
+    writing: '<path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/>',
+    speaking: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/>',
+    summary: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+    lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+  };
+  function icon(name, size) {
+    return '<svg width="' + (size || 17) + '" height="' + (size || 17) + '" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' +
+      (ICON[name] || '') + '</svg>';
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function bi(en, ko) { return '<span data-en>' + esc(en) + '</span><span data-ko>' + esc(ko) + '</span>'; }
+  function p2(n) { return (n < 10 ? '0' : '') + n; }
+  function when(iso, withTime) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d)) return '—';
+    var s = d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+    return withTime ? s + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()) : s;
+  }
+  function slash(iso) {                       // 07/09/2026 — 최고 점수 밑줄용
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d)) return '';
+    return p2(d.getMonth() + 1) + '/' + p2(d.getDate()) + '/' + d.getFullYear();
+  }
+  var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function longWhen(iso) {                    // Aug 7, 2026, 05:00 PM — 리뷰 머리글용
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d)) return '—';
+    var h = d.getHours(), ap = h < 12 ? 'AM' : 'PM';
+    h = h % 12; if (!h) h = 12;
+    return MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() +
+           ', ' + p2(h) + ':' + p2(d.getMinutes()) + ' ' + ap;
+  }
+  function cut(s, n) { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; }
+
+  /* session → W·S 채점 행. load() 가 한 번만 읽어 채운다. */
+  var TASKS = {}, VIEW = {};
+  function viewOf(r) {
+    if (!VIEW[r.session]) VIEW[r.session] = BAND.of(r, TASKS[r.session] || []);
+    return VIEW[r.session];
+  }
+
+  /* 응시가 몇 영역을 건드렸는지 — 전체 시험과 영역별 시험을 가르는 기준이다.
+     sg_results.mode 는 채점 방식(offline/online)이라 여기에 쓸 수 없다. */
+  function touched(r) {
+    var by = r.by_section || {}, n = 0;
+    BAND.SKILLS.forEach(function (s) {
+      if (by[s] || (viewOf(r).sections[s].tasks || []).length) n += 1;
+    });
+    return n;
+  }
+  function isFull(r) { return touched(r) >= 3; }
+
+  /* ── 점수 눈금 한 칸 ──────────────────────────────────────
+     막대는 밴드 1.0~6.0 을 0~100% 로 편다. 1.0 이 바닥이므로 (b-1)/5 다. */
+  function pct(band) {
+    var b = Number(band);
+    if (!isFinite(b)) return 0;
+    return Math.max(0, Math.min(100, (b - 1) / 5 * 100));
+  }
+  function meter(band) {
+    var p = pct(band);
+    var empty = (band === null || band === undefined);
+    return '<div class="meter' + (empty ? ' flat' : '') + '">' +
+      (empty ? '' : '<i style="width:' + p + '%"></i><b style="left:' + p + '%"></b>') + '</div>';
+  }
+  /**
+   * 한 칸 = 제목 + 막대 + 값 + 밑줄.
+   * @param head  제목 HTML   @param band 1~6 또는 null
+   * @param sub   밑줄 HTML(없으면 생략)  @param cefr 값 옆 작은 등급
+   */
+  function cell(head, band, sub, cefr, cls) {
+    return '<div class="' + (cls || '') + '">' +
+      '<div class="meter-h">' + head + '</div>' + meter(band) +
+      '<div class="val">' + (band === null || band === undefined ? '—' : BAND.fmt(band)) +
+        '<small> / 6.0</small>' + (cefr ? '<span class="cefr">' + esc(cefr) + '</span>' : '') + '</div>' +
+      (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+  }
+  function secHead(s) { return icon(s, 15) + '<span>' + LAB[s][0] + '</span>'; }
+
+  /* ── 대시보드 · 확정 성적 세트 ──────────────────────────
+     시험을 다시 친 학생은 응시가 여러 건이다. 그중 어느 회차를 성적으로 삼을지는
+     선생님이 동의하고 관리자가 확정한다(sg2/admin-score-sets.html → sg_score_sets).
+
+     세트는 점수를 복사해 두지 않는다 — 영역마다 "어느 응시" 만 가리킨다. 그래서
+     여기서 그 응시들을 다시 합쳐 계산한다. 나중에 선생님이 라이팅 점수를 고치면
+     성적표도 따라 고쳐진다는 뜻이다. 확정 당시의 값은 snapshot 에 남아 있고 화면은
+     쓰지 않는다 — 학생에게 보여야 할 것은 지금의 점수다. */
+  function composeSet(v) {
+    var picks = (v && v.picks) || {};
+    var row = { by_section: {}, scale: 'toefl6' };
+    var tasks = [], from = {};
+    BAND.SKILLS.forEach(function (s) {
+      var p = picks[s];
+      var sess = p && (typeof p === 'string' ? p : p.session);
+      if (!sess) return;
+      var src = rowOf(sess);
+      if (!src) return;                       // 지워졌거나 내가 못 읽는 응시
+      if (s === 'reading' || s === 'listening') {
+        var by = (src.by_section || {})[s];
+        if (by) row.by_section[s] = by;
+      } else {
+        (TASKS[sess] || []).forEach(function (t) {
+          if (String((t || {}).skill || '').toLowerCase() === s) tasks.push(t);
+        });
+      }
+      from[s] = src;
+    });
+    return { view: BAND.of(row, tasks), from: from };
+  }
+
+  function paintOfficial() {
+    var v = SETS[0];
+    if (!v) { $('official-card').classList.add('hide'); return; }
+    var c = composeSet(v);
+
+    var cells = BAND.SKILLS.map(function (s) {
+      var src = c.from[s];
+      return cell(secHead(s), c.view.sections[s].band,
+        src ? esc(src.set_code || '') + ' · ' + slash(src.submitted_at)
+            : bi('not included', '포함되지 않음'));
+    }).join('') + '<div class="sep"></div>';
+
+    var sub = c.view.conventional === null || c.view.conventional === undefined
+      ? bi('some sections still being scored', '일부 영역 채점 중')
+      : '<b style="color:var(--ink-2)">' + c.view.conventional + '/120</b><span class="conv">Conventional</span>';
+
+    $('official-row').innerHTML = cells +
+      cell('<span>Total</span>', c.view.overall, sub, c.view.cefr, 'total-cell');
+
+    $('official-note').innerHTML =
+      (v.label ? '<b>' + esc(v.label) + '</b> · ' : '') +
+      bi('Confirmed ' + when(v.created_at), when(v.created_at) + ' 확정') +
+      (v.approved_name ? ' · ' + bi('approved by ' + v.approved_name, '동의 ' + v.approved_name) : '') +
+      (v.approved_note ? ' · ' + esc(v.approved_note) : '');
+    $('official-card').classList.remove('hide');
+  }
+
+  /* ── 대시보드 · 최고 점수 ────────────────────────────── */
+  function paintBest() {
+    /* 영역별 최고는 응시 종류를 가리지 않는다 — 영역만 따로 본 시험도 내 최고다. */
+    var best = {}, bestTotal = null;
+    ALL.forEach(function (r) {
+      var v = viewOf(r);
+      BAND.SKILLS.forEach(function (s) {
+        var b = v.sections[s].band;
+        if (b === null) return;
+        if (!best[s] || b > best[s].band) best[s] = { band: b, row: r };
+      });
+      /* 종합의 최고는 네 영역이 다 채점된 응시에서만 고른다 — 리딩만 본 시험의
+         '종합' 은 리딩 점수일 뿐이라, 그대로 두면 총점이 부풀어 보인다.
+         완결된 응시가 하나도 없을 때만 반쪽 응시로 물러선다. */
+      if (v.overall === null) return;
+      var done = !v.pending.length;
+      if (!bestTotal || (done && !bestTotal.done) ||
+          (done === bestTotal.done && v.overall > bestTotal.view.overall)) {
+        bestTotal = { view: v, row: r, done: done };
+      }
+    });
+
+    var cells = BAND.SKILLS.map(function (s) {
+      var b = best[s];
+      return cell(secHead(s), b ? b.band : null,
+        b ? esc(b.row.set_code || '') + ' · ' + slash(b.row.submitted_at) : bi('not scored yet', '채점 전'));
+    }).join('') + '<div class="sep"></div>';
+
+    var sub;
+    if (!bestTotal) sub = bi('no completed test yet', '완료된 응시 없음');
+    else if (bestTotal.view.conventional === null) sub = bi('some sections still being scored', '일부 영역 채점 중');
+    else sub = '<b style="color:var(--ink-2)">' + bestTotal.view.conventional + '/120</b>' +
+              '<span class="conv">Conventional</span>';
+
+    $('best-row').innerHTML = cells +
+      cell('<span>Total</span>', bestTotal ? bestTotal.view.overall : null, sub,
+           bestTotal ? bestTotal.view.cefr : '', 'total-cell');
+  }
+
+  /* ── 대시보드 · 목록 ─────────────────────────────────── */
+  function shown() {
+    var set = $('f-set').value;
+    return ALL.filter(function (r) {
+      return (KIND === 'full' ? isFull(r) : !isFull(r)) && (!set || r.set_code === set);
+    });
+  }
+  function statusOf(v) {
+    if (!v.pending.length) return '<span class="status">✓ ' + bi('Done', '완료') + '</span>';
+    return '<span class="status wait">' + bi('Scoring', '채점 중') + '</span>';
+  }
+  function bandCell(band, cls) {
+    return '<span class="band' + (cls || '') + '">' +
+      (band === null ? '—' : BAND.fmt(band)) + ' <small>/ 6.0</small></span>';
+  }
+  function paintList() {
+    var list = shown();
+    var label = KIND === 'full' ? 'Full test records' : 'Section test records';
+    $('list-h').innerHTML = bi(label + ' (' + list.length + ')',
+                               (KIND === 'full' ? '전체 시험 기록' : '영역별 시험 기록') + ' (' + list.length + ')');
+
+    $('rows').innerHTML = list.length ? list.map(function (r) {
+      var v = viewOf(r);
+      return '<tr>' +
+        '<td><span class="test-no">' + esc(r.set_code || '—') + '</span></td>' +
+        '<td>' + when(r.submitted_at) + '</td>' +
+        '<td>' + bandCell(v.overall, ' tot') + '</td>' +
+        BAND.SKILLS.map(function (s) { return '<td>' + bandCell(v.sections[s].band) + '</td>'; }).join('') +
+        '<td>' + statusOf(v) + '</td>' +
+        '<td class="no-print" style="white-space:nowrap">' +
+          '<a class="btn brand sm" href="#/review/' + esc(r.session) + '">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+          'stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
+          '<circle cx="12" cy="12" r="3"/></svg>' + bi('Review', '리뷰') + '</a> ' +
+          /* 성적표는 리뷰를 거치지 않고도 한 번에 닿아야 한다 — 인쇄하러 오는 사람은
+             문항을 보러 온 것이 아니다. */
+          '<a class="btn sm" href="#/report/' + esc(r.session) + '">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+          'stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 ' +
+          '2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>' +
+          bi('Report', '성적표') + '</a></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="9" class="muted" style="padding:28px">' +
+      bi('No records here yet.', '아직 기록이 없습니다.') + '</td></tr>';
+  }
+  function fillSets() {
+    var seen = {}, opts = '<option value="">All tests</option>';
+    ALL.forEach(function (r) {
+      if (!r.set_code || seen[r.set_code]) return;
+      seen[r.set_code] = true;
+      opts += '<option value="' + esc(r.set_code) + '">' + esc(r.set_code) + '</option>';
+    });
+    $('f-set').innerHTML = opts;
+  }
+
+  /* ── 리뷰 ──────────────────────────────────────────────
+     문항과 정답은 서버에게 물어야 한다. 응시 한 건당 한 번만 묻고 붙들어 둔다.
+     돌아오는 것은 세 가지다.
+       open  … 기한이 남았거나 관리자가 열어 준 상태. rows 가 채워져 온다.
+       닫힘  … rows 가 비어 있다. 화면이 감춘 게 아니라 서버가 주지 않은 것이다.
+       error … 서버에 못 닿았다. 위 둘과 섞어 보이면 학생이 오해한다. */
+  var ROWS = {};                               // session → { open, until, rows, ... }
+  function questions(r) {
+    if (ROWS[r.session]) return Promise.resolve(ROWS[r.session]);
+    return AUTH.fn(CFG.reviewFn, { session: r.session }).then(function (j) {
+      var out = {
+        open: j.open === true,
+        until: j.until || null,
+        grantedUntil: j.granted_until || null,
+        unlocked: j.unlocked === true,
+        staff: j.staff === true,
+        rows: GRADE.rows(j.questions || [], r.answers || {})
+      };
+      ROWS[r.session] = out;
+      return out;
+    }, function (err) {
+      /* 붙들어 두지 않는다 — 네트워크가 돌아오면 다시 물어야 한다. */
+      return { open: false, error: err.message || 'error', rows: [], until: null };
+    });
+  }
+  function rateOf(sec) {
+    var d = sec.detail;
+    if (!d || !d.total) return '';
+    return Math.round(d.correct / d.total * 100) + '% ' + 'Correct Rate';
+  }
+  function rawOf(sec, s) {
+    var d = sec.detail;
+    if (!d) return null;
+    if (s === 'writing' || s === 'speaking') {
+      return 'Raw Score: ' + d.got.toFixed(2) + ' out of ' + d.top;
+    }
+    return 'Raw Score: ' + d.correct + ' out of ' + d.total;
+  }
+
+  function paintReviewHead(r) {
+    var v = viewOf(r);
+    $('rev-set').textContent = r.set_code || '—';
+    $('rev-when').textContent = (isFull(r) ? 'Full Test' : 'Section Test') + ' · ' + longWhen(r.submitted_at);
+    $('rev-me').textContent = (ME && (ME.email || ME.student_id || ME.name)) || '';
+    $('go-card').href = '#/report/' + encodeURIComponent(r.session);
+
+    var tabs =[{ id: 'summary', lab: 'Summary', on: true }].concat(BAND.SKILLS.map(function (s) {
+      return { id: s, lab: LAB[s][0], on: v.sections[s].band !== null || (r.by_section || {})[s] };
+    }));
+    $('rev-tabs').innerHTML = tabs.map(function (t) {
+      return '<button class="rev-tab' + (TAB === t.id ? ' on' : '') + '"' + (t.on ? '' : ' disabled') +
+        ' data-tab="' + t.id + '">' + icon(t.id, 16) + '<span>' + t.lab + '</span></button>';
+    }).join('');
+    [].forEach.call($('rev-tabs').querySelectorAll('[data-tab]'), function (b) {
+      b.onclick = function () { goTab(r, b.getAttribute('data-tab')); };
+    });
+
+    /* 요약 줄 — 종합이 앞, 네 영역이 뒤. 대시보드의 눈금과 같은 그림이다. */
+    var conv = v.conventional === null
+      ? bi('scoring in progress', '채점 중')
+      : '<b style="color:var(--ink-2)">' + v.conventional + '/120</b><span class="conv">Conventional</span>';
+    $('rev-row').innerHTML =
+      cell('<span>Overall score</span>', v.overall, conv, v.cefr, 'total-cell') +
+      '<div class="sep"></div>' +
+      BAND.SKILLS.map(function (s) {
+        var sec = v.sections[s];
+        var sub = sec.band === null ? bi('not scored yet', '채점 전')
+          : (s === 'reading' || s === 'listening') ? esc(rateOf(sec))
+          : (sec.status === 'final' ? bi('teacher-adjusted', '교사 확정')
+                                    : bi('AI-scored', 'AI 채점'));
+        return cell(secHead(s), sec.band, sub);
+      }).join('');
+  }
+
+  /** 리뷰가 언제까지 열려 있는지 한 줄. 학생이 먼저 알아야 할 사실이다. */
+  function paintWindow(r) {
+    var host = $('rev-window');
+    host.innerHTML = '';
+    questions(r).then(function (q) {
+      if (route().session !== r.session) return;      // 그 사이 다른 응시로 옮겨 갔다
+      if (q.error) { host.innerHTML = ''; return; }   // 오류는 문항 자리에서 말한다
+      if (!q.open) {
+        host.className = 'rev-note shut no-print';
+        host.innerHTML = icon('lock', 15) +
+          bi('Questions and answers closed on ', '문항과 정답은 ') +
+          '<span class="when">' + when(q.until) + '</span>' +
+          bi(' — ask an administrator to reopen.', ' 에 닫혔습니다 — 관리자에게 요청하세요.');
+        return;
+      }
+      host.className = 'rev-note no-print';
+      host.innerHTML = icon('clock', 15) +
+        (q.unlocked
+          ? bi('Reopened by an administrator until ', '관리자가 다시 열어 둔 기한: ') +
+            '<span class="when">' + when(q.grantedUntil) + '</span>'
+          : bi('Questions and answers stay open until ', '문항과 정답은 ') +
+            '<span class="when">' + when(q.until) + '</span>' +
+            bi('', ' 까지 볼 수 있습니다')) +
+        (q.staff ? ' <span class="chip">staff</span>' : '');
+    });
+  }
+
+  function paintSummary(r) {
+    var v = viewOf(r);
+    $('rev-body').innerHTML = '<div id="rev-window"></div>' + BAND.SKILLS.map(function (s) {
+      var sec = v.sections[s];
+      var raw = rawOf(sec, s);
+      return '<div class="sec-card" data-sec="' + s + '">' +
+        '<button class="disc" data-toggle="' + s + '">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" ' +
+          'stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>' +
+          bi('Details', '자세히') + '</button>' +
+        '<span class="name">' + icon(s, 20) + LAB[s][0] + '</span>' +
+        '<span class="raw">' + (raw ? esc(raw) : bi('Not scored yet', '아직 채점 전')) + '</span>' +
+        (sec.band === null ? '' :
+          '<button class="btn brand sm go" data-go="' + s + '">' +
+            bi('Review All', '전체 보기') + ' →</button>') +
+        '<div class="sec-body hide" id="body-' + s + '"></div>' +
+      '</div>';
+    }).join('');
+
+    paintWindow(r);
+
+    [].forEach.call($('rev-body').querySelectorAll('[data-go]'), function (b) {
+      b.onclick = function () { goTab(r, b.getAttribute('data-go')); };
+    });
+    [].forEach.call($('rev-body').querySelectorAll('[data-toggle]'), function (b) {
+      b.onclick = function () {
+        var s = b.getAttribute('data-toggle');
+        var card = b.parentNode, body = $('body-' + s);
+        var open = card.classList.toggle('open');
+        body.classList.toggle('hide', !open);
+        if (open && !body.getAttribute('data-filled')) {
+          body.setAttribute('data-filled', '1');
+          sectionBody(r, s, body);
+        }
+      };
+    });
+  }
+
+  /* ── 녹음 ────────────────────────────────────────────────
+     스피킹의 답은 글이 아니라 소리다. 표에 남는 'idb:set9-S1-q01' 은 응시한 그 기기의
+     IndexedDB 를 가리키는 쪽지일 뿐이라, 다른 컴퓨터에서 여는 이 화면에서는 아무 뜻도
+     없다. 들려줄 수 있는 사본은 제출 때 올라간 비공개 버킷의 파일 하나고, 서명 URL 로만
+     열린다 — 자기 폴더만 서명할 수 있으므로 남의 녹음은 애초에 열리지 않는다(Storage RLS).
+
+     자리는 채점기(api/score.js)가 media_path 에 적어 둔다. 채점 전이거나 옛 행이라
+     비어 있으면 업로더의 규칙({owner}/{session}/{qid}.{ext})으로 직접 찾는다 —
+     확장자는 기기의 MediaRecorder 가 고르는 대로라 후보를 돈다. sg2 의
+     assets/sg-review-speaking.js 와 같은 규칙이다. */
+  var REC = (function () {
+    var EXTS = ['webm', 'm4a', 'ogg', 'mp3', 'wav'];
+
+    function paths(media, owner, session, qid) {
+      var out = [];
+      if (media) out.push(media);
+      if (owner && session && qid) {
+        EXTS.forEach(function (x) {
+          var guess = owner + '/' + session + '/' + qid + '.' + x;
+          if (guess !== media) out.push(guess);
+        });
+      }
+      return out;
+    }
+
+    function sign(path) {
+      return AUTH.token().then(function (tok) {
+        if (!tok) return null;
+        return fetch(CFG.url + '/storage/v1/object/sign/toefl-recordings/' +
+                     path.split('/').map(encodeURIComponent).join('/'), {
+          method: 'POST',
+          headers: { apikey: CFG.anon, Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ expiresIn: 3600 })
+        }).then(function (res) { return res.ok ? res.json().catch(function () { return null; }) : null; })
+          .then(function (j) { return j && j.signedURL ? CFG.url + '/storage/v1' + j.signedURL : null; });
+      }).catch(function () { return null; });
+    }
+
+    /** 후보를 앞에서부터 하나씩 열어 본다. 다 실패하면 null — 버킷에 파일이 없다는 뜻이다. */
+    function open(list) {
+      var i = 0;
+      function next() {
+        if (i >= list.length) return Promise.resolve(null);
+        return sign(list[i++]).then(function (url) { return url || next(); });
+      }
+      return next();
+    }
+
+    return { paths: paths, open: open };
+  })();
+
+  /** 한 스피킹 과제의 녹음을 그 자리에 편다. 두 번 눌러도 한 번만 부른다. */
+  function playRecording(r, t, slot) {
+    if (!slot || slot.getAttribute('data-on')) return;
+    slot.setAttribute('data-on', '1');
+    slot.innerHTML = '<span class="muted">' + bi('Looking for the recording…', '녹음을 찾는 중…') + '</span>';
+    REC.open(REC.paths(t.media, r.owner, r.session, t.question_id)).then(function (url) {
+      if (!url) {
+        slot.removeAttribute('data-on');       // 네트워크 탓일 수도 있다 — 다시 눌러 볼 수 있게 둔다
+        slot.innerHTML = '<span class="muted">' +
+          bi('The recording could not be opened. Ask an administrator.',
+             '녹음을 열 수 없습니다. 관리자에게 문의하세요.') + '</span>';
+        return;
+      }
+      slot.innerHTML = '';
+      var a = document.createElement('audio');
+      a.controls = true;
+      a.src = url;
+      slot.appendChild(a);
+      a.play().catch(function () {});          // 자동재생이 막히면 재생기는 그대로 남는다
+    });
+  }
+
+  /* 한 영역의 속살 — 객관식은 문항 표, 산출형은 과제별 점수. */
+  function sectionBody(r, s, host) {
+    var v = viewOf(r);
+    if (s === 'writing' || s === 'speaking') {
+      var tasks = v.sections[s].tasks || [];
+      var speak = s === 'speaking';
+      host.innerHTML = tasks.length ? tasks.map(function (t, i) {
+        var given = (r.answers || {})[t.question_id];
+        if (given && typeof given === 'object' && 'v' in given) given = given.v;
+        /* 'idb:…' 는 답이 아니라 기기 안 녹음을 가리키는 쪽지다. 재생기가 그 자리를 대신한다. */
+        var note = /^idb:/.test(String(given || ''));
+        return '<div class="task' + (speak ? ' playable' : '') + '"' +
+            (speak ? ' data-task="' + i + '" title="Play my recording"' : '') + '>' +
+          '<span class="qid">' + esc(t.question_id || '—') + '</span>' +
+          '<span class="sc">' + Number(t.score).toFixed(2) + ' <small>/ ' + BAND.TASK_MAX + '</small></span>' +
+          '<span class="status">' +
+            (t.confirmed ? bi('teacher', '교사 확정') : bi('AI', 'AI 채점')) + '</span>' +
+          (speak ? '<span class="play">' + icon('speaking', 14) +
+            bi('Play recording', '녹음 듣기') + '</span>' : '') +
+          (given && !note ? '<div class="ans">' + esc(cut(given, 400)) + '</div>' : '') +
+          (speak ? '<div class="rec"></div>' : '') +
+        '</div>';
+      }).join('') : '<p class="muted" style="padding:14px 0;font-size:13.5px">' +
+        bi('No task score yet.', '아직 과제 점수가 없습니다.') + '</p>';
+      if (speak) {
+        [].forEach.call(host.querySelectorAll('[data-task]'), function (el) {
+          el.onclick = function (e) {
+            /* 재생기 자체를 누른 것(막대·버튼)은 재생기에게 맡긴다. */
+            if (e.target && e.target.closest && e.target.closest('audio')) return;
+            playRecording(r, tasks[Number(el.getAttribute('data-task'))], el.querySelector('.rec'));
+          };
+        });
+      }
+      return;
+    }
+    host.innerHTML = '<p class="muted" style="padding:14px 0;font-size:13.5px">' + bi('Loading…', '불러오는 중…') + '</p>';
+    questions(r).then(function (q) {
+      host.innerHTML = qTable(q, s, 6);
+    });
+  }
+
+  /** 닫힌 리뷰·오류에 붙일 안내. 둘은 다른 말이라 문구도 다르다. */
+  function lockNote(q) {
+    if (q.error) {
+      return '<div class="locked"><b>' + bi('Could not reach the server.', '서버에 닿지 못했습니다.') + '</b>' +
+        '<p>' + bi('Your scores above are from your last visit. Try again in a moment.',
+                   '위의 점수는 지난번에 받아 둔 값입니다. 잠시 뒤 다시 시도하세요.') + '</p></div>';
+    }
+    return '<div class="locked">' +
+      '<b>' + icon('lock', 15) + ' ' + bi('Questions and answers are closed', '문항과 정답은 닫혔습니다') + '</b>' +
+      '<p>' + bi('Review stays open for one week after your teacher goes over the test' +
+                 (q.until ? ' — this one closed on ' + when(q.until) + '.' : '.'),
+                 '리뷰는 선생님과 리뷰한 뒤 1주일 동안만 열려 있습니다' +
+                 (q.until ? ' — 이 응시는 ' + when(q.until) + ' 에 닫혔습니다.' : '.')) + '</p>' +
+      '<p>' + bi('Your scores stay here. To see the questions again, ask an administrator to reopen this test.',
+                 '점수는 그대로 남습니다. 문항을 다시 보려면 관리자에게 열어 달라고 요청하세요.') + '</p>' +
+      '</div>';
+  }
+
+  /** 문항 표. limit 을 주면 앞에서 그만큼만 보여주고 나머지는 숫자로 알린다. */
+  function qTable(q, section, limit) {
+    if (!q.open) return lockNote(q);
+    var rows = q.rows.filter(function (x) { return x.section === section; });
+    var keyed = CFG.showAnswerKey && rows.some(function (x) { return x.key !== null; });
+    if (!rows.length) {
+      return '<p class="muted" style="padding:14px 0;font-size:13.5px">' +
+        bi('No saved answers for this section.', '이 영역에는 저장된 답안이 없습니다.') + '</p>';
+    }
+    var use = limit ? rows.slice(0, limit) : rows;
+    var note = q.unlocked ? '<p class="muted" style="padding:12px 0;font-size:13px">' +
+      bi('Reopened by an administrator until ' + when(q.grantedUntil) + '.',
+         '관리자가 ' + when(q.grantedUntil) + ' 까지 다시 열어 두었습니다.') + '</p>' : '';
+    return note + '<div class="table-wrap"><table class="qtable"><thead><tr>' +
+        '<th style="width:52px">#</th>' +
+        '<th>' + bi('Question', '문항') + '</th>' +
+        '<th>' + bi('Your answer', '내 답') + '</th>' +
+        (keyed ? '<th>' + bi('Correct answer', '정답') + '</th>' : '') +
+        '<th class="right" style="width:76px">' + bi('Result', '결과') + '</th>' +
+      '</tr></thead><tbody>' +
+      use.map(function (x, i) {
+        var res = x.ok === null ? '<span class="muted">—</span>'
+          : (x.ok ? '<span class="ok">O</span>' : '<span class="bad">X</span>');
+        return '<tr' + (x.ok === false ? ' class="row-bad"' : '') + '>' +
+          '<td>' + (i + 1) + '</td>' +
+          '<td><b>' + esc(x.qid) + '</b>' +
+            (x.prompt ? '<div class="muted" style="font-size:12.5px">' + esc(cut(x.prompt, 90)) + '</div>' : '') + '</td>' +
+          '<td>' + (String(x.given || '') ? esc(String(x.given))
+            : '<span class="muted">' + bi('(no answer)', '(무응답)') + '</span>') + '</td>' +
+          (keyed ? '<td><b>' + esc([].concat(x.key == null ? [] : x.key).join(' / ')) + '</b></td>' : '') +
+          '<td class="right">' + res + '</td>' +
+        '</tr>';
+      }).join('') + '</tbody></table></div>' +
+      (limit && rows.length > use.length
+        ? '<p class="muted" style="padding:10px 0;font-size:13px">+ ' + (rows.length - use.length) + ' ' +
+          bi('more — open the section tab.', '문항 더 — 영역 탭에서 봅니다.') + '</p>'
+        : '');
+  }
+
+  function paintSection(r, s) {
+    var v = viewOf(r), sec = v.sections[s], raw = rawOf(sec, s);
+    $('rev-body').innerHTML =
+      '<div class="sec-card open">' +
+        '<span class="name">' + icon(s, 20) + LAB[s][0] + '</span>' +
+        '<span class="raw">' + (raw ? esc(raw) : bi('Not scored yet', '아직 채점 전')) + '</span>' +
+        '<span class="band go">' + (sec.band === null ? '—' : BAND.fmt(sec.band)) + ' <small>/ 6.0</small></span>' +
+        '<div class="sec-body" id="body-' + s + '"></div>' +
+      '</div>';
+    var host = $('body-' + s);
+    if (s === 'writing' || s === 'speaking') { sectionBody(r, s, host); return; }
+    host.innerHTML = '<p class="muted" style="padding:14px 0;font-size:13.5px">' + bi('Loading…', '불러오는 중…') + '</p>';
+    questions(r).then(function (q) { host.innerHTML = qTable(q, s, 0); });
+  }
+
+  /* ── 길잡이(해시 라우팅) ─────────────────────────────────
+     탭도 주소에 실린다 — 뒤로 가기가 요약으로 돌아오고, 링크 하나로 남에게
+     '리스닝 3번 문항' 을 열어 보일 수 있다. */
+  var TABS = { summary: 1, reading: 1, listening: 1, writing: 1, speaking: 1 };
+  function route() {
+    var c = /^#\/report\/([^\/]+)$/.exec(location.hash || '');
+    if (c) return { view: 'report', session: decodeURIComponent(c[1]) };
+    var m = /^#\/review\/([^\/]+)(?:\/([a-z]+))?$/.exec(location.hash || '');
+    if (!m) return { view: 'dash' };
+    return { view: 'review', session: decodeURIComponent(m[1]),
+             tab: TABS[m[2]] ? m[2] : 'summary' };
+  }
+  function goTab(r, tab) {
+    location.hash = '#/review/' + encodeURIComponent(r.session) + (tab === 'summary' ? '' : '/' + tab);
+  }
+  function rowOf(session) {
+    for (var i = 0; i < ALL.length; i++) if (ALL[i].session === session) return ALL[i];
+    return null;
+  }
+  function render() {
+    var rt = route();
+    var r = rt.session ? rowOf(rt.session) : null;
+    if (rt.session && !r) { location.hash = '#/'; return; }
+    var card = rt.view === 'report';
+
+    /* 성적표는 한 장짜리 종이다 — 앱의 머리글도 리뷰의 탭 줄도 그 위에 없어야 한다. */
+    $('nav').classList.toggle('hide', !!r);
+    $('rev-bar').classList.toggle('hide', !r || card);
+    $('dash').classList.toggle('hide', !!r);
+    $('review').classList.toggle('hide', !r || card);
+    $('report').classList.toggle('hide', !card);
+    if (!r) { OPEN = null; TAB = 'summary'; paintOfficial(); paintBest(); paintList(); return; }
+
+    OPEN = r;
+    if (card) { paintCard(r); return; }
+
+    TAB = rt.tab;
+    paintReviewHead(r);
+    if (TAB === 'summary') paintSummary(r); else paintSection(r, TAB);
+  }
+
+  /* ── 성적표 한 장 ─────────────────────────────────────────────
+     리뷰 화면은 "왜 이 점수인가" 를 보여 준다. 성적표는 다른 물건이다 — 선생님이
+     학생·학부모에게 건네는 한 장이고, 종이로 나가는 순간 고쳐 쓸 수 없다.
+
+     그래서 여기는 영역(R·L·W·S)이 아니라 **파트**로 편다. 라이팅 3.0 은 세 가지
+     다른 일(문장 만들기·이메일·토론 글)의 평균이라, 무엇을 더 해야 하는지는 파트를
+     펴야 보인다. 파트 구성은 세트가 바뀌어도 같으므로 표로 박아 둔다. */
+  var PARTS = {
+    reading:   [{ id: 'reading',    label: 'Reading',                        auto: true }],
+    listening: [{ id: 'listening',  label: 'Listening',                      auto: true }],
+    /* Build a Sentence 는 기계가 채점한다 — 산출형 두 과제와 출처가 다르다. */
+    /* 이메일과 토론 글은 '문항 수' 가 없는 과제다 — 한 편을 써서 루브릭으로 받는다.
+       거기에 1 을 찍으면 한 문제짜리 시험처럼 읽히므로 그 칸은 비운다. */
+    writing:   [{ id: 'build',      label: 'Build a Sentence',               auto: true },
+                { id: 'email',      label: 'Write an Email',                 essay: true },
+                { id: 'discussion', label: 'Write for an Academic Discussion', essay: true }],
+    speaking:  [{ id: 'repeat',     label: 'Listen and Repeat' },
+                { id: 'interview',  label: 'Take an Interview' }]
+  };
+  var CEFR_SAY = {
+    C2: ['Proficient user', '원어민에 가까운 숙달'],
+    C1: ['Advanced user', '고급 — 복잡한 글과 말을 자유롭게'],
+    B2: ['Upper-intermediate user', '중상급 — 익숙한 주제라면 막힘 없이'],
+    B1: ['Intermediate user', '중급 — 일상과 학교 생활을 감당'],
+    A2: ['Elementary user', '초급 — 짧고 익숙한 표현 위주'],
+    A1: ['Beginner', '입문 — 아주 짧은 표현부터']
+  };
+
+  /** 산출형 채점 한 줄이 어느 파트인지. task_kind 가 정본이고, 없으면 문항 번호로 짐작한다. */
+  function partOf(t) {
+    var k = String((t && t.task_kind) || '').toLowerCase();
+    if (k === 'email' || k === 'discussion' || k === 'repeat' || k === 'interview') return k;
+    var q = String((t && t.question_id) || '');
+    if (/W2|email/i.test(q)) return 'email';
+    if (/W3|disc/i.test(q)) return 'discussion';
+    if (/S1/.test(q)) return 'repeat';
+    if (/S2|interview/i.test(q)) return 'interview';
+    return '';
+  }
+
+  /**
+   * 응시 한 건 → 성적표가 그릴 줄들.
+   *
+   * 파트의 환산점수와 영역의 평균은 **다른 곳에서 온다**. 파트는 그 파트만 놓고 다시
+   * 환산한 값이고, 평균 칸은 앱이 쓰는 공식 밴드(BAND.of)를 그대로 옮긴 값이다.
+   * 성적표만 따로 계산하면 대시보드의 4.0 과 성적표의 4.5 가 갈리는 날이 온다.
+   */
+  function cardRows(r) {
+    var v = viewOf(r), by = r.by_section || {}, byPart = {};
+    (TASKS[r.session] || []).forEach(function (t) {
+      var p = partOf(t);
+      if (!p) return;
+      var sc = (t.teacher_score === null || t.teacher_score === undefined) ? t.ai_score : t.teacher_score;
+      if (sc === null || sc === undefined || sc === '') return;
+      (byPart[p] = byPart[p] || []).push({ score: Number(sc), confirmed: !!t.confirmed_at });
+    });
+
+    return BAND.SKILLS.map(function (s) {
+      var parts = PARTS[s].map(function (p) {
+        if (p.auto) {
+          /* 자동채점 파트 — 리딩·리스닝은 영역이 곧 파트이고, Build a Sentence 는
+             라이팅 영역의 객관 채점분이 그대로 by_section.writing 에 들어 있다. */
+          var d = by[s === 'writing' ? 'writing' : s];
+          if (!d || !(Number(d.total) > 0)) return { label: p.label, band: null };
+          return { label: p.label, band: BAND.sectionBand(d.score, d.total, s),
+                   correct: Number(d.score) || 0, items: Number(d.total) || 0 };
+        }
+        var list = byPart[p.id] || [];
+        return { label: p.label, band: BAND.taskBand(list, s),
+                 items: p.essay ? null : (list.length || null) };
+      });
+      return { skill: s, short: SHORT[s], parts: parts,
+               band: v.sections[s].band, status: v.sections[s].status };
+    });
+  }
+
+  /* 반원 눈금 — 밴드 1.0 이 왼쪽 끝, 6.0 이 오른쪽 끝이다. 숫자를 못 읽는 사람에게도
+     "어디쯤" 이 먼저 가 닿아야 해서 표보다 크게 그린다. */
+  function gaugeSvg(band) {
+    var R = 92, cx = 130, cy = 112, w = 30, len = Math.PI * R;
+    var frac = (band === null || band === undefined) ? 0 : Math.max(0, Math.min(1, (band - 1) / 5));
+    var arc = 'M' + (cx - R) + ' ' + cy + ' A ' + R + ' ' + R + ' 0 0 1 ' + (cx + R) + ' ' + cy;
+    return '<svg width="260" height="132" viewBox="0 0 260 132" role="img" aria-label="Overall band">' +
+      '<path d="' + arc + '" fill="none" stroke="#ececec" stroke-width="' + w + '"/>' +
+      (frac > 0 ? '<path d="' + arc + '" fill="none" stroke="#4a7f96" stroke-width="' + w + '" ' +
+        'stroke-dasharray="' + (len * frac).toFixed(2) + ' ' + len.toFixed(2) + '"/>' : '') +
+      '<text x="' + cx + '" y="102" text-anchor="middle" font-size="34" font-weight="900" fill="#111">' +
+        (band === null || band === undefined ? '—' : BAND.fmt(band)) + '</text>' +
+      '<text x="' + (cx - R) + '" y="128" text-anchor="middle" font-size="11" fill="#9a9a9a">1.0</text>' +
+      '<text x="' + (cx + R) + '" y="128" text-anchor="middle" font-size="11" fill="#9a9a9a">6.0</text>' +
+      '</svg>';
+  }
+
+  /* 손으로 채우는 칸(E-name·담당 선생님·코멘트)은 서버에 올리지 않는다. 학생 토큰으로는
+     sg_comments 에 못 쓰고, 쓸 수 있게 하는 순간 '선생님이 남긴 말' 과 구별이 사라진다.
+     그래서 이 기기에만 남긴다 — 화면이 그 사실을 위에 적어 둔다. */
+  var CARD_MEM = 'smeag_card_v1';
+  function memAll() { try { return JSON.parse(localStorage.getItem(CARD_MEM) || '{}'); } catch (e) { return {}; } }
+  function memGet(session, k) { var m = memAll()[session] || {}; return m[k] || ''; }
+  function memSet(session, k, v) {
+    var m = memAll();
+    (m[session] = m[session] || {})[k] = v;
+    try { localStorage.setItem(CARD_MEM, JSON.stringify(m)); } catch (e) {}
+  }
+
+  function editable(session, key, ph, cls) {
+    return '<span class="' + (cls || 'v') + '" contenteditable="true" spellcheck="false" ' +
+      'data-mem="' + esc(key) + '" data-ph="' + esc(ph) + '">' + esc(memGet(session, key)) + '</span>';
+  }
+
+  function paintCard(r) {
+    var v = viewOf(r), rows = cardRows(r);
+    var name = (ME && (ME.name || ME.student_id)) || '';
+    var say = CEFR_SAY[v.cefr] || null;
+
+    /* CEFR 칸 하나가 표 전체를 세로로 가른다 — 등급은 한 영역의 성질이 아니라
+       이 응시 전체의 성질이기 때문이다. 그래서 rowspan 은 파트 수 + 총점 줄이다. */
+    var span = rows.reduce(function (n, x) { return n + x.parts.length; }, 0) + 1;
+    var first = true, body = '';
+
+    rows.forEach(function (sec) {
+      sec.parts.forEach(function (p, i) {
+        body += '<tr>' +
+          (i === 0 ? '<td class="sec" rowspan="' + sec.parts.length + '">' + sec.short + '</td>' : '') +
+          '<td class="part">' + esc(p.label) + '</td>' +
+          '<td class="c-scaled">' + (p.band === null || p.band === undefined
+            ? '<span class="dim">—</span>' : BAND.fmt(p.band)) + '</td>' +
+          '<td class="c-correct">' + (p.correct === undefined ? '<span class="dim">–</span>' : p.correct) + '</td>' +
+          '<td>' + (p.items ? p.items : '<span class="dim">–</span>') + '</td>' +
+          (i === 0 ? '<td class="c-avg" rowspan="' + sec.parts.length + '">' +
+            (sec.band === null ? '<span class="dim">—</span>' : BAND.fmt(sec.band)) + '</td>' : '') +
+          (first ? '<td class="c-cefr" rowspan="' + span + '">' + (v.cefr || '—') + '</td>' : '') +
+          '</tr>';
+        first = false;
+      });
+    });
+
+    var head = '<div class="sh-top">' +
+        '<span class="sh-mark"><span class="st">✻</span>toefl<span class="mt">Mock Test</span></span>' +
+        '<span class="sh-date">' + when(r.submitted_at) + '</span>' +
+      '</div>' +
+      '<div class="sh-who">' +
+        '<span>Name : ' + (name ? '<span class="v">' + esc(name) + '</span>'
+                                : editable(r.session, 'name', 'name')) + '</span>' +
+        '<span>E-name: ' + editable(r.session, 'ename', 'english name') + '</span>' +
+        '<span>S.A Teacher: ' + editable(r.session, 'teacher', 'teacher') + '</span>' +
+      '</div>';
+
+    var table = '<table class="rc"><thead><tr>' +
+        '<th>Section</th><th>Part</th>' +
+        '<th class="c-scaled">Scaled score</th>' +
+        '<th class="c-correct">Correct<br>Answer</th>' +
+        '<th>Total<br>Items</th>' +
+        '<th class="c-avg">Average</th>' +
+        '<th class="c-cefr">CEFR</th>' +
+      '</tr></thead><tbody>' + body +
+      '<tr class="tot"><td>Total</td><td></td><td></td><td></td><td></td>' +
+        '<td class="c-avg">' + (v.overall === null ? '—' : BAND.fmt(v.overall)) + '</td></tr>' +
+      '</tbody></table>';
+
+    /* 눈금이 둘이라는 사실을 성적표가 스스로 밝힌다. 파트 점수를 평균 내도 영역
+       점수가 안 나오는 이유가 여기 적혀 있지 않으면, 읽는 사람은 오타로 본다. */
+    var foot = '<p class="sh-foot">' +
+      esc('Scaled score and Average are TOEFL bands (1.0–6.0); Total is the average of the scored sections. ' +
+          'Writing and Speaking averages follow the ETS rubric for the productive tasks — ' +
+          'Build a Sentence is reported for diagnosis.') +
+      (v.pending.length ? '<br>' + esc('Still being scored: ' +
+        v.pending.map(function (s) { return LAB[s][0]; }).join(', ') + '.') : '') +
+      '</p>';
+
+    var sum = '<div class="sh-gauge">' + gaugeSvg(v.overall) +
+      '<div class="sh-sum" id="sh-sum">' +
+        '<b>' + (v.overall === null ? 'Not scored yet'
+          : 'Overall ' + BAND.fmt(v.overall) + ' / 6.0' + (v.cefr ? ' · CEFR ' + v.cefr : '')) + '</b>' +
+        (say ? '<br>' + esc(say[0]) : '') +
+        '<br>' + esc(r.set_code || '') + (r.set_code ? ' · ' : '') +
+        esc(isFull(r) ? 'Full test' : 'Section test') +
+      '</div></div>';
+
+    var cmt = '<div class="sh-cmt-h">SA Teacher\'s Comments</div>' +
+      '<div class="sh-cmt" id="sh-cmt">' +
+        editable(r.session, 'comment', "Type the teacher's comments here, or leave blank to write by hand.", 'cmt') +
+      '</div>';
+
+    $('sheet').innerHTML = head + table + foot + sum + cmt;
+
+    /* 고친 자리는 그 자리에서 이 기기에 남는다 — 인쇄 버튼을 누르기 전에 화면을
+       떠나도 다시 왔을 때 그대로여야 하기 때문이다. */
+    [].forEach.call($('sheet').querySelectorAll('[data-mem]'), function (el) {
+      el.onblur = function () { memSet(r.session, el.getAttribute('data-mem'), el.textContent.trim()); };
+    });
+    $('card-review').href = '#/review/' + encodeURIComponent(r.session);
+
+    teacherWord(r);
+  }
+
+  /** 선생님이 서버에 남긴 총평이 있으면 그것이 코멘트 칸의 정본이다. */
+  function teacherWord(r) {
+    if (!ME || !ME.id) return;
+    AUTH.rest('sg_comments?select=scope,source,author_name,body,updated_at' +
+      '&session=eq.' + encodeURIComponent(r.session) +
+      '&owner=eq.' + ME.id + '&scope=eq.overall&source=eq.teacher&order=updated_at.desc&limit=1')
+      .then(function (rows) {
+        var c = rows && rows[0];
+        if (!c || !c.body) return;
+        if (route().session !== r.session) return;       // 그 사이 다른 화면으로 갔다
+        var host = $('sh-cmt');
+        if (!host) return;
+        host.innerHTML = esc(c.body) +
+          '<span class="by">— ' + esc(c.author_name || 'Teacher') + ' · ' + when(c.updated_at) + '</span>';
+      });
+  }
+
+  /* ── 보고서 연동 ─────────────────────────────────────────────
+     조회 화면이 쥐고 있는 것은 원점수(맞은 개수)뿐이다. 보고서는 시험 눈금
+     위의 점수를 원하므로 여기서 한 번 환산한다 — TOEFL 은 영역 /30·총점 /120,
+     IELTS 는 밴드다. 환산 규칙은 studyground/app/scoring/scale.py 와 짝이다.
+
+     점수는 리포트 서버로 미리 보내지 않고 URL 조각(#d=…)에 실어 넘긴다.
+     조각은 요청에 포함되지 않으므로 학생 점수가 남의 서버 로그에 남지 않는다. */
+  var REPORT = (function () {
+    var SKILLS = ['reading', 'listening', 'writing', 'speaking'];
+
+    /* ⚠️ 가설(검증필요) — app/scoring/ielts_band_table.json 의 사본이다.
+       실측 표로 바꿀 때는 두 곳을 함께 고쳐야 한다. writing·speaking 은
+       표가 없다(루브릭 채점) — 비율 환산으로 떨어진다. */
+    var BANDS = {
+      raw: 40,
+      listening: [[39,9],[37,8.5],[35,8],[32,7.5],[30,7],[26,6.5],[23,6],[18,5.5],[16,5],[13,4.5],[11,4],[8,3.5],[6,3],[4,2.5],[3,2],[2,1.5],[1,1],[0,0]],
+      reading:   [[39,9],[37,8.5],[35,8],[33,7.5],[30,7],[27,6.5],[23,6],[19,5.5],[15,5],[13,4.5],[10,4],[8,3.5],[6,3],[4,2.5],[3,2],[2,1.5],[1,1],[0,0]]
+    };
+    /* CEFR 구간 — app/models.py 의 _CEFR_BANDS 와 같은 표(총점 /120 기준). */
+    var CEFR = [[102,'C1'],[90,'B2+'],[78,'B2'],[66,'B1+'],[54,'B1'],[36,'A2'],[0,'A1']];
+
+    function halfUp(x) { return Math.floor(Number(x) + 0.5); }       // .5 는 항상 올린다
+    function toHalf(x) { return Math.floor(Number(x) * 2 + 0.5) / 2; }  // 0.5 단위
+    function cefrFor(total120) {
+      for (var i = 0; i < CEFR.length; i++) if (total120 >= CEFR[i][0]) return CEFR[i][1];
+      return 'A1';
+    }
+    function profileOf(code) {
+      return /IELTS/.test(String(code || '').toUpperCase()) ? 'ielts' : 'toefl';
+    }
+    function bandFor(skill, got, tot) {
+      var rows = BANDS[skill];
+      if (!rows || !tot) return toHalf((tot ? got / tot : 0) * 9);
+      var n = got * (BANDS.raw / tot);          // 시험지가 늘 /40 은 아니다
+      for (var i = 0; i < rows.length; i++) if (n >= rows[i][0]) return rows[i][1];
+      return rows[rows.length - 1][1];
+    }
+
+    /* 산출형(라이팅·스피킹)의 원점수 — 과제 하나가 0~5 다.
+       왜 여기서 다시 세는가: by_section 에는 이 점수가 **없다**. 스피킹에는 객관 채점
+       문항이 하나도 없고(전부 루브릭 채점), 라이팅의 by_section 은 Build a Sentence
+       뿐이다. by_section 만 보면 스피킹은 통째로 사라지고 라이팅은 반쪽이 된다.
+       BAND.of 의 detail 을 빌리지 않는 것은 그 칸의 모양이 사본마다 달라서다
+       (sg2/assets/sg-band.js 에는 got·top 이 없다). 여기서 세면 어디서든 같다. */
+    function produced(r, skill) {
+      var rows = (typeof TASKS !== 'undefined' && TASKS[r.session]) || [];
+      var got = 0, n = 0;
+      for (var i = 0; i < rows.length; i++) {
+        var t = rows[i] || {};
+        if (String(t.skill || '').toLowerCase() !== skill) continue;
+        /* 최종 점수는 선생님이 이긴다 — 손대지 않았으면 AI 점수가 그대로 점수다. */
+        var sc = (t.teacher_score === null || t.teacher_score === undefined)
+          ? t.ai_score : t.teacher_score;
+        if (sc === null || sc === undefined || sc === '') continue;
+        got += Number(sc); n += 1;
+      }
+      return n ? { got: got, top: n * BAND.TASK_MAX } : null;
+    }
+
+    /** 옛 총점(/120) — 네 영역이 모두 채점됐을 때만 말이 되는 수다. 아니면 null. */
+    function conventionalOf(scores) {
+      var sum = 0;
+      for (var i = 0; i < scores.length; i++) {
+        var v = scores[i].scaled;
+        if (typeof v !== 'number' || !isFinite(v)) return null;
+        sum += v;
+      }
+      return scores.length === SKILLS.length ? sum : null;
+    }
+
+    function build(r, me) {
+      var ielts = profileOf(r.set_code) === 'ielts';
+      var by = r.by_section || {}, scores = [], pts = [], missing = [];
+
+      /* TOEFL 성적표에 실리는 점수는 **밴드(1.0~6.0)** 다. ETS 가 2026-01 부터 그렇게
+         보고하고, 리뷰 화면·성적표 한 장도 그 눈금으로 말한다. 옛 /30·/120 값은
+         버리지 않고 conventional 로 함께 넘긴다 — 전환기(2026~2028)의 병기 규칙이다. */
+      var bandView = ielts ? null : BAND.of(r, (TASKS && TASKS[r.session]) || []);
+
+      SKILLS.forEach(function (s) {
+        var rate = null, points = null;
+        if (s === 'writing' || s === 'speaking') {
+          /* 채점된 과제가 하나도 없으면 비운다 — by_section 으로 물러서지 않는다.
+             그랬다가는 리뷰 화면이 "채점 전" 이라 부르는 영역에 성적표만 점수를
+             적어 내려간다. */
+          var prod = produced(r, s);
+          if (prod) {
+            rate = prod.got / prod.top;
+            points = ielts ? toHalf(rate * 9) : halfUp(rate * 30);
+          }
+        } else {
+          var v = by[s];
+          var tot = v ? Number(v.total) || 0 : 0, got = v ? Number(v.score) || 0 : 0;
+          rate = tot ? got / tot : null;
+          /* 선생님 채점 영역(총 문항 0)은 점수 칸을 비운다 — 0 으로 찍으면 오해가 된다. */
+          points = tot ? (ielts ? bandFor(s, got, tot) : halfUp(rate * 30)) : null;
+        }
+        /* 보고서에 실리는 점수. IELTS 는 밴드 0~9, TOEFL 은 ETS 2026 밴드 1.0~6.0.
+           옛 환산점수(/30)는 scaled 로 따라간다. */
+        var band = bandView ? bandView.sections[s].band : null;
+        var report = ielts ? points : band;
+        if (report === null || report === undefined) missing.push(LAB[s][0]);
+        else pts.push(report);
+        scores.push({
+          skill: LAB[s][0],
+          rate: rate,
+          points: report,
+          scaled: points,
+          /* 영역 등급도 밴드에서 나온다 — 예전에는 환산점수를 4배 해 총점 표에
+             대보는 가설이었다. 밴드→CEFR 은 ETS 표라 대볼 필요가 없다. */
+          level: (!ielts && band !== null) ? BAND.cefr(band) : null
+        });
+      });
+
+      var sum = pts.reduce(function (a, b) { return a + b; }, 0);
+      var average, total;
+      if (ielts) {
+        average = pts.length ? toHalf(sum / pts.length) : null;
+        total = average;
+      } else {
+        /* 종합은 합이 아니라 **평균**이다(ETS 2026). BAND.of 가 이미 그 규칙으로
+           계산해 두었으므로 여기서 다시 세지 않는다 — 두 번 세면 언젠가 갈린다. */
+        average = bandView ? bandView.overall : null;
+        total = average;
+      }
+      var warnings = [];
+      if (missing.length) {
+        warnings.push(missing.join(' · ') + ' — not scored yet, left out of the overall.');
+      }
+
+      return {
+        /* toefl6 = ETS 2026 밴드 눈금. 옛 'toefl'(/30·/120)과 다른 프로파일이다. */
+        profile: ielts ? 'ielts' : 'toefl6',
+        scale: ielts ? 'ielts9' : (r.scale || 'toefl6'),
+        set_code: r.set_code || '',
+        student: {
+          name: (me && me.name) || (me && me.student_id) || '',
+          ename: '',
+          date: when(r.submitted_at)
+        },
+        scores: scores,
+        average: average,
+        total: total,
+        band: bandView ? {
+          overall: bandView.overall,
+          cefr: bandView.cefr,
+          sections: BAND.SKILLS.map(function (s) {
+            return { skill: LAB[s][0], band: bandView.sections[s].band,
+                     status: bandView.sections[s].status };
+          }),
+          pending: bandView.pending
+        } : null,
+        /* 옛 눈금(/120)은 버리지 않고 함께 보낸다 — 전환기에는 둘을 병기한다.
+           BAND 의 값을 빌리지 않고 여기서 세는 이유는 produced() 와 같다: 그 칸의
+           모양이 사본마다 다르다. 네 영역이 다 있을 때만 말이 되는 수다. */
+        conventional: conventionalOf(scores),
+        /* 영역이 빠진 채 매긴 등급은 실제보다 낮게 보인다 — 아예 비워 둔다. */
+        grade: (total === null || missing.length) ? ''
+          : (ielts ? 'Band ' + total.toFixed(1) : (bandView ? bandView.cefr : '')),
+        warnings: warnings
+      };
+    }
+
+    /* UTF-8 → base64url. 한글 이름이 깨지지 않게 바이트로 먼저 바꾼다. */
+    function encode(obj) {
+      var bytes = new TextEncoder().encode(JSON.stringify(obj)), bin = '';
+      for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function open_(r, me) {
+      if (!CFG.reportUrl) return;
+      var base = String(CFG.reportUrl).split('#')[0];
+      window.open(base + '#d=' + encode(build(r, me)), '_blank', 'noopener');
+    }
+
+    return { build: build, open: open_, profileOf: profileOf };
+  })();
+
+  /* ── 내려받기 ── */
+  function save(name, text) {
+    var blob = new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' });  // BOM: 엑셀에서 한글이 깨지지 않게
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+  function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+  /** CSV 한 칸으로 줄인 응시 상태. 선생님이 산출형 점수를 하나라도 고쳤으면 final. */
+  function bandStatus(v) {
+    if (v.pending.length) return 'incomplete';
+    return ['writing', 'speaking'].some(function (s) {
+      return v.sections[s] && v.sections[s].status === 'final';
+    }) ? 'final' : 'scored';
+  }
+  function csvList() {
+    /* 밴드가 앞, 원점수가 뒤다 — 성적표의 눈금이 밴드이기 때문이다. band_status 는
+       incomplete(아직 덜 채점됨) · final(선생님이 손봄) · scored(AI 채점 그대로). */
+    var head = ['submitted_at', 'name', 'student_id', 'test', 'kind',
+                'band_overall', 'cefr', 'band_reading', 'band_listening',
+                'band_writing', 'band_speaking', 'band_status',
+                'auto_correct', 'auto_total', 'session'];
+    var lines = [head.join(',')];
+    shown().forEach(function (r) {
+      var v = viewOf(r);
+      function b(s) { return v.sections[s].band === null ? '' : BAND.fmt(v.sections[s].band); }
+      lines.push([r.submitted_at, (ME && ME.name) || '', (ME && ME.student_id) || '', r.set_code,
+                  isFull(r) ? 'full' : 'section',
+                  v.overall === null ? '' : BAND.fmt(v.overall), v.cefr,
+                  b('reading'), b('listening'), b('writing'), b('speaking'),
+                  bandStatus(v),
+                  r.score, r.total, r.session].map(csvCell).join(','));
+    });
+    save('smeag-toefl-scores.csv', lines.join('\r\n'));
+  }
+  function csvOne() {
+    if (!OPEN) return;
+    var r = OPEN;
+    questions(r).then(function (q) {
+      /* 리뷰가 닫혔으면 내려받을 문항도 없다 — CSV 는 화면의 우회로가 아니다. */
+      if (!q.open || !q.rows.length) {
+        alert(q.error
+          ? 'Could not reach the server. Try again in a moment.'
+          : 'Questions and answers for this test are closed. Ask an administrator to reopen it.');
+        return;
+      }
+      var keyed = CFG.showAnswerKey && q.rows.some(function (x) { return x.key !== null; });
+      var head = ['no', 'question_id', 'section', 'your_answer'].concat(keyed ? ['correct_answer'] : []).concat(['result']);
+      var lines = [head.join(',')];
+      q.rows.forEach(function (x, i) {
+        var row = [i + 1, x.qid, x.section, x.given];
+        if (keyed) row.push([].concat(x.key == null ? [] : x.key).join(' / '));
+        row.push(x.ok === null ? '' : (x.ok ? 'O' : 'X'));
+        lines.push(row.map(csvCell).join(','));
+      });
+      save('smeag-' + String(r.set_code || 'test').toLowerCase() + '-' +
+           when(r.submitted_at).replace(/-/g, '') + '.csv', lines.join('\r\n'));
+    });
+  }
+
+  /* ── 데이터 ── */
+  var SELECT = 'id,owner,session,set_code,mode,started_at,submitted_at,score,total,percent,by_section,answers,scale';
+  var TASK_SELECT = 'session,question_id,skill,task_kind,ai_score,teacher_score,confirmed_at,media_path';
+  var SET_SELECT = 'id,label,set_code,picks,snapshot,approved_name,approved_note,created_at';
+  function load() {
+    var u = AUTH.user();
+    /* 응시와 W·S 채점을 함께 읽는다. 밴드는 둘이 다 있어야 완성된다.
+       채점 조회가 실패해도 목록은 그린다 — 그때 W·S 는 '아직 채점 전' 으로 남는다. */
+    return Promise.all([
+      AUTH.rest('sg_results?select=' + SELECT + '&owner=eq.' + u.id + '&order=submitted_at.desc'),
+      AUTH.rest('sg_task_scores?select=' + TASK_SELECT + '&owner=eq.' + u.id)
+        .catch(function () { return []; }),
+      /* 확정 성적 세트. 없는 게 보통이다 — 다시 친 학생에게만 생긴다.
+         무효로 돌린 것은 빼고 최신 한 벌만 보여 준다. */
+      AUTH.rest('sg_score_sets?select=' + SET_SELECT + '&owner=eq.' + u.id +
+                '&voided_at=is.null&order=created_at.desc')
+        .catch(function () { return []; })
+    ])
+      .then(function (out) {
+        TASKS = {}; VIEW = {}; ROWS = {};
+        (out[1] || []).forEach(function (t) {
+          if (!t || !t.session) return;
+          (TASKS[t.session] = TASKS[t.session] || []).push(t);
+        });
+        ALL = out[0] || [];
+        SETS = out[2] || [];
+        fillSets();
+        $('notice').classList.toggle('hide', !!ALL.length);
+        if (!ALL.length) {
+          $('notice').innerHTML = '<p class="muted">' +
+            bi('No test result has been uploaded to your account yet.',
+               '아직 계정에 올라온 응시 결과가 없습니다.') + '</p>';
+        }
+        render();
+      });
+  }
+
+  /* ── 부팅 ── */
+  function showApp() {
+    $('gate').classList.add('hide');
+    $('dash').classList.remove('hide');
+    $('out').classList.remove('hide');
+    $('who').classList.remove('hide');
+    AUTH.profile().then(function (p) {
+      ME = p || AUTH.user();
+      $('who').textContent = '👤 ' + [(ME && ME.name), (ME && ME.student_id) || (ME && ME.email)]
+        .filter(Boolean).join(' · ');
+      if (OPEN) $('rev-me').textContent = (ME && (ME.email || ME.student_id || ME.name)) || '';
+      /* 성적표에는 이름이 인쇄된다 — 프로필이 늦게 와도 빈칸으로 남겨 두지 않는다. */
+      if (OPEN && route().view === 'report') paintCard(OPEN);
+    });
+    load();
+  }
+  function showGate() {
+    $('dash').classList.add('hide');
+    $('review').classList.add('hide');
+    $('rev-bar').classList.add('hide');
+    $('nav').classList.remove('hide');
+    $('out').classList.add('hide');
+    $('who').classList.add('hide');
+    $('gate').classList.remove('hide');
+  }
+
+  function boot() {
+    $('login').onsubmit = function (e) {
+      e.preventDefault();
+      var btn = $('login-go'); btn.disabled = true;
+      $('login-err').classList.add('hide');
+      var who = String($('login-id').value || '').trim().toLowerCase();
+      var when = String($('login-date').value || '').trim();
+      /* 수험생 아이디는 응시일이 있어야 어느 응시인지 정해진다. 여기서 막지 않으면
+         서버가 대신 짐작하고, 그 짐작은 남의 성적일 수 있다. */
+      if (/^smeag\d{3}$/.test(who) && !when) {
+        btn.disabled = false;
+        $('login-err').classList.remove('hide');
+        $('login-err').innerHTML = bi('Enter the date you sat the test.', '응시일을 입력하세요.');
+        return;
+      }
+      AUTH.signIn($('login-id').value, $('login-pw').value, when).then(function () {
+        btn.disabled = false;
+        showApp();
+      }).catch(function (err) {
+        btn.disabled = false;
+        $('login-err').classList.remove('hide');
+        /* 서버는 아이디·시험일·비밀번호가 안 맞으면 똑같이 401 을 준다. 응시일까지
+           넣어 보낸 자리에서는 날짜도 후보라고 알려 준다 — 맞는 아이디로 날짜만
+           틀렸을 때 "비밀번호가 틀렸다"만 보이면 학생은 헤맨다. */
+        if (err.code === 'bad_credentials' && when) {
+          $('login-err').innerHTML = bi(
+            'No scores found for that ID on ' + when + '. Check the ID, the exam date, and the password.',
+            when + ' 응시 기록에서 그 아이디를 찾지 못했습니다. 아이디 · 응시일 · 비밀번호를 확인하세요.');
+          return;
+        }
+        $('login-err').innerHTML = bi(err.message || 'Sign-in failed.', err.messageKo || err.message || '로그인하지 못했습니다.');
+      });
+    };
+    $('out').onclick = function () {
+      AUTH.signOut(); OPEN = null; ALL = []; SETS = []; location.hash = '#/'; showGate();
+    };
+    $('f-set').onchange = paintList;
+    $('refresh').onclick = function () {
+      var b = $('refresh'); b.disabled = true;
+      load().then(function () { b.disabled = false; }, function () { b.disabled = false; });
+    };
+    [].forEach.call($('bigtabs').querySelectorAll('[data-kind]'), function (b) {
+      b.onclick = function () {
+        KIND = b.getAttribute('data-kind');
+        [].forEach.call($('bigtabs').querySelectorAll('[data-kind]'), function (x) {
+          x.classList.toggle('on', x === b);
+        });
+        paintList();
+      };
+    });
+    $('dl-csv').onclick = csvList;
+    $('dl-one').onclick = csvOne;
+    /* 리포트 생성기 주소가 설정된 배포에서만 보고서 버튼을 보여준다. */
+    if (CFG.reportUrl) {
+      $('dl-report').classList.remove('hide');
+      $('dl-report').onclick = function () { if (OPEN) REPORT.open(OPEN, ME); };
+    }
+    $('print').onclick = function () { window.print(); };
+    $('card-print').onclick = function () {
+      /* 편집 중인 칸에 커서가 남아 있으면 그 글자는 아직 기기에 저장되지 않았다.
+         인쇄 대화상자가 뜨기 전에 초점을 떼어 blur 를 한 번 태운다. */
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      window.print();
+    };
+
+    /* 주소가 바뀌면 그 주소가 가리키는 화면을 그린다 — 뒤로 가기도 이 길로 온다.
+       아직 목록을 못 받은 동안(로그인 직후)에는 load() 가 이어서 그린다. */
+    window.addEventListener('hashchange', function () {
+      if (ALL.length || route().view === 'dash') render();
+    });
+
+    /* 저장된 세션이 아직 살아 있는지 확인한 뒤에 화면을 고른다. */
+    if (!AUTH.user()) { showGate(); return; }
+    AUTH.token().then(function (tok) { tok ? showApp() : showGate(); });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

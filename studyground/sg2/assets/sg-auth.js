@@ -442,6 +442,7 @@ window.SG_AUTH = (function () {
     createTeacher: createTeacher, signIn: signIn, signOut: signOut,
     user: user, profile: profile, role: role, isStaff: isStaff,
     token: token, invalidate: invalidate, require: require_, onChange: onChange,
+    session: read,
     url: URL_, anonKey: ANON
   };
 })();
