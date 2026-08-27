@@ -115,7 +115,9 @@
   var MEDIA_DB = 'sg2-media', MEDIA_STORE = 'recordings';
   var BUCKET = 'toefl-recordings';
   var found = [];           // [{ key, session, qid, blob, mime, size, state, why }]
-  var owners = {};          // session -> owner uuid
+  var owners = {};          // session -> [owner uuid] (한 세션에 계정이 둘일 수 있다)
+  var who = {};             // owner uuid -> '학번 · 이름'
+  var picked = {};          // session -> 사람이 고른 owner uuid
   var all = [];             // 이 브라우저에 있는 전부(세션 필터 이전)
   var TARGET = '';          // 비면 각 파일이 적힌 세션 자리에 올린다. 세우면 그 응시 자리에 올린다.
 
@@ -222,7 +224,19 @@
              '<th class="num">Size</th><th>Status</th></tr></thead><tbody>'];
     order.forEach(function (s) {
       var meta = metaOf(s);
-      var owner = owners[s];
+      var list = owners[s] || [];
+      var chosen = ownerOf(s);
+      /* 계정이 둘 이상이면 이름을 나란히 놓고 고르게 한다 — 고르기 전에는 올리지 않는다. */
+      var ownerCell = chosen
+        ? ' &nbsp;· <span class="mono">' + esc(ownerLabel(chosen)) + '</span>'
+        : (list.length > 1
+            ? '<div style="margin-top:6px;font-size:11.5px;color:var(--muted)">' +
+              'Two accounts submitted this test id — whose recordings are these? ' +
+              list.map(function (o) {
+                return '<button class="attach" data-owner="' + esc(s) + '|' + esc(o) + '">' +
+                       esc(ownerLabel(o)) + '</button>';
+              }).join('') + '</div>'
+            : '');
       /* 열고 들어온 응시와 id 가 다른 녹음 뭉치에는 "이 응시에 붙이기" 를 단다.
          재시작·범위변경은 그때마다 새 세션 id 를 발급하므로(exam-shell.js), 같은
          학생의 같은 시험인데도 녹음이 다른 id 밑에 적혀 있는 일이 생긴다. */
@@ -231,8 +245,7 @@
         : '';
       h.push('<tr class="head"><td colspan="4"><span class="mono">' + esc(s) + '</span>' +
              (meta ? ' &nbsp;· ' + esc(meta) : '') +
-             (owner ? ' &nbsp;· <span class="mono">owner ' + esc(owner.slice(0, 8)) + '…</span>' : '') +
-             attach + '</td></tr>');
+             ownerCell + attach + '</td></tr>');
       bySession[s].forEach(function (f) {
         h.push('<tr><td class="mono">' + esc(f.qid) + '</td><td class="mono">' + esc(f.mime) +
                '</td><td class="num">' + Math.round(f.size / 1024) + ' KB</td><td><span class="tag ' +
@@ -288,7 +301,12 @@
 
   /* ── 3. 클라우드로 올리기 ───────────────────────────────────
      owner 는 짐작하지 않는다 — sg_results 에서 session 으로 찾는다. 못 찾으면
-     그 응시는 건너뛰고(skip) 그렇게 적는다. 남의 폴더에 올리는 것보다 낫다. */
+     그 응시는 건너뛰고(skip) 그렇게 적는다. 남의 폴더에 올리는 것보다 낫다.
+
+     한 세션에 계정이 둘 붙어 있는 일도 있다 — 같은 PC 에서 로그인만 바꿔 제출하면
+     같은 offline 세션 id 로 결과 행이 두 학생에게 각각 생긴다. 예전에는 조회 결과의
+     마지막 줄이 이겨서, 아무 말 없이 둘 중 한 학생의 폴더로 올라갔다. 이제는 고르지
+     않으면 올리지 않는다. */
   function resolveOwners() {
     var list = [];
     found.forEach(function (f) { if (list.indexOf(f.session) < 0) list.push(f.session); });
@@ -296,15 +314,47 @@
     if (!list.length) return Promise.resolve();
     var q = 'sg_results?select=session,owner&session=in.(' +
             list.map(function (s) { return '"' + s + '"'; }).join(',') + ')';
-    return SG_AUTH.token().then(function (tok) {
+    var tok = null;
+    return SG_AUTH.token().then(function (t) {
+      tok = t;
       if (!tok) return null;
       return fetch(SG_AUTH.url + '/rest/v1/' + q, {
         headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok }
       }).then(function (r) { return r.ok ? r.json() : null; });
     }).then(function (rows) {
-      (rows || []).forEach(function (r) { if (r && r.session && r.owner) owners[r.session] = r.owner; });
+      (rows || []).forEach(function (r) {
+        if (!r || !r.session || !r.owner) return;
+        var a = owners[r.session] || (owners[r.session] = []);
+        if (a.indexOf(r.owner) < 0) a.push(r.owner);
+      });
+      /* 계정이 둘인 자리에서 uuid 앞 8 자만 보고 고르라고 할 수는 없다. 이름을 붙인다. */
+      var ids = [], k, i;
+      for (k in owners) {
+        if (!owners.hasOwnProperty(k) || owners[k].length < 2) continue;
+        for (i = 0; i < owners[k].length; i++) {
+          if (ids.indexOf(owners[k][i]) < 0) ids.push(owners[k][i]);
+        }
+      }
+      if (!ids.length || !tok) return null;
+      return fetch(SG_AUTH.url + '/rest/v1/sg_profiles?select=id,student_id,name&id=in.(' +
+                   ids.join(',') + ')', {
+        headers: { apikey: SG_AUTH.anonKey, Authorization: 'Bearer ' + tok }
+      }).then(function (r) { return r.ok ? r.json() : null; }).then(function (ps) {
+        (ps || []).forEach(function (p) {
+          if (p && p.id) who[p.id] = [p.student_id, p.name].filter(Boolean).join(' · ');
+        });
+      });
     })['catch'](function () {});
   }
+
+  /* 이 세션의 파일을 누구 폴더에 놓을 것인가. 계정이 하나면 그것, 둘 이상이면
+     사람이 고른 것. 고르기 전에는 null 이고, null 이면 올리지 않는다. */
+  function ownerOf(session) {
+    if (picked[session]) return picked[session];
+    var a = owners[session] || [];
+    return a.length === 1 ? a[0] : null;
+  }
+  function ownerLabel(id) { return who[id] || (String(id).slice(0, 8) + '…'); }
 
   function uploadAll() {
     var u = SG_AUTH.user();
@@ -332,9 +382,12 @@
            응시에 붙이기로 한 경우) 그 자리다 — 리뷰는 {owner}/{session}/{qid} 만
            들여다보므로, 녹음이 적힌 옛 id 자리에 올려 두면 영영 붙지 않는다. */
         var dest = TARGET || f.session;
-        var owner = owners[dest];
+        var owner = ownerOf(dest);
         if (!owner) {
-          f.state = 'skip'; f.why = 'no account found for this test on the server';
+          f.state = 'skip';
+          f.why = (owners[dest] || []).length > 1
+            ? 'two accounts are on this test — choose whose recording this is, above'
+            : 'no account found for this test on the server';
           render(); return one();
         }
         var path = [owner, dest, f.qid + '.' + extOf(f.mime)]
@@ -437,7 +490,19 @@
      되돌리기(빈 값)는 전체 목록으로 되감는다. 파일 자체는 건드리지 않는다 — 바뀌는
      것은 클라우드에서 어느 응시의 자리에 놓느냐 뿐이다. */
   $('out').addEventListener('click', function (ev) {
-    var b = ev.target && ev.target.closest ? ev.target.closest('[data-attach]') : null;
+    var t = ev.target;
+    var o = t && t.closest ? t.closest('[data-owner]') : null;
+    if (o) {                                   // 계정 고르기
+      var parts = String(o.getAttribute('data-owner') || '').split('|');
+      if (parts.length === 2) {
+        picked[parts[0]] = parts[1];
+        render();
+        say('warn', 'These will be filed under <b>' + esc(ownerLabel(parts[1])) + '</b>. ' +
+                    'Click <b>Sign in &amp; upload</b> again.');
+      }
+      return;
+    }
+    var b = t && t.closest ? t.closest('[data-attach]') : null;
     if (!b) return;
     var src = b.getAttribute('data-attach');
     if (!src) {

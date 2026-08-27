@@ -135,6 +135,14 @@ var b = src.indexOf('</script>', a);
 if (a < 0 || b < 0) { console.error('스크립트 블록을 찾지 못했습니다.'); process.exit(1); }
 var code = src.slice(a + '<script>'.length, b);
 
+/* #out 의 위임 클릭 — 어느 속성의 버튼을 눌렀는지까지 흉내 낸다. */
+function clickAttr(attr, value) {
+  var btn = { getAttribute: function (a) { return a === attr ? value : null; } };
+  els.out._on.click({ target: { closest: function (sel) {
+    return sel === '[' + attr + ']' ? btn : null;
+  } } });
+}
+
 async function main() {
   eval(code);                       // ?session= 이 붙어 있으므로 스스로 스캔한다
   await settle(); await settle(); await settle(); await settle();
@@ -156,8 +164,7 @@ async function main() {
   ok(/data-attach="/.test(out), '"이 응시에 붙이기" 버튼이 붙어 있다');
 
   console.log('[3] 붙이면 열고 들어온 응시 자리로 올라간다');
-  var fakeBtn = { getAttribute: function () { return TAKEN; } };
-  els.out._on.click({ target: { closest: function () { return fakeBtn; } } });
+  clickAttr('data-attach', TAKEN);
   await settle();
   ok(/uploaded into the attempt you opened/.test(els.msg.innerHTML),
      '어디로 올라가는지 먼저 말한다');
