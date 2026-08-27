@@ -288,7 +288,11 @@
     return Object.keys(LAB).map(function (s) {
       var sec = v.sections[s];
       var band = sec && sec.band !== null ? SG_BAND.fmt(sec.band) : '—';
-      return '<span class="chip">' + esc(LAB[s][0]) + ' ' + esc(band) + '</span>';
+      var d = sec && sec.detail;
+      var raw = d && (s === 'writing' || s === 'speaking')
+        ? ' (' + d.got + '/' + d.top + ')'
+        : d ? ' (' + d.correct + '/' + d.total + ')' : '';
+      return '<span class="chip">' + esc(LAB[s][0]) + ' ' + esc(band + raw) + '</span>';
     }).join(' ');
   }
 

@@ -812,7 +812,20 @@ var BAND = (function () {
   function of(r, taskRows) {
     r = r || {};
     var by = r.by_section || {}, byTask = { writing: [], speaking: [] };
+    var picked = {};
     (taskRows || []).forEach(function (t) {
+      if (!t) return;
+      var skill = String(t.skill || '').toLowerCase();
+      var key = skill + '|' + String(t.question_id || '');
+      var old = picked[key];
+      function rank(x) {
+        return (x && x.confirmed_at ? 8 : 0) +
+          (x && x.teacher_score !== null && x.teacher_score !== undefined ? 4 : 0) +
+          (x && x.ai_score !== null && x.ai_score !== undefined ? 2 : 0);
+      }
+      if (!old || rank(t) >= rank(old)) picked[key] = t;
+    });
+    Object.keys(picked).map(function (key) { return picked[key]; }).forEach(function (t) {
       var skill = String((t && t.skill) || '').toLowerCase();
       if (!byTask[skill]) return;
       var score = (t.teacher_score === null || t.teacher_score === undefined) ? t.ai_score : t.teacher_score;

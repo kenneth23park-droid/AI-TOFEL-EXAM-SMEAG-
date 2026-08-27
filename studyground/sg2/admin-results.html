@@ -152,8 +152,12 @@
     return Object.keys(LAB).map(function (s) {
       var sec = v.sections[s];
       var band = sec && sec.band !== null ? SG_BAND.fmt(sec.band) : '—';
+      var d = sec && sec.detail;
+      var raw = d && (s === 'writing' || s === 'speaking')
+        ? ' (' + d.got + '/' + d.top + ')'
+        : d ? ' (' + d.correct + '/' + d.total + ')' : '';
       // ✎ = 선생님이 점수를 고친 자리. 나머지는 AI 채점 그대로다.
-      return '<span class="chip">' + LAB[s] + ' ' + band + (sec && sec.status === 'final' ? ' ✎' : '') + '</span>';
+      return '<span class="chip">' + LAB[s] + ' ' + band + raw + (sec && sec.status === 'final' ? ' ✎' : '') + '</span>';
     }).join(' ');
   }
 

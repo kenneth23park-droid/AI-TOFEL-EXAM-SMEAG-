@@ -161,9 +161,26 @@
     row = row || {};
     var by = row.by_section || {};
     var byTask = { writing: [], speaking: [] };
+    var picked = {};
 
-    for (var i = 0; i < (taskRows || []).length; i++) {
-      var t = taskRows[i] || {};
+    /* DB 중복 행이 남아 있어도 문항당 점수는 하나만 집계한다. */
+    for (var p = 0; p < (taskRows || []).length; p++) {
+      var candidate = taskRows[p] || {};
+      var candidateSkill = String(candidate.skill || '').toLowerCase();
+      var candidateKey = candidateSkill + '|' + String(candidate.question_id || '');
+      var current = picked[candidateKey];
+      var candidateRank = (candidate.confirmed_at ? 8 : 0) +
+        (candidate.teacher_score !== null && candidate.teacher_score !== undefined ? 4 : 0) +
+        (candidate.ai_score !== null && candidate.ai_score !== undefined ? 2 : 0);
+      var currentRank = current ? ((current.confirmed_at ? 8 : 0) +
+        (current.teacher_score !== null && current.teacher_score !== undefined ? 4 : 0) +
+        (current.ai_score !== null && current.ai_score !== undefined ? 2 : 0)) : -1;
+      if (!current || candidateRank >= currentRank) picked[candidateKey] = candidate;
+    }
+
+    var pickedKeys = Object.keys(picked);
+    for (var i = 0; i < pickedKeys.length; i++) {
+      var t = picked[pickedKeys[i]] || {};
       var skill = String(t.skill || '').toLowerCase();
       if (!byTask[skill]) continue;
       /* 최종 점수는 교사가 이긴다. 교사가 손대지 않았으면 AI 점수가 그대로 점수다. */
@@ -192,7 +209,11 @@
           /* 점수는 이미 나와 있다. confirmed 는 "선생님이 들여다본 자리" 를 세는
              것일 뿐, 점수가 유효한지를 가르는 값이 아니다. */
           status = confirmed === tasks.length ? 'final' : 'scored';
-          detail = { tasks: tasks.length, confirmed: confirmed };
+          var got = 0;
+          for (var k = 0; k < tasks.length; k++) got += Number(tasks[k].score) || 0;
+          detail = { tasks: tasks.length, confirmed: confirmed, got: got,
+                     top: tasks.length * TASK_MAX,
+                     scaled: scaledFromRaw(got, tasks.length * TASK_MAX) };
         }
       } else {
         var v = by[skill2];

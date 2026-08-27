@@ -391,12 +391,32 @@ window.SG_RESULTS = (function () {
    * 응시 20건이면 요청도 20번이 되던 자리다.
    */
   function tasks(session, ownerId) {
-    var q = 'sg_task_scores?select=session,question_id,skill,task_kind,ai_score,ai_rubric,' +
-            'ai_model,ai_error,transcript,transcript_model,media_path,' +
+    var q = 'sg_task_scores?select=id,session,question_id,skill,task_kind,ai_score,ai_rubric,' +
+            'ai_model,ai_at,ai_error,transcript,transcript_model,media_path,' +
             'teacher_score,teacher_note,confirmed_at&order=question_id';
     if (session) q += '&session=eq.' + encodeURIComponent(session);
     if (ownerId) q += '&owner=eq.' + encodeURIComponent(ownerId);
-    return rest(q).then(function (rows) { return rows || []; });
+    return rest(q).then(function (rows) { return dedupeTasks(rows || []); });
+  }
+
+  /* 예전 DB 에 unique(owner,session,question_id) 제약이 없던 기간에 같은 문항의
+   * 채점 행이 여러 개 쌓였다. 교사 확정 → 교사 점수 → 가장 최근 AI 점수 순으로
+   * 한 건만 남겨, 스피킹·라이팅이 중복 집계되지 않게 한다. */
+  function dedupeTasks(rows) {
+    var by = {};
+    function rank(t) {
+      return (t && t.confirmed_at ? 8 : 0) +
+        (t && t.teacher_score !== null && t.teacher_score !== undefined ? 4 : 0) +
+        (t && t.ai_score !== null && t.ai_score !== undefined ? 2 : 0);
+    }
+    (rows || []).forEach(function (t) {
+      if (!t) return;
+      var k = [t.session || '', t.skill || '', t.question_id || ''].join('|');
+      var old = by[k];
+      if (!old || rank(t) > rank(old) ||
+          (rank(t) === rank(old) && String(t.ai_at || t.id || '') > String(old.ai_at || old.id || ''))) by[k] = t;
+    });
+    return Object.keys(by).map(function (k) { return by[k]; });
   }
 
   /** 이 과제에 이미 점수가 있는가. 교사 확정 > 교사 점수 > AI 초안 순으로 본다.
@@ -500,7 +520,7 @@ window.SG_RESULTS = (function () {
   /** session → 채점 행[] 로 묶는다. 목록 화면이 한 번만 묻고 나눠 쓰기 위한 것. */
   function tasksBySession(rows) {
     var by = {};
-    (rows || []).forEach(function (r) {
+    dedupeTasks(rows || []).forEach(function (r) {
       if (!r || !r.session) return;
       (by[r.session] = by[r.session] || []).push(r);
     });
@@ -932,7 +952,7 @@ window.SG_RESULTS = (function () {
     sectionOf: sectionOf, label: LABEL, pack: pack, score: score, detail: detail,
     local: local, remote: remote, list: list, get: get, push: push,
     listFor: listFor, listAll: listAll, archives: archives, setHidden: setHidden,
-    productive: productive, tasks: tasks, tasksBySession: tasksBySession,
+    productive: productive, tasks: tasks, tasksBySession: tasksBySession, dedupeTasks: dedupeTasks,
     unscored: unscored, hasTaskScore: hasScore, scoreMissing: scoreMissing,
     aiScore: aiScore, bandOf: bandOf,
     uploadRecordings: uploadRecordings, recordedQids: recordedQids, extOf: extOf
