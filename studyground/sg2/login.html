@@ -81,7 +81,7 @@
         <div id="login-look" class="login-look" hidden></div>
         <div class="scan-msg" style="text-align:left"><span data-en>Students: smeag000–smeag999, or the email you registered with. Staff: your admin ID.</span><span data-ko>수험생은 smeag000~smeag999 또는 등록한 이메일, 관리자는 관리자 아이디.</span></div></div>
       <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label>
-        <input id="pw" type="password" name="password" autocomplete="current-password" value="smeag2222" required></div>
+        <input id="pw" type="password" name="password" autocomplete="current-password" value="444444" required></div>
       <button class="btn brand block lg" id="go" type="submit"><span data-en>Log in</span><span data-ko>로그인</span></button>
     </form>
     <div class="divider"><span data-en>or</span><span data-ko>또는</span></div>
@@ -267,7 +267,7 @@
       })
       .catch(function (e2) {
         go.disabled = false;
-        document.getElementById('pw').value = 'smeag2222';
+        document.getElementById('pw').value = '444444';
         show(e2.message, e2.messageKo);
       });
   }
@@ -294,7 +294,7 @@
 
   /* ── QR 카드 ────────────────────────────────────────────────
    * 배부 카드의 내용은 "SG2|smeag007|2026-08-10". 비밀번호는 담지 않는다 —
-   * 어차피 전부 smeag2222 라 QR 에 넣어봐야 보호되는 게 없고, 카드만 주우면
+   * 어차피 전부 444444 라 QR 에 넣어봐야 보호되는 게 없고, 카드만 주우면
    * 다 되는 상태를 만들 이유도 없다. 카드는 "아이디 타이핑 대행"이다. */
   function fromCode(raw) {
     var m = /^SG2\|(smeag\d{3})\|(\d{4}-\d{2}-\d{2})/.exec(String(raw || '').trim());
@@ -312,7 +312,7 @@
     examDateEl.value = c.date;
     saveExamDate(c.date);
     if (window.SG_FS) SG_FS.armAndEnter();     // QR 로 들어와도 학생 화면은 전체화면
-    enter(c.id, 'smeag2222', c.date);   // 카드가 자기 시험일을 들고 온다
+    enter(c.id, '444444', c.date);   // 카드가 자기 시험일을 들고 온다
   }
 
   // 카드를 폰 카메라로 찍어 열었을 때: login.html#SG2|smeag007|2026-08-10

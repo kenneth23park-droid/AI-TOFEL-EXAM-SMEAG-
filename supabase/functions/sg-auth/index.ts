@@ -8,7 +8,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  *    구글 시트에서 한 칸씩 내려 채우듯 서버가 순서대로 배정한다 — 사람이 번호를
  *    고르는 자리는 없고, 같은 날 같은 번호는 DB 의 unique(student_id, exam_date)
  *    가 막는다. 번호가 겹치면 그 자리는 건너뛰고 다음 빈 번호로 간다.
- *  • 비밀번호는 전부 smeag2222.
+ *  • 비밀번호는 전부 444444.
  *  • 이름·이메일·담당 선생님은 비워도 된다 — 학생 수만 넣고 자리를 먼저 뽑는 대량 발급
  *    (admin-students.html)이 그렇게 쓴다. 비면 배정된 아이디가 이름이 되고,
  *    이메일은 합성 로그인 주소가 그대로 들어간다. 그 주소는 (아이디, 시험일)
@@ -24,7 +24,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  * (supabase/teacher_scope.sql).
  *
  * 로그인은 세 가지로 들어온다 — 학생아이디(smeag###), 등록한 이메일,
- * 그리고 선생님·관리자 계정(상주 이메일). 비밀번호는 수험생이면 smeag2222.
+ * 그리고 선생님·관리자 계정(상주 이메일). 비밀번호는 수험생이면 444444.
  *
  * Supabase Auth 는 이메일이 필수라 아이디+시험일로 합성한다:
  *   smeag007.20260901@smeagstudyground.com
@@ -41,7 +41,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  *   → 4xx { error, message, message_ko, ... }
  */
 
-const PW = "smeag2222";
+const PW = "444444";
 const STAFF_PW = "smeag2222";
 const DOMAIN = "smeagstudyground.com";
 /* 학생아이디는 이 한 가지 모양뿐이다 — 배정도, 로그인도, 직원 아이디 금지도 같은 자. */
