@@ -348,7 +348,13 @@
        그래서 여기서 기다렸다가, 새로 매겨진 점수가 있으면 목록을 다시 그린다 —
        기다리지 않으면 방금 올라간 점수를 다음 방문 때야 보게 된다. */
     if (window.SG_RESULTS && SG_AUTH.user()) {
-      SG_RESULTS.push({ waitScore: true }).then(function (r) {
+      /* claim 은 제출 화면이 넘겨 준다 — 로그인이 풀린 채 시험을 마친 학생이
+         그 자리에서 로그인해 올리는 경로다(exam-shell.js §done-offline-login).
+         그 한 세션만 지목해 올린다. 없으면 push() 는 주인이 자기로 박힌 응시만
+         올린다 — 이 브라우저에 남은 남의 시험은 건드리지 않는다. */
+      var claim = '';
+      try { claim = new URLSearchParams(location.search).get('claim') || ''; } catch (e) { claim = ''; }
+      SG_RESULTS.push({ waitScore: true, session: claim || undefined }).then(function (r) {
         var sc = (r && r.scored) || null;
         if (sc && ((sc.scored || []).length)) paintAll();
         var m = (r && r.media) || null;

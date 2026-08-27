@@ -125,9 +125,14 @@ ok(list.every(function (t) { return t.question_id.indexOf('-R') < 0; }),
 
 /* ── 2) 제출 직후: 채점을 끝까지 기다린다 ─────────────────────────────── */
 
-console.log('제출 직후 push({waitScore:true})');
+console.log('제출 직후 push({session, waitScore:true})');
 var seen = [];
+/* session 을 지목해서 부른다 — 제출 화면이 그렇게 부른다(exam-shell.js).
+   지목이 곧 "이 시험은 지금 이 학생 것"이라는 사람의 확인이고, 그것이 없으면
+   push() 는 주인이 박히지 않은 응시를 올리지 않는다(§uploadable). 아래 3) 이
+   그 거절을 따로 확인한다. */
 SG_RESULTS.push({
+  session: SESSION,
   waitScore: true,
   onProgress: function (done, total) { seen.push(done + '/' + total); }
 }).then(function (r) {
@@ -140,8 +145,20 @@ SG_RESULTS.push({
   ok(seen[0] === '0/4' && seen[seen.length - 1] === '4/4',
      '진행을 0/4 로 열고 4/4 로 닫는다 (얻은 값 ' + JSON.stringify(seen) + ')');
 
-  console.log(fails ? '\nFAILED ' + fails + '건' : '\n모두 통과');
-  process.exit(fails ? 1 : 0);
+  /* ── 3) 지목도 없고 주인도 안 박힌 응시는 올리지 않는다 ─────────────
+   *
+   * 공용 시험 PC 의 localStorage 에는 앞 학생들의 응시가 남는다. 예전에는
+   * 대시보드를 여는 것만으로 그것이 지금 로그인한 학생 앞으로 올라갔다 —
+   * 2026-08-27 에 세션 60개가 여러 학생에게 걸쳐 있었고 한 세션은 11명이
+   * 주인이었다. 이 자리가 그 길을 막는다. */
+  return SG_RESULTS.push({ waitScore: true }).then(function (r2) {
+    ok(r2 && r2.sent === 0,
+       '지목 없이 부르면 주인 없는 응시는 올리지 않는다 (얻은 값 ' +
+       ((r2 && r2.sent) || 0) + ')');
+
+    console.log(fails ? '\nFAILED ' + fails + '건' : '\n모두 통과');
+    process.exit(fails ? 1 : 0);
+  });
 })['catch'](function (e) {
   console.error('예외: ' + (e && e.stack || e));
   process.exit(1);

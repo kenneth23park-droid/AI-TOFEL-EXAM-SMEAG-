@@ -235,6 +235,9 @@ window.SG_RESULTS = (function () {
       var s = score(p, answers);
       out.push({
         session: session,
+        /* 이 응시를 친 사람. exam-shell.js 의 stampOwner() 가 시작·제출 두 번 박는다.
+           예전 세션에는 없다 — push() 는 그 경우를 "모른다"로 보고 올리지 않는다. */
+        owner_id: meta.ownerId || '',
         // 화면·필터가 한 가지 표기만 보게 대문자로 굳힌다('set9' 와 'SET9' 는 같은 세트다).
         set_code: String(meta.setCode || meta.set || (p && p.code) || '').toUpperCase(),
         mode: meta.mode || '',
@@ -816,18 +819,47 @@ window.SG_RESULTS = (function () {
    * 녹음 업로드는 "아직 안 올라간 응시"뿐 아니라 **이미 올라간 응시**도 훑는다.
    * 시험장에서 회선이 끊겼던 응시는 결과 행만 올라가고 음성이 남았을 수 있고,
    * 그 경우 학생이 나중에 대시보드를 열기만 해도 밀린 녹음이 따라 올라가야 한다. */
+  /* 올려도 되는 응시인가 — 이 한 줄이 성적표의 주인을 지킨다.
+   *
+   * 규칙은 둘뿐이다:
+   *   1) 세션에 박힌 주인이 지금 로그인한 사람과 같다        → 올린다
+   *   2) 호출자가 "이 세션"이라고 명시했다(opts.session)      → 올린다
+   * 그 밖은 올리지 않는다. 특히 주인이 안 박힌 예전 세션은 올리지 않는다 —
+   * "모르면 내 것" 이 정확히 2026-08-27 의 사고였다. 공용 시험 PC 의 localStorage
+   * 에 남아 있던 앞 학생들의 응시가, 뒷 학생이 대시보드를 여는 것만으로 그 학생
+   * 성적표에 얹혔다(세션 60개 · 최다 11명).
+   *
+   * 2)가 있는 이유는 제출 화면 때문이다. 로그인이 풀린 채 시험을 마친 학생은 그
+   * 자리에서 로그인해 올려야 하는데, 그때 세션에는 아직 주인이 없을 수 있다.
+   * 그 자리는 사람이 "지금 이 시험"이라고 지목한 자리라 신뢰할 수 있다. */
+  function uploadable(r, u, only) {
+    if (only) return r.session === only;
+    return !!r.owner_id && r.owner_id === u.id;
+  }
+
   function push(opts) {
     opts = opts || {};
     var u = window.SG_AUTH && SG_AUTH.user();
     var mine = local();
     if (!u || !mine.length) return Promise.resolve({ sent: 0, failed: 0, scored: null });
 
+
     /* 숨긴 응시까지 본다 — 여기서 빼면 "서버에 없다"고 판단해 다시 올리고,
        가려 둔 응시가 성적 목록으로 되돌아온다. */
     return remote({ includeHidden: true }).then(function (rows) {
       var have = {};
       (rows || []).forEach(function (r) { have[r.session] = true; });
-      var todo = mine.filter(function (r) { return !have[r.session]; });
+      /* 여기가 소유권이 생기는 자리다 — 서버에 없는 응시를 내 이름으로 새로
+         적는 순간. 그래서 검문은 정확히 여기서만 한다(§uploadable).
+         이미 서버에 내 것으로 있는 응시는 통과시킨다: 주인이 새로 정해지는 것이
+         아니라 이미 정해진 것이고, 그 뒤의 녹음 업로드·못 매긴 과제 재의뢰는
+         그대로 돌아야 하기 때문이다. */
+      var fresh = mine.filter(function (r) { return !have[r.session]; });
+      var todo = fresh.filter(function (r) { return uploadable(r, u, opts.session); });
+      var blocked = fresh.length - todo.length;
+      if (blocked && window.console && console.info) {
+        console.info('[SG_RESULTS] 내 것이라는 근거가 없는 응시 ' + blocked + '건은 올리지 않는다.');
+      }
 
       var wrote = todo.length
         ? rest('sg_results?on_conflict=owner,session', {

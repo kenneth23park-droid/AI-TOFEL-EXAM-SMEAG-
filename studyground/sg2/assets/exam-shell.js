@@ -1242,9 +1242,16 @@ window.SG_RUNTIME = (function () {
       if (host && note) host.insertBefore(box, note); else if (host) host.appendChild(box);
 
       /* 로그인 뒤에는 대시보드로 보낸다 — 그 화면이 열리면서 push() 가 돌고,
-         이 기기에 남은 제출된 응시가 그 계정으로 따라 올라간다. */
+         이 응시가 그 계정으로 따라 올라간다.
+         claim 으로 세션을 지목해서 넘긴다. 지목이 없으면 대시보드는 주인이 박힌
+         응시만 올리므로(§uploadable), 로그인 없이 친 이 시험은 영영 못 올라간다.
+         반대로 지목을 넘기면 올라가는 것은 딱 이 하나다 — 옆자리 학생 것이 묻어
+         가지 않는다. */
       var a = document.getElementById('done-offline-login');
-      if (a) a.href = 'login.html?next=' + encodeURIComponent('dashboard.html');
+      if (a) {
+        a.href = 'login.html?next=' +
+                 encodeURIComponent('dashboard.html?claim=' + encodeURIComponent(session));
+      }
 
       /* 녹음은 토큰 없이도 손에 쥘 수 있다. 업로드가 막힌 자리일수록 이 한 장이
          유일한 사본이라 더 세게 붙잡는다 — 실패해도 화면은 이미 할 말을 다 했다. */
@@ -1336,6 +1343,9 @@ window.SG_RUNTIME = (function () {
              { failed: rec.failed, saved: rec.saved && rec.saved.name, error: rec.error || 'unknown' });
       }
       return SG_RESULTS.push({
+      /* 방금 친 이 시험만 올린다. 이 브라우저에 남은 다른 세션은 이 학생 것이
+         아닐 수 있고, 실제로 아니었다(§uploadable). */
+      session: session,
       waitScore: true,
       onProgress: function (done, total) {
         say('Scoring Writing and Speaking… ' + done + ' / ' + total,
@@ -1490,7 +1500,27 @@ window.SG_RUNTIME = (function () {
     }
   }
 
+  /* 이 응시의 주인이 누구인지 세션에 새긴다.
+   *
+   * 없으면 sg-results.js 의 local() 이 이 브라우저에 남은 모든 세션을 "내 것"으로
+   * 보고, push() 가 지금 로그인한 사람 앞으로 통째로 올린다. 공용 시험 PC 에서는
+   * 그것이 곧 앞 학생의 시험이 뒷 학생 성적표에 얹히는 길이었다 — 2026-08-27 에
+   * 세션 60개가 여러 학생에게 걸쳐 있는 것이 발견됐고, 한 세션은 11명에게 붙어
+   * 있었다. 로그인 전이면 비워 두고, 로그인하는 순간(제출 화면) 다시 새긴다. */
+  function stampOwner() {
+    try {
+      var u = window.SG_AUTH && SG_AUTH.user();
+      if (!u || !u.id) return null;
+      var m = STORE.meta() || {};
+      if (m.ownerId !== u.id) STORE.patchMeta({ ownerId: u.id, studentNo: u.student_id || m.studentNo || '' });
+      return u.id;
+    } catch (e) { return null; }
+  }
+
   function finishUp(session) {
+    /* 제출 도장을 찍기 전에 주인부터 박는다 — 이 순서가 뒤집히면 submittedAt 은
+       있는데 ownerId 는 없는 세션이 생기고, 그 세션이 정확히 옮겨 다니는 것이다. */
+    stampOwner();
     if (machine && machine.status() !== 'submitted') {
       try { machine.markSubmitted(); } catch (e) { STORE.patchMeta({ submittedAt: Date.now() }); }
     } else {
@@ -1513,6 +1543,8 @@ window.SG_RUNTIME = (function () {
       });
       meta = STORE.meta();
     }
+    // 시작하는 순간의 로그인 계정이 이 응시의 주인이다(§stampOwner).
+    stampOwner();
     // mode 는 저장값이 이긴다(Story 1.8 AC5).
     var mode = meta.mode || url.mode;
     STORE.patchMeta({ screenCount: screens.length, mode: mode });
