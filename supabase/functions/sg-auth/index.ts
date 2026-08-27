@@ -337,6 +337,20 @@ async function resolveAccount(filter: string, wanted?: unknown) {
          (await pick(`&exam_date=gt.${t}`, "exam_date.asc"));
 }
 
+/** 시험일 명단을 도입하기 전에 만든 학생은 sg_exam_accounts 행이 없을 수 있다.
+ *  그 계정은 sg_profiles 에 남아 있는 실제 인증 이메일로 로그인한다. */
+async function legacyStudentEmail(studentId: string) {
+  const r = await admin(
+    `/rest/v1/sg_profiles?student_id=ilike.${encodeURIComponent(studentId)}` +
+      `&select=email&order=id.asc&limit=1`,
+  );
+  const rows = await r.json().catch(() => []);
+  const email = Array.isArray(rows) && rows[0]
+    ? String(rows[0].email ?? "").trim().toLowerCase()
+    : "";
+  return email || null;
+}
+
 async function handleSignin(b: Record<string, unknown>) {
   const login = String(b.login ?? "").trim().toLowerCase();
   const password = String(b.password ?? "") || PW;
@@ -348,8 +362,9 @@ async function handleSignin(b: Record<string, unknown>) {
   if (ID_RE.test(login)) {
     // 1) 학생아이디 — 그 아이디가 어느 시험일 계정인지부터 되짚는다.
     const acc = await resolveAccount(`student_id=eq.${login}`, b.exam_date);
-    if (!acc) return bad();
-    target = authEmail(acc.student_id, acc.exam_date);
+    // 예전 계정은 시험일 명단이 없으므로 프로필의 인증 이메일로 한 번 더 찾는다.
+    target = acc ? authEmail(acc.student_id, acc.exam_date) : (await legacyStudentEmail(login)) ?? "";
+    if (!target) return bad();
   } else if (login.includes("@")) {
     // 2) 등록한 이메일 → 그 시험일의 계정. 없으면 3) 선생님·관리자 계정으로 그대로 쓴다.
     const acc = await resolveAccount(`email=eq.${encodeURIComponent(login)}`, b.exam_date);
