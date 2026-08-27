@@ -4,7 +4,7 @@
  * 환경변수)에만 있고, 브라우저는 공용 토큰(SG_TTS_TOKEN)만 들고 있다.
  * 토큰은 이 기기의 localStorage 에 남는다 — 관리자 로그인과 같은 성격의 가림막이다.
  *
- * 엔진은 넷이고 기본은 ElevenLabs 다 — 시험 음성 정본이 전부 그 계정의 목소리로
+ * 엔진은 다섯이고 기본은 ElevenLabs 다 — 시험 음성 정본이 전부 그 계정의 목소리로
  * 만들어졌고, 이미 있는 세트의 한 문항만 다른 엔진으로 다시 만들면 그 문항만 목소리가
  * 튄다. 새 세트를 통째로 지을 때는 어느 엔진이든 처음부터 끝까지 한 엔진으로 가면 된다
  * (api/tts.js 머리말). 모델·목소리 목록은 서버가 알려준다. 서버에 닿지 못하면 아래
@@ -93,9 +93,16 @@
         free: '월 100만자 무료(Standard)', envVar: 'GOOGLE_TTS_API_KEY' },
       { id: 'deepgram', label: 'Deepgram Aura',
         models: ['aura-2', 'aura'], defaultModel: 'aura-2', langs: [], speed: { min: 1, max: 1 },
-        free: '가입 시 $200 크레딧', envVar: 'DEEPGRAM_API_KEY' }
+        free: '가입 시 $200 크레딧', envVar: 'DEEPGRAM_API_KEY' },
+      /* 무료 한도가 있는 유일한 엔진 — 화면이 FREE 로 표시한다(freeTier). WAV 로 내준다. */
+      { id: 'qwen', label: 'Qwen TTS',
+        models: ['qwen3-tts-flash', 'qwen-tts'], defaultModel: 'qwen3-tts-flash',
+        langs: [], speed: { min: 1, max: 1 }, mime: 'audio/wav', ext: 'wav', freeTier: true,
+        free: '신규 계정 무료 한도(모델당 100만 토큰 · 90일)', envVar: 'DASHSCOPE_API_KEY' }
     ].map(function (p) {
-      p.mp3 = 'native'; p.gap = false; p.acceptsKey = true;
+      if (!p.mime) p.mp3 = 'native';
+      p.mime = p.mime || 'audio/mpeg'; p.ext = p.ext || 'mp3';
+      p.gap = false; p.acceptsKey = true;
       p.ready = false; p.envReady = false; p.note = 'server unreachable';
       return p;
     }),
@@ -266,10 +273,14 @@
         provider: opts.provider, model: opts.model, lang: opts.lang,
         segments: opts.segments, gapMs: opts.gapMs, rate: opts.rate, pitch: opts.pitch
       }).then(function (j) {
-        var blob = b64ToBlob(j.audio, j.mime);
-        var name = (opts.filename || 'generated').replace(/[^\w.-]+/g, '-') + '.mp3';
-        var file = new File([blob], name, { type: 'audio/mpeg' });
-        return { blob: blob, file: file, chars: j.chars, bytes: j.bytes,
+        /* 엔진마다 내주는 형식이 다르다(Qwen 은 WAV). mp3 로 못 박아 두면 파일 이름과
+           속이 어긋나서, 나중에 배포한 뒤에야 안 들린다는 것을 알게 된다. */
+        var mime = j.mime || 'audio/mpeg';
+        var ext = j.ext || (/wav/i.test(mime) ? 'wav' : 'mp3');
+        var blob = b64ToBlob(j.audio, mime);
+        var name = (opts.filename || 'generated').replace(/[^\w.-]+/g, '-') + '.' + ext;
+        var file = new File([blob], name, { type: mime });
+        return { blob: blob, file: file, mime: mime, ext: ext, chars: j.chars, bytes: j.bytes,
                  segments: j.segments, provider: j.provider, model: j.model, gapApplied: j.gapApplied };
       });
     }

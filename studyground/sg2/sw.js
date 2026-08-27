@@ -389,7 +389,10 @@
 //      the four passage positions into interactive A–D markers.
 // v97: SET 10 Listening restores all speaker illustrations and refreshes every
 //      SET 10 entry point so the repaired pack is not hidden by an old query key.
-const VERSION = 'sg-v97';
+// v98: 세트 만들기 화면에 녹음 파일 올리기(폴더·파일 선택 · assets/audio-match.js)와
+//      Qwen TTS(무료 한도 · WAV · assets/wav-join.js)가 붙는다. 프리캐시된
+//      assets/tts-client.js 가 함께 바뀌므로 VERSION 을 올려 셸 캐시를 새로 채운다.
+const VERSION = 'sg-v98';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

@@ -1,7 +1,7 @@
 /* /api/tts 의 엔진 계약 검증.
  * 실행: node studyground/tests/test_tts_engines.js
  *
- * 엔진은 넷이고 기본은 ElevenLabs 다. 시험 음성 정본(media/audio/set9/)이 전부
+ * 엔진은 다섯이고 기본은 ElevenLabs 다. 시험 음성 정본(media/audio/set9/)이 전부
  * ElevenLabs 로 만들어졌고 배역표의 voice_id 도 그 계정 것이라, **이미 있는 세트의 한
  * 문항**을 다른 엔진으로 다시 만들면 그 문항만 목소리가 튄다 — 리스닝은 "누가
  * 말하는가" 가 문항의 일부다. 새 세트를 통째로 지을 때만 다른 엔진을 쓴다.
@@ -43,6 +43,19 @@ function call(opts) {
   });
 }
 
+/** 16bit mono PCM WAV 한 개 — Qwen 이 내주는 모양을 흉내 낸다. */
+function wavOf(bytes) {
+  var b = Buffer.alloc(44 + bytes.length);
+  b.write('RIFF', 0); b.writeUInt32LE(36 + bytes.length, 4); b.write('WAVE', 8);
+  b.write('fmt ', 12); b.writeUInt32LE(16, 16);
+  b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
+  b.writeUInt32LE(24000, 24); b.writeUInt32LE(48000, 28);
+  b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34);
+  b.write('data', 36); b.writeUInt32LE(bytes.length, 40);
+  Buffer.from(bytes).copy(b, 44);
+  return b;
+}
+
 var seen = [];                       // 가로챈 요청들
 function stubFetch(kind) {
   global.fetch = function (url, init) {
@@ -66,6 +79,14 @@ function stubFetch(kind) {
       return Promise.resolve({ ok: true, json: function () {
         return Promise.resolve({ tts: [{ name: 'aura-2-thalia-en', canonical_name: 'aura-2-thalia-en',
                                          languages: ['en'], metadata: {} }] });
+      } });
+    }
+    if (kind === 'qwen') {
+      /* DashScope 는 오디오를 base64(또는 24시간짜리 임시 URL)로 준다. 여기서는
+         토막마다 다른 WAV 를 돌려줘 이어 붙인 결과를 확인한다. */
+      var n = seen.length;                       // 첫 요청 1,2 · 두 번째 3,4
+      return Promise.resolve({ ok: true, json: function () {
+        return Promise.resolve({ output: { audio: { data: wavOf([n * 2 - 1, n * 2]).toString('base64') } } });
       } });
     }
     if (kind === 'google-tts') {
@@ -103,14 +124,20 @@ function clearKeys() { ENV.forEach(function (n) { delete process.env[n]; }); }
   r = await call({});
   check('토큰이 틀리면 401', r.status, 401);
 
-  /* 목록: 엔진 넷이 모두 보이고, 키가 없는 것은 이유를 달고 잠긴 채로 보인다.
+  /* 목록: 엔진 다섯이 모두 보이고, 키가 없는 것은 이유를 달고 잠긴 채로 보인다.
      "안 보인다" 와 "키가 없다" 는 다른 말이다 — 화면이 그 둘을 구분해 줘야 한다. */
   stubFetch('voices');
   seen = [];
   r = await call({ headers: { 'x-sg-token': TOKEN } });
   check('GET 은 200', r.status, 200);
-  check('엔진은 넷', r.body.providers.map(function (p) { return p.id; }),
-    ['elevenlabs', 'openai', 'google', 'deepgram']);
+  check('엔진은 다섯', r.body.providers.map(function (p) { return p.id; }),
+    ['elevenlabs', 'openai', 'google', 'deepgram', 'qwen']);
+  /* 무료 한도가 있는 엔진은 그렇다고 말해야 한다 — 화면이 그것만 보고 FREE 를 붙인다. */
+  check('무료 한도가 있는 엔진은 Qwen 뿐',
+    r.body.providers.filter(function (p) { return p.freeTier; }).map(function (p) { return p.id; }),
+    ['qwen']);
+  check('Qwen 은 WAV 로 내준다고 미리 밝힌다', pick(r.body.providers, 'qwen').mime, 'audio/wav');
+  check('나머지는 mp3', pick(r.body.providers, 'elevenlabs').mime, 'audio/mpeg');
   check('키가 없으면 ready 아니다', pick(r.body.providers, 'elevenlabs').ready, false);
   check('이유를 적어 준다', pick(r.body.providers, 'google').why, 'GOOGLE_TTS_API_KEY 미설정');
   check('기본 모델은 시험 정본과 같다', pick(r.body.providers, 'elevenlabs').defaultModel, 'eleven_flash_v2_5');
@@ -246,6 +273,39 @@ function clearKeys() { ENV.forEach(function (n) { delete process.env[n]; }); }
   check('목소리가 곧 모델이다', seen[0].url.indexOf('model=aura-2-thalia-en') > 0, true);
   check('토큰 인증', seen[0].init.headers.Authorization, 'Token dg_server');
   check('속도는 아예 안 받는다 — 1 로 접힌다', r.body.speed, 1);
+
+  /* ── Qwen(DashScope) ── 무료 한도가 있는 엔진. mp3 가 아니라 WAV 로 내주기 때문에,
+     토막이 여럿이면 **머리표를 다시 적어** 이어야 한다. 그냥 붙이면 재생기가 첫 토막에서
+     멈추고, 그 사실은 학생이 듣는 자리에서야 드러난다. */
+  process.env.DASHSCOPE_API_KEY = 'ds_server';
+  stubFetch('qwen');
+  seen = [];
+  r = await post({ provider: 'qwen', rate: 1.4,
+                   segments: [{ text: 'hello', voice: 'Cherry' }, { text: 'again', voice: 'Ethan' }] });
+  check('Qwen 은 200', r.status, 200);
+  check('DashScope 로 간다',
+    seen[0].url, 'https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation');
+  check('Bearer 로 붙는다', seen[0].init.headers.Authorization, 'Bearer ds_server');
+  var qb = JSON.parse(seen[0].init.body);
+  check('모델은 기본값', qb.model, 'qwen3-tts-flash');
+  check('목소리를 그대로 싣는다', qb.input.voice, 'Cherry');
+  check('영어로 읽으라고 못 박는다', qb.input.language_type, 'English');
+  check('속도는 안 받는다 — 1 로 접힌다', r.body.speed, 1);
+  check('WAV 라고 알려준다', r.body.mime, 'audio/wav');
+  check('확장자도 알려준다', r.body.ext, 'wav');
+
+  /* 두 토막을 이었으니 WAV 하나여야 한다 — 소리는 둘 다 들어 있고 머리표는 하나다. */
+  var out = Buffer.from(r.body.audio, 'base64');
+  var WAV = require(path.join(__dirname, '..', 'sg2', 'assets', 'wav-join.js'));
+  check('이어 붙인 결과도 WAV', WAV.isWav(out), true);
+  check('두 토막의 소리가 다 있다', Array.from(WAV.parse(out).data).join(','), '1,2,3,4');
+  check('머리표는 하나다', out.length, 44 + 4);
+
+  /* 목소리 이름은 서버에서 걸러진다 — 방언 전용 목소리를 영어 시험에 싣지 않는다. */
+  seen = [];
+  r = await post({ provider: 'qwen', segments: [{ text: 'hi', voice: 'Sichuan - Sunny' }] });
+  check('모르는 Qwen 목소리는 400', r.status, 400);
+  check('그 요청은 밖으로 나가지 않는다', seen.length, 0);
 
   console.log(fails.length ? '\nFAILED: ' + fails.join(', ') : '\nall ok');
   process.exit(fails.length ? 1 : 0);

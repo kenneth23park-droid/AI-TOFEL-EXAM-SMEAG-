@@ -1,6 +1,6 @@
 /* SMEAG StudyGround — /api/tts : 문항 스크립트 → 음성(mp3) 생성.
  *
- * 엔진은 넷이다. 기본은 여전히 ElevenLabs 다.
+ * 엔진은 다섯이다. 기본은 여전히 ElevenLabs 다.
  *   SET 9 의 시험 음성 정본(media/audio/set9/)이 전부 ElevenLabs 로 만들어졌고,
  *   배역표(config/set9-voice-casting.json)의 13인도 그 계정의 voice_id 다. 그래서
  *   **이미 있는 세트의 한 문항만 다시 만들 때는 ElevenLabs 를 쓴다** — 리스닝은
@@ -18,6 +18,7 @@
  *   openai      OPENAI_API_KEY       채점·생성에 이미 쓰는 키를 그대로 쓴다(가장 싸게 시작).
  *   google      GOOGLE_TTS_API_KEY   en-US·GB·AU·IN 억양 폭이 가장 넓다(리스닝 다양성).
  *   deepgram    DEEPGRAM_API_KEY     빠르고 싸다. 목소리(voice)가 곧 모델이다.
+ *   qwen        DASHSCOPE_API_KEY    무료 한도가 있다(신규 계정). WAV 로 내준다.
  *
  * 왜 서버가 필요한가
  *   정적 사이트라 프런트에 TTS API 키를 두면 그대로 공개된다. 그래서 키는 Vercel
@@ -50,6 +51,8 @@
 const MAX_SEGMENTS = 20;
 const MAX_CHARS_PER_SEGMENT = 1200;
 const MAX_CHARS_TOTAL = 6000;
+
+const WAV = require('../assets/wav-join.js');   // UMD — 화면과 같은 코드로 WAV 를 잇는다
 
 function env(n) { return process.env[n] || ''; }
 
@@ -264,6 +267,71 @@ const ENGINES = {
       if (!r.ok) throw await fail(r);
       return Buffer.from(await r.arrayBuffer());
     }
+  },
+
+  /* Qwen TTS (Alibaba Model Studio · DashScope) — 무료 한도가 있는 유일한 엔진이다.
+     새 계정은 모델마다 100만 토큰이 90일간 공짜라, 세트를 통째로 지어 보는 동안 청구서가
+     안 나온다. 그래서 화면이 이 엔진에 FREE 표시를 붙인다.
+
+     둘을 조심할 것.
+       ① mp3 가 아니라 **WAV** 로 내준다. 토막을 그냥 이어 붙이면 재생기가 첫 토막에서
+          멈추므로 assets/wav-join.js 로 제대로 잇는다(머리표를 다시 적는다).
+       ② 속도 파라미터가 없다 — 접어서 1 로 보낸다(Deepgram 과 같다).
+
+     목소리 목록 API 가 없어서 여기 적어 둔다. 중국 방언 전용 목소리(Dylan·Sunny 등)는
+     싣지 않는다 — 영어 시험 음성에 쓸 자리가 없다. qwen-tts(구버전)는 앞의 넷만 받는다. */
+  qwen: {
+    label: 'Qwen TTS',
+    envVar: 'DASHSCOPE_API_KEY',
+    models: ['qwen3-tts-flash', 'qwen-tts'],
+    defaultModel: 'qwen3-tts-flash',
+    langs: [],
+    speed: { min: 1, max: 1 },     // 속도 파라미터가 없다 — 접어서 1 로 보낸다
+    mime: 'audio/wav',
+    ext: 'wav',
+    free: '신규 계정 무료 한도(모델당 100만 토큰 · 90일) · 이후 1M자 약 $15',
+    freeTier: true,
+    note2: '무료 한도가 있다 · WAV 로 내준다(mp3 아님) · 속도 조절 없음',
+    fixed: [
+      { id: 'Cherry',   name: 'Cherry',   lang: 'en', gender: 'female', family: 'qwen-tts' },
+      { id: 'Serena',   name: 'Serena',   lang: 'en', gender: 'female', family: 'qwen-tts' },
+      { id: 'Chelsie',  name: 'Chelsie',  lang: 'en', gender: 'female', family: 'qwen-tts' },
+      { id: 'Ethan',    name: 'Ethan',    lang: 'en', gender: 'male',   family: 'qwen-tts' },
+      { id: 'Jennifer', name: 'Jennifer', lang: 'en', gender: 'female', family: 'qwen3-tts-flash' },
+      { id: 'Katerina', name: 'Katerina', lang: 'en', gender: 'female', family: 'qwen3-tts-flash' },
+      { id: 'Vivian',   name: 'Vivian',   lang: 'en', gender: 'female', family: 'qwen3-tts-flash' },
+      { id: 'Bella',    name: 'Bella',    lang: 'en', gender: 'female', family: 'qwen3-tts-flash' },
+      { id: 'Mia',      name: 'Mia',      lang: 'en', gender: 'female', family: 'qwen3-tts-flash' },
+      { id: 'Ryan',     name: 'Ryan',     lang: 'en', gender: 'male',   family: 'qwen3-tts-flash' },
+      { id: 'Nofish',   name: 'Nofish',   lang: 'en', gender: 'male',   family: 'qwen3-tts-flash' },
+      { id: 'Aiden',    name: 'Aiden',    lang: 'en', gender: 'male',   family: 'qwen3-tts-flash' },
+      { id: 'Kai',      name: 'Kai',      lang: 'en', gender: 'male',   family: 'qwen3-tts-flash' },
+      { id: 'Moon',     name: 'Moon',     lang: 'en', gender: 'male',   family: 'qwen3-tts-flash' }
+    ],
+    okVoice(v) { return this.fixed.some((x) => x.id === v); },
+    async voices() { return this.fixed.slice(); },
+    join(parts) { return Buffer.from(WAV.join(parts)); },
+    async synth(seg, o, key) {
+      const base = (env('DASHSCOPE_BASE_URL') || 'https://dashscope-intl.aliyuncs.com').replace(/\/+$/, '');
+      const r = await fetch(base + '/api/v1/services/aigc/multimodal-generation/generation', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: o.model,
+          input: { text: seg.text, voice: seg.voice, language_type: 'English' }
+        })
+      });
+      if (!r.ok) throw await fail(r);
+      const j = await r.json();
+      /* DashScope 는 실패를 200 에 담아 보내기도 한다 — code 가 있으면 실패다. */
+      if (j && j.code) throw new Error(j.code + (j.message ? ': ' + j.message : ''));
+      const a = (j && j.output && j.output.audio) || {};
+      if (a.data) return Buffer.from(a.data, 'base64');
+      if (!a.url) throw new Error('Qwen returned no audio.');
+      const rr = await fetch(a.url);          // url 은 24시간짜리 임시 주소다
+      if (!rr.ok) throw await fail(rr);
+      return Buffer.from(await rr.arrayBuffer());
+    }
   }
 };
 
@@ -322,9 +390,12 @@ function describe(pid, C) {
   const ready = !!keyFor(pid, C);
   return {
     id: pid, label: E.label,
-    mp3: 'native',
+    mp3: E.mime && E.mime !== 'audio/mpeg' ? 'no' : 'native',
+    mime: E.mime || 'audio/mpeg',
+    ext: E.ext || 'mp3',
     gap: false,                    // 서버에 ffmpeg 이 없어 무음을 못 만든다
     free: E.free,
+    freeTier: !!E.freeTier,        // 화면이 FREE 표시를 붙이는 근거
     note: ready ? (E.note2 || '') : (E.envVar + ' 미설정'),
     models: E.models, defaultModel: E.defaultModel,
     langs: E.langs, speed: E.speed,
@@ -427,9 +498,12 @@ module.exports = async function handler(req, res) {
   try {
     // 세그먼트는 병렬로 합성하고 순서대로 이어 붙인다(함수 실행시간 제한 대비).
     const parts = await Promise.all(segments.map((seg) => E.synth(seg, opts, key)));
-    const mp3 = Buffer.concat(parts);
+    /* mp3 는 그냥 붙여도 되지만 WAV 는 머리표를 다시 적어야 한다 — 그냥 붙이면
+       재생기가 첫 토막에서 멈춘다. 엔진이 자기 방식을 들고 있다(qwen.join). */
+    const mp3 = E.join ? E.join(parts) : Buffer.concat(parts);
     return json(res, 200, {
-      audio: mp3.toString('base64'), mime: 'audio/mpeg', bytes: mp3.length,
+      audio: mp3.toString('base64'), mime: E.mime || 'audio/mpeg', ext: E.ext || 'mp3',
+      bytes: mp3.length,
       chars: total, segments: segments.length, provider: pid, model,
       speed: opts.speed,
       gapApplied: false
