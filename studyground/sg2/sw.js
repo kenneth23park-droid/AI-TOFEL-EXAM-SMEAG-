@@ -392,7 +392,11 @@
 // v98: 세트 만들기 화면에 녹음 파일 올리기(폴더·파일 선택 · assets/audio-match.js)와
 //      Qwen TTS(무료 한도 · WAV · assets/wav-join.js)가 붙는다. 프리캐시된
 //      assets/tts-client.js 가 함께 바뀌므로 VERSION 을 올려 셸 캐시를 새로 채운다.
-const VERSION = 'sg-v98';
+// v99: 녹음 회수 화면(recover-recordings.html) — ?session= 으로 들어온 응시 id 로
+//      녹음이 없을 때, 이 컴퓨터에 있는 다른 id 의 녹음을 감추고 "없다" 고 말하던
+//      것을 고쳤다. 전부 보여 주고, 한 뭉치를 열고 들어온 응시에 붙여 올릴 수 있다.
+//      프리캐시된 셸 파일이라 VERSION 을 올려야 재방문 기기가 새 화면을 받는다.
+const VERSION = 'sg-v99';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

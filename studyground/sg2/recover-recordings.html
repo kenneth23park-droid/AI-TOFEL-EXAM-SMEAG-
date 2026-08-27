@@ -67,6 +67,9 @@
   .tag.fail { background: #fdeeee; color: #c62828; }
   .tag.wait { background: #eee; color: #666; }
   .tag.skip { background: #fdf1dc; color: #a86b00; }
+  button.attach { font: inherit; font-size: 11px; font-weight: 800; padding: 4px 9px; margin-left: 8px;
+    border: 1px solid var(--brand); border-radius: 999px; background: var(--brand); color: #fff;
+    cursor: pointer; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -113,6 +116,8 @@
   var BUCKET = 'toefl-recordings';
   var found = [];           // [{ key, session, qid, blob, mime, size, state, why }]
   var owners = {};          // session -> owner uuid
+  var all = [];             // 이 브라우저에 있는 전부(세션 필터 이전)
+  var TARGET = '';          // 비면 각 파일이 적힌 세션 자리에 올린다. 세우면 그 응시 자리에 올린다.
 
   function $(id) { return document.getElementById(id); }
   function say(cls, html) { $('msg').innerHTML = '<div class="note ' + cls + '">' + html + '</div>'; }
@@ -218,10 +223,16 @@
     order.forEach(function (s) {
       var meta = metaOf(s);
       var owner = owners[s];
+      /* 열고 들어온 응시와 id 가 다른 녹음 뭉치에는 "이 응시에 붙이기" 를 단다.
+         재시작·범위변경은 그때마다 새 세션 id 를 발급하므로(exam-shell.js), 같은
+         학생의 같은 시험인데도 녹음이 다른 id 밑에 적혀 있는 일이 생긴다. */
+      var attach = (ONLY && s !== ONLY && TARGET !== ONLY)
+        ? ' <button class="attach" data-attach="' + esc(s) + '">Attach these to the attempt I opened</button>'
+        : '';
       h.push('<tr class="head"><td colspan="4"><span class="mono">' + esc(s) + '</span>' +
              (meta ? ' &nbsp;· ' + esc(meta) : '') +
              (owner ? ' &nbsp;· <span class="mono">owner ' + esc(owner.slice(0, 8)) + '…</span>' : '') +
-             '</td></tr>');
+             attach + '</td></tr>');
       bySession[s].forEach(function (f) {
         h.push('<tr><td class="mono">' + esc(f.qid) + '</td><td class="mono">' + esc(f.mime) +
                '</td><td class="num">' + Math.round(f.size / 1024) + ' KB</td><td><span class="tag ' +
@@ -232,7 +243,14 @@
       });
     });
     h.push('</tbody></table>');
-    $('out').innerHTML = found.length ? h.join('') : '';
+    var banner = TARGET
+      ? '<div class="note warn" style="margin:0 0 12px">Uploading into attempt ' +
+        '<span class="mono">' + esc(TARGET) + '</span>' +
+        (metaOf(TARGET) ? ' (' + esc(metaOf(TARGET)) + ')' : '') +
+        ' — not the id the recordings are filed under. Check the student and the test above ' +
+        'before uploading. <button class="attach" data-attach="">Undo</button></div>'
+      : '';
+    $('out').innerHTML = found.length ? banner + h.join('') : '';
   }
 
   /* ── 2. 파일로 내려받기 ─────────────────────────────────────
@@ -274,6 +292,7 @@
   function resolveOwners() {
     var list = [];
     found.forEach(function (f) { if (list.indexOf(f.session) < 0) list.push(f.session); });
+    if (TARGET && list.indexOf(TARGET) < 0) list.push(TARGET);
     if (!list.length) return Promise.resolve();
     var q = 'sg_results?select=session,owner&session=in.(' +
             list.map(function (s) { return '"' + s + '"'; }).join(',') + ')';
@@ -309,12 +328,16 @@
         }
         var f = found[i++];
         if (f.state === 'ok') return one();
-        var owner = owners[f.session];
+        /* 어느 응시 자리에 놓을지. TARGET 이 서 있으면(다른 id 로 적힌 녹음을 이
+           응시에 붙이기로 한 경우) 그 자리다 — 리뷰는 {owner}/{session}/{qid} 만
+           들여다보므로, 녹음이 적힌 옛 id 자리에 올려 두면 영영 붙지 않는다. */
+        var dest = TARGET || f.session;
+        var owner = owners[dest];
         if (!owner) {
           f.state = 'skip'; f.why = 'no account found for this test on the server';
           render(); return one();
         }
-        var path = [owner, f.session, f.qid + '.' + extOf(f.mime)]
+        var path = [owner, dest, f.qid + '.' + extOf(f.mime)]
           .map(encodeURIComponent).join('/');
         return fetch(SG_AUTH.url + '/storage/v1/object/' + BUCKET + '/' + path, {
           method: 'POST',
@@ -353,7 +376,34 @@
   function doScan() {
     say('warn', 'Scanning…');
     return scan().then(function (list) {
+      all = list;
       found = ONLY ? list.filter(function (f) { return f.session === ONLY; }) : list;
+
+      /* 이 응시 id 로는 없는데 이 컴퓨터에는 녹음이 있는 경우.
+         예전에는 여기서 "이 브라우저에 녹음이 없다" 고 말하고 끝냈다 — 화면 밖에
+         멀쩡히 있는 파일을 없다고 한 것이다. 시험을 재시작하거나(전체 다시 시작)
+         범위를 바꿔 새 응시로 열면 그때마다 새 세션 id 가 발급되므로, 녹음은 앞선
+         id 밑에, 채점된 결과는 뒤의 id 밑에 각각 남는다. 그럴 때는 감추지 않고
+         전부 보여 주고, 어느 뭉치를 이 응시에 붙일지 사람이 고르게 한다. */
+      if (ONLY && !found.length && list.length) {
+        found = list;
+        render();
+        var sess = {};
+        list.forEach(function (f) { sess[f.session] = 1; });
+        say('warn',
+            'Nothing is filed under <span class="mono">' + esc(ONLY) + '</span>, but this computer ' +
+            'holds <b>' + list.length + '</b> recording(s) from <b>' + Object.keys(sess).length +
+            '</b> other test id(s). A test that was restarted — or reopened for a single section as a ' +
+            'separate attempt — is given a new id, so its recordings stay under the earlier one. ' +
+            '<b>Save all</b> first, then use <b>Attach these to the attempt I opened</b> on the right ' +
+            'group to upload it into this attempt.');
+        $('btn-save').disabled = false;
+        $('btn-up').disabled = false;
+        $('signin').hidden = false;
+        showWho();
+        return;
+      }
+
       render();
       if (!found.length) {
         say('bad', (ONLY
@@ -382,6 +432,27 @@
   /* 리뷰에서 넘어온 자리는 한 번 더 누르게 하지 않는다 — 여기까지 온 사람의 뜻은
      이미 "그 응시의 녹음을 보자" 이고, 스캔은 회선도 로그인도 필요 없다. */
   if (ONLY) doScan();
+
+  /* "이 응시에 붙이기". 고른 뭉치만 남기고 업로드 자리를 열고 들어온 응시로 돌린다.
+     되돌리기(빈 값)는 전체 목록으로 되감는다. 파일 자체는 건드리지 않는다 — 바뀌는
+     것은 클라우드에서 어느 응시의 자리에 놓느냐 뿐이다. */
+  $('out').addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-attach]') : null;
+    if (!b) return;
+    var src = b.getAttribute('data-attach');
+    if (!src) {
+      TARGET = '';
+      found = all.slice();
+      render();
+      say('warn', 'Back to everything on this computer. Uploads go to the id each recording is filed under.');
+      return;
+    }
+    TARGET = ONLY;
+    found = all.filter(function (f) { return f.session === src; });
+    render();
+    say('warn', found.length + ' recording(s) from <span class="mono">' + esc(src) + '</span> will be ' +
+                'uploaded into the attempt you opened. Sign in and click <b>Sign in &amp; upload</b>.');
+  });
 
   $('btn-save').onclick = saveAll;
   $('btn-up').onclick = uploadAll;
