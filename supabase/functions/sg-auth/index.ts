@@ -8,7 +8,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  *    구글 시트에서 한 칸씩 내려 채우듯 서버가 순서대로 배정한다 — 사람이 번호를
  *    고르는 자리는 없고, 같은 날 같은 번호는 DB 의 unique(student_id, exam_date)
  *    가 막는다. 번호가 겹치면 그 자리는 건너뛰고 다음 빈 번호로 간다.
- *  • 비밀번호는 전부 2222.
+ *  • 비밀번호는 전부 smeag2222.
  *  • 이름·이메일·담당 선생님은 비워도 된다 — 학생 수만 넣고 자리를 먼저 뽑는 대량 발급
  *    (admin-students.html)이 그렇게 쓴다. 비면 배정된 아이디가 이름이 되고,
  *    이메일은 합성 로그인 주소가 그대로 들어간다. 그 주소는 (아이디, 시험일)
@@ -24,7 +24,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  * (supabase/teacher_scope.sql).
  *
  * 로그인은 세 가지로 들어온다 — 학생아이디(smeag###), 등록한 이메일,
- * 그리고 선생님·관리자 계정(상주 이메일). 비밀번호는 수험생이면 2222.
+ * 그리고 선생님·관리자 계정(상주 이메일). 비밀번호는 수험생이면 smeag2222.
  *
  * Supabase Auth 는 이메일이 필수라 아이디+시험일로 합성한다:
  *   smeag007.20260901@smeagstudyground.com
@@ -41,7 +41,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  *   → 4xx { error, message, message_ko, ... }
  */
 
-const PW = "2222";
+const PW = "smeag2222";
 const STAFF_PW = "smeag2222";
 const DOMAIN = "smeagstudyground.com";
 /* 학생아이디는 이 한 가지 모양뿐이다 — 배정도, 로그인도, 직원 아이디 금지도 같은 자. */
@@ -320,35 +320,36 @@ async function claim(studentId: string, date: string, rawName: string, rawEmail:
   return { user, login, name, email };
 }
 
-/** 아이디나 이메일이 여러 시험일에 걸쳐 있을 때 어느 계정으로 들여보낼지.
- *  오늘 → 가장 가까운 과거 → 가장 가까운 미래. 시험 당일 계정이 항상 이긴다. */
-async function resolveAccount(filter: string, wanted?: unknown) {
-  const pick = async (extra: string, order: string) => {
-    const r = await admin(
-      `/rest/v1/sg_exam_accounts?${filter}${extra}&select=student_id,exam_date&order=${order}&limit=1`,
-    );
-    const rows = await r.json().catch(() => []);
-    return Array.isArray(rows) && rows.length ? rows[0] : null;
-  };
-  if (wanted) return await pick(`&exam_date=eq.${dateOf(wanted)}`, "exam_date.asc");
-  const t = today();
-  return (await pick(`&exam_date=eq.${t}`, "exam_date.asc")) ??
-         (await pick(`&exam_date=lt.${t}`, "exam_date.desc")) ??
-         (await pick(`&exam_date=gt.${t}`, "exam_date.asc"));
-}
-
-/** 시험일 명단을 도입하기 전에 만든 학생은 sg_exam_accounts 행이 없을 수 있다.
- *  그 계정은 sg_profiles 에 남아 있는 실제 인증 이메일로 로그인한다. */
-async function legacyStudentEmail(studentId: string) {
+/** 같은 아이디가 여러 시험일에 있을 때 로그인 시도 순서.
+ *  명단만 남고 Auth 계정이 지워진 고아 행이 있어도 다음 계정을 시도한다. */
+async function resolveAccounts(filter: string, wanted?: unknown) {
+  const datePart = wanted ? `&exam_date=eq.${dateOf(wanted)}` : "";
   const r = await admin(
-    `/rest/v1/sg_profiles?student_id=ilike.${encodeURIComponent(studentId)}` +
-      `&select=email&order=id.asc&limit=1`,
+    `/rest/v1/sg_exam_accounts?${filter}${datePart}&select=student_id,exam_date&order=exam_date.desc`,
   );
   const rows = await r.json().catch(() => []);
-  const email = Array.isArray(rows) && rows[0]
-    ? String(rows[0].email ?? "").trim().toLowerCase()
-    : "";
-  return email || null;
+  if (!Array.isArray(rows)) return [];
+  if (wanted) return rows;
+  const t = today();
+  return rows.sort((a, b) => {
+    const ad = String(a.exam_date), bd = String(b.exam_date);
+    const ar = ad === t ? 0 : ad < t ? 1 : 2;
+    const br = bd === t ? 0 : bd < t ? 1 : 2;
+    if (ar !== br) return ar - br;
+    return ar === 2 ? ad.localeCompare(bd) : bd.localeCompare(ad);
+  });
+}
+
+/** 시험일 명단 도입 전 계정의 실제 인증 이메일. */
+async function legacyStudentEmails(studentId: string) {
+  const r = await admin(
+    `/rest/v1/sg_profiles?student_id=ilike.${encodeURIComponent(studentId)}` +
+      `&select=email&order=id.asc`,
+  );
+  const rows = await r.json().catch(() => []);
+  return (Array.isArray(rows) ? rows : [])
+    .map((row) => String(row.email ?? "").trim().toLowerCase())
+    .filter(Boolean);
 }
 
 async function handleSignin(b: Record<string, unknown>) {
@@ -357,26 +358,28 @@ async function handleSignin(b: Record<string, unknown>) {
   if (!login) return fail(400, "missing_fields", "Enter your ID or email.", "아이디 또는 이메일을 입력하세요.");
 
   const bad = () => fail(401, "bad_credentials", "Wrong ID or password.", "아이디 또는 비밀번호가 올바르지 않습니다.");
-  let target = login;
+  let targets: string[] = [login];
 
   if (ID_RE.test(login)) {
-    // 1) 학생아이디 — 그 아이디가 어느 시험일 계정인지부터 되짚는다.
-    const acc = await resolveAccount(`student_id=eq.${login}`, b.exam_date);
-    // 예전 계정은 시험일 명단이 없으므로 프로필의 인증 이메일로 한 번 더 찾는다.
-    target = acc ? authEmail(acc.student_id, acc.exam_date) : (await legacyStudentEmail(login)) ?? "";
-    if (!target) return bad();
+    const accounts = await resolveAccounts(`student_id=eq.${login}`, b.exam_date);
+    targets = accounts.map((acc) => authEmail(acc.student_id, acc.exam_date));
+    targets.push(...await legacyStudentEmails(login));
   } else if (login.includes("@")) {
-    // 2) 등록한 이메일 → 그 시험일의 계정. 없으면 3) 선생님·관리자 계정으로 그대로 쓴다.
-    const acc = await resolveAccount(`email=eq.${encodeURIComponent(login)}`, b.exam_date);
-    if (acc) target = authEmail(acc.student_id, acc.exam_date);
+    const accounts = await resolveAccounts(`email=eq.${encodeURIComponent(login)}`, b.exam_date);
+    targets = accounts.map((acc) => authEmail(acc.student_id, acc.exam_date));
+    targets.push(login); // 예전 학생·선생님·관리자의 실제 Auth 이메일
   } else {
     return bad();
   }
 
-  const s = await issueSession(target, password);
-  if (!s.ok) return bad();
-  const id = s.body?.user?.id;
-  return json({ session: s.body, user: id ? await profileOf(id) : null });
+  const uniqueTargets = [...new Set(targets.filter(Boolean))];
+  for (const target of uniqueTargets) {
+    const s = await issueSession(target, password);
+    if (!s.ok) continue;
+    const id = s.body?.user?.id;
+    return json({ session: s.body, user: id ? await profileOf(id) : null });
+  }
+  return bad();
 }
 
 /* ── 선생님 계정 만들기 (관리자 전용) ─────────────────────────
