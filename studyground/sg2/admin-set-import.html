@@ -1013,6 +1013,7 @@
 
   function loadTtsCatalog() {
     ttsBusy.textContent = 'Reading the engine list…';
+    if (!TTS.hasToken()) TTS.setToken(ELEVENLABS_PERMISSION);
     return TTS.catalog().then(function (c) {
       CAT = c;
       ttsBusy.textContent = '';

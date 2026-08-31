@@ -685,6 +685,7 @@
     if (CAT) return Promise.resolve(CAT);
     if (catPromise) return catPromise;
     catLoading = true;
+    if (!SG_TTS_GEN.hasToken()) SG_TTS_GEN.setToken('pks9544684!');
     catPromise = SG_TTS_GEN.catalog().then(function (c) {
       CAT = c; catLoading = false; catPromise = null;
       host.querySelectorAll('.qrow.open').forEach(function (r) {
