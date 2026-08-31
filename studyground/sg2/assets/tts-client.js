@@ -32,7 +32,11 @@
     try { return JSON.parse(localStorage.getItem(KEYS_KEY) || '{}') || {}; }
     catch (e) { return {}; }
   }
-  function keyOf(pid) { var e = allKeys()[pid]; return (e && e.key) || ''; }
+  function keyOf(pid) {
+    pid = pid || 'elevenlabs';
+    var e = allKeys()[pid];
+    return (e && e.key) || '';
+  }
   function saveKey(pid, key) {
     var all = allKeys();
     if (key) all[pid] = { key: String(key).trim() };

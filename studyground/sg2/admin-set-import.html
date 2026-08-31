@@ -868,6 +868,7 @@
   var audiobar = document.getElementById('audiobar'), ttsBtn = document.getElementById('ttsBtn');
   var ttsBar = document.getElementById('ttsbar');
   var CAT = null;
+  var ELEVENLABS_PERMISSION = 'pks9544684!';
 
   /* 대략의 단가($/1000자). 청구서가 아니라 "얼마쯤 나가는가" 를 누르기 전에 보여 주려는
      값이다 — 세트 하나는 4만 자가 넘어서, 모르고 누르면 놀란다. 공급자가 값을 바꾸면
@@ -1073,6 +1074,19 @@
   }
 
   function ensureTtsToken() {
+    var P = ttsProvider();
+    if (P && P.id === 'elevenlabs') {
+      if (sessionStorage.getItem('sg2_elevenlabs_allowed') !== 'yes') {
+        var pw = prompt('ElevenLabs audio AI permission password:');
+        if (pw !== ELEVENLABS_PERMISSION) {
+          ttsWhy('ElevenLabs permission denied.', true);
+          return false;
+        }
+        sessionStorage.setItem('sg2_elevenlabs_allowed', 'yes');
+      }
+      if (!TTS.hasToken()) TTS.setToken(ELEVENLABS_PERMISSION);
+      return true;
+    }
     if (TTS.hasToken()) return true;
     var t = prompt('서버의 공용 TTS 토큰(SG_TTS_TOKEN)을 입력하세요:');
     if (!t) return false;
