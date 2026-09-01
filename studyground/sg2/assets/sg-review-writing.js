@@ -281,6 +281,21 @@ window.SG_REVIEW_WRITING = (function () {
     if (!t) return '';
     var rub = t.ai_rubric || {}, crit = rub.criteria || [], out = '';
     if (t.ai_error) out += '<p class="muted">' + bi('AI scoring failed: ', 'AI 채점 실패: ') + esc(t.ai_error) + '</p>';
+    if (rub.score_basis && rub.score_basis.selected) {
+      out += '<div class="rw-basis">' +
+        '<p><b>' + bi('Selected band', '선택된 점수 구간') + '</b> — ' +
+          esc(rub.score_basis.selected) + '</p>' +
+        (rub.score_basis.next
+          ? '<p><b>' + bi('Next band up', '바로 위 점수 구간') + '</b> — ' +
+              esc(rub.score_basis.next) + '</p>' : '') +
+        (rub.score_basis.lower
+          ? '<p><b>' + bi('One band lower', '바로 아래 점수 구간') + '</b> — ' +
+              esc(rub.score_basis.lower) + '</p>' : '') +
+      '</div>';
+    } else if (rub.descriptor) {
+      out += '<p class="rw-body"><b>' + bi('Selected descriptor', '선택된 기준 문구') + '</b> — ' +
+        esc(rub.descriptor) + '</p>';
+    }
     if (rub.summary) out += '<p class="rw-body">' + esc(rub.summary) + '</p>';
     if (crit.length) {
       /* 인용은 서버가 답안에서 글자 그대로 찾은 것만 남는다(api/score.js). 그래서 여기

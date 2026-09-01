@@ -97,6 +97,8 @@ function schemaFor(criteria) {
     '- "score" is the holistic score from the guide. It is an integer 0-5, never a band.\n' +
     '- Pick the score by matching descriptors, not by impression: find the band whose\n' +
     '  description fits the response, and copy the phrase you matched into "descriptor".\n' +
+    '- The score must be strict. Do not award the next score up unless THIS response meets\n' +
+    '  that higher band\'s own words. If evidence is mixed, choose the lower defensible score.\n' +
     '- "why_not_higher" and "why_not_lower" must name something in THIS response. If the\n' +
     '  score is 5 write "" for "why_not_higher"; if it is 0 write "" for "why_not_lower".\n' +
     '- Use the whole range. Do not default to 3.\n' +
@@ -108,6 +110,23 @@ function schemaFor(criteria) {
     'The server checks every quote against the response and deletes the ones that are not ' +
     'in it, so a quote you did not copy is simply lost.\n' +
     '- Comment on what the response actually does. Never comment on its length.';
+}
+
+function scoreLine(rubric, score) {
+  const re = new RegExp('Score\\s+' + score + '\\s+—\\s+([^\\n]+)');
+  const m = String(rubric || '').match(re);
+  return m ? m[1].trim() : '';
+}
+
+function scoreBasis(skill, kind, score) {
+  const rub = RUBRIC.rubricFor(skill, kind);
+  const s = Math.max(0, Math.min(RUBRIC.MAX_SCORE, Math.round(Number(score) || 0)));
+  return {
+    selected: scoreLine(rub, s),
+    next: s < RUBRIC.MAX_SCORE ? scoreLine(rub, s + 1) : '',
+    lower: s > 0 ? scoreLine(rub, s - 1) : '',
+    scale: 'TOEFL productive task holistic score 0-5'
+  };
 }
 
 /* ── Supabase (service_role) ─────────────────────────────────────────────── */
@@ -279,6 +298,7 @@ async function scoreOne(P, key, model, lang, task, text) {
     rubric: {
       summary: String(parsed.summary || ''),
       descriptor: String(parsed.descriptor || ''),
+      score_basis: scoreBasis(task.skill, task.task_kind, score),
       why_not_higher: String(parsed.why_not_higher || ''),
       why_not_lower: String(parsed.why_not_lower || ''),
       criteria: rows,
@@ -433,6 +453,7 @@ module.exports = async function handler(req, res) {
         summary: isNotSubmit(record)
           ? 'No response was recorded for this task (NOT SUBMIT).'
           : 'The response is blank.',
+        score_basis: scoreBasis(task.skill, task.task_kind, 0),
         criteria: criteria.map(function (c) { return { criterion: c, comment: '', quote: '' }; }),
         task_kind: RUBRIC.normalizeKind(task.task_kind),
         source: 'rule'          // 모델을 부르지 않았다는 표시

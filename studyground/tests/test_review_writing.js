@@ -60,6 +60,11 @@ var tasks = [{
   question_id: 'set9-W2-email', skill: 'writing', task_kind: 'email',
   ai_score: 4, teacher_score: null, confirmed_at: null, ai_model: 'gpt-4o',
   ai_rubric: { summary: 'Clear and on task.',
+               score_basis: {
+                 selected: 'A generally successful response.',
+                 next: 'A fully successful response.',
+                 lower: 'A partially successful response.'
+               },
                criteria: [{ criterion: 'Task fulfilment', comment: 'All three points covered.' }] }
 }];
 
@@ -124,6 +129,11 @@ ok(email.bullets.every(function (b) { return mailHtml.indexOf(RW.esc(b)) >= 0; }
    'D: 이메일 요구사항 세 줄이 전부 실려야 한다');
 ok(mailHtml.indexOf('4.00') >= 0, 'D: 이메일 점수가 실려야 한다');
 ok(mailHtml.indexOf('All three points covered.') >= 0, 'D: 채점 근거(루브릭)가 실려야 한다');
+ok(mailHtml.indexOf('Selected band') >= 0 &&
+   mailHtml.indexOf('A generally successful response.') >= 0 &&
+   mailHtml.indexOf('Next band up') >= 0 &&
+   mailHtml.indexOf('A fully successful response.') >= 0,
+   'D: 왜 이 점수인지 공식 점수 구간과 바로 위 구간이 보여야 한다');
 
 var discHtml = RW.html(M, { m: 2, q: 0 });
 var disc = PACK.sections.filter(function (s) { return s.id === 'writing'; })[0]

@@ -163,7 +163,10 @@
   var SCRIPTS = {};        // 오디오 경로 → 대본
 
   function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
-  function pack() { return window[PACK_GLOBAL[setId]] || null; }
+  function packGlobal(id) { return PACK_GLOBAL[id] || ('SMEAG_' + String(id || '').toUpperCase()); }
+  function pack() {
+    return window[packGlobal(setId)] || (window.SG_SET_STORE && SG_SET_STORE.get(setId)) || null;
+  }
   function apath(raw) { return raw ? SG_AUDIO_INDEX.resolve(raw) : ''; }
 
   /* ── 대본 모으기 ─────────────────────────────────────────
@@ -316,8 +319,16 @@
   }
   function paintSetSeg() {
     var allowed = A.allowedSets();
-    document.getElementById('setseg').innerHTML = A.SETS
-      .filter(function (s) { return allowed.indexOf(s.id) >= 0; })
+    var rows = A.SETS.slice();
+    if (window.SG_SET_STORE) {
+      SG_SET_STORE.list().forEach(function (r) {
+        if (!rows.some(function (s) { return s.id === r.slug; })) {
+          rows.push({ id: r.slug, label: r.title || r.slug.toUpperCase() });
+        }
+      });
+    }
+    document.getElementById('setseg').innerHTML = rows
+      .filter(function (s) { return A.can(s.id); })
       .map(function (s) {
         return '<button data-set="' + s.id + '"' + (s.id === setId ? ' class="on"' : '') + '>' + s.label + '</button>';
       }).join('');
@@ -385,7 +396,9 @@
 
   function open() {
     var allowed = A.allowedSets();
-    if (!setId || allowed.indexOf(setId) < 0) setId = allowed.indexOf('set9') >= 0 ? 'set9' : (allowed[0] || 'set9');
+    if (!setId || !A.can(setId)) {
+      setId = A.can('set9') ? 'set9' : (allowed[0] || 'set9');
+    }
     document.getElementById('gate').hidden = true;
     document.getElementById('main').hidden = false;
     paintSetSeg();
