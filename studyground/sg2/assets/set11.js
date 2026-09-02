@@ -403,7 +403,12 @@ window.SMEAG_SET11 = {
                 {
                   "kind": "mcq",
                   "prompt": "Click on the sentence in paragraph 4 that identifies the specific types of stuctures that can now be constructed using noise-reducing composites?",
-                  "choices": [],
+                  "choices": [
+                    "Advances in materials science have expanded the tools available for noise control.",
+                    "Engineers have developed noise-reducing composites that absorb sound energy more efficiently than traditional concrete or metal.",
+                    "In controlled tests, panels made from these composites blocked nearly twice as much sound energy as standard concrete barriers of equal thickness.",
+                    "Highway sound barriers, railroad partition walls, and building facades can now be constructed from these materials, lowering the volume of noise that reaches surrounding communities."
+                  ],
                   "no": 34,
                   "id": "R1-34",
                   "answer": 3
