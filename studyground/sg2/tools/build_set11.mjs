@@ -34,7 +34,11 @@ const answers = await read(FILES.answers);
 /* strictSource — 관리자 화면(admin-set-import.html)과 같은 잣대로 짓는다. 이게 없으면
    명령줄로 지은 팩만 조용히 느슨해진다: 문서에 없는 보기·정답에서 역산한 타일이
    들어간 채로 assets/set<N>.js 에 박히고, 그건 화면에서는 저장조차 막히는 팩이다. */
-const out = IMPORT.build({ code: 'SET 11', questions, script, answers, strictSource: true });
+/* 듣기 화면의 화자 사진 — 배역 매니페스트(tts-voices-set11exam-11labs.json)를 보고
+   목소리 성별·인원에 맞춘 것이다. 이게 없으면 듣기 1·2 모듈만 사진 없이 뜬다. */
+const listeningImages = JSON.parse(fs.readFileSync(path.join(SG2, 'config/set11-listening-images.json'), 'utf8'));
+
+const out = IMPORT.build({ code: 'SET 11', questions, script, answers, listeningImages, strictSource: true });
 const stop = out.gates.filter((g) => g.level === 'stop');
 if (stop.length) {
   stop.forEach((g) => console.error('STOP [' + g.scope + '] ' + g.message));

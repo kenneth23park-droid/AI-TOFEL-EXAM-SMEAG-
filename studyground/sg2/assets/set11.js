@@ -647,6 +647,7 @@ window.SMEAG_SET11 = {
                     "It starts at three o’clock.",
                     "I really enjoyed the discussion."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "Why did you miss the physics seminar?",
                   "audio": "media/audio/set11/l1-q01.mp3",
                   "answer": 0
@@ -662,6 +663,7 @@ window.SMEAG_SET11 = {
                     "I think the campus bookstore opens at nine.",
                     "I already finished reading chapter one."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male).webp",
                   "script": "These textbooks are so expensive.",
                   "audio": "media/audio/set11/l1-q02.mp3",
                   "answer": 1
@@ -677,6 +679,7 @@ window.SMEAG_SET11 = {
                     "They had several copies stacked near the front counter.",
                     "My proffesor recommended it."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
                   "script": "Why did you choose the book to buy from the bookstore?",
                   "audio": "media/audio/set11/l1-q03.mp3",
                   "answer": 3
@@ -692,6 +695,7 @@ window.SMEAG_SET11 = {
                     "They’re open from nine to five on weekdays.",
                     "I think it’s Jake."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
                   "script": "Who is the tutor in the student success center today?",
                   "audio": "media/audio/set11/l1-q04.mp3",
                   "answer": 3
@@ -707,6 +711,7 @@ window.SMEAG_SET11 = {
                     "Well, no. Homework took all afternoon.",
                     "The seminar covered some interesting topics last time."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Academic, Single female).webp",
                   "script": "Did you end up going to the seminar?",
                   "audio": "media/audio/set11/l1-q05.mp3",
                   "answer": 2
@@ -722,6 +727,7 @@ window.SMEAG_SET11 = {
                     "I submitted my travel request yesterday.",
                     "The forecast says it’ll be sunny there."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
                   "script": "Would you prefer a window seat or an aisle seat for our flight to the conference?",
                   "audio": "media/audio/set11/l1-q06.mp3",
                   "answer": 0
@@ -737,6 +743,7 @@ window.SMEAG_SET11 = {
                     "Actually, the professor really liked it.",
                     "I think we need to add more visuals to the slides."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "Did your class presentation go well?",
                   "audio": "media/audio/set11/l1-q07.mp3",
                   "answer": 2
@@ -752,6 +759,7 @@ window.SMEAG_SET11 = {
                     "It’s right next to the science building.",
                     "I bought a poster from the campus store yesterday."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male).webp",
                   "script": "I’d like to visit the art gallery on campus.",
                   "audio": "media/audio/set11/l1-q08.mp3",
                   "answer": 2
@@ -767,6 +775,7 @@ window.SMEAG_SET11 = {
                     "The weather has been really nice lately.",
                     "It was more hands-on than I expected."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
                   "script": "How did you like the gardening class?",
                   "audio": "media/audio/set11/l1-q09.mp3",
                   "answer": 3
@@ -782,6 +791,7 @@ window.SMEAG_SET11 = {
                     "Our data charts must be double-checked before that.",
                     "The classroom is on the second floor of the building."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
                   "script": "We should give a presentation about our research to the class.",
                   "audio": "media/audio/set11/l1-q10.mp3",
                   "answer": 2
@@ -797,6 +807,7 @@ window.SMEAG_SET11 = {
                     "The bookstore on Oak Street is closer to campus.",
                     "I usually prefer to read digital copies."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Academic, Single female).webp",
                   "script": "This bookstore has a rare collection of books.",
                   "audio": "media/audio/set11/l1-q11.mp3",
                   "answer": 0
@@ -812,6 +823,7 @@ window.SMEAG_SET11 = {
                     "We might need a few more.",
                     "The venue has room for about a hundred people."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
                   "script": "Do we have enough volunteers for the fundraising event?",
                   "audio": "media/audio/set11/l1-q12.mp3",
                   "answer": 2
@@ -852,6 +864,7 @@ window.SMEAG_SET11 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set11/l1-q13-14.mp3",
               "scriptOrigin": "script-docx",
               "script": "W: I've been thinking about signing up for the water aerobics class at the university gym. Have you ever tried it?\nM: Actually, yeah, I took it last semester. It's a great workout. The resistance from the water really makes a difference.\nW: That's good to hear. Was it pretty intense?\nM: It can be. I actually tweaked my shoulder during one of the sessions - we were doing water jumping jacks, and I think I pushed it too hard. It was sore for a couple of weeks.\nW: Oh no. Are you feeling better now?\nM: Oh, totally. It wasn't serious. I'm still doing laps at the pool and I even went scuba diving over spring break. It didn't slow me down at all."
@@ -888,6 +901,7 @@ window.SMEAG_SET11 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 Persons).webp",
               "audio": "media/audio/set11/l1-q15-16.mp3",
               "scriptOrigin": "script-docx",
               "script": "W: Ugh, I've been spending half the day just trying to keep my phone charged. The battery barely lasts an hour now.\nM: That doesn't sound right. What's going on with it?\nW: I have no idea. The battery's just been acting up lately. It drains so fast. Do you think you could take a look at it for me?\nM: Oh, I wouldn't know where to start. I know next to nothing about that stuff. I pretty much just use my phone to send messages and take pictures\nW: Are you serious? I always assumed you were into technology.\nM: No, not really. I use it, but I have no clue how to fix anything. Actually, my friend Katie is pretty tech-savvy. She helped me set up my laptop on the Wi-Fi network last time. I could give you her number if you'd like.\nW: That would be great. I'll reach out to her this afternoon."
@@ -924,6 +938,7 @@ window.SMEAG_SET11 = {
                   "answer": 0
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set11/l1-q17-18.mp3",
               "scriptOrigin": "script-docx",
               "script": "W: Did you book your flight to the conference yet?\nM: Yes, I did. I found a great deal using a flight comparison website. It searches all the airlines and shows you the cheapest options. Have you booked yours?\nW: Not yet. The flights I’ve been looking at are pretty expensive. I’m trying to figure out how to save some money.\nM: Well, the conference starts on Tuesday, right? I actually booked my flight for Monday instead. The fares were a lot cheaper, and I figured I’d use the extra day to do some sightseeing downtown.\nW: Hmm, that’s not a bad idea. I’ll look into that."
@@ -960,6 +975,7 @@ window.SMEAG_SET11 = {
                   "answer": 0
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male).webp",
               "audio": "media/audio/set11/l1-q19-20.mp3",
               "scriptOrigin": "script-docx",
               "script": "Attention, everyone. Due to heavy rain damage, the library will undergo maintenance beginning next Monday. Online databases and the book return service will remain available, but all study spaces will be temporarily closed. Temporary study areas have been arranged in the Student Center."
@@ -996,6 +1012,7 @@ window.SMEAG_SET11 = {
                   "answer": 3
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
               "audio": "media/audio/set11/l1-q21-22.mp3",
               "scriptOrigin": "script-docx",
               "script": "Attention, everyone. Our annual community service award ceremony will be held next Thursday at the university auditorium. This year, we’re excited to introduce two new categories: the Environmental Stewardship Award and the Public Education Service Award, recognizing students’ growing contributions in these fields. We strongly encourage everyone to participate in community service - it’s a vital part of your university experience. To nominate a fellow student, please visit the Student Affairs Office, Room 210, before next Monday."
@@ -1032,6 +1049,7 @@ window.SMEAG_SET11 = {
                   "answer": 1
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
               "audio": "media/audio/set11/l1-q23-24.mp3",
               "scriptOrigin": "script-docx",
               "script": "Attention, everyone. I have an update about the campus tech help station. It has been relocated from the Science Building basement to the first floor of the Student Center. We’ve also extended our operating hours – the station is now open on Saturdays and Sundays in addition to weekdays, and appointments are no longer required, so walk-ins are welcome. Please take a moment to complete the survey that was sent to your student email. Your responses to previous surveys actually helped bring about these changes, so your feedback truly makes a difference."
@@ -1094,6 +1112,7 @@ window.SMEAG_SET11 = {
                   "answer": 0
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
               "audio": "media/audio/set11/l1-q25-28.mp3",
               "scriptOrigin": "script-docx",
               "script": "So today, I want to talk about what we call outside artists, or sometimes outsider artists. These are people who create art without any formal training. They have not gone to art school, they do not have ties to galleries or museums, and they typically work entirely outside the established art world. Compared to artists who have gone through traditional channels, outside artists face real challenges. They do not have institutional support, professional networks, or the financial resources that trained artists can often access. So getting their work seen by a wider audience can be extremely difficult. A good example here is James Castle. Castle was born deaf in rural Idaho in the early 1900s. He never learned to read or write. But he created remarkable drawings and constructions using found materials - things like soot mixed with saliva for ink, and scraps of cardboard and old paper. His work depicted everyday scenes from his surroundings, and it has an incredibly raw, personal quality. Because outside artists create from such a personal place - often rooted in their own struggles and experiences - their work tends to feel deeply emotional and relatable. The challenge is that without access to the traditional art world, much of this work remains hidden or underappreciated for long periods of time.t"
@@ -1156,6 +1175,7 @@ window.SMEAG_SET11 = {
                   "answer": 3
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male 3).webp",
               "audio": "media/audio/set11/l1-q29-32.mp3",
               "scriptOrigin": "script-docx",
               "script": "So today, let's talk about something called desertification. Desertification is the process where fertile land gradually turns into desert. It does not mean that a desert appears overnight - it is a slow process, usually caused by a combination of factors. One major cause is climate change. As temperatures rise and rainfall patterns shift, the soil dries out and can no longer support plant life. Another big one is intensive agriculture. When farmers overuse the same land without giving it time to recover, the soil loses nutrients and becomes unproductive. Deforestation also plays a role - when trees are removed, there is nothing to hold the soil in place, so it gets blown or washed away. Even irrigation can contribute. If irrigation is not managed properly, it can cause salt to build up in the soil, which makes it impossible for plants to grow. The good news is that people are working on solutions. One well-known example is the Great Green Wall project in Africa. The idea is to plant a massive belt of trees across the continent to hold back the expanding desert. Desertification threatens the livelihoods of millions of people who depend on the land for food and water, so stopping it is not just an environmental issue - it is a matter of human survival."
@@ -1182,6 +1202,7 @@ window.SMEAG_SET11 = {
                     "I saw the movie poster in the lobby yesterday.",
                     "The previews usually run about fifteen minutes before the film."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "When does the movie start?",
                   "audio": "media/audio/set11/l2-q01.mp3",
                   "answer": 0
@@ -1197,6 +1218,7 @@ window.SMEAG_SET11 = {
                     "Great, that time works well for me.",
                     "Professor Lee shared some articles with us yesterday."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
                   "script": "“The research workshop has been scheduled for Friday afternoon.”",
                   "audio": "media/audio/set11/l2-q02.mp3",
                   "answer": 2
@@ -1212,6 +1234,7 @@ window.SMEAG_SET11 = {
                     "Do you know if they’re still serving the pasta special?",
                     "I think the East Dining Hall has better hours on weeknights."
                   ],
+                  "image": "media/pictures/TOEFL Listening Image (Single female).webp",
                   "script": "“Would you like to eat at the West Dining Hall Tonight”",
                   "audio": "media/audio/set11/l2-q03.mp3",
                   "answer": 0
@@ -1252,6 +1275,7 @@ window.SMEAG_SET11 = {
                   "answer": 1
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 Persons).webp",
               "audio": "media/audio/set11/l2-q04-05.mp3",
               "scriptOrigin": "script-docx",
               "script": "W: Hey, did you hear back from the technician about your computer? I’ve been worried it might be something serious.\nM: Yeah, I just picked it up this morning. Turns out it was only a software issue - some corrupted files were causing the system to crash.\nW: Oh, that is such a relief. I honestly thought we were looking at a hardware failure, like the motherboard or something.\nM: Same here. I was already dreading having to buy a new one. But the technician said a full system restore took care of it.\nW: That's great news. So it's running fine now?\nM: Good as new. I even backed everything up this time, just in case."
@@ -1288,6 +1312,7 @@ window.SMEAG_SET11 = {
                   "answer": 2
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set11/l2-q06-07.mp3",
               "scriptOrigin": "script-docx",
               "script": "M: Hey, have you heard about the new gym that just opened on campus? They have all kinds of classes and brand-new equipment.\nW: Oh, I have already signed up, actually. I went in last week and got a membership.\nM: Wow, that was fast. So, have you tried anything yet?\nW: I've been going to the yoga classes, and I'm thinking about trying the rock climbing wall next. It looks really fun.\nM: That sounds awesome. So you are enjoying it overall?\nW: Mostly, yeah. My only complaint is the hours. I like to work out first thing in the morning, around seven thirty, but the gym doesn't open until eight. By then, I barely have time before my nine o'clock class.\nW: That is a tight window. Maybe you could suggest earlier hours to the staff."
@@ -1350,6 +1375,7 @@ window.SMEAG_SET11 = {
                   "answer": 0
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single male 2).webp",
               "audio": "media/audio/set11/l2-q08-11.mp3",
               "scriptOrigin": "script-docx",
               "script": "Alright, so today let's talk about something that's really reshaping the retail landscape - dark stores. A dark store is a warehouse-style retail facility, usually located in or near urban centers. But here's the key thing - it doesn't serve walk-in customers. Its sole purpose is to fulfill online delivery orders.\nNow, compare that with a traditional supermarket - it's designed for shoppers to come in and browse, with attractive displays, wide aisles, and checkout counters. Dark stores have none of that. They're organized entirely for speed and efficiency, with workers picking and packing orders along optimized routes. Because they don't invest in the shopping experience, their overhead costs are significantly lower, and they can pass those savings on to consumers. And since they're close to where people live, deliveries can be very fast.\nHowever, there are real concerns around employment. Dark stores do create new jobs in logistics, warehouse management, and technology. But these roles are fundamentally different from traditional retail work. They come at the cost of customer-facing positions - cashiers, sales associates, and floor staff - the workers who deal directly with consumers.\nMost experts predict dark stores will continue to grow and reshape the broader business landscape. But they stress that striking the right balance between the new jobs these stores create and the traditional retail positions they displace will be a critical challenge going forward."
@@ -1412,6 +1438,7 @@ window.SMEAG_SET11 = {
                   "answer": 0
                 }
               ],
+              "image": "media/pictures/TOEFL Listening Image (Single female 2).webp",
               "audio": "media/audio/set11/l2-q12-15.mp3",
               "scriptOrigin": "script-docx",
               "script": "So today, let's talk about gift giving. You might think of it as a simple act, but across many cultures, gift giving is much more complex. It's a social practice that helps build and maintain relationships. In many societies, gift giving is not a one-time exchange. It creates a cycle: when someone gives you a gift, you feel an obligation to give something back, and that back-and-forth can continue for years.\nA good example is the potlatch ceremony practiced by many Indigenous peoples of the Pacific Northwest. In a potlatch, a host gives away large amounts of food and goods to guests, and guests are then expected to host their own potlatch later. This strengthens community bonds and keeps relationships going over time.\nIn business or formal settings, things can be tricky because gift-giving customs vary widely across cultures. For example, in some cultures a potted plant is thoughtful, but in others it can carry negative meanings such as funerals or bad luck. So in cross-cultural situations, understanding these differences is important to avoid misunderstandings."
@@ -2231,7 +2258,7 @@ window.SMEAG_SET11 = {
     },
     "autoScored": 107,
     "humanScored": 13,
-    "pictures": 8,
+    "pictures": 16,
     "audioClips": 40,
     "audioWithScript": 40,
     "scriptChars": 11988,
