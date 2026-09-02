@@ -399,7 +399,10 @@
 // v100: 녹음 회수 화면 — 한 세션에 계정이 둘일 때(같은 PC 에서 로그인만 바꿔
 //       제출하면 그렇게 된다) 마지막 조회 줄이 이겨 남의 폴더로 올라가던 것을
 //       막았다. 고르기 전에는 올리지 않고, 학번·이름으로 묻는다.
-const VERSION = 'sg-v100';
+// v101: SET 11 이 저장소에 들어왔다 — assets/set11.js 와 media/pictures/set11.
+//       시험·리뷰·관리자 화면이 같은 팩을 보도록 셸 캐시를 끊는다.
+// v102: 로그인 뒤 학생 대시보드의 공개 세트 목록에도 SET 11 을 노출한다.
+const VERSION = 'sg-v102';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -459,7 +462,7 @@ const SHELL_ASSETS = [
   // 검사기는 오프라인이면 조용히 물러나므로 프리캐시해도 시험장에서 걸리지 않는다.
   'assets/build-version.js', 'assets/sg-update-check.js',
 
-  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js',
+  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js', 'assets/set11.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',
   'manifest.webmanifest',
 

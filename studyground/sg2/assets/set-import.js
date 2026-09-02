@@ -383,6 +383,11 @@
             } else if (sawInsertLabel && !insertSentence && it && !lettered(it)
                        && !(ip.listed && /^position\s+[A-D]$/i.test(it))) {
               insertSentence = it;
+            } else if (!insertSentence && it && !iLetter
+                       && !(ip.listed && /^position\s+[A-D]$/i.test(it))) {
+              /* Some source documents (SET 11) place the quoted sentence directly
+                 below the question, without a "Sentence to insert:" label. */
+              insertSentence = it;
             }
             iz++; insertNext = iz;
           }
@@ -460,8 +465,9 @@
         if (cur) { groups.push(cur); cur = null; }
         continue;
       }
-      if (!cur) cur = { lines: [], images: [] };
+      if (!cur) cur = { lines: [], listed: [], images: [] };
       cur.lines.push(t);
+      cur.listed.push(!!p.listed);
       if (p.images && p.images.length) cur.images = cur.images.concat(p.images);
     }
     if (cur) groups.push(cur);
@@ -524,7 +530,9 @@
 
     lines.forEach(function (line) {
       var L = lettered(line);
-      if (numbered(line) && cur.length && sawChoice) { segs.push(cur); cur = []; sawChoice = false; }
+      if (numbered(line) && cur.length && (sawChoice || cur.length >= 4)) {
+        segs.push(cur); cur = []; sawChoice = false;
+      }
       if (L && L.letter >= 0) sawChoice = true;
       cur.push(line);
     });
@@ -586,11 +594,14 @@
 
       var groups = groupByBlankLine(paras, head.at + 1, end);
       var pendingStem = null;   /* 문두와 보기 사이에 빈 줄이 있는 서식을 위해 */
+      var trailingNumberMarkers = false;
 
       groups.forEach(function (g) {
         images = images.concat(g.images);
 
+        var hadPendingStem = !!pendingStem;
         var lines = pendingStem ? [pendingStem].concat(g.lines) : g.lines;
+        var listed = pendingStem ? [false].concat(g.listed || []) : (g.listed || []);
         pendingStem = null;
 
         /* 'Listen to a conversation.' 이 첫 문항과 같은 덩어리에 있는 세트가 있다
@@ -601,10 +612,37 @@
                && (LISTEN_CUE.test(lines[0]) || /select the best response/i.test(lines[0]))) {
           if (!blk.instruction) blk.instruction = lines[0];
           lines = lines.slice(1);
+          listed = listed.slice(1);
         }
 
+        if (lines.length > 1) {
+          var lastNo = numbered(lines[lines.length - 1]);
+          var markerAfterListedChoices = lastNo && !lastNo.text
+            && listed.length === lines.length
+            && listed.slice(0, -1).every(function (x) { return x; });
+          if (trailingNumberMarkers && lastNo && !lastNo.text || markerAfterListedChoices) {
+            lines = lines.slice(0, -1);
+            listed = listed.slice(0, -1);
+          }
+        }
         var joined = lines.join(' ');
-        var got = itemsFromGroup(lines);
+        /* SET 11's short-response auto-number marker is serialized after its
+           four choices. It labels the item already collected, not the next one. */
+        if (trailingNumberMarkers && lines.length === 1) {
+          var trailingNo = numbered(lines[0]);
+          if (trailingNo && !trailingNo.text) return;
+        }
+        /* SET 11 short-response blocks put the four listed choices first and the
+           auto-number paragraph after them.  With no visible stem, all four listed
+           lines are choices; treating the first as a stem drops one choice and one
+           question from the module. */
+        var allListedChoices = !hadPendingStem && lines.length >= 3 && lines.length <= 5
+          && listed.length === lines.length && listed.every(function (x) { return x; })
+          && !lines.some(function (line) { return numbered(line) || lettered(line); });
+        var got = allListedChoices
+          ? [{ no: null, prompt: '', choices: lines.slice() }]
+          : itemsFromGroup(lines);
+        if (allListedChoices) trailingNumberMarkers = true;
         if (!got.length) {
           /* 한 줄짜리 문두는 버리지 않고 다음 덩어리(보기)에 붙인다. */
           if (lines.length === 1 && (numbered(lines[0]) || /[?？]$/.test(lines[0]))) {
@@ -634,12 +672,19 @@
       }
 
       items.forEach(function (x, k) {
+        var prompt = x.prompt || SHORT_RESPONSE_PROMPT;
+        var choices = x.choices;
+        if (head.range.from === 1 && choices && choices.length === 3
+            && x.prompt && !/[?？]$/.test(x.prompt)) {
+          choices = [x.prompt].concat(choices);
+          prompt = SHORT_RESPONSE_PROMPT;
+        }
         blk.questions.push({
           id: moduleId + '-' + nos[k],
           kind: 'mcq',
           no: nos[k],
-          prompt: x.prompt || SHORT_RESPONSE_PROMPT,
-          choices: x.choices
+          prompt: prompt,
+          choices: choices
         });
       });
 
@@ -793,7 +838,8 @@
                  밑줄도 없는 줄' 이다 — 다음 문항의 context 줄은 자동번호 목록이라 구분된다.
                  이 검사 없이 3줄로 밀면 다음 문항의 지문을 타일로 먹어 10문항이 5문항이 된다. */
               var p2 = i + 2 < paras.length ? paras[i + 2] : null;
-              var t1 = p2 && !p2.listed && !/_{2,}/.test(txt(p2)) ? txt(p2) : '';
+              var t2 = p2 ? txt(p2) : '';
+              var t1 = p2 && !p2.listed && !numbered(t2) && !/_{2,}/.test(t2) ? t2 : '';
               var built = parseBuildItem(s1, t1);
               qs.push({
                 id: codeSlug + '-W1-q' + pad2(qs.length + 1),
@@ -1167,8 +1213,7 @@
                 다르면 대사다. 줄 수만으로 가르면 4문항짜리 강의가 낭독으로 오해되므로
                 (SET 9 l1-q25-28) 반드시 1·2 를 먼저 본다. */
         var span = (hit.to != null && hit.from != null) ? (hit.to - hit.from + 1) : blk.questions.length;
-        var isTranscript = !!hit.cue
-          || (!blk.perQuestionAudio && hit.lines.length !== span);
+        var isTranscript = !!hit.cue || !blk.perQuestionAudio;
         blk.scriptOrigin = 'script-docx';
 
         if (isTranscript) {
@@ -1329,7 +1374,8 @@
       sec.modules.forEach(function (mod) {
         mod.blocks.forEach(function (blk) {
           (blk.questions || []).forEach(function (q) {
-            if (q.kind === 'mcq' && (!q.choices || q.choices.length < 3)) thin.push(q.id);
+            if (q.kind === 'mcq' && !/^click on the sentence/i.test(q.prompt || '')
+                && (!q.choices || q.choices.length < 3)) thin.push(q.id);
           });
         });
       });

@@ -47,6 +47,14 @@
     {
       "pair": "SET10::R1-27 | SET10::R1-31",
       "reason": "SET 10 안에서 같은 어휘 문항 틀이 두 번 쓰였다(penetrate · paramount). 한 세트에 어휘 문항이 여럿인 것은 정상이며 지문 문단도 선택지도 다르다."
+    },
+    {
+      "pair": "SET10::blk:S2:0 | SET11::blk:S2:0",
+      "reason": "스피킹 Task 2 의 지시문 틀이다 — 문항이 아니라 안내문이다. 'You have volunteered for a research study about X. You will have a short online interview with a researcher…' 는 이 과제 유형의 고정 문구이고, 다른 것은 연구 주제뿐이다(SET 10 = sports activities, SET 11 = hobbies). 뒤따르는 인터뷰 질문 4개는 양쪽이 전부 다르다."
+    },
+    {
+      "pair": "SET11::blk:S2:0 | SET9::blk:S2:0",
+      "reason": "스피킹 Task 2 의 지시문 틀이다 — 문항이 아니라 안내문이다. 'You have volunteered for a research study about X. You will have a short online interview with a researcher…' 는 이 과제 유형의 고정 문구이고, 다른 것은 연구 주제뿐이다(SET 9 = Exercise and Physical activity, SET 11 = hobbies). 뒤따르는 인터뷰 질문 4개는 양쪽이 전부 다르다."
     }
   ]
 }

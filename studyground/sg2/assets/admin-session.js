@@ -23,14 +23,16 @@
     { id: 'admin', pw: 'smeag2222', sets: ['*'],     label: 'Master admin',  labelKo: '전체 관리자' },
     { id: 'set1',  pw: 'set1-2222', sets: ['set1'],  label: 'SET 1 admin',   labelKo: 'SET 1 관리자' },
     { id: 'set9',  pw: 'set9-2222', sets: ['set9'],  label: 'SET 9 admin',   labelKo: 'SET 9 관리자' },
-    { id: 'set10', pw: 'set10-2222', sets: ['set10'], label: 'SET 10 admin', labelKo: 'SET 10 관리자' }
+    { id: 'set10', pw: 'set10-2222', sets: ['set10'], label: 'SET 10 admin', labelKo: 'SET 10 관리자' },
+    { id: 'set11', pw: 'set11-2222', sets: ['set11'], label: 'SET 11 admin', labelKo: 'SET 11 관리자' }
   ];
 
   /* 이 사이트가 아는 SET 목록 — 관리자 페이지의 SET 선택기가 이걸 쓴다. */
   var SETS = [
     { id: 'set1', label: 'SET 1', global: 'SMEAG_SET1' },
     { id: 'set9', label: 'SET 9', global: 'SMEAG_SET9' },
-    { id: 'set10', label: 'SET 10', global: 'SMEAG_SET10' }
+    { id: 'set10', label: 'SET 10', global: 'SMEAG_SET10' },
+    { id: 'set11', label: 'SET 11', global: 'SMEAG_SET11' }
   ];
 
   var listeners = [];
@@ -203,6 +205,7 @@
           '<option value="set1"></option>' +
           '<option value="set9"></option>' +
           '<option value="set10"></option>' +
+          '<option value="set11"></option>' +
         '</datalist>' +
         '<form autocomplete="off">' +
           '<label class="sga-lb"><span data-en>Admin ID</span><span data-ko>관리자 아이디</span>' +

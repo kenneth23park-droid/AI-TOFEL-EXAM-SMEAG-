@@ -1484,6 +1484,15 @@
    * 에 멈추고 학생은 아무 것도 누를 수 없다. 원인을 골라 문구로 돌려준다. */
   var MIC_WAIT_MS = 8000;
 
+  /* 장치 선택을 학생 손에 두지 않는다.
+   *
+   * 2026-08-27 smeag995 는 스피킹 11문항을 17초에 지나쳤다 — 문항마다 마이크가
+   * denied 로 떨어졌고, 앱은 계약대로(FR14) NOT SUBMIT 을 찍고 계속 갔다. 그날
+   * smeag037 도 8문항 중 6개가 같은 자리에서 떨어졌다. 시험 중에 학생이 장치를
+   *고르거나 권한을 되돌리는 일은 없어야 한다 — 손댈 것이 없어야 손대다 잃지 않는다.
+   * IELTS 쪽에서 다시 고르게 하려면 이 한 줄만 true 로 돌린다. */
+  var MIC_PICK_BY_STUDENT = false;
+
   function insecureOrigin() {
     var loc = root.location;
     if (!loc) return false;
@@ -1701,6 +1710,19 @@
           o.value = ins[i].deviceId;
           o.textContent = ins[i].label || ('Microphone ' + (i + 1));
           micSel.appendChild(o);
+        }
+        /* 시험장에서는 장치를 학생이 고르지 않는다(§MIC_PICK_BY_STUDENT).
+           고르게 두면 잘못 고른 채로 스피킹에 들어가고, 그 사실은 녹음이 빈 뒤에야
+           드러난다. 브라우저가 이미 열어 준 기본 입력을 그대로 쓴다 — 자리 세팅은
+           감독이 OS 에서 맞추는 일이지 학생이 시험 중에 만질 일이 아니다. */
+        if (!MIC_PICK_BY_STUDENT) {
+          pick.style.display = 'none';
+          var cur = null;
+          if (state.stream && state.stream.getAudioTracks) cur = state.stream.getAudioTracks()[0] || null;
+          state.deviceId = (cur && cur.getSettings && cur.getSettings().deviceId) || ins[0].deviceId;
+          state.picked = true;
+          confirmReady((cur && cur.label) || ins[0].label);
+          return;
         }
         pick.style.display = '';
         micSel.value = state.deviceId || '';

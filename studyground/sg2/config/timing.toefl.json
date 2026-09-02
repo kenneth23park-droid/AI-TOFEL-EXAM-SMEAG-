@@ -265,6 +265,21 @@
       ]
     },
     {
+      "id": "hardwareCheck",
+      "label": "Microphone Check",
+      "screenType": "hardwareCheck",
+      "insertAt": {
+        "position": "beforeSection",
+        "section": "speaking",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "continue"
+      ]
+    },
+    {
       "id": "speakingDirections",
       "label": "Speaking Section Directions",
       "screenType": "instruction",

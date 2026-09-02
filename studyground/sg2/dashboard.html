@@ -125,12 +125,13 @@
 <script src="assets/app.js"></script>
 <script src="assets/sg-fullscreen.js"></script>
 <script src="assets/sg-auth.js"></script>
-<script src="assets/student-landing.js"></script>
+<script src="assets/student-landing.js?v=102"></script>
 <!-- 응시 기록은 기기(localStorage)가 정본이고, 로그인해 있으면 서버 사본이 합쳐진다.
      문항별 점수를 다시 세려면 콘텐츠 팩이 필요하다. -->
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
 <script src="assets/set10.js?v=97"></script>
+<script src="assets/set11.js?v=102"></script>
 <script src="assets/sg-band.js"></script>
 <!-- 스피킹 녹음은 IndexedDB 에 있고, 그 문을 여는 것은 SG_STORE 하나뿐이다
      (assets/exam-store.js). 이 줄이 없으면 sg-results.js 의 uploadRecordings 가
@@ -151,7 +152,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   /* 학생은 서버가 허용한 본인 응시 기록을 모든 공개 세트에 걸쳐 본다. */
-  var SETS = (window.SG_STUDENT_SETS || ['SET1', 'SET9', 'SET10']).map(code);
+  var SETS = (window.SG_STUDENT_SETS || ['SET1', 'SET9', 'SET10', 'SET11']).map(code);
   var EXAM = window.SG_STUDENT_EXAM || 'tests.html';
   var ONLY = '';                      // 학생으로 확인된 뒤에만 채워진다
   function code(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
