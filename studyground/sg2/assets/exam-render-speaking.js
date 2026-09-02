@@ -280,6 +280,11 @@
     var pendingArm = null;       // 신호음이 끝나고 걸 응답 시계 {index, phase}
     var advanceTimer = null;     // 응답 종료 후 자동 전진까지의 짧은 대기
     var stickyCaption = false;   // read/prompt 가 세운 지시문을 prep·record 내내 유지할지
+    var micReady = false;        // 이 화면에서 마이크 스트림을 손에 쥐었는가
+    var micWarming = false;      // 권한 요청이 진행 중인가(두 번 묻지 않기 위해)
+    var micBannerUp = false;     // 지금 배너가 마이크 안내인가(다른 안내를 덮지 않기 위해)
+    var armWaitTimer = null;     // 마이크가 열리기를 기다리는 동안의 폴링
+    var armWaitedMs = 0;
 
     /* ── DOM 골격 ── */
     var box = el('div', 'speaking-screen');
@@ -590,6 +595,85 @@
       }
     }
 
+    /* ── 마이크 확보 ──
+     * 권한 창은 응답 시간 안에서 떠서는 안 된다. 학생이 Allow 를 누르는 몇 초가
+     * 그대로 답변 시간에서 깎이기 때문이다(관찰된 실제 사고).
+     * 그래서 화면에 들어서자마자 — read·listen·prep 이 도는 동안 — 미리 열어 두고,
+     * 그래도 안 열렸으면 응답 시계를 걸지 않고 열릴 때까지 기다린다. */
+
+    var MIC_WAIT_MAX_MS = 8000;   // 그래도 안 열리면 시험을 세우지 않고 진행한다
+    var MIC_WAIT_STEP_MS = 200;
+
+    function micBanner(en, ko, tone) {
+      setBanner(en, ko, tone);
+      micBannerUp = true;
+    }
+
+    function clearMicBanner() {
+      if (!micBannerUp) return;   // 중단 안내 같은 다른 배너는 건드리지 않는다
+      banner.hidden = true;
+      micBannerUp = false;
+    }
+
+    function prewarmMic() {
+      var R = REC();
+      if (disposed || micReady || micWarming) return;
+      if (!R || typeof R.requestPermission !== 'function') return;
+      if (typeof R.isSupported === 'function' && !R.isSupported()) return;
+      micWarming = true;
+      R.requestPermission(function (e) {
+        micWarming = false;
+        if (disposed) return;
+        if (e) {
+          logEvent('mic_prewarm_failed', screen.id, { qid: qid, code: e.code || '' });
+          micBanner('Allow the microphone. Your answer cannot be recorded until you do — look for the browser prompt near the address bar.',
+                    '마이크를 허용하세요. 허용하기 전에는 답변이 녹음되지 않습니다 — 주소창 근처의 허용 창을 확인하세요.', 'error');
+          return;
+        }
+        micReady = true;
+        clearMicBanner();
+        logEvent('mic_ready', screen.id, { qid: qid });
+      });
+    }
+
+    function cancelArmWait() {
+      if (armWaitTimer !== null && root.clearTimeout) { try { root.clearTimeout(armWaitTimer); } catch (e) {} }
+      armWaitTimer = null;
+    }
+
+    /* 응답 시계는 마이크가 실제로 열린 뒤에 건다. startRecording 의 재시도(1초 x 5)가
+       늦게 성공해도 잃는 시간이 없다. 끝내 못 열면 MIC_WAIT_MAX_MS 뒤에 그냥 걸어
+       시험을 계속한다 — 이 문항은 이미 NOT SUBMIT 으로 표시돼 있다. */
+    function armWhenMicLive() {
+      if (disposed || !pendingArm) return;
+      if (recording) {
+        clearMicBanner();
+        armPhaseClock(pendingArm.index, pendingArm.phase);
+        pendingArm = null;
+        cancelArmWait();
+        paint();
+        return;
+      }
+      if (armWaitedMs >= MIC_WAIT_MAX_MS || !root.setTimeout) {
+        logEvent('record_clock_forced', screen.id, { qid: qid, waitedMs: armWaitedMs });
+        armPhaseClock(pendingArm.index, pendingArm.phase);
+        pendingArm = null;
+        cancelArmWait();
+        paint();
+        return;
+      }
+      if (armWaitedMs === 0) {
+        micBanner('Waiting for the microphone. Your response time starts when it opens — select Allow if your browser asks.',
+                  '마이크를 기다리는 중입니다. 마이크가 열려야 응답 시간이 시작됩니다 — 브라우저가 물으면 Allow 를 누르세요.', 'warn');
+      }
+      cancelArmWait();
+      armWaitTimer = root.setTimeout(function () {
+        armWaitTimer = null;
+        armWaitedMs += MIC_WAIT_STEP_MS;
+        armWhenMicLive();
+      }, MIC_WAIT_STEP_MS);
+    }
+
     /* ── 녹음 ── */
 
     /* record phase 진입 → 신호음 → (소리가 끝나면) 마이크 열기 + 응답 시계.
@@ -602,11 +686,8 @@
         beepTimer = null;
         if (disposed) return;
         startRecording();
-        if (pendingArm) {
-          armPhaseClock(pendingArm.index, pendingArm.phase);
-          pendingArm = null;
-          paint();
-        }
+        armWaitedMs = 0;
+        armWhenMicLive();
       }
       if (root.setTimeout) beepTimer = root.setTimeout(run, beepMs());
       else run();
@@ -669,6 +750,7 @@
           return;
         }
         cancelRetry();
+        micReady = true;
         recording = true;
         recStartedAt = Date.now();
         silentWarned = false;
@@ -781,7 +863,14 @@
         if (p.cue && p.seconds > 0) {
           setButton('Start speaking now', '지금 말하기 시작', function () { fire('force'); });
         }
-      } else if (p.name === 'record') {
+      }
+
+      /* record 전 어느 phase 에서든 마이크를 미리 잡아 둔다 — 학생이 뒤늦게 허용해
+         주었거나, 앞 문항에서 스트림이 끊겼을 수 있다. 이미 쥐고 있으면 아무 일도
+         일어나지 않는다(권한 창을 두 번 띄우지 않는다). */
+      if (p.name !== 'record' && recordIndex() >= 0) prewarmMic();
+
+      if (p.name === 'record') {
         /* 관찰(1830s): 녹음 중에도 상단 지시문은 "Please answer the interviewer's questions." 그대로다.
            그래서 read/prompt 가 세운 지시문은 유지하고, 그런 지시문이 없었던 경우
            (S1 Listen and Repeat 처럼 listen → record 로 바로 가는 흐름)에만 안내를 새로 쓴다. */
@@ -792,7 +881,12 @@
       /* record 의 응답 시계는 신호음이 끝난 뒤에 건다(beepThenRecord 가 건다).
          여기서 걸어 버리면 아직 마이크가 열리지도 않은 0.4초가 응답 시간에서 깎인다. */
       if (p.name === 'record' && beepTimer !== null) pendingArm = { index: i, phase: p };
-      else armPhaseClock(i, p);
+      else if (p.name === 'record' && !recording) {
+        // 신호음 없이 곧장 들어온 경로. 여기서도 마이크가 열린 뒤에 시계를 건다.
+        pendingArm = { index: i, phase: p };
+        armWaitedMs = 0;
+        armWhenMicLive();
+      } else armPhaseClock(i, p);
       if (isPlayable(p.media)) playPhaseMedia(i, p);
       paint();
     }
@@ -847,6 +941,8 @@
         renderPhase();
         return;
       }
+      /* 아직 record 까지 갈 길이 남아 있을 때 권한 창을 띄운다. */
+      if (recordIndex() >= 0) prewarmMic();
       var out = nextPhase(state, { type: 'start' });
       state = { phases: out.phases, phaseIndex: out.phaseIndex, status: out.status };
       applyActions(out.actions);
@@ -862,6 +958,7 @@
       cancelBeep();
       cancelRetry();
       cancelAdvance();
+      cancelArmWait();
       var R = REC();
       if (R && R.isRecording()) { try { R.abort(); } catch (e) {} }
       recording = false;
