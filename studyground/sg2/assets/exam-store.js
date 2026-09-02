@@ -270,7 +270,14 @@
           /* 녹음이 남긴 사실을 답안에 함께 적는다 — 길이·무음 여부는 나중에 파일을
              열어도 알 수 없거나(무음 판정) 비싸다(길이). 옛 경로가 Blob 을 그대로
              넘기는 경우도 있어 record 인지 먼저 본다. */
-          var meta = { media: 'idb:' + qid, recorded: true };
+          /* notSubmit 을 여기서 되돌리는 이유:
+             마이크가 처음 안 열리면 화면이 즉시 NOT SUBMIT 을 적고, 그 뒤 응답 시간이
+             남아 있는 동안 조용히 재시도한다(exam-render-speaking.startRecording).
+             재시도가 성공해 녹음이 여기까지 오면 그 문항은 더 이상 미제출이 아니다.
+             upsertAnswer 는 키를 덮어쓸 뿐 지우지 않으므로, 되돌린다고 말하지 않으면
+             notSubmit:true 가 그대로 남는다. 그러면 api/score.js 는 버킷에 멀쩡한
+             녹음이 있는데도 전사를 건너뛰고 0 점을 박는다(SET 11 q05 가 그랬다). */
+          var meta = { media: 'idb:' + qid, recorded: true, notSubmit: false, reason: '' };
           if (blob && blob.blob) {
             if (blob.mime) meta.mime = blob.mime;
             if (typeof blob.durationMs === 'number') meta.durationMs = blob.durationMs;
