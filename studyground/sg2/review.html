@@ -913,6 +913,22 @@
         (t.media_path ? '<div data-cloudplay="' + esc(t.media_path) + '"></div>' : '') +
       '</div>';
     }
+    /* 어느 점수 구간의 어떤 문장에 맞춘 것인지부터 적는다. ETS 가이드 원문 그대로라
+       총평보다 앞선다 — 점수를 다투는 자리에서 사람이 먼저 읽어야 할 줄이 이것이다.
+       바로 위·아래 구간까지 함께 놓아야 "왜 4가 아니라 3인가" 가 눈으로 갈린다. */
+    var basis = rub.score_basis;
+    if (basis && basis.selected) {
+      body += '<div class="muted" style="font-size:12px;margin-top:8px">' +
+        '<div><b>' + bi('Band used', '적용 구간') + '</b> — ' + esc(basis.selected) + '</div>' +
+        (basis.next ? '<div style="margin-top:3px"><b>' + bi('One higher', '한 칸 위') +
+          '</b> — ' + esc(basis.next) + '</div>' : '') +
+        (basis.lower ? '<div style="margin-top:3px"><b>' + bi('One lower', '한 칸 아래') +
+          '</b> — ' + esc(basis.lower) + '</div>' : '') +
+      '</div>';
+    } else if (rub.descriptor) {
+      body += '<div class="muted" style="font-size:12px;margin-top:8px"><b>' +
+        bi('Band used', '적용 구간') + '</b> — ' + esc(rub.descriptor) + '</div>';
+    }
     if (rub.summary) {
       body += '<div style="font-size:13.5px;margin-top:8px">' + esc(rub.summary) + '</div>';
     }
@@ -935,6 +951,28 @@
                      ? ' · ' + bi('missing ', '빠짐 ') + esc(g.missing_content.join(', ')) : '')) +
         (g.applied ? ' · ' + bi('AI said ' + g.model_score + ', capped at ' + g.cap + ' by the guide',
                                 'AI 는 ' + g.model_score + ', 루브릭 상한 ' + g.cap + ' 적용') : '') +
+      '</div>';
+    }
+    /* 두 경계선. 위는 다음에 무엇을 고쳐야 하는지를, 아래는 이 답안이 이미 해낸 것을
+       가리킨다. 서버는 둘 다 받아 두는데(api/score.js) 이 카드에는 여태 없었다. */
+    if (rub.why_not_higher) {
+      body += '<div style="font-size:12.5px;margin-top:6px"><b>' +
+        bi('To score higher', '한 점 더 받으려면') + '</b> — ' + esc(rub.why_not_higher) + '</div>';
+    }
+    if (rub.why_not_lower) {
+      body += '<div style="font-size:12.5px;margin-top:4px"><b>' +
+        bi('Why not lower', '더 낮지 않은 이유') + '</b> — ' + esc(rub.why_not_lower) + '</div>';
+    }
+    /* 위의 인용은 답안·전사문에서 글자 그대로 찾아낸 것만 남은 결과다. 그 검증이
+       무엇을 걸렀는지까지 적어야 이 근거를 얼마나 믿을지 함께 읽힌다. */
+    var okQ = Number(rub.quotes_verified || 0), badQ = Number(rub.unverified_quotes || 0);
+    if (okQ || badQ) {
+      body += '<div class="muted" style="font-size:11.5px;margin-top:6px">' +
+        (okQ ? bi(okQ + ' quote(s) verified word-for-word.',
+                  '인용 ' + okQ + '건은 글자 그대로 확인했습니다.') : '') +
+        (badQ ? (okQ ? ' ' : '') +
+                bi(badQ + ' unverifiable quote(s) removed.',
+                   '확인되지 않은 인용 ' + badQ + '건은 지웠습니다.') : '') +
       '</div>';
     }
     if (ai !== null && mine !== null && mine !== ai) {
@@ -1199,7 +1237,7 @@
           if (out.expired) { sayExpired('AI scoring failed: ' + out.error); return; }
           if (out.error) { saySc('AI scoring failed: ' + out.error); return; }
           // 눌렀는데 한 건도 안 매겨졌으면 까닭을 적는다 — 버튼이 먹지 않은 것처럼 보인다.
-          saySc((out.scored || []).length ? '' : whyNothing(out));
+          saySc((out.scored || []).length ? saidBy(out) : whyNothing(out));
           reloadTasks();
         })['catch'](function (e) {
           done();
@@ -1216,6 +1254,20 @@
    * 아무 일도 일어나지 않는다. 이 화면이 열린 지금이 다시 걸 자리다.
    * 되풀이는 sg-results.js 의 고삐(응시당 횟수·간격)가 막는다 — 녹음이 아예
    * 없는 응시를 열 때마다 전사·채점을 다시 사지 않기 위한 것. */
+  /* 채점이 끝났을 때 "무엇이 매겼는가" 를 한 줄로 남긴다.
+
+     여태 이 자리는 성공하면 입을 닫았다. 점수만 바뀌고 그것을 어느 모델이 매겼는지는
+     과제 카드를 하나씩 펼쳐야 보였다 — 모델을 바꿔 다시 매긴 자리에서 특히 아쉽다.
+     서버가 응답에 provider·model 을 실어 보내므로(api/score.js) 그대로 적는다. */
+  function saidBy(out) {
+    var n = ((out && out.scored) || []).length;
+    if (!n) return '';
+    var model = (out && out.model) || '';
+    var prov = (out && out.provider) || '';
+    var who = model ? (prov ? prov + ' / ' + model : model) : '';
+    return 'Scored ' + n + ' task(s)' + (who ? ' with ' + who : '') + '.';
+  }
+
   /* 한 건도 매겨지지 않고 끝났을 때 그 까닭을 한 줄로 만든다.
    *
    * 여태 이 자리는 조용했다. 서버가 200 으로 "전부 건너뛰었다"고 답해도 out.error 가
@@ -1273,7 +1325,7 @@
       }
       if (out.expired) { sayExpired('Scoring failed: ' + out.error); return; }
       if (out.error) { saySc('Scoring failed: ' + out.error); return; }
-      if ((out.scored || []).length) { saySc(''); reloadTasks(); return; }
+      if ((out.scored || []).length) { saySc(saidBy(out)); reloadTasks(); return; }
       saySc(whyNothing(out));
     })['catch'](function () { saySc(''); });
     });

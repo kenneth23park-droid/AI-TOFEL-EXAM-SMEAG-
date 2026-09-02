@@ -275,6 +275,23 @@ window.SG_REVIEW_WRITING = (function () {
       '</small></div>';
   }
 
+  /** 인용 검증 결과 한 줄. 확인된 인용도, 걸러진 인용도 없으면 아무 말도 하지 않는다. */
+  function quoteAudit(rub) {
+    var ok = Number(rub.quotes_verified || 0);
+    var bad = Number(rub.unverified_quotes || 0);
+    if (!ok && !bad) return '';
+    var said = ok
+      ? bi(ok + ' quote(s) checked word-for-word against your response.',
+           '인용 ' + ok + '건은 답안에서 글자 그대로 확인했습니다.')
+      : '';
+    if (bad) {
+      said += (said ? ' ' : '') +
+        bi(bad + ' quote(s) could not be found in it and were removed.',
+           '답안에서 찾을 수 없는 인용 ' + bad + '건은 지웠습니다.');
+    }
+    return '<p class="muted" style="font-size:11.5px">' + said + '</p>';
+  }
+
   /** 왜 그 점수인가. 점수만 있고 근거가 없으면 학생은 배울 수도 다툴 수도 없다. */
   function rubricHtml(it) {
     var t = it.task;
@@ -311,6 +328,17 @@ window.SG_REVIEW_WRITING = (function () {
       out += '<p class="rw-body"><b>' + bi('To score higher', '한 점 더 받으려면') + '</b> — ' +
         esc(rub.why_not_higher) + '</p>';
     }
+    /* 아래쪽 경계도 같이 보여 준다. "왜 더 깎이지 않았는가" 는 이 답안이 이미 해낸
+       것을 가리키는 유일한 줄이고, 점수를 다투는 자리에서 가장 먼저 확인할 값이다.
+       서버가 채점 때 함께 받아 두었는데(api/score.js) 여태 어디에도 뜨지 않았다. */
+    if (rub.why_not_lower) {
+      out += '<p class="rw-body"><b>' + bi('Why not lower', '더 낮지 않은 이유') + '</b> — ' +
+        esc(rub.why_not_lower) + '</p>';
+    }
+    /* 위의 인용은 서버가 답안에서 글자 그대로 찾아낸 것만 남은 결과다. 그 검증이
+       실제로 무엇을 걸렀는지 적는다 — 지어낸 인용이 있었다는 사실은 숨길 것이 아니라
+       이 채점을 얼마나 믿을지 재는 눈금이다. */
+    out += quoteAudit(rub);
     if (t.teacher_note) {
       out += '<p class="rw-body"><b>' + bi('Teacher', '선생님') + '</b> — ' + esc(t.teacher_note) + '</p>';
     }

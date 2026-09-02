@@ -303,6 +303,10 @@ async function scoreOne(P, key, model, lang, task, text) {
       why_not_lower: String(parsed.why_not_lower || ''),
       criteria: rows,
       guard: guard || undefined,
+      /* 인용 검증의 결과를 수치로 남긴다. 화면에 남은 인용이 답안에서 글자 그대로
+         확인된 것이라는 사실은, 그 인용 자체만큼이나 근거다 — 몇 건이 지어내져
+         버려졌는지까지 보이면 그 채점을 얼마나 믿을지도 함께 보인다. */
+      quotes_verified: rows.filter(function (r) { return r.quote; }).length,
       unverified_quotes: dropped || undefined,
       task_kind: RUBRIC.normalizeKind(task.task_kind),
       source: 'ai_draft'

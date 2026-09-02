@@ -347,6 +347,24 @@ window.SG_REVIEW_SPEAKING = (function () {
     '</div>';
   }
 
+  /** 인용 검증 결과 한 줄. 화면에 남은 인용이 전사문에서 글자 그대로 확인된 것이라는
+   *  사실은, 그 인용 자체만큼이나 근거다. */
+  function quoteAudit(rub) {
+    var ok = Number(rub.quotes_verified || 0);
+    var bad = Number(rub.unverified_quotes || 0);
+    if (!ok && !bad) return '';
+    var said = ok
+      ? bi(ok + ' quote(s) checked word-for-word against the transcript.',
+           '인용 ' + ok + '건은 전사문에서 글자 그대로 확인했습니다.')
+      : '';
+    if (bad) {
+      said += (said ? ' ' : '') +
+        bi(bad + ' quote(s) could not be found in it and were removed.',
+           '전사문에서 찾을 수 없는 인용 ' + bad + '건은 지웠습니다.');
+    }
+    return '<p class="muted" style="font-size:11.5px">' + said + '</p>';
+  }
+
   /** 왜 그 점수인가. 점수만 있고 근거가 없으면 학생은 배울 수도 다툴 수도 없다. */
   function rubricHtml(it) {
     var t = it.task;
@@ -389,11 +407,27 @@ window.SG_REVIEW_SPEAKING = (function () {
               ? ' ' + bi('Missing: ', '빠진 말: ') + esc(g.missing_content.join(', '))
               : '')) +
         '</p>';
+      /* 이 셈이 AI 가 부른 점수를 실제로 끌어내렸다면 그 사실이 곧 채점 근거다.
+         숨기면 "AI 가 3 이라 했다" 로만 읽히지만, 3 을 만든 것은 루브릭의 상한이다. */
+      if (g.applied) {
+        out += '<p class="muted" style="font-size:11.5px">' +
+          bi('The AI proposed ' + g.model_score + ' / 5; the guide\'s own limit for this ' +
+             'many missing words is ' + g.cap + ' / 5, so ' + g.cap + ' stands.',
+             'AI 는 ' + g.model_score + ' / 5 로 봤지만, 빠진 말의 수가 허락하는 상한은 ' +
+             g.cap + ' / 5 라 ' + g.cap + ' 이 남았습니다.') + '</p>';
+      }
     }
     if (rub.why_not_higher) {
       out += '<p class="rs-body"><b>' + bi('To score higher', '한 점 더 받으려면') + '</b> — ' +
         esc(rub.why_not_higher) + '</p>';
     }
+    /* 아래쪽 경계. "왜 더 깎이지 않았는가" 는 이 답안이 이미 해낸 것을 가리키는
+       유일한 줄이다 — 서버가 받아 두고도 여태 어디에도 뜨지 않던 값이다. */
+    if (rub.why_not_lower) {
+      out += '<p class="rs-body"><b>' + bi('Why not lower', '더 낮지 않은 이유') + '</b> — ' +
+        esc(rub.why_not_lower) + '</p>';
+    }
+    out += quoteAudit(rub);
     if (t.teacher_note) {
       out += '<p class="rs-body"><b>' + bi('Teacher', '선생님') + '</b> — ' + esc(t.teacher_note) + '</p>';
     }
