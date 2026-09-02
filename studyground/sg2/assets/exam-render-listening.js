@@ -41,6 +41,25 @@
   var DEFAULT_VOLUME = 0.8;
   var SEEK_TOLERANCE_SEC = 0.35;  // timeupdate 지연을 감안한 되감기 판정 여유
 
+  /* ── 끊긴 재생 이어붙이기 ─────────────────────────────────────────────
+   * 2026-09-02 SET 11 Listening Module 2 (Q12-15): 강의 음성이 20초쯤에서 끊겼고,
+   * 앱은 그것을 '다 들었다'로 처리해 답변 시계를 걸었다. 4문항이 20초 간격으로
+   * 흘러갔고 학생은 강의를 듣지도 못한 채 문항을 잃었다.
+   *
+   * 끊김은 재생이 아니다. 그래서 여기서는 두 가지를 본다.
+   *   · error         — 회선이 끊겼다
+   *   · 짧은 ended    — 길이를 아는데 그보다 한참 앞에서 끝났다
+   * 둘 다 '끝'으로 넘기지 않고, 멈춘 지점(maxT)부터 이어서 다시 튼다. 되감기가
+   * 아니라 이어듣기라 1회 재생 규칙은 그대로다. 몇 번을 시도해도 안 되면 그때는
+   * 진행시킨다 — 학생을 죽은 화면에 가둘 수는 없다 — 대신 기록을 남긴다. */
+  var RESUME_TRIES = 3;
+  var RESUME_DELAY_MS = 1200;
+  /* 다시 틀어도 소식이 없을 수 있다 — load() 가 loadedmetadata 도 error 도 내지 않고
+     매달려 있는 회선이 그렇다. 그 경우까지 기다리면 Next 가 잠긴 화면에 갇힌다.
+     이만큼 안에 재생이 앞으로 나아가지 않으면 그 시도는 실패로 친다. */
+  var RESUME_TIMEOUT_MS = 5000;
+  var SHORT_END_SEC = 1.0;        // 이만큼 넘게 남았는데 ended 면 끊긴 것으로 본다
+
   /* set1.js 의 하드코딩 한국어 prompt → EN 기본 문구 매핑(FR29).
    * set1.js 는 수정하지 않는다. 렌더 계층에서만 EN 우선으로 바꾼다. */
   var KO_PROMPT_EN = {
@@ -245,6 +264,15 @@
     return !!m[key];
   }
 
+  /* 재생 사고는 화면에서 사라져도 기록에는 남아야 한다 — 채점 뒤 "왜 그 4문항이
+     비었나" 를 답할 수 있는 유일한 흔적이다. */
+  function logAudioEvent(name, data) {
+    var st = store();
+    if (!st || typeof st.pushEvent !== 'function') return false;
+    try { st.pushEvent(name, '', data || {}); } catch (e) { warn('pushEvent threw', e); }
+    return true;
+  }
+
   function markAudioSpent(key) {
     var st = store();
     if (!st || typeof st.patchMeta !== 'function') return false;
@@ -328,15 +356,79 @@
     wrap.appendChild(playBtn);
 
     var started = false, finished = false, maxT = 0;
+    var tries = 0, recovering = false;
+
+    /* 끝까지 들었는가. duration 을 모르면 판단하지 않는다(모르는 채로 끊겼다고
+       우기면 멀쩡한 재생을 계속 되돌리게 된다). */
+    function playedThrough() {
+      var d = audio.duration;
+      if (!isFinite(d) || d <= 0) return true;
+      return maxT >= d - SHORT_END_SEC;
+    }
+
+    /* 멈춘 자리부터 다시 잇는다. 실패하면 다음 시도, 다 떨어지면 진행시킨다. */
+    function resume(reason) {
+      if (finished || isStopped(audio)) return;
+      tries += 1;
+      logAudioEvent('audio_interrupted', { key: key, at: Math.round(maxT), reason: reason, attempt: tries });
+      if (tries > RESUME_TRIES) { finish('error'); return; }
+      recovering = true;
+      wrap.setAttribute('data-audio-state', 'recovering');
+      caption('Audio interrupted — reconnecting…', '오디오가 끊겼습니다 — 다시 연결 중…');
+      var at = maxT;
+      var mark = -1;              // 다시 앉은 자리. 여기서 앞으로 나가야 되살아난 것이다.
+      root.setTimeout(function () {
+        if (finished || isStopped(audio)) return;
+        /* 멈춘 자리에 다시 앉힌다. 되감기 차단의 기준선(maxT)도 그 자리로 옮긴다 —
+           끊긴 뒤에도 maxT 는 멈추기 직전까지 올라가 있어서, 그대로 두면 seeking
+           훅이 방금 앉힌 자리를 "되감기"로 보고 도로 끌어당긴다(재생이 0 에
+           주저앉는다). 앞으로 건너뛰는 것은 여전히 막힌다. */
+        function seat() {
+          recovering = true;
+          try { if (at > 0) audio.currentTime = at; } catch (e) {}
+          maxT = audio.currentTime || 0;
+          mark = maxT;
+          recovering = false;
+        }
+        /* metadata 만 온 시점에는 seekable 이 비어 있어 자리를 못 잡는 회선이 있다.
+           데이터가 붙는 순간(canplay) 한 번 더 앉혀 본다. 그래도 안 되면 처음부터
+           듣는다 — 네 문항을 통째로 잃는 것보다는 낫다. */
+        function reseat() {
+          audio.removeEventListener('canplay', reseat);
+          if (at > 0 && audio.currentTime < at - 0.5) seat();
+        }
+        function seekAndPlay() {
+          audio.removeEventListener('loadedmetadata', seekAndPlay);
+          seat();
+          audio.addEventListener('canplay', reseat);
+          var pr = null;
+          try { pr = audio.play(); } catch (e2) { pr = null; }
+          if (pr && pr['catch']) pr['catch'](function () { resume('play-rejected'); });
+        }
+        audio.addEventListener('loadedmetadata', seekAndPlay);
+        try { audio.load(); } catch (e3) { recovering = false; resume('load-threw'); return; }
+        root.setTimeout(function () {
+          if (finished || isStopped(audio)) return;
+          if (mark >= 0 && audio.currentTime > mark + 0.2) return;   // 다시 흐르고 있다
+          audio.removeEventListener('loadedmetadata', seekAndPlay);
+          recovering = false;
+          resume('timeout');
+        }, RESUME_TIMEOUT_MS);
+      }, RESUME_DELAY_MS);
+    }
 
     function finish(reason) {
       if (finished) return;
       finished = true;
+      recovering = false;
       wrap.setAttribute('data-audio-state', 'done');
       wrap.className = baseCls + ' is-done';
       caption(reason === 'error' ? 'Audio unavailable. Continue with the question.' : 'Audio finished.',
               reason === 'error' ? '오디오를 재생할 수 없습니다. 문항을 이어서 진행하세요.' : '오디오 재생이 끝났습니다.');
-      markAudioSpent(key);
+      /* 끝까지 들려준 재생만 '소진'으로 적는다. 실패한 재생까지 소진으로 적으면
+         새로 고쳐 되살릴 길까지 함께 막힌다. */
+      if (reason !== 'error') markAudioSpent(key);
+      else logAudioEvent('audio_failed', { key: key, at: Math.round(maxT), attempts: tries });
       // AC2 — 컨트롤과 소스를 함께 제거한다. 콘솔에서 play() 를 불러도 재생될 소스가 없다.
       try { audio.pause(); } catch (e) {}
       try { audio.removeAttribute('src'); audio.load(); } catch (e2) {}
@@ -350,6 +442,8 @@
       wrap.setAttribute('data-audio-state', 'playing');
       wrap.className = baseCls + ' is-playing';
       playBtn.style.display = 'none';
+      // 이어 붙이기에 성공했으면 "다시 연결 중" 문구를 치운다.
+      if (tries > 0) caption(opts.captionEn || 'Audio plays once', opts.captionKo || '오디오는 1회만 재생됩니다');
     });
     // 되감기 차단에 쓸 최대 재생 위치만 기록한다 — 잔여시간은 표시하지 않는다.
     audio.addEventListener('timeupdate', function () {
@@ -357,7 +451,7 @@
     });
     // 되감기 차단(FR8). 앞으로 건너뛰는 것도 되돌린다 — 재생 위치는 자연 진행만 허용.
     audio.addEventListener('seeking', function () {
-      if (finished) return;
+      if (finished || recovering) return;
       if (Math.abs(audio.currentTime - maxT) > SEEK_TOLERANCE_SEC) {
         try { audio.currentTime = maxT; } catch (e) {}
       }
@@ -365,14 +459,18 @@
     // 일시정지 후 재개는 허용하지 않는다 — 실제 시험은 멈추지 않는다.
     // 단, 화면 전환으로 멈춘 것이면 되살리지 않는다.
     audio.addEventListener('pause', function () {
-      if (finished || isStopped(audio)) return;
+      if (finished || recovering || isStopped(audio)) return;
       if (started && !audio.ended) { var p = audio.play(); if (p && p['catch']) p['catch'](function () {}); }
     });
-    audio.addEventListener('ended', function () { if (!isStopped(audio)) finish('ended'); });
+    audio.addEventListener('ended', function () {
+      if (isStopped(audio) || finished) return;
+      if (!playedThrough()) { resume('short-end'); return; }
+      finish('ended');
+    });
     audio.addEventListener('error', function () {
-      if (isStopped(audio)) return;
+      if (isStopped(audio) || finished) return;
       warn('audio load failed: ' + media.src);
-      finish('error');
+      resume('error');
     });
 
     playBtn.onclick = function () {
@@ -515,7 +613,65 @@
     wrap.appendChild(playBtn);
 
     var started = false, finished = false, maxT = 0;
+    var tries = 0, recovering = false;
     lockAdvance(screen.id);
+
+    /* 끊긴 재생은 재생이 아니다 — makeAudioUnit 과 같은 규칙이다(파일 상단 주석). */
+    function playedThrough() {
+      var d = audio.duration;
+      if (!isFinite(d) || d <= 0) return true;
+      return maxT >= d - SHORT_END_SEC;
+    }
+
+    function resume(reason) {
+      if (finished || isStopped(audio)) return;
+      tries += 1;
+      logAudioEvent('audio_interrupted', { key: key, at: Math.round(maxT), reason: reason, attempt: tries });
+      if (tries > RESUME_TRIES) { finish('error'); return; }
+      recovering = true;
+      wrap.setAttribute('data-audio-state', 'recovering');
+      setBadge('Reconnecting…', '다시 연결 중…');
+      var at = maxT;
+      var mark = -1;              // 다시 앉은 자리. 여기서 앞으로 나가야 되살아난 것이다.
+      root.setTimeout(function () {
+        if (finished || isStopped(audio)) return;
+        /* 멈춘 자리에 다시 앉힌다. 되감기 차단의 기준선(maxT)도 그 자리로 옮긴다 —
+           끊긴 뒤에도 maxT 는 멈추기 직전까지 올라가 있어서, 그대로 두면 seeking
+           훅이 방금 앉힌 자리를 "되감기"로 보고 도로 끌어당긴다(재생이 0 에
+           주저앉는다). 앞으로 건너뛰는 것은 여전히 막힌다. */
+        function seat() {
+          recovering = true;
+          try { if (at > 0) audio.currentTime = at; } catch (e) {}
+          maxT = audio.currentTime || 0;
+          mark = maxT;
+          recovering = false;
+        }
+        /* metadata 만 온 시점에는 seekable 이 비어 있어 자리를 못 잡는 회선이 있다.
+           데이터가 붙는 순간(canplay) 한 번 더 앉혀 본다. 그래도 안 되면 처음부터
+           듣는다 — 네 문항을 통째로 잃는 것보다는 낫다. */
+        function reseat() {
+          audio.removeEventListener('canplay', reseat);
+          if (at > 0 && audio.currentTime < at - 0.5) seat();
+        }
+        function seekAndPlay() {
+          audio.removeEventListener('loadedmetadata', seekAndPlay);
+          seat();
+          audio.addEventListener('canplay', reseat);
+          var pr = null;
+          try { pr = audio.play(); } catch (e2) { pr = null; }
+          if (pr && pr['catch']) pr['catch'](function () { resume('play-rejected'); });
+        }
+        audio.addEventListener('loadedmetadata', seekAndPlay);
+        try { audio.load(); } catch (e3) { recovering = false; resume('load-threw'); return; }
+        root.setTimeout(function () {
+          if (finished || isStopped(audio)) return;
+          if (mark >= 0 && audio.currentTime > mark + 0.2) return;   // 다시 흐르고 있다
+          audio.removeEventListener('loadedmetadata', seekAndPlay);
+          recovering = false;
+          resume('timeout');
+        }, RESUME_TIMEOUT_MS);
+      }, RESUME_DELAY_MS);
+    }
 
     function advance() {
       var eng = ctx && ctx.engine;
@@ -531,9 +687,11 @@
       finished = true;
       wrap.setAttribute('data-audio-state', 'done');
       wrap.className = 'lst-play is-done';
+      recovering = false;
       setBadge(reason === 'error' ? 'Audio unavailable' : 'Audio finished',
                reason === 'error' ? '오디오를 재생할 수 없습니다' : '오디오 재생 완료');
-      markAudioSpent(key);
+      if (reason !== 'error') markAudioSpent(key);
+      else logAudioEvent('audio_failed', { key: key, at: Math.round(maxT), attempts: tries });
       try { audio.pause(); } catch (e) {}
       try { audio.removeAttribute('src'); audio.load(); } catch (e2) {}
       if (audio.parentNode) audio.parentNode.removeChild(audio);
@@ -553,20 +711,24 @@
       if (audio.currentTime > maxT) maxT = audio.currentTime;
     });
     audio.addEventListener('seeking', function () {
-      if (finished) return;
+      if (finished || recovering) return;
       if (Math.abs(audio.currentTime - maxT) > SEEK_TOLERANCE_SEC) {
         try { audio.currentTime = maxT; } catch (e) {}
       }
     });
     audio.addEventListener('pause', function () {
-      if (finished || isStopped(audio)) return;
+      if (finished || recovering || isStopped(audio)) return;
       if (started && !audio.ended) { var p = audio.play(); if (p && p['catch']) p['catch'](function () {}); }
     });
-    audio.addEventListener('ended', function () { if (!isStopped(audio)) finish('ended'); });
+    audio.addEventListener('ended', function () {
+      if (isStopped(audio) || finished) return;
+      if (!playedThrough()) { resume('short-end'); return; }
+      finish('ended');
+    });
     audio.addEventListener('error', function () {
-      if (isStopped(audio)) return;   // 화면을 떠나며 끊긴 것 — 다음 화면으로 또 넘기지 않는다
+      if (isStopped(audio) || finished) return;   // 화면을 떠나며 끊긴 것 — 다음 화면으로 또 넘기지 않는다
       warn('audio load failed: ' + media.src);
-      finish('error');
+      resume('error');
     });
 
     playBtn.onclick = function () {

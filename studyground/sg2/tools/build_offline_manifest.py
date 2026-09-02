@@ -39,9 +39,19 @@ SETS = {
         'label': 'NEW TOEFL SET 9',
         'sources': ['assets/set9-audio.js', 'assets/set9.js'],
     },
+    'set10': {
+        'label': 'NEW TOEFL SET 10',
+        'sources': ['assets/set10.js'],
+    },
+    'set11': {
+        'label': 'NEW TOEFL SET 11',
+        'sources': ['assets/set11.js'],
+    },
 }
 
-MEDIA_REF = re.compile(r'["\'](media/[^"\'\s]+)["\']')
+# 파일 이름에 공백이 들어간 참조가 있다("TOEFL Listening Image (Single female).webp").
+# 공백을 끊는 옛 패턴은 그것들을 통째로 놓쳤고, 놓친 파일은 시험장에서 회선에 기댄다.
+MEDIA_REF = re.compile(r'["\'](media/[^"\']+)["\']')
 
 
 def digest(path):

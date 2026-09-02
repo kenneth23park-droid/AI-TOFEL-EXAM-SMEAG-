@@ -1,0 +1,4 @@
+{
+ "note": "오프라인 준비가 받아 둘 세트 목록. 응시 페이지는 ?set= 로 지목된 하나만 보고, 목록 페이지(index·tests·dashboard)는 여기 있는 전부를 받는다. 새 세트를 지으면 tools/build_offline_manifest.py 의 SETS 와 여기 둘 다에 넣는다.",
+ "sets": ["set9", "set10", "set11"]
+}

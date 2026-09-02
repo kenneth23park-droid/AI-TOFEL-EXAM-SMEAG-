@@ -26,9 +26,86 @@
   // 다툰다. 그쪽에서는 <script ... data-mode="check"> 로 불러 확인과 경고만 시킨다.
   var MODE = (document.currentScript && document.currentScript.dataset.mode) || 'auto';
 
-  var MANIFEST = 'config/offline.set9.json';
+  /* 어느 세트의 목록을 볼 것인가.
+   *
+   * 여기 'config/offline.set9.json' 이 박혀 있던 동안, SET 10·11 의 mp3 는 단 한 번도
+   * 미리 받아지지 않았다 — 시험장에서 클립마다 회선을 탔고, 한 번 끊기면 그 블록의
+   * 문항이 통째로 날아갔다(2026-09-02 SET 11 Listening L2 12-15). 그래서 목록은
+   * 세트를 따라간다.
+   *   · 응시 화면(?set= / ?testId=)  → 그 세트 하나만 본다. 경고도 그 세트 것이어야 한다.
+   *   · 목록 화면(index·tests·dashboard) → config/offline.sets.json 의 세트를 전부 받는다.
+   *     어느 세트를 칠지 모르는 자리라, 하나만 받아 두면 나머지는 여전히 회선에 기댄다. */
+  var SET_LIST = 'config/offline.sets.json';
+  var FALLBACK_SETS = ['set9'];
   var CONCURRENCY = 4;          // 학원 회선을 다 먹지 않으면서 25 MB 를 몇 분 안에 끝내는 선.
   var REC_KEY = 'sg2_offline_have';   // { rev, have: { url: hash } }
+
+  function query(name) {
+    var loc = window.location || {};
+    var m = new RegExp('[?&]' + name + '=([^&]*)').exec(String(loc.search || ''));
+    return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : '';
+  }
+
+  /* exam-shell.js currentSetId() 와 같은 규칙이다 — 두 곳이 다른 세트를 가리키면
+     "준비 완료"라고 말해 놓고 다른 세트의 음성을 트는 일이 생긴다. */
+  function urlSetId() {
+    var explicit = query('set').toLowerCase();
+    if (/^[a-z0-9]+$/.test(explicit)) return explicit;
+    var t = String(query('testId') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!t) return '';
+    if (/(^|[A-Z])0*11$/.test(t) || t === 'SET11') return 'set11';
+    if (/(^|[A-Z])0*10$/.test(t) || t === 'SET10') return 'set10';
+    if (/(^|[A-Z])0*9$/.test(t) || t === 'SET9') return 'set9';
+    return 'set1';
+  }
+
+  function manifestUrl(setId) { return 'config/offline.' + setId + '.json'; }
+
+  /* 볼 목록들. 세트가 지목돼 있으면 그것 하나, 아니면 sets.json 전부. */
+  var partialView = false;   // 세트 하나만 보고 있다 — 다른 세트의 캐시를 건드리면 안 된다.
+
+  function manifestUrls() {
+    var one = urlSetId();
+    partialView = !!one;
+    if (one) return Promise.resolve([manifestUrl(one)]);
+    return fetch(absolute(SET_LIST), { cache: 'no-store' })
+      .catch(function () { return fetch(absolute(SET_LIST)); })
+      .then(function (r) { if (!r.ok) throw new Error('sets ' + r.status); return r.json(); })
+      .then(function (j) {
+        var list = (j && j.sets && j.sets.length) ? j.sets : FALLBACK_SETS;
+        return list.map(manifestUrl);
+      })
+      .catch(function () { return FALLBACK_SETS.map(manifestUrl); });
+  }
+
+  /* 여러 세트를 한 목록처럼 다룬다. 같은 파일을 두 세트가 참조하면 한 번만 센다 —
+     아니면 진행률의 분모가 실제로 받아야 할 양보다 커진다. */
+  function merge(parts) {
+    if (parts.length === 1) return parts[0];
+    var files = [], seen = {}, labels = [], i, j;
+    for (i = 0; i < parts.length; i++) {
+      labels.push(parts[i].label || parts[i].set || '');
+      var fs = parts[i].files || [];
+      for (j = 0; j < fs.length; j++) {
+        if (seen[fs[j].u]) continue;
+        seen[fs[j].u] = true;
+        files.push(fs[j]);
+      }
+    }
+    files.sort(function (a, b) { return a.u < b.u ? -1 : (a.u > b.u ? 1 : 0); });
+    var rev = '', bytes = 0;
+    for (i = 0; i < files.length; i++) { rev += files[i].u + ':' + files[i].h + '|'; bytes += files[i].b; }
+    return {
+      set: parts.map(function (p) { return p.set; }).join('+'),
+      label: labels.join(' · '),
+      /* rev 는 "받을 것이 있는가"를 한 번에 가르는 지문일 뿐이라 해시 함수까지 갈 것 없다.
+         목록이 한 글자라도 다르면 다른 문자열이 된다. */
+      rev: rev.length + ':' + files.length,
+      count: files.length,
+      bytes: bytes,
+      files: files
+    };
+  }
 
   var state = {
     manifest: null,
@@ -77,17 +154,23 @@
   // ── 목록 읽기 ───────────────────────────────────────────────
   // 온라인이면 언제나 서버 것을 새로 읽는다. 이 한 번의 20 KB 요청이 "업데이트가
   // 있는가"를 가른다. 오프라인이면 셸 캐시에 프리캐시된 판본으로 되돌아간다.
+  function loadOne(url) {
+    return fetch(absolute(url), { cache: 'no-store' })
+      .catch(function () { return fetch(absolute(url)); })   // 오프라인 → 캐시본
+      .then(function (r) { if (!r.ok) throw new Error('manifest ' + r.status); return r.json(); });
+  }
+
   function load(force) {
     if (state.manifest && !force) return Promise.resolve(state.manifest);
-    return fetch(absolute(MANIFEST), { cache: 'no-store' })
-      .catch(function () { return fetch(absolute(MANIFEST)); })   // 오프라인 → 캐시본
-      .then(function (r) { if (!r.ok) throw new Error('manifest ' + r.status); return r.json(); })
-      .then(function (m) {
-        state.manifest = m;
-        state.total = m.files.length;
-        state.bytes = m.bytes;
-        return m;
-      });
+    return manifestUrls().then(function (urls) {
+      return Promise.all(urls.map(loadOne));
+    }).then(function (parts) {
+      var m = merge(parts);
+      state.manifest = m;
+      state.total = m.files.length;
+      state.bytes = m.bytes;
+      return m;
+    });
   }
 
   // ── 무엇이 없고 무엇이 바뀌었는지 ───────────────────────────
@@ -118,8 +201,10 @@
               have++; haveBytes += f.b;
             });
 
-            // 목록에서 빠진 파일 — 문항이 교체되면 옛 오디오가 캐시에 남는다.
-            var prune = keys.filter(function (req) {
+            /* 목록에서 빠진 파일 — 문항이 교체되면 옛 오디오가 캐시에 남는다.
+               단, 세트 하나만 보고 있을 때는 지우지 않는다. 그 목록에 없는 파일은
+               "버려진 파일"이 아니라 그냥 다른 세트의 파일이다. */
+            var prune = partialView ? [] : keys.filter(function (req) {
               return !wanted[req.url] && req.url.indexOf('/media/') !== -1;
             });
 

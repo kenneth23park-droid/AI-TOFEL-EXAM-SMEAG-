@@ -227,7 +227,9 @@ if (spentScreen) {
   ok('소진된 오디오 화면은 잠그지 않는다', locked(spentScreen.id) === false, JSON.stringify(window.SG_AUDIO_GATE));
 }
 
-/* 오디오 로드 실패도 풀어 준다 — 안 그러면 학생이 그 화면에 갇힌다. */
+/* 오디오가 끊기면 먼저 이어 붙이고, 그래도 안 되면 풀어 준다 — 어느 쪽이든
+   학생이 그 화면에 갇히지는 않는다. 이어 붙이기 자체는 별도 테스트에서 본다
+   (test_listening_audio_resume.js). */
 window.SG_AUDIO_GATE = null;
 var errScreen = listening.filter(function (s) {
   return s.blockKind === 'audio-set' && s.audio && s.audio.src && s.id !== qScreen.id && s.id !== (spentScreen && spentScreen.id);
@@ -235,8 +237,12 @@ var errScreen = listening.filter(function (s) {
 if (errScreen) {
   var eNode = L.renderListeningQuestion(errScreen, { engine: engine });
   ok('렌더 직후 잠김', locked(errScreen.id) === true);
-  collect(eNode, 'audio, video')[0].emit('error');
-  ok('로드 실패면 풀린다(갇히지 않는다)', locked(errScreen.id) === false, JSON.stringify(window.SG_AUDIO_GATE));
+  var eAudio = collect(eNode, 'audio, video')[0];
+  eAudio.emit('error');
+  ok('첫 실패에는 곧장 넘기지 않는다 — 이어 붙이기를 먼저 한다', locked(errScreen.id) === true,
+     JSON.stringify(window.SG_AUDIO_GATE));
+  for (var t = 0; t <= 4; t++) { eAudio.emit('error'); }   // 시도를 다 써 버린다
+  ok('시도를 다 쓰면 풀린다(갇히지 않는다)', locked(errScreen.id) === false, JSON.stringify(window.SG_AUDIO_GATE));
 }
 
 /* ── [4] 셸 배선 ───────────────────────────────────────────── */

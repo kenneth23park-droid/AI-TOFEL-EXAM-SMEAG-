@@ -402,7 +402,13 @@
 // v101: SET 11 이 저장소에 들어왔다 — assets/set11.js 와 media/pictures/set11.
 //       시험·리뷰·관리자 화면이 같은 팩을 보도록 셸 캐시를 끊는다.
 // v102: 로그인 뒤 학생 대시보드의 공개 세트 목록에도 SET 11 을 노출한다.
-const VERSION = 'sg-v102';
+// v103: 오프라인 사전 다운로드가 세트를 따라간다. 여태 목록 주소가 set9 하나에
+//       박혀 있어 SET 10·11 의 mp3 는 한 번도 미리 받아지지 않았고, 시험장에서
+//       클립마다 회선을 탔다. 끊기면 앱이 그것을 '다 들었다'로 처리해 4문항이
+//       20초씩 흘러갔다(SET 11 Listening Module 2 Q12-15). 목록을 세트별로 짓고
+//       (config/offline.set10/set11.json · offline.sets.json), 끊긴 재생은
+//       멈춘 자리부터 이어 붙이도록 고쳤다. 프리캐시 목록이 바뀌었으므로 판올림.
+const VERSION = 'sg-v103';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -450,7 +456,8 @@ const SHELL_ASSETS = [
 
   // 오프라인 사전 다운로드 — 목록 자체가 캐시에 있어야, 두 번째 방문이 오프라인이어도
   // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.
-  'assets/offline-prep.js', 'config/offline.set9.json',
+  'assets/offline-prep.js', 'config/offline.sets.json',
+  'config/offline.set9.json', 'config/offline.set10.json', 'config/offline.set11.json',
 
   // 전체화면 자동 진입 · 화면 맞춤 — 오프라인 시험장에서도 첫 화면부터 적용돼야 한다.
   'assets/sg-fullscreen.js',
