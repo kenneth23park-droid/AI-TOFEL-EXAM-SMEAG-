@@ -138,6 +138,7 @@
       <div class="testcard" data-staff-only><div class="code">02</div><div class="body"><h4>NEW TOEFL SET 2</h4><p data-en>Releasing soon</p><p data-ko>곧 공개</p></div><button class="btn ghost" disabled>Locked</button></div>
       <div class="testcard" data-staff-only><div class="code">03</div><div class="body"><h4>NEW TOEFL SET 3</h4><p data-en>Releasing soon</p><p data-ko>곧 공개</p></div><button class="btn ghost" disabled>Locked</button></div>
     </div>
+    <div class="grid" id="savedSetLibrary" style="gap:12px;margin-top:12px"></div>
     <!-- 관리자 도구 — SET 별 관리자 로그인을 통과해야 열린다(assets/admin-session.js). -->
     <div class="testcard" data-staff-only style="margin-top:12px"><div class="code">⚙︎</div><div class="body"><h4 data-en>Listening audio settings (admin)</h4><h4 data-ko>듣기 오디오 설정 (관리자)</h4><p data-en>Assign or upload the mp3 for each listening item.</p><p data-ko>리스닝 문항별 mp3 지정·업로드.</p></div><a class="btn ghost" href="admin-audio.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
     <div class="testcard" data-staff-only style="margin-top:12px"><div class="code">📁</div><div class="body"><h4 data-en>Audio file check (admin)</h4><h4 data-ko>오디오 파일 점검 (관리자)</h4><p data-en>Audio only — path, size, length and whether a clip is missing or replaced.</p><p data-ko>오디오만 봅니다 — 경로·용량·길이·누락/교체 여부.</p></div><a class="btn ghost" href="admin-audio-files.html"><span data-en>Open</span><span data-ko>열기</span></a></div>
@@ -155,6 +156,7 @@
 <!-- 좌석 설정(언어 고정·시험 전용 모드·오디오 배속) — app.js 가 언어를 읽기 전에 정해진다. -->
 <script src="assets/sg-seats.js"></script>
 <script src="assets/seat-runtime.js"></script>
+<script src="assets/set-store.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/sg-fullscreen.js"></script>
 <script src="assets/sg-auth.js"></script>
@@ -177,6 +179,71 @@
 </script>
 <!-- 영역별 진입 — 학생이 그대로 연다. 승인 칸은 없앴다(assets/exam-shell.js 도 같다). -->
 <script src="assets/admin-session.js"></script>
+
+<script>
+/* Browser-built sets live in localStorage, not in assets/set11.js.
+   set-store.js activates them as window.SMEAG_SET11 etc.; this renders them in the test library. */
+(function () {
+  'use strict';
+  function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
+  function pad2(n) { n = Number(n) || 0; return n < 10 ? '0' + n : String(n); }
+  function counts(pack) {
+    var out = { reading: 0, listening: 0, writing: 0, speaking: 0 };
+    (pack.sections || []).forEach(function (sec) {
+      (sec.modules || []).forEach(function (m) {
+        (m.blocks || []).forEach(function (b) { out[sec.id] += (b.questions || []).length; });
+      });
+    });
+    return out;
+  }
+  function audioCount(pack) {
+    var n = 0;
+    (pack.sections || []).forEach(function (sec) {
+      (sec.modules || []).forEach(function (m) {
+        (m.blocks || []).forEach(function (b) {
+          if (b.audio) n++;
+          (b.questions || []).forEach(function (q) { if (q.audio) n++; });
+        });
+      });
+    });
+    return n;
+  }
+  function renderCard(row) {
+    var S = window.SG_SET_STORE, pack = S && S.get(row.slug);
+    if (!pack || !pack.sections) return '';
+    var rt = 'exam-' + 'runtime.html';
+    var c = counts(pack), au = audioCount(pack);
+    var num = String(row.slug || '').replace(/^set/i, '') || row.slug;
+    var total = row.total || (c.reading + c.listening + c.writing + c.speaking);
+    var label = row.title || pack.title || row.slug.toUpperCase();
+    var origin = pack.summary && pack.summary.origin;
+    var slug = esc(row.slug);
+    return '<div class="testcard" data-staff-only data-set="' + esc(String(row.slug).toUpperCase()) + '">' +
+      '<div class="code">' + esc(pad2(num)) + '</div><div class="body"><h4>' + esc(label) + '</h4>' +
+      '<p data-en>Full 4-section mock · ' + total + ' questions (R ' + c.reading + ' · L ' + c.listening + ' · W ' + c.writing + ' · S ' + c.speaking + ')</p>' +
+      '<p data-ko>4영역 전체 모의고사 · ' + total + '문항 (리딩 ' + c.reading + ' · 리스닝 ' + c.listening + ' · 라이팅 ' + c.writing + ' · 스피킹 ' + c.speaking + ')</p>' +
+      '<div class="chips">' + (origin ? '<span class="chip">AI draft</span>' : '<span class="chip">Imported</span>') +
+        (au ? '<span class="chip">' + au + ' audio slots</span>' : '<span class="chip">Audio pending</span>') + '</div>' +
+      '<div class="scope" data-sec-scope data-sec-set="' + slug + '"><span class="scope-lab"><span data-en>One section</span><span data-ko>한 영역만</span></span>' +
+      ['reading','listening','speaking','writing'].map(function (s) {
+        var name = s.charAt(0).toUpperCase() + s.slice(1);
+        return '<' + 'a class="btn ghost sm" data-sec="' + s + '" data-sec-label="' + name + '" data-sec-set="' + slug + '" href="' + rt + '?mode=section&amp;section=' + s + '&amp;profile=toefl&amp;set=' + slug + '">' + name + '</' + 'a>';
+      }).join('') + '</div></div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><' + 'a class="btn ghost" data-staff-only href="admin-set-view.html?set=' + slug + '"><span data-en>View set</span><span data-ko>세트 보기</span></' + 'a>' +
+      '<' + 'a class="btn brand" href="' + rt + '?mode=exam&amp;profile=toefl&amp;set=' + slug + '"><span data-en>Full test</span><span data-ko>전체 과정</span></' + 'a></div></div>';
+  }
+  function boot() {
+    var host = document.getElementById('savedSetLibrary'), S = window.SG_SET_STORE;
+    if (!host || !S) return;
+    var builtIn = { set1: 1, set9: 1, set10: 1 };
+    host.innerHTML = S.list().filter(function (r) {
+      return !builtIn[String(r.slug || '').toLowerCase()];
+    }).map(renderCard).join('');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
 
 <!-- 이미 응시한 세트 표시 — 기기에 남은 응시 기록(+로그인했으면 서버 사본)만 읽는다. -->
 <script src="assets/sg-results.js"></script>

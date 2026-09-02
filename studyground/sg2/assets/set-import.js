@@ -1100,6 +1100,7 @@
   function build(input) {
     var gates = [];
     function gate(level, scope, message) { gates.push({ level: level, scope: scope, message: message }); }
+    var strictSource = !!input.strictSource;
 
     var code = String(input.code || 'SET ?').trim();
     var codeSlug = slug(code) || 'set';
@@ -1109,6 +1110,12 @@
     if (!input.questions || !input.questions.paragraphs) {
       gate('stop', 'upload', 'Could not read the question document.');
       return { pack: null, gates: gates, stats: {} };
+    }
+    if (strictSource && (!input.script || !input.script.paragraphs)) {
+      gate('stop', 'upload', 'Strict source mode requires the source script document. Nothing may be inferred or filled later.');
+    }
+    if (strictSource && (!input.answers || !input.answers.paragraphs)) {
+      gate('stop', 'upload', 'Strict source mode requires the source answer key. Nothing may be inferred or solved later.');
     }
 
     var qParas = explodeLines(input.questions.paragraphs);
@@ -1199,7 +1206,7 @@
           if (g.from == null || (g.from <= r.to && g.to >= r.from)) { hit = g; break; }
         }
         if (!hit) {
-          gate('warn', 'listening', mod.label + ' ' + (blk.heading || '') + ' — no script found. It is left out of audio generation.');
+          gate(strictSource ? 'stop' : 'warn', 'listening', mod.label + ' ' + (blk.heading || '') + ' — no script found in the source script document. Strict source mode will not create or infer it.');
           return;
         }
         if (hit.cue && !blk.instruction) blk.instruction = hit.cue;
@@ -1234,8 +1241,8 @@
           /* 문항 낭독만 있고 들려줄 대사가 없다 — 원본 문서에 그 대화·강의가 통째로
              빠져 있다는 뜻이다(SET 9 리스닝 Module 2 가 그랬다). 지어내지 않고 알린다. */
           delete blk.scriptOrigin;
-          gate('warn', 'listening', mod.label + ' ' + (blk.heading || '')
-            + ' — the questions are here, but the source script has no spoken lines for them. No audio will be made.');
+          gate(strictSource ? 'stop' : 'warn', 'listening', mod.label + ' ' + (blk.heading || '')
+            + ' — the questions are here, but the source script has no spoken lines for them. Strict source mode will not create or infer them.');
         }
       });
     });
@@ -1246,7 +1253,7 @@
     var unmatched = [];
 
     if (!answers) {
-      gate('warn', 'answers', 'No answer key was uploaded — the questions are built without automatic scoring.');
+      gate(strictSource ? 'stop' : 'warn', 'answers', 'No answer key was uploaded — strict source mode will not infer answers.');
     } else {
       [reading, listening].forEach(function (sec) {
         sec.modules.forEach(function (mod) {
@@ -1309,7 +1316,8 @@
         }
       });
       if (derived.length) {
-        gate('warn', 'writing', derived.length + ' sentence-building questions had no word tiles in the docx — the words were taken from the answer key and scrambled (' + derived.slice(0, 3).join(', ') + (derived.length > 3 ? ' and more' : '') + '). Add a tile line, with decoys, if you want traps.');
+        gate(strictSource ? 'stop' : 'warn', 'writing', derived.length + ' sentence-building questions had no word tiles in the docx — the words were taken from the answer key and scrambled (' + derived.slice(0, 3).join(', ') + (derived.length > 3 ? ' and more' : '') + '). ' +
+          (strictSource ? 'Strict source mode does not allow this derived tile set.' : 'Add a tile line, with decoys, if you want traps.'));
       }
       if (buildQs.length && wList.length && buildQs.length > wList.length) {
         gate('warn', 'writing', 'Only ' + wList.length + ' of ' + buildQs.length + ' sentence-building questions have an answer.');
@@ -1317,7 +1325,33 @@
     }
 
     if (unmatched.length) {
-      gate('warn', 'answers', unmatched.length + ' questions have no answer attached: ' + unmatched.slice(0, 8).join(', ') + (unmatched.length > 8 ? ' and more' : ''));
+      gate(strictSource ? 'stop' : 'warn', 'answers', unmatched.length + ' questions have no answer attached in the source answer key: ' + unmatched.slice(0, 8).join(', ') + (unmatched.length > 8 ? ' and more' : ''));
+    }
+
+    if (strictSource) {
+      sections.forEach(function (sec) {
+        sec.modules.forEach(function (mod) {
+          mod.blocks.forEach(function (blk) {
+            if (blk.headingOrigin === 'generated') {
+              gate('stop', sec.id, mod.label + ' — a missing heading was generated. Strict source mode requires the heading to exist in the question document.');
+            }
+            if (blk.headingOrigin === 'corrected-from-source') {
+              gate('stop', sec.id, mod.label + ' ' + (blk.heading || '') + ' — a source heading was corrected. Strict source mode does not allow changing source wording.');
+            }
+            (blk.questions || []).forEach(function (q) {
+              if (q.choicesOrigin === 'generated') {
+                gate('stop', sec.id, q.id + ' — choices were generated because the source document did not list them. Strict source mode requires source choices.');
+              }
+              if (q.tilesOrigin === 'derived-from-answer') {
+                gate('stop', sec.id, q.id + ' — word tiles were derived from the answer key. Strict source mode requires tiles in the question document.');
+              }
+              if (q.scriptOrigin === 'ai' || q.answerOrigin === 'ai') {
+                gate('stop', sec.id, q.id + ' — AI-filled content is not allowed in strict source mode.');
+              }
+            });
+          });
+        });
+      });
     }
 
     return finalize(sections, {

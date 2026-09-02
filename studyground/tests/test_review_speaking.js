@@ -97,6 +97,11 @@ var TASKS = [
     ai_score: 3.5, transcript: 'is this your first time in the cafeteria',
     transcript_model: 'whisper-1', ai_model: 'test-model', media_path: 'u/s/q.webm',
     ai_rubric: { summary: 'Nearly all of the sentence came back.',
+                 score_basis: {
+                   selected: 'Essentially full, but does not accurately capture the original meaning.',
+                   next: 'Captures the meaning of the prompt but is not an exact repetition.',
+                   lower: 'Missing a significant part of the prompt and/or highly inaccurate.'
+                 },
                  criteria: [{ criterion: 'Repetition Accuracy', score: 3.5, comment: '7/8 matched' }] } },
   { question_id: questions(1)[0].id, skill: 'speaking', task_kind: 'interview',
     ai_score: 4, teacher_score: 3, confirmed_at: '2026-08-11T00:00:00Z',
@@ -135,8 +140,16 @@ ok(rep.indexOf('Reference text') >= 0, 'D: 복창에는 원문이라는 이름�
 ok(rep.indexOf(RS.esc(TASKS[0].transcript)) >= 0, 'D: 전사문이 화면에 있어야 한다');
 ok(rep.indexOf('3.50') >= 0, 'D: 점수가 화면에 있어야 한다');
 ok(rep.indexOf('Nearly all of the sentence came back.') >= 0, 'D: 채점 근거가 실려야 한다');
+ok(rep.indexOf('Selected band') >= 0 &&
+   rep.indexOf('Essentially full, but does not accurately capture the original meaning.') >= 0 &&
+   rep.indexOf('Next band up') >= 0 &&
+   rep.indexOf('Captures the meaning of the prompt but is not an exact repetition.') >= 0,
+   'D: 왜 이 점수인지 공식 점수 구간과 바로 위 구간이 보여야 한다');
+ok(rep.indexOf('Overall Assessment') >= 0, 'D: 종합 평가 카드가 있어야 한다');
 ok(rep.indexOf('data-play="' + repeats[0].id + '"') >= 0, 'D: 녹음 자리가 있어야 한다');
-ok(rep.indexOf('Word by word') >= 0, 'D: 복창에는 낱말 대조 카드가 있어야 한다');
+ok(rep.indexOf('Accuracy Highlights') >= 0, 'D: 복창에는 정확도 하이라이트 카드가 있어야 한다');
+ok(rep.indexOf('Error Severity') >= 0, 'D: 복창에는 오류 심각도 카드가 있어야 한다');
+ok(rep.indexOf('Meaning Preserved') >= 0, 'D: 복창에는 의미 보존 카드가 있어야 한다');
 ok(/rs-diff/.test(rep) && /<i class="del">/.test(rep),
    'D: 빠뜨린 낱말이 취소선으로 갈려야 한다');
 ok(rep.indexOf('Scored by AI') >= 0, 'D: 확정 전이면 AI 채점이라고 말해야 한다');
@@ -145,7 +158,8 @@ ok(rep.indexOf('AI draft') < 0, 'D: 초안이라고 부르지 않는다 — AI �
 var ask = RS.html(M, { m: 1, q: 0 });
 ok(ask.indexOf('What the interviewer asked') >= 0, 'D: 인터뷰에는 질문이라는 이름이 붙어야 한다');
 ok(ask.indexOf(RS.esc(questions(1)[0].script)) >= 0, 'D: 면접관의 질문이 화면에 있어야 한다');
-ok(ask.indexOf('Word by word') < 0, 'E: 인터뷰에 낱말 대조 카드가 뜨면 안 된다');
+ok(ask.indexOf('Overall Assessment') >= 0, 'D: 인터뷰에도 종합 평가 카드가 있어야 한다');
+ok(ask.indexOf('Accuracy Highlights') < 0, 'E: 인터뷰에 낱말 대조 카드가 뜨면 안 된다');
 ok(ask.indexOf('Confirmed by a teacher.') >= 0, 'E: 확정된 점수는 확정이라고 말해야 한다');
 
 /* [E] 채점 전은 0점이 아니다 */

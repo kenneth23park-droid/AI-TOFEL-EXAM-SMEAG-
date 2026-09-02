@@ -685,6 +685,7 @@
     if (CAT) return Promise.resolve(CAT);
     if (catPromise) return catPromise;
     catLoading = true;
+    SG_TTS_GEN.setToken('pks9544684!');
     catPromise = SG_TTS_GEN.catalog().then(function (c) {
       CAT = c; catLoading = false; catPromise = null;
       host.querySelectorAll('.qrow.open').forEach(function (r) {
@@ -799,7 +800,20 @@
     if (inp) inp.focus();
   }
 
-  function ensureToken() {
+  function ensureToken(row) {
+    var P = row ? providerOf(row) : null;
+    if (P && P.id === 'elevenlabs') {
+      if (sessionStorage.getItem('sg2_elevenlabs_allowed') !== 'yes') {
+        var pw = prompt('ElevenLabs audio AI permission password:');
+        if (pw !== 'pks9544684!') {
+          genMsg(row, 'ElevenLabs permission denied.', true);
+          return false;
+        }
+        sessionStorage.setItem('sg2_elevenlabs_allowed', 'yes');
+      }
+      if (!SG_TTS_GEN.hasToken()) SG_TTS_GEN.setToken('pks9544684!');
+      return true;
+    }
     if (SG_TTS_GEN.hasToken()) return true;
     var t = prompt('Enter the shared TTS token (SG_TTS_TOKEN set on the server):');
     if (!t) return false;
@@ -843,7 +857,7 @@
     var ta = row.querySelector('[data-f=script]');
     var segs = SG_TTS_GEN.parseScript(ta.value);
     if (!segs.length) { genMsg(row, 'Write the script first.', true); return; }
-    if (!ensureToken()) return;
+    if (!ensureToken(row)) return;
     var pick = {}, voices = voiceList(row);
     row.querySelectorAll('[data-role=voices] select').forEach(function (s) { pick[s.getAttribute('data-sp')] = s.value; });
     var payload = segs.map(function (s, i) {

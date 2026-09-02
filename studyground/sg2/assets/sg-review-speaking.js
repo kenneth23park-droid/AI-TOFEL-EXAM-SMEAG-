@@ -264,16 +264,37 @@ window.SG_REVIEW_SPEAKING = (function () {
       '</small></div>';
   }
 
+  function overallText(it) {
+    var t = it.task || {}, rub = t.ai_rubric || {};
+    if (rub.summary) return String(rub.summary);
+    if (it.score === null) return '';
+    if (it.kind === 'repeat' && it.compare) {
+      return it.compare.accuracy >= 90
+        ? 'Your pronunciation and fluency are clear, and the original message is mostly preserved.'
+        : 'Your pronunciation and fluency are developing, but important words from the original sentence were missing or changed. Focus on carefully repeating all key words to better preserve the intended message next time.';
+    }
+    return 'Your response has been scored against the official speaking rubric. Review the transcript and scoring notes below to see what affected the result.';
+  }
+
+  function overallHtml(it) {
+    var text = overallText(it);
+    if (!text) return '';
+    return '<div class="rs-panel rs-step rs-step-overall">' +
+      '<div class="lr-lab">' + bi('Overall Assessment', '종합 평가') + '</div>' +
+      '<p class="rs-body">' + esc(text) + '</p>' +
+    '</div>';
+  }
+
   /** 복창의 낱말 대조. 점수 밑에 깔리는 산수를 그대로 펴 보인다. */
   function accuracyHtml(it) {
     var c = it.compare;
     if (!c) return '';
     return '<div class="rs-panel rs-step rs-step-accuracy">' +
-      '<div class="lr-lab">' + bi('Word by word', '낱말 대조') + '</div>' +
+      '<div class="lr-lab">' + bi('Accuracy Highlights', '정확도 하이라이트') + '</div>' +
       '<div class="rs-stats">' +
         '<div class="rs-stat"><b>' + c.accuracy + '%</b><span>' + bi('Accuracy', '정확도') + '</span></div>' +
         '<div class="rs-stat ok"><b>' + c.matched + '</b><span>' + bi('Correct', '맞은 낱말') + '</span></div>' +
-        '<div class="rs-stat"><b>' + c.total + '</b><span>' + bi('In the sentence', '원문 낱말') + '</span></div>' +
+        '<div class="rs-stat"><b>' + c.total + '</b><span>' + bi('Total', '전체 낱말') + '</span></div>' +
       '</div>' +
       '<div class="rs-tags">' +
         '<span class="rs-tag miss">' + bi('Missing', '빠뜨림') + ' ' + c.missing + '</span>' +
@@ -293,13 +314,60 @@ window.SG_REVIEW_SPEAKING = (function () {
     '</div>';
   }
 
+  function severityOf(it) {
+    var c = it.compare;
+    if (!c) return '';
+    var changed = Math.max(c.missing, c.added);
+    if (c.accuracy >= 90 && c.substituted <= 1) return 'minor';
+    if (c.accuracy >= 60 || changed <= Math.ceil(c.total / 2)) return 'moderate';
+    return 'major';
+  }
+
+  function meaningPreserved(it) {
+    var c = it.compare;
+    if (!c) return '';
+    var g = it.task && it.task.ai_rubric && it.task.ai_rubric.guard;
+    if (g && g.exact) return 'Yes';
+    if (g && g.content_total) return (Number(g.content_kept) / Number(g.content_total)) >= 0.8 ? 'Yes' : 'No';
+    return c.accuracy >= 80 ? 'Yes' : 'No';
+  }
+
+  function repeatSummaryHtml(it) {
+    if (!it.compare) return '';
+    var preserved = meaningPreserved(it);
+    return '<div class="rs-repeat-summary">' +
+      '<div class="rs-mini-card">' +
+        '<div class="lr-lab">' + bi('Error Severity', '오류 심각도') + '</div>' +
+        '<b>' + esc(severityOf(it)) + '</b>' +
+      '</div>' +
+      '<div class="rs-mini-card">' +
+        '<div class="lr-lab">' + bi('Meaning Preserved', '의미 보존') + '</div>' +
+        '<b class="' + (preserved === 'Yes' ? 'ok' : 'bad') + '">' + esc(preserved) + '</b>' +
+      '</div>' +
+    '</div>';
+  }
+
   /** 왜 그 점수인가. 점수만 있고 근거가 없으면 학생은 배울 수도 다툴 수도 없다. */
   function rubricHtml(it) {
     var t = it.task;
     if (!t) return '';
     var rub = t.ai_rubric || {}, crit = rub.criteria || [], out = '';
     if (t.ai_error) out += '<p class="muted">' + bi('AI scoring failed: ', 'AI 채점 실패: ') + esc(t.ai_error) + '</p>';
-    if (rub.summary) out += '<p class="rs-body">' + esc(rub.summary) + '</p>';
+    if (rub.score_basis && rub.score_basis.selected) {
+      out += '<div class="rw-basis">' +
+        '<p><b>' + bi('Selected band', '선택된 점수 구간') + '</b> — ' +
+          esc(rub.score_basis.selected) + '</p>' +
+        (rub.score_basis.next
+          ? '<p><b>' + bi('Next band up', '바로 위 점수 구간') + '</b> — ' +
+              esc(rub.score_basis.next) + '</p>' : '') +
+        (rub.score_basis.lower
+          ? '<p><b>' + bi('One band lower', '바로 아래 점수 구간') + '</b> — ' +
+              esc(rub.score_basis.lower) + '</p>' : '') +
+      '</div>';
+    } else if (rub.descriptor) {
+      out += '<p class="rs-body"><b>' + bi('Selected descriptor', '선택된 기준 문구') + '</b> — ' +
+        esc(rub.descriptor) + '</p>';
+    }
     if (crit.length) {
       /* 인용은 전사문에서 글자 그대로 찾은 것만 남는다(api/score.js) — 학생이 "내가
          그렇게 말했나" 를 전사문에서 바로 확인할 수 있어야 한다. */
@@ -416,7 +484,8 @@ window.SG_REVIEW_SPEAKING = (function () {
         /* 점수가 먼저다 — 학생이 이 화면을 여는 이유가 그것이고, 그 밑의 녹음·전사·대조는
            전부 "왜 그 점수인가" 에 대한 답이라 점수 뒤에 와야 순서가 맞는다. */
         '<div class="lr-right rs-flow">' +
-          verdictHtml(it) + recordingHtml(it) + accuracyHtml(it) + rubricHtml(it) +
+          verdictHtml(it) + recordingHtml(it) + overallHtml(it) + accuracyHtml(it) +
+          repeatSummaryHtml(it) + rubricHtml(it) +
           (opts.extraFor ? opts.extraFor(it.qid) : '') +
         '</div>' +
       '</div>' +
