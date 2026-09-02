@@ -378,7 +378,7 @@ window.SMEAG_SET11 = {
                   "kind": "mcq",
                   "prompt": "According to paragraph 2, how do green walls help reduce noise pollution in cities?",
                   "choices": [
-                    "They trap and redirect sound waves before they travel to surrounding structures.",
+                    "They trap anf redirect sound waves before they travel to surrounding structures.",
                     "They create physical barriers that completely block all noise from passing trhough.",
                     "They lower city temperatures through natural shade and cooling effects.",
                     "They replace concrete surfaces with softer materials that muffle vibrations."
@@ -403,12 +403,7 @@ window.SMEAG_SET11 = {
                 {
                   "kind": "mcq",
                   "prompt": "Click on the sentence in paragraph 4 that identifies the specific types of stuctures that can now be constructed using noise-reducing composites?",
-                  "choices": [
-                    "Advances in materials science have expanded the tools available for noise control.",
-                    "Engineers have developed noise-reducing composites that absorb sound energy more efficiently than traditional concrete or metal.",
-                    "In controlled tests, panels made from these composites blocked nearly twice as much sound energy as standard concrete barriers of equal thickness.",
-                    "Highway sound barriers, railroad partition walls, and building facades can now be constructed from these materials, lowering the volume of noise that reaches surrounding communities."
-                  ],
+                  "choices": [],
                   "no": 34,
                   "id": "R1-34",
                   "answer": 3
@@ -550,7 +545,7 @@ window.SMEAG_SET11 = {
                   "choices": [
                     "It is reserved for building residents only.",
                     "It requires a monthly permit from a city.",
-                    "It may ve difficult to find an available space.",
+                    "It may be difficult to find an available space.",
                     "It is free of charge on weekday evenings."
                   ],
                   "no": 12,
@@ -1474,23 +1469,28 @@ window.SMEAG_SET11 = {
                   "context": "1. What did your advisor say about your grades?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "she"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "wanted to know"
                     },
                     {
                       "t": "f",
                       "text": "why"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "had dropped"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "two courses"
                     },
                     {
                       "t": "f",
@@ -1498,17 +1498,22 @@ window.SMEAG_SET11 = {
                     }
                   ],
                   "tiles": [
-                    "had",
-                    "dropped",
-                    "two",
-                    "courses",
+                    "had dropped",
+                    "two courses",
                     "she",
-                    "wanted",
-                    "to",
-                    "know",
+                    "wanted to know",
                     "I"
                   ],
-                  "answerSentence": "She wanted to know why I had dropped two courses."
+                  "answerSentence": "She wanted to know why I had dropped two courses.",
+                  "answerTokens": [
+                    "she",
+                    "wanted to know",
+                    "I",
+                    "had dropped",
+                    "two courses"
+                  ],
+                  "sentence": "She wanted to know why I had dropped two courses.",
+                  "trapTiles": []
                 },
                 {
                   "id": "set11-W1-q02",
@@ -1517,22 +1522,28 @@ window.SMEAG_SET11 = {
                   "context": "2. Are you ready for the potluck tonight?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "just"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "need"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to make sure"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "have"
                     },
                     {
                       "t": "f",
@@ -1543,14 +1554,24 @@ window.SMEAG_SET11 = {
                     "have",
                     "ready",
                     "I",
-                    "to",
-                    "make",
-                    "sure",
+                    "to make sure",
                     "just",
                     "I",
                     "need"
                   ],
-                  "answerSentence": "I just need to make sure I have enough plates."
+                  "answerSentence": "I just need to make sure I have enough plates.",
+                  "answerTokens": [
+                    "I",
+                    "just",
+                    "need",
+                    "to make sure",
+                    "I",
+                    "have"
+                  ],
+                  "sentence": "I just need to make sure I have enough plates.",
+                  "trapTiles": [
+                    "ready"
+                  ]
                 },
                 {
                   "id": "set11-W1-q03",
@@ -1559,25 +1580,32 @@ window.SMEAG_SET11 = {
                   "context": "3. Why is the pharmacy already closed?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "think"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "it"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "closes"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "early"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "on"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "Sundays"
                     },
                     {
                       "t": "f",
@@ -1593,7 +1621,18 @@ window.SMEAG_SET11 = {
                     "it",
                     "think"
                   ],
-                  "answerSentence": "I think it closes early on Sundays."
+                  "answerSentence": "I think it closes early on Sundays.",
+                  "answerTokens": [
+                    "I",
+                    "think",
+                    "it",
+                    "closes",
+                    "early",
+                    "on",
+                    "Sundays"
+                  ],
+                  "sentence": "I think it closes early on Sundays.",
+                  "trapTiles": []
                 },
                 {
                   "id": "set11-W1-q04",
@@ -1602,26 +1641,32 @@ window.SMEAG_SET11 = {
                   "context": "4. What did the teaching assistant say would be on the quiz?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "he"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "said"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the last chapter"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "was"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
                       "t": "f",
                       "text": "main"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "focus"
                     },
                     {
                       "t": "f",
@@ -1631,15 +1676,25 @@ window.SMEAG_SET11 = {
                   "tiles": [
                     "he",
                     "questions",
-                    "the",
-                    "last",
-                    "chapter",
+                    "the last chapter",
                     "was",
                     "said",
                     "the",
                     "focus"
                   ],
-                  "answerSentence": "He said the last chapter was the main focus."
+                  "answerSentence": "He said the last chapter was the main focus.",
+                  "answerTokens": [
+                    "he",
+                    "said",
+                    "the last chapter",
+                    "was",
+                    "the",
+                    "focus"
+                  ],
+                  "sentence": "He said the last chapter was the main focus.",
+                  "trapTiles": [
+                    "questions"
+                  ]
                 },
                 {
                   "id": "set11-W1-q05",
@@ -1648,20 +1703,24 @@ window.SMEAG_SET11 = {
                   "context": "5. Which language app do you use for studying?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
                       "t": "f",
                       "text": "still"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "can’t decide"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "which one"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to use"
                     },
                     {
                       "t": "f",
@@ -1670,14 +1729,19 @@ window.SMEAG_SET11 = {
                   ],
                   "tiles": [
                     "I",
-                    "to",
-                    "use",
-                    "which",
-                    "one",
-                    "can’t",
-                    "decide"
+                    "to use",
+                    "which one",
+                    "can’t decide"
                   ],
-                  "answerSentence": "I still can’t decide which one to use."
+                  "answerSentence": "I still can’t decide which one to use.",
+                  "answerTokens": [
+                    "I",
+                    "can’t decide",
+                    "which one",
+                    "to use"
+                  ],
+                  "sentence": "I still can’t decide which one to use.",
+                  "trapTiles": []
                 },
                 {
                   "id": "set11-W1-q06",
@@ -1686,23 +1750,28 @@ window.SMEAG_SET11 = {
                   "context": "6. I just came back from the food festival downtown.",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "did"
                     },
                     {
                       "t": "f",
                       "text": "you"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "get a chance"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to try"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "anything"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "good"
                     },
                     {
                       "t": "f",
@@ -1712,14 +1781,23 @@ window.SMEAG_SET11 = {
                   "tiles": [
                     "good",
                     "sampled",
-                    "to",
-                    "try",
+                    "to try",
                     "did",
-                    "get",
-                    "chance",
+                    "get a chance",
                     "anything"
                   ],
-                  "answerSentence": "Did you get a chance to try anything good?"
+                  "answerSentence": "Did you get a chance to try anything good?",
+                  "answerTokens": [
+                    "did",
+                    "get a chance",
+                    "to try",
+                    "anything",
+                    "good"
+                  ],
+                  "sentence": "Did you get a chance to try anything good?",
+                  "trapTiles": [
+                    "sampled"
+                  ]
                 },
                 {
                   "id": "set11-W1-q07",
@@ -1749,11 +1827,7 @@ window.SMEAG_SET11 = {
                     },
                     {
                       "t": "b",
-                      "a": "spring"
-                    },
-                    {
-                      "t": "b",
-                      "a": "registration"
+                      "a": "spring registration"
                     },
                     {
                       "t": "b",
@@ -1766,11 +1840,10 @@ window.SMEAG_SET11 = {
                   ],
                   "tiles": [
                     "details",
-                    "registration",
-                    "had",
-                    "spring",
-                    "opens",
+                    "spring registration",
                     "when",
+                    "had",
+                    "opens",
                     "about",
                     "It"
                   ],
@@ -1781,13 +1854,11 @@ window.SMEAG_SET11 = {
                     "details",
                     "about",
                     "when",
-                    "spring",
-                    "registration",
+                    "spring registration",
                     "opens"
                   ],
                   "sentence": "It had details about when spring registration opens.",
-                  "tilesOrigin": "derived-from-answer",
-                  "tilesNote": "The source docx had no word tiles — the words of the answer sentence were used, in scrambled order."
+                  "trapTiles": []
                 },
                 {
                   "id": "set11-W1-q08",
@@ -1800,19 +1871,24 @@ window.SMEAG_SET11 = {
                       "text": "Yes,"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "ordered"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the drink"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "a classmate"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "recommended"
                     },
                     {
                       "t": "f",
@@ -1820,16 +1896,25 @@ window.SMEAG_SET11 = {
                     }
                   ],
                   "tiles": [
-                    "a",
-                    "classmate",
+                    "a classmate",
                     "menu",
-                    "the",
-                    "drink",
+                    "the drink",
                     "recommended",
                     "I",
                     "ordered"
                   ],
-                  "answerSentence": "Yes, I ordered the drink a classmate recommended."
+                  "answerSentence": "Yes, I ordered the drink a classmate recommended.",
+                  "answerTokens": [
+                    "I",
+                    "ordered",
+                    "the drink",
+                    "a classmate",
+                    "recommended"
+                  ],
+                  "sentence": "Yes, I ordered the drink a classmate recommended.",
+                  "trapTiles": [
+                    "menu"
+                  ]
                 },
                 {
                   "id": "set11-W1-q09",
@@ -1838,19 +1923,24 @@ window.SMEAG_SET11 = {
                   "context": "9. Why are you packing up so early?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I’m"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "supposed to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "meet"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "my study group"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "in"
                     },
                     {
                       "t": "f",
@@ -1859,15 +1949,21 @@ window.SMEAG_SET11 = {
                   ],
                   "tiles": [
                     "meet",
-                    "my",
-                    "study",
-                    "group",
+                    "my study group",
                     "in",
-                    "supposed",
-                    "to",
+                    "supposed to",
                     "I’m"
                   ],
-                  "answerSentence": "I’m supposed to meet my study group in ten minutes."
+                  "answerSentence": "I’m supposed to meet my study group in ten minutes.",
+                  "answerTokens": [
+                    "I’m",
+                    "supposed to",
+                    "meet",
+                    "my study group",
+                    "in"
+                  ],
+                  "sentence": "I’m supposed to meet my study group in ten minutes.",
+                  "trapTiles": []
                 },
                 {
                   "id": "set11-W1-q10",
@@ -1876,23 +1972,28 @@ window.SMEAG_SET11 = {
                   "context": "10. Who helped you move all those boxes?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "a neighbor"
                     },
                     {
                       "t": "f",
                       "text": "who"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "lives downstairs"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "helped me"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "carry"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "everything"
                     },
                     {
                       "t": "f",
@@ -1900,17 +2001,25 @@ window.SMEAG_SET11 = {
                     }
                   ],
                   "tiles": [
-                    "lives",
-                    "downstairs",
+                    "lives downstairs",
                     "nearby",
-                    "helped",
-                    "me",
+                    "helped me",
                     "everything",
-                    "a",
-                    "neighbor",
+                    "a neighbor",
                     "carry"
                   ],
-                  "answerSentence": "A neighbor who lives downstairs helped me carry everything."
+                  "answerSentence": "A neighbor who lives downstairs helped me carry everything.",
+                  "answerTokens": [
+                    "a neighbor",
+                    "lives downstairs",
+                    "helped me",
+                    "carry",
+                    "everything"
+                  ],
+                  "sentence": "A neighbor who lives downstairs helped me carry everything.",
+                  "trapTiles": [
+                    "nearby"
+                  ]
                 }
               ]
             }
@@ -2238,19 +2347,13 @@ window.SMEAG_SET11 = {
     "set11-W1-q10": "A neighbor who lives downstairs helped me carry everything."
   },
   "buildWarnings": [
-    "warn: The numbers printed on these questions disagree with their \"Questions a-b\" heading — the numbering that keeps the module in order was used: L1-9 (printed 8 under heading 1-12)",
-    "warn: 1 sentence-building questions had no word tiles in the docx — the words were taken from the answer key and scrambled (set11-W1-q07). Add a tile line, with decoys, if you want traps."
+    "warn: The numbers printed on these questions disagree with their \"Questions a-b\" heading — the numbering that keeps the module in order was used: L1-9 (printed 8 under heading 1-12)"
   ],
   "gates": [
     {
       "level": "warn",
       "scope": "listening",
       "message": "The numbers printed on these questions disagree with their \"Questions a-b\" heading — the numbering that keeps the module in order was used: L1-9 (printed 8 under heading 1-12)"
-    },
-    {
-      "level": "warn",
-      "scope": "writing",
-      "message": "1 sentence-building questions had no word tiles in the docx — the words were taken from the answer key and scrambled (set11-W1-q07). Add a tile line, with decoys, if you want traps."
     }
   ],
   "summary": {
@@ -2295,7 +2398,7 @@ window.SMEAG_SET11 = {
     ],
     "gates": {
       "stop": 0,
-      "warn": 2
+      "warn": 1
     },
     "sources": [
       "NEW TOEFL SET 11.docx",
