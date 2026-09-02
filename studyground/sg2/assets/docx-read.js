@@ -175,7 +175,7 @@
 
   function newPara(ctx) {
     return {
-      i: -1, style: '', listed: false, ilvl: 0, text: '',
+      i: -1, style: '', listed: false, ilvl: 0, text: '', textRaw: '',
       images: [], table: ctx.tbl > 0, row: ctx.row, cell: ctx.cell, box: ctx.box > 0
     };
   }
@@ -212,7 +212,15 @@
         if (t.close) {
           var done = stack.pop();
           top = stack.length ? stack[stack.length - 1] : null;
-          if (done) { done.i = out.length; done.text = done.text.replace(/[ \t]+/g, ' ').trim(); out.push(done); }
+          if (done) {
+            done.i = out.length;
+            /* textRaw 는 칸을 접기 전의 글. 라이팅 타일 줄('had dropped     two courses')은
+               낱말 사이 한 칸과 타일 사이 여러 칸으로만 나뉘어 있어, 접고 나면 어디까지가
+               한 타일인지 되살릴 길이 없다. 본문은 지금까지처럼 접은 text 를 쓴다. */
+            done.textRaw = done.text.replace(/[ \t]+$/, '').replace(/^[ \t]+/, '');
+            done.text = done.text.replace(/[ \t]+/g, ' ').trim();
+            out.push(done);
+          }
           return;
         }
         top = newPara(ctx);

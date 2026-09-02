@@ -93,6 +93,32 @@ check('writing build questions 1-10', builds.length === 10
 check('build answers complete', builds.every((q) => q.slots.some((s) => s.t === 'b')
   && q.answerSentence && q.tiles && q.tiles.length), 'blank answer');
 
+/* 빈칸마다 정답이 붙어 있어야 라이팅 1교시가 채점된다 — 자동채점도 성적표도 slots[].a 만 본다.
+   그리고 조각은 문서에 적힌 그대로여야 한다: 'wanted to know' 가 낱말 셋으로 쪼개지면
+   빈칸 수와 조각 수가 어긋나 학생이 문장을 완성할 수 없다. */
+const noKey = builds.filter((q) => q.slots.some((s) => s.t === 'b' && !s.a)).map((q) => q.id);
+check('every blank carries its answer', noKey.length === 0, noKey.join(', '));
+
+const rebuilt = builds.filter((q) => {
+  const said = q.slots.map((s) => (s.t === 'b' ? s.a : s.text)).join(' ').replace(/\s+([,.;:!?])/g, '$1');
+  const want = q.answerSentence.replace(/\s+([,.;:!?])/g, '$1');
+  return said.toLowerCase() !== want.toLowerCase();
+}).map((q) => q.id);
+check('slots rebuild the answer sentence', rebuilt.length === 0, rebuilt.join(', '));
+
+check('tiles keep the phrases the docx wrote', builds[0].tiles.includes('wanted to know')
+  && builds[0].tiles.includes('two courses')
+  && builds[3].tiles.includes('the last chapter')
+  && builds[8].tiles.includes('my study group'), builds[0].tiles.join(' | '));
+
+/* 함정 조각 — 어느 빈칸에도 들어가지 않는 것들. 문서에 있는 그대로 남아야 한다. */
+check('trap tiles found', builds[1].trapTiles.join() === 'ready'
+  && builds[3].trapTiles.join() === 'questions'
+  && builds[5].trapTiles.join() === 'sampled'
+  && builds[7].trapTiles.join() === 'menu'
+  && builds[9].trapTiles.join() === 'nearby',
+  builds.map((q) => (q.trapTiles || []).join('+')).join(' | '));
+
 const email = questionsOfModule(writing[1])[0];
 check('email source text exact', email.to === 'Customer Service Manager'
   && email.subject === 'Feedback on Recent Group Stay'

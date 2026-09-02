@@ -25,7 +25,7 @@
       "code": "SET11",
       "title": "SET 11",
       "file": "sg2/assets/set11.js",
-      "items": 70,
+      "items": 79,
       "texts": 23,
       "scripts": 0,
       "isCandidate": false
@@ -40,9 +40,9 @@
       "isCandidate": false
     }
   ],
-  "unitCount": 389,
+  "unitCount": 398,
   "frameOnlyUnits": 0,
-  "candidatePairs": 647,
+  "candidatePairs": 649,
   "thresholds": {
     "shingleK": 4,
     "jaccardHigh": 0.55,
@@ -1135,15 +1135,15 @@
         "moduleLabel": "Reading Module 2",
         "blockKind": "passage",
         "blockHeading": "Questions 11-12",
-        "text": "What can be inferred about parking near the apartment?\nIt is reserved for building residents only.\nIt requires a monthly permit from a city.\nIt may be difficult to find an available space.\nIt is free of charge on weekday evenings.",
+        "text": "What can be inferred about parking near the apartment?\nIt is reserved for building residents only.\nIt requires a monthly permit from a city.\nIt may ve difficult to find an available space.\nIt is free of charge on weekday evenings.",
         "choices": [
           "It is reserved for building residents only.",
           "It requires a monthly permit from a city.",
-          "It may be difficult to find an available space.",
+          "It may ve difficult to find an available space.",
           "It is free of charge on weekday evenings."
         ],
-        "answerText": "C. It may be difficult to find an available space.",
-        "payload": "What can be inferred about parking near the apartment?\nIt is reserved for building residents only.\nIt requires a monthly permit from a city.\nIt may be difficult to find an available space.\nIt is free of charge on weekday evenings.",
+        "answerText": "C. It may ve difficult to find an available space.",
+        "payload": "What can be inferred about parking near the apartment?\nIt is reserved for building residents only.\nIt requires a monthly permit from a city.\nIt may ve difficult to find an available space.\nIt is free of charge on weekday evenings.",
         "framedOut": [],
         "tokenCount": 41,
         "meta": null,

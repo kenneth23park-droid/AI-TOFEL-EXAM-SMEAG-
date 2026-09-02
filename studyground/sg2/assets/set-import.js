@@ -38,6 +38,8 @@
   /* ------------------------------------------------------------ 유틸 */
 
   function txt(p) { return p && p.text ? p.text : ''; }
+  /* 칸을 접기 전의 글. 타일 줄은 여러 칸으로 조각을 가르므로 이걸 봐야 한다. */
+  function txtRaw(p) { return p && p.textRaw ? p.textRaw : txt(p); }
   function isBlank(p) { return !txt(p) && (!p || !p.images || !p.images.length); }
 
   /** 'Questions 13-14' → {from:13,to:14}. 아니면 null. */
@@ -781,6 +783,67 @@
     return true;
   }
 
+  /* 정답 문장을 견주기 위한 꼴. 대소문자와 굽은 따옴표만 맞춘다 — 낱말은 그대로 둔다. */
+  function cmpText(s) {
+    return String(s || '').toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ').trim();
+  }
+
+  /**
+   * 타일을 정답 문장에 순서대로 맞춰 빈칸마다 slots[].a 를 채운다.
+   *
+   * 이게 없으면 팩은 지어지되 라이팅 1교시가 채점되지 않는다: 자동채점(sg-review-writing.js)과
+   * 성적표(sg-results.js)는 빈칸의 .a 만 정답으로 보는데, 타일 줄에서 온 문항에는 그 칸이
+   * 비어 있었다. 맞추지 못하면 false — 그건 타일과 정답지가 서로 다른 문장이라는 뜻이다.
+   * @return {boolean} 맞췄으면 true
+   */
+  function alignBuildAnswer(q) {
+    var sentence = String(q.answerSentence || '').trim();
+    var slots = q.slots || [], tiles = (q.tiles || []).slice();
+    if (!sentence || !slots.length || !tiles.length) return false;
+
+    var rest = cmpText(sentence), used = [], tokens = [], i, k;
+    /* 긴 타일부터 본다. 'the last chapter' 가 있는데 'the' 를 먼저 집으면 그 뒤가 어긋난다. */
+    var order = tiles.map(function (t, ix) { return ix; }).sort(function (a, b) {
+      return cmpText(tiles[b]).length - cmpText(tiles[a]).length;
+    });
+
+    function takes(want) {
+      if (!want || rest.indexOf(want) !== 0) return false;
+      var next = rest.charAt(want.length);
+      return next === '' || !/[a-z0-9']/.test(next);   /* 낱말 한가운데를 물지 않는다 */
+    }
+    function eat(want) { rest = rest.slice(want.length).replace(/^\s+/, ''); }
+
+    for (i = 0; i < slots.length; i++) {
+      if (slots[i].t === 'f') {
+        var fixed = cmpText(slots[i].text);
+        /* 정답지가 마침표를 빠뜨린 문장이 있다(SET 9 q03). 마지막 고정 조각이 문장부호뿐이면
+           없어도 넘어간다 — 학생이 놓을 조각이 아니라 화면에 이미 찍혀 있는 글자다. */
+        if (!rest && /^[,.;:!?…—–-]+$/.test(fixed)) continue;
+        if (!takes(fixed)) return false;
+        eat(fixed);
+        continue;
+      }
+      var pick = -1;
+      for (k = 0; k < order.length; k++) {
+        if (used[order[k]]) continue;
+        if (takes(cmpText(tiles[order[k]]))) { pick = order[k]; break; }
+      }
+      if (pick < 0) return false;
+      used[pick] = true;
+      eat(cmpText(tiles[pick]));
+      slots[i].a = tiles[pick];
+      tokens.push(tiles[pick]);
+    }
+    if (rest) return false;
+
+    q.answerTokens = tokens;
+    q.sentence = sentence;
+    /* 남은 타일 = 함정. 학생 화면에는 같이 깔리지만 어느 칸에도 들어가지 않는다. */
+    q.trapTiles = tiles.filter(function (t, ix) { return !used[ix]; });
+    return true;
+  }
+
   function parseWriting(paras, codeSlug, startNo) {
     var modules = [], i = 0, no = startNo;
 
@@ -839,7 +902,7 @@
                  이 검사 없이 3줄로 밀면 다음 문항의 지문을 타일로 먹어 10문항이 5문항이 된다. */
               var p2 = i + 2 < paras.length ? paras[i + 2] : null;
               var t2 = p2 ? txt(p2) : '';
-              var t1 = p2 && !p2.listed && !numbered(t2) && !/_{2,}/.test(t2) ? t2 : '';
+              var t1 = p2 && !p2.listed && !numbered(t2) && !/_{2,}/.test(t2) ? txtRaw(p2) : '';
               var built = parseBuildItem(s1, t1);
               qs.push({
                 id: codeSlug + '-W1-q' + pad2(qs.length + 1),
@@ -1307,14 +1370,21 @@
           (b.questions || []).forEach(function (q) { if (q.kind === 'build') buildQs.push(q); });
         });
       });
-      var derived = [];
+      var derived = [], unaligned = [];
       buildQs.forEach(function (q, k) {
         if (k < wList.length && typeof wList[k] === 'string') {
           q.answerSentence = wList[k];
           answerKey[q.id] = wList[k];
           if (deriveTiles(q)) derived.push(q.id);
+          else if (!alignBuildAnswer(q)) unaligned.push(q.id);
         }
       });
+      if (unaligned.length) {
+        gate(strictSource ? 'stop' : 'warn', 'writing',
+          unaligned.length + ' sentence-building questions do not cross-check: the word tiles in the question document cannot build the answer-key sentence, in that order ('
+            + unaligned.slice(0, 8).join(', ') + (unaligned.length > 8 ? ' and more' : '')
+            + '). Until they match, Build a Sentence has no answer to score against.');
+      }
       if (derived.length) {
         gate(strictSource ? 'stop' : 'warn', 'writing', derived.length + ' sentence-building questions had no word tiles in the docx — the words were taken from the answer key and scrambled (' + derived.slice(0, 3).join(', ') + (derived.length > 3 ? ' and more' : '') + '). ' +
           (strictSource ? 'Strict source mode does not allow this derived tile set.' : 'Add a tile line, with decoys, if you want traps.'));
