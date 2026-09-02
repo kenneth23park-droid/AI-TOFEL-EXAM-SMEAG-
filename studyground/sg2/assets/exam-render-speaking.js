@@ -285,6 +285,8 @@
     var micBannerUp = false;     // 지금 배너가 마이크 안내인가(다른 안내를 덮지 않기 위해)
     var armWaitTimer = null;     // 마이크가 열리기를 기다리는 동안의 폴링
     var armWaitedMs = 0;
+    var gated = false;           // 권한을 못 잡아 문항을 아직 시작하지 못한 상태
+    var gateTimer = null;
 
     /* ── DOM 골격 ── */
     var box = el('div', 'speaking-screen');
@@ -626,14 +628,80 @@
         if (disposed) return;
         if (e) {
           logEvent('mic_prewarm_failed', screen.id, { qid: qid, code: e.code || '' });
-          micBanner('Allow the microphone. Your answer cannot be recorded until you do — look for the browser prompt near the address bar.',
-                    '마이크를 허용하세요. 허용하기 전에는 답변이 녹음되지 않습니다 — 주소창 근처의 허용 창을 확인하세요.', 'error');
+          if (!gated) {
+            micBanner('Allow the microphone. Your answer cannot be recorded until you do — look for the browser prompt near the address bar.',
+                      '마이크를 허용하세요. 허용하기 전에는 답변이 녹음되지 않습니다 — 주소창 근처의 허용 창을 확인하세요.', 'error');
+          }
           return;
         }
         micReady = true;
-        clearMicBanner();
         logEvent('mic_ready', screen.id, { qid: qid });
+        if (gated) { openGate(); return; }
+        clearMicBanner();
       });
+    }
+
+    /* ── 권한 게이트 ──
+     * 이어보기·딥링크(planResume, ?screen=, ?goq=)는 마이크 점검 화면을 지나치지 않고
+     * 끊긴 스피킹 문항에 곧장 착지한다. 그 자리에서 마이크를 못 잡았다면 문항을
+     * 시작하지 않는다 — 마이크 없는 스피킹 문항은 빈 파일 하나를 남길 뿐이다.
+     * 하드웨어 점검 화면과 같은 규칙이다(건너뛰기 없음). 시계를 걸지 않으므로
+     * 여기서 서 있는 동안 응답 시간은 1초도 줄지 않는다. */
+
+    var GATE_POLL_MS = 2000;
+
+    /* 지금 손에 살아 있는 마이크가 있는가. exam-recorder 의 liveStream 과 같은 판정이다 —
+       트랙이 죽었거나(ended) 다른 앱이 물고 있으면(muted) 없는 것으로 본다. */
+    function micHeld() {
+      var R = REC();
+      if (!R || typeof R.getStream !== 'function') return false;
+      var st = R.getStream();
+      if (!st) return false;
+      if (typeof st.getAudioTracks !== 'function') return true;
+      var ts = st.getAudioTracks();
+      return !!(ts.length && ts[0].readyState !== 'ended' && ts[0].muted !== true);
+    }
+
+    function cancelGatePoll() {
+      if (gateTimer !== null && root.clearTimeout) { try { root.clearTimeout(gateTimer); } catch (e) {} }
+      gateTimer = null;
+    }
+
+    /* 학생이 주소창 자물쇠에서 권한을 푸는 경우, 브라우저는 우리에게 알려 주지 않는다.
+       스스로 주기적으로 다시 잡아 봐야 게이트가 열린다. */
+    function pollGate() {
+      cancelGatePoll();
+      if (!root.setTimeout || disposed || !gated) return;
+      gateTimer = root.setTimeout(function () {
+        gateTimer = null;
+        if (disposed || !gated) return;
+        if (micHeld()) { micReady = true; openGate(); return; }
+        micWarming = false;
+        prewarmMic();
+        pollGate();
+      }, GATE_POLL_MS);
+    }
+
+    function showGate() {
+      if (gated) return;
+      gated = true;
+      rbox.hidden = true;
+      logEvent('mic_gate', screen.id, { qid: qid });
+      setCaption('Microphone required', '마이크가 필요합니다');
+      micBanner('This question cannot start until your microphone is on. Select Allow microphone below, then choose "Allow while visiting the site" in the browser prompt. If no prompt appears, select the lock icon in the address bar and allow the microphone. Your response time has not started.',
+                '마이크가 켜져야 이 문항이 시작됩니다. 아래 Allow microphone 을 누르고, 브라우저 창에서 "Allow while visiting the site" 를 고르세요. 창이 뜨지 않으면 주소창의 자물쇠 아이콘에서 마이크를 허용하세요. 응답 시간은 아직 시작되지 않았습니다.', 'error');
+      setButton('Allow microphone', '마이크 허용', function () { micWarming = false; prewarmMic(); });
+      pollGate();
+    }
+
+    function openGate() {
+      if (!gated) return;
+      gated = false;
+      cancelGatePoll();
+      clearMicBanner();
+      btn.hidden = true;
+      logEvent('mic_gate_open', screen.id, { qid: qid });
+      startPhases();
     }
 
     function cancelArmWait() {
@@ -941,8 +1009,18 @@
         renderPhase();
         return;
       }
-      /* 아직 record 까지 갈 길이 남아 있을 때 권한 창을 띄운다. */
-      if (recordIndex() >= 0) prewarmMic();
+      /* 아직 record 까지 갈 길이 남아 있을 때 권한 창을 띄운다.
+         못 잡으면 문항을 시작하지 않고 게이트에서 기다린다. */
+      if (recordIndex() >= 0) {
+        if (micHeld()) micReady = true;
+        prewarmMic();
+        if (!micReady) { showGate(); return; }
+      }
+      startPhases();
+    }
+
+    function startPhases() {
+      if (disposed) return;
       var out = nextPhase(state, { type: 'start' });
       state = { phases: out.phases, phaseIndex: out.phaseIndex, status: out.status };
       applyActions(out.actions);
@@ -959,6 +1037,7 @@
       cancelRetry();
       cancelAdvance();
       cancelArmWait();
+      cancelGatePoll();
       var R = REC();
       if (R && R.isRecording()) { try { R.abort(); } catch (e) {} }
       recording = false;

@@ -77,7 +77,10 @@ function advanceMs(ms) {
 }
 
 /* ── 마이크·시계 스텁 ───────────────────────────────────── */
-var mic = { granted: false, permissionCalls: 0, startCalls: 0, pending: null };
+/* granted = 브라우저가 허용해 줄 것인가, held = 지금 스트림을 손에 쥐고 있는가.
+   둘은 다르다 — 허용돼 있어도 스트림은 getUserMedia 를 한 번 통과해야 생긴다. */
+var mic = { granted: false, held: false, permissionCalls: 0, startCalls: 0 };
+var fakeStream = { getAudioTracks: function () { return [{ readyState: 'live', muted: false }]; } };
 window.SG_RECORDER = {
   NOT_SUBMIT: 'NOT SUBMIT',
   isSupported: function () { return true; },
@@ -85,16 +88,17 @@ window.SG_RECORDER = {
   level: function () { return 0; },
   requestPermission: function (cb) {
     mic.permissionCalls += 1;
-    if (mic.granted) { cb(null, {}); return; }
+    if (mic.granted) { mic.held = true; cb(null, fakeStream); return; }
     var e = new Error('denied'); e.code = 'denied';
     cb(e, null);
   },
   start: function (qid, cb) {
     mic.startCalls += 1;
-    if (mic.granted) { cb(null); return; }
+    if (mic.granted) { mic.held = true; cb(null); return; }
     var e = new Error('denied'); e.code = 'denied';
     cb(e);
   },
+  getStream: function () { return mic.held ? fakeStream : null; },
   stop: function (cb) { cb(null, { durationMs: 0, mime: '', peak: 0 }); },
   abort: function () {}
 };
@@ -148,11 +152,17 @@ function recordArmed() { return armed.filter(function (a) { return /\|1$/.test(a
 
 /* ── [1] 권한은 record 이전에 미리 묻는다 ───────────────── */
 console.log('\n[1] 화면에 들어서자마자 마이크를 미리 연다');
-mic.granted = true;
+mic.granted = true; mic.held = false;
 run();
 ok('record 에 닿기 전에 권한을 요청했다', mic.permissionCalls > 0, true);
 ok('아직 녹음을 시작하지는 않았다', mic.startCalls, 0);
 ok('응답 시계도 아직 안 걸렸다', recordArmed(), 0);
+
+console.log('\n[1b] 이미 쥐고 있으면 권한 창을 두 번 띄우지 않는다');
+mic.granted = true; mic.held = true;
+run();
+ok('다시 묻지 않는다', mic.permissionCalls, 0);
+ok('그래도 문항은 시작된다 (prep 시계)', armed.length > 0, true);
 
 /* ── [2] 마이크가 열리면 그때 시계를 건다 ───────────────── */
 console.log('\n[2] 마이크가 열린 뒤에 응답 시계');
@@ -161,10 +171,11 @@ advanceMs(500);            // 신호음 대기(AudioContext 없어도 같은 타
 ok('녹음을 시작했다', mic.startCalls > 0, true);
 ok('응답 시계가 걸렸다', recordArmed(), 1);
 
-/* ── [3] 권한이 없으면 시계를 걸지 않고 기다린다 ────────── */
-console.log('\n[3] 권한이 없으면 응답 시간이 흐르지 않는다');
-mic.granted = false;
-var node3 = run();
+/* ── [3] 도중에 마이크를 잃으면 시계를 걸지 않고 기다린다 ── */
+console.log('\n[3] 녹음 직전에 마이크를 잃으면 응답 시간이 흐르지 않는다');
+mic.granted = true; mic.held = true;
+var node3 = run();                 // 권한이 있는 채로 문항 시작 (게이트 통과)
+mic.granted = false; mic.held = false;   // prep 도중 장치를 잃었다
 expirePrep();
 advanceMs(500);
 ok('마이크를 열려고 시도는 했다', mic.startCalls > 0, true);
@@ -172,21 +183,46 @@ ok('열리지 않았으므로 시계를 걸지 않는다', recordArmed(), 0);
 ok('학생에게 마이크를 허용하라고 말한다',
    find(node3, 'speaking-banner').textContent.toLowerCase().indexOf('microphone') >= 0, true);
 
-console.log('\n[3b] 늦게 허용하면 그 순간부터 응답 시간이 시작된다');
-mic.granted = true;        // 학생이 이제 Allow 를 눌렀다
-advanceMs(1200);           // 재시도(1초 간격)가 성공한다
+console.log('\n[3b] 늦게 되살아나면 그 순간부터 응답 시간이 시작된다');
+mic.granted = true;
+advanceMs(1200);                   // 재시도(1초 간격)가 성공한다
 ok('시계가 그제서야 걸렸다', recordArmed(), 1);
 ok('잃은 응답 시간은 없다 (45초 그대로)', armed[armed.length - 1].sec, 45);
 
 /* ── [4] 끝내 안 열려도 시험은 세우지 않는다 ────────────── */
 console.log('\n[4] 끝내 안 열리면 시험을 세우지 않는다');
-mic.granted = false;
+mic.granted = true; mic.held = true;
 run();
+mic.granted = false; mic.held = false;
 expirePrep();
 advanceMs(500);
 ok('아직은 기다린다', recordArmed(), 0);
 advanceMs(9000);
 ok('8초를 넘기면 시계를 걸고 진행한다', recordArmed(), 1);
+
+/* ── [5] 권한 없이 착지하면 문항 자체가 시작되지 않는다 ── */
+/* 이어보기(planResume)·?screen=·?goq= 는 마이크 점검 화면을 지나치지 않고
+   스피킹 문항에 곧장 착지한다. 오늘 사고의 실제 경로다. */
+console.log('\n[5] 권한 없이 스피킹 문항에 착지 — 게이트가 막는다');
+mic.granted = false; mic.held = false;
+var node5 = run();
+ok('phase 를 시작하지 않는다 (prep 시계조차 안 걸린다)', armed.length, 0);
+ok('마이크 허용 버튼을 세운다',
+   find(node5, 'speaking-btn').textContent.indexOf('Allow microphone') >= 0, true);
+ok('응답 시간이 시작되지 않았다고 알린다',
+   find(node5, 'speaking-banner').textContent.indexOf('response time has not started') >= 0, true);
+ok('녹음 시도조차 하지 않는다', mic.startCalls, 0);
+advanceMs(30000);
+ok('30초를 기다려도 그냥 흘려보내지 않는다', armed.length, 0);
+
+console.log('\n[5b] 학생이 허용하면 그때 문항이 처음부터 시작된다');
+mic.granted = true;
+advanceMs(2500);                   // 게이트 폴링이 다시 잡는다
+ok('이제 phase 가 시작됐다', armed.length > 0, true);
+ok('prep 시간은 3초 그대로', armed[0].sec, 3);
+expirePrep();
+advanceMs(500);
+ok('응답 시계도 45초 그대로', recordArmed(), 1);
 
 console.log(fails ? '\n' + fails + ' FAILED' : '\nALL PASS');
 process.exit(fails ? 1 : 0);
