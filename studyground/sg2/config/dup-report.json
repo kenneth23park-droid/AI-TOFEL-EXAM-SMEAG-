@@ -25,7 +25,7 @@
       "code": "SET11",
       "title": "SET 11",
       "file": "sg2/assets/set11.js",
-      "items": 79,
+      "items": 70,
       "texts": 23,
       "scripts": 0,
       "isCandidate": false
@@ -40,9 +40,9 @@
       "isCandidate": false
     }
   ],
-  "unitCount": 398,
+  "unitCount": 389,
   "frameOnlyUnits": 0,
-  "candidatePairs": 649,
+  "candidatePairs": 647,
   "thresholds": {
     "shingleK": 4,
     "jaccardHigh": 0.55,
