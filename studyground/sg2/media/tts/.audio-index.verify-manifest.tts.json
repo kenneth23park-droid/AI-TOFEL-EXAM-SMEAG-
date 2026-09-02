@@ -3,6 +3,22 @@
   "manifest": ".verify-manifest.tts.json",
   "sigVersion": 3,
   "items": {
+    "read-R1-questions-13-15": {
+      "scriptHash": "6446c5d12bf934210ff5cf6f167a5c8fb7f88c893304b7ab2f8b477300272a2a",
+      "sigVersion": 3,
+      "bytes": 465261,
+      "durationSec": 66.99,
+      "audioSha256": "42d8a5a7fba9b2c919d00a309c5b7167b678f6d83294a022f7a37b51bd57b908",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "just got off the phone with finance. Due to the quarterly budget cuts, we need to reduce our training department spending by 15% immediately. This affects our upcoming leadership development program. That's significant. The external facilitators alone account for about 40% of the program budget. Should we consider using internal trainers instead? I could lead the communication skills module since I've done similar workshops before. That would save us the cost of one external speaker. That would help. Sandra, can you review the catering contract? We originally planned for a full lunch service, but switching to a lighter refreshment option might also reduce costs. I'll call the catering company this afternoon. They mentioned flexibility in their proposal. What about the venue? Let's keep the hotel venue. The professional setting is important for senior participants. Focus on the facilitators and catering first, and we'll reassess if needed. Understood. I'll prepare an outline for my session and send it to you for approval by Thursday.",
+        "audioSha256": "42d8a5a7fba9b2c919d00a309c5b7167b678f6d83294a022f7a37b51bd57b908",
+        "scriptHash": "6446c5d12bf934210ff5cf6f167a5c8fb7f88c893304b7ab2f8b477300272a2a"
+      }
+    },
     "read-R1-roman-roads": {
       "scriptHash": "5623a2c053ae4a598d00a2927db2fc6d47339a7a06ec80eeb24fb78b43f0107c",
       "sigVersion": 3,
@@ -209,6 +225,22 @@
         "transcript": "Do you know when the lecture starts?",
         "audioSha256": "26b750accb891b8a3d38287425c59ef6a4c386d66a49c77de2b899caaaba51e0",
         "scriptHash": "2d986fe74d353177c25756f55356c067bce025bd0fdb1dd68e8a571864e06ccf"
+      }
+    },
+    "set9-M1-sr-03": {
+      "scriptHash": "fef8654b9012be710583099d6eac8cc4dfca7b0e7bbd3e08c182a4db7c3f9f79",
+      "sigVersion": 3,
+      "bytes": 61902,
+      "durationSec": 3.81,
+      "audioSha256": "959601c160138860ee5fec6205ab4677d0bf8a34788c95fb828b20692b274666",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I don't know how many people will join our study group tonight.",
+        "audioSha256": "959601c160138860ee5fec6205ab4677d0bf8a34788c95fb828b20692b274666",
+        "scriptHash": "fef8654b9012be710583099d6eac8cc4dfca7b0e7bbd3e08c182a4db7c3f9f79"
       }
     },
     "set9-M1-sr-04": {
@@ -435,6 +467,22 @@
         "scriptHash": "470f93830e50e824da3637c4bc0794917c3864aa5fa3061bd9b174895f59ffba"
       }
     },
+    "set9-M2-repeat-02": {
+      "scriptHash": "a5c04d60637c47ae5e334c84525dcf25fc9e8cb6ad9b3a0994fca6683f832391",
+      "sigVersion": 3,
+      "bytes": 44765,
+      "durationSec": 2.74,
+      "audioSha256": "0a7c3da064fb257aef72a9c5eb0f6c03377a31c9b34397e8679a9ed73390fe7b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You can find today's menu on the board.",
+        "audioSha256": "0a7c3da064fb257aef72a9c5eb0f6c03377a31c9b34397e8679a9ed73390fe7b",
+        "scriptHash": "a5c04d60637c47ae5e334c84525dcf25fc9e8cb6ad9b3a0994fca6683f832391"
+      }
+    },
     "set9-M2-repeat-03": {
       "scriptHash": "89d0e063345366d7af71c4d66c4a10a1a450254aca2006d93ff47eb85717933c",
       "sigVersion": 3,
@@ -531,6 +579,22 @@
         "scriptHash": "547d66b2821fd24b422b133f53be674f58ef640805687dc3da2e6ee46aef9190"
       }
     },
+    "set9-M2-sr-02": {
+      "scriptHash": "f85e83a6ba8bfd73eaa7d213585c0a5e88ecff44083a014e93d9493fd7693ab6",
+      "sigVersion": 3,
+      "bytes": 38078,
+      "durationSec": 2.32,
+      "audioSha256": "f948b3adf75345ce8ab864c8cc47813cc2a4b0641bf08e81fd69d06e3a1e38e1",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where's the Financial Aid Office?",
+        "audioSha256": "f948b3adf75345ce8ab864c8cc47813cc2a4b0641bf08e81fd69d06e3a1e38e1",
+        "scriptHash": "f85e83a6ba8bfd73eaa7d213585c0a5e88ecff44083a014e93d9493fd7693ab6"
+      }
+    },
     "set9-M2-sr-03": {
       "scriptHash": "cb51b17ccacd8cc9a1c51a049a643a1633001e1bc867223dad40ea8f4470d6fb",
       "sigVersion": 3,
@@ -577,70 +641,6 @@
         "transcript": "A literary magazine has invited readers to submit short stories for publication. You decided to submit one of your stories using their online submission form. However, after clicking the submit button, you received an error message and are unsure whether your submission was received.",
         "audioSha256": "4019a249112b3b891c2eea76f5f0722b0df918b609416d3166daf99071144399",
         "scriptHash": "47e3dc6942a5a5b3f401b2f3a11ca86d42b3fd947e18f2ef9b720bb688c17438"
-      }
-    },
-    "read-R1-questions-13-15": {
-      "scriptHash": "6446c5d12bf934210ff5cf6f167a5c8fb7f88c893304b7ab2f8b477300272a2a",
-      "sigVersion": 3,
-      "bytes": 465261,
-      "durationSec": 66.99,
-      "audioSha256": "42d8a5a7fba9b2c919d00a309c5b7167b678f6d83294a022f7a37b51bd57b908",
-      "stt": {
-        "verdict": "PASS",
-        "wer": 0.0,
-        "backend": "faster_whisper",
-        "reason": "WER 0.0%",
-        "transcript": "just got off the phone with finance. Due to the quarterly budget cuts, we need to reduce our training department spending by 15% immediately. This affects our upcoming leadership development program. That's significant. The external facilitators alone account for about 40% of the program budget. Should we consider using internal trainers instead? I could lead the communication skills module since I've done similar workshops before. That would save us the cost of one external speaker. That would help. Sandra, can you review the catering contract? We originally planned for a full lunch service, but switching to a lighter refreshment option might also reduce costs. I'll call the catering company this afternoon. They mentioned flexibility in their proposal. What about the venue? Let's keep the hotel venue. The professional setting is important for senior participants. Focus on the facilitators and catering first, and we'll reassess if needed. Understood. I'll prepare an outline for my session and send it to you for approval by Thursday.",
-        "audioSha256": "42d8a5a7fba9b2c919d00a309c5b7167b678f6d83294a022f7a37b51bd57b908",
-        "scriptHash": "6446c5d12bf934210ff5cf6f167a5c8fb7f88c893304b7ab2f8b477300272a2a"
-      }
-    },
-    "set9-M1-sr-03": {
-      "scriptHash": "fef8654b9012be710583099d6eac8cc4dfca7b0e7bbd3e08c182a4db7c3f9f79",
-      "sigVersion": 3,
-      "bytes": 61902,
-      "durationSec": 3.81,
-      "audioSha256": "959601c160138860ee5fec6205ab4677d0bf8a34788c95fb828b20692b274666",
-      "stt": {
-        "verdict": "PASS",
-        "wer": 0.0,
-        "backend": "faster_whisper",
-        "reason": "WER 0.0%",
-        "transcript": "I don't know how many people will join our study group tonight.",
-        "audioSha256": "959601c160138860ee5fec6205ab4677d0bf8a34788c95fb828b20692b274666",
-        "scriptHash": "fef8654b9012be710583099d6eac8cc4dfca7b0e7bbd3e08c182a4db7c3f9f79"
-      }
-    },
-    "set9-M2-repeat-02": {
-      "scriptHash": "a5c04d60637c47ae5e334c84525dcf25fc9e8cb6ad9b3a0994fca6683f832391",
-      "sigVersion": 3,
-      "bytes": 44765,
-      "durationSec": 2.74,
-      "audioSha256": "0a7c3da064fb257aef72a9c5eb0f6c03377a31c9b34397e8679a9ed73390fe7b",
-      "stt": {
-        "verdict": "PASS",
-        "wer": 0.0,
-        "backend": "faster_whisper",
-        "reason": "WER 0.0%",
-        "transcript": "You can find today's menu on the board.",
-        "audioSha256": "0a7c3da064fb257aef72a9c5eb0f6c03377a31c9b34397e8679a9ed73390fe7b",
-        "scriptHash": "a5c04d60637c47ae5e334c84525dcf25fc9e8cb6ad9b3a0994fca6683f832391"
-      }
-    },
-    "set9-M2-sr-02": {
-      "scriptHash": "f85e83a6ba8bfd73eaa7d213585c0a5e88ecff44083a014e93d9493fd7693ab6",
-      "sigVersion": 3,
-      "bytes": 38078,
-      "durationSec": 2.32,
-      "audioSha256": "f948b3adf75345ce8ab864c8cc47813cc2a4b0641bf08e81fd69d06e3a1e38e1",
-      "stt": {
-        "verdict": "PASS",
-        "wer": 0.0,
-        "backend": "faster_whisper",
-        "reason": "WER 0.0%",
-        "transcript": "Where's the Financial Aid Office?",
-        "audioSha256": "f948b3adf75345ce8ab864c8cc47813cc2a4b0641bf08e81fd69d06e3a1e38e1",
-        "scriptHash": "f85e83a6ba8bfd73eaa7d213585c0a5e88ecff44083a014e93d9493fd7693ab6"
       }
     }
   }
