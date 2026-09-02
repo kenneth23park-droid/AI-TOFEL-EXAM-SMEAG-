@@ -44,6 +44,12 @@ const pack = result.pack;
 
 check('no stop gates', result.gates.filter((g) => g.level === 'stop').length === 0,
   result.gates.map((g) => g.level + ' ' + g.scope + ' ' + g.message).join('\n'));
+
+/* 시험에 실제로 나갈 팩은 strict source mode 로 지어진다 — 관리자 화면도, tools/build_set11.mjs
+   도 그 잣대다. 느슨한 모드만 확인하면 "테스트는 초록인데 저장은 막히는" 세트가 나온다. */
+const strict = IMPORT.build({ code: 'SET 11', questions, script, answers, strictSource: true });
+check('strict source build has no stops', strict.gates.filter((g) => g.level === 'stop').length === 0,
+  strict.gates.filter((g) => g.level === 'stop').map((g) => g.scope + ' ' + g.message).join('\n  '));
 check('section counts', result.stats.total === 120
   && result.stats.bySection.reading === 50
   && result.stats.bySection.listening === 47

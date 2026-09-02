@@ -32,8 +32,9 @@ kenneth-brain/smeag-TOFEL 자료/SET <N> ANWER KEY.docx      정답지
 | AI 가 채운 내용 | `scriptOrigin === 'ai'` · `answerOrigin === 'ai'` |
 | 스크립트·정답지 문서를 안 올림 | 빌드 자체가 막힘 |
 
-`build_set11.mjs` 처럼 명령줄로 짓는 경우도 같은 코드 경로를 탄다 — `stop` 이 하나라도 있으면
-스크립트가 0 이 아닌 값으로 끝난다.
+`tools/build_set<N>.mjs` 로 명령줄에서 짓는 경우도 **같은 잣대**다 — `strictSource: true` 를
+명시적으로 넘기고, `stop` 이 하나라도 있으면 0 이 아닌 값으로 끝난다. 이 둘이 어긋나면
+"명령줄로는 지어지는데 화면에서는 저장이 막히는" 팩이 생기고, 그 팩은 이미 시험에 나간 뒤다.
 
 ## 2. 오디오 — 스크립트로 ElevenLabs 에서 만들고, 스크립트와 100% 맞춘다
 

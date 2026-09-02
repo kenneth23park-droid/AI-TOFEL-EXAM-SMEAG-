@@ -1,4 +1,6 @@
-/* SMEAG StudyGround — tools/build_set11.mjs : SET 11 source docx files -> assets/set11.js. */
+/* SMEAG StudyGround — tools/build_set11.mjs : SET 11 source docx files -> assets/set11.js.
+   세트 만들기 네 관문(원본 그대로 · 음성 대조 · 정답 크로스체크 · 저장 검산)은
+   ../../docs/set-build.md 에 있다. 여기서는 첫 관문과 셋째 관문이 gate 로 걸린다. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,7 +31,10 @@ const questions = await read(FILES.questions);
 const script = await read(FILES.script);
 const answers = await read(FILES.answers);
 
-const out = IMPORT.build({ code: 'SET 11', questions, script, answers });
+/* strictSource — 관리자 화면(admin-set-import.html)과 같은 잣대로 짓는다. 이게 없으면
+   명령줄로 지은 팩만 조용히 느슨해진다: 문서에 없는 보기·정답에서 역산한 타일이
+   들어간 채로 assets/set<N>.js 에 박히고, 그건 화면에서는 저장조차 막히는 팩이다. */
+const out = IMPORT.build({ code: 'SET 11', questions, script, answers, strictSource: true });
 const stop = out.gates.filter((g) => g.level === 'stop');
 if (stop.length) {
   stop.forEach((g) => console.error('STOP [' + g.scope + '] ' + g.message));
