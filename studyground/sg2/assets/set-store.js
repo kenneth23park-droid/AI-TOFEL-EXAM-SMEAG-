@@ -53,9 +53,60 @@
     return n;
   }
 
+  /** 팩 하나의 지문 — 문항 수·문항 id·정답·듣기 음원 경로. 저장 전후를 이것으로 맞댄다. */
+  function fingerprint(pack) {
+    var qs = [], audio = [];
+    (pack && pack.sections || []).forEach(function (sec) {
+      (sec.modules || []).forEach(function (mod) {
+        (mod.blocks || []).forEach(function (b) {
+          if (b.audio) audio.push(b.audio);
+          (b.questions || []).forEach(function (q) {
+            if (q.audio) audio.push(q.audio);
+            qs.push(q.id + '=' + JSON.stringify(q.answer === undefined ? null : q.answer));
+          });
+        });
+      });
+    });
+    return { total: qs.length, questions: qs, audio: audio };
+  }
+
+  /**
+   * 저장된 것이 저장하려던 것과 같은지 되읽어 확인한다.
+   * localStorage 는 조용히 실패하는 자리가 많다 — 용량이 모자라 잘리거나, 시크릿 모드에서
+   * setItem 이 통째로 버려지거나, 다른 탭이 같은 키를 덮어쓴다. put 이 ok 를 돌려준 것만
+   * 믿고 "저장됐다" 고 말하면 정답이 빠진 세트로 시험을 볼 수 있다.
+   * @return {{ok:boolean, problems:string[]}}
+   */
+  function verify(slug, pack) {
+    var problems = [];
+    var back = API.get(slug);
+    if (!back) return { ok: false, problems: ['저장된 세트를 다시 읽지 못했습니다.'] };
+
+    var want = fingerprint(pack), got = fingerprint(back);
+    if (want.total !== got.total) {
+      problems.push('문항 수가 다릅니다 — 저장하려던 ' + want.total + ', 저장된 ' + got.total + '.');
+    }
+    var lost = want.questions.filter(function (k, i) { return got.questions[i] !== k; });
+    if (lost.length) {
+      problems.push(lost.length + ' 문항의 정답이 저장본과 다릅니다: '
+        + lost.slice(0, 5).join(', ') + (lost.length > 5 ? ' 외' : '') + '.');
+    }
+    if (want.audio.length !== got.audio.length) {
+      problems.push('듣기 음원 경로 수가 다릅니다 — ' + want.audio.length + ' → ' + got.audio.length + '.');
+    }
+    var row = null;
+    readIndex().forEach(function (r) { if (r.slug === slug) row = r; });
+    if (!row) problems.push('저장 목록에 이 세트가 없습니다.');
+    else if (row.total !== want.total) problems.push('저장 목록의 문항 수(' + row.total + ')가 팩과 다릅니다.');
+
+    return { ok: problems.length === 0, problems: problems };
+  }
+
   var API = {
     PREFIX: PREFIX,
     globalName: globalName,
+    fingerprint: fingerprint,
+    verify: function (slug, pack) { return verify(String(slug || '').toLowerCase().replace(/[^a-z0-9]/g, ''), pack); },
 
     /** 저장된 세트 목록(최근 저장 순). */
     list: function () {
@@ -97,7 +148,17 @@
         bytes: body.length
       });
       writeIndex(list);
-      return { ok: true, slug: slug };
+
+      /* 저장했다고 말하기 전에 되읽어 본다 — 여기서 걸러야 시험장에서 안 걸린다. */
+      var v = verify(slug, pack);
+      if (!v.ok) {
+        /* 본문이 아예 들어가지 않았으면 목록만 남는다 — 없는 세트를 목록이 광고하지
+           않도록 그 줄은 걷어낸다. 본문이 있는데 내용이 다른 경우는 손대지 않는다:
+           덮어쓰기가 반만 된 것이라 지우면 이전 세트까지 사라진다. */
+        if (!API.get(slug)) writeIndex(readIndex().filter(function (r) { return r.slug !== slug; }));
+        return { ok: false, slug: slug, error: '저장이 끝나지 않았습니다: ' + v.problems.join(' '), problems: v.problems };
+      }
+      return { ok: true, slug: slug, verified: true };
     },
 
     remove: function (slug) {

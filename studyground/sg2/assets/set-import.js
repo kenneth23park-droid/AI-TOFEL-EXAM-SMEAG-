@@ -1328,6 +1328,17 @@
       gate(strictSource ? 'stop' : 'warn', 'answers', unmatched.length + ' questions have no answer attached in the source answer key: ' + unmatched.slice(0, 8).join(', ') + (unmatched.length > 8 ? ' and more' : ''));
     }
 
+    /* ---- 정답지 ↔ 문제지 크로스체크 ----
+       정답을 붙이는 것과, 붙은 정답이 문제지의 그 문항에 실제로 성립하는지는 다른 일이다.
+       정답지가 한 줄 밀리거나 보기 개수가 다르면 여기서만 드러난다. 세트 하나에 대해
+       "문항마다 정답이 하나, 그 정답이 그 문항의 보기 안에 있다" 를 전수로 확인한다. */
+    var crossBad = crossCheckAnswers([reading, listening], unmatched);
+    if (crossBad.length) {
+      gate(strictSource ? 'stop' : 'warn', 'answers',
+        crossBad.length + ' questions do not cross-check against the answer key: '
+          + crossBad.slice(0, 8).join(', ') + (crossBad.length > 8 ? ' and more' : ''));
+    }
+
     if (strictSource) {
       sections.forEach(function (sec) {
         sec.modules.forEach(function (mod) {
@@ -1573,9 +1584,48 @@
     return pack;
   }
 
+  /**
+   * 정답지 ↔ 문제지 크로스체크. 정답을 붙이는 것과, 붙은 정답이 그 문항에서 성립하는지는
+   * 다른 일이다 — 정답지가 한 줄 밀리거나 보기 개수가 다르면 여기서만 드러난다.
+   * "문항마다 정답이 하나, 그 정답이 그 문항의 보기 안에 있다" 를 전수로 확인한다.
+   * @param {Array} sections  reading·listening 처럼 modules 를 가진 섹션들
+   * @param {string[]} [skip] 이미 다른 gate 로 올린 문항 id (정답 없음 등)
+   * @return {string[]} 사람이 읽을 수 있는 어긋남 목록
+   */
+  function crossCheckAnswers(sections, skip) {
+    var bad = [];
+    skip = skip || [];
+    (sections || []).forEach(function (sec) {
+      (sec.modules || []).forEach(function (mod) {
+        (mod.blocks || []).forEach(function (blk) {
+          (blk.questions || []).forEach(function (q) {
+            if (skip.indexOf(q.id) >= 0) return;
+            var a = q.answer;
+            if (q.kind === 'blank') {
+              if (typeof a !== 'string' || !a.trim()) bad.push(q.id + ' (빈칸 정답이 비었음)');
+              return;
+            }
+            /* "Click on the sentence …" 은 보기 목록이 아니라 지문 문장을 고르는 문항이라
+               보기가 없는 것이 정상이다(finalize 의 빈 보기 판정과 같은 규칙). */
+            if (/^click on the sentence/i.test(q.prompt || '')) {
+              if (a === undefined || a === null || a === '') bad.push(q.id + ' (정답이 비었음)');
+              return;
+            }
+            var n = (q.choices || []).length;
+            if (!n) { bad.push(q.id + ' (보기가 없음)'); return; }
+            if (typeof a !== 'number') { bad.push(q.id + ' (정답 "' + a + '" 이 보기 어디에도 없음)'); return; }
+            if (a < 0 || a >= n) bad.push(q.id + ' (정답 번호 ' + (a + 1) + ' 인데 보기는 ' + n + '개)');
+          });
+        });
+      });
+    });
+    return bad;
+  }
+
   return {
     build: build,
     finalize: finalize,       /* set-generate.js 가 같은 조립·검산을 타려고 부른다 */
+    crossCheckAnswers: crossCheckAnswers,
     withHelpers: withHelpers,
     SECTION_ORDER: SECTION_ORDER,
     /* 테스트용 */

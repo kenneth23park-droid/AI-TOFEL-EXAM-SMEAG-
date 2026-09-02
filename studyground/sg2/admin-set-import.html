@@ -9,6 +9,7 @@
   (assets/set-store.js). 저장 즉시 시험 화면 ?set=<코드> 로 열린다.
 
   검산에 걸린 것은 숨기지 않는다 — 멈춤(stop)이 하나라도 있으면 저장 단추가 잠긴다.
+  세트 만들기 네 관문 전체는 ../docs/set-build.md 에 있다.
 
   문서가 없을 때는 AI 가 대신 짓는다(assets/set-generate.js + /api/generate). 모양은
   AI 가 정하지 않는다 — 문항 수도 모듈 구성도 config/blueprint.toefl.json 에서 오고,
@@ -1551,8 +1552,15 @@
          잃었다" 로 읽힌다 — origin 이 이미 무엇으로 지었는지 들고 있으므로 건드리지 않는다. */
       if (names.length) built.pack.summary.sources = names;
     }
+    /* put 은 저장한 뒤 되읽어 대조한다(set-store.js verify) — 문항 수·문항별 정답·음원
+       경로가 저장본과 하나라도 다르면 ok 가 아니다. 반쯤 저장된 세트를 활성화하면
+       정답이 빠진 채로 시험이 열리므로, 실패하면 여기서 끝낸다. */
     var res = STORE.put(slug, built.pack, { title: codeEl.value.trim() });
-    if (!res.ok) { toast(res.error); return; }
+    if (!res.ok) {
+      toast(res.error);
+      document.getElementById('savehint').textContent = res.error;
+      return;
+    }
     STORE.activate(slug, built.pack);
 
     /* 그림은 팩과 따로 간다 — 수 MB 라 localStorage 에 들어가지 않는다(set-media.js). */
@@ -1564,7 +1572,9 @@
         note: built.stats.total + ' questions ' + (o ? ('AI generated · ' + o.provider + '/' + o.model) : 'imported')
       });
     }
-    toast(slug.toUpperCase() + ' saved — it opens at exam-runtime.html?set=' + slug);
+    document.getElementById('savehint').textContent = '';
+    toast(slug.toUpperCase() + ' saved and verified (' + built.stats.total
+      + ' questions read back) — it opens at exam-runtime.html?set=' + slug);
     renderSaved();
     refresh();
   });
