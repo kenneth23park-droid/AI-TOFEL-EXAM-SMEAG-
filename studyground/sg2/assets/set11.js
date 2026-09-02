@@ -378,7 +378,7 @@ window.SMEAG_SET11 = {
                   "kind": "mcq",
                   "prompt": "According to paragraph 2, how do green walls help reduce noise pollution in cities?",
                   "choices": [
-                    "They trap anf redirect sound waves before they travel to surrounding structures.",
+                    "They trap and redirect sound waves before they travel to surrounding structures.",
                     "They create physical barriers that completely block all noise from passing trhough.",
                     "They lower city temperatures through natural shade and cooling effects.",
                     "They replace concrete surfaces with softer materials that muffle vibrations."
