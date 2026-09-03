@@ -408,7 +408,12 @@
 //       20초씩 흘러갔다(SET 11 Listening Module 2 Q12-15). 목록을 세트별로 짓고
 //       (config/offline.set10/set11.json · offline.sets.json), 끊긴 재생은
 //       멈춘 자리부터 이어 붙이도록 고쳤다. 프리캐시 목록이 바뀌었으므로 판올림.
-const VERSION = 'sg-v103';
+// v104: SET 11 Reading 34번 보기 네 줄과 라이팅 조각 교정이 assets/set11.js 에
+//       들어갔는데 판올림을 하지 않았다. 이 파일은 SHELL_ASSETS(cache-first)라
+//       재방문 기기는 캐시된 옛 사본 — 34번 보기가 빈 배열인 판 — 을 계속 읽어
+//       "This question has no choices in the content pack." 만 보았다.
+//       내용만 고치고 VERSION 을 두면 학생 화면은 영영 바뀌지 않는다.
+const VERSION = 'sg-v104';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
