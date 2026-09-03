@@ -312,6 +312,10 @@ screens.forEach(function (s) {
       var r4 = window.SG_STORE.getAnswer(iq.id);
       ok(iq.id + ' 라디오 → 답안 3(Position D)', !!r4 && r4.v === 3, r4 ? String(r4.v) : 'none');
       ok(iq.id + ' 라디오 → 마커 동기화', markers[3].className.indexOf('is-chosen') > 0 && markers[1].className.indexOf('is-chosen') < 0);
+      // 보기 라벨의 A~D 도 지문 마커와 같은 배지로 선다(눈으로 잇기 위함).
+      var optMarks = node.querySelectorAll('span.rd-opt-marker');
+      check(iq.id + ' 보기 배지 수', optMarks.length, 4);
+      check(iq.id + ' 보기 배지 글자', optMarks.map(function (m) { return m.textContent; }).join(''), 'ABCD');
     }
   }
 });

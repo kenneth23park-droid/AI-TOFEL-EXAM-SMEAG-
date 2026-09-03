@@ -614,6 +614,14 @@ body.exam-body {
 .rd-marker.is-chosen .rd-marker-dot { background: var(--brand); color: #fff; border-color: var(--brand); }
 .rd-marker .rd-marker-preview { color: var(--ink-2); font-weight: 600; font-style: italic; }
 .rd-insert-sentence { font-style: italic; margin-bottom: 10px; }
+/* insert 보기의 글자 배지 — 지문 마커와 같은 색·같은 크기로 세운다. */
+.rd-opt-marker {
+  display: inline-block; width: 20px; height: 20px; line-height: 19px;
+  text-align: center; border-radius: 50%; font-size: 12px; font-weight: 850;
+  vertical-align: -4px; background: var(--brand-soft); color: var(--brand-ink);
+  border: 1px solid var(--brand-tint-2);
+}
+.opt.is-chosen .rd-opt-marker { background: var(--brand); color: #fff; border-color: var(--brand); }
 
 /* chat — 말풍선 */
 .rd-chat { display: flex; flex-direction: column; gap: 10px; }

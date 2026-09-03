@@ -467,6 +467,19 @@
     return box;
   }
 
+  /* insert 보기 라벨 — "Position A" 처럼 끝에 선 A~D 를 지문 마커와 같은 배지로 세운다.
+     글자를 못 찾으면 원문 그대로 둔다(문구는 콘텐츠가 정한다). */
+  function optionWithMarker(text) {
+    var span = el('span', 'rd-opt-choice');
+    var raw = String(text === undefined || text === null ? '' : text);
+    var m = /^(.*?)([A-D])(\s*)$/.exec(raw), k, known = false;
+    if (m) { for (k = 0; k < MARKERS.length; k++) { if (MARKERS[k] === m[2]) known = true; } }
+    if (!known) { span.textContent = raw; return span; }
+    span.appendChild(textEl('span', null, m[1]));
+    span.appendChild(textEl('span', 'rd-opt-marker', m[2]));
+    return span;
+  }
+
   /* 문항 카드 1개. mcq/insert 모두 라디오 4지선다이며 값은 선택지 index(숫자)로 저장한다. */
   function questionCard(screen, ctx, q, api) {
     var card = el('div', 'qcard rd-q');
@@ -477,6 +490,7 @@
     if (q.sentence) card.appendChild(textEl('div', 'passage rd-insert-sentence', q.sentence));
 
     var choices = q.choices || [], i;
+    var insert = q.kind === 'insert';
     var saved = savedAnswer(q.id);
     for (i = 0; i < choices.length; i++) {
       var lab = el('label', 'opt');
@@ -497,7 +511,8 @@
         };
       })(i, radio);
       lab.appendChild(radio);
-      lab.appendChild(textEl('span', null, choices[i]));
+      // insert 보기는 지문의 마커와 같은 색 배지를 달아 A~D 를 눈으로 바로 잇게 한다.
+      lab.appendChild(insert ? optionWithMarker(choices[i]) : textEl('span', null, choices[i]));
       card.appendChild(lab);
       if (!api.radios[q.id]) api.radios[q.id] = [];
       api.radios[q.id].push(radio);
