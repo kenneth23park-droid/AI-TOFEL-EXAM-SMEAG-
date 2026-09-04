@@ -1,0 +1,289 @@
+{
+ "set": "SET12",
+ "label": "NEW TOEFL SET 12",
+ "rev": "19293fc33c6e",
+ "count": 56,
+ "bytes": 13809890,
+ "files": [
+  {
+   "u": "media/audio/set12/l1-q01.mp3",
+   "b": 48527,
+   "h": "9a4107f8822f"
+  },
+  {
+   "u": "media/audio/set12/l1-q02.mp3",
+   "b": 57722,
+   "h": "087554245dfc"
+  },
+  {
+   "u": "media/audio/set12/l1-q03.mp3",
+   "b": 43511,
+   "h": "1009f2d52d38"
+  },
+  {
+   "u": "media/audio/set12/l1-q04.mp3",
+   "b": 42675,
+   "h": "bb8cdbb8b270"
+  },
+  {
+   "u": "media/audio/set12/l1-q05.mp3",
+   "b": 36824,
+   "h": "664adba0c3eb"
+  },
+  {
+   "u": "media/audio/set12/l1-q06.mp3",
+   "b": 49363,
+   "h": "82375a4fddf5"
+  },
+  {
+   "u": "media/audio/set12/l1-q07.mp3",
+   "b": 39750,
+   "h": "12c4429b4a93"
+  },
+  {
+   "u": "media/audio/set12/l1-q08.mp3",
+   "b": 60648,
+   "h": "4f8b747eb9ea"
+  },
+  {
+   "u": "media/audio/set12/l1-q09.mp3",
+   "b": 58140,
+   "h": "03b8fd2dedb4"
+  },
+  {
+   "u": "media/audio/set12/l1-q10.mp3",
+   "b": 45601,
+   "h": "9eac99f8d26e"
+  },
+  {
+   "u": "media/audio/set12/l1-q11.mp3",
+   "b": 40586,
+   "h": "cfd9986cdd14"
+  },
+  {
+   "u": "media/audio/set12/l1-q12.mp3",
+   "b": 64409,
+   "h": "2d03c05130c5"
+  },
+  {
+   "u": "media/audio/set12/l1-q13-14.mp3",
+   "b": 390249,
+   "h": "514b898813f8"
+  },
+  {
+   "u": "media/audio/set12/l1-q15-16.mp3",
+   "b": 418052,
+   "h": "8edd7f9d836c"
+  },
+  {
+   "u": "media/audio/set12/l1-q17-18.mp3",
+   "b": 391531,
+   "h": "4f8a9eb35b95"
+  },
+  {
+   "u": "media/audio/set12/l1-q19-20.mp3",
+   "b": 371191,
+   "h": "ff75c39af981"
+  },
+  {
+   "u": "media/audio/set12/l1-q21-22.mp3",
+   "b": 445588,
+   "h": "569128f1034f"
+  },
+  {
+   "u": "media/audio/set12/l1-q23-24.mp3",
+   "b": 570140,
+   "h": "4ad7df58f749"
+  },
+  {
+   "u": "media/audio/set12/l1-q25-28.mp3",
+   "b": 1799358,
+   "h": "cca7a103b30c"
+  },
+  {
+   "u": "media/audio/set12/l1-q29-32.mp3",
+   "b": 1438241,
+   "h": "8396c7730ec8"
+  },
+  {
+   "u": "media/audio/set12/l2-q01.mp3",
+   "b": 44347,
+   "h": "83e0b569c0af"
+  },
+  {
+   "u": "media/audio/set12/l2-q02.mp3",
+   "b": 38078,
+   "h": "e4d9e6ae9758"
+  },
+  {
+   "u": "media/audio/set12/l2-q03.mp3",
+   "b": 52288,
+   "h": "44763dd753aa"
+  },
+  {
+   "u": "media/audio/set12/l2-q04-05.mp3",
+   "b": 402073,
+   "h": "00a7d8dca4a4"
+  },
+  {
+   "u": "media/audio/set12/l2-q06-07.mp3",
+   "b": 547944,
+   "h": "816a680d3fc7"
+  },
+  {
+   "u": "media/audio/set12/l2-q08-11.mp3",
+   "b": 1470006,
+   "h": "150558119624"
+  },
+  {
+   "u": "media/audio/set12/l2-q12-15.mp3",
+   "b": 1591214,
+   "h": "d10ee7ff4ce0"
+  },
+  {
+   "u": "media/audio/set12/s1-instructions.mp3",
+   "b": 81128,
+   "h": "f5e0c4c4e2a0"
+  },
+  {
+   "u": "media/audio/set12/s1-q1.mp3",
+   "b": 51035,
+   "h": "11f176242260"
+  },
+  {
+   "u": "media/audio/set12/s1-q2.mp3",
+   "b": 47273,
+   "h": "13b991c210e3"
+  },
+  {
+   "u": "media/audio/set12/s1-q3.mp3",
+   "b": 75276,
+   "h": "31ee02d30c2c"
+  },
+  {
+   "u": "media/audio/set12/s1-q4.mp3",
+   "b": 66499,
+   "h": "aa789803b4cb"
+  },
+  {
+   "u": "media/audio/set12/s1-q5.mp3",
+   "b": 94084,
+   "h": "afc4743e128d"
+  },
+  {
+   "u": "media/audio/set12/s1-q6.mp3",
+   "b": 101190,
+   "h": "77ecd4db08bd"
+  },
+  {
+   "u": "media/audio/set12/s1-q7.mp3",
+   "b": 113311,
+   "h": "e50153142382"
+  },
+  {
+   "u": "media/audio/set12/s2-instructions.mp3",
+   "b": 220308,
+   "h": "366f884070e2"
+  },
+  {
+   "u": "media/audio/set12/s2-q1.mp3",
+   "b": 249983,
+   "h": "a517d8782ea2"
+  },
+  {
+   "u": "media/audio/set12/s2-q2.mp3",
+   "b": 158450,
+   "h": "f44735c949c6"
+  },
+  {
+   "u": "media/audio/set12/s2-q3.mp3",
+   "b": 135462,
+   "h": "49f44643078d"
+  },
+  {
+   "u": "media/audio/set12/s2-q4.mp3",
+   "b": 203172,
+   "h": "10a5dc92f3de"
+  },
+  {
+   "u": "media/pictures/TOEFL Listening Image (2 People).webp",
+   "b": 49380,
+   "h": "522171776930"
+  },
+  {
+   "u": "media/pictures/TOEFL Listening Image (2 Persons).webp",
+   "b": 27576,
+   "h": "2817fd07b520"
+  },
+  {
+   "u": "media/pictures/TOEFL Listening Image (Academic, Single female).webp",
+   "b": 34586,
+   "h": "b2f10842b53e"
+  },
+  {
+   "u": "media/pictures/TOEFL Listening Image (Single female 2).webp",
+   "b": 67288,
+   "h": "afb252829de6"
+  },
+  {
+   "u": "media/pictures/TOEFL Listening Image (Single female).webp",
+   "b": 29154,
+   "h": "f821d3ad532b"
+  },
+  {
+   "u": "media/pictures/TOEFL Listening Image (Single male 2).webp",
+   "b": 67076,
+   "h": "708d1ebec3f9"
+  },
+  {
+   "u": "media/pictures/TOEFL Listening Image (Single male 3).webp",
+   "b": 38456,
+   "h": "1b54f70ab655"
+  },
+  {
+   "u": "media/pictures/TOEFL Listening Image (Single male).webp",
+   "b": 49858,
+   "h": "f113d0ee6310"
+  },
+  {
+   "u": "media/pictures/set12/image1.png",
+   "b": 142729,
+   "h": "7100bc2f6f17"
+  },
+  {
+   "u": "media/pictures/set12/image2.png",
+   "b": 142142,
+   "h": "bdb1eb0de4e0"
+  },
+  {
+   "u": "media/pictures/set12/image3.png",
+   "b": 141569,
+   "h": "0182467f9209"
+  },
+  {
+   "u": "media/pictures/set12/image4.png",
+   "b": 151120,
+   "h": "b42cfb43f8c0"
+  },
+  {
+   "u": "media/pictures/set12/image5.png",
+   "b": 150751,
+   "h": "62d813f8a7c1"
+  },
+  {
+   "u": "media/pictures/set12/image6.png",
+   "b": 147323,
+   "h": "bb019e2e339c"
+  },
+  {
+   "u": "media/pictures/set12/image7.png",
+   "b": 135337,
+   "h": "dbc0de6fff6b"
+  },
+  {
+   "u": "media/pictures/set12/image8.png",
+   "b": 280318,
+   "h": "56b623a5e8c1"
+  }
+ ]
+}

@@ -413,7 +413,12 @@
 //       재방문 기기는 캐시된 옛 사본 — 34번 보기가 빈 배열인 판 — 을 계속 읽어
 //       "This question has no choices in the content pack." 만 보았다.
 //       내용만 고치고 VERSION 을 두면 학생 화면은 영영 바뀌지 않는다.
-const VERSION = 'sg-v104';
+// v105: SET 12 가 저장소에 들어왔다. 여태 SET 12 는 음성·배역표만 커밋돼 있고
+//       문항 팩(assets/set12.js)이 없어, 가져온 그 브라우저의 localStorage 밖에서는
+//       존재하지 않는 세트였다 — 로그인 계정 목록에도, 시험 라이브러리에도, 리뷰에도
+//       뜨지 않았다. 팩을 tools/build_set12.mjs 로 지어 커밋하고 아홉 자리에 등록한다.
+//       프리캐시 목록이 바뀌었으므로 판올림.
+const VERSION = 'sg-v105';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -463,6 +468,7 @@ const SHELL_ASSETS = [
   // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.
   'assets/offline-prep.js', 'config/offline.sets.json',
   'config/offline.set9.json', 'config/offline.set10.json', 'config/offline.set11.json',
+  'config/offline.set12.json',
 
   // 전체화면 자동 진입 · 화면 맞춤 — 오프라인 시험장에서도 첫 화면부터 적용돼야 한다.
   'assets/sg-fullscreen.js',
@@ -474,7 +480,7 @@ const SHELL_ASSETS = [
   // 검사기는 오프라인이면 조용히 물러나므로 프리캐시해도 시험장에서 걸리지 않는다.
   'assets/build-version.js', 'assets/sg-update-check.js',
 
-  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js', 'assets/set11.js',
+  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js', 'assets/set11.js', 'assets/set12.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',
   'manifest.webmanifest',
 

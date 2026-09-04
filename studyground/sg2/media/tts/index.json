@@ -1146,5 +1146,290 @@
       "GB-Oliver"
     ],
     "segments": 1
+  },
+  "set12-l1-q01": {
+    "file": "media/tts/set12-l1-q01.mp3",
+    "voices": [
+      "US-Ava"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q02": {
+    "file": "media/tts/set12-l1-q02.mp3",
+    "voices": [
+      "US-Liam"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q03": {
+    "file": "media/tts/set12-l1-q03.mp3",
+    "voices": [
+      "US-Mia"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q04": {
+    "file": "media/tts/set12-l1-q04.mp3",
+    "voices": [
+      "US-Mason"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q05": {
+    "file": "media/tts/set12-l1-q05.mp3",
+    "voices": [
+      "GB-Alice"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q06": {
+    "file": "media/tts/set12-l1-q06.mp3",
+    "voices": [
+      "GB-Henry"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q07": {
+    "file": "media/tts/set12-l1-q07.mp3",
+    "voices": [
+      "AU-Lily"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q08": {
+    "file": "media/tts/set12-l1-q08.mp3",
+    "voices": [
+      "US-Noah"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q09": {
+    "file": "media/tts/set12-l1-q09.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q10": {
+    "file": "media/tts/set12-l1-q10.mp3",
+    "voices": [
+      "US-Ethan"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q11": {
+    "file": "media/tts/set12-l1-q11.mp3",
+    "voices": [
+      "US-Zoe"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q12": {
+    "file": "media/tts/set12-l1-q12.mp3",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q13-14": {
+    "file": "media/tts/set12-l1-q13-14.mp3",
+    "voices": [
+      "US-Liam",
+      "US-Emma"
+    ],
+    "segments": 7
+  },
+  "set12-l1-q15-16": {
+    "file": "media/tts/set12-l1-q15-16.mp3",
+    "voices": [
+      "US-Ethan",
+      "US-Mia"
+    ],
+    "segments": 6
+  },
+  "set12-l1-q17-18": {
+    "file": "media/tts/set12-l1-q17-18.mp3",
+    "voices": [
+      "US-Mason",
+      "US-Zoe"
+    ],
+    "segments": 7
+  },
+  "set12-l1-q19-20": {
+    "file": "media/tts/set12-l1-q19-20.mp3",
+    "voices": [
+      "US-Liam"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q21-22": {
+    "file": "media/tts/set12-l1-q21-22.mp3",
+    "voices": [
+      "US-Ethan"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q23-24": {
+    "file": "media/tts/set12-l1-q23-24.mp3",
+    "voices": [
+      "US-Mason"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q25-28": {
+    "file": "media/tts/set12-l1-q25-28.mp3",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segments": 1
+  },
+  "set12-l1-q29-32": {
+    "file": "media/tts/set12-l1-q29-32.mp3",
+    "voices": [
+      "GB-Henry"
+    ],
+    "segments": 1
+  },
+  "set12-l2-q01": {
+    "file": "media/tts/set12-l2-q01.mp3",
+    "voices": [
+      "US-Ava"
+    ],
+    "segments": 1
+  },
+  "set12-l2-q02": {
+    "file": "media/tts/set12-l2-q02.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-l2-q03": {
+    "file": "media/tts/set12-l2-q03.mp3",
+    "voices": [
+      "GB-Ivy"
+    ],
+    "segments": 1
+  },
+  "set12-l2-q04-05": {
+    "file": "media/tts/set12-l2-q04-05.mp3",
+    "voices": [
+      "US-Noah",
+      "GB-Ivy"
+    ],
+    "segments": 6
+  },
+  "set12-l2-q06-07": {
+    "file": "media/tts/set12-l2-q06-07.mp3",
+    "voices": [
+      "US-Mason",
+      "AU-Lily"
+    ],
+    "segments": 8
+  },
+  "set12-l2-q08-11": {
+    "file": "media/tts/set12-l2-q08-11.mp3",
+    "voices": [
+      "US-Ethan"
+    ],
+    "segments": 1
+  },
+  "set12-l2-q12-15": {
+    "file": "media/tts/set12-l2-q12-15.mp3",
+    "voices": [
+      "US-Mia"
+    ],
+    "segments": 1
+  },
+  "set12-s1-instructions": {
+    "file": "media/tts/set12-s1-instructions.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-s1-q1": {
+    "file": "media/tts/set12-s1-q1.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-s1-q2": {
+    "file": "media/tts/set12-s1-q2.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-s1-q3": {
+    "file": "media/tts/set12-s1-q3.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-s1-q4": {
+    "file": "media/tts/set12-s1-q4.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-s1-q5": {
+    "file": "media/tts/set12-s1-q5.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-s1-q6": {
+    "file": "media/tts/set12-s1-q6.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-s1-q7": {
+    "file": "media/tts/set12-s1-q7.mp3",
+    "voices": [
+      "US-Emma"
+    ],
+    "segments": 1
+  },
+  "set12-s2-instructions": {
+    "file": "media/tts/set12-s2-instructions.mp3",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segments": 1
+  },
+  "set12-s2-q1": {
+    "file": "media/tts/set12-s2-q1.mp3",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segments": 1
+  },
+  "set12-s2-q2": {
+    "file": "media/tts/set12-s2-q2.mp3",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segments": 1
+  },
+  "set12-s2-q3": {
+    "file": "media/tts/set12-s2-q3.mp3",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segments": 1
+  },
+  "set12-s2-q4": {
+    "file": "media/tts/set12-s2-q4.mp3",
+    "voices": [
+      "GB-Oliver"
+    ],
+    "segments": 1
   }
 }

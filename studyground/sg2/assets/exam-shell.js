@@ -42,10 +42,10 @@ window.SG_RUNTIME = (function () {
 
   /* 컴파일러(exam-compile.js)·타이밍 로더(exam-timing.js)가 아직 없어도 셸이 동작하도록
      선택적으로 로드한다. 404 여도 진행한다(F12: 시험을 멈추지 않는다). */
-  /* 어떤 콘텐츠 팩을 실을지 — `?set=set1|set9|set10|set11`, 없으면 `?testId=` 에서 유추한다.
+  /* 어떤 콘텐츠 팩을 실을지 — `?set=set1|set9|set10|set11|set12`, 없으면 `?testId=` 에서 유추한다.
      선택한 세트가 없으면 다른 세트로 조용히 떨어뜨리지 않는다.
      exam-engine.js 의 parseUrl 은 이 파라미터를 모르므로 여기서 직접 읽는다. */
-  var SET_IDS = { set1: 'SMEAG_SET1', set9: 'SMEAG_SET9', set10: 'SMEAG_SET10', set11: 'SMEAG_SET11' };
+  var SET_IDS = { set1: 'SMEAG_SET1', set9: 'SMEAG_SET9', set10: 'SMEAG_SET10', set11: 'SMEAG_SET11', set12: 'SMEAG_SET12' };
 
   /* 업로드로 만든 세트(admin-set-import.html)는 저장소에 커밋된 파일이 없고
      assets/set-store.js 가 부팅할 때 window.SMEAG_<SLUG> 로 올린다. 그래서 여기서는
@@ -58,6 +58,7 @@ window.SG_RUNTIME = (function () {
      T-016 은 SET 1(=NT-016), T-009 는 SET 9, T-010 / SET10 은 SET 10 이다. */
   function setFromTestId(testId) {
     var t = String(testId || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (/(^|[A-Z])0*12$/.test(t) || t === 'SET12') return 'set12';
     if (/(^|[A-Z])0*11$/.test(t) || t === 'SET11') return 'set11';
     if (/(^|[A-Z])0*10$/.test(t) || t === 'SET10') return 'set10';
     if (/(^|[A-Z])0*9$/.test(t) || t === 'SET9') return 'set9';

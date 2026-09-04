@@ -1,0 +1,647 @@
+{
+  "note": "verify_audio.py 신선도 기준. 스크립트/음성정책 해시 + 계층3 판정. 매니페스트별로 따로 둔다(한 폴더를 두 매니페스트가 선언할 수 있다). 손으로 고치지 말고 tools/audio_gate.py 로 다시 세워라.",
+  "manifest": ".verify-manifest.tts.json",
+  "sigVersion": 3,
+  "items": {
+    "set12-l1-q01": {
+      "scriptHash": "a11bada3aedd62ddabdb341d86448d5018263a3e904ce6519b561aa8a24982a2",
+      "sigVersion": 3,
+      "bytes": 48527,
+      "durationSec": 2.97,
+      "audioSha256": "9a4107f8822f67a54ed1b3f9c1ba88b8bc0280ffb146b1b334ea49e3e871b23b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where is the guest lecture going to take place?",
+        "audioSha256": "9a4107f8822f67a54ed1b3f9c1ba88b8bc0280ffb146b1b334ea49e3e871b23b",
+        "scriptHash": "a11bada3aedd62ddabdb341d86448d5018263a3e904ce6519b561aa8a24982a2"
+      }
+    },
+    "set12-l1-q02": {
+      "scriptHash": "75176172b98412b5cb5d2af0ecebbbfad51469604d73f514bd771c39519bf6b3",
+      "sigVersion": 3,
+      "bytes": 57722,
+      "durationSec": 3.53,
+      "audioSha256": "087554245dfc8a7402c9fac4f0bd81c30ca40156583cf57c7949598f76638216",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Did you find last week's Science Seminar useful?",
+        "audioSha256": "087554245dfc8a7402c9fac4f0bd81c30ca40156583cf57c7949598f76638216",
+        "scriptHash": "75176172b98412b5cb5d2af0ecebbbfad51469604d73f514bd771c39519bf6b3"
+      }
+    },
+    "set12-l1-q03": {
+      "scriptHash": "586ddb7d30ed5bfe13f374f51d1782e34f31fed27f6d206e2264076a0227d709",
+      "sigVersion": 3,
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "1009f2d52d3857d0d45a7c8db987229996c7277081f72029f97ff0315786fca7",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Still tied up with that group assignment?",
+        "audioSha256": "1009f2d52d3857d0d45a7c8db987229996c7277081f72029f97ff0315786fca7",
+        "scriptHash": "586ddb7d30ed5bfe13f374f51d1782e34f31fed27f6d206e2264076a0227d709"
+      }
+    },
+    "set12-l1-q04": {
+      "scriptHash": "0cac3bb39da7cfd48e6a21cfdf2e38cf84149a101d11de8e62edbafce04057ce",
+      "sigVersion": 3,
+      "bytes": 42675,
+      "durationSec": 2.6,
+      "audioSha256": "bb8cdbb8b2700c219bf06ebd8a1cbd0ed113f49be6bbcf76c9a2356b800777e4",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You've finished your research paper, haven't you?",
+        "audioSha256": "bb8cdbb8b2700c219bf06ebd8a1cbd0ed113f49be6bbcf76c9a2356b800777e4",
+        "scriptHash": "0cac3bb39da7cfd48e6a21cfdf2e38cf84149a101d11de8e62edbafce04057ce"
+      }
+    },
+    "set12-l1-q05": {
+      "scriptHash": "e05aed626f57bfe351f0e2ec0ea024d56ef647d6b559691a184c027bfe60229c",
+      "sigVersion": 3,
+      "bytes": 36824,
+      "durationSec": 2.23,
+      "audioSha256": "664adba0c3eb640e7b4677a21f11207c8afff556904080659c7d8e21d2b8dc88",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Which building is your class in?",
+        "audioSha256": "664adba0c3eb640e7b4677a21f11207c8afff556904080659c7d8e21d2b8dc88",
+        "scriptHash": "e05aed626f57bfe351f0e2ec0ea024d56ef647d6b559691a184c027bfe60229c"
+      }
+    },
+    "set12-l1-q06": {
+      "scriptHash": "6d3282bc24f534241d9c4bd7e3e180fbf2f126949ea2802f0e252f9487497d5d",
+      "sigVersion": 3,
+      "bytes": 49363,
+      "durationSec": 3.02,
+      "audioSha256": "82375a4fddf51dacd3a47801f438f603f4263a8d0e3d229a4f5bce49ed37d22b",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.1111,
+        "backend": "faster_whisper",
+        "reason": "WER 11.1% but only 1 word on a 9-word segment — short-segment rule, queue for a human listen",
+        "transcript": "How do I get to the Student Health Centre?",
+        "audioSha256": "82375a4fddf51dacd3a47801f438f603f4263a8d0e3d229a4f5bce49ed37d22b",
+        "scriptHash": "6d3282bc24f534241d9c4bd7e3e180fbf2f126949ea2802f0e252f9487497d5d"
+      }
+    },
+    "set12-l1-q07": {
+      "scriptHash": "a0c266cb78e591d75a1a91597fcfad7d23f37667b3f7e105bd794f08b271a26d",
+      "sigVersion": 3,
+      "bytes": 39750,
+      "durationSec": 2.41,
+      "audioSha256": "12c4429b4a934878079a0b6d8f8b4a603c9c5cc1847fae6e7171c701dd59a2d0",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Can you give me a ride to the airport?",
+        "audioSha256": "12c4429b4a934878079a0b6d8f8b4a603c9c5cc1847fae6e7171c701dd59a2d0",
+        "scriptHash": "a0c266cb78e591d75a1a91597fcfad7d23f37667b3f7e105bd794f08b271a26d"
+      }
+    },
+    "set12-l1-q08": {
+      "scriptHash": "06973c3a4d642d0dc9bc2d71b4bf4cd3f4f02199bfacbdd5036db557a295b944",
+      "sigVersion": 3,
+      "bytes": 60648,
+      "durationSec": 3.72,
+      "audioSha256": "4f8b747eb9eae0ae4e8f2b6ace20b4fd9dbdd97fa2c1a482f9cac9f31d96d815",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Do you know what time the campus bookstore closes?",
+        "audioSha256": "4f8b747eb9eae0ae4e8f2b6ace20b4fd9dbdd97fa2c1a482f9cac9f31d96d815",
+        "scriptHash": "06973c3a4d642d0dc9bc2d71b4bf4cd3f4f02199bfacbdd5036db557a295b944"
+      }
+    },
+    "set12-l1-q09": {
+      "scriptHash": "3cd19426c8e5398356ff27a26f0cb5d23738ed6caad1283b675a0d18382a9c20",
+      "sigVersion": 3,
+      "bytes": 58140,
+      "durationSec": 3.58,
+      "audioSha256": "03b8fd2dedb4d8980bc8109992103db03452749cd393a006fd7f6843b1de769b",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "The campus shuttle hasn't been running on time lately.",
+        "audioSha256": "03b8fd2dedb4d8980bc8109992103db03452749cd393a006fd7f6843b1de769b",
+        "scriptHash": "3cd19426c8e5398356ff27a26f0cb5d23738ed6caad1283b675a0d18382a9c20"
+      }
+    },
+    "set12-l1-q10": {
+      "scriptHash": "dde4dae5e6ddaf1fc4b002fa037b170116f49acf77e1502b5f1bdb242f5dce5c",
+      "sigVersion": 3,
+      "bytes": 45601,
+      "durationSec": 2.79,
+      "audioSha256": "9eac99f8d26e1eac0dbbe42d3a8a908ccf5f2c72e6743fd9627a1c32adbe4f0f",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "isn't the campus pool closed for maintenance.",
+        "audioSha256": "9eac99f8d26e1eac0dbbe42d3a8a908ccf5f2c72e6743fd9627a1c32adbe4f0f",
+        "scriptHash": "dde4dae5e6ddaf1fc4b002fa037b170116f49acf77e1502b5f1bdb242f5dce5c"
+      }
+    },
+    "set12-l1-q11": {
+      "scriptHash": "8acecf76fecd1da2520736f6c73851136a45cfcf2a54a11fd8baf877b49402c5",
+      "sigVersion": 3,
+      "bytes": 40586,
+      "durationSec": 2.46,
+      "audioSha256": "cfd9986cdd14c74f50289c2270a93f04efeba0b442f557560b2cca30e178c89f",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Why don't we grab dinner after the movie?",
+        "audioSha256": "cfd9986cdd14c74f50289c2270a93f04efeba0b442f557560b2cca30e178c89f",
+        "scriptHash": "8acecf76fecd1da2520736f6c73851136a45cfcf2a54a11fd8baf877b49402c5"
+      }
+    },
+    "set12-l1-q12": {
+      "scriptHash": "a4c5e9260d86147b8a3194d86279fb829b2fccc62bdc7e87e08bb3599efe3bda",
+      "sigVersion": 3,
+      "bytes": 64409,
+      "durationSec": 3.95,
+      "audioSha256": "2d03c05130c51630e8b82f31de3abdaed2fe5e5cab0ead82e320aa559d99caeb",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you heard back from the mechanic about your car?",
+        "audioSha256": "2d03c05130c51630e8b82f31de3abdaed2fe5e5cab0ead82e320aa559d99caeb",
+        "scriptHash": "a4c5e9260d86147b8a3194d86279fb829b2fccc62bdc7e87e08bb3599efe3bda"
+      }
+    },
+    "set12-l1-q13-14": {
+      "scriptHash": "5d8ffac6b93ea6ff2f7ab94875e8e7245a15733e5c3f302ca95895ef3ff03dfb",
+      "sigVersion": 3,
+      "bytes": 390249,
+      "durationSec": 38.34,
+      "audioSha256": "514b898813f83b83d97b591993fdf1169a0621d75a6c7b1219c7163c2d21eaad",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0084,
+        "backend": "faster_whisper",
+        "reason": "WER 0.8%",
+        "transcript": "You mentioned you tried that new Thai restaurant with your coworkers last Friday. How was it? Yeah, we went to the one on Baker Street. It was nice just getting out of the office for a change. That's great. How was the food? It was pretty good, actually. There were some dishes I'd never tried before, which was a pleasant surprise. I've been wanting to try it too. Is it worth making a reservation? Hmm, I'm not sure I'd go out of my way for it. If someone asked me to go again, I'd probably just suggest ordering takeout instead. You'd save time and money that way. That makes sense. I've been doing that with most places lately anyway.",
+        "audioSha256": "514b898813f83b83d97b591993fdf1169a0621d75a6c7b1219c7163c2d21eaad",
+        "scriptHash": "5d8ffac6b93ea6ff2f7ab94875e8e7245a15733e5c3f302ca95895ef3ff03dfb"
+      }
+    },
+    "set12-l1-q15-16": {
+      "scriptHash": "61a4fad45a9bfe88f4fcc3b79ff6cb130ac6e30d42e054cc2e0b8ddc009a0028",
+      "sigVersion": 3,
+      "bytes": 418052,
+      "durationSec": 39.48,
+      "audioSha256": "8edd7f9d836c3d529c4806bfa74913af6e0fbe1eec68635be34e1a0e767fbe9a",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Didn't you start using some kind of language learning app a couple of weeks ago? How's that going? Yeah, it's actually been really useful. I feel like my vocabulary has improved quite a bit since I started. That's impressive. I've been wanting to brush up on my Spanish. What do you like about it the most? Definitely the interactive conversation exercises. They simulate real dialogues. So it feels like you're actually practicing with someone. Sounds great. Any complaints? The only thing is the push notifications. They pop up way too often, and it gets a bit irritating. But aside from that, I'd say it's worth trying.",
+        "audioSha256": "8edd7f9d836c3d529c4806bfa74913af6e0fbe1eec68635be34e1a0e767fbe9a",
+        "scriptHash": "61a4fad45a9bfe88f4fcc3b79ff6cb130ac6e30d42e054cc2e0b8ddc009a0028"
+      }
+    },
+    "set12-l1-q17-18": {
+      "scriptHash": "c5ff4604baae1bae0ef9e916e1c7b225bf30b0d6526dc18a6568d5778f42542f",
+      "sigVersion": 3,
+      "bytes": 391531,
+      "durationSec": 41.27,
+      "audioSha256": "4f8a9eb35b95ce09f01217957c36f625fba29cf65301c4b14203d5537b7ed2aa",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "So, got any fun plans coming up? Yeah, actually. A group of old college friends and I are doing a camping trip up in the mountains next month. I'm really looking forward to catching up with everyone. But now that I think about it, I really need a pair of decent hiking boots. Oh, you should try that outdoor gear shop on Pine Avenue. Trailhead Outfitters. Yeah, what's it like? They've got an excellent variety of brands and they do a proper fitting where they check your arch and everything to make sure the boots are right for you. Are the prices okay? Totally fair. My sister picked up a pair there before her backpacking trip and she said they were comfortable right out of the box. She couldn't stop raving about the service either.",
+        "audioSha256": "4f8a9eb35b95ce09f01217957c36f625fba29cf65301c4b14203d5537b7ed2aa",
+        "scriptHash": "c5ff4604baae1bae0ef9e916e1c7b225bf30b0d6526dc18a6568d5778f42542f"
+      }
+    },
+    "set12-l1-q19-20": {
+      "scriptHash": "90aa3205105e1560eda4d20fca3a3d238af4f22644f48b29555585e6563381a2",
+      "sigVersion": 3,
+      "bytes": 371191,
+      "durationSec": 23.13,
+      "audioSha256": "ff75c39af9811807401f1df762548512251919d710c68f8a8a698a3c15ed4324",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Class, one quick thing before we start. I've noticed some of you use laptops during lecture, and that's perfectly fine. I understand you prefer typing your notes. I won't restrict that. But I do need you to silence all notifications. I record these lectures and upload them for review, and the constant pinging keeps getting picked up by the microphone. So use your devices however you like. Just make sure they're on mute.",
+        "audioSha256": "ff75c39af9811807401f1df762548512251919d710c68f8a8a698a3c15ed4324",
+        "scriptHash": "90aa3205105e1560eda4d20fca3a3d238af4f22644f48b29555585e6563381a2"
+      }
+    },
+    "set12-l1-q21-22": {
+      "scriptHash": "a22eea7306fb60344ae878fc537d668d816e838aa1a56c1ab484dcf0189a0405",
+      "sigVersion": 3,
+      "bytes": 445588,
+      "durationSec": 27.77,
+      "audioSha256": "569128f1034f43a923f5272a93dc70f8e451a7ef05ea82f50dae4d8dfe4ae29a",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0256,
+        "backend": "faster_whisper",
+        "reason": "WER 2.6% — queue for a human listen",
+        "transcript": "Attention, everyone. I have an important update about our financial aid procedures. Starting next month, all scholarship applications must be submitted through a new online portal. Paper forms will no longer be accepted. The financial aid office has also extended its weekday hours until 7 p.m. to better accommodate students' schedules. Please visit the office website and create your portal account before the transition date. If you have any questions, stop by the office or call our helpline.",
+        "audioSha256": "569128f1034f43a923f5272a93dc70f8e451a7ef05ea82f50dae4d8dfe4ae29a",
+        "scriptHash": "a22eea7306fb60344ae878fc537d668d816e838aa1a56c1ab484dcf0189a0405"
+      }
+    },
+    "set12-l1-q23-24": {
+      "scriptHash": "2fa1cb50634634510cc0549d67eb57d11d337cd6a3eed193c369522390f602f2",
+      "sigVersion": 3,
+      "bytes": 570140,
+      "durationSec": 35.57,
+      "audioSha256": "4ad7df58f7494b1897dc9718cf7ced40105a894d811625727af1e60f3669f948",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0111,
+        "backend": "faster_whisper",
+        "reason": "WER 1.1%",
+        "transcript": "Hey everyone. Our campus environmental action club is hosting a park restoration event this Saturday. We'll gather at two o'clock by the science building and spend three hours planting trees and fixing trails at Riverside Park. Everyone's welcome, students and local residents alike, and volunteers get snacks and a commemorative wristband. Also, we're launching our first inner university volunteer workshop next month where student groups from three nearby campuses will exchange best practices for organizing park cleanups, tree planting drives, and invasive species removal. Hope to see you all involved.",
+        "audioSha256": "4ad7df58f7494b1897dc9718cf7ced40105a894d811625727af1e60f3669f948",
+        "scriptHash": "2fa1cb50634634510cc0549d67eb57d11d337cd6a3eed193c369522390f602f2"
+      }
+    },
+    "set12-l1-q25-28": {
+      "scriptHash": "6e4bc76abe732fd2bf41ef2f7f6e871d0e746fb35b37fa7047be2559b62e1fa4",
+      "sigVersion": 3,
+      "bytes": 1799358,
+      "durationSec": 112.38,
+      "audioSha256": "cca7a103b30cdaf5794b0910a2a9b09fbd1d3eaf791b97b8a19caf87c99e2c8e",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0085,
+        "backend": "faster_whisper",
+        "reason": "WER 0.8%",
+        "transcript": "So today, I want to talk about William Grant Still, an American composer sometimes called the Dean of African American Composers. Still grew up in Little Rock, Arkansas. His father, who was a local bandmaster, passed away when Still was just an infant. But his stepfather really nurtured his love of music. He bought recordings of classical operas for the boy and took him to live performances regularly. That early exposure made a huge impression. Still eventually studied at the Oberlin Conservatory of Music, where he learned composition and theory rooted in the European classical tradition. He also studied privately with the avant-garde French composer, Edgard Vérez. So he had this really interesting blend of influences, traditional European form on one hand, and experimental modern techniques on the other. Now, his most celebrated work is the Afro-American Symphony, completed in 1931. This piece is warm and lyrical. It draws heavily on blues melodies and spirituals, and there's a beautiful balance between those folk elements and the formal structure of a classical symphony. It really captures the emotional landscape of everyday African-American life, but still also explored more dramatic territory. His ballet, Sargi, set in Africa, was composed after extensive study of African musical traditions. It uses layered percussion and choral singing to depict a ceremonial scene. Critics regarded it as a powerful expression of cultural heritage and identity.",
+        "audioSha256": "cca7a103b30cdaf5794b0910a2a9b09fbd1d3eaf791b97b8a19caf87c99e2c8e",
+        "scriptHash": "6e4bc76abe732fd2bf41ef2f7f6e871d0e746fb35b37fa7047be2559b62e1fa4"
+      }
+    },
+    "set12-l1-q29-32": {
+      "scriptHash": "49326cb3d11ce0da153dc95801505aa734b18097c42f4d711572d9b3bd7f0205",
+      "sigVersion": 3,
+      "bytes": 1438241,
+      "durationSec": 89.81,
+      "audioSha256": "8396c7730ec8c92a782646a115474cbf50e499bc6f1fcdda28cf048fc1b61cd9",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0083,
+        "backend": "faster_whisper",
+        "reason": "WER 0.8%",
+        "transcript": "All right, let's talk about something fascinating. How very young children understand numbers. This is a topic that has kept researchers busy for decades because it tells us so much about how the human mind develops. So one classic experiment is the dot comparison task. Researchers showed toddlers, around three years old, two cards. One card had, say, five dots, and the other had 15. And what they found was that even before these children could count reliably, they could point to the card with more dots. In other words, they had an intuitive sense of quantity, a basic number sense, without any formal instruction. OK, so a second experiment took a different approach. This one used what we call the violation of expectation method, with even younger babies, around five months old. Here's how it worked. Babies watched as one toy was placed on a small stage, then a screen went up, and a second toy was added behind it. When the screen dropped, sometimes it revealed two toys, which is correct, and sometimes it showed just one. The babies stared significantly longer at the unexpected result, the single toy, which suggests they expected 1 plus 1 to equal 2. So basically babies are intuitive mathematicians. They seem to grasp basic quantities from very early on. Now the question is, does this early number sense connect to other kinds of abstract reasoning? Let's look at some research exploring that connection.",
+        "audioSha256": "8396c7730ec8c92a782646a115474cbf50e499bc6f1fcdda28cf048fc1b61cd9",
+        "scriptHash": "49326cb3d11ce0da153dc95801505aa734b18097c42f4d711572d9b3bd7f0205"
+      }
+    },
+    "set12-l2-q01": {
+      "scriptHash": "1323e720877fac2e1608d44bc0be3e8067d88f78aa14a8cb7ab5b8080220e339",
+      "sigVersion": 3,
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "83e0b569c0afad4c3c896273e738fc53a94666529807598dc9ac90b928111f5f",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Who organized today's charity event?",
+        "audioSha256": "83e0b569c0afad4c3c896273e738fc53a94666529807598dc9ac90b928111f5f",
+        "scriptHash": "1323e720877fac2e1608d44bc0be3e8067d88f78aa14a8cb7ab5b8080220e339"
+      }
+    },
+    "set12-l2-q02": {
+      "scriptHash": "580dd1cade4125ff639b2adbdf0dfc9c8ae4a77b41b3ca57beae207d24b45b4c",
+      "sigVersion": 3,
+      "bytes": 38078,
+      "durationSec": 2.32,
+      "audioSha256": "e4d9e6ae97585b0eac738f6e005e4dcc17f22bec25045edfec2512be3219d5b5",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "How often do you go to the library?",
+        "audioSha256": "e4d9e6ae97585b0eac738f6e005e4dcc17f22bec25045edfec2512be3219d5b5",
+        "scriptHash": "580dd1cade4125ff639b2adbdf0dfc9c8ae4a77b41b3ca57beae207d24b45b4c"
+      }
+    },
+    "set12-l2-q03": {
+      "scriptHash": "1191cf615453acb5d12857ea1762f785c1884fe67bb36f85fbe15b4c9193d1e1",
+      "sigVersion": 3,
+      "bytes": 52288,
+      "durationSec": 3.2,
+      "audioSha256": "44763dd753aa0392f17bde6cd9ce2a0b1cbdffd8ef0ddd605ea7941fb4ae5ece",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Would you like me to save you a seat at the lecture?",
+        "audioSha256": "44763dd753aa0392f17bde6cd9ce2a0b1cbdffd8ef0ddd605ea7941fb4ae5ece",
+        "scriptHash": "1191cf615453acb5d12857ea1762f785c1884fe67bb36f85fbe15b4c9193d1e1"
+      }
+    },
+    "set12-l2-q04-05": {
+      "scriptHash": "d06627ef1485b4e533ac9f5a1a5d15ef652672c552604ac731a21639545c5937",
+      "sigVersion": 3,
+      "bytes": 402073,
+      "durationSec": 41.24,
+      "audioSha256": "00a7d8dca4a4cd7b7fd6a51970ea5a02c8ff1be956bcfbb9bce564da45e06e48",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0082,
+        "backend": "faster_whisper",
+        "reason": "WER 0.8%",
+        "transcript": "Hey, I've been looking everywhere for you. Where were you? I just got out of my lab session. What's up? Well, I need to get a new desk for my apartment. And I remember you saying you knew a really good home good store. I was hoping you could point me in the right direction. Oh, definitely. There's a place called Watson's Interiors. They've got a ton of options. Standing desks, corner desks, you name it. That's promising. Do they handle shipping? They do, and they also send a technician to your place for setup. When I got my bookshelf there last year, someone came and put the whole thing together in my living room. I didn't have to lift a finger.",
+        "audioSha256": "00a7d8dca4a4cd7b7fd6a51970ea5a02c8ff1be956bcfbb9bce564da45e06e48",
+        "scriptHash": "d06627ef1485b4e533ac9f5a1a5d15ef652672c552604ac731a21639545c5937"
+      }
+    },
+    "set12-l2-q06-07": {
+      "scriptHash": "4396f561c14a62e97cdc200ac9b2fa41d8d64b3524c132d66eba47ea844bf9c8",
+      "sigVersion": 3,
+      "bytes": 547944,
+      "durationSec": 55.6,
+      "audioSha256": "816a680d3fc77a2d333e6d02ff9c3a0dc1a0e51f315d109bb5fbbad6cc5a1914",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0192,
+        "backend": "faster_whisper",
+        "reason": "WER 1.9%",
+        "transcript": "Hey, I'm looking to buy a new camera. Do you know a good shop? Actually, I just went in to get some lens filters the other day. There's a photography store downtown called Vocal Point. I definitely recommend it. What did you like about it? They carry everything from beginner point-and-shoots to professional DSLRs. So the range is really impressive. But the best thing is they're hands-on demo service. They let you test any camera in a little studio setup so you can see exactly how it performs. You have to schedule a time slot for that, though. That's perfect. Do they sell accessories too? I don't want to have to visit three different places. Oh, yeah. They've got tripods, bags, memory cards. Everything you'd need is under one roof. Awesome. How do I book a demo session? It's all on their website. Hold on. Let me pull up the link for you.",
+        "audioSha256": "816a680d3fc77a2d333e6d02ff9c3a0dc1a0e51f315d109bb5fbbad6cc5a1914",
+        "scriptHash": "4396f561c14a62e97cdc200ac9b2fa41d8d64b3524c132d66eba47ea844bf9c8"
+      }
+    },
+    "set12-l2-q08-11": {
+      "scriptHash": "2e9a28ece790df2c5770b0ee65d991ed1e74277db52e318ab0b3c81752904eff",
+      "sigVersion": 3,
+      "bytes": 1470006,
+      "durationSec": 91.81,
+      "audioSha256": "150558119624deadaf35bbe51b7c4046888754af9356f2a98f0397b087787f37",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.013,
+        "backend": "faster_whisper",
+        "reason": "WER 1.3%",
+        "transcript": "So when people hear the words public transit, they often think about crowded buses, delays, noise, basically all the negative stuff. And sure, poorly managed systems can contribute to pollution and congestion. However, when cities invest wisely in their transit networks, the results can actually be surprisingly positive for the environment. Take Bogota, Columbia, for example. In the early 2000s, the city built a bus rapid transit system with dedicated lanes and efficient stations. The result? Many residents who previously drove chose to ride the bus instead. This cut down on traffic congestion and noticeably improved air quality in the city center. Now contrast that with car-dependent suburban areas. When neighborhoods are spread out, everyone needs a private vehicle. That means more fuel consumption, more roads to build and maintain, and infrastructure costs stretched across a huge area. So paradoxically, those quiet suburban neighborhoods can actually have a larger environmental footprint per person than a dense city with well-designed transit. And here's another interesting case. Seoul has been converting elevated highways into green parks in pedestrian zones. On this freed up space for community gardens where residents grow food locally. As a result, these neighborhoods have reduced their dependence on produce shipped in from distant farms. So the takeaway is this. Thoughtful investment in public transit and urban redesign can make dense cities significantly greener than low density suburbs.",
+        "audioSha256": "150558119624deadaf35bbe51b7c4046888754af9356f2a98f0397b087787f37",
+        "scriptHash": "2e9a28ece790df2c5770b0ee65d991ed1e74277db52e318ab0b3c81752904eff"
+      }
+    },
+    "set12-l2-q12-15": {
+      "scriptHash": "4b03f0dcaf8c7f86e51481f70ad57f4e13a936c709c2d07f395c41e7c52411ff",
+      "sigVersion": 3,
+      "bytes": 1591214,
+      "durationSec": 99.38,
+      "audioSha256": "d10ee7ff4ce00c32a43e0c079c9721899896f929680f9b6c0bc62431867e6c0c",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0041,
+        "backend": "faster_whisper",
+        "reason": "WER 0.4%",
+        "transcript": "Okay, so today I want to talk about something pretty remarkable. How ancient Polynesian sailors navigated thousands of miles across the open Pacific Ocean without any of the instruments we think of as essential for sea travel. No compasses, no maps, no written charts. And yet, they managed to settle islands scattered across an enormous stretch of ocean. So how did they do it? Well, Polynesian navigators relied on what we call wayfinding. Basically, they read natural signs. They memorized the positions of hundreds of stars at different times of year and used them as a kind of celestial guide. But it wasn't just stars. They also paid close attention to ocean swell patterns, the way waves reflected off distant islands could signal that land was nearby, even before they could actually see it. And they watched the flight paths of certain seabirds, since some species fly out to sea during the day, but always return to land at night. Now, the evidence for how widely they traveled is really impressive. Archaeologists have found similar styles of pottery, the same cultivated plants like taro and breadfruit, and closely related languages on islands thousands of miles apart. All of this points to a connected network of voyagers who deliberately explored and colonized new territories. What's really significant here is that this challenges the old assumption that long-distance ocean travel required advanced technology. These navigators achieved extraordinary feats through careful observation and knowledge passed down across generations.",
+        "audioSha256": "d10ee7ff4ce00c32a43e0c079c9721899896f929680f9b6c0bc62431867e6c0c",
+        "scriptHash": "4b03f0dcaf8c7f86e51481f70ad57f4e13a936c709c2d07f395c41e7c52411ff"
+      }
+    },
+    "set12-s1-instructions": {
+      "scriptHash": "fef3735fae217e5784cba9a1d270a4d6a5bdcbab58935dbbe7d7f3be31c06af2",
+      "sigVersion": 3,
+      "bytes": 81128,
+      "durationSec": 5.02,
+      "audioSha256": "f5e0c4c4e2a0373b2287add27a0a4e47d0631b9a0cc171c61aebe0077d445bfd",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You are training to familiar the student portal, listen to the officer and repeat what she says.",
+        "audioSha256": "f5e0c4c4e2a0373b2287add27a0a4e47d0631b9a0cc171c61aebe0077d445bfd",
+        "scriptHash": "fef3735fae217e5784cba9a1d270a4d6a5bdcbab58935dbbe7d7f3be31c06af2"
+      }
+    },
+    "set12-s1-q1": {
+      "scriptHash": "f90e11c062ba95759e78baaa864bbffc723b3ccd4fb5f8a6a251dab361ba890f",
+      "sigVersion": 3,
+      "bytes": 51035,
+      "durationSec": 3.11,
+      "audioSha256": "11f1762422602c9fa111ec55a531eadb799d1bf6f0621f9812e438c5ff45b371",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Here is how we navigate the student portal.",
+        "audioSha256": "11f1762422602c9fa111ec55a531eadb799d1bf6f0621f9812e438c5ff45b371",
+        "scriptHash": "f90e11c062ba95759e78baaa864bbffc723b3ccd4fb5f8a6a251dab361ba890f"
+      }
+    },
+    "set12-s1-q2": {
+      "scriptHash": "d4e923d16d2f457b15fe5c0e5540a31a8438d5039be180880bf10f1bb94e8557",
+      "sigVersion": 3,
+      "bytes": 47273,
+      "durationSec": 2.88,
+      "audioSha256": "13b991c210e3a7adf3928ade910d1e953dc3448fe2e939004186f037d30996d9",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You can find the login button at the top.",
+        "audioSha256": "13b991c210e3a7adf3928ade910d1e953dc3448fe2e939004186f037d30996d9",
+        "scriptHash": "d4e923d16d2f457b15fe5c0e5540a31a8438d5039be180880bf10f1bb94e8557"
+      }
+    },
+    "set12-s1-q3": {
+      "scriptHash": "411b1897d6523e02b263c3791df729f0220f7457264e44892c6c68fc6cffebe9",
+      "sigVersion": 3,
+      "bytes": 75276,
+      "durationSec": 4.64,
+      "audioSha256": "31ee02d30c2ca2fd026f894f188fa6b33cf5e883c3c845612ba76c3ae059c570",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "The course registration tab is next to the academic calendar.",
+        "audioSha256": "31ee02d30c2ca2fd026f894f188fa6b33cf5e883c3c845612ba76c3ae059c570",
+        "scriptHash": "411b1897d6523e02b263c3791df729f0220f7457264e44892c6c68fc6cffebe9"
+      }
+    },
+    "set12-s1-q4": {
+      "scriptHash": "21426b0ee4c7d0ec14fa8bd15feae46d735675ab4ef1ed3f7c3ec87933ef60f4",
+      "sigVersion": 3,
+      "bytes": 66499,
+      "durationSec": 4.09,
+      "audioSha256": "aa789803b4cbc9777a36f17b33f5138a65ba7a404ee31df87b53d3bfcb2550d2",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You can check your grades and attendance records on this page.",
+        "audioSha256": "aa789803b4cbc9777a36f17b33f5138a65ba7a404ee31df87b53d3bfcb2550d2",
+        "scriptHash": "21426b0ee4c7d0ec14fa8bd15feae46d735675ab4ef1ed3f7c3ec87933ef60f4"
+      }
+    },
+    "set12-s1-q5": {
+      "scriptHash": "963fb013e7dc12a785fe74b4f43617b283a3c07f2781a404fe6b1eb705ad833a",
+      "sigVersion": 3,
+      "bytes": 94084,
+      "durationSec": 5.8,
+      "audioSha256": "afc4743e128d2f228515eb8a9b6d4f7235c46efe8fb7a8226f79ded44af1cd7c",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "We suggest updating your contact information at the start of each semester.",
+        "audioSha256": "afc4743e128d2f228515eb8a9b6d4f7235c46efe8fb7a8226f79ded44af1cd7c",
+        "scriptHash": "963fb013e7dc12a785fe74b4f43617b283a3c07f2781a404fe6b1eb705ad833a"
+      }
+    },
+    "set12-s1-q6": {
+      "scriptHash": "63c29c81b3ff3af0e28609135a1470be8e85e1c5cc17a892940085017f732b77",
+      "sigVersion": 3,
+      "bytes": 101190,
+      "durationSec": 6.27,
+      "audioSha256": "77ecd4db08bd798a638081be03243832ffd9e262fd389ce161a226370f3d0057",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0833,
+        "backend": "faster_whisper",
+        "reason": "WER 8.3% but only 1 word on a 12-word segment — short-segment rule, queue for a human listen",
+        "transcript": "Also, the payment section shows your tuition balance and upcoming due dates.",
+        "audioSha256": "77ecd4db08bd798a638081be03243832ffd9e262fd389ce161a226370f3d0057",
+        "scriptHash": "63c29c81b3ff3af0e28609135a1470be8e85e1c5cc17a892940085017f732b77"
+      }
+    },
+    "set12-s1-q7": {
+      "scriptHash": "28b99b5630eb2085f0882faa55f65282c919e343010e3f1cc99bb1ad6360f130",
+      "sigVersion": 3,
+      "bytes": 113311,
+      "durationSec": 7.01,
+      "audioSha256": "e50153142382fe25906bca1350a0e0e76551c86f21beaefe4c33b09e2b9479b2",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "If you forget your password, click the reset link located below the login box to recover it.",
+        "audioSha256": "e50153142382fe25906bca1350a0e0e76551c86f21beaefe4c33b09e2b9479b2",
+        "scriptHash": "28b99b5630eb2085f0882faa55f65282c919e343010e3f1cc99bb1ad6360f130"
+      }
+    },
+    "set12-s2-instructions": {
+      "scriptHash": "9bb89a97004f892ac3a3ba793bee0c07f2746a2bd30621b0b5e44382d206762a",
+      "sigVersion": 3,
+      "bytes": 220308,
+      "durationSec": 13.7,
+      "audioSha256": "366f884070e2eb126036f2600db4c3ddd0fe7e7a8839d3628cfa4e97ea0f22c1",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You have volunteered for a research study about health and wellness. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+        "audioSha256": "366f884070e2eb126036f2600db4c3ddd0fe7e7a8839d3628cfa4e97ea0f22c1",
+        "scriptHash": "9bb89a97004f892ac3a3ba793bee0c07f2746a2bd30621b0b5e44382d206762a"
+      }
+    },
+    "set12-s2-q1": {
+      "scriptHash": "dbbcb06a4172124d8a0f4bd6549c66d2b93731da3f1f63b20577d0c59a61b58b",
+      "sigVersion": 3,
+      "bytes": 249983,
+      "durationSec": 15.56,
+      "audioSha256": "a517d8782ea29bd9690dc994d3fc6728044edadf682a86b08260f16b3cb679a2",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Thank you for joining today. I'd like to ask you some questions about health and wellness. What do you usually do to stay healthy? Do you exercise regularly, eat well, or do other things to take care of your body?",
+        "audioSha256": "a517d8782ea29bd9690dc994d3fc6728044edadf682a86b08260f16b3cb679a2",
+        "scriptHash": "dbbcb06a4172124d8a0f4bd6549c66d2b93731da3f1f63b20577d0c59a61b58b"
+      }
+    },
+    "set12-s2-q2": {
+      "scriptHash": "18d5889779423c3e95a0e95cb1a5d6f79100e1f65ca113221663db4b988872ec",
+      "sigVersion": 3,
+      "bytes": 158450,
+      "durationSec": 9.85,
+      "audioSha256": "f44735c949c64ab75ed61e2de7f165e3763074a47f83a42a0fa065a526267649",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I see. What do you usually do for your diet? For example, do you try to eat certain types of food or do you try to avoid certain foods?",
+        "audioSha256": "f44735c949c64ab75ed61e2de7f165e3763074a47f83a42a0fa065a526267649",
+        "scriptHash": "18d5889779423c3e95a0e95cb1a5d6f79100e1f65ca113221663db4b988872ec"
+      }
+    },
+    "set12-s2-q3": {
+      "scriptHash": "6ff6a5228812b3f3d815c6e2915968608ec2960b8a70088a41d38474959390b2",
+      "sigVersion": 3,
+      "bytes": 135462,
+      "durationSec": 8.41,
+      "audioSha256": "49f44643078daac8e49d7f68e36af9bf9fd590f51c63d1225827aca16dbeffb2",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "That makes sense. What part of staying healthy or keeping fit do you find the most difficult? Could you tell me why?",
+        "audioSha256": "49f44643078daac8e49d7f68e36af9bf9fd590f51c63d1225827aca16dbeffb2",
+        "scriptHash": "6ff6a5228812b3f3d815c6e2915968608ec2960b8a70088a41d38474959390b2"
+      }
+    },
+    "set12-s2-q4": {
+      "scriptHash": "132e79a34f16ecd450ef909b82e4aaffb03eacb41c9b0129318b8b8f05b93591",
+      "sigVersion": 3,
+      "bytes": 203172,
+      "durationSec": 12.63,
+      "audioSha256": "10a5dc92f3dedc221d05ec9ef5247311c01fa20b2507a24bc58dc527279d41d5",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Good points. Lastly, some people believe it will become easier for people to maintain healthy habits in the future. Some people disagree with this. What is your opinion and why?",
+        "audioSha256": "10a5dc92f3dedc221d05ec9ef5247311c01fa20b2507a24bc58dc527279d41d5",
+        "scriptHash": "132e79a34f16ecd450ef909b82e4aaffb03eacb41c9b0129318b8b8f05b93591"
+      }
+    }
+  }
+}

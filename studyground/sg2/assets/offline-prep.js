@@ -53,6 +53,7 @@
     if (/^[a-z0-9]+$/.test(explicit)) return explicit;
     var t = String(query('testId') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (!t) return '';
+    if (/(^|[A-Z])0*12$/.test(t) || t === 'SET12') return 'set12';
     if (/(^|[A-Z])0*11$/.test(t) || t === 'SET11') return 'set11';
     if (/(^|[A-Z])0*10$/.test(t) || t === 'SET10') return 'set10';
     if (/(^|[A-Z])0*9$/.test(t) || t === 'SET9') return 'set9';
