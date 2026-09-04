@@ -423,7 +423,13 @@
 //       Reading 30번 "prophecy")은 지문에 아무 표시가 없었다. assets/exam-render-reading.js
 //       와 assets/exam.css 가 함께 바뀐다 — 둘 다 SHELL_ASSETS(cache-first)라
 //       판올림하지 않으면 재방문 기기는 옛 사본을 계속 읽는다.
-const VERSION = 'sg-v106';
+// v107: SET 12 라이팅 3(학술 토론)의 교수·글쓴이가 얼굴 사진으로 뜬다. 여태 이니셜
+//       원('?'·'B'·'H')만 있어 실제 시험 화면과 달랐다. 사진은 공용 인물 사진을
+//       얼굴만 잘라 media/pictures/set12/w3-*.webp 로 두고, 문서 밖 자료라
+//       config/set12-writing-images.json 으로 붙인다(듣기 사진과 같은 방식) —
+//       다시 지어도 지워지지 않는다. assets/set12.js·set-import.js 가 함께 바뀌고
+//       둘 다 SHELL_ASSETS(cache-first)라 판올림 없이는 재방문 기기가 옛 사본을 읽는다.
+const VERSION = 'sg-v107';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

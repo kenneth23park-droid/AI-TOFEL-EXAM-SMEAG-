@@ -39,7 +39,11 @@ const answers = await read(FILES.answers);
    목소리 성별·인원에 맞춘 것이다. 이게 없으면 듣기 1·2 모듈만 사진 없이 뜬다. */
 const listeningImages = JSON.parse(fs.readFileSync(path.join(SG2, 'config/set12-listening-images.json'), 'utf8'));
 
-const out = IMPORT.build({ code: 'SET 12', questions, script, answers, listeningImages, strictSource: true });
+/* 라이팅 3(학술 토론)의 얼굴 사진 — 교수·글쓴이 이름으로 붙인다. 듣기 사진과 같이
+   원본 문서에는 없어서 여기서 넣는다. 이게 없으면 W3 만 이니셜 원으로 뜬다. */
+const discussionImages = JSON.parse(fs.readFileSync(path.join(SG2, 'config/set12-writing-images.json'), 'utf8'));
+
+const out = IMPORT.build({ code: 'SET 12', questions, script, answers, listeningImages, discussionImages, strictSource: true });
 const stop = out.gates.filter((g) => g.level === 'stop');
 if (stop.length) {
   stop.forEach((g) => console.error('STOP [' + g.scope + '] ' + g.message));

@@ -1235,6 +1235,22 @@
 
     /* ---- writing / speaking ---- */
     var wModules = parseWriting(split.writing, codeSlug, 11);
+    /* 학술 토론(W3)의 얼굴 사진 — 듣기 사진과 같은 이유로 원본 문서 밖에 산다.
+       { professor: '...', posts: { 'Brandon': '...' } } 를 받아 이름으로 붙인다. */
+    var discImages = input.discussionImages || {};
+    wModules.forEach(function (mod) {
+      if (mod.id !== 'W3') return;
+      (mod.blocks || []).forEach(function (blk) {
+        (blk.questions || []).forEach(function (q) {
+          if (q.kind !== 'discussion') return;
+          if (discImages.professor) q.professorImage = discImages.professor;
+          (q.posts || []).forEach(function (post) {
+            var src = discImages.posts && discImages.posts[post.name];
+            if (src) post.image = src;
+          });
+        });
+      });
+    });
     var writing = { id: 'writing', label: 'Writing', labelKo: '라이팅', timeLimitSec: null, modules: wModules };
 
     var scripts = input.script && input.script.paragraphs

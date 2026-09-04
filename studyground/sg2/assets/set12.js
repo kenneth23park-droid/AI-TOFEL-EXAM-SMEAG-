@@ -2032,14 +2032,17 @@ window.SMEAG_SET12 = {
                   "posts": [
                     {
                       "name": "Brandon",
-                      "text": "I believe employee training is better for long-term success. Low prices may bring customers at first, but they will not stay if service is poor or mistakes happen often. Training helps workers do their jobs efficiently and communicate with buyers more professionally. It can also reduce turnover because employees feel more confident and valued. For that reason, investing in workers gives a company stronger results over time."
+                      "text": "I believe employee training is better for long-term success. Low prices may bring customers at first, but they will not stay if service is poor or mistakes happen often. Training helps workers do their jobs efficiently and communicate with buyers more professionally. It can also reduce turnover because employees feel more confident and valued. For that reason, investing in workers gives a company stronger results over time.",
+                      "image": "media/pictures/set12/w3-brandon.webp"
                     },
                     {
                       "name": "Hailey",
-                      "text": "I think lower product prices are more important for long-term success. In many markets, customers compare prices before anything else, so cheaper products can attract more buyers quickly. This can help a company increase sales, build a larger customer base, and compete against rivals. Training is useful, but it often costs a lot of money, and smaller companies may not be able to spend that much."
+                      "text": "I think lower product prices are more important for long-term success. In many markets, customers compare prices before anything else, so cheaper products can attract more buyers quickly. This can help a company increase sales, build a larger customer base, and compete against rivals. Training is useful, but it often costs a lot of money, and smaller companies may not be able to spend that much.",
+                      "image": "media/pictures/set12/w3-hailey.webp"
                     }
                   ],
-                  "minWords": 100
+                  "minWords": 100,
+                  "professorImage": "media/pictures/set12/w3-professor.webp"
                 }
               ]
             }

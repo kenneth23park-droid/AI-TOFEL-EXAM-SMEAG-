@@ -1,9 +1,9 @@
 {
  "set": "SET12",
  "label": "NEW TOEFL SET 12",
- "rev": "19293fc33c6e",
- "count": 56,
- "bytes": 13809890,
+ "rev": "0d6dfb6728b9",
+ "count": 59,
+ "bytes": 13838502,
  "files": [
   {
    "u": "media/audio/set12/l1-q01.mp3",
@@ -284,6 +284,21 @@
    "u": "media/pictures/set12/image8.png",
    "b": 280318,
    "h": "56b623a5e8c1"
+  },
+  {
+   "u": "media/pictures/set12/w3-brandon.webp",
+   "b": 6718,
+   "h": "b6a8861b10f9"
+  },
+  {
+   "u": "media/pictures/set12/w3-hailey.webp",
+   "b": 10338,
+   "h": "9dd38a68c38d"
+  },
+  {
+   "u": "media/pictures/set12/w3-professor.webp",
+   "b": 11556,
+   "h": "5f6771257508"
   }
  ]
 }
