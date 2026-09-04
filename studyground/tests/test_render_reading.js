@@ -419,5 +419,49 @@ var savedKb = window.SG_STORE && window.SG_STORE.getAnswer ? window.SG_STORE.get
 ok('저장에도 한글이 남지 않는다', !savedKb || !/[^\x20-\x7E]/.test(String(savedKb.v || '')),
    savedKb ? JSON.stringify(savedKb.v) : 'none');
 
+/* ── [12] 표적 어휘 강조는 지금 펴 놓은 문항을 따라간다 ─────────────
+ * 지문은 화면당 한 번만 그리므로 화면 안 모든 표적 어휘를 미리 <mark class="rd-hit"> 로 표시해 두고,
+ * 지금 문항의 단어만 is-on 으로 켠다. 예전에는 첫 문항의 단어만 켠 채 굳어 있어서,
+ * 30번(어휘 문항)으로 넘어가도 지문에 아무 표시가 없었다. */
+console.log('\n[12] 표적 어휘 강조가 문항을 따라간다');
+(function () {
+  var tested = 0;
+  screens.forEach(function (s) {
+    if (s.blockKind === 'cloze') return;
+    var blk = RD.blockOf(s);
+    var qs = RD.questionsOf(blk, s.questionIds);
+    var words = RD.targetWordsOf(qs);
+    if (!words.length) return;
+
+    var full = res.screens;
+    var at = window.SG_STORE.findScreenIndex(full, s.id);
+    var machine = window.SG_EXAM.create(full, { mode: 'exam' });
+    machine.restoreTo(at, 0);
+    machine.start(at);
+    var node = RD.render(s, { engine: machine, mode: 'exam', phaseIndex: 0 });
+    var marks = node.querySelectorAll('mark.rd-hit');
+    if (!marks.length) return;      // 표적 어휘가 지문 문자열에 없는 화면은 건너뛴다
+    tested++;
+
+    // 각 문항으로 옮겨 가며(그리드 버튼 클릭) 그 문항의 단어만 켜져 있는지 본다.
+    for (var i = 0; i < qs.length; i++) {
+      var btn = node.querySelectorAll('button[data-qid="' + qs[i].id + '"]')[0];
+      if (!btn || !btn.onclick) continue;
+      btn.onclick();
+      var want = String(RD.targetWordFromPrompt(qs[i].prompt) || '').toLowerCase();
+      var bad = 0, onCount = 0;
+      for (var m = 0; m < marks.length; m++) {
+        var isOn = marks[m].className.indexOf('is-on') >= 0;
+        var mine = marks[m].getAttribute('data-word') === want && !!want;
+        if (isOn) onCount++;
+        if (isOn !== mine) bad++;
+      }
+      ok(s.id + ' ' + qs[i].id + ' 강조 = 그 문항의 단어만', bad === 0,
+         'want="' + want + '" on=' + onCount + ' mismatch=' + bad);
+    }
+  });
+  ok('강조를 검증한 화면이 있다', tested > 0, String(tested));
+})();
+
 console.log('\n' + (fails.length ? 'FAILED: ' + fails.join(', ') : 'ALL PASS'));
 process.exit(fails.length ? 1 : 0);

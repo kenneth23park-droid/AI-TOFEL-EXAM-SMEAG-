@@ -559,6 +559,14 @@ body.exam-body {
 .rd-para { font-size: 15px; line-height: 1.8; margin-bottom: 12px; color: var(--ink-2); }
 .rd-para:last-child { margin-bottom: 0; }
 
+/* 어휘 문항의 표적 어휘 — 지문에 미리 표시해 두되, 지금 펴 놓은 문항의 단어만 켠다.
+   mark 의 브라우저 기본 노랑을 끄고, is-on 일 때만 색을 준다. */
+.rd-hit { background: transparent; color: inherit; }
+.rd-hit.is-on {
+  background: #fff1a8; color: inherit; border-radius: 4px; padding: 0 2px;
+  box-shadow: 0 0 0 1px rgba(140, 110, 0, .08) inset;
+}
+
 /* cloze — 관찰(reading-cloze-2760s.png): 빈 입력상자가 아니라 '어간 + 남은 글자 수만큼의 밑줄'이
    지문 안에 인라인으로 있다(fo__ / she____ / prov_____). 어간은 본문 글꼴, 밑줄과 입력 글자는 등폭.
    레일(밑줄)은 입력칸 뒤에 겹쳐 두고, 이미 친 글자만큼은 공백으로 비워 두므로 오프셋 계산이 필요 없다. */

@@ -241,18 +241,37 @@
     return m && m[1] ? m[1] : '';
   }
 
-  function wrapHighlightedText(text, word) {
+  /* 화면 안 모든 어휘 문항의 표적 어휘를 모은다 — 지문은 한 번만 그리므로 미리 다 표시해 두고,
+     지금 펴 놓은 문항의 단어만 켠다(api.setWord). 그러지 않으면 첫 문항의 단어만 계속 켜져 있다. */
+  function targetWordsOf(qs) {
+    var out = [], seen = {}, i, w, key;
+    for (i = 0; i < (qs || []).length; i++) {
+      w = targetWordFromPrompt(qs[i] && qs[i].prompt);
+      key = String(w || '').trim().toLowerCase();
+      if (!key || seen[key]) continue;
+      seen[key] = true;
+      out.push(w.trim());
+    }
+    return out;
+  }
+
+  function wrapHighlightedText(text, words, hits) {
     var src = String(text == null ? '' : text);
-    var key = String(word || '').trim();
-    if (!key) return doc.createTextNode(src);
-    var re = new RegExp('(' + escapeRegExp(key) + ')', 'ig');
+    var keys = [], i;
+    for (i = 0; i < (words || []).length; i++) { if (String(words[i] || '').trim()) keys.push(String(words[i]).trim()); }
+    if (!keys.length) return doc.createTextNode(src);
+    var alts = [];
+    for (i = 0; i < keys.length; i++) alts.push(escapeRegExp(keys[i]));
+    var re = new RegExp('(' + alts.join('|') + ')', 'ig');
     var frag = el('span');
     var last = 0, m;
     while ((m = re.exec(src))) {
       if (m.index > last) frag.appendChild(doc.createTextNode(src.slice(last, m.index)));
       var mark = el('mark', 'rd-hit');
+      mark.setAttribute('data-word', m[1].toLowerCase());
       mark.appendChild(doc.createTextNode(m[1]));
       frag.appendChild(mark);
+      if (hits) hits.push(mark);
       last = m.index + m[1].length;
     }
     if (last < src.length) frag.appendChild(doc.createTextNode(src.slice(last)));
@@ -421,7 +440,7 @@
 
   /* passage 본문 — {{A}}~{{D}} 마커는 클릭 가능한 삽입 지점 버튼이 된다(insert 문항 있을 때만).
      선택 시 sentence 를 그 자리에 미리보기로 넣는다. 라디오와의 동기화는 api.setInsert 가 맡는다. */
-  function renderPassageBody(blk, insertQ, api, highlightWord) {
+  function renderPassageBody(blk, insertQ, api, highlightWords) {
     var box = el('div', 'rd-passage-body');
     if (blk.title) box.appendChild(textEl('h3', 'rd-passage-title', blk.title));
     var images = blk.images || [], imageRef, img;
@@ -440,7 +459,7 @@
       var toks = insertQ ? markerTokens(ps[i]) : [{ text: ps[i] }];
       for (j = 0; j < toks.length; j++) {
         if (toks[j].text !== undefined) {
-          para.appendChild(wrapHighlightedText(toks[j].text, highlightWord));
+          para.appendChild(wrapHighlightedText(toks[j].text, highlightWords, api.hits));
           continue;
         }
         var letter = toks[j].token;
@@ -551,13 +570,21 @@
 
     var qs = questionsOf(blk, screen && screen.questionIds);
     var insertQ = insertQuestionOf(blk, qs);
-    var currentWord = targetWordFromPrompt(qs[0] && qs[0].prompt);
+    var currentWords = targetWordsOf(qs);
 
     // 렌더 지역 상태 — 마커/라디오/그리드가 서로를 갱신한다.
     var cards = {};                    // qid → 문항 카드(한 개만 펴 둔다)
     var cur = 0;                       // 지금 보이는 문항의 인덱스
     var api = {
-      markers: {}, radios: {}, gridBtns: {}, blanks: [], qs: qs,
+      markers: {}, radios: {}, gridBtns: {}, blanks: [], hits: [], qs: qs,
+      // 지문에 표시해 둔 표적 어휘 중 지금 문항의 것만 켠다.
+      setWord: function (word) {
+        var key = String(word || '').trim().toLowerCase(), i, mk;
+        for (i = 0; i < api.hits.length; i++) {
+          mk = api.hits[i];
+          mk.className = (key && mk.getAttribute('data-word') === key) ? 'rd-hit is-on' : 'rd-hit';
+        }
+      },
       // 문항 하나만 펴고 나머지는 감춘다. 그리드의 현재 표시와 셸 버튼도 함께 맞춘다.
       showQuestion: function (i) {
         if (i < 0 || i >= qs.length) return false;
@@ -567,6 +594,7 @@
           card = cards[qs[j].id];
           if (card) card.hidden = (j !== i);
         }
+        api.setWord(targetWordFromPrompt(qs[i] && qs[i].prompt));
         api.refreshGrid();
         syncShellNav();
         return true;
@@ -636,7 +664,8 @@
     if (bar.firstChild) left.appendChild(bar);
 
     var scroller = el('div', 'rd-scroll');
-    scroller.appendChild(kind === 'chat' ? renderChat(blk) : renderPassageBody(blk, insertQ, api, currentWord));
+    scroller.appendChild(kind === 'chat' ? renderChat(blk) : renderPassageBody(blk, insertQ, api, currentWords));
+    api.setWord(targetWordFromPrompt(qs[0] && qs[0].prompt));
     left.appendChild(scroller);
 
     var right = el('div', 'rd-right');
@@ -751,7 +780,8 @@
     clozeTokens: clozeTokens, markerTokens: markerTokens, hasMarkers: hasMarkers,
     stemOf: stemOf, missingCount: missingCount, railText: railText,
     composeAnswer: composeAnswer, typedFrom: typedFrom, FREE_WIDTH: FREE_WIDTH,
-    questionsOf: questionsOf, blockOf: blockOf, insertQuestionOf: insertQuestionOf
+    questionsOf: questionsOf, blockOf: blockOf, insertQuestionOf: insertQuestionOf,
+    targetWordFromPrompt: targetWordFromPrompt, targetWordsOf: targetWordsOf
   };
 
   install(root.SG_RENDER);
