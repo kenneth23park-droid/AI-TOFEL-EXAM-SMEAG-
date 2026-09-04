@@ -59,7 +59,7 @@ storage.onSet = function (k, v) { return k.indexOf('sg2:set:') === 0 ? null : v;
 var res2 = STORE.put('settest2', good, { title: 'SET TEST 2' });
 storage.onSet = null;
 ok(!res2.ok, '본문이 저장되지 않으면 put 이 ok 를 돌려주지 않는다');
-ok(/저장/.test(res2.error || ''), '실패 사유가 저장에 대한 말로 나온다 — ' + res2.error);
+ok(/save/i.test(res2.error || ''), '실패 사유가 저장에 대한 말로 나온다 — ' + res2.error);
 ok(!STORE.list().some(function (r) { return r.slug === 'settest2'; }),
   '본문이 없는 세트를 저장 목록이 광고하지 않는다');
 
@@ -68,14 +68,14 @@ var drifted = pack([0, 1, 2, 3]);
 STORE.put('settest3', drifted, {});
 storage._mem['sg2:set:settest3'] = JSON.stringify(pack([0, 1, 2, 0]));
 var v3 = STORE.verify('settest3', drifted);
-ok(!v3.ok && /정답/.test(v3.problems.join(' ')), '저장본의 정답이 다르면 verify 가 잡는다 — ' + v3.problems.join(' '));
+ok(!v3.ok && /different answer/.test(v3.problems.join(' ')), '저장본의 정답이 다르면 verify 가 잡는다 — ' + v3.problems.join(' '));
 
 /* 4. 문항이 줄어든 경우. */
 var short = pack([0, 1, 2, 3]);
 STORE.put('settest4', short, {});
 storage._mem['sg2:set:settest4'] = JSON.stringify(pack([0, 1]));
 var v4 = STORE.verify('settest4', short);
-ok(!v4.ok && /문항 수/.test(v4.problems.join(' ')), '문항 수가 줄면 verify 가 잡는다 — ' + v4.problems.join(' '));
+ok(!v4.ok && /Question count/.test(v4.problems.join(' ')), '문항 수가 줄면 verify 가 잡는다 — ' + v4.problems.join(' '));
 
 /* 5. 듣기 음원 경로가 빠진 경우 — 소리 없는 시험은 시험이 아니다. */
 var withAudio = pack([0, 1, 2, 3]);
@@ -84,7 +84,7 @@ var noAudio = pack([0, 1, 2, 3]);
 noAudio.sections[1].modules[0].blocks[0].audio = '';
 storage._mem['sg2:set:settest5'] = JSON.stringify(noAudio);
 var v5 = STORE.verify('settest5', withAudio);
-ok(!v5.ok && /음원/.test(v5.problems.join(' ')), '음원 경로가 빠지면 verify 가 잡는다 — ' + v5.problems.join(' '));
+ok(!v5.ok && /audio path/.test(v5.problems.join(' ')), '음원 경로가 빠지면 verify 가 잡는다 — ' + v5.problems.join(' '));
 
 /* 6. 저장 자체가 안 되는 브라우저(시크릿 모드)에서는 성공이라 말하지 않는다. */
 ok(!STORE.verify('never-saved', good).ok, '저장한 적 없는 코드는 검산을 통과하지 못한다');

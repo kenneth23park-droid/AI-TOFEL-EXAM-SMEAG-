@@ -1706,19 +1706,19 @@
             if (skip.indexOf(q.id) >= 0) return;
             var a = q.answer;
             if (q.kind === 'blank') {
-              if (typeof a !== 'string' || !a.trim()) bad.push(q.id + ' (빈칸 정답이 비었음)');
+              if (typeof a !== 'string' || !a.trim()) bad.push(q.id + ' (the blank has no answer)');
               return;
             }
             /* "Click on the sentence …" 은 보기 목록이 아니라 지문 문장을 고르는 문항이라
                보기가 없는 것이 정상이다(finalize 의 빈 보기 판정과 같은 규칙). */
             if (/^click on the sentence/i.test(q.prompt || '')) {
-              if (a === undefined || a === null || a === '') bad.push(q.id + ' (정답이 비었음)');
+              if (a === undefined || a === null || a === '') bad.push(q.id + ' (the answer is empty)');
               return;
             }
             var n = (q.choices || []).length;
-            if (!n) { bad.push(q.id + ' (보기가 없음)'); return; }
-            if (typeof a !== 'number') { bad.push(q.id + ' (정답 "' + a + '" 이 보기 어디에도 없음)'); return; }
-            if (a < 0 || a >= n) bad.push(q.id + ' (정답 번호 ' + (a + 1) + ' 인데 보기는 ' + n + '개)');
+            if (!n) { bad.push(q.id + ' (no choices)'); return; }
+            if (typeof a !== 'number') { bad.push(q.id + ' (answer "' + a + '" matches none of the choices)'); return; }
+            if (a < 0 || a >= n) bad.push(q.id + ' (answer is choice ' + (a + 1) + ' but there are only ' + n + ' choices)');
           });
         });
       });

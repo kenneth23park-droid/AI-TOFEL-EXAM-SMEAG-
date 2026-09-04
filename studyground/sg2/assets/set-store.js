@@ -80,24 +80,24 @@
   function verify(slug, pack) {
     var problems = [];
     var back = API.get(slug);
-    if (!back) return { ok: false, problems: ['저장된 세트를 다시 읽지 못했습니다.'] };
+    if (!back) return { ok: false, problems: ['The saved set could not be read back.'] };
 
     var want = fingerprint(pack), got = fingerprint(back);
     if (want.total !== got.total) {
-      problems.push('문항 수가 다릅니다 — 저장하려던 ' + want.total + ', 저장된 ' + got.total + '.');
+      problems.push('Question count differs — ' + want.total + ' to save, ' + got.total + ' saved.');
     }
     var lost = want.questions.filter(function (k, i) { return got.questions[i] !== k; });
     if (lost.length) {
-      problems.push(lost.length + ' 문항의 정답이 저장본과 다릅니다: '
-        + lost.slice(0, 5).join(', ') + (lost.length > 5 ? ' 외' : '') + '.');
+      problems.push(lost.length + ' questions have a different answer in the saved copy: '
+        + lost.slice(0, 5).join(', ') + (lost.length > 5 ? ' and more' : '') + '.');
     }
     if (want.audio.length !== got.audio.length) {
-      problems.push('듣기 음원 경로 수가 다릅니다 — ' + want.audio.length + ' → ' + got.audio.length + '.');
+      problems.push('Listening audio path count differs — ' + want.audio.length + ' to ' + got.audio.length + '.');
     }
     var row = null;
     readIndex().forEach(function (r) { if (r.slug === slug) row = r; });
-    if (!row) problems.push('저장 목록에 이 세트가 없습니다.');
-    else if (row.total !== want.total) problems.push('저장 목록의 문항 수(' + row.total + ')가 팩과 다릅니다.');
+    if (!row) problems.push('This set is missing from the saved list.');
+    else if (row.total !== want.total) problems.push('The saved list says ' + row.total + ' questions, which differs from the pack.');
 
     return { ok: problems.length === 0, problems: problems };
   }
@@ -129,14 +129,14 @@
      */
     put: function (slug, pack, meta) {
       var s = store();
-      if (!s) return { ok: false, error: '이 브라우저에서는 저장소를 쓸 수 없습니다(시크릿 모드일 수 있습니다).' };
+      if (!s) return { ok: false, error: 'Storage is not available in this browser (private mode, perhaps).' };
       slug = String(slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (!slug) return { ok: false, error: '세트 코드가 비어 있습니다.' };
+      if (!slug) return { ok: false, error: 'The set code is empty.' };
 
       var body = JSON.stringify(pack);
       try { s.setItem(PREFIX + slug, body); }
       catch (e) {
-        return { ok: false, error: '저장 공간이 부족합니다 (' + Math.round(body.length / 1024) + 'KB). 쓰지 않는 세트를 지우고 다시 시도해 주세요.' };
+        return { ok: false, error: 'Not enough storage space (' + Math.round(body.length / 1024) + 'KB). Delete a set you no longer need and try again.' };
       }
 
       var list = readIndex().filter(function (r) { return r.slug !== slug; });
@@ -156,7 +156,7 @@
            않도록 그 줄은 걷어낸다. 본문이 있는데 내용이 다른 경우는 손대지 않는다:
            덮어쓰기가 반만 된 것이라 지우면 이전 세트까지 사라진다. */
         if (!API.get(slug)) writeIndex(readIndex().filter(function (r) { return r.slug !== slug; }));
-        return { ok: false, slug: slug, error: '저장이 끝나지 않았습니다: ' + v.problems.join(' '), problems: v.problems };
+        return { ok: false, slug: slug, error: 'The save did not complete: ' + v.problems.join(' '), problems: v.problems };
       }
       return { ok: true, slug: slug, verified: true };
     },

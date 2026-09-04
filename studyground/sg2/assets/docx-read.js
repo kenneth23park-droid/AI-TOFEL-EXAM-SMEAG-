@@ -62,7 +62,7 @@
       } catch (e) { /* use the browser implementation below */ }
     }
     if (typeof DecompressionStream !== 'function') {
-      return Promise.reject(new Error('이 브라우저는 DecompressionStream 을 지원하지 않습니다 — 최신 Chrome/Edge/Safari 에서 열어 주세요.'));
+      return Promise.reject(new Error('This browser does not support DecompressionStream — open the page in a current Chrome, Edge or Safari.'));
     }
     var ds = new DecompressionStream('deflate-raw');
     var writer = ds.writable.getWriter();
@@ -78,7 +78,7 @@
     var bytes = new Uint8Array(arrayBuffer);
     var view = new DataView(arrayBuffer);
     var eocd = findEocd(view);
-    if (eocd < 0) return Promise.reject(new Error('zip 구조를 찾지 못했습니다 — .docx 파일이 맞는지 확인해 주세요.'));
+    if (eocd < 0) return Promise.reject(new Error('No zip structure found — check that the file really is a .docx.'));
 
     var count = view.getUint16(eocd + 10, true);
     var cdOffset = view.getUint32(eocd + 16, true);
@@ -113,7 +113,7 @@
     jobs.forEach(function (job) {
       chain = chain.then(function () {
         if (job.method === 0) { out[job.name] = job.raw; return; }
-        if (job.method !== 8) throw new Error('지원하지 않는 압축 방식입니다 (' + job.name + ')');
+        if (job.method !== 8) throw new Error('Unsupported compression method (' + job.name + ')');
         return inflateRaw(job.raw).then(function (u8) { out[job.name] = u8; });
       });
     });
@@ -269,7 +269,7 @@
         || name.indexOf('word/media/') === 0;
     }).then(function (files) {
       var doc = files['word/document.xml'];
-      if (!doc) throw new Error('word/document.xml 이 없습니다 — .docx 가 아니거나 손상된 파일입니다.');
+      if (!doc) throw new Error('word/document.xml is missing — the file is not a .docx, or it is damaged.');
       var utf8 = new TextDecoder('utf-8');
 
       var rels = files['word/_rels/document.xml.rels']

@@ -28,10 +28,10 @@ ok(IMPORT.crossCheckAnswers(sec([mcq('R1-1', 0), mcq('R1-2', 3)])).length === 0,
   '보기 안에 있는 정답은 통과한다');
 
 var over = IMPORT.crossCheckAnswers(sec([mcq('R1-1', 4)]));
-ok(over.length === 1 && /보기는 4개/.test(over[0]), '보기 범위를 넘는 정답 번호를 잡는다 — ' + over[0]);
+ok(over.length === 1 && /only 4 choices/.test(over[0]), '보기 범위를 넘는 정답 번호를 잡는다 — ' + over[0]);
 
 var text = IMPORT.crossCheckAnswers(sec([mcq('R1-1', 'nitrogen')]));
-ok(text.length === 1 && /보기 어디에도 없음/.test(text[0]), '보기와 못 맞춘 정답 본문을 잡는다 — ' + text[0]);
+ok(text.length === 1 && /matches none of the choices/.test(text[0]), '보기와 못 맞춘 정답 본문을 잡는다 — ' + text[0]);
 
 var none = IMPORT.crossCheckAnswers(sec([mcq('R1-1', undefined)]));
 ok(none.length === 1, '정답이 없는 문항을 잡는다');
@@ -40,7 +40,7 @@ ok(IMPORT.crossCheckAnswers(sec([mcq('R1-1', undefined)]), ['R1-1']).length === 
   '이미 다른 gate 로 올린 문항은 두 번 세지 않는다');
 
 var noChoices = IMPORT.crossCheckAnswers(sec([{ id: 'R1-1', kind: 'mcq', prompt: 'Pick one', choices: [], answer: 0 }]));
-ok(noChoices.length === 1 && /보기가 없음/.test(noChoices[0]), '보기가 통째로 빠진 문항을 잡는다');
+ok(noChoices.length === 1 && /no choices/.test(noChoices[0]), '보기가 통째로 빠진 문항을 잡는다');
 
 /* "Click on the sentence …" 은 지문 문장을 고르는 문항이라 보기 목록이 없는 게 정상이다. */
 var click = { id: 'R1-34', kind: 'mcq', prompt: 'Click on the sentence that best summarizes…', choices: [], answer: 'The city grew.' };

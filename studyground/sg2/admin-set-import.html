@@ -635,20 +635,20 @@
   function paintAiKey() {
     if (aikeyBox.dataset.editing) return;
     if (aiCreds.token) {
-      aikeyBox.innerHTML = '<span class="kstate srv">🔒 선생님 계정</span>' +
-        '<span>로그인한 선생님 계정으로 서버가 열려 있습니다.</span>';
+      aikeyBox.innerHTML = '<span class="kstate srv">🔒 Teacher account</span>' +
+        '<span>The server is open through the teacher account you signed in with.</span>';
       return;
     }
     if (aiCreds.adminToken) {
-      aikeyBox.innerHTML = '<span class="kstate loc">🔑 관리자 토큰</span>' +
+      aikeyBox.innerHTML = '<span class="kstate loc">🔑 Admin token</span>' +
         '<code>' + esc(maskTok(aiCreds.adminToken)) + '</code>' +
-        '<button type="button" data-aikey="edit">변경</button>' +
-        '<button type="button" data-aikey="clear">삭제</button>';
+        '<button type="button" data-aikey="edit">Change</button>' +
+        '<button type="button" data-aikey="clear">Remove</button>';
       return;
     }
-    aikeyBox.innerHTML = '<span class="kstate none">열쇠 없음</span>' +
-      '<span>선생님 계정으로 로그인하거나, 서버의 관리자 토큰(SG_ADMIN_TOKEN)을 넣으면 관리자 로그인만으로도 AI 생성이 열립니다.</span>' +
-      '<button type="button" data-aikey="edit">관리자 토큰 입력</button>';
+    aikeyBox.innerHTML = '<span class="kstate none">No key</span>' +
+      '<span>Sign in with a teacher account, or paste the server admin token (SG_ADMIN_TOKEN), and AI generation opens with the admin sign-in alone.</span>' +
+      '<button type="button" data-aikey="edit">Enter the admin token</button>';
   }
 
   aikeyBox.addEventListener('click', function (ev) {
@@ -659,17 +659,17 @@
       aikeyBox.dataset.editing = '1';
       aikeyBox.innerHTML =
         '<input type="password" data-aikey="input" autocomplete="off" spellcheck="false" ' +
-          'placeholder="서버의 관리자 토큰(SG_ADMIN_TOKEN) 붙여넣기">' +
-        '<button type="button" data-aikey="save">저장</button>' +
-        '<button type="button" data-aikey="cancel">취소</button>' +
-        '<span>이 브라우저에만 저장됩니다. 공용 PC 라면 넣지 마세요.</span>';
+          'placeholder="Paste the server admin token (SG_ADMIN_TOKEN)">' +
+        '<button type="button" data-aikey="save">Save</button>' +
+        '<button type="button" data-aikey="cancel">Cancel</button>' +
+        '<span>Kept in this browser only. Do not enter it on a shared PC.</span>';
       var inp = aikeyBox.querySelector('[data-aikey=input]');
       if (inp) inp.focus();
       return;
     }
     if (act === 'cancel') { delete aikeyBox.dataset.editing; paintAiKey(); return; }
     if (act === 'clear') {
-      if (!confirm('이 브라우저에서 관리자 토큰을 지웁니다. 계속할까요?')) return;
+      if (!confirm('This removes the admin token from this browser. Continue?')) return;
       if (window.SG_TTS_GEN) window.SG_TTS_GEN.setToken('');
       delete aikeyBox.dataset.editing;
       readyAI();
@@ -677,7 +677,7 @@
     }
     if (act === 'save') {
       var v = ((aikeyBox.querySelector('[data-aikey=input]') || {}).value || '').trim();
-      if (!v) { alert('토큰을 붙여넣어 주세요.'); return; }
+      if (!v) { alert('Paste the token first.'); return; }
       if (window.SG_TTS_GEN) window.SG_TTS_GEN.setToken(v);
       delete aikeyBox.dataset.editing;
       readyAI();          /* 토큰이 맞는지는 서버가 답한다 — 다시 물어 본다. */
@@ -794,14 +794,14 @@
     var had = existingSet(slug);
     if (!had) return true;
     var what = had.where === 'built-in'
-      ? '“' + code.toUpperCase() + '” 는 이 사이트에 실려 있는 시험 정본입니다(' +
-        (had.title || slug) + ').\n새로 지어 저장하면 학생이 보는 시험이 그 세트로 바뀝니다.'
-      : '“' + code.toUpperCase() + '” 는 이미 저장되어 있습니다' +
-        (had.when ? ' (' + had.when + ' 저장' : ' (') +
-        (had.total ? ' · 문항 ' + had.total + '개)' : ')') +
-        '.\n새로 지은 세트를 저장하면 이 세트를 덮어씁니다 — 되돌릴 수 없습니다.';
-    return confirm(what + '\n\n다른 코드로 지으려면 취소하고 세트 코드를 바꾸세요.\n\n' +
-      '그래도 이 코드로 새로 지을까요?');
+      ? '“' + code.toUpperCase() + '” is a live exam shipped with this site (' +
+        (had.title || slug) + ').\nBuilding and saving over it changes the exam students sit.'
+      : '“' + code.toUpperCase() + '” is already saved' +
+        (had.when ? ' (saved ' + had.when : ' (') +
+        (had.total ? ' · ' + had.total + ' questions)' : ')') +
+        '.\nSaving the new set overwrites it — this cannot be undone.';
+    return confirm(what + '\n\nTo build under a different code, cancel and change the set code.\n\n' +
+      'Build under this code anyway?');
   }
 
   genBtn.addEventListener('click', function () {
@@ -993,16 +993,16 @@
     var free = isFree(P);
     el.className = 'pricepill' + (free ? ' free' : '');
     var per = USD1K[P.id];
-    var rate = per ? '1M자 약 $' + Math.round(per * 1000) : '';
+    var rate = per ? '~$' + Math.round(per * 1000) + ' per 1M chars' : '';
     el.innerHTML = '<b>' + (free ? 'Free tier' : 'Paid') + '</b>'
-      + esc(P.free || rate || '') + (free && rate ? ' · 이후 ' + rate : '');
+      + esc(P.free || rate || '') + (free && rate ? ' · then ' + rate : '');
   }
 
   function paintTtsProviders() {
     var list = (CAT && CAT.providers) || [];
     var keep = ttsProvSel.value;
     ttsProvSel.innerHTML = list.map(function (p) {
-      var tail = p.ready ? (p.byLocalKey ? ' — 이 기기 키' : '') : ' — 키 필요';
+      var tail = p.ready ? (p.byLocalKey ? ' — key on this device' : '') : ' — key needed';
       if (isFree(p)) tail = ' · FREE' + tail;      // 무료 한도가 있는 엔진은 목록에서도 보이게
       return '<option value="' + esc(p.id) + '">' + esc(p.label) + tail + '</option>';
     }).join('') || '<option value="">—</option>';
@@ -1024,21 +1024,21 @@
     if (ttsKeyBox.dataset.editing === P.id) return;      // 입력 중이면 다시 그리지 않는다
     var envName = P.envVar ? ' (' + esc(P.envVar) + ')' : '';
     if (P.envReady) {
-      ttsKeyBox.innerHTML = '<span class="kstate srv">🔒 서버에 설정됨</span>' +
-        '<span>이 엔진의 키는 서버 환경변수에 있습니다' + envName + '. 브라우저에 저장하지 않습니다.</span>' +
-        '<button type="button" data-key="edit">이 기기 키로 바꾸기</button>';
+      ttsKeyBox.innerHTML = '<span class="kstate srv">🔒 Set on the server</span>' +
+        '<span>This engine\u2019s key lives in a server environment variable' + envName + '. Nothing is stored in the browser.</span>' +
+        '<button type="button" data-key="edit">Use a key on this device instead</button>';
       return;
     }
     if (TTS.hasKey(P.id)) {
-      ttsKeyBox.innerHTML = '<span class="kstate loc">🔑 이 기기의 키</span>' +
+      ttsKeyBox.innerHTML = '<span class="kstate loc">🔑 Key on this device</span>' +
         '<code>' + esc(TTS.keyMask(P.id)) + '</code>' +
-        '<button type="button" data-key="edit">변경</button>' +
-        '<button type="button" data-key="clear">삭제</button>';
+        '<button type="button" data-key="edit">Change</button>' +
+        '<button type="button" data-key="clear">Remove</button>';
       return;
     }
-    ttsKeyBox.innerHTML = '<span class="kstate none">키 없음</span>' +
-      '<span>' + esc(P.label) + ' 키' + envName + '를 넣으면 이 기기에서 바로 만들 수 있습니다.</span>' +
-      '<button type="button" data-key="edit">키 입력</button>';
+    ttsKeyBox.innerHTML = '<span class="kstate none">No key</span>' +
+      '<span>Enter a ' + esc(P.label) + ' key' + envName + ' and this device can generate audio right away.</span>' +
+      '<button type="button" data-key="edit">Enter a key</button>';
   }
 
   function paintTtsKeyForm() {
@@ -1047,10 +1047,10 @@
     ttsKeyBox.dataset.editing = P.id;
     ttsKeyBox.innerHTML =
       '<input type="password" data-key="input" autocomplete="off" spellcheck="false" ' +
-        'placeholder="' + esc(P.label) + ' API key 붙여넣기">' +
-      '<button type="button" data-key="save">저장</button>' +
-      '<button type="button" data-key="cancel">취소</button>' +
-      '<span>이 브라우저에만 저장됩니다. 공용 PC 라면 넣지 마세요.</span>';
+        'placeholder="' + esc(P.label) + ' API key">' +
+      '<button type="button" data-key="save">Save</button>' +
+      '<button type="button" data-key="cancel">Cancel</button>' +
+      '<span>Kept in this browser only. Do not enter it on a shared PC.</span>';
     var inp = ttsKeyBox.querySelector('[data-key=input]');
     if (inp) inp.focus();
   }
@@ -1063,7 +1063,7 @@
     if (act === 'edit') { paintTtsKeyForm(); return; }
     if (act === 'cancel') { delete ttsKeyBox.dataset.editing; paintTtsKey(); return; }
     if (act === 'clear') {
-      if (!confirm(P.label + ' 키를 이 브라우저에서 지웁니다. 계속할까요?')) return;
+      if (!confirm('This removes the ' + P.label + ' key from this browser. Continue?')) return;
       TTS.clearKey(P.id);
       delete ttsKeyBox.dataset.editing;
       CAT = null; loadTtsCatalog();
@@ -1071,7 +1071,7 @@
     }
     if (act === 'save') {
       var v = (ttsKeyBox.querySelector('[data-key=input]') || {}).value || '';
-      if (!v.trim()) { alert('키를 붙여넣어 주세요.'); return; }
+      if (!v.trim()) { alert('Paste the key first.'); return; }
       TTS.setKey(P.id, v);
       delete ttsKeyBox.dataset.editing;
       CAT = null;
@@ -1160,7 +1160,7 @@
       return true;
     }
     if (TTS.hasToken()) return true;
-    var t = prompt('서버의 공용 TTS 토큰(SG_TTS_TOKEN)을 입력하세요:');
+    var t = prompt('Enter the shared server TTS token (SG_TTS_TOKEN):');
     if (!t) return false;
     TTS.setToken(t);
     return true;
@@ -1201,13 +1201,13 @@
     var usd = (USD1K[P.id] || 0.06) * chars / 1000;
     var wav = /wav/i.test(P.mime || '');
     if (!confirm(todo.length + ' clips · ' + chars.toLocaleString() + ' characters with ' + P.label +
-        (isFree(P) ? ' — 무료 한도 안이면 $0, 한도를 넘으면 약 $' + usd.toFixed(2)
+        (isFree(P) ? ' — $0 within the free quota, about $' + usd.toFixed(2) + ' beyond it'
                    : ' ≈ $' + usd.toFixed(2)) + '.\n\n' +
-        '만든 소리는 이 브라우저에 저장됩니다(IndexedDB). 학생 기기에서도 들리게 하려면 ' +
-        'media/audio/ 에 파일로 넣어 배포해야 합니다.\n\n' +
-        (wav ? '이 엔진은 mp3 가 아니라 WAV 로 만듭니다. 이 화면과 시험 화면에서는 그대로 들리지만, ' +
-               '파일로 내보내 배포할 때는 팩이 가리키는 경로(.mp3)와 확장자가 다릅니다.\n\n' : '') +
-        '계속할까요?')) return;
+        'The audio is stored in this browser (IndexedDB). To let student devices hear it, ' +
+        'deploy the files under media/audio/.\n\n' +
+        (wav ? 'This engine produces WAV, not mp3. It plays fine here and in the exam, but ' +
+               'exported files will not match the .mp3 paths the pack points at.\n\n' : '') +
+        'Continue?')) return;
 
     var cast = PLAN.caster(voices);
     var model = ttsModelSel.value, rate = Number(ttsRateEl.value) || 1;
@@ -1315,9 +1315,9 @@
     upNote.innerHTML = '<b>' + has + ' of ' + items.length + '</b> clips have audio on this device. '
       + 'Choose the folder your recordings sit in — files are matched to clips by name '
       + '(<code>l1-q01.mp3</code>, <code>SET 10 L1 Q1.wav</code>). '
-      + '이름으로 가릴 수 없는 파일은 걸지 않고 아래 목록에 남습니다. '
-      + '올린 파일은 이 브라우저에 저장됩니다(IndexedDB) — 학생 기기에서도 들리게 하려면 '
-      + 'media/audio/ 에 같은 이름으로 넣어 배포해야 합니다.';
+      + 'Files that cannot be matched by name are left unattached and stay listed below. '
+      + 'What you upload is stored in this browser (IndexedDB) — to let student devices hear it, '
+      + 'deploy the same filenames under media/audio/.';
     upListBtn.textContent = (upShow ? 'Hide' : 'Show') + ' the clip list · ' + items.length;
     upList.hidden = !upShow;
     if (upShow) upList.innerHTML = items.map(upRow).join('');
@@ -1377,7 +1377,7 @@
       input.value = '';
       if (!f) return;
       if (!SG_AUDIO_MATCH.isAudio(f.name) &&
-          !confirm(f.name + ' 은 소리 파일로 보이지 않습니다. 그래도 걸까요?')) return;
+          !confirm(f.name + ' does not look like an audio file. Attach it anyway?')) return;
       SG_AUDIO.setFile(slot, f).then(function () {
         upBusy.textContent = baseName(slot) + ' ← ' + f.name;
         renderAudioBar();
@@ -1480,7 +1480,7 @@
       : 'Show reviewed too (' + (dupRes.pairs.length - shown.length) + ')';
 
     SG_DUP_VIEW.render(dhost, shown,
-      '<span data-ko>겹치는 문항이 없습니다.</span><span data-en>No overlapping items.</span>');
+      '<span data-en>No overlapping items.</span>');
   }
 
   document.getElementById('dupall').addEventListener('click', function () {
