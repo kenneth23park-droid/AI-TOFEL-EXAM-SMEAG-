@@ -418,7 +418,12 @@
 //       존재하지 않는 세트였다 — 로그인 계정 목록에도, 시험 라이브러리에도, 리뷰에도
 //       뜨지 않았다. 팩을 tools/build_set12.mjs 로 지어 커밋하고 아홉 자리에 등록한다.
 //       프리캐시 목록이 바뀌었으므로 판올림.
-const VERSION = 'sg-v105';
+// v106: 리딩 지문의 낱말 표시가 지금 펴 놓은 문항을 따라간다. 지문은 화면당 한 번만
+//       그리는데 첫 문항의 표적 낱말만 켜 둔 채 굳어 있어, 뒤쪽 어휘 문항(SET 12
+//       Reading 30번 "prophecy")은 지문에 아무 표시가 없었다. assets/exam-render-reading.js
+//       와 assets/exam.css 가 함께 바뀐다 — 둘 다 SHELL_ASSETS(cache-first)라
+//       판올림하지 않으면 재방문 기기는 옛 사본을 계속 읽는다.
+const VERSION = 'sg-v106';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
