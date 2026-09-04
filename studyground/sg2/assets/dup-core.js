@@ -86,6 +86,22 @@
     interview:  null
   };
 
+  /* ── 블록 단위 정책 ───────────────────────────────────────────────────────
+   * 어떤 블록은 본문이라는 게 없다. 스피킹 record-set(Task 1 Listen and Repeat,
+   * Task 2 인터뷰)의 블록에 담긴 글은 과제 유형이 정하는 안내문 한 문단뿐이고
+   * (introScript 는 그 안내문을 소리로 읽어 주려고 그대로 복사한 것이다), 세트마다
+   * 다른 것은 소재 낱말 하나뿐이다 — 'a research study about sports activities /
+   * hobbies / health and wellness'. 그래서 SET 이 하나 늘 때마다 이 안내문끼리
+   * high 로 맞물려 저장이 막히고, 사람이 "안내문이지 문항이 아니다"라고 손으로
+   * 허용해 주는 일이 반복됐다(dup-allowlist.json 에 같은 사유로 세 쌍이 있었다).
+   * 자동 틀 판정(frameDf)은 줄이 글자까지 같아야 걸리므로 이걸 잡지 못한다.
+   * 유형이 필드째로 고정하는 경우라 여기 명시한다 — FIELD_POLICY 와 같은 이유다.
+   * 이 블록의 진짜 내용(따라 읽을 문장 · 인터뷰 질문)은 팩에 글로 없고 대본 단위
+   * (unitsFromScriptRows)가 담당하므로, 본문을 빼도 검사에서 빠지는 내용은 없다. */
+  var BLOCK_POLICY = {
+    'record-set': null      // 안내문뿐 — 텍스트 단위를 만들지 않는다
+  };
+
   /* 내용이 아닌 필드. heading/instruction 은 SET 마다 같은 게 정상이라 여기서 뺀다. */
   var SKIP_KEYS = {
     id: 1, kind: 1, no: 1, layout: 1, answer: 1,
@@ -248,6 +264,9 @@
             units.push(mkUnit({
               uid: setCode + '::blk:' + mod.id + ':' + bi,
               role: 'text', where: where,
+              /* 유형이 통째로 고정하는 블록은 줄을 지우지 않고 틀로 표시만 한다 —
+                 화면에는 원문 그대로 남고, 비교에서만 빠진다. */
+              frameByPolicy: BLOCK_POLICY[block.kind] === null,
               title: block.title || block.heading || ((mod.label || mod.id) + ' ' + block.kind),
               bodyLines: bodyLines, choices: [],
               meta: {
@@ -403,6 +422,7 @@
       function keep(l) {
         var nn = normalize(l);
         if (!nn) return false;
+        if (u.frameByPolicy) { u.framedOut.push({ line: l, df: df[nn] || 0, policy: 'block:' + u.where.blockKind }); return false; }
         if (df[nn] >= TH.frameDf) { u.framedOut.push({ line: l, df: df[nn] }); return false; }
         return true;
       }
@@ -626,7 +646,7 @@
   }
 
   return {
-    TH: TH, FIELD_POLICY: FIELD_POLICY, SKIP_KEYS: SKIP_KEYS,
+    TH: TH, FIELD_POLICY: FIELD_POLICY, BLOCK_POLICY: BLOCK_POLICY, SKIP_KEYS: SKIP_KEYS,
     normalize: normalize, tokens: tokens, shingles: shingles, longestRun: longestRun,
     harvest: harvest, lines: lines, payloadLinesFor: payloadLinesFor,
     unitsFromPack: unitsFromPack, unitsFromScriptRows: unitsFromScriptRows,

@@ -820,6 +820,17 @@
         /* 정답지가 마침표를 빠뜨린 문장이 있다(SET 9 q03). 마지막 고정 조각이 문장부호뿐이면
            없어도 넘어간다 — 학생이 놓을 조각이 아니라 화면에 이미 찍혀 있는 글자다. */
         if (!rest && /^[,.;:!?…—–-]+$/.test(fixed)) continue;
+        /* 문제지의 끝 부호와 정답지의 끝 부호가 다른 경우가 있다(SET 12 W1-q06: 문제지는
+           '?', 정답 문장은 '.'). 여기까지 왔다는 건 타일과 고정 글이 정답 문장에 남김없이
+           맞아떨어졌다는 뜻이므로 정답지가 밀린 것이 아니다 — 부호는 화면에 이미 찍혀 있는
+           글자이지 학생이 놓을 조각이 아니다. 넘기되 어느 문항이었는지 남긴다. */
+        if (!takes(fixed) && i === slots.length - 1
+            && /^[,.;:!?…—–-]+$/.test(fixed) && /^[.?!…]+$/.test(rest)) {
+          q.endPunctNote = 'The question document ends this sentence with "' + String(slots[i].text).trim()
+            + '" but the answer key ends it with "' + rest + '".';
+          rest = '';
+          continue;
+        }
         if (!takes(fixed)) return false;
         eat(fixed);
         continue;
@@ -1370,15 +1381,22 @@
           (b.questions || []).forEach(function (q) { if (q.kind === 'build') buildQs.push(q); });
         });
       });
-      var derived = [], unaligned = [];
+      var derived = [], unaligned = [], endPunct = [];
       buildQs.forEach(function (q, k) {
         if (k < wList.length && typeof wList[k] === 'string') {
           q.answerSentence = wList[k];
           answerKey[q.id] = wList[k];
           if (deriveTiles(q)) derived.push(q.id);
           else if (!alignBuildAnswer(q)) unaligned.push(q.id);
+          else if (q.endPunctNote) endPunct.push(q.id + ' — ' + q.endPunctNote);
         }
       });
+      if (endPunct.length) {
+        gate('warn', 'writing',
+          endPunct.length + ' sentence-building questions end with a different punctuation mark in the two documents. '
+            + 'The words all match, so the answer is scored — but the mark the student sees comes from the question document ('
+            + endPunct.slice(0, 4).join('; ') + (endPunct.length > 4 ? '; and more' : '') + ').');
+      }
       if (unaligned.length) {
         gate(strictSource ? 'stop' : 'warn', 'writing',
           unaligned.length + ' sentence-building questions do not cross-check: the word tiles in the question document cannot build the answer-key sentence, in that order ('

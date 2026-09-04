@@ -144,6 +144,7 @@ function main() {
     candidatePairs: res.candidatePairs,
     thresholds: res.thresholds,
     fieldPolicy: SG_DUP.FIELD_POLICY,
+    blockPolicy: SG_DUP.BLOCK_POLICY,
     coverage: {
       note: '팩에 텍스트로 존재하는 것만 비교한다. mp3 만 있고 대본이 없는 오디오는 비교 대상이 아니다.',
       scriptsLoaded: setInfo.map(function (s) { return s.code + ':' + s.scripts; }).join(' '),
