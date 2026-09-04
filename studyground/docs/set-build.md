@@ -30,7 +30,25 @@ kenneth-brain/smeag-TOFEL 자료/SET <N> ANWER KEY.docx      정답지
 | 보기를 만들어 채움 | `choicesOrigin === 'generated'` |
 | 타일을 정답에서 역산함 | `tilesOrigin === 'derived-from-answer'` |
 | AI 가 채운 내용 | `scriptOrigin === 'ai'` · `answerOrigin === 'ai'` |
+| 팩의 문장이 원본에 그대로 없음 | `verbatimGaps()` (scope `source`) |
 | 스크립트·정답지 문서를 안 올림 | 빌드 자체가 막힘 |
+
+**표식만으로는 모자란다.** 위의 표는 전부 `...Origin` 표식, 곧 **파서가 스스로 신고한 것**을
+본다. 신고하지 않고 문장이 달라지는 길(줄을 잇다 낱말이 빠지거나, 손으로 고친 팩을 다시
+커밋하거나, 나중에 누가 매끄럽게 다듬거나)은 그 표식에 걸리지 않는다. 그래서 결과물 쪽에서
+한 번 더 본다 — **팩에 적힌 모든 문장이 원본 문서에 그대로 있는가**
+(`set-import.js` 의 `verbatimGaps()`, gate scope `source`, strict source mode 에서 `stop`).
+
+* 문장 단위로 본다. 팩은 원본의 여러 문단을 한 필드로 잇는다(W2 이메일의 상황문 + 요구사항,
+  표의 칸). 통째로 찾으면 이어 붙였다는 이유만으로 전부 걸리므로, 문장 하나가 원본에 그대로
+  있는지만 본다 — 순서를 바꿔 잇는 것은 지나가고 **낱말을 고치는 것은 걸린다.**
+* 원본은 세 장 전부다(문제지·스크립트·정답지). 굽은 따옴표·긴 대시·표 구분자·공백·대소문자
+  차이는 고침으로 세지 않는다. `{{1}}` · `{{B}}` 는 빈칸·삽입 자리 표시라 사이의 글만 본다.
+* 원본에 없는 것이 정상인 화면 문구는 `GENERATED_UI_TEXT` 에 적힌 것뿐이다
+  (`Fill in the blank.` · `Listen to the question and select the best response.`).
+  이 목록이 길어지면 그만큼 "원본 그대로"가 아니니, 늘리기 전에 다시 생각한다.
+
+규칙은 `tests/test_verbatim_gate.js` 가 고정한다.
 
 `tools/build_set<N>.mjs` 로 명령줄에서 짓는 경우도 **같은 잣대**다 — `strictSource: true` 를
 명시적으로 넘기고, `stop` 이 하나라도 있으면 0 이 아닌 값으로 끝난다. 이 둘이 어긋나면

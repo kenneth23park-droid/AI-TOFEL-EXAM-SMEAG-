@@ -1443,6 +1443,17 @@
           + crossBad.slice(0, 8).join(', ') + (crossBad.length > 8 ? ' and more' : ''));
     }
 
+    /* 원본 대조 — 표식(origin)이 아니라 결과물의 문장을 원본과 맞대 본다.
+       origin 표식은 파서가 스스로 신고한 것이라, 신고 없이 문장이 달라지는 길은
+       여기서만 걸린다. strict source mode 에서는 한 문장만 어긋나도 저장이 막힌다. */
+    var gaps = verbatimGaps(sections, input);
+    if (gaps.length) {
+      gate(strictSource ? 'stop' : 'warn', 'source',
+        gaps.length + ' sentences are not in the source documents word for word — the pack must quote the docx exactly: '
+          + gaps.slice(0, 5).map(function (g) { return g.where + ' "' + g.text.slice(0, 80) + '"'; }).join(' · ')
+          + (gaps.length > 5 ? ' and ' + (gaps.length - 5) + ' more' : ''));
+    }
+
     if (strictSource) {
       sections.forEach(function (sec) {
         sec.modules.forEach(function (mod) {
@@ -1688,6 +1699,115 @@
     return pack;
   }
 
+  /* ------------------------------------------ 원본 대조 (첫 관문의 마지막 그물)
+   *
+   * headingOrigin·choicesOrigin 같은 표식은 **파서가 스스로 신고한 것**이다. 신고하지
+   * 않고 문장을 다듬는 길(줄을 잇다 한 낱말이 빠지거나, 손으로 고친 팩을 다시 커밋하거나)
+   * 은 그 표식으로 잡히지 않는다. 그래서 결과물 쪽에서 한 번 더 본다 —
+   * **팩에 적힌 모든 문장이 원본 문서에 그대로 있는가.**
+   *
+   * 문장 단위로 보는 이유: 팩은 원본의 여러 문단을 한 필드로 잇는다(W2 이메일의 상황문 +
+   * 요구사항, 표의 칸). 통째로 찾으면 이어 붙였다는 이유만으로 전부 걸린다. 문장 하나가
+   * 원본에 그대로 있는지만 보면, 순서를 바꿔 잇는 것은 지나가고 낱말을 고치는 것은 걸린다.
+   */
+
+  /** 원본과 팩을 같은 잣대로 눕힌다 — 따옴표·대시·공백·표 구분자·대소문자만 지운다. */
+  function flattenText(t) {
+    return String(t == null ? '' : t)
+      .replace(/[‘’ʼ]/g, "'")
+      .replace(/[“”]/g, '"')
+      .replace(/[–—]/g, '-')
+      .replace(/…/g, '...')
+      .replace(/[ ​]/g, ' ')
+      .replace(/\|/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  /** 문장으로 자른다. lookbehind 없이 — ES5 규칙을 지킨다. */
+  function splitSentences(t) {
+    var out = [];
+    var buf = '';
+    String(t == null ? '' : t).split(/(\s+)/).forEach(function (piece) {
+      if (/^\s+$/.test(piece)) {
+        if (/[.!?][)"'”’]?$/.test(buf)) { out.push(buf); buf = ''; }
+        else buf += ' ';
+        return;
+      }
+      buf += piece;
+    });
+    if (buf) out.push(buf);
+    return out;
+  }
+
+  /** 원본 문서 셋의 모든 문단을 한 줄로 눕힌 건초더미. */
+  function sourceHaystack(input) {
+    var parts = [];
+    ['questions', 'script', 'answers'].forEach(function (k) {
+      var doc = input && input[k];
+      ((doc && doc.paragraphs) || []).forEach(function (p) {
+        parts.push(typeof p === 'string' ? p : (p && p.text) || '');
+      });
+    });
+    return flattenText(parts.join(' '));
+  }
+
+  /* 원본 문서에 없는 것이 정상인 화면 문구 — 여기서 짓는 것이라 여기에만 적는다.
+     이 목록이 길어지면 그만큼 "원본 그대로"가 아닌 것이니, 늘리기 전에 다시 생각한다. */
+  var GENERATED_UI_TEXT = ['Fill in the blank.', SHORT_RESPONSE_PROMPT];
+
+  /* 원본에서 온 글이 담기는 자리. 여기 없는 필드는 검사하지 않으므로,
+     새 필드를 만들면 여기에도 적는다(tests/test_verbatim_gate.js 가 고정한다). */
+  var VERBATIM_BLOCK_FIELDS = ['heading', 'title', 'instruction', 'template', 'script', 'introScript'];
+  var VERBATIM_Q_FIELDS = ['prompt', 'context', 'sentence', 'answerSentence', 'situation', 'subject',
+    'to', 'professor', 'script', 'hint'];
+  var VERBATIM_Q_LISTS = ['choices', 'tiles', 'trapTiles', 'bullets'];
+
+  /**
+   * 팩의 문장 중 원본 문서에 그대로 있지 않은 것을 모은다.
+   * @param {Array} sections
+   * @param {Object} input  build 가 받은 것과 같은 { questions, script, answers }
+   * @return {Array<{where:string, text:string}>}
+   */
+  function verbatimGaps(sections, input) {
+    var hay = sourceHaystack(input);
+    var gaps = [];
+    var allowed = GENERATED_UI_TEXT.map(flattenText);
+    function look(where, val) {
+      if (val == null || typeof val === 'object') return;
+      /* {{1}} · {{B}} 는 빈칸/삽입 자리 표시라 원본에 없다 — 사이의 글만 본다. */
+      String(val).split(/\{\{[^}]*\}\}/).forEach(function (part) {
+        splitSentences(part).forEach(function (sent) {
+          var n = flattenText(sent);
+          if (n.length < 4) return;              /* 'a' · 'so' 같은 힌트 조각 */
+          if (allowed.indexOf(n) >= 0) return;
+          if (hay.indexOf(n) < 0) gaps.push({ where: where, text: sent.trim() });
+        });
+      });
+    }
+    function lookList(where, list) {
+      (list || []).forEach(function (v, i) { look(where + '[' + (i + 1) + ']', v); });
+    }
+    (sections || []).forEach(function (sec) {
+      (sec.modules || []).forEach(function (mod) {
+        (mod.blocks || []).forEach(function (blk) {
+          VERBATIM_BLOCK_FIELDS.forEach(function (k) { look(mod.id + ' ' + k, blk[k]); });
+          lookList(mod.id + ' passage', blk.paragraphs);
+          (blk.questions || []).forEach(function (q) {
+            VERBATIM_Q_FIELDS.forEach(function (k) { look(q.id + ' ' + k, q[k]); });
+            VERBATIM_Q_LISTS.forEach(function (k) { lookList(q.id + ' ' + k, q[k]); });
+            (q.posts || []).forEach(function (p, i) {
+              look(q.id + ' post' + (i + 1), p && p.name);
+              look(q.id + ' post' + (i + 1), p && p.text);
+            });
+          });
+        });
+      });
+    });
+    return gaps;
+  }
+
   /**
    * 정답지 ↔ 문제지 크로스체크. 정답을 붙이는 것과, 붙은 정답이 그 문항에서 성립하는지는
    * 다른 일이다 — 정답지가 한 줄 밀리거나 보기 개수가 다르면 여기서만 드러난다.
@@ -1730,6 +1850,7 @@
     build: build,
     finalize: finalize,       /* set-generate.js 가 같은 조립·검산을 타려고 부른다 */
     crossCheckAnswers: crossCheckAnswers,
+    verbatimGaps: verbatimGaps,
     withHelpers: withHelpers,
     SECTION_ORDER: SECTION_ORDER,
     /* 테스트용 */
