@@ -38,6 +38,28 @@ if git diff --cached --name-only | grep -q '^studyground/sg2/sw\.js$'; then
   fi
 fi
 
+# ── 세트가 반쪽인가 ──────────────────────────────────────────
+# SET 12 는 음성·배역표·사진표까지 커밋됐는데 문항 팩이 없었다. 팩은 가져온 그
+# 브라우저의 localStorage 안에만 있었고, 그래서 그 브라우저 밖에서는 존재하지 않는
+# 세트였다 — 어느 화면에도 뜨지 않았다. 기존 검사는 전부 "팩이 있다"를 전제해서
+# 팩이 없는 세트는 검사할 대상이 없어 조용히 지나갔다.
+#
+# 이 검사는 판정을 뒤집는다: 세트의 흔적이 하나라도 커밋에 있으면, 팩과 미디어와
+# 등록 열여섯 자리가 전부 있어야 한다. 어느 자리가 비었는지 그 자리에서 말해 준다.
+if git diff --cached --name-only | grep -qE '^studyground/(sg2/(assets/set[0-9]+\.js|tools/build_set[0-9]+\.mjs|tts-voices-set[0-9]+exam-11labs\.json|config/(set[0-9]+-listening-images|offline\.set[0-9]+|offline\.sets)\.json|media/(audio|pictures)/set[0-9]+/|login\.html|dashboard\.html|exam-runtime\.html|review\.html|admin-set-view\.html|tests\.html|sw\.js|assets/(question-config|exam-shell|offline-prep|admin-session)\.js|tools/build_offline_manifest\.py)|tests/test_set_complete\.js)'; then
+  if command -v node >/dev/null 2>&1; then
+    echo "pre-commit: 세트가 바뀌었습니다 — 팩·미디어·등록이 갖춰졌는지 봅니다."
+    if ! node studyground/tests/test_set_complete.js; then
+      echo "" >&2
+      echo "커밋을 멈췄습니다. 세트가 반쪽인 채로 나가면 시험장에서야 드러납니다." >&2
+      echo "절차: studyground/docs/set-build.md" >&2
+      exit 1
+    fi
+  else
+    echo "pre-commit: node 가 없어 세트 검사를 건너뜁니다." >&2
+  fi
+fi
+
 # 이번 커밋이 겹침 판정에 영향을 주는가. 아니면 조용히 지나간다.
 if ! git diff --cached --name-only | grep -qE '^studyground/(sg2/assets/set[0-9a-z]+\.js|sg2/config/_.*_fragments/|sg2/config/dup-allowlist\.json|sg2/assets/dup-core\.js|tools/dup_check\.js)'; then
   exit 0

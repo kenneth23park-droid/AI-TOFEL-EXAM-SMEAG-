@@ -1,5 +1,5 @@
 /* SMEAG StudyGround — tools/build_set12.mjs : SET 12 source docx files -> assets/set12.js.
-   세트 만들기 네 관문(원본 그대로 · 음성 대조 · 정답 크로스체크 · 저장 검산)은
+   세트 만들기 다섯 관문(원본 그대로 · 음성 대조 · 정답 크로스체크 · 저장 검산 · 완결성)은
    ../../docs/set-build.md 에 있다. 여기서는 첫 관문과 셋째 관문이 gate 로 걸린다.
 
    build_set11.mjs 와 다른 것 하나 — 원본 세 장의 이름을 적어 두지 않는다.

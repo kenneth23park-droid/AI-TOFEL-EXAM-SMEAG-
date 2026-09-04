@@ -1,7 +1,7 @@
 # 세트 만들기 — 순서와 검산
 
 세트 하나는 문서 세 장(문제지·스크립트·정답지)에서 나온다. 이 문서는 그 세 장이 시험이 될
-때까지 반드시 지나야 하는 네 관문을 적는다. **각 관문은 사람 눈이 아니라 코드가 막는다** —
+때까지 반드시 지나야 하는 다섯 관문을 적는다. **각 관문은 사람 눈이 아니라 코드가 막는다** —
 아래에 어느 코드가 무엇을 막는지 같이 적어 둔 이유다. 사람이 확인하기로 한 것은 언젠가
 확인하지 않게 되고, 그 사실은 시험장에서만 드러난다.
 
@@ -89,6 +89,56 @@ localStorage 는 조용히 반쯤 실패하는 자리가 많아서(용량 초과
 
 규칙은 `tests/test_set_save_verify.js` 가 고정한다.
 
+## 5. 세트는 통째로 나간다 — 반쪽이면 막는다
+
+앞의 넷은 전부 **팩이 있다**를 전제한다. 팩이 없는 세트는 검사할 대상이 없어서 조용히
+지나간다. SET 12 가 그렇게 나갔다: 음성(`media/audio/set12`)·배역표·사진 배정표까지
+지어져 커밋됐는데 문항 팩(`assets/set12.js`)이 없었다. 팩은 `admin-set-import.html` 로
+가져온 **그 브라우저의 localStorage 안에만** 있었고, 그래서 그 브라우저 밖에서는
+존재하지 않는 세트였다 — 로그인 목록에도, 시험 라이브러리에도, 리뷰에도 뜨지 않았다.
+"세트가 안 보인다"는 화면의 결함처럼 보이지만, 세트가 파일로 지어진 적이 없다는 뜻이었다.
+
+그래서 판정을 뒤집는다 — **세트의 흔적이 하나라도 있으면 전부 있어야 한다.**
+
+강제하는 곳 — `studyground/tests/test_set_complete.js`. 세트 번호를 흔적의 합집합에서
+모은다(팩·빌더·배역표·사진표·음성 폴더·사진 폴더·오프라인 목록). 하나라도 있으면
+그 세트는 "짓는 중"이고, 아래가 전부 있어야 한다.
+
+| 갖춰야 할 것 | 없으면 |
+| --- | --- |
+| `assets/set<N>.js` | 가져온 브라우저 밖에 세트가 존재하지 않는다 |
+| `tools/build_set<N>.mjs` | 팩을 다시 지을 길이 없다 |
+| `tests/test_set_import_set<N>.mjs` | 원본 회귀를 잡는 그물이 없다 |
+| `tts-voices-set<N>exam-11labs.json` · `config/set<N>-listening-images.json` | 목소리·얼굴이 없다 |
+| `config/offline.set<N>.json` · `media/audio/set<N>/` | 시험장에서 클립마다 회선을 탄다 |
+| 등록 열여섯 자리 | 그 화면에서만 조용히 사라진다 |
+| 팩이 가리키는 `media/` 파일 | 학생 화면은 `Audio unavailable` 만 본다 |
+| 듣기 문항의 화자 사진 | 듣기만 그림 없이 뜬다 |
+
+**등록 열여섯 자리** — 세트 하나가 보이려면 이름이 여기 전부 있어야 한다. 하나만
+빠져도 그 화면에서만 사라지므로, 검사가 실패하면 어느 파일에 어떤 문자열이 없는지와
+그 자리가 무엇을 하는지를 같이 적어 준다.
+
+```
+login.html                       계정 목록
+dashboard.html · exam-runtime.html · review.html · admin-set-view.html   팩 스크립트 태그
+tests.html                       시험 라이브러리 카드
+assets/question-config.js        문항 편집기 후킹
+assets/exam-shell.js             ?set= 로 팩 고르기 · ?testId= 추론
+assets/offline-prep.js           오프라인 준비가 같은 세트를 본다(어긋나면 다른 세트 음성을 튼다)
+assets/admin-session.js          관리자 계정 · SET 선택기
+config/offline.sets.json         오프라인 사전 다운로드 목록
+sw.js                            프리캐시(팩 · 오프라인 목록) + VERSION 판올림
+tools/build_offline_manifest.py  오프라인 목록 생성기
+```
+
+SET 1·9 는 이 규칙이 생기기 전에 만들어져 모양이 다르다. 검사 안의 `LEGACY` 에 사유와
+함께 적어 면제한다. **면제는 그 둘뿐이고, 새로 짓는 세트는 예외 없이 전부 지나야 한다.**
+
+돌리는 자리는 둘이다. `studyground/tools/hooks/pre-commit` 이 세트 관련 파일이 커밋에
+들어 있을 때 돌고, `.github/workflows/deploy-sg2.yml` 이 배포 직전에 다시 돈다 —
+훅은 `git commit --no-verify` 로 넘길 수 있지만 배포 앞의 문은 넘을 수 없다.
+
 ---
 
 ## 세트 하나를 끝낼 때 돌리는 것
@@ -99,6 +149,7 @@ node studyground/tests/test_set_save_verify.js        # 4
 node studyground/tests/test_audio_script_check.js     # 2 의 판정 규칙
 node studyground/tests/test_set_import_set<N>.mjs     # 그 세트의 실제 문서 회귀
 node studyground/tests/test_listening_pictures.js     # 2 — 듣기 화자 사진이 빠지지 않았는가
+node studyground/tests/test_set_complete.js           # 5 — 세트가 반쪽이 아닌가 (훅·CI 가 자동으로 돈다)
 ```
 
 세트마다 `test_set_import_set<N>.mjs` 를 하나씩 둔다. 문항 수·모듈별 번호·원문 그대로인지를

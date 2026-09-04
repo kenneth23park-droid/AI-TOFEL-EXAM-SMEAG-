@@ -25,6 +25,18 @@ jobs:
         with:
           node-version: '22'
 
+      # 배포 앞의 문. pre-commit 훅과 같은 검사를 여기서 다시 돈다 —
+      # 훅은 `git commit --no-verify` 로 넘길 수 있지만 이 자리는 넘길 수 없다.
+      #
+      # 세트 완결성: SET 12 는 음성·배역표·사진표까지 커밋됐는데 문항 팩이 없어서
+      # 가져온 그 브라우저 밖에서는 존재하지 않는 세트였다. 흔적이 있으면 팩·미디어·
+      # 등록이 전부 있어야 한다.
+      # 겹침: 훅 주석이 "배포는 막힌다"고 적어 두고도 이 워크플로에는 그 검사가 없었다.
+      - name: Gate — 세트 완결성 · 문항 겹침
+        run: |
+          node studyground/tests/test_set_complete.js
+          node studyground/tools/dup_check.js --quiet
+
       - name: Install Vercel CLI
         run: npm install -g vercel@54
 

@@ -149,9 +149,11 @@ Exam audio has its own gate — it runs whenever an mp3 is added or replaced
 layer 3 transcribes the changed audio back to text to check it against the
 script. See [docs/audio-gate.md](docs/audio-gate.md).
 
-세트 하나를 새로 만들 때는 네 관문을 순서대로 지난다 — 원본 문서 그대로 문제지 짓기,
+세트 하나를 새로 만들 때는 다섯 관문을 순서대로 지난다 — 원본 문서 그대로 문제지 짓기,
 스크립트로 ElevenLabs 음성 만들고 받아쓰기로 대조하기, 정답지와 문제지 전수 크로스체크,
-저장한 뒤 되읽어 확인하기. 각 관문을 무엇이 막는지는
+저장한 뒤 되읽어 확인하기, 그리고 세트가 반쪽이 아닌지 — 팩·미디어·등록이 함께
+있는지 — 확인하기. 다섯째 관문은 SET 12 가 음성만 지어진 채 커밋돼 어느 화면에도
+뜨지 않았던 일에서 나왔다. 각 관문을 무엇이 막는지는
 [docs/set-build.md](docs/set-build.md) 에 있다.
 
 ## BMAD streams
