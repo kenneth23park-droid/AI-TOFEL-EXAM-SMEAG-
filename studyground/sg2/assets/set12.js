@@ -2161,7 +2161,7 @@ window.SMEAG_SET12 = {
                   "prepSec": 3,
                   "respondSec": 45,
                   "script": "Thank you for joining today. I'd like to ask you some questions about health and wellness. What do you usually do to stay healthy—do you exercise regularly, eat well, or do other things to take care of your body?",
-                  "image": "media/pictures/set12/image8.png"
+                  "image": "media/pictures/set12/s-task2-interviewer.webp"
                 },
                 {
                   "id": "set12-S2-q02",
@@ -2171,7 +2171,7 @@ window.SMEAG_SET12 = {
                   "prepSec": 3,
                   "respondSec": 45,
                   "script": "I see. What do you usually do for your diet? For example, do you try to eat certain types of food, or do you try to avoid certain foods?",
-                  "image": "media/pictures/set12/image8.png"
+                  "image": "media/pictures/set12/s-task2-interviewer.webp"
                 },
                 {
                   "id": "set12-S2-q03",
@@ -2181,7 +2181,7 @@ window.SMEAG_SET12 = {
                   "prepSec": 3,
                   "respondSec": 45,
                   "script": "That makes sense. What part of staying healthy or keeping fit do you find the most difficult? Could you tell me Why?",
-                  "image": "media/pictures/set12/image8.png"
+                  "image": "media/pictures/set12/s-task2-interviewer.webp"
                 },
                 {
                   "id": "set12-S2-q04",
@@ -2191,7 +2191,7 @@ window.SMEAG_SET12 = {
                   "prepSec": 3,
                   "respondSec": 45,
                   "script": "Good points. Lastly, some people believe it will become easier for people to maintain healthy habits in the future. Some people disagree with this. What is your opinion and why?",
-                  "image": "media/pictures/set12/image8.png"
+                  "image": "media/pictures/set12/s-task2-interviewer.webp"
                 }
               ],
               "introScript": "You have volunteered for a research study about health and wellness. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer’s questions."
