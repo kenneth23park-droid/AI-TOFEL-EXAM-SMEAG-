@@ -14,8 +14,16 @@
 set -e
 
 N="${1:?세트 번호를 주세요 — 예: sh tools/make_set_audio.sh 11}"
+# 세트 번호는 여기서 소비한다. 남은 인자만 생성기로 넘긴다 —
+# "$@" 를 그대로 넘기면 번호가 위치 인자로 다시 들어가 tts_multivoice.py 가
+# 'unrecognized arguments: 12' 로 멈춘다(SET 12 에서 실제로 그랬다).
+shift
 MANIFEST="tts-voices-set${N}exam-11labs.json"
 
+# 듣기 화자 사진도 같은 배역표에서 나온다 — 음성만 만들고 사진을 잊으면
+# 듣기 화면만 그림 없이 뜬다. 세트 하나를 끝내는 명령은 하나여야 한다.
 node tools/build_voices_manifest.mjs --set "$N"
+echo
+node tools/build_listening_images.mjs --set "$N"
 echo
 python3 tools/tts_multivoice.py --manifest "$MANIFEST" "$@"

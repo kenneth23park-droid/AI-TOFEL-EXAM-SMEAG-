@@ -1,5 +1,6 @@
 {
   "source": "tts-voices-set11exam-11labs.json voice casting + shared TOEFL listening picture assets",
+  "generatedBy": "tools/build_listening_images.mjs",
   "questions": {
     "L1-1": "media/pictures/TOEFL Listening Image (Single female).webp",
     "L1-2": "media/pictures/TOEFL Listening Image (Single male).webp",

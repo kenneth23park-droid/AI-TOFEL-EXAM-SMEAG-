@@ -43,14 +43,24 @@ cd studyground/sg2
 ELEVENLABS_API_KEY=... sh tools/make_set_audio.sh <N>
 ```
 
-하는 일은 둘이다.
+하는 일은 셋이다.
 1. `tools/build_voices_manifest.mjs` — 원본 docx 를 같은 파서에 물려 배역 매니페스트를 짓는다.
-   대사는 스크립트 문서에서 그대로 온다(사람이 옮겨 적지 않는다).
-2. `tools/tts_multivoice.py` — mp3 를 뽑고, **만든 음성을 다시 받아쓰기해 스크립트와 대조한다**
+   대사는 스크립트 문서에서 그대로 온다(사람이 옮겨 적지 않는다). 원본 문서의 **이름은
+   세트마다 다르다** — 적어 두지 않고 폴더에서 골라 온다(`tools/source_docs.mjs`,
+   `tests/test_source_docs.js` 가 지금까지 온 이름 네 벌을 고정한다).
+2. `tools/build_listening_images.mjs` — 듣기 화자 사진(`config/set<N>-listening-images.json`).
+   같은 배역표에서 나오므로 목소리와 얼굴의 성별이 어긋나지 않고, 한 세트 안에서 같은
+   목소리는 늘 같은 얼굴이다. 손으로 적지 않는다.
+3. `tools/tts_multivoice.py` — mp3 를 뽑고, **만든 음성을 다시 받아쓰기해 스크립트와 대조한다**
    (`tools/verify_audio.py`, WER 기준). 하나라도 FAIL 이면 이 명령이 0 이 아닌 값으로 끝난다.
 
 받아쓰기 대조를 건너뛰는 `--no-verify` 는 실험용이다. 시험에 나갈 음성에는 쓰지 않는다.
 판정 규칙 자체는 `tests/test_audio_script_check.js` 가 고정한다.
+
+듣기 사진은 소리와 함께 이 명령 하나로 끝난다 — 음성만 만들고 사진을 잊으면 듣기 화면만
+그림 없이 뜬다(SET 12 가 그랬다). 화면으로 세트를 가져올 때도 `admin-set-import.html` 이
+같은 파일을 읽어 붙이고, 없으면 검산 줄에 적는다. `tests/test_listening_pictures.js` ·
+`tests/test_set_audio_cli.js` 가 이 둘을 고정한다.
 
 ## 3. 정답지 ↔ 문제지 크로스체크 — 전수로 맞는지 확인한다
 
@@ -88,6 +98,7 @@ node studyground/tests/test_answer_crosscheck.js      # 3
 node studyground/tests/test_set_save_verify.js        # 4
 node studyground/tests/test_audio_script_check.js     # 2 의 판정 규칙
 node studyground/tests/test_set_import_set<N>.mjs     # 그 세트의 실제 문서 회귀
+node studyground/tests/test_listening_pictures.js     # 2 — 듣기 화자 사진이 빠지지 않았는가
 ```
 
 세트마다 `test_set_import_set<N>.mjs` 를 하나씩 둔다. 문항 수·모듈별 번호·원문 그대로인지를
