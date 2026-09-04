@@ -87,13 +87,13 @@ var t = REPORT.build(row('SET9',
   { reading: { score: 26, total: 35 }, listening: { score: 26, total: 33 },
     writing: { score: 3, total: 10 } },              // Build a Sentence — 총점에는 안 쓴다
   produced('writing', 7, 2)                          // 과제 2개 · 7.0/10 → 21
-    .concat(produced('speaking', 12, 4))             // 과제 4개 · 12.0/20 → 18
+    .concat(produced('speaking', 12, 4))             // 과제 4개 · 12.0/20 → 평균 3.00
 ), ME);
 eq(t.profile, 'toefl6', '프로파일 — 옛 /30 눈금(toefl)과 다른 이름이어야 한다');
 eq(t.scores[0].points, 4.5, 'Reading 26/35 → 환산 22 → 밴드 4.5');
 eq(t.scores[1].points, 5, 'Listening 26/33 → 환산 24 → 밴드 5.0');
 eq(t.scores[2].points, 4.5, 'Writing 과제 7.0/10 → 환산 21 → 밴드 4.5');
-eq(t.scores[3].points, 3.5, 'Speaking 과제 12.0/20 → 환산 18 → 밴드 3.5');
+eq(t.scores[3].points, 3, 'Speaking 과제 12.0/20 → 평균 3.00 → 밴드 3.0 (표를 타지 않는다)');
 /* 옛 환산점수를 버리지 않는다 — 전환기(2026~2028)에는 두 눈금을 병기한다. */
 eq(t.scores.map(function (s) { return s.scaled; }), [22, 24, 21, 18], '옛 환산점수는 scaled 로 따라간다');
 eq(t.conventional, 85, '옛 총점(/120)도 함께 넘긴다');

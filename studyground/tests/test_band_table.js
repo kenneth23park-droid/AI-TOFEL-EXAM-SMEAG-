@@ -88,6 +88,28 @@ if (hit) {
   });
 }
 
+/* ── 3-1. scores.html 의 스피킹 규칙이 sg-band.js 와 같은 값을 내는가 ──
+   스피킹만은 표가 아니라 "과제 평균을 0.5 로 올린다" 는 규칙이다. 표를 대조하는
+   것만으로는 이 규칙이 어긋난 것을 못 잡는다 — 그래서 조회 화면의 BAND 를 잘라
+   내 실제로 돌려 본다. */
+var BAND_START = 'var BAND = (function () {';
+var bs = html.indexOf(BAND_START);
+ok(bs >= 0, 'scores.html 에서 BAND 모듈을 찾았다');
+if (bs >= 0) {
+  var be = html.indexOf('\n})();', bs);
+  var pageBand = eval('(function(){ ' + html.slice(bs, be + 6) + ' return BAND; })()');
+  [[3, 3], [3.25, 3.5], [3.5, 3.5], [3.75, 4], [4.25, 4.5], [4.75, 5], [5, 5], [0, 1]]
+    .forEach(function (pair) {
+      eq(pageBand.taskBand([{ score: pair[0] }], 'speaking'), pair[1],
+         'scores.html S 평균 ' + pair[0].toFixed(2) + ' → ' + pair[1].toFixed(1));
+      eq(pageBand.taskBand([{ score: pair[0] }], 'speaking'),
+         BAND.taskBand([{ score: pair[0] }], 'speaking'),
+         'scores.html 과 sg-band.js 가 같은 스피킹 밴드를 낸다 (' + pair[0] + ')');
+    });
+  eq(pageBand.taskBand([{ score: 3.5 }], 'writing'), 4.5,
+     'scores.html 라이팅은 여전히 0~30 표를 탄다');
+}
+
 /* ── 4. 종합은 합이 아니라 평균이고, .25 는 올라간다 (ETS 규칙) ── */
 eq(BAND.overall({ r: 5, l: 5, w: 5, s: 5.5 }), 5, '종합 5.125 → 5.0 (ETS 예시)');
 eq(BAND.overall({ r: 5, l: 5, w: 5.5, s: 5.5 }), 5.5, '종합 5.25 → 5.5 (ETS 예시)');
@@ -111,7 +133,19 @@ eq(BAND.sectionBand(40, 47, 'listening'), 5.5, 'L 40/47 → 26/30 → 밴드 5.5
 
 /* ── 7. 산출형: 루브릭 0~5 → 밴드. 영역마다 경계가 다르다 ── */
 eq(BAND.taskBand([{ score: 3.5 }], 'writing'), 4.5, 'W 3.5/5 → 21/30 → 4.5');
-eq(BAND.taskBand([{ score: 3.5 }], 'speaking'), 4, 'S 3.5/5 → 21/30 → 4.0');
+
+/* 스피킹만은 표를 타지 않는다 — 과제 평균(0~5)을 0.5 로 올린 값이 곧 밴드다.
+   2026-09-04 운영 결정. 아래 표는 요구받은 그대로다(.25·.75 는 올라간다). */
+[[3, 3], [3.25, 3.5], [3.5, 3.5], [3.75, 4], [4, 4],
+ [4.25, 4.5], [4.5, 4.5], [4.75, 5], [5, 5]].forEach(function (pair) {
+  /* 과제 넷의 평균이 pair[0] 이 되도록 한 과제에 그 값을 그대로 준다. */
+  eq(BAND.taskBand([{ score: pair[0] }], 'speaking'), pair[1],
+     'S 평균 ' + pair[0].toFixed(2) + ' → ' + pair[1].toFixed(1));
+});
+eq(BAND.taskBand([{ score: 4 }, { score: 4 }, { score: 5 }, { score: 4 }], 'speaking'), 4.5,
+   'S 과제 넷 4·4·5·4 → 평균 4.25 → 4.5');
+eq(BAND.taskBand([{ score: 0 }], 'speaking'), 1, 'S 0점도 밴드 1 (0 이라는 밴드는 없다)');
+eq(BAND.taskBand([], 'speaking'), null, 'S 채점된 과제가 없으면 null');
 eq(BAND.taskBand([{ score: 5 }, { score: 5 }], 'writing'), 6, 'W 만점 → 6.0');
 eq(BAND.taskBand([{ score: 0 }], 'writing'), 1, 'W 0점 → 밴드 1 (0 이라는 밴드는 없다)');
 

@@ -784,7 +784,7 @@ var BAND = (function () {
     return bandForScaled(scaledFromRaw(correct, total), skill);
   }
 
-  /** 산출형: 과제 점수(0~5) 목록 → 밴드. */
+  /** 산출형: 과제 점수(0~5) 목록 → 밴드. 스피킹만 표를 타지 않는다(speakingBand). */
   function taskBand(tasks, skill) {
     var got = 0, top = 0, n = 0;
     (tasks || []).forEach(function (t) {
@@ -792,7 +792,17 @@ var BAND = (function () {
       got += Number(t.score); top += TASK_MAX; n += 1;
     });
     if (!n || top <= 0) return null;
-    return bandForScaled(halfUp(Math.max(0, Math.min(1, got / top)) * SCALED_MAX), skill);
+    var ratio = Math.max(0, Math.min(1, got / top));
+    if (String(skill || '').toLowerCase() === 'speaking') return speakingBand(ratio);
+    return bandForScaled(halfUp(ratio * SCALED_MAX), skill);
+  }
+
+  /** 스피킹 = 과제 평균(0~5)을 0.5 단위로 올린 값. 0~30 표를 거치지 않는다.
+      3.25→3.5 · 3.75→4.0 · 4.75→5.0. 바닥 1.0, 천장은 만점 평균 5.0.
+      sg2/assets/sg-band.js · app/scoring/scale.py 와 같은 규칙이라야 세 화면이 같다. */
+  function speakingBand(ratio) {
+    var mean = Math.max(0, Math.min(1, Number(ratio) || 0)) * TASK_MAX;
+    return Math.max(1, Math.min(6, toHalf(mean)));
   }
 
   /** 종합 = 채점된 영역 밴드의 평균, 0.5 단위(.25 는 올림). */
@@ -882,7 +892,7 @@ var BAND = (function () {
 
   return { SKILLS: SKILLS, TOEFL6: TOEFL6, TASK_MAX: TASK_MAX, scaledFromRaw: scaledFromRaw,
            bandForScaled: bandForScaled, sectionBand: sectionBand, taskBand: taskBand,
-           overall: overall, fmt: fmt, cefr: cefr, of: of, conventional: conventional };
+           speakingBand: speakingBand, overall: overall, fmt: fmt, cefr: cefr, of: of, conventional: conventional };
 })();
 
 /* ─────────────────────────────────────────────────────────────

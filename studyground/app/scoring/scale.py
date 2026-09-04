@@ -322,7 +322,27 @@ class Toefl6Scale:
                 skill = str(row["skill"]).strip().lower()
                 break
         ratio = min(max(sum(earned) / top, 0.0), 1.0)
+        if skill == "speaking":
+            return self.speaking_band(ratio)
         return self.band_for_scaled(round_half_up(ratio * self.scaled_max), skill)
+
+    def speaking_band(self, ratio: float) -> float:
+        """스피킹 밴드 = **과제 평균(0~5)을 그대로 0.5 단위로 올린 값**.
+
+        다른 영역과 달리 0~30 환산표를 거치지 않는다. 스피킹은 과제가 넷이라 평균이
+        늘 0.25 단위로 떨어지는데, 그 자리를 표로 옮기면 같은 0.25 차이가 어떤
+        구간에서는 밴드를 바꾸고 어떤 구간에서는 안 바꾼다. 학생에게 설명되는 눈금이
+        아니어서 평균을 0.5 로 올리는 규칙 하나로 바꿨다(2026-09-04, 운영 결정).
+
+            3.00 → 3.0 · 3.25 → 3.5 · 3.50 → 3.5 · 3.75 → 4.0 · 4.75 → 5.0
+
+        바닥은 1.0 이다(0.0 이라는 밴드는 없다). 천장은 만점 평균 5.0 이라 스피킹에서
+        6.0 은 나오지 않는다 — 표를 버린 대가이고, 의도한 것이다.
+
+        sg2/assets/sg-band.js · smeag-com/scores.html 의 speakingBand() 와 같은 규칙.
+        """
+        mean = min(max(float(ratio), 0.0), 1.0) * 5.0
+        return min(max(round_half_up_to_half(mean), 1.0), self.section_max)
 
     def band_score(self, total: float) -> float | None:
         return round_half_up_to_half(total)

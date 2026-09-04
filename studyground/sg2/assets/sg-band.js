@@ -19,6 +19,7 @@
  * 노출 전역: window.SG_BAND
  *   SG_BAND.sectionBand(correct, total, skill)  객관식 영역(R·L) → 밴드
  *   SG_BAND.taskBand(tasks, skill)              산출형(W·S) 과제 점수(0~5) → 밴드
+ *   SG_BAND.speakingBand(ratio)                 스피킹 전용 — 과제 평균을 0.5 로 올린다
  *   SG_BAND.overall(bandsBySkill)               종합 = 평균(빈 영역은 빠진다)
  *   SG_BAND.of(row, taskRows)                   응시 한 건 → 화면이 그릴 전부
  *   SG_BAND.fmt(band) / SG_BAND.cefr(band)
@@ -100,6 +101,8 @@
    * 산출형 영역(Writing·Speaking) → 밴드.
    * tasks: [{ score: 0~5, max?: 5 }] — 과제(문항) 하나당 한 개. 채점된 과제가
    * 하나도 없으면 null(= 채점 대기)이다.
+   *
+   * 스피킹은 표를 타지 않는다 — `speakingBand()` 참조.
    */
   function taskBand(tasks, skill) {
     var got = 0, top = 0, n = 0;
@@ -113,7 +116,26 @@
     }
     if (!n || top <= 0) return null;
     var ratio = Math.max(0, Math.min(1, got / top));
+    if (String(skill || '').toLowerCase() === 'speaking') return speakingBand(ratio);
     return bandForScaled(halfUp(ratio * SCALED_MAX), skill);
+  }
+
+  /**
+   * 스피킹 영역 밴드 = **과제 평균(0~5)을 그대로 0.5 단위로 올린 값**.
+   *
+   * 리딩·리스닝·라이팅과 달리 0~30 환산표를 거치지 않는다. 스피킹은 과제가 넷이라
+   * 평균이 늘 0.25 단위로 떨어지는데, 그 자리를 표로 옮기면 같은 0.25 차이가 어떤
+   * 구간에서는 밴드를 바꾸고 어떤 구간에서는 안 바꾼다. 학생에게 설명되는 눈금이
+   * 아니어서, 평균을 0.5 로 올리는 규칙 하나로 바꿨다(2026-09-04, 운영 결정).
+   *
+   *   3.00 → 3.0 · 3.25 → 3.5 · 3.50 → 3.5 · 3.75 → 4.0 · 4.75 → 5.0
+   *
+   * 바닥은 1.0 이다(0.0 이라는 밴드는 없다). 천장은 만점 평균 5.0 이라 6.0 은
+   * 스피킹에서 나오지 않는다 — 표를 버린 대가이고, 의도한 것이다.
+   */
+  function speakingBand(ratio) {
+    var mean = Math.max(0, Math.min(1, Number(ratio) || 0)) * TASK_MAX;
+    return Math.max(BAND_MIN, Math.min(BAND_MAX, toHalf(mean)));
   }
 
   /**
@@ -247,7 +269,7 @@
     SCALED_MAX: SCALED_MAX, TASK_MAX: TASK_MAX,
     halfUp: halfUp, toHalf: toHalf,
     scaledFromRaw: scaledFromRaw, bandForScaled: bandForScaled,
-    sectionBand: sectionBand, taskBand: taskBand, overall: overall,
+    sectionBand: sectionBand, taskBand: taskBand, speakingBand: speakingBand, overall: overall,
     cefr: cefr, fmt: fmt, of: of
   };
 });

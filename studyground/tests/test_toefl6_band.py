@@ -145,19 +145,20 @@ def test_rubric_to_section_uses_the_official_band_row_only():
 
 
 def test_rubric_to_section_reads_the_skill_from_the_rows():
-    """같은 0~30 이라도 영역마다 밴드 경계가 다르다 — 27/30 은 W 5.5, S 5.5, R 5.5.
+    """영역마다 산출이 다르다 — 라이팅은 0~30 표를, 스피킹은 과제 평균을 탄다.
 
-    갈리는 지점으로 고른다: 25/30 은 writing 5.0 이지만 speaking 도 5.0,
-    23/30 은 writing 4.5 · speaking 4.5. 확실히 갈리는 20/30 을 쓴다
-    (reading 4.0 · writing 4.0 · speaking 4.0 …) → listening 4.5 로 확인.
+    같은 3.5/5 라도 writing 은 21/30 을 표에 넣어 4.5 가 되고, speaking 은
+    평균 3.5 를 0.5 로 올린 3.5 가 된다(2026-09-04 운영 결정).
     """
     scale = get_scale(TOEFL6)
     def row(skill, score):
         return [{"skill": skill, "criterion": "Official Band",
                  "score": score, "max_score": 5.0}]
-    # 3.5/5 = 70% → 21/30.  writing 21 → 4.5,  speaking 21 → 4.0.
+    # 3.5/5 = 70% → writing 은 21/30 → 4.5.  speaking 은 평균 3.5 → 3.5.
     assert scale.rubric_to_section(row("writing", 3.5)) == 4.5
-    assert scale.rubric_to_section(row("speaking", 3.5)) == 4.0
+    assert scale.rubric_to_section(row("speaking", 3.5)) == 3.5
+    # .25 는 올라간다 — 스피킹 규칙의 핵심.
+    assert scale.rubric_to_section(row("speaking", 4.25)) == 4.5
 
 
 def test_grade_and_cefr():
