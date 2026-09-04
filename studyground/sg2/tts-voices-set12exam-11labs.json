@@ -1,0 +1,803 @@
+{
+  "provider": "elevenlabs",
+  "model": "eleven_flash_v2_5",
+  "output": "mp3_44100_128",
+  "note": [
+    "SET 12 시험 음성 배역 매니페스트. tools/build_voices_manifest.mjs 가 원본 docx 에서 만든다 — 손으로 고치지 말 것.",
+    "대본은 set-import.js 가 읽은 것과 같은 것이고, out 은 콘텐츠 팩이 가리키는 경로 그대로다.",
+    "목소리 13명은 SET 9 에서 확정된 것을 그대로 쓴다(config/set9-voice-casting.json).",
+    "id 에 세트 접두사를 붙이는 이유: tools/tts_multivoice.py 의 검산 매니페스트는 tts-voices*.json 을 합치므로, l1-q01 같은 이름은 SET 9 것과 부딪친다."
+  ],
+  "items": [
+    {
+      "id": "set12-l1-q01",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "Where is the guest lecture going to take place?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q02",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Did you find last week’s science seminar useful?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q03",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Still tied up with that group assignment?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q04",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q04.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "You’ve finished your research paper, haven’t you?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q05",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q05.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "Xb7hH8MSUJpSbSDYk0k2",
+          "voice_name": "GB-Alice",
+          "el_voice": "Alice",
+          "text": "Which building is your class in?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q06",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q06.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "How do I get to the student health center?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q07",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q07.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "Can you give me a ride to the airport?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q08",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q08.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Do you know what time the campus bookstore closes?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q09",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q09.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "The campus shuttle hasn’t been running on time lately."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q10",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q10.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Isn’t the campus pool closed for maintenance?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q11",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q11.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Why don’t we grab dinner after the movie?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q12",
+      "kind": "short",
+      "out": "media/audio/set12/l1-q12.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Have you heard back from the mechanic about your car?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l1-q13-14",
+      "kind": "conversation",
+      "out": "media/audio/set12/l1-q13-14.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "You mentioned you tried that new Thai restaurant with your coworkers last Friday. How was it?"
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Yeah, we went to the one on Baker Street. It was nice just getting out of the office for a change."
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "That's great. How was the food?"
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "It was pretty good, actually. There were some dishes I'd never tried before, which was a pleasant surprise."
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "I've been wanting to try it too. Is it worth making a reservation?"
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Hmmm, I'm not sure I'd go out of my way for it. If someone asked me to go again, I'd probably just suggest ordering takeout instead. You'd save time and money that way."
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "That makes sense. I've been doing that with most places lately anyway."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set12-l1-q15-16",
+      "kind": "conversation",
+      "out": "media/audio/set12/l1-q15-16.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Didn't you start using some kind of language learning app a couple of weeks ago? How's that going?"
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Yeah, it's actually been really useful. I feel like my vocabulary has improved quite a bit since I started."
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "That's impressive. I've been wanting to brush up on my Spanish. What do you like about it the most?"
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Definitely the interactive conversation exercises. They simulate real dialogues, so it feels like you're actually practicing with someone."
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Sounds great. Any complaints?"
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "The only thing is the push notifications. They pop up way too often and it gets a bit irritating. But aside from that, I'd say it's worth trying."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set12-l1-q17-18",
+      "kind": "conversation",
+      "out": "media/audio/set12/l1-q17-18.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "So, got any fun plans coming up?"
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Yeah, actually. A group of old college friends and I are doing a camping trip up in the mountains next month. I'm really looking forward to catching up with everyone. But now that I think about it, I really need a pair of decent hiking boots."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Oh, you should try that outdoor gear shop on Pine Avenue - Trailhead Outfitters."
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Yeah? What's it like?"
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "They've got an excellent variety of brands, and they do a proper fitting where they check your arch and everything to make sure the boots are right for you."
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Are the prices okay?"
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Totally fair. My sister picked up a pair there before her backpacking trip, and she said they were comfortable right out of the box. She couldn't stop raving about the service, either."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set12-l1-q19-20",
+      "kind": "announcement",
+      "out": "media/audio/set12/l1-q19-20.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Class, one quick thing before we start. I've noticed some of you use laptops during lecture, and that's perfectly fine – I understand you prefer typing your notes. I won't restrict that. But I do need you to silence all notifications. I record these lectures and upload them for review, and the constant pinging keeps getting picked up by the microphone. So use your devices however you like, just make sure they're on mute."
+        }
+      ]
+    },
+    {
+      "id": "set12-l1-q21-22",
+      "kind": "announcement",
+      "out": "media/audio/set12/l1-q21-22.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Attention, everyone. I have an important update about our financial aid procedures. Starting next month, all scholarship applications must be submitted through a new online portal - paper forms will no longer be accepted. The Financial Aid Office has also extended its weekday hours until seven PM to better accommodate students' schedules. Please visit the office website and create your portal account before the transition date. If you have any questions, stop by the office or call our helpline."
+        }
+      ]
+    },
+    {
+      "id": "set12-l1-q23-24",
+      "kind": "announcement",
+      "out": "media/audio/set12/l1-q23-24.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Hey everyone. Our Campus Environmental Action Club is hosting a park restoration event this Saturday. We'll gather at two o'clock by the science building and spend three hours planting trees and fixing trails at Riverside Park. Everyone's welcome – students and local residents alike – and volunteers get snacks and a commemorative wristband. Also, we're launching our first inter-university volunteer workshop next month where student groups from three nearby campuses will exchange best practices for organizing park cleanups, tree-planting drives, and invasive species removal. Hope to see you all involved."
+        }
+      ]
+    },
+    {
+      "id": "set12-l1-q25-28",
+      "kind": "announcement",
+      "out": "media/audio/set12/l1-q25-28.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "So today, I want to talk about William Grant Still, an American composer sometimes called the \"Dean of African American Composers.\" Still grew up in Little Rock, Arkansas. His father, who was a local bandmaster, passed away when Still was just an infant. But his stepfather really nurtured his love of music - he bought recordings of classical operas for the boy and took him to live performances regularly. That early exposure made a huge impression. Still eventually studied at the Oberlin Conservatory of Music, where he learned composition and theory rooted in the European classical tradition. He also studied privately with the avant-garde French composer Edgard Varese. So he had this really interesting blend of influences - traditional European form on one hand, and experimental modern techniques on the other. Now, his most celebrated work is the \"Afro-American Symphony,\" completed in 1931. This piece is warm and lyrical. It draws heavily on blues melodies and spirituals, and there's a beautiful balance between those folk elements and the formal structure of a classical symphony. It really captures the emotional landscape of everyday African American life. But Still also explored more dramatic territory. His ballet \"Sahdji,\" set in Africa, was composed after extensive study of African musical traditions. It uses layered percussion and choral singing to depict a ceremonial scene. Critics regarded it as a powerful expression of cultural heritage and identity."
+        }
+      ]
+    },
+    {
+      "id": "set12-l1-q29-32",
+      "kind": "announcement",
+      "out": "media/audio/set12/l1-q29-32.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "Alright, let's talk about something fascinating - how very young children understand numbers. This is a topic that has kept researchers busy for decades, because it tells us so much about how the human mind develops. So, one classic experiment is the dot comparison task. Researchers showed toddlers, around three years old, two cards. One card had, say, five dots, and the other had fifteen. And what they found was that even before these children could count reliably, they could point to the card with more dots. In other words, they had an intuitive sense of quantity - a basic number sense - without any formal instruction. OK, so a second experiment took a different approach. This one used what we call the violation of expectation method, with even younger babies, around five months old. Here's how it worked. Babies watched as one toy was placed on a small stage. Then a screen went up, and a second toy was added behind it. When the screen dropped, sometimes it revealed two toys, which is correct, and sometimes it showed just one. The babies stared significantly longer at the unexpected result - the single toy - which suggests they expected one plus one to equal two. So basically, babies are intuitive mathematicians. They seem to grasp basic quantities from very early on. Now, the question is - does this early number sense connect to other kinds of abstract reasoning? Let's look at some research exploring that connection."
+        }
+      ]
+    },
+    {
+      "id": "set12-l2-q01",
+      "kind": "short",
+      "out": "media/audio/set12/l2-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "Who organized today’s charity event?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l2-q02",
+      "kind": "short",
+      "out": "media/audio/set12/l2-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "How often do you go to the library?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l2-q03",
+      "kind": "short",
+      "out": "media/audio/set12/l2-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Would you like me to save you a seat at the lecture?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set12-l2-q04-05",
+      "kind": "conversation",
+      "out": "media/audio/set12/l2-q04-05.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Hey, I've been looking everywhere for you. Where were you?"
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "I just got out of my lab session. What's up?"
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Well, I need to get a new desk for my apartment, and I remember you saying you knew a really good home goods store. I was hoping you could point me in the right direction."
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Oh, definitely! There's a place called Watson's Interiors. They've got a ton of options - standing desks, corner desks, you name it."
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "That's promising. Do they handle shipping?"
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "They do, and they also send a technician to your place for setup. When I got my bookshelf there last year, someone came and put the whole thing together in my living room. I didn't have to lift a finger."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set12-l2-q06-07",
+      "kind": "conversation",
+      "out": "media/audio/set12/l2-q06-07.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Hey, I'm looking to buy a new camera. Do you know a good shop?"
+        },
+        {
+          "speaker": "W",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "Actually, I just went in to get some lens filters the other day. There's a photography store downtown called Focal Point - I'd definitely recommend it."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "What did you like about it?"
+        },
+        {
+          "speaker": "W",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "They carry everything from beginner point-and-shoots to professional DSLRs, so the range is really impressive. But the best thing is their hands-on demo service. They let you test any camera in a little studio setup so you can see exactly how it performs. You have to schedule a time slot for that, though."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "That's perfect. Do they sell accessories too? I don't want to have to visit three different places."
+        },
+        {
+          "speaker": "W",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "Oh yeah, they've got tripods, bags, memory cards - everything you'd need is under one roof."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Awesome. How do I book a demo session?"
+        },
+        {
+          "speaker": "W",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "It's all on their website. Hold on, let me pull up the link for you."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set12-l2-q08-11",
+      "kind": "announcement",
+      "out": "media/audio/set12/l2-q08-11.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "So, when people hear the words \"public transit,\" they often think about crowded buses, delays, noise - basically all the negative stuff. And sure, poorly managed systems can contribute to pollution and congestion. However, when cities invest wisely in their transit networks, the results can actually be surprisingly positive for the environment. Take Bogota, Colombia, for example. In the early 2000s, the city built a bus rapid transit system with dedicated lanes and efficient stations. The result? Many residents who previously drove chose to ride the bus instead. This cut down on traffic congestion and noticeably improved air quality in the city center. Now, contrast that with car-dependent suburban areas. When neighborhoods are spread out, everyone needs a private vehicle. That means more fuel consumption, more roads to build and maintain, and infrastructure costs stretched across a huge area. So, paradoxically, those quiet suburban neighborhoods can actually have a larger environmental footprint per person than a dense city with well-designed transit. And here's another interesting case - Seoul has been converting elevated highways into green parks and pedestrian zones. This freed up space for community gardens where residents grow food locally. As a result, these neighborhoods have reduced their dependence on produce shipped in from distant farms. So the takeaway is this: thoughtful investment in public transit and urban redesign can make dense cities significantly greener than low-density suburbs."
+        }
+      ]
+    },
+    {
+      "id": "set12-l2-q12-15",
+      "kind": "announcement",
+      "out": "media/audio/set12/l2-q12-15.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "OK, so today I want to talk about something pretty remarkable - how ancient Polynesian sailors navigated thousands of miles across the open Pacific Ocean without any of the instruments we think of as essential for sea travel. No compasses, no maps, no written charts. And yet, they managed to settle islands scattered across an enormous stretch of ocean. So how did they do it? Well, Polynesian navigators relied on what we call wayfinding. Basically, they read natural signs. They memorized the positions of hundreds of stars at different times of year and used them as a kind of celestial guide. But it wasn't just stars. They also paid close attention to ocean swell patterns - the way waves reflected off distant islands could signal that land was nearby, even before they could actually see it. And they watched the flight paths of certain seabirds, since some species fly out to sea during the day but always return to land at night. Now, the evidence for how widely they traveled is really impressive. Archaeologists have found similar styles of pottery, the same cultivated plants like taro and breadfruit, and closely related languages on islands thousands of miles apart. All of this points to a connected network of voyagers who deliberately explored and colonized new territories. What's really significant here is that this challenges the old assumption that long-distance ocean travel required advanced technology. These navigators achieved extraordinary feats through careful observation and knowledge passed down across generations."
+        }
+      ]
+    },
+    {
+      "id": "set12-s1-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set12/s1-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You are training to familiar the student portal. Listen to the officer and repeat what she says."
+        }
+      ]
+    },
+    {
+      "id": "set12-s1-q1",
+      "kind": "repeat",
+      "out": "media/audio/set12/s1-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Here is how we navigate the student portal."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set12-s1-q2",
+      "kind": "repeat",
+      "out": "media/audio/set12/s1-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You can find the login button at the top."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set12-s1-q3",
+      "kind": "repeat",
+      "out": "media/audio/set12/s1-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "The course registration tab is next to the academic calendar."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set12-s1-q4",
+      "kind": "repeat",
+      "out": "media/audio/set12/s1-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You can check your grades and attendance records on this page."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set12-s1-q5",
+      "kind": "repeat",
+      "out": "media/audio/set12/s1-q5.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "We suggest updating your contact information at the start of each semester."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set12-s1-q6",
+      "kind": "repeat",
+      "out": "media/audio/set12/s1-q6.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Also, they payment section shows your tuition balance and upcoming due dates."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set12-s1-q7",
+      "kind": "repeat",
+      "out": "media/audio/set12/s1-q7.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "If you forget your password, click the reset link located below the login box to recover it."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set12-s2-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set12/s2-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "You have volunteered for a research study about health and wellness. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer’s questions."
+        }
+      ]
+    },
+    {
+      "id": "set12-s2-q1",
+      "kind": "interview",
+      "out": "media/audio/set12/s2-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Thank you for joining today. I'd like to ask you some questions about health and wellness. What do you usually do to stay healthy—do you exercise regularly, eat well, or do other things to take care of your body?"
+        }
+      ]
+    },
+    {
+      "id": "set12-s2-q2",
+      "kind": "interview",
+      "out": "media/audio/set12/s2-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "I see. What do you usually do for your diet? For example, do you try to eat certain types of food, or do you try to avoid certain foods?"
+        }
+      ]
+    },
+    {
+      "id": "set12-s2-q3",
+      "kind": "interview",
+      "out": "media/audio/set12/s2-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "That makes sense. What part of staying healthy or keeping fit do you find the most difficult? Could you tell me Why?"
+        }
+      ]
+    },
+    {
+      "id": "set12-s2-q4",
+      "kind": "interview",
+      "out": "media/audio/set12/s2-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Good points. Lastly, some people believe it will become easier for people to maintain healthy habits in the future. Some people disagree with this. What is your opinion and why?"
+        }
+      ]
+    }
+  ]
+}

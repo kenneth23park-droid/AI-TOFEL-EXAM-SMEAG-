@@ -29,6 +29,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { findSourceDocsIn, sourceDirs } from './source_docs.mjs';
 
 const require = createRequire(import.meta.url);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -103,8 +104,8 @@ const OVERRIDE = {};
 
 /* ------------------------------------------------------------------ */
 
-function readDocx(name) {
-  const file = path.join(REPO, name);
+function readDocx(dir, name) {
+  const file = path.join(dir, name);
   if (!fs.existsSync(file)) return null;
   const b = fs.readFileSync(file);
   return DOCX.read(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength));
@@ -150,19 +151,19 @@ const main = async () => {
   const argv = process.argv.slice(2);
   const setNo = +(argv[argv.indexOf('--set') + 1] || 10);
   const checkOnly = argv.includes('--check');
-  const sources = {
-    questions: `NEW TOEFL MOCK TEST SET ${setNo} Questions.docx`,
-    script: `SET ${setNo} SCRIPT.docx`,
-    answers: `SET ${setNo} ANSWER KEY.docx`
-  };
-  const missing = Object.values(sources).filter((f) => !fs.existsSync(path.join(REPO, f)));
-  if (missing.length) {
-    console.error('원본 docx 를 찾지 못했습니다:\n  ' + missing.join('\n  '));
+  /* 원본 이름은 세트마다 다르다 — 적어 두지 않고 폴더에서 골라 온다(source_docs.mjs). */
+  let sources;
+  try {
+    sources = findSourceDocsIn(sourceDirs(SG2), setNo);
+  } catch (e) {
+    console.error(e.message);
     process.exit(2);
   }
+  console.log('원본: ' + sources.dir + '\n  ' + sources.questions + ' · ' + sources.script + ' · ' + sources.answers);
 
   const [questions, script, answers] = await Promise.all([
-    readDocx(sources.questions), readDocx(sources.script), readDocx(sources.answers)
+    readDocx(sources.dir, sources.questions), readDocx(sources.dir, sources.script),
+    readDocx(sources.dir, sources.answers)
   ]);
   const result = IMPORT.build({ code: `SET ${setNo}`, questions, script, answers });
   if (!result.pack) {

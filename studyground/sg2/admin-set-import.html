@@ -422,6 +422,26 @@
   var files = { questions: null, script: null, answers: null };
   var parsed = { questions: null, script: null, answers: null };
   var built = null;
+  var imagesNote = null;   /* 듣기 화자 사진을 붙였는가 — render() 가 검산 줄로 올린다 */
+
+  /* 듣기 화자 사진(config/set<N>-listening-images.json).
+   *
+   * 명령줄 빌더(tools/build_set11.mjs)는 이 파일을 읽어 넘기는데 이 화면은 넘기지
+   * 않아서, 화면으로 가져온 세트만 듣기에 사진이 없었다(SET 12 가 그랬다). 문서 세 장은
+   * 사진을 담고 있지 않으므로 이건 문서가 아니라 저장소가 아는 것이다 — 화면도 같은
+   * 파일을 읽는다. 없으면 사진 없이 가되, 없다는 사실을 검산 줄에 적는다.
+   * file:// 로 열면 fetch 가 막히므로 실패도 "없음"으로 본다. */
+  function loadListeningImages(slug) {
+    var url = 'config/' + slug + '-listening-images.json';
+    return fetch(url, { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; })
+      .then(function (json) {
+        var n = json ? Object.keys(json.questions || {}).length + Object.keys(json.blocks || {}).length : 0;
+        imagesNote = { file: url, count: n, ok: !!n };
+        return json || {};
+      });
+  }
 
   var flash = document.getElementById('flash'), flashT;
   function toast(m) {
@@ -498,12 +518,16 @@
         .then(function (buf) { return window.SG_DOCX.read(buf); })
         .then(function (doc) { parsed[k] = doc; });
     })).then(function () {
+      busy.textContent = 'Looking for the listening pictures…';
+      return loadListeningImages(slugOf(codeEl.value));
+    }).then(function (listeningImages) {
       busy.textContent = 'Splitting the sections…';
       built = window.SG_SET_IMPORT.build({
         code: codeEl.value.trim(),
         questions: parsed.questions,
         script: parsed.script,
         answers: parsed.answers,
+        listeningImages: listeningImages,
         sources: slots.map(function (k) { return files[k] && files[k].name; }).filter(Boolean),
         strictSource: STRICT_SOURCE_ONLY
       });
@@ -1473,7 +1497,21 @@
         'Do not give it to students before a human has read the passages, questions and answers.'
     }] : [];
 
-    var allGates = aiGates.concat(built.gates, dupGates);
+    /* 듣기에 화자 사진이 붙었는가. 사진이 없어도 시험은 돌아가므로 막지는 않지만,
+       "듣기만 그림이 없다" 는 시험장에서야 보이는 종류의 결함이라 여기서 말해 준다. */
+    var imgGates = [];
+    var hasListening = (pack.sections || []).some(function (s) {
+      return s.id === 'listening' && (s.modules || []).length;
+    });
+    if (hasListening && imagesNote && !imagesNote.ok) {
+      imgGates.push({
+        level: 'warn', scope: 'listening',
+        message: 'No speaker pictures for this set — ' + imagesNote.file + ' was not found, so the listening screens will have no picture. '
+          + 'Build it with: node studyground/sg2/tools/build_listening_images.mjs --set <N>'
+      });
+    }
+
+    var allGates = aiGates.concat(built.gates, dupGates, imgGates);
     renderDup();
     renderFillBar();
 

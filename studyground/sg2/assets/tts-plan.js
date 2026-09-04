@@ -36,7 +36,11 @@
     String(text || '').split(/\r?\n/).forEach(function (line) {
       var t = line.trim();
       if (!t) return;
-      var m = /^([A-Za-z][A-Za-z0-9 ._'-]{0,24}):\s*(.+)$/.exec(t);
+      /* 화자 표시는 대문자로 시작하는 낱말 1~3개다(M · W · Narrator · Professor Kim).
+         문장 한가운데의 콜론까지 표시로 보면 강의 한 대목이 통째로 화자가 된다 —
+         SET 12 L2 'So the takeaway is this: ...' 가 그렇게 화자로 잡혀 배역이 갈렸다.
+         낱말마다 첫 글자가 대문자여야 한다는 조건 하나로 그 줄들이 걸러진다. */
+      var m = /^([A-Z][A-Za-z0-9._'-]{0,15}(?: [A-Z0-9][A-Za-z0-9._'-]{0,15}){0,2}):\s*(.+)$/.exec(t);
       if (m) out.push({ speaker: m[1].trim(), text: m[2].trim() });
       else if (out.length && !/[:]$/.test(t)) out[out.length - 1].text += ' ' + t;
       else out.push({ speaker: 'Narrator', text: t });
