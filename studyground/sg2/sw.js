@@ -429,7 +429,7 @@
 //       config/set12-writing-images.json 으로 붙인다(듣기 사진과 같은 방식) —
 //       다시 지어도 지워지지 않는다. assets/set12.js·set-import.js 가 함께 바뀌고
 //       둘 다 SHELL_ASSETS(cache-first)라 판올림 없이는 재방문 기기가 옛 사본을 읽는다.
-const VERSION = 'sg-v107';
+const VERSION = 'sg-v108';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

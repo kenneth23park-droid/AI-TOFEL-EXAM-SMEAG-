@@ -180,17 +180,18 @@ def test_get_scale_defaults_and_aliases():
 
 
 # ── 스피킹: 표가 아니라 과제 평균을 0.5 로 올린다 (2026-09-04 운영 결정) ─────────
+# 스피킹 11 과제 × 5 = 만점 55. 밴드 = round½(1 + 원점수 ÷ 55 × 5).
+# 2026-09-07 운영 결정 — 2026-09-04 의 "평균을 0.5 로 올린다"(= 5×비율)에 +1 을 더해
+# 라이팅과 같은 선형식으로 통일했다. 만점이 6.0 에 닿는다.
 SPEAKING_TABLE = [
-    ([3, 3, 3, 3], 3.0),
-    ([3, 3, 4, 3], 3.5),        # 평균 3.25 → 올림
-    ([3, 4, 4, 3], 3.5),
-    ([4, 4, 4, 3], 4.0),        # 평균 3.75 → 올림
-    ([4, 4, 4, 4], 4.0),
-    ([4, 5, 4, 4], 4.5),        # 평균 4.25 → 올림
-    ([5, 5, 4, 4], 4.5),
-    ([5, 5, 5, 4], 5.0),        # 평균 4.75 → 올림
-    ([5, 5, 5, 5], 5.0),        # 만점 평균은 5.0 이다 — 스피킹에 6.0 은 없다
     ([0, 0, 0, 0], 1.0),        # 바닥은 1.0 (0 이라는 밴드는 없다)
+    ([1, 1, 1, 1], 2.0),        # 1 + 1.0 = 2.0
+    ([3, 3, 3, 3], 4.0),        # 1 + 3.0 = 4.0
+    ([3, 3, 4, 3], 4.5),        # 평균 3.25 → 4.25 → 올림
+    ([4, 4, 4, 4], 5.0),        # 1 + 4.0 = 5.0
+    ([4, 5, 4, 4], 5.5),        # 평균 4.25 → 5.25 → 올림
+    ([5, 5, 5, 4], 6.0),        # 평균 4.75 → 5.75 → 올림
+    ([5, 5, 5, 5], 6.0),        # 만점은 6.0 에 닿는다
 ]
 
 
@@ -201,25 +202,44 @@ def _speaking_rubrics(scores, skill="speaking"):
     ]
 
 
-def test_speaking_band_is_the_rounded_task_mean():
+def test_speaking_band_is_the_linear_conversion_of_the_task_mean():
     scale = get_scale("toefl6")
     for tasks, expected in SPEAKING_TABLE:
         got = scale.rubric_to_section(_speaking_rubrics(tasks))
         assert got == expected, f"{tasks} (평균 {sum(tasks) / len(tasks)}) → {got}, 기대 {expected}"
 
 
-def test_writing_still_goes_through_the_ets_table():
-    """규칙을 바꾼 것은 스피킹뿐이다. 라이팅은 0~30 공식 표를 그대로 탄다."""
+def test_writing_uses_the_same_linear_rule():
+    """W·S 는 같은 식을 쓴다 — 0~30 표는 Reading·Listening 만 탄다."""
     scale = get_scale("toefl6")
+    # 루브릭만 넘기는 경로는 **에세이만** 접는다(BAS 를 모르는 호출부).
     assert scale.rubric_to_section(_speaking_rubrics([3.5], "writing")) == 4.5
     assert scale.rubric_to_section(_speaking_rubrics([5, 5], "writing")) == 6.0
+    assert scale.rubric_to_section(_speaking_rubrics([0, 0], "writing")) == 1.0
 
 
-def test_speaking_matches_the_js_copies():
-    """sg-band.js · scores.html 의 speakingBand() 와 같은 값이라야 세 화면이 같다."""
+def test_writing_raw_folds_build_a_sentence_in():
+    """ETS 라이팅 12문항 — BAS 10(문항당 1점) + 에세이 둘(각 5.14) = 만점 20.28."""
     scale = get_scale("toefl6")
-    for ratio, expected in [(0.0, 1.0), (0.65, 3.5), (0.75, 4.0), (0.85, 4.5), (0.95, 5.0), (1.0, 5.0)]:
-        assert scale.speaking_band(ratio) == expected, f"{ratio} → {expected}"
+    raw, top = scale.writing_raw(8, 10, [4, 3])
+    assert round(raw, 3) == 15.196, raw       # 8 + 4.112 + 3.084
+    assert round(top, 3) == 20.28, top
+    assert scale.writing_band(8, 10, [4, 3]) == 4.5
+    assert scale.writing_band(10, 10, [5, 5]) == 6.0
+    assert scale.writing_band(0, 10, [0, 0]) == 1.0
+    # 에세이가 한 편도 채점 안 됐으면 밴드가 아니라 "없음" 이다.
+    assert scale.writing_band(10, 10, []) is None
+    # BAS 가 없는 옛 응시는 에세이만으로 접는다.
+    assert scale.writing_band(0, 0, [5, 5]) == 6.0
+
+
+def test_linear_band_matches_the_js_copies():
+    """sg-band.js · scores.html 의 linearBand() 와 같은 값이라야 세 화면이 같다."""
+    scale = get_scale("toefl6")
+    for ratio, expected in [(0.0, 1.0), (0.25, 2.5), (0.5, 3.5), (0.75, 5.0),
+                            (0.9, 5.5), (1.0, 6.0), (-1.0, 1.0), (9.0, 6.0)]:
+        assert scale.linear_band(ratio) == expected, f"{ratio} → {expected}"
+        assert scale.speaking_band(ratio) == expected, f"speaking {ratio} → {expected}"
 
 
 if __name__ == "__main__":  # pytest-free runner

@@ -753,6 +753,9 @@ var BAND = (function () {
   var CEFR6 = { '6.0':'C2','5.5':'C1','5.0':'C1','4.5':'B2','4.0':'B2','3.5':'B1',
                 '3.0':'B1','2.5':'A2','2.0':'A2','1.5':'A1','1.0':'A1' };
   var SCALED_MAX = 30, TASK_MAX = 5;
+  /* ETS 라이팅 12문항 — Build a Sentence 는 문항당 1점, 에세이 둘은 각 5.14 점.
+     라이팅 만점 = 10 + 5.14 + 5.14 = 20.28. */
+  var ESSAY_WEIGHT = 5.14;
   var SKILLS = ['reading', 'listening', 'writing', 'speaking'];
 
   function halfUp(x) { return Math.floor(Number(x) + 0.5); }
@@ -784,7 +787,9 @@ var BAND = (function () {
     return bandForScaled(scaledFromRaw(correct, total), skill);
   }
 
-  /** 산출형: 과제 점수(0~5) 목록 → 밴드. 스피킹만 표를 타지 않는다(speakingBand). */
+  /** 산출형 과제 목록 → 밴드. W·S 는 표가 아니라 선형식을 탄다(linearBand).
+      라이팅을 이 함수로 부르면 **에세이만** 접은 값이다 — BAS 를 포함한 영역 밴드는
+      writingBand() 이고, of() 가 그쪽을 쓴다. 여기는 파트별 칸을 위해 남아 있다. */
   function taskBand(tasks, skill) {
     var got = 0, top = 0, n = 0;
     (tasks || []).forEach(function (t) {
@@ -793,16 +798,43 @@ var BAND = (function () {
     });
     if (!n || top <= 0) return null;
     var ratio = Math.max(0, Math.min(1, got / top));
-    if (String(skill || '').toLowerCase() === 'speaking') return speakingBand(ratio);
+    var sk = String(skill || '').toLowerCase();
+    if (sk === 'speaking' || sk === 'writing') return linearBand(ratio);
     return bandForScaled(halfUp(ratio * SCALED_MAX), skill);
   }
 
-  /** 스피킹 = 과제 평균(0~5)을 0.5 단위로 올린 값. 0~30 표를 거치지 않는다.
-      3.25→3.5 · 3.75→4.0 · 4.75→5.0. 바닥 1.0, 천장은 만점 평균 5.0.
+  /** W·S 기관 선형 환산 = round½(1 + 비율 × 5). 0~30 표를 거치지 않는다.
+      바닥 1.0, 천장 6.0. .25·.75 는 올린다.
       sg2/assets/sg-band.js · app/scoring/scale.py 와 같은 규칙이라야 세 화면이 같다. */
-  function speakingBand(ratio) {
-    var mean = Math.max(0, Math.min(1, Number(ratio) || 0)) * TASK_MAX;
-    return Math.max(1, Math.min(6, toHalf(mean)));
+  function linearBand(ratio) {
+    var r = Math.max(0, Math.min(1, Number(ratio) || 0));
+    return Math.max(1, Math.min(6, toHalf(1 + r * 5)));
+  }
+  function speakingBand(ratio) { return linearBand(ratio); }
+
+  /** 라이팅 원점수 → {raw, max}. BAS 정답 수 + Σ(에세이÷5×5.14).
+      채점 안 된 몫은 raw 에도 max 에도 넣지 않는다. */
+  function writingRaw(auto, essays) {
+    var raw = 0, max = 0;
+    if (auto && Number(auto.total) > 0) {
+      raw += Math.max(0, Math.min(Number(auto.total), Number(auto.score) || 0));
+      max += Number(auto.total);
+    }
+    (essays || []).forEach(function (t) {
+      if (!t || !num(Number(t.score))) return;
+      raw += Math.max(0, Math.min(TASK_MAX, Number(t.score))) / TASK_MAX * ESSAY_WEIGHT;
+      max += ESSAY_WEIGHT;
+    });
+    return { raw: raw, max: max };
+  }
+
+  /** 라이팅 영역 밴드 — BAS 를 함께 접는다. 에세이가 하나도 없으면 null(채점 대기). */
+  function writingBand(auto, essays) {
+    var scored = 0;
+    (essays || []).forEach(function (t) { if (t && num(Number(t.score))) scored += 1; });
+    if (!scored) return null;
+    var w = writingRaw(auto, essays);
+    return w.max > 0 ? linearBand(w.raw / w.max) : null;
   }
 
   /** 종합 = 채점된 영역 밴드의 평균, 0.5 단위(.25 는 올림). */
@@ -850,7 +882,10 @@ var BAND = (function () {
       var band = null, status = 'pending', detail = null;
       if (s === 'writing' || s === 'speaking') {
         var list = byTask[s];
-        band = taskBand(list, s);
+        /* 라이팅만 자동채점분(Build a Sentence)을 함께 접는다 — 12문항 중 10문항이
+           거기 있어서, 에세이 둘만 보면 영역의 절반을 안 본 점수가 된다. */
+        var auto = s === 'writing' ? by.writing : null;
+        band = s === 'writing' ? writingBand(auto, list) : taskBand(list, s);
         if (band !== null) {
           /* AI 점수가 곧 성적이다. confirmed 는 선생님이 손본 자리를 세는 값일 뿐,
              성적표에 점수를 실을지 말지를 가르지 않는다(sg-band.js 와 같은 규칙). */
@@ -859,7 +894,18 @@ var BAND = (function () {
           /* 산출형의 원점수는 '받은 점수 / 만점' 이다 — 과제 하나가 5점. */
           var got = list.reduce(function (a, t) { return a + Number(t.score); }, 0);
           detail = { tasks: list.length, confirmed: ok, got: got, top: list.length * TASK_MAX,
+                     /* 옛 /30·/120 눈금은 전환기(2026~2028) 병기용으로 계속 낸다. */
                      scaled: halfUp(Math.max(0, Math.min(1, got / (list.length * TASK_MAX))) * SCALED_MAX) };
+          if (s === 'writing') {
+            var w = writingRaw(auto, list);
+            detail.raw = Math.round(w.raw * 1000) / 1000;
+            detail.rawMax = Math.round(w.max * 1000) / 1000;
+            detail.scaled = scaledFromRaw(w.raw, w.max);
+            if (auto && Number(auto.total) > 0) {
+              detail.autoCorrect = Number(auto.score) || 0;
+              detail.autoTotal = Number(auto.total);
+            }
+          }
         }
       } else if (by[s]) {
         band = sectionBand(by[s].score, by[s].total, s);
@@ -892,7 +938,9 @@ var BAND = (function () {
 
   return { SKILLS: SKILLS, TOEFL6: TOEFL6, TASK_MAX: TASK_MAX, scaledFromRaw: scaledFromRaw,
            bandForScaled: bandForScaled, sectionBand: sectionBand, taskBand: taskBand,
-           speakingBand: speakingBand, overall: overall, fmt: fmt, cefr: cefr, of: of, conventional: conventional };
+           linearBand: linearBand, speakingBand: speakingBand,
+           writingRaw: writingRaw, writingBand: writingBand,
+           overall: overall, fmt: fmt, cefr: cefr, of: of, conventional: conventional };
 })();
 
 /* ─────────────────────────────────────────────────────────────
@@ -1579,7 +1627,12 @@ var BAND = (function () {
              라이팅 영역의 객관 채점분이 그대로 by_section.writing 에 들어 있다. */
           var d = by[s === 'writing' ? 'writing' : s];
           if (!d || !(Number(d.total) > 0)) return { label: p.label, band: null };
-          return { label: p.label, band: BAND.sectionBand(d.score, d.total, s),
+          /* 라이팅 파트(BAS)는 영역과 같은 선형식을 탄다. 여기만 0~30 표를 태우면
+             파트 칸이 영역 칸과 다른 눈금으로 그려진다. */
+          var pb = s === 'writing'
+            ? BAND.linearBand(Number(d.score) / Number(d.total))
+            : BAND.sectionBand(d.score, d.total, s);
+          return { label: p.label, band: pb,
                    correct: Number(d.score) || 0, items: Number(d.total) || 0 };
         }
         var list = byPart[p.id] || [];

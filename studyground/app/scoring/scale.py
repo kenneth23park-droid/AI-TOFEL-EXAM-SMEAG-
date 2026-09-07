@@ -31,6 +31,10 @@ from app.models import SECTION_MAX, TOTAL_MAX, cefr_for
 
 log = logging.getLogger("studyground.scoring")
 
+# ETS 라이팅 12문항의 배점 — Build a Sentence 는 문항당 1점, 에세이 둘은 각 5.14 점.
+# 라이팅 만점 = 10 + 5.14 + 5.14 = 20.28.
+ESSAY_WEIGHT = 5.14
+
 BAND_TABLE_PATH = Path(__file__).resolve().parent / "ielts_band_table.json"
 TOEFL6_TABLE_PATH = Path(__file__).resolve().parent / "toefl6_band_table.json"
 
@@ -190,8 +194,10 @@ class Toefl6Scale:
     문항 수가 실제 시험과 다르다(SET 9 는 R 50 · L 47 문항). 실측 환산표가 생기면
     `scaled_from_raw()` 하나만 갈아 끼우면 되고 밴드 경계는 건드릴 필요가 없다.
 
-    Writing·Speaking 은 맞은 개수가 없으므로 루브릭(과제당 0~5)의 평균을 0~30 으로
-    편 뒤 같은 표를 태운다 — `rubric_to_section()` 참조.
+    Writing·Speaking 은 이 표를 타지 않는다. 과제 수가 적어 원점수가 늘 0.25 단위로
+    떨어지는데 그 자리를 표로 옮기면 같은 0.25 차이가 구간마다 밴드를 바꾸기도, 안
+    바꾸기도 한다. 대신 비율을 1.0~6.0 에 그대로 펴는 선형식 하나를 쓴다 —
+    `linear_band()` · `writing_band()` 참조(2026-09-07 운영 결정, 기관용 눈금이다).
 
     밴드 바닥은 1.0 이다. ETS 표에서 0점도 밴드 1 이므로 0.0 은 존재하지 않는다.
     "아직 채점 안 된 영역"은 밴드 1 이 아니라 **없음(None)** 이며, 종합 평균에서
@@ -322,27 +328,87 @@ class Toefl6Scale:
                 skill = str(row["skill"]).strip().lower()
                 break
         ratio = min(max(sum(earned) / top, 0.0), 1.0)
-        if skill == "speaking":
-            return self.speaking_band(ratio)
+        if skill in ("speaking", "writing"):
+            # 라이팅을 이 경로로 부르면 **에세이만** 접은 값이다. Build a Sentence 를
+            # 포함한 영역 밴드는 writing_band() 이고, 자동채점 결과를 함께 들고 있는
+            # 호출부가 그쪽을 쓴다.
+            return self.linear_band(ratio)
         return self.band_for_scaled(round_half_up(ratio * self.scaled_max), skill)
 
-    def speaking_band(self, ratio: float) -> float:
-        """스피킹 밴드 = **과제 평균(0~5)을 그대로 0.5 단위로 올린 값**.
+    def linear_band(self, ratio: float) -> float:
+        """기관용 선형 환산 — 비율(0~1)을 1.0~6.0 에 그대로 편다. Writing·Speaking 전용.
 
-        다른 영역과 달리 0~30 환산표를 거치지 않는다. 스피킹은 과제가 넷이라 평균이
-        늘 0.25 단위로 떨어지는데, 그 자리를 표로 옮기면 같은 0.25 차이가 어떤
+        Reading·Listening 과 달리 0~30 환산표를 거치지 않는다. 산출형은 과제 수가 적어
+        원점수가 늘 0.25 단위로 떨어지는데, 그 자리를 표로 옮기면 같은 0.25 차이가 어떤
         구간에서는 밴드를 바꾸고 어떤 구간에서는 안 바꾼다. 학생에게 설명되는 눈금이
-        아니어서 평균을 0.5 로 올리는 규칙 하나로 바꿨다(2026-09-04, 운영 결정).
+        아니어서 선형식 하나로 바꿨다.
 
-            3.00 → 3.0 · 3.25 → 3.5 · 3.50 → 3.5 · 3.75 → 4.0 · 4.75 → 5.0
+            밴드 = round½(1 + 원점수 ÷ 만점 × 5)
 
-        바닥은 1.0 이다(0.0 이라는 밴드는 없다). 천장은 만점 평균 5.0 이라 스피킹에서
-        6.0 은 나오지 않는다 — 표를 버린 대가이고, 의도한 것이다.
+        2026-09-04 에 스피킹만 "평균을 0.5 로 올린다"(= 5×비율)로 바꿨고, 2026-09-07 에
+        여기 +1 을 더해 두 영역 모두 이 식으로 통일했다. 만점이 6.0 에 닿는다.
+        .25·.75 는 늘 올린다 — 집 전체의 반올림 규칙과 같다.
 
-        sg2/assets/sg-band.js · smeag-com/scores.html 의 speakingBand() 와 같은 규칙.
+        sg2/assets/sg-band.js · smeag-com/scores.html 의 linearBand() 와 같은 규칙.
         """
-        mean = min(max(float(ratio), 0.0), 1.0) * 5.0
-        return min(max(round_half_up_to_half(mean), 1.0), self.section_max)
+        r = min(max(float(ratio), 0.0), 1.0)
+        band = round_half_up_to_half(1.0 + r * (self.section_max - 1.0))
+        return min(max(band, 1.0), self.section_max)
+
+    def speaking_band(self, ratio: float) -> float:
+        """스피킹 밴드 — 11 과제(만점 55)의 비율을 선형 환산한다. linear_band 와 같다."""
+        return self.linear_band(ratio)
+
+    def writing_raw(
+        self,
+        auto_correct: float,
+        auto_total: float,
+        essay_scores: list[float],
+        essay_max: float = 5.0,
+    ) -> tuple[float, float]:
+        """라이팅 원점수 → (raw, max).
+
+        ETS 라이팅은 12문항이다 — Build a Sentence 10 (문항당 1점) + Write an Email +
+        Write for an Academic Discussion (각 5.14 점). 에세이는 0~5 루브릭으로 채점하므로
+        원점수로 넣을 때 5.14/5 를 곱한다. SET 9 기준 만점은 10 + 5.14 + 5.14 = 20.28.
+
+        채점되지 않은 부분은 raw 에도 max 에도 넣지 않는다 — 넣으면 아직 안 낸 몫이
+        오답으로 세어져 밴드가 실제보다 낮게 굳는다.
+        """
+        raw = 0.0
+        top = 0.0
+        if auto_total and float(auto_total) > 0:
+            raw += min(max(float(auto_correct or 0.0), 0.0), float(auto_total))
+            top += float(auto_total)
+        for value in essay_scores or []:
+            try:
+                score = float(value)
+            except (TypeError, ValueError):
+                continue
+            raw += min(max(score, 0.0), essay_max) / essay_max * ESSAY_WEIGHT
+            top += ESSAY_WEIGHT
+        return raw, top
+
+    def writing_band(
+        self,
+        auto_correct: float,
+        auto_total: float,
+        essay_scores: list[float],
+        essay_max: float = 5.0,
+    ) -> float | None:
+        """라이팅 영역 밴드. 에세이가 한 편도 채점되지 않았으면 None(= 채점 대기)이다 —
+        BAS 만으로 밴드를 내면 10 점짜리 몫을 다 놓친 점수가 성적표에 실린다.
+        """
+        usable = []
+        for value in essay_scores or []:
+            try:
+                usable.append(float(value))
+            except (TypeError, ValueError):
+                continue
+        if not usable:
+            return None
+        raw, top = self.writing_raw(auto_correct, auto_total, usable, essay_max)
+        return self.linear_band(raw / top) if top > 0 else None
 
     def band_score(self, total: float) -> float | None:
         return round_half_up_to_half(total)

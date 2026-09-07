@@ -98,7 +98,9 @@ eq(w.parts.map(function (p) { return p.label; }),
    '라이팅은 파트 셋으로 펴진다');
 eq([w.parts[0].correct, w.parts[0].items], [3, 10],
    'Build a Sentence 의 원점수는 by_section.writing 에서 온다');
-eq(w.parts[0].band, SG_BAND.sectionBand(3, 10, 'writing'), 'Build a Sentence 는 그 파트만 놓고 환산한다');
+/* BAS 파트는 라이팅 영역과 같은 선형식을 탄다 — 여기만 0~30 표를 태우면 파트 칸이
+   영역 칸과 다른 눈금으로 그려진다. */
+eq(w.parts[0].band, SG_BAND.linearBand(3 / 10), 'Build a Sentence 는 영역과 같은 선형식을 탄다');
 ok(w.parts[1].band !== null && w.parts[2].band !== null, '이메일·토론 글에도 각자의 밴드가 붙는다');
 
 console.log('\n3) 평균 칸은 언제나 앱의 공식 밴드');

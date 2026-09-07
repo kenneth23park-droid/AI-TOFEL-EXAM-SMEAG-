@@ -88,26 +88,39 @@ if (hit) {
   });
 }
 
-/* ── 3-1. scores.html 의 스피킹 규칙이 sg-band.js 와 같은 값을 내는가 ──
-   스피킹만은 표가 아니라 "과제 평균을 0.5 로 올린다" 는 규칙이다. 표를 대조하는
-   것만으로는 이 규칙이 어긋난 것을 못 잡는다 — 그래서 조회 화면의 BAND 를 잘라
-   내 실제로 돌려 본다. */
+/* ── 3-1. scores.html 의 W·S 선형식이 sg-band.js 와 같은 값을 내는가 ──
+   Writing·Speaking 만은 표가 아니라 "round½(1 + 비율 × 5)" 라는 식이다. 표를
+   대조하는 것만으로는 이 식이 어긋난 것을 못 잡는다 — 그래서 조회 화면의 BAND 를
+   잘라 내 실제로 돌려 본다. */
 var BAND_START = 'var BAND = (function () {';
 var bs = html.indexOf(BAND_START);
 ok(bs >= 0, 'scores.html 에서 BAND 모듈을 찾았다');
 if (bs >= 0) {
   var be = html.indexOf('\n})();', bs);
   var pageBand = eval('(function(){ ' + html.slice(bs, be + 6) + ' return BAND; })()');
-  [[3, 3], [3.25, 3.5], [3.5, 3.5], [3.75, 4], [4.25, 4.5], [4.75, 5], [5, 5], [0, 1]]
-    .forEach(function (pair) {
-      eq(pageBand.taskBand([{ score: pair[0] }], 'speaking'), pair[1],
-         'scores.html S 평균 ' + pair[0].toFixed(2) + ' → ' + pair[1].toFixed(1));
-      eq(pageBand.taskBand([{ score: pair[0] }], 'speaking'),
-         BAND.taskBand([{ score: pair[0] }], 'speaking'),
-         'scores.html 과 sg-band.js 가 같은 스피킹 밴드를 낸다 (' + pair[0] + ')');
-    });
-  eq(pageBand.taskBand([{ score: 3.5 }], 'writing'), 4.5,
-     'scores.html 라이팅은 여전히 0~30 표를 탄다');
+
+  /* 스피킹 11 과제 = 만점 55. 원점수 전 구간에서 두 사본이 같아야 한다. */
+  var sMismatch = [];
+  for (var raw = 0; raw <= 55; raw++) {
+    if (pageBand.linearBand(raw / 55) !== BAND.linearBand(raw / 55)) sMismatch.push(raw);
+  }
+  ok(sMismatch.length === 0, 'scores.html 과 sg-band.js 가 S 원점수 0~55 에서 같다 ' +
+     (sMismatch.join(',') || ''));
+
+  /* 라이팅은 BAS(10) + 에세이 둘(각 5.14) = 20.28. 두 사본이 같은 밴드를 내는가. */
+  var wMismatch = [];
+  for (var basHit = 0; basHit <= 10; basHit++) {
+    for (var e1 = 0; e1 <= 5; e1++) {
+      for (var e2 = 0; e2 <= 5; e2++) {
+        var auto = { score: basHit, total: 10 }, essays = [{ score: e1 }, { score: e2 }];
+        if (pageBand.writingBand(auto, essays) !== BAND.writingBand(auto, essays)) {
+          wMismatch.push(basHit + '/' + e1 + '/' + e2);
+        }
+      }
+    }
+  }
+  ok(wMismatch.length === 0, 'scores.html 과 sg-band.js 가 W 전 조합에서 같다 ' +
+     (wMismatch.slice(0, 5).join(' ') || ''));
 }
 
 /* ── 4. 종합은 합이 아니라 평균이고, .25 는 올라간다 (ETS 규칙) ── */
@@ -131,23 +144,36 @@ eq(BAND.scaledFromRaw(99, 50), 30, '비율은 1.0 을 넘지 않는다');
 eq(BAND.sectionBand(40, 50, 'reading'), 5, 'R 40/50 → 24/30 → 밴드 5.0');
 eq(BAND.sectionBand(40, 47, 'listening'), 5.5, 'L 40/47 → 26/30 → 밴드 5.5');
 
-/* ── 7. 산출형: 루브릭 0~5 → 밴드. 영역마다 경계가 다르다 ── */
-eq(BAND.taskBand([{ score: 3.5 }], 'writing'), 4.5, 'W 3.5/5 → 21/30 → 4.5');
-
-/* 스피킹만은 표를 타지 않는다 — 과제 평균(0~5)을 0.5 로 올린 값이 곧 밴드다.
-   2026-09-04 운영 결정. 아래 표는 요구받은 그대로다(.25·.75 는 올라간다). */
-[[3, 3], [3.25, 3.5], [3.5, 3.5], [3.75, 4], [4, 4],
- [4.25, 4.5], [4.5, 4.5], [4.75, 5], [5, 5]].forEach(function (pair) {
-  /* 과제 넷의 평균이 pair[0] 이 되도록 한 과제에 그 값을 그대로 준다. */
-  eq(BAND.taskBand([{ score: pair[0] }], 'speaking'), pair[1],
-     'S 평균 ' + pair[0].toFixed(2) + ' → ' + pair[1].toFixed(1));
+/* ── 7. 산출형(W·S) — 표가 아니라 선형식 round½(1 + 비율 × 5) ──
+   2026-09-07 운영 결정. 두 영역이 같은 식을 쓰고, 만점이 6.0 에 닿는다.
+   .25·.75 는 늘 올라간다(집 전체의 반올림 규칙). */
+[[0, 1], [0.25, 2.5], [0.5, 3.5], [0.75, 5], [0.9, 5.5], [1, 6]].forEach(function (pair) {
+  eq(BAND.linearBand(pair[0]), pair[1],
+     '선형 ' + pair[0] + ' → ' + pair[1].toFixed(1));
 });
-eq(BAND.taskBand([{ score: 4 }, { score: 4 }, { score: 5 }, { score: 4 }], 'speaking'), 4.5,
-   'S 과제 넷 4·4·5·4 → 평균 4.25 → 4.5');
+eq(BAND.linearBand(-1), 1, '비율은 0 아래로 내려가지 않는다');
+eq(BAND.linearBand(9), 6, '비율은 1.0 을 넘지 않는다');
+
+/* 스피킹: 11 과제 × 5 = 만점 55. 제안서 예시 43/55 → 1 + 3.909 = 4.909 → 5.0. */
+eq(BAND.taskBand([{ score: 5 }], 'speaking'), 6, 'S 만점 → 6.0');
 eq(BAND.taskBand([{ score: 0 }], 'speaking'), 1, 'S 0점도 밴드 1 (0 이라는 밴드는 없다)');
+eq(BAND.taskBand([{ score: 4 }, { score: 4 }, { score: 5 }, { score: 4 }], 'speaking'), 5.5,
+   'S 평균 4.25 → 1 + 4.25 = 5.25 → 5.5 (.25 는 올린다)');
 eq(BAND.taskBand([], 'speaking'), null, 'S 채점된 과제가 없으면 null');
-eq(BAND.taskBand([{ score: 5 }, { score: 5 }], 'writing'), 6, 'W 만점 → 6.0');
-eq(BAND.taskBand([{ score: 0 }], 'writing'), 1, 'W 0점 → 밴드 1 (0 이라는 밴드는 없다)');
+
+/* 라이팅: BAS 10 + 에세이 둘 × 5.14 = 만점 20.28. */
+eq(BAND.ESSAY_WEIGHT, 5.14, '에세이 가중치는 5.14 다');
+var wRaw = BAND.writingRaw({ score: 8, total: 10 }, [{ score: 4 }, { score: 3 }]);
+eq(Math.round(wRaw.raw * 1000) / 1000, 15.196, 'W 원점수 8 + 4.112 + 3.084 = 15.196');
+eq(Math.round(wRaw.max * 1000) / 1000, 20.28, 'W 만점 10 + 5.14 + 5.14 = 20.28');
+eq(BAND.writingBand({ score: 8, total: 10 }, [{ score: 4 }, { score: 3 }]), 4.5,
+   'W 15.196/20.28 → 4.5 (제안서 예시)');
+eq(BAND.writingBand({ score: 10, total: 10 }, [{ score: 5 }, { score: 5 }]), 6, 'W 만점 → 6.0');
+eq(BAND.writingBand({ score: 0, total: 10 }, [{ score: 0 }, { score: 0 }]), 1, 'W 0점 → 밴드 1');
+eq(BAND.writingBand({ score: 10, total: 10 }, []), null,
+   'W 에세이가 하나도 채점 안 됐으면 null — BAS 만으로 밴드를 내지 않는다');
+eq(BAND.writingBand(null, [{ score: 5 }, { score: 5 }]), 6,
+   'W BAS 가 없는 옛 응시는 에세이만으로 접는다');
 
 /* ── 8. of() — 화면이 실제로 부르는 모양 ── */
 var row = {
@@ -172,7 +198,7 @@ var withAi = BAND.of(row, [
   { skill: 'writing', question_id: 'set9-W2-email', ai_score: 4, teacher_score: null, confirmed_at: null },
   { skill: 'writing', question_id: 'set9-W3-disc', ai_score: 3, teacher_score: null, confirmed_at: null }
 ]);
-eq(withAi.sections.writing.band, 4.5, 'of(): AI 채점 7/10 → 21/30 → W 4.5');
+eq(withAi.sections.writing.band, 4.5, 'of(): BAS 가 없는 응시는 에세이만 — 7/10 → 4.5');
 eq(withAi.sections.writing.status, 'scored', 'of(): 교사 확정 없이도 채점된 상태다');
 eq(withAi.overall, 5, 'of(): AI 점수도 종합에 그대로 들어간다 (5.0 + 5.5 + 4.5) / 3 = 5.0');
 
@@ -180,8 +206,28 @@ var confirmed = BAND.of(row, [
   { skill: 'writing', question_id: 'set9-W2-email', ai_score: 4, teacher_score: 5, confirmed_at: '2026-08-11T00:00:00Z' },
   { skill: 'writing', question_id: 'set9-W3-disc', ai_score: 3, teacher_score: 5, confirmed_at: '2026-08-11T00:00:00Z' }
 ]);
-eq(confirmed.sections.writing.band, 6, 'of(): 교사 점수가 AI 를 이긴다 (10/10 → 30/30 → 6.0)');
+eq(confirmed.sections.writing.band, 6, 'of(): 교사 점수가 AI 를 이긴다 (에세이 만점 → 6.0)');
 eq(confirmed.sections.writing.status, 'final', 'of(): 확정 상태');
+
+/* ── 8-1. of() 가 Build a Sentence 를 라이팅 밴드에 접는가 ──
+   by_section.writing 에 BAS 자동채점분이 들어 있는 실제 응시 모양이다. 이걸 빼먹으면
+   12문항 중 10문항이 성적표에서 사라진다. */
+var withBas = BAND.of({
+  scale: 'toefl6',
+  by_section: {
+    reading: { score: 40, total: 50 },
+    listening: { score: 40, total: 47 },
+    writing: { score: 8, total: 10 },      // Build a Sentence 8/10
+    speaking: { score: 0, total: 0 }
+  }
+}, [
+  { skill: 'writing', question_id: 'set9-W2-email', ai_score: 4, teacher_score: null, confirmed_at: null },
+  { skill: 'writing', question_id: 'set9-W3-disc', ai_score: 3, teacher_score: null, confirmed_at: null }
+]);
+eq(withBas.sections.writing.band, 4.5, 'of(): BAS 8 + 에세이 4·3 → 15.196/20.28 → 4.5');
+eq(withBas.sections.writing.detail.raw, 15.196, 'of(): 라이팅 원점수를 화면에 넘긴다');
+eq(withBas.sections.writing.detail.rawMax, 20.28, 'of(): 라이팅 만점을 화면에 넘긴다');
+eq(withBas.sections.writing.detail.autoTotal, 10, 'of(): BAS 문항 수도 함께 넘긴다');
 
 console.log('\n' + (fails ? fails + ' FAILED' : 'ALL PASS'));
 process.exit(fails ? 1 : 0);
