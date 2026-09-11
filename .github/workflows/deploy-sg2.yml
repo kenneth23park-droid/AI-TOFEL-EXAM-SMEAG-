@@ -32,10 +32,13 @@ jobs:
       # 가져온 그 브라우저 밖에서는 존재하지 않는 세트였다. 흔적이 있으면 팩·미디어·
       # 등록이 전부 있어야 한다.
       # 겹침: 훅 주석이 "배포는 막힌다"고 적어 두고도 이 워크플로에는 그 검사가 없었다.
-      - name: Gate — 세트 완결성 · 문항 겹침
+      # 원본 docx 빈 틀: 파서가 바뀌어 틀이 더는 가져와지지 않으면 선생님은 틀대로 채우고도
+      # 문항이 사라진 세트를 받는다. 틀을 strict 모드로 지어 120문항이 나오는지 본다.
+      - name: Gate — 세트 완결성 · 문항 겹침 · 원본 틀
         run: |
           node studyground/tests/test_set_complete.js
           node studyground/tools/dup_check.js --quiet
+          node studyground/tests/test_set_template.mjs
 
       - name: Install Vercel CLI
         run: npm install -g vercel@54

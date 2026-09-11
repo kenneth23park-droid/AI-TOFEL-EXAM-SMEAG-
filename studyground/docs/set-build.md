@@ -12,6 +12,10 @@ kenneth-brain/smeag-TOFEL 자료/SET <N> SCRIPT.docx         듣기 스크립트
 kenneth-brain/smeag-TOFEL 자료/SET <N> ANWER KEY.docx      정답지
 ```
 
+새 세트의 세 장은 빈 틀에서 시작한다 — `set-template/` (채우는 규칙은 그 폴더의 `README.md`).
+틀 그대로도 strict 모드에서 120문항이 stop 없이 지어지고, `tests/test_set_template.mjs` 가
+파서가 바뀔 때마다 그 약속이 아직 지켜지는지 본다.
+
 ---
 
 ## 1. 문제지 — 원본 문서에 100% 맞춘다. 가공하지 않는다
