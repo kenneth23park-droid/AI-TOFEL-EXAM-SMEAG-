@@ -57,6 +57,7 @@
     if (/(^|[A-Z])0*11$/.test(t) || t === 'SET11') return 'set11';
     if (/(^|[A-Z])0*10$/.test(t) || t === 'SET10') return 'set10';
     if (/(^|[A-Z])0*9$/.test(t) || t === 'SET9') return 'set9';
+    if (/(^|[A-Z])0*2$/.test(t) || t === 'SET2') return 'set2';
     return 'set1';
   }
 

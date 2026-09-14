@@ -1,0 +1,711 @@
+{
+  "note": "verify_audio.py 신선도 기준. 스크립트/음성정책 해시 + 계층3 판정. 매니페스트별로 따로 둔다(한 폴더를 두 매니페스트가 선언할 수 있다). 손으로 고치지 말고 tools/audio_gate.py 로 다시 세워라.",
+  "manifest": ".verify-manifest.tts.json",
+  "sigVersion": 3,
+  "items": {
+    "set2-l1-q01": {
+      "scriptHash": "263a9ed6e5f7c2df160cf97e7b57fab671adafc8c8c8d017d13624101f5bfd68",
+      "sigVersion": 3,
+      "bytes": 45601,
+      "durationSec": 2.79,
+      "audioSha256": "5b82614580ce1086d63d2d56f347135a2113fb4f25af4e595e28ea36bc2e8713",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Isn't the bookstore closed on Sundays?",
+        "audioSha256": "5b82614580ce1086d63d2d56f347135a2113fb4f25af4e595e28ea36bc2e8713",
+        "scriptHash": "263a9ed6e5f7c2df160cf97e7b57fab671adafc8c8c8d017d13624101f5bfd68"
+      }
+    },
+    "set2-l1-q02": {
+      "scriptHash": "10048bbec4a46bd6ef61dbca59eccb98db3e0b25807530e08c3c00831a8b0ef4",
+      "sigVersion": 3,
+      "bytes": 36824,
+      "durationSec": 2.23,
+      "audioSha256": "17372ea08756efdd4b849678b5b6d35e7582272c23de4fa1eea7fec36b8b27fc",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Could you hold the elevator for me?",
+        "audioSha256": "17372ea08756efdd4b849678b5b6d35e7582272c23de4fa1eea7fec36b8b27fc",
+        "scriptHash": "10048bbec4a46bd6ef61dbca59eccb98db3e0b25807530e08c3c00831a8b0ef4"
+      }
+    },
+    "set2-l1-q03": {
+      "scriptHash": "1c2f65eccd08bef1b3058d9c75bb4b98e4897a2c93f765e266bed4d46daf7e84",
+      "sigVersion": 3,
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "acbb88a465f03871befadc6365d4f0f77af0166b5d81883dda9c1608dab4e2e0",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "How do I access the shared drive?",
+        "audioSha256": "acbb88a465f03871befadc6365d4f0f77af0166b5d81883dda9c1608dab4e2e0",
+        "scriptHash": "1c2f65eccd08bef1b3058d9c75bb4b98e4897a2c93f765e266bed4d46daf7e84"
+      }
+    },
+    "set2-l1-q04": {
+      "scriptHash": "b6fd859cf08746ed74787080c51e4aafe4e48e9ba214cbd3e292df950eab9abe",
+      "sigVersion": 3,
+      "bytes": 51453,
+      "durationSec": 3.16,
+      "audioSha256": "e5252c6c15397762fb2d593582eb3815d08613fcf3fd2a568d086fa289ed96a4",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "That's the building where orientation is held, right?",
+        "audioSha256": "e5252c6c15397762fb2d593582eb3815d08613fcf3fd2a568d086fa289ed96a4",
+        "scriptHash": "b6fd859cf08746ed74787080c51e4aafe4e48e9ba214cbd3e292df950eab9abe"
+      }
+    },
+    "set2-l1-q05": {
+      "scriptHash": "cb0b4218f0a1e49f4834993855ed08a441589a5e48946134e892b0c7329f1c17",
+      "sigVersion": 3,
+      "bytes": 57722,
+      "durationSec": 3.53,
+      "audioSha256": "336aae007d34bcfcf0db4d49c58635b3039bf3fd19bc7b7cb8d903cfb259760a",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.1111,
+        "backend": "faster_whisper",
+        "reason": "WER 11.1% but only 1 word on a 9-word segment — short-segment rule, queue for a human listen",
+        "transcript": "Weren't we supposed to get the test results today?",
+        "audioSha256": "336aae007d34bcfcf0db4d49c58635b3039bf3fd19bc7b7cb8d903cfb259760a",
+        "scriptHash": "cb0b4218f0a1e49f4834993855ed08a441589a5e48946134e892b0c7329f1c17"
+      }
+    },
+    "set2-l1-q06": {
+      "scriptHash": "cf9b19ad12817d10ca9386d51d6bf377cfd46c2b468d6813b3065514a42e37dc",
+      "sigVersion": 3,
+      "bytes": 44765,
+      "durationSec": 2.74,
+      "audioSha256": "069e13aae0788d614428e0bddab8483413e074ac9377ac73d4e16c224603d08f",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Would you mind if I borrowed your umbrella?",
+        "audioSha256": "069e13aae0788d614428e0bddab8483413e074ac9377ac73d4e16c224603d08f",
+        "scriptHash": "cf9b19ad12817d10ca9386d51d6bf377cfd46c2b468d6813b3065514a42e37dc"
+      }
+    },
+    "set2-l1-q07": {
+      "scriptHash": "868ff1cee7b958cb7153c5ffb61ed6a2dd9f11c8391dd6bfe76db399617eec8d",
+      "sigVersion": 3,
+      "bytes": 50199,
+      "durationSec": 3.07,
+      "audioSha256": "97f50164fbecace3ebed1aafe956c036dd66bc59e2ccfc6e9fe2371e115c961d",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.125,
+        "backend": "faster_whisper",
+        "reason": "WER 12.5% but only 1 word on a 8-word segment — short-segment rule, queue for a human listen",
+        "transcript": "What's the fastest way to the convention centre?",
+        "audioSha256": "97f50164fbecace3ebed1aafe956c036dd66bc59e2ccfc6e9fe2371e115c961d",
+        "scriptHash": "868ff1cee7b958cb7153c5ffb61ed6a2dd9f11c8391dd6bfe76db399617eec8d"
+      }
+    },
+    "set2-l1-q08": {
+      "scriptHash": "bb63bf929329a9e3b5d2022d214dd16df187b99f86d82404fbf1b8a5c6c3b2d9",
+      "sigVersion": 3,
+      "bytes": 55214,
+      "durationSec": 3.39,
+      "audioSha256": "f9ac9b2646ac5dbfac908d7ba8c6b8bd7be687ba72beef635ea0d003dfc2c809",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You finished the certification course, didn't you?",
+        "audioSha256": "f9ac9b2646ac5dbfac908d7ba8c6b8bd7be687ba72beef635ea0d003dfc2c809",
+        "scriptHash": "bb63bf929329a9e3b5d2022d214dd16df187b99f86d82404fbf1b8a5c6c3b2d9"
+      }
+    },
+    "set2-l1-q09": {
+      "scriptHash": "7fb694692e146b4ca584d5c0a2f579883b3ac74fc66c1abfd61f73f0c74290aa",
+      "sigVersion": 3,
+      "bytes": 68589,
+      "durationSec": 4.23,
+      "audioSha256": "e5294853d6cc2f6a64623e25ac24307484d0520d892067a9033d88117ae02357",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you decided which elective you're taking next semester?",
+        "audioSha256": "e5294853d6cc2f6a64623e25ac24307484d0520d892067a9033d88117ae02357",
+        "scriptHash": "7fb694692e146b4ca584d5c0a2f579883b3ac74fc66c1abfd61f73f0c74290aa"
+      }
+    },
+    "set2-l1-q10": {
+      "scriptHash": "fada0cc2a03173cb4d60519bea8fe5cfc2b75f35fba66b8691932dd3bd15b087",
+      "sigVersion": 3,
+      "bytes": 66499,
+      "durationSec": 4.09,
+      "audioSha256": "a96d81e129d088ff07ce36fec4f08d92aef125ba2105ce053e2089107e5d60ec",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I can't believe how long the line is at the registration office.",
+        "audioSha256": "a96d81e129d088ff07ce36fec4f08d92aef125ba2105ce053e2089107e5d60ec",
+        "scriptHash": "fada0cc2a03173cb4d60519bea8fe5cfc2b75f35fba66b8691932dd3bd15b087"
+      }
+    },
+    "set2-l1-q11": {
+      "scriptHash": "05784c01cad04b443bfe67ebb429e9600adf3d669e5cf2e057f27633dd638012",
+      "sigVersion": 3,
+      "bytes": 47273,
+      "durationSec": 2.88,
+      "audioSha256": "26c3cfdf7cddec19a7d5858e28cecb34e470625ee749422ad79ec4610f5a195d",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Would you like a window seat or an aisle seat?",
+        "audioSha256": "26c3cfdf7cddec19a7d5858e28cecb34e470625ee749422ad79ec4610f5a195d",
+        "scriptHash": "05784c01cad04b443bfe67ebb429e9600adf3d669e5cf2e057f27633dd638012"
+      }
+    },
+    "set2-l1-q12": {
+      "scriptHash": "ecb4073fd8802047da5c0fffa8fbc1a7ab48d0ad9a948d8aa447bb67076b6e5b",
+      "sigVersion": 3,
+      "bytes": 65663,
+      "durationSec": 4.04,
+      "audioSha256": "7562a427a5646bffa8e43eb5d0c421b5cdfe677308e12379a44fe5071f97fc53",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You've already seen the new exhibit at the museum, haven't you?",
+        "audioSha256": "7562a427a5646bffa8e43eb5d0c421b5cdfe677308e12379a44fe5071f97fc53",
+        "scriptHash": "ecb4073fd8802047da5c0fffa8fbc1a7ab48d0ad9a948d8aa447bb67076b6e5b"
+      }
+    },
+    "set2-l1-q13-14": {
+      "scriptHash": "ce070d647851978cd5bda631b5798d8a540fdbce40678a351ba56c7f7da18765",
+      "sigVersion": 3,
+      "bytes": 284152,
+      "durationSec": 26.99,
+      "audioSha256": "c3b9fbba4eb6b156e6266c53f8576939f01022eef37948625f93dfcffe897094",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Did you notice they blocked off the main entrance to the science building? Yes, I almost went there this morning before I saw the signs. There's construction on the front steps. So where are we supposed to enter now? The temporary entrance is on the east side, near the parking lot. It adds a few minutes to the walk, but it's not too bad. How long is the construction supposed to last? The notice said about three weeks, so we'll be using the side door for a while.",
+        "audioSha256": "c3b9fbba4eb6b156e6266c53f8576939f01022eef37948625f93dfcffe897094",
+        "scriptHash": "ce070d647851978cd5bda631b5798d8a540fdbce40678a351ba56c7f7da18765"
+      }
+    },
+    "set2-l1-q15-16": {
+      "scriptHash": "d477048a8db3d2407d3804c6f1e5565a6f585d2a6d748f56457b5607fa42d021",
+      "sigVersion": 3,
+      "bytes": 237089,
+      "durationSec": 22.1,
+      "audioSha256": "39d802edb08e4669685a2323b0a77aab080b449d0a1f046bfbf60a06fb52c6b4",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0135,
+        "backend": "faster_whisper",
+        "reason": "WER 1.4%",
+        "transcript": "Excuse me, I think I left my gym locker key at the front desk this morning when I signed in. Let me check. What's your locker number? Well, it's 214 in the women's section. I need it soon because my laptop is in there and I have a class in 20 minutes. Okay, I see it here. Just sign this form to confirm you're picking it up. Great, thank you so much.",
+        "audioSha256": "39d802edb08e4669685a2323b0a77aab080b449d0a1f046bfbf60a06fb52c6b4",
+        "scriptHash": "d477048a8db3d2407d3804c6f1e5565a6f585d2a6d748f56457b5607fa42d021"
+      }
+    },
+    "set2-l1-q17-18": {
+      "scriptHash": "b684def53733de94dff68e183bffc8e3bbe479937a5ee16ea617a625a3b41a56",
+      "sigVersion": 3,
+      "bytes": 225983,
+      "durationSec": 23.73,
+      "audioSha256": "bb3a21c35fb0dd88210a5a1a76ee5ea11dda8b6ba5d8ebe8ac9112dc41671221",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0253,
+        "backend": "faster_whisper",
+        "reason": "WER 2.5% — queue for a human listen",
+        "transcript": "Julia, can you open the budget spreadsheet for our meeting? I can't right now. My computer is stuck on an update and it's taking forever. That's a problem because we need those charts before the client arrives at two. I'll try logging into the cloud version from the tablet in the break room. Good idea. I'll see if I can find a backup copy on my laptop too. Great. I'm heading there now to see if the tablet is available.",
+        "audioSha256": "bb3a21c35fb0dd88210a5a1a76ee5ea11dda8b6ba5d8ebe8ac9112dc41671221",
+        "scriptHash": "b684def53733de94dff68e183bffc8e3bbe479937a5ee16ea617a625a3b41a56"
+      }
+    },
+    "set2-l1-q19-20": {
+      "scriptHash": "8a37f46a2f9816867d02323d8cbedf9c876a4758ca044056e92b50332fa5c639",
+      "sigVersion": 3,
+      "bytes": 216546,
+      "durationSec": 13.47,
+      "audioSha256": "7cbeb846790aff4cd620160abcc028931934b8ec5ecd069723dc341e17cf3cc5",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0238,
+        "backend": "faster_whisper",
+        "reason": "WER 2.4% — queue for a human listen",
+        "transcript": "Class, I have an important notice. The main dining hall will close for renovations starting next Monday and will remain closed for two weeks. During this time, meals will be served at the West Campus Cafe instead. Please plan your schedules accordingly.",
+        "audioSha256": "7cbeb846790aff4cd620160abcc028931934b8ec5ecd069723dc341e17cf3cc5",
+        "scriptHash": "8a37f46a2f9816867d02323d8cbedf9c876a4758ca044056e92b50332fa5c639"
+      }
+    },
+    "set2-l1-q21-22": {
+      "scriptHash": "6725c17bc461973b117c4f8af70105c92cdb3a460aadab7667e41a001db8194c",
+      "sigVersion": 3,
+      "bytes": 611100,
+      "durationSec": 38.13,
+      "audioSha256": "cefbd11c29ad03c943d0a00bda3b247e5d48428d14f5d9b1135484218b5292cf",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0119,
+        "backend": "faster_whisper",
+        "reason": "WER 1.2%",
+        "transcript": "For those interested in teaching, the Graduate School of Education is accepting applications for its Teaching Assistant Training Program. This semester-long program covers classroom management, lesson planning, and effective communication strategies. Participants will observe experienced instructors and conduct supervised teaching sessions. Upon completion, you'll receive a certificate recognized by departments across campus. Open up at the Education Building, Office 210, and submit a one-page statement describing your teaching goals along with one faculty reference letter. Applications close in two weeks.",
+        "audioSha256": "cefbd11c29ad03c943d0a00bda3b247e5d48428d14f5d9b1135484218b5292cf",
+        "scriptHash": "6725c17bc461973b117c4f8af70105c92cdb3a460aadab7667e41a001db8194c"
+      }
+    },
+    "set2-l1-q23-24": {
+      "scriptHash": "6dc8f40a2a097bca61a2cac77484a1c1c0ecaaddb44c981d186af8de5cabe786",
+      "sigVersion": 3,
+      "bytes": 573902,
+      "durationSec": 35.81,
+      "audioSha256": "e4ab979b9111a9287c186605bf7b916c25ba64d7dd50455ec96ad27a10c56000",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Good afternoon, students. This is a quick reminder about the updated entry requirements for the North Campus Fitness Center starting this Monday. To improve security, the old plastic membership cards will no longer be accepted at the turnstiles. Instead, all students must now scan the digital QR code available through the University Life mobile app to gain access. If you haven't downloaded the app yet, please do so before your next workout to avoid any delays at the entrance. For a step-by-step guide on how to set up your digital ID, please visit the help desk in the main lobby or check the official athletics department website.",
+        "audioSha256": "e4ab979b9111a9287c186605bf7b916c25ba64d7dd50455ec96ad27a10c56000",
+        "scriptHash": "6dc8f40a2a097bca61a2cac77484a1c1c0ecaaddb44c981d186af8de5cabe786"
+      }
+    },
+    "set2-l1-q25-28": {
+      "scriptHash": "8f55c1f691db908e298c6a076f1b580d47e74d67e46e8cc5a26cf0d4558e27d6",
+      "sigVersion": 3,
+      "bytes": 1559867,
+      "durationSec": 97.43,
+      "audioSha256": "fec0141052e2937a5224283a2809e1369e326c0f98f99854e3fd7e4582a8740e",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "So today, let's talk about something called brand loyalty. Basically, brand loyalty is when customers keep buying the same brand over and over again, even when there are other options available. You know, like when someone always buys the same type of phone or always goes to the same coffee shop. Now, why does this happen? Well, there are a few key reasons. First, consistency plays a big role. When a product or service delivers the same quality every time, customers start to trust it. I mean, if your favorite restaurant always makes great food, you're more likely to go back, right? Second, emotional connection matters. Companies create this through advertising, customer service, or even just memories. Think about a brand your family has used for years. There's often an emotional attachment there. However, brand loyalty isn't permanent. If quality drops, or if a competitor offers something significantly better, customers might switch. Also, younger consumers tend to be less loyal than older generations, because they value trying new things. That said, strong brand loyalty is incredibly valuable for businesses. It reduces marketing costs, since loyal customers basically advertise for you through word of mouth. Plus, these customers are often willing to pay premium prices.",
+        "audioSha256": "fec0141052e2937a5224283a2809e1369e326c0f98f99854e3fd7e4582a8740e",
+        "scriptHash": "8f55c1f691db908e298c6a076f1b580d47e74d67e46e8cc5a26cf0d4558e27d6"
+      }
+    },
+    "set2-l1-q29-32": {
+      "scriptHash": "60acfeffc94657d2426209059b568aca348a974ea7f4f1a913e25062ad93ef64",
+      "sigVersion": 3,
+      "bytes": 1403968,
+      "durationSec": 87.68,
+      "audioSha256": "d6dfa7489d34457813642da0ef3b79836cef264eb113d8f951997226fd9d1578",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0092,
+        "backend": "faster_whisper",
+        "reason": "WER 0.9%",
+        "transcript": "In many ecosystems, we see species that look nearly identical when they live in separate geographic areas. But when these same two species overlap in the same habitat, they often start to diverge. This phenomenon is a direct response to the intense pressure of resource competition. If two species require the exact same food source in the same place, one will eventually out-compete the other, potentially leading to local extinction. To avoid this, we observe what ecologists call character displacement. Character displacement refers to the evolutionary process where two similar species develop distinct physical differences, specifically to minimize competition. Essentially, it's a way for species to carve out separate ecological niches within the shared territory. Instead of competing for the identical food types, they adapt to utilize different parts of the environment. Look at how this works with certain bird populations like Darwin's finches. On islands where only one species lives, their beak sizes are usually intermediate. However, on islands where two species coexist, their beak sizes shift dramatically. One species evolves a larger beak for tough seeds, while the other develops a smaller one for smaller food items. This divergence ensures that neither species is in direct competition for the same specific resource, allowing both to thrive. It's a crucial mechanism for maintaining biodiversity in competitive environments.",
+        "audioSha256": "d6dfa7489d34457813642da0ef3b79836cef264eb113d8f951997226fd9d1578",
+        "scriptHash": "60acfeffc94657d2426209059b568aca348a974ea7f4f1a913e25062ad93ef64"
+      }
+    },
+    "set2-l2-q01": {
+      "scriptHash": "3b79a03153aaef42a5a47fd3c401ed6feedf7a063a9fa1bd87eb23ac5d47dff1",
+      "sigVersion": 3,
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "e83e9943bea25dfd31cc95f0be9610b9022609117d79bf296ade708aab77b585",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Where can I find the recycling bins?",
+        "audioSha256": "e83e9943bea25dfd31cc95f0be9610b9022609117d79bf296ade708aab77b585",
+        "scriptHash": "3b79a03153aaef42a5a47fd3c401ed6feedf7a063a9fa1bd87eb23ac5d47dff1"
+      }
+    },
+    "set2-l2-q02": {
+      "scriptHash": "ee84a431a2c8b3d1c457b63a071b7789f637e69ed02346a454b81f9fac444634",
+      "sigVersion": 3,
+      "bytes": 41839,
+      "durationSec": 2.55,
+      "audioSha256": "d95eccbb97afa17049dc4c3b80d020a881e9387858373b66bdc6ee4ca5591832",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Did you hear back from the hiring committee?",
+        "audioSha256": "d95eccbb97afa17049dc4c3b80d020a881e9387858373b66bdc6ee4ca5591832",
+        "scriptHash": "ee84a431a2c8b3d1c457b63a071b7789f637e69ed02346a454b81f9fac444634"
+      }
+    },
+    "set2-l2-q03": {
+      "scriptHash": "a2a63f4568f719046775f0b00a40c05c99dab11123e34afdd3a67c46d23aa294",
+      "sigVersion": 3,
+      "bytes": 28465,
+      "durationSec": 1.72,
+      "audioSha256": "38551cef7c312adbbdc7b067f5008c6dbca0016afac4a5dff5ffda441d0656ba",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "mild or spicy",
+        "audioSha256": "38551cef7c312adbbdc7b067f5008c6dbca0016afac4a5dff5ffda441d0656ba",
+        "scriptHash": "a2a63f4568f719046775f0b00a40c05c99dab11123e34afdd3a67c46d23aa294"
+      }
+    },
+    "set2-l2-q04": {
+      "scriptHash": "97137406ecf20a3dc6455906c4d6c2700f17d605395e60cc65311acdaefd82d8",
+      "sigVersion": 3,
+      "bytes": 43511,
+      "durationSec": 2.65,
+      "audioSha256": "15ced47238265a97f3726ff010d93a6466edfcbdd2b901bc1aa18a4c53ca85cf",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "I can't figure out how to use this scanner.",
+        "audioSha256": "15ced47238265a97f3726ff010d93a6466edfcbdd2b901bc1aa18a4c53ca85cf",
+        "scriptHash": "97137406ecf20a3dc6455906c4d6c2700f17d605395e60cc65311acdaefd82d8"
+      }
+    },
+    "set2-l2-q05": {
+      "scriptHash": "f219d68845bdf94ec5423a8146a5c3cd68ed5c517059a14b6f793bd390d31b64",
+      "sigVersion": 3,
+      "bytes": 40586,
+      "durationSec": 2.46,
+      "audioSha256": "9cb8eaa806b9845e13f4b6dcfb4768bcdf265dfc82efbfe7b0b2e82f2c6380eb",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Who approved the budget increase?",
+        "audioSha256": "9cb8eaa806b9845e13f4b6dcfb4768bcdf265dfc82efbfe7b0b2e82f2c6380eb",
+        "scriptHash": "f219d68845bdf94ec5423a8146a5c3cd68ed5c517059a14b6f793bd390d31b64"
+      }
+    },
+    "set2-l2-q06": {
+      "scriptHash": "c6ccfa337bff50dfda42484bb15608643c1ace83dd3f3b3550064af8bf4a4538",
+      "sigVersion": 3,
+      "bytes": 38078,
+      "durationSec": 2.32,
+      "audioSha256": "2a62694271442f402dcfa20d27a15b482dd071c1bf103e10da682d7b01bdd714",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you confirmed the guest list?",
+        "audioSha256": "2a62694271442f402dcfa20d27a15b482dd071c1bf103e10da682d7b01bdd714",
+        "scriptHash": "c6ccfa337bff50dfda42484bb15608643c1ace83dd3f3b3550064af8bf4a4538"
+      }
+    },
+    "set2-l2-q07": {
+      "scriptHash": "9ee520d47176419a7a81ab787f5236e40f71aeb1711a7eca4ee694573d7a85ff",
+      "sigVersion": 3,
+      "bytes": 24285,
+      "durationSec": 1.44,
+      "audioSha256": "0e11671e35501b1eea8014cb7053c248e8d048f719f439c5b0650940ff43eef9",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Large or medium?",
+        "audioSha256": "0e11671e35501b1eea8014cb7053c248e8d048f719f439c5b0650940ff43eef9",
+        "scriptHash": "9ee520d47176419a7a81ab787f5236e40f71aeb1711a7eca4ee694573d7a85ff"
+      }
+    },
+    "set2-l2-q08-09": {
+      "scriptHash": "5364247e6c3b06ac90bda9c10af37516b1f72375bd3b3d716b770ea1c81ad7d3",
+      "sigVersion": 3,
+      "bytes": 289259,
+      "durationSec": 27.56,
+      "audioSha256": "da674e33511dcdf72d55a195918c00e38dfc13344153079af861b3b26d008ecb",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Have you heard about the new counseling services they're offering at the Health Center? No, what's new about them? They've added evening appointments for students who have classes during the day, and they hired two more counselors, so wait times are shorter. That's great news. I know a lot of people were frustrated with how long it took to get an appointment last semester. Exactly. They also have a new online booking system, which makes scheduling much easier.",
+        "audioSha256": "da674e33511dcdf72d55a195918c00e38dfc13344153079af861b3b26d008ecb",
+        "scriptHash": "5364247e6c3b06ac90bda9c10af37516b1f72375bd3b3d716b770ea1c81ad7d3"
+      }
+    },
+    "set2-l2-q10-11": {
+      "scriptHash": "b9261243a2ff51aef4be6e9e6de6337e1282cdabb1b27c774abfcd8f91bc1728",
+      "sigVersion": 3,
+      "bytes": 262274,
+      "durationSec": 26.72,
+      "audioSha256": "12c3ab4f0c4205d02156647a86d4498fe5cf4db5f29eecc9cdc88beb16ecee28",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Hey, I just got a message from Jake. He can't make it to the rock concert tonight, so I've got an extra ticket. Oh no, that's too bad. What time does it start? 8 p.m. at the Riverside Arena. I was thinking of posting it on the campus bulletin board, but I'd rather go with someone I know. Actually, I've been wanting to see that band for months. If you're offering, I'd love to go. Perfect. Let's meet at the main gate around 7.30 so we can grab dinner first.",
+        "audioSha256": "12c3ab4f0c4205d02156647a86d4498fe5cf4db5f29eecc9cdc88beb16ecee28",
+        "scriptHash": "b9261243a2ff51aef4be6e9e6de6337e1282cdabb1b27c774abfcd8f91bc1728"
+      }
+    },
+    "set2-l2-q12-13": {
+      "scriptHash": "71b0b958101cce4258671233478555dd7a3254fc37c9293a8ebf8bf2a7baefc8",
+      "sigVersion": 3,
+      "bytes": 247893,
+      "durationSec": 15.42,
+      "audioSha256": "c408c9a50979fd783fbac1dfff85c9a0dd29b6a78ee5043d0580d10398932ad1",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0417,
+        "backend": "faster_whisper",
+        "reason": "WER 4.2% — queue for a human listen",
+        "transcript": "Attention students, the deadline to enroll in the Student Health Insurance Plan is this Friday at 5 p.m. If you haven't submitted your enrollment form yet, please do so through the student portal immediately. Those who miss the deadline will not be eligible for coverage until next semester.",
+        "audioSha256": "c408c9a50979fd783fbac1dfff85c9a0dd29b6a78ee5043d0580d10398932ad1",
+        "scriptHash": "71b0b958101cce4258671233478555dd7a3254fc37c9293a8ebf8bf2a7baefc8"
+      }
+    },
+    "set2-l2-q14-17": {
+      "scriptHash": "3803009a6a0499dde4430956fa2e9162fc8ba05fc482f90823e30ff1ba8a9817",
+      "sigVersion": 3,
+      "bytes": 1619217,
+      "durationSec": 101.15,
+      "audioSha256": "85c13d1550a6f8cea26feca410362642bd5c6aa4f54159a898d9b9eac20f6f43",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.0293,
+        "backend": "faster_whisper",
+        "reason": "WER 2.9% — queue for a human listen",
+        "transcript": "All right, so today we're going to discuss how caves form. Most caves, especially the really large ones, are created through a process called dissolution. Basically, this happens when slightly acidic water dissolves rock over thousands of years. Now, let me explain how this works. Rainwater absorbs carbon dioxide from the air and soil, which makes it mildly acidic, kind of like natural soda water. When this acidic water seeps into the ground, it moves through cracks and joints in limestone or similar rocks. Over time, the acid slowly dissolves the rock and these small cracks gradually become larger openings. This process is incredibly slow. We're talking about thousands or even millions of years. As the dissolution continues, the passages get bigger and bigger until you have what we recognize as caves. The water also creates interesting formations inside caves. When water drips from the ceiling, it leaves behind tiny mineral deposits. These deposits build up over time, forming stalactites hanging from the ceiling and stalagmites rising from the floor. Some caves even have underground rivers or lakes. These form when the water table is high enough to fill the lower chambers. However, caves are fragile environments. Human activity, like excessive tourism or pollution, can damage these formations that took millennia to create. Changes in groundwater levels, due to draw row 43-ut or excessive pumping, can also affect cave systems. That's why geologists work hard to study and protect these natural wonders.",
+        "audioSha256": "85c13d1550a6f8cea26feca410362642bd5c6aa4f54159a898d9b9eac20f6f43",
+        "scriptHash": "3803009a6a0499dde4430956fa2e9162fc8ba05fc482f90823e30ff1ba8a9817"
+      }
+    },
+    "set2-s1-instructions": {
+      "scriptHash": "4479f99361c9b07e96242e514212eb0efaf2e248542b011998c71dd2ddcc00ad",
+      "sigVersion": 3,
+      "bytes": 129611,
+      "durationSec": 8.03,
+      "audioSha256": "6ec4b21d31542f0fc40780cbe8a46852b14a31a0db21dd1841d02313a784f756",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You are being trained to help student at the University Library, listen to your trainer, and repeat what she says, repeat only once.",
+        "audioSha256": "6ec4b21d31542f0fc40780cbe8a46852b14a31a0db21dd1841d02313a784f756",
+        "scriptHash": "4479f99361c9b07e96242e514212eb0efaf2e248542b011998c71dd2ddcc00ad"
+      }
+    },
+    "set2-s1-q1": {
+      "scriptHash": "ca65afd89793d1fda4208bd7c02e09b299f642b4147fd578227ef54b00854ba2",
+      "sigVersion": 3,
+      "bytes": 47273,
+      "durationSec": 2.88,
+      "audioSha256": "02a31de29d22610142070b4e62c0855c443a642356fe77d248a087146376ea81",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "We have several study space available here.",
+        "audioSha256": "02a31de29d22610142070b4e62c0855c443a642356fe77d248a087146376ea81",
+        "scriptHash": "ca65afd89793d1fda4208bd7c02e09b299f642b4147fd578227ef54b00854ba2"
+      }
+    },
+    "set2-s1-q2": {
+      "scriptHash": "0d4467a7ff77d689bdf981aaef2ee930b957709af5653d7df5ad0c88e7205698",
+      "sigVersion": 3,
+      "bytes": 56050,
+      "durationSec": 3.44,
+      "audioSha256": "56a00ec1c8095e39f57313c72c663a05c14de4da3277c468b9f44746612c7f5f",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "There are group study rooms on the second floor.",
+        "audioSha256": "56a00ec1c8095e39f57313c72c663a05c14de4da3277c468b9f44746612c7f5f",
+        "scriptHash": "0d4467a7ff77d689bdf981aaef2ee930b957709af5653d7df5ad0c88e7205698"
+      }
+    },
+    "set2-s1-q3": {
+      "scriptHash": "e39262ca16c64349399d59cf52ea64b33f64af7db395c763aa143395a66d858d",
+      "sigVersion": 3,
+      "bytes": 101190,
+      "durationSec": 6.27,
+      "audioSha256": "73a5fb390bf7ceda10a7765c167adeabd2528153b1132abadd51ae255a4ee4b7",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "The reference section includes academic journals and research databases.",
+        "audioSha256": "73a5fb390bf7ceda10a7765c167adeabd2528153b1132abadd51ae255a4ee4b7",
+        "scriptHash": "e39262ca16c64349399d59cf52ea64b33f64af7db395c763aa143395a66d858d"
+      }
+    },
+    "set2-s1-q4": {
+      "scriptHash": "f1b1f4b3fc20759a0cdb7a04e7e4594800c4e97cdcb151f7116327993178e639",
+      "sigVersion": 3,
+      "bytes": 63573,
+      "durationSec": 3.9,
+      "audioSha256": "3951251e94fe2a2d183ef2149ba2359210686760987885c1a225ca7c06f97ab1",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Students can check out up to 10 books at a time.",
+        "audioSha256": "3951251e94fe2a2d183ef2149ba2359210686760987885c1a225ca7c06f97ab1",
+        "scriptHash": "f1b1f4b3fc20759a0cdb7a04e7e4594800c4e97cdcb151f7116327993178e639"
+      }
+    },
+    "set2-s1-q5": {
+      "scriptHash": "b01ecd3f8c30965c2fc12cd2d4bdfed8b22c4a082c82cb625e3033fa45cbee11",
+      "sigVersion": 3,
+      "bytes": 101190,
+      "durationSec": 6.27,
+      "audioSha256": "420add91e2b09c1fc1b9d6507ec01340d3e783d04c0283825e32f084cfdd4ebc",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "We encourage students to use the online reservation system for study rooms.",
+        "audioSha256": "420add91e2b09c1fc1b9d6507ec01340d3e783d04c0283825e32f084cfdd4ebc",
+        "scriptHash": "b01ecd3f8c30965c2fc12cd2d4bdfed8b22c4a082c82cb625e3033fa45cbee11"
+      }
+    },
+    "set2-s1-q6": {
+      "scriptHash": "c67b379b9bb39068df5ecf75cdfb23af89f07ab1c439c87f80aed451077a188c",
+      "sigVersion": 3,
+      "bytes": 100772,
+      "durationSec": 6.22,
+      "audioSha256": "0d8604f576d180e978ead28d26fa3b7262dc082aa01c51f35442464e1f2793f8",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Please remember that food and drinks are only allowed in designated areas.",
+        "audioSha256": "0d8604f576d180e978ead28d26fa3b7262dc082aa01c51f35442464e1f2793f8",
+        "scriptHash": "c67b379b9bb39068df5ecf75cdfb23af89f07ab1c439c87f80aed451077a188c"
+      }
+    },
+    "set2-s1-q7": {
+      "scriptHash": "21d20a81080b51823a5bf4d4c92f499130fb361a538f83c3bf248e8538e33f20",
+      "sigVersion": 3,
+      "bytes": 107459,
+      "durationSec": 6.64,
+      "audioSha256": "c3728ac89293446554fb82bd01fddc83ca135a8dc9d6e2e00a3453a22b44fe55",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Before leaving, make sure to return all materials to the circulation desk or the book drop.",
+        "audioSha256": "c3728ac89293446554fb82bd01fddc83ca135a8dc9d6e2e00a3453a22b44fe55",
+        "scriptHash": "21d20a81080b51823a5bf4d4c92f499130fb361a538f83c3bf248e8538e33f20"
+      }
+    },
+    "set2-s2-instructions": {
+      "scriptHash": "76f4d582a49a8b94422454c35e25b04aac0735d5cc0ad57600ca499a2122ac70",
+      "sigVersion": 3,
+      "bytes": 252073,
+      "durationSec": 15.7,
+      "audioSha256": "7735a4eeb5fdd30a3b82e97c042fe7a6643e3a1cbac9d03667ccdd5612a9d307",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "You have volunteered for a research study about physical activity and health. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+        "audioSha256": "7735a4eeb5fdd30a3b82e97c042fe7a6643e3a1cbac9d03667ccdd5612a9d307",
+        "scriptHash": "76f4d582a49a8b94422454c35e25b04aac0735d5cc0ad57600ca499a2122ac70"
+      }
+    },
+    "set2-s2-q1": {
+      "scriptHash": "a2d2f54b1fa0a860a15d5684beef9b3b8b25838526841170b316873da6ea6d9c",
+      "sigVersion": 3,
+      "bytes": 191469,
+      "durationSec": 11.89,
+      "audioSha256": "3835ad56e8e48e8d763631b2ee56c1dd35276708df667abab36e7b9f90c8cdee",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Thank you for your participation today. I'd like to ask you some questions about exercise. Can you share one or two ways that you or people you know try to stay physically active?",
+        "audioSha256": "3835ad56e8e48e8d763631b2ee56c1dd35276708df667abab36e7b9f90c8cdee",
+        "scriptHash": "a2d2f54b1fa0a860a15d5684beef9b3b8b25838526841170b316873da6ea6d9c"
+      }
+    },
+    "set2-s2-q2": {
+      "scriptHash": "97c5412cb989f0bc4d459aeea2fed32bdbbeac083c82cf49c12c71dee4e9f8b5",
+      "sigVersion": 3,
+      "bytes": 277568,
+      "durationSec": 17.28,
+      "audioSha256": "5e9bc418d0826ddd683427633e4055ea465ff6d8b6e4ebc92e658ae10c877584",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "That's helpful. Exercising at a gym provides equipment and structure, but costs money and requires travel time, while exercising at home is free and convenient, but may lack motivation and proper equipment. Which do you prefer?",
+        "audioSha256": "5e9bc418d0826ddd683427633e4055ea465ff6d8b6e4ebc92e658ae10c877584",
+        "scriptHash": "97c5412cb989f0bc4d459aeea2fed32bdbbeac083c82cf49c12c71dee4e9f8b5"
+      }
+    },
+    "set2-s2-q3": {
+      "scriptHash": "6150556d4aaa5cea1477ea8ff1923bf78b1873bdef8b615b6a87759425001b3e",
+      "sigVersion": 3,
+      "bytes": 194813,
+      "durationSec": 12.12,
+      "audioSha256": "4116fb9de2c6a52b7df99e15260aa67842257f8e666ee542077c73122b62d7eb",
+      "stt": {
+        "verdict": "WARN",
+        "wer": 0.037,
+        "backend": "faster_whisper",
+        "reason": "WER 3.7% — queue for a human listen",
+        "transcript": "Okay, many people start exercise programs but stop after a few weeks. Why do you think it is difficult for people to maintain a regular exercise routine?",
+        "audioSha256": "4116fb9de2c6a52b7df99e15260aa67842257f8e666ee542077c73122b62d7eb",
+        "scriptHash": "6150556d4aaa5cea1477ea8ff1923bf78b1873bdef8b615b6a87759425001b3e"
+      }
+    },
+    "set2-s2-q4": {
+      "scriptHash": "bb0ec19512f0a1f03a9c70c6da910652aaed57aef305136328f89744cebe66a4",
+      "sigVersion": 3,
+      "bytes": 194813,
+      "durationSec": 12.12,
+      "audioSha256": "d452c22ca4358496e0581738dba724550512dee255d41d483fd84b5a6ff64cb1",
+      "stt": {
+        "verdict": "PASS",
+        "wer": 0.0,
+        "backend": "faster_whisper",
+        "reason": "WER 0.0%",
+        "transcript": "Good points. I just have one more question. How might workplace policies, such as providing gym facilities or flexible schedules, influence people's exercise habits in the future?",
+        "audioSha256": "d452c22ca4358496e0581738dba724550512dee255d41d483fd84b5a6ff64cb1",
+        "scriptHash": "bb0ec19512f0a1f03a9c70c6da910652aaed57aef305136328f89744cebe66a4"
+      }
+    }
+  }
+}

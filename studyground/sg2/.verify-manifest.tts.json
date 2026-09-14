@@ -2789,6 +2789,727 @@
       "origin": "tts-voices-set12exam-11labs.json"
     },
     {
+      "id": "set2-l1-q01",
+      "text": "Isn’t the bookstore closed on Sundays?",
+      "out": "media/audio/set2/l1-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Isn’t the bookstore closed on Sundays?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q02",
+      "text": "Could you hold the elevator for me?",
+      "out": "media/audio/set2/l1-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Could you hold the elevator for me?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q03",
+      "text": "How do I access the shared drive?",
+      "out": "media/audio/set2/l1-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "How do I access the shared drive?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q04",
+      "text": "That’s the building where orientation is held, right?",
+      "out": "media/audio/set2/l1-q04.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "That’s the building where orientation is held, right?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q05",
+      "text": "Weren’t we supposed to get the tests results today?",
+      "out": "media/audio/set2/l1-q05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|Xb7hH8MSUJpSbSDYk0k2",
+          "text": "Weren’t we supposed to get the tests results today?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q06",
+      "text": "Would you mind if I borrowed your umbrella?",
+      "out": "media/audio/set2/l1-q06.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "Would you mind if I borrowed your umbrella?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q07",
+      "text": "What’s the fastest way to the convention center?",
+      "out": "media/audio/set2/l1-q07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "What’s the fastest way to the convention center?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q08",
+      "text": "You finished the certification course, didn’t you?",
+      "out": "media/audio/set2/l1-q08.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "You finished the certification course, didn’t you?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q09",
+      "text": "Have you decided which elective you're taking next semester?",
+      "out": "media/audio/set2/l1-q09.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Have you decided which elective you're taking next semester?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q10",
+      "text": "I can't believe how long the line is at the registration office.",
+      "out": "media/audio/set2/l1-q10.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "I can't believe how long the line is at the registration office."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q11",
+      "text": "Would you like a window seat or an aisle seat?",
+      "out": "media/audio/set2/l1-q11.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Would you like a window seat or an aisle seat?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q12",
+      "text": "You've already seen the new exhibit at the museum, haven't you?",
+      "out": "media/audio/set2/l1-q12.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "You've already seen the new exhibit at the museum, haven't you?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q13-14",
+      "text": "Did you notice they blocked off the main entrance to the science building? Yes, I almost went there this morning before I saw the signs. There's construction on the front steps. So where are we supposed to enter now? The temporary entrance is on the east side, near the parking lot. It adds a few minutes to the walk, but it's not too bad. How long is the construction supposed to last? The notice said about three weeks, so we'll be using the side door for a while.",
+      "out": "media/audio/set2/l1-q13-14.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Did you notice they blocked off the main entrance to the science building?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Yes, I almost went there this morning before I saw the signs. There's construction on the front steps."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "So where are we supposed to enter now?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "The temporary entrance is on the east side, near the parking lot. It adds a few minutes to the walk, but it's not too bad."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "How long is the construction supposed to last?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "The notice said about three weeks, so we'll be using the side door for a while."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q15-16",
+      "text": "Excuse me, I think I left my gym locker key at the front desk this morning when I signed in. Let me check. What's your locker number? W: It's 214, in the women's section. I need it soon because my laptop is in there, and I have a class in twenty minutes. Okay, I see it here. Just sign this form to confirm you're picking it up. Great, thank you so much.",
+      "out": "media/audio/set2/l1-q15-16.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Excuse me, I think I left my gym locker key at the front desk this morning when I signed in."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Let me check. What's your locker number? W: It's 214, in the women's section. I need it soon because my laptop is in there, and I have a class in twenty minutes."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Okay, I see it here. Just sign this form to confirm you're picking it up."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Great, thank you so much."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q17-18",
+      "text": "Julia, can you open the budget spreadsheet for our meeting? I can't right now. My computer is stuck on an update and it's taking forever. That's a problem because we need those charts before the client arrives at two. I'll try logging into the cloud version from the tablet in the breakroom. Good idea. I'll see if I can find a backup copy on my laptop too. Great. I'm heading there now to see if the tablet is available.",
+      "out": "media/audio/set2/l1-q17-18.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Julia, can you open the budget spreadsheet for our meeting?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "I can't right now. My computer is stuck on an update and it's taking forever."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "That's a problem because we need those charts before the client arrives at two."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "I'll try logging into the cloud version from the tablet in the breakroom."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Good idea. I'll see if I can find a backup copy on my laptop too."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Great. I'm heading there now to see if the tablet is available."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q19-20",
+      "text": "Class, I have an important notice. The main dining hall will close for renovations starting next Monday and will remain closed for two weeks. During this time, meals will be served at the West Campus Café instead. Please plan your schedules accordingly.",
+      "out": "media/audio/set2/l1-q19-20.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Class, I have an important notice. The main dining hall will close for renovations starting next Monday and will remain closed for two weeks. During this time, meals will be served at the West Campus Café instead. Please plan your schedules accordingly."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q21-22",
+      "text": "For those interested in teaching, the Graduate School of Education is accepting applications for its Teaching Assistant Training Program. This semester-long program covers classroom management, lesson planning, and effective communication strategies. Participants will observe experienced instructors and conduct supervised teaching sessions. Upon completion, you'll receive a certificate recognized by departments across campus. Sign up at the Education Building, Office 210, and submit a one-page statement describing your teaching goals along with one faculty reference letter. Applications close in two weeks.",
+      "out": "media/audio/set2/l1-q21-22.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "For those interested in teaching, the Graduate School of Education is accepting applications for its Teaching Assistant Training Program. This semester-long program covers classroom management, lesson planning, and effective communication strategies. Participants will observe experienced instructors and conduct supervised teaching sessions. Upon completion, you'll receive a certificate recognized by departments across campus. Sign up at the Education Building, Office 210, and submit a one-page statement describing your teaching goals along with one faculty reference letter. Applications close in two weeks."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q23-24",
+      "text": "Good afternoon, students. This is a quick reminder about the updated entry requirements for the North Campus Fitness Center starting this Monday. To improve security, the old plastic membership cards will no longer be accepted at the turnstiles. Instead, all students must now scan the digital QR code available through the University Life mobile app to gain access. If you haven't downloaded the app yet, please do so before your next workout to avoid any delays at the entrance. For a step-by-step guide on how to set up your digital ID, please visit the help desk in the main lobby or check the official athletics department website.",
+      "out": "media/audio/set2/l1-q23-24.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Good afternoon, students. This is a quick reminder about the updated entry requirements for the North Campus Fitness Center starting this Monday. To improve security, the old plastic membership cards will no longer be accepted at the turnstiles. Instead, all students must now scan the digital QR code available through the University Life mobile app to gain access. If you haven't downloaded the app yet, please do so before your next workout to avoid any delays at the entrance. For a step-by-step guide on how to set up your digital ID, please visit the help desk in the main lobby or check the official athletics department website."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q25-28",
+      "text": "So today, let's talk about something called brand loyalty. Basically, brand loyalty is when customers keep buying the same brand over and over again, even when there are other options available. You know, like when someone always buys the same type of phone or always goes to the same coffee shop. Now, why does this happen? Well, there are a few key reasons. First, consistency plays a big role. When a product or service delivers the same quality every time, customers start to trust it. I mean, if your favorite restaurant always makes great food, you're more likely to go back, right? Second, emotional connection matters. Companies create this through advertising, customer service, or even just memories. Think about a brand your family has used for years—there's often an emotional attachment there. However, brand loyalty isn't permanent. If quality drops or if a competitor offers something significantly better, customers might switch. Also, younger consumers tend to be less loyal than older generations because they value trying new things. That said, strong brand loyalty is incredibly valuable for businesses. It reduces marketing costs since loyal customers basically advertise for you through word-of-mouth. Plus, these customers are often willing to pay premium prices.",
+      "out": "media/audio/set2/l1-q25-28.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "So today, let's talk about something called brand loyalty. Basically, brand loyalty is when customers keep buying the same brand over and over again, even when there are other options available. You know, like when someone always buys the same type of phone or always goes to the same coffee shop. Now, why does this happen? Well, there are a few key reasons. First, consistency plays a big role. When a product or service delivers the same quality every time, customers start to trust it. I mean, if your favorite restaurant always makes great food, you're more likely to go back, right? Second, emotional connection matters. Companies create this through advertising, customer service, or even just memories. Think about a brand your family has used for years—there's often an emotional attachment there. However, brand loyalty isn't permanent. If quality drops or if a competitor offers something significantly better, customers might switch. Also, younger consumers tend to be less loyal than older generations because they value trying new things. That said, strong brand loyalty is incredibly valuable for businesses. It reduces marketing costs since loyal customers basically advertise for you through word-of-mouth. Plus, these customers are often willing to pay premium prices."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l1-q29-32",
+      "text": "In many ecosystems, we see species that look nearly identical when they live in separate geographic areas. But, when these same two species overlap in the same habitat, they often start to diverge. This phenomenon is a direct response to the intense pressure of resource competition. If two species require the exact same food source in the same place, one will eventually outcompete the other, potentially leading to local extinction. To avoid this, we observe what ecologists call character displacement. Character displacement refers to the evolutionary process where two similar species develop distinct physical differences specifically to minimize competition. Essentially, it's a way for species to carve out separate ecological niches within the shared territory. Instead of competing for the identical food types, they adapt to utilize different parts of the environment. Look at how this works with certain bird populations, like Darwin’s finches. On islands where only one species lives, their beak sizes are usually intermediate. However, on islands where two species coexist, their beak sizes shift dramatically—one species evolves a larger beak for tough seeds, while the other develops a smaller one for smaller food items. This divergence ensures that neither species is in direct competition for the same specific resource, allowing both to thrive. It’s a crucial mechanism for maintaining biodiversity in competitive environments",
+      "out": "media/audio/set2/l1-q29-32.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "In many ecosystems, we see species that look nearly identical when they live in separate geographic areas. But, when these same two species overlap in the same habitat, they often start to diverge. This phenomenon is a direct response to the intense pressure of resource competition. If two species require the exact same food source in the same place, one will eventually outcompete the other, potentially leading to local extinction. To avoid this, we observe what ecologists call character displacement. Character displacement refers to the evolutionary process where two similar species develop distinct physical differences specifically to minimize competition. Essentially, it's a way for species to carve out separate ecological niches within the shared territory. Instead of competing for the identical food types, they adapt to utilize different parts of the environment. Look at how this works with certain bird populations, like Darwin’s finches. On islands where only one species lives, their beak sizes are usually intermediate. However, on islands where two species coexist, their beak sizes shift dramatically—one species evolves a larger beak for tough seeds, while the other develops a smaller one for smaller food items. This divergence ensures that neither species is in direct competition for the same specific resource, allowing both to thrive. It’s a crucial mechanism for maintaining biodiversity in competitive environments"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q01",
+      "text": "Where can I find the recycling bins?",
+      "out": "media/audio/set2/l2-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Where can I find the recycling bins?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q02",
+      "text": "Did you hear back from the hiring committee?",
+      "out": "media/audio/set2/l2-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Did you hear back from the hiring committee?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q03",
+      "text": "Mild or spicy?",
+      "out": "media/audio/set2/l2-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Mild or spicy?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q04",
+      "text": "I can't figure out how to use this scanner",
+      "out": "media/audio/set2/l2-q04.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "I can't figure out how to use this scanner"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q05",
+      "text": "Who approved the budget increase?",
+      "out": "media/audio/set2/l2-q05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Who approved the budget increase?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q06",
+      "text": "Have you confirmed the guest list?",
+      "out": "media/audio/set2/l2-q06.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Have you confirmed the guest list?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q07",
+      "text": "Large or medium?",
+      "out": "media/audio/set2/l2-q07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Large or medium?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q08-09",
+      "text": "Have you heard about the new counseling services they're offering at the health center? No, what's new about them? They've added evening appointments for students who have classes during the day. And they hired two more counselors, so wait times are shorter. That's great news. I know a lot of people were frustrated with how long it took to get an appointment last semester. Exactly. They also have a new online booking system, which makes scheduling much easier.",
+      "out": "media/audio/set2/l2-q08-09.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Have you heard about the new counseling services they're offering at the health center?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "No, what's new about them?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "They've added evening appointments for students who have classes during the day. And they hired two more counselors, so wait times are shorter."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "That's great news. I know a lot of people were frustrated with how long it took to get an appointment last semester."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Exactly. They also have a new online booking system, which makes scheduling much easier."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q10-11",
+      "text": "Hey, I just got a message from Jake. He can't make it to the rock concert tonight, so I've got an extra ticket. Oh no! That's too bad. What time does it start? 8 p.m. at the Riverside Arena. I was thinking of posting it on the campus bulletin board, but I'd rather go with someone I know. Actually, I've been wanting to see that band for months. If you're offering, I'd love to go. Perfect! Let's meet at the main gate around 7:30 so we can grab dinner first.",
+      "out": "media/audio/set2/l2-q10-11.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Hey, I just got a message from Jake. He can't make it to the rock concert tonight, so I've got an extra ticket."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "Oh no! That's too bad. What time does it start?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "8 p.m. at the Riverside Arena. I was thinking of posting it on the campus bulletin board, but I'd rather go with someone I know."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "Actually, I've been wanting to see that band for months. If you're offering, I'd love to go."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Perfect! Let's meet at the main gate around 7:30 so we can grab dinner first."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q12-13",
+      "text": "Attention, students. The deadline to enroll in the student health insurance plan is this Friday at 5 PM. If you haven't submitted your enrollment form yet, please do so through the student portal immediately. Those who miss the deadline will not be eligible for coverage until next semester.",
+      "out": "media/audio/set2/l2-q12-13.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Attention, students. The deadline to enroll in the student health insurance plan is this Friday at 5 PM. If you haven't submitted your enrollment form yet, please do so through the student portal immediately. Those who miss the deadline will not be eligible for coverage until next semester."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-l2-q14-17",
+      "text": "Alright, so today we're going to discuss how caves form. Most caves, especially the really large ones, are created through a process called dissolution. Basically, this happens when slightly acidic water dissolves rock over thousands of years. Now, let me explain how this works. Rainwater absorbs carbon dioxide from the air and soil, which makes it mildly acidic—kind of like natural soda water. When this acidic water seeps into the ground, it moves through cracks and joints in limestone or similar rocks. Over time, the acid slowly dissolves the rock, and these small cracks gradually become larger openings. This process is incredibly slow—we're talking about thousands or even millions of years. As the dissolution continues, the passages get bigger and bigger until you have what we recognize as caves. The water also creates interesting formations inside caves. When water drips from the ceiling, it leaves behind tiny mineral deposits. These deposits build up over time, forming stalactites hanging from the ceiling and stalagmites rising from the floor. Some caves even have underground rivers or lakes. These form when the water table is high enough to fill the lower chambers. However, caves are fragile environments. Human activity, like excessive tourism or pollution, can damage these formations that took millennia to create. Changes in groundwater levels due to dro43ught or excessive pumping can also affect cave systems. That's why geologists work hard to study and protect these natural wonders.",
+      "out": "media/audio/set2/l2-q14-17.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Alright, so today we're going to discuss how caves form. Most caves, especially the really large ones, are created through a process called dissolution. Basically, this happens when slightly acidic water dissolves rock over thousands of years. Now, let me explain how this works. Rainwater absorbs carbon dioxide from the air and soil, which makes it mildly acidic—kind of like natural soda water. When this acidic water seeps into the ground, it moves through cracks and joints in limestone or similar rocks. Over time, the acid slowly dissolves the rock, and these small cracks gradually become larger openings. This process is incredibly slow—we're talking about thousands or even millions of years. As the dissolution continues, the passages get bigger and bigger until you have what we recognize as caves. The water also creates interesting formations inside caves. When water drips from the ceiling, it leaves behind tiny mineral deposits. These deposits build up over time, forming stalactites hanging from the ceiling and stalagmites rising from the floor. Some caves even have underground rivers or lakes. These form when the water table is high enough to fill the lower chambers. However, caves are fragile environments. Human activity, like excessive tourism or pollution, can damage these formations that took millennia to create. Changes in groundwater levels due to dro43ught or excessive pumping can also affect cave systems. That's why geologists work hard to study and protect these natural wonders."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s1-instructions",
+      "text": "You are being trained to help student at the university library, listen to your trainer, and repeat what she says. Repeat only once.",
+      "out": "media/audio/set2/s1-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "You are being trained to help student at the university library, listen to your trainer, and repeat what she says. Repeat only once."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s1-q1",
+      "text": "We have several study space available here.",
+      "out": "media/audio/set2/s1-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "We have several study space available here."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s1-q2",
+      "text": "There are group study rooms on the second floor.",
+      "out": "media/audio/set2/s1-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "There are group study rooms on the second floor."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s1-q3",
+      "text": "The reference section includes academic journals and research databases.",
+      "out": "media/audio/set2/s1-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "The reference section includes academic journals and research databases."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s1-q4",
+      "text": "Students can check out up to ten books at a time.",
+      "out": "media/audio/set2/s1-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Students can check out up to ten books at a time."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s1-q5",
+      "text": "We encourage students to use the online reservation system for study rooms.",
+      "out": "media/audio/set2/s1-q5.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "We encourage students to use the online reservation system for study rooms."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s1-q6",
+      "text": "Please remember that food and drinks are only allowed in designated areas.",
+      "out": "media/audio/set2/s1-q6.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Please remember that food and drinks are only allowed in designated areas."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s1-q7",
+      "text": "Before leaving, make sure to return all materials to the circulation desk or the book drop.",
+      "out": "media/audio/set2/s1-q7.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Before leaving, make sure to return all materials to the circulation desk or the book drop."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s2-instructions",
+      "text": "You have volunteered for a research study about physical activity and health. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+      "out": "media/audio/set2/s2-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "You have volunteered for a research study about physical activity and health. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s2-q1",
+      "text": "Thank you for your participation today. I’d like to ask you some questions about exercise. Can you share one or two ways that you or people you know try to stay physically active?",
+      "out": "media/audio/set2/s2-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Thank you for your participation today. I’d like to ask you some questions about exercise. Can you share one or two ways that you or people you know try to stay physically active?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s2-q2",
+      "text": "That’s helpful. Exercising at a gym provides equipment and structure but costs money and requires travel time, while exercising at home is free and convenient but may lack motivation and proper equipment. Which do you prefer?",
+      "out": "media/audio/set2/s2-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "That’s helpful. Exercising at a gym provides equipment and structure but costs money and requires travel time, while exercising at home is free and convenient but may lack motivation and proper equipment. Which do you prefer?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s2-q3",
+      "text": "OK. Many people start exercise programs but stop after a few weeks. Why do you think it is difficult for people to maintain a regular exercise routine?",
+      "out": "media/audio/set2/s2-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "OK. Many people start exercise programs but stop after a few weeks. Why do you think it is difficult for people to maintain a regular exercise routine?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
+      "id": "set2-s2-q4",
+      "text": "Good points. I just have one more question. How might workplace policies, such as providing gym facilities or flexible schedules, influence people’s exercise habits in the future?",
+      "out": "media/audio/set2/s2-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Good points. I just have one more question. How might workplace policies, such as providing gym facilities or flexible schedules, influence people’s exercise habits in the future?"
+        }
+      ],
+      "origin": "tts-voices-set2exam-11labs.json"
+    },
+    {
       "id": "set9-L2-04-05",
       "text": "Hey, did you manage to get into Professor Hammond's linguistics seminar? I know it fills up fast. Not initially. I was number four on the waitlist, but I just got an email saying a spot opened up. That's great news! I'm still stuck at number seven. I'm keeping my fingers crossed, but I'm not holding my breath. You might want to have a backup plan. The add-drop deadline is next Friday, and the list doesn't usually move that quickly. Yeah, I've been looking at a sociolinguistics course as an alternative. It fits my schedule, but it's not my first choice. Well, sometimes those unexpected courses turn out to be the best ones.",
       "out": "media/audio/set9/set9-L2-04-05.mp3",

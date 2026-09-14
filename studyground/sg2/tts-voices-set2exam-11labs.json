@@ -1,0 +1,807 @@
+{
+  "provider": "elevenlabs",
+  "model": "eleven_flash_v2_5",
+  "output": "mp3_44100_128",
+  "note": [
+    "SET 2 시험 음성 배역 매니페스트. tools/build_voices_manifest.mjs 가 원본 docx 에서 만든다 — 손으로 고치지 말 것.",
+    "대본은 set-import.js 가 읽은 것과 같은 것이고, out 은 콘텐츠 팩이 가리키는 경로 그대로다.",
+    "목소리 13명은 SET 9 에서 확정된 것을 그대로 쓴다(config/set9-voice-casting.json).",
+    "id 에 세트 접두사를 붙이는 이유: tools/tts_multivoice.py 의 검산 매니페스트는 tts-voices*.json 을 합치므로, l1-q01 같은 이름은 SET 9 것과 부딪친다."
+  ],
+  "items": [
+    {
+      "id": "set2-l1-q01",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "Isn’t the bookstore closed on Sundays?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q02",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Could you hold the elevator for me?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q03",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "How do I access the shared drive?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q04",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q04.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "That’s the building where orientation is held, right?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q05",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q05.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "Xb7hH8MSUJpSbSDYk0k2",
+          "voice_name": "GB-Alice",
+          "el_voice": "Alice",
+          "text": "Weren’t we supposed to get the tests results today?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q06",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q06.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "Would you mind if I borrowed your umbrella?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q07",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q07.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "What’s the fastest way to the convention center?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q08",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q08.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "You finished the certification course, didn’t you?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q09",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q09.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Have you decided which elective you're taking next semester?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q10",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q10.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "I can't believe how long the line is at the registration office."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q11",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q11.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Would you like a window seat or an aisle seat?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q12",
+      "kind": "short",
+      "out": "media/audio/set2/l1-q12.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "You've already seen the new exhibit at the museum, haven't you?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l1-q13-14",
+      "kind": "conversation",
+      "out": "media/audio/set2/l1-q13-14.mp3",
+      "segments": [
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Did you notice they blocked off the main entrance to the science building?"
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Yes, I almost went there this morning before I saw the signs. There's construction on the front steps."
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "So where are we supposed to enter now?"
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "The temporary entrance is on the east side, near the parking lot. It adds a few minutes to the walk, but it's not too bad."
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "How long is the construction supposed to last?"
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "The notice said about three weeks, so we'll be using the side door for a while."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set2-l1-q15-16",
+      "kind": "conversation",
+      "out": "media/audio/set2/l1-q15-16.mp3",
+      "segments": [
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Excuse me, I think I left my gym locker key at the front desk this morning when I signed in."
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Let me check. What's your locker number? W: It's 214, in the women's section. I need it soon because my laptop is in there, and I have a class in twenty minutes."
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Okay, I see it here. Just sign this form to confirm you're picking it up."
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Great, thank you so much."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set2-l1-q17-18",
+      "kind": "conversation",
+      "out": "media/audio/set2/l1-q17-18.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Julia, can you open the budget spreadsheet for our meeting?"
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "I can't right now. My computer is stuck on an update and it's taking forever."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "That's a problem because we need those charts before the client arrives at two."
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "I'll try logging into the cloud version from the tablet in the breakroom."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Good idea. I'll see if I can find a backup copy on my laptop too."
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Great. I'm heading there now to see if the tablet is available."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set2-l1-q19-20",
+      "kind": "announcement",
+      "out": "media/audio/set2/l1-q19-20.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Class, I have an important notice. The main dining hall will close for renovations starting next Monday and will remain closed for two weeks. During this time, meals will be served at the West Campus Café instead. Please plan your schedules accordingly."
+        }
+      ]
+    },
+    {
+      "id": "set2-l1-q21-22",
+      "kind": "announcement",
+      "out": "media/audio/set2/l1-q21-22.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "For those interested in teaching, the Graduate School of Education is accepting applications for its Teaching Assistant Training Program. This semester-long program covers classroom management, lesson planning, and effective communication strategies. Participants will observe experienced instructors and conduct supervised teaching sessions. Upon completion, you'll receive a certificate recognized by departments across campus. Sign up at the Education Building, Office 210, and submit a one-page statement describing your teaching goals along with one faculty reference letter. Applications close in two weeks."
+        }
+      ]
+    },
+    {
+      "id": "set2-l1-q23-24",
+      "kind": "announcement",
+      "out": "media/audio/set2/l1-q23-24.mp3",
+      "segments": [
+        {
+          "speaker": "W",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Good afternoon, students. This is a quick reminder about the updated entry requirements for the North Campus Fitness Center starting this Monday. To improve security, the old plastic membership cards will no longer be accepted at the turnstiles. Instead, all students must now scan the digital QR code available through the University Life mobile app to gain access. If you haven't downloaded the app yet, please do so before your next workout to avoid any delays at the entrance. For a step-by-step guide on how to set up your digital ID, please visit the help desk in the main lobby or check the official athletics department website."
+        }
+      ]
+    },
+    {
+      "id": "set2-l1-q25-28",
+      "kind": "announcement",
+      "out": "media/audio/set2/l1-q25-28.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "So today, let's talk about something called brand loyalty. Basically, brand loyalty is when customers keep buying the same brand over and over again, even when there are other options available. You know, like when someone always buys the same type of phone or always goes to the same coffee shop. Now, why does this happen? Well, there are a few key reasons. First, consistency plays a big role. When a product or service delivers the same quality every time, customers start to trust it. I mean, if your favorite restaurant always makes great food, you're more likely to go back, right? Second, emotional connection matters. Companies create this through advertising, customer service, or even just memories. Think about a brand your family has used for years—there's often an emotional attachment there. However, brand loyalty isn't permanent. If quality drops or if a competitor offers something significantly better, customers might switch. Also, younger consumers tend to be less loyal than older generations because they value trying new things. That said, strong brand loyalty is incredibly valuable for businesses. It reduces marketing costs since loyal customers basically advertise for you through word-of-mouth. Plus, these customers are often willing to pay premium prices."
+        }
+      ]
+    },
+    {
+      "id": "set2-l1-q29-32",
+      "kind": "announcement",
+      "out": "media/audio/set2/l1-q29-32.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "In many ecosystems, we see species that look nearly identical when they live in separate geographic areas. But, when these same two species overlap in the same habitat, they often start to diverge. This phenomenon is a direct response to the intense pressure of resource competition. If two species require the exact same food source in the same place, one will eventually outcompete the other, potentially leading to local extinction. To avoid this, we observe what ecologists call character displacement. Character displacement refers to the evolutionary process where two similar species develop distinct physical differences specifically to minimize competition. Essentially, it's a way for species to carve out separate ecological niches within the shared territory. Instead of competing for the identical food types, they adapt to utilize different parts of the environment. Look at how this works with certain bird populations, like Darwin’s finches. On islands where only one species lives, their beak sizes are usually intermediate. However, on islands where two species coexist, their beak sizes shift dramatically—one species evolves a larger beak for tough seeds, while the other develops a smaller one for smaller food items. This divergence ensures that neither species is in direct competition for the same specific resource, allowing both to thrive. It’s a crucial mechanism for maintaining biodiversity in competitive environments"
+        }
+      ]
+    },
+    {
+      "id": "set2-l2-q01",
+      "kind": "short",
+      "out": "media/audio/set2/l2-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "Where can I find the recycling bins?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l2-q02",
+      "kind": "short",
+      "out": "media/audio/set2/l2-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Did you hear back from the hiring committee?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l2-q03",
+      "kind": "short",
+      "out": "media/audio/set2/l2-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Mild or spicy?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l2-q04",
+      "kind": "short",
+      "out": "media/audio/set2/l2-q04.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "I can't figure out how to use this scanner"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l2-q05",
+      "kind": "short",
+      "out": "media/audio/set2/l2-q05.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Who approved the budget increase?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l2-q06",
+      "kind": "short",
+      "out": "media/audio/set2/l2-q06.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Have you confirmed the guest list?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l2-q07",
+      "kind": "short",
+      "out": "media/audio/set2/l2-q07.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "Large or medium?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set2-l2-q08-09",
+      "kind": "conversation",
+      "out": "media/audio/set2/l2-q08-09.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Have you heard about the new counseling services they're offering at the health center?"
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "No, what's new about them?"
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "They've added evening appointments for students who have classes during the day. And they hired two more counselors, so wait times are shorter."
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "That's great news. I know a lot of people were frustrated with how long it took to get an appointment last semester."
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Exactly. They also have a new online booking system, which makes scheduling much easier."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set2-l2-q10-11",
+      "kind": "conversation",
+      "out": "media/audio/set2/l2-q10-11.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Hey, I just got a message from Jake. He can't make it to the rock concert tonight, so I've got an extra ticket."
+        },
+        {
+          "speaker": "W",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "Oh no! That's too bad. What time does it start?"
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "8 p.m. at the Riverside Arena. I was thinking of posting it on the campus bulletin board, but I'd rather go with someone I know."
+        },
+        {
+          "speaker": "W",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "Actually, I've been wanting to see that band for months. If you're offering, I'd love to go."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Perfect! Let's meet at the main gate around 7:30 so we can grab dinner first."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set2-l2-q12-13",
+      "kind": "announcement",
+      "out": "media/audio/set2/l2-q12-13.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Attention, students. The deadline to enroll in the student health insurance plan is this Friday at 5 PM. If you haven't submitted your enrollment form yet, please do so through the student portal immediately. Those who miss the deadline will not be eligible for coverage until next semester."
+        }
+      ]
+    },
+    {
+      "id": "set2-l2-q14-17",
+      "kind": "announcement",
+      "out": "media/audio/set2/l2-q14-17.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Alright, so today we're going to discuss how caves form. Most caves, especially the really large ones, are created through a process called dissolution. Basically, this happens when slightly acidic water dissolves rock over thousands of years. Now, let me explain how this works. Rainwater absorbs carbon dioxide from the air and soil, which makes it mildly acidic—kind of like natural soda water. When this acidic water seeps into the ground, it moves through cracks and joints in limestone or similar rocks. Over time, the acid slowly dissolves the rock, and these small cracks gradually become larger openings. This process is incredibly slow—we're talking about thousands or even millions of years. As the dissolution continues, the passages get bigger and bigger until you have what we recognize as caves. The water also creates interesting formations inside caves. When water drips from the ceiling, it leaves behind tiny mineral deposits. These deposits build up over time, forming stalactites hanging from the ceiling and stalagmites rising from the floor. Some caves even have underground rivers or lakes. These form when the water table is high enough to fill the lower chambers. However, caves are fragile environments. Human activity, like excessive tourism or pollution, can damage these formations that took millennia to create. Changes in groundwater levels due to dro43ught or excessive pumping can also affect cave systems. That's why geologists work hard to study and protect these natural wonders."
+        }
+      ]
+    },
+    {
+      "id": "set2-s1-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set2/s1-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You are being trained to help student at the university library, listen to your trainer, and repeat what she says. Repeat only once."
+        }
+      ]
+    },
+    {
+      "id": "set2-s1-q1",
+      "kind": "repeat",
+      "out": "media/audio/set2/s1-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "We have several study space available here."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set2-s1-q2",
+      "kind": "repeat",
+      "out": "media/audio/set2/s1-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "There are group study rooms on the second floor."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set2-s1-q3",
+      "kind": "repeat",
+      "out": "media/audio/set2/s1-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "The reference section includes academic journals and research databases."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set2-s1-q4",
+      "kind": "repeat",
+      "out": "media/audio/set2/s1-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Students can check out up to ten books at a time."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set2-s1-q5",
+      "kind": "repeat",
+      "out": "media/audio/set2/s1-q5.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "We encourage students to use the online reservation system for study rooms."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set2-s1-q6",
+      "kind": "repeat",
+      "out": "media/audio/set2/s1-q6.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Please remember that food and drinks are only allowed in designated areas."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set2-s1-q7",
+      "kind": "repeat",
+      "out": "media/audio/set2/s1-q7.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Before leaving, make sure to return all materials to the circulation desk or the book drop."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set2-s2-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set2/s2-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "You have volunteered for a research study about physical activity and health. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ]
+    },
+    {
+      "id": "set2-s2-q1",
+      "kind": "interview",
+      "out": "media/audio/set2/s2-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Thank you for your participation today. I’d like to ask you some questions about exercise. Can you share one or two ways that you or people you know try to stay physically active?"
+        }
+      ]
+    },
+    {
+      "id": "set2-s2-q2",
+      "kind": "interview",
+      "out": "media/audio/set2/s2-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "That’s helpful. Exercising at a gym provides equipment and structure but costs money and requires travel time, while exercising at home is free and convenient but may lack motivation and proper equipment. Which do you prefer?"
+        }
+      ]
+    },
+    {
+      "id": "set2-s2-q3",
+      "kind": "interview",
+      "out": "media/audio/set2/s2-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "OK. Many people start exercise programs but stop after a few weeks. Why do you think it is difficult for people to maintain a regular exercise routine?"
+        }
+      ]
+    },
+    {
+      "id": "set2-s2-q4",
+      "kind": "interview",
+      "out": "media/audio/set2/s2-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Good points. I just have one more question. How might workplace policies, such as providing gym facilities or flexible schedules, influence people’s exercise habits in the future?"
+        }
+      ]
+    }
+  ]
+}

@@ -11,7 +11,8 @@
  *
  * 계약
  *   SG_DOCX.read(arrayBuffer) -> Promise<{
- *     paragraphs: [{ i, style, listed, ilvl, text, images:[url], table, row, cell, box }],
+ *     paragraphs: [{ i, style, listed, ilvl, text, textU, images:[url], table, row, cell, box }],
+ *       textU — 밑줄만 그은 빈 런을 '__' 로 적은 글. 그런 빈칸이 없으면 ''.
  *     media: { 'image1.png': Uint8Array, ... },     // word/media/*
  *     rels:  { rId4: 'media/image1.png', ... }
  *   }>
@@ -175,9 +176,21 @@
 
   function newPara(ctx) {
     return {
-      i: -1, style: '', listed: false, ilvl: 0, text: '', textRaw: '',
-      images: [], table: ctx.tbl > 0, row: ctx.row, cell: ctx.cell, box: ctx.box > 0
+      i: -1, style: '', listed: false, ilvl: 0, text: '', textRaw: '', textU: '',
+      images: [], table: ctx.tbl > 0, row: ctx.row, cell: ctx.cell, box: ctx.box > 0,
+      _run: null
     };
+  }
+
+  /* 런 하나가 끝났다. 밑줄을 그은 런 중 글자 없이 탭·공백·'_' 만 든 것은 워드 화면에서
+     빈칸 밑줄로 보인다 — SET 2 문장 만들기는 '__' 대신 밑줄 친 탭으로, 또는 '_' 하나에
+     밑줄 친 탭을 붙여 빈칸을 그었다. text 에서는 공백이거나 '_' 하나라 빈칸이 사라지므로, textU 에만 표시(\u0001)를 남긴다. */
+  function closeRun(p) {
+    var r = p._run;
+    if (!r) return;
+    var piece = p.text.slice(r.start);
+    p.textU += (r.u && piece && /^[_ \t ]+$/.test(piece)) ? '\u0001' : piece;
+    p._run = null;
   }
 
   /**
@@ -219,6 +232,10 @@
                한 타일인지 되살릴 길이 없다. 본문은 지금까지처럼 접은 text 를 쓴다. */
             done.textRaw = done.text.replace(/[ \t]+$/, '').replace(/^[ \t]+/, '');
             done.text = done.text.replace(/[ \t]+/g, ' ').trim();
+            /* textU 는 밑줄 빈칸이 있을 때만 남긴다. 붙어 있는 밑줄 런 여럿은 빈칸 하나다. */
+            done.textU = done.textU.indexOf('\u0001') >= 0
+              ? done.textU.replace(/\u0001+/g, '__').replace(/[ \t]+/g, ' ').trim() : '';
+            delete done._run;
             out.push(done);
           }
           return;
@@ -233,6 +250,13 @@
       if (n === 'w:pStyle' && t.attrs) { top.style = t.attrs['w:val'] || ''; return; }
       if (n === 'w:numPr' && !t.close) { top.listed = true; return; }
       if (n === 'w:ilvl' && t.attrs) { top.ilvl = parseInt(t.attrs['w:val'], 10) || 0; return; }
+      if (n === 'w:r') {
+        if (t.close) closeRun(top);
+        else if (!t.selfClose) top._run = { start: top.text.length, u: false };
+        return;
+      }
+      /* 런 밖(문단 표시의 w:rPr)의 밑줄은 글자가 아니다 — 열린 런이 있을 때만 본다. */
+      if (n === 'w:u' && top._run && !t.close) { top._run.u = !t.attrs || t.attrs['w:val'] !== 'none'; return; }
       if (n === 'w:tab' || n === 'w:ptab') { top.text += '\t'; return; }
       if (n === 'w:br' || n === 'w:cr') { top.text += '\n'; return; }
       if (n === 'w:t') { inText = !t.close && !t.selfClose; return; }

@@ -5,6 +5,13 @@
 아래에 어느 코드가 무엇을 막는지 같이 적어 둔 이유다. 사람이 확인하기로 한 것은 언젠가
 확인하지 않게 되고, 그 사실은 시험장에서만 드러난다.
 
+**2026-09-15 부터 — 세트는 부족해도 항상 짓는다.** 관문에 걸린 것은 세트를 멈추지 않고
+리포트에 오른다(`docs/set-reports/set<N>.md`, 팩 안의 `report`). 코드가 잡는 것은 그대로다 —
+바뀐 것은 잡은 뒤에 막느냐, 적느냐다. 원본 그대로 원칙도 그대로라 모자란 것을 지어내 채우지
+않는다. 대신 정답이 성립하지 않는 문항은 팩에 `unscored` 로 표시돼 점수에서 빠진다
+(`set-import.js` 의 `unscore()`, 채점은 `sg-results.js` · `sg-review-writing.js`) — 틀린 정답으로
+채점하느니 빼고, 뺀 것을 리포트가 말한다.
+
 원본 문서
 ```
 kenneth-brain/smeag-TOFEL 자료/NEW TOEFL SET <N>.docx      문제지
@@ -24,8 +31,8 @@ kenneth-brain/smeag-TOFEL 자료/SET <N> ANWER KEY.docx      정답지
 없는 제목을 지어내지 않는다. 문서가 틀렸으면 **문서를 고치고 다시 짓는다.**
 
 강제하는 곳 — `sg2/assets/set-import.js` 의 strict source mode
-(`admin-set-import.html` 의 `STRICT_SOURCE_ONLY = true`, 끌 수 없다). 다음은 전부 `stop` 이라
-저장 단추가 잠긴다.
+(`admin-set-import.html` 의 `STRICT_SOURCE_ONLY = true`, 끌 수 없다). 다음은 전부 `stop`
+(화면에서는 Problem)이라 리포트에 오른다 — 저장은 막지 않는다.
 
 | 상황 | gate |
 | --- | --- |
@@ -55,8 +62,9 @@ kenneth-brain/smeag-TOFEL 자료/SET <N> ANWER KEY.docx      정답지
 규칙은 `tests/test_verbatim_gate.js` 가 고정한다.
 
 `tools/build_set<N>.mjs` 로 명령줄에서 짓는 경우도 **같은 잣대**다 — `strictSource: true` 를
-명시적으로 넘기고, `stop` 이 하나라도 있으면 0 이 아닌 값으로 끝난다. 이 둘이 어긋나면
-"명령줄로는 지어지는데 화면에서는 저장이 막히는" 팩이 생기고, 그 팩은 이미 시험에 나간 뒤다.
+명시적으로 넘긴다. `stop` 이 있어도 팩을 쓰고 끝나며(`build_set2.mjs` 부터), 걸린 것은
+`tools/set_report.mjs` 가 `docs/set-reports/set<N>.md` 에 적는다. 화면과 명령줄이 같은 잣대라야
+"한쪽에서는 문제로 적히고 다른 쪽에서는 조용히 지나가는" 팩이 생기지 않는다.
 
 ## 2. 오디오 — 스크립트로 ElevenLabs 에서 만들고, 스크립트와 100% 맞춘다
 
@@ -125,6 +133,10 @@ localStorage 는 조용히 반쯤 실패하는 자리가 많아서(용량 초과
 강제하는 곳 — `studyground/tests/test_set_complete.js`. 세트 번호를 흔적의 합집합에서
 모은다(팩·빌더·배역표·사진표·음성 폴더·사진 폴더·오프라인 목록). 하나라도 있으면
 그 세트는 "짓는 중"이고, 아래가 전부 있어야 한다.
+
+2026-09-15 부터 **막는 것은 팩·빌더·회귀테스트·등록뿐**이다. 목소리·얼굴 배정표·오프라인
+목록·음성 파일·화자 사진은 없으면 `REPORT` 로 적고 통과한다 — 세트는 나가고, 빠진 것은
+리포트에 남는다.
 
 | 갖춰야 할 것 | 없으면 |
 | --- | --- |

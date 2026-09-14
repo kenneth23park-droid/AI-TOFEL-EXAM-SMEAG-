@@ -111,7 +111,10 @@ window.SG_RESULTS = (function () {
     if (!q || !isArray(q.slots)) return null;
     var out = [], i;
     for (i = 0; i < q.slots.length; i++) {
-      if (q.slots[i] && q.slots[i].t === 'b') out.push(q.slots[i].a);
+      if (q.slots[i] && q.slots[i].t === 'b') {
+        if (q.slots[i].a == null) return null;   /* 빈칸 정답이 비었으면 토큰으로 잴 수 없다 */
+        out.push(q.slots[i].a);
+      }
     }
     return out.length ? out : null;
   }
@@ -178,7 +181,9 @@ window.SG_RESULTS = (function () {
       var qid = q.id;
       var key = keys.hasOwnProperty(qid) ? keys[qid] : q.answer;
       var given = valueOf(answers, qid);
-      var ok, seq = (key == null && q.kind === 'build') ? blankTokens(q) : null;
+      /* 문장 만들기는 key 가 있어도 빈칸 토큰 순서로 잰다. 가져온 세트(SET 10~)는 정답표에
+         완성 문장을 적어 두는데 학생 답은 토큰 배열이라, 문장과 견주면 다 맞혀도 0 이었다. */
+      var ok, seq = q.kind === 'build' ? blankTokens(q) : null;
       if (seq) {
         ok = hitSequence(given, seq);
         // 리뷰 화면의 '정답' 칸에는 빈칸 토막이 아니라 완성 문장을 보여 준다.
@@ -186,6 +191,9 @@ window.SG_RESULTS = (function () {
       } else {
         ok = hit(given, key);
       }
+      /* 세트를 지을 때 성립하지 않는다고 판정된 문항(q.unscored)은 점수에 넣지 않는다 —
+         틀린 정답으로 채점하느니 빼고, 무엇을 뺐는지는 세트 리포트가 말한다. */
+      if (q.unscored) ok = null;
       var sec = sectionEntry(all[i], qid);
 
       bySection[sec] = bySection[sec] || { score: 0, total: 0 };

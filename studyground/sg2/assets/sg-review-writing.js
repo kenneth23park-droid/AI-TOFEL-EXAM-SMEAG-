@@ -101,7 +101,8 @@ window.SG_REVIEW_WRITING = (function () {
             };
             if (q.kind === 'build') {
               it.build = checkBuild(q, given);
-              it.ok = it.build.answered ? it.build.ok : false;
+              /* 지을 때 정답이 성립하지 않은 문항은 채점하지 않는다(q.unscored). */
+              it.ok = q.unscored ? null : (it.build.answered ? it.build.ok : false);
             } else if (RATED[q.kind]) {
               it.task = byTask[q.id] || null;
               it.score = scoreOf(it.task);
@@ -123,7 +124,7 @@ window.SG_REVIEW_WRITING = (function () {
   function summarize(items) {
     var auto = 0, autoOk = 0, rated = 0, sum = 0;
     items.forEach(function (it) {
-      if (it.kind === 'build') { auto += 1; if (it.ok) autoOk += 1; }
+      if (it.kind === 'build') { if (it.ok !== null) { auto += 1; if (it.ok) autoOk += 1; } }
       else if (RATED[it.kind] && it.score !== null) { rated += 1; sum += it.score; }
     });
     if (auto) return { kind: 'auto', got: autoOk, max: auto, text: autoOk + '/' + auto };
@@ -142,7 +143,7 @@ window.SG_REVIEW_WRITING = (function () {
   }
 
   function markOf(it) {
-    if (it.kind === 'build') return it.ok === true ? 'ok' : 'no';
+    if (it.kind === 'build') return it.ok === null ? 'na' : (it.ok === true ? 'ok' : 'no');
     if (it.score !== null && it.score !== undefined) return 'rated';
     return 'na';
   }
@@ -229,9 +230,11 @@ window.SG_REVIEW_WRITING = (function () {
         '</div>' +
         '<div class="rw-panel key">' +
           '<div class="rw-lab">' + bi('Correct Answer', '정답') + '</div>' +
-          slotLine(it.q, function (i) {
-            return '<span class="rw-tok key">' + esc(b.blanks[i] ? b.blanks[i].a : '') + '</span>';
-          }) +
+          (it.q.unscored
+            ? '<div class="rw-line"><span class="rw-fixed">' + esc(it.q.answerSentence || '') + '</span></div>'
+            : slotLine(it.q, function (i) {
+                return '<span class="rw-tok key">' + esc(b.blanks[i] ? b.blanks[i].a : '') + '</span>';
+              })) +
         '</div>';
     }
 
@@ -248,6 +251,10 @@ window.SG_REVIEW_WRITING = (function () {
 
   function verdictHtml(it) {
     if (it.kind === 'build') {
+      if (it.q.unscored) {
+        return '<div class="rw-verdict">— ' + bi('Not scored', '채점 제외') +
+          '<small>' + esc(it.q.unscoredReason || 'This question did not cross-check when the set was built.') + '</small></div>';
+      }
       if (!it.build.answered) {
         return '<div class="rw-verdict no">✗ ' + bi('Not answered', '무응답') + '</div>';
       }

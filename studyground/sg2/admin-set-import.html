@@ -8,7 +8,8 @@
   만들어진 팩은 assets/set9.js 와 같은 모양이고 브라우저 저장소에 들어간다
   (assets/set-store.js). 저장 즉시 시험 화면 ?set=<코드> 로 열린다.
 
-  검산에 걸린 것은 숨기지 않는다 — 멈춤(stop)이 하나라도 있으면 저장 단추가 잠긴다.
+  검산에 걸린 것은 숨기지 않는다 — 그렇다고 막지도 않는다. 세트는 부족해도 저장되고
+  (2026-09-15), 걸린 것(Problem)은 리포트로 남는다. 정답이 성립하지 않은 문항은 점수에서 빠진다.
   세트 만들기 다섯 관문 전체는 ../docs/set-build.md 에 있다.
 
   문서가 없을 때는 AI 가 대신 짓는다(assets/set-generate.js + /api/generate). 모양은
@@ -521,10 +522,11 @@
   var busy = document.getElementById('busy');
 
   function refresh() {
-    buildBtn.disabled = !files.questions || (STRICT_SOURCE_ONLY && (!files.script || !files.answers)) || !slugOf(codeEl.value);
+    /* 스크립트·정답지가 빠져도 짓는다 — 빠진 것은 지어내지 않고 problem 으로 리포트에 오른다. */
+    buildBtn.disabled = !files.questions || !slugOf(codeEl.value);
     var s = slugOf(codeEl.value);
     document.getElementById('codehint').textContent = s
-      ? 'Strict source mode: question, script and answer key files are required. Exam address: exam-runtime.html?set=' + s
+      ? 'Strict source mode: upload the question, script and answer key files — anything missing is reported, never guessed. Exam address: exam-runtime.html?set=' + s
       : 'Enter a code made of letters and numbers.';
     var dup = s && STORE.get(s);
     if (dup) document.getElementById('codehint').textContent += ' · this code is already saved (it will be overwritten)';
@@ -1515,7 +1517,7 @@
     } else if (dupRes.counts.high) {
       dupGates.push({
         level: 'stop', scope: 'dup',
-        message: dupRes.counts.high + ' questions are identical to existing ones — click a row below to see both side by side. The set cannot be saved until those questions are changed.'
+        message: dupRes.counts.high + ' questions are identical to existing ones — click a row below to see both side by side. Change them in the document and build again.'
       });
     } else if (dupRes.counts.watch) {
       dupGates.push({
@@ -1564,7 +1566,7 @@
     var stops = allGates.filter(function (g) { return g.level === 'stop'; });
     document.getElementById('gates').innerHTML = allGates.length
       ? allGates.map(function (g) {
-          return '<div class="gt ' + g.level + '"><span class="lv">' + (g.level === 'stop' ? 'Stop' : 'Check') + '</span>'
+          return '<div class="gt ' + g.level + '"><span class="lv">' + (g.level === 'stop' ? 'Problem' : 'Check') + '</span>'
             + '<span>' + esc(g.message) + '</span></div>';
         }).join('')
       : '<div class="gt warn" style="--gc:#1f9d55"><span class="lv" style="color:#1f9d55">Pass</span>'
@@ -1588,10 +1590,14 @@
     document.getElementById('pbody').innerHTML = rows.join('');
     document.getElementById('pcount').textContent = stats.total + ' questions · ' + stats.answered + ' answered';
 
+    /* 세트는 부족해도 항상 저장한다(2026-09-15) — 위 목록이 곧 리포트다. 정답이 성립하지
+       않은 문항은 팩에 unscored 로 표시돼 점수에서 빠진다(틀린 정답으로 채점하지 않는다). */
     var saveBtn = document.getElementById('saveBtn');
-    saveBtn.disabled = stops.length > 0;
+    saveBtn.disabled = false;
+    var unscoredN = ((pack.report && pack.report.unscored) || []).length;
     document.getElementById('savehint').textContent = stops.length
-      ? 'Resolve ' + stops.length + ' stop item(s) before this set can be saved.'
+      ? stops.length + ' problem(s) are listed above — the set can still be saved.'
+        + (unscoredN ? ' ' + unscoredN + ' question(s) will not be scored until the documents are fixed.' : '')
       : '';
   }
 
@@ -1753,7 +1759,7 @@
     if (!gs.length) return '<p class="muted" style="font-size:12px;margin:0">Nothing was caught by the checks.</p>';
     return gs.map(function (g) {
       return '<div class="gt ' + g.level + '"><span class="lv">'
-        + (g.level === 'stop' ? 'Stop' : 'Check') + '</span><span>' + esc(g.message) + '</span></div>';
+        + (g.level === 'stop' ? 'Problem' : 'Check') + '</span><span>' + esc(g.message) + '</span></div>';
     }).join('');
   }
 

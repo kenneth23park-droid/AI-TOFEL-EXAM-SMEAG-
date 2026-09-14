@@ -429,7 +429,11 @@
 //       config/set12-writing-images.json 으로 붙인다(듣기 사진과 같은 방식) —
 //       다시 지어도 지워지지 않는다. assets/set12.js·set-import.js 가 함께 바뀌고
 //       둘 다 SHELL_ASSETS(cache-first)라 판올림 없이는 재방문 기기가 옛 사본을 읽는다.
-const VERSION = 'sg-v108';
+// v109: SET 2 가 저장소에 들어왔다(tools/build_set2.mjs · assets/set2.js). 세트는 부족해도
+//       항상 짓는다 — 성립하지 않은 문항은 팩에 unscored 로 남아 점수에서 빠지고, 채점기
+//       (sg-results.js · sg-review-writing.js)와 문장 만들기 밑줄 빈칸을 읽는 docx-read.js 가
+//       함께 바뀐다. 프리캐시 목록(팩 · 오프라인 목록)이 바뀌었으므로 판올림.
+const VERSION = 'sg-v109';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -479,7 +483,7 @@ const SHELL_ASSETS = [
   // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.
   'assets/offline-prep.js', 'config/offline.sets.json',
   'config/offline.set9.json', 'config/offline.set10.json', 'config/offline.set11.json',
-  'config/offline.set12.json',
+  'config/offline.set12.json', 'config/offline.set2.json',
 
   // 전체화면 자동 진입 · 화면 맞춤 — 오프라인 시험장에서도 첫 화면부터 적용돼야 한다.
   'assets/sg-fullscreen.js',
@@ -491,7 +495,7 @@ const SHELL_ASSETS = [
   // 검사기는 오프라인이면 조용히 물러나므로 프리캐시해도 시험장에서 걸리지 않는다.
   'assets/build-version.js', 'assets/sg-update-check.js',
 
-  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js', 'assets/set11.js', 'assets/set12.js',
+  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js', 'assets/set11.js', 'assets/set12.js', 'assets/set2.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',
   'manifest.webmanifest',
 

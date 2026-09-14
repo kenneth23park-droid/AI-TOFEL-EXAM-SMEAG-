@@ -28,6 +28,7 @@ function put(name) { fs.writeFileSync(path.join(dir, name), 'x'); }
   'NEW TOEFL MOCK TEST SET 10 Questions.docx', 'SET 10 SCRIPT.docx', 'SET 10 ANSWER KEY.docx',
   'NEW TOEFL SET 11.docx', 'SET 11 SCRIPT.docx', 'SET 11 ANWER KEY.docx',
   'NEW TOEFL SET 12.docx', 'SET 12 SCRIPT.docx', 'SET 12 ANWER KEY.docx',
+  'NEW TOEFL SET 2 Final Mock set 1.docx', 'TEST 2 SCRIPT 2.docx', 'SET 2 ANSWER KEY version 2.docx',
   'NEW TOEFL SET 11.docx.bak-before-writing-tiles',   // docx 가 아니다 — 걸리면 안 된다
   '~$EW TOEFL SET 12.docx'                            // 워드가 열어 둔 임시 파일
 ].forEach(put);
@@ -47,6 +48,13 @@ import(require('url').pathToFileURL(path.join(__dirname, '..', 'sg2', 'tools', '
       ok('SET ' + row[0] + ' 정답지', got.answers === row[2], got.answers || got.error);
       ok('SET ' + row[0] + ' 스크립트', got.script === 'SET ' + row[0] + ' SCRIPT.docx', got.script || got.error);
     });
+
+    console.log('\n[1b] 번호 앞 낱말이 TEST 여도 찾는다 (SET 2)');
+    var s2 = null;
+    try { s2 = M.findSourceDocs(dir, 2); } catch (e) { s2 = { error: e.message }; }
+    ok('SET 2 문제지', s2.questions === 'NEW TOEFL SET 2 Final Mock set 1.docx', s2.questions || s2.error);
+    ok('SET 2 스크립트', s2.script === 'TEST 2 SCRIPT 2.docx', s2.script || s2.error);
+    ok('SET 2 정답지', s2.answers === 'SET 2 ANSWER KEY version 2.docx', s2.answers || s2.error);
 
     console.log('\n[2] 번호가 비슷한 세트를 물지 않는다');
     var one = null;

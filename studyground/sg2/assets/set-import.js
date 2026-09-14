@@ -40,6 +40,14 @@
   function txt(p) { return p && p.text ? p.text : ''; }
   /* 칸을 접기 전의 글. 타일 줄은 여러 칸으로 조각을 가르므로 이걸 봐야 한다. */
   function txtRaw(p) { return p && p.textRaw ? p.textRaw : txt(p); }
+  /* 문장 만들기의 빈칸 줄. 빈칸은 보통 '__' 로 적혀 오지만, 밑줄만 그은 칸으로 오기도
+     한다(SET 2) — 그 모양은 docx-read.js 가 textU 에 '__' 로 적어 둔다. 두 읽기 중
+     빈칸을 더 많이 찾은 쪽을 쓴다: 밑줄로 그은 빈칸도 빈칸이다. 같으면 글자 그대로(text). */
+  function blankCount(s) { return (String(s || '').match(/_{2,}/g) || []).length; }
+  function slotText(p) {
+    var t = txt(p);
+    return p && p.textU && blankCount(p.textU) > blankCount(t) ? p.textU : t;
+  }
   function isBlank(p) { return !txt(p) && (!p || !p.images || !p.images.length); }
 
   /** 'Questions 13-14' → {from:13,to:14}. 아니면 null. */
@@ -73,6 +81,7 @@
         var q = {};
         for (var k in p) if (Object.prototype.hasOwnProperty.call(p, k)) q[k] = p[k];
         q.text = s;
+        q.textU = '';   /* 문단 전체의 밑줄 빈칸 표시라 줄 하나에는 맞지 않는다 */
         if (!first) q.images = [];
         out.push(q);
         first = false;
@@ -783,6 +792,18 @@
     return true;
   }
 
+  /**
+   * 세트에는 두되 점수에서 빼는 문항. 세트는 부족해도 항상 짓는다(2026-09-15) — 대신
+   * 성립하지 않는 정답으로 채점하지 않는다. 채점기(sg-results.js · sg-review-writing.js)는
+   * q.unscored 를 보고 이 문항을 합계에서 뺀다. 무엇을 왜 뺐는지는 pack.report 에 남는다.
+   */
+  function unscore(q, reason) {
+    (q.slots || []).forEach(function (s) { if (s && s.t === 'b') delete s.a; });
+    delete q.answerTokens;
+    q.unscored = true;
+    q.unscoredReason = reason;
+  }
+
   /* 정답 문장을 견주기 위한 꼴. 대소문자와 굽은 따옴표만 맞춘다 — 낱말은 그대로 둔다. */
   function cmpText(s) {
     return String(s || '').toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ').trim();
@@ -906,14 +927,14 @@
           if (/_{2,}/.test(line)) slotAt = i;
           if (slotAt < 0) {
             /* context 줄 — 다음 두 줄이 slot/tiles 인지 본다. */
-            var s1 = i + 1 < paras.length ? txt(paras[i + 1]) : '';
+            var s1 = i + 1 < paras.length ? slotText(paras[i + 1]) : '';
             if (/_{2,}/.test(s1)) {
               /* 타일 줄이 아예 없는 세트가 있다(SET 10). 타일 줄은 '자동번호 목록이 아니고
                  밑줄도 없는 줄' 이다 — 다음 문항의 context 줄은 자동번호 목록이라 구분된다.
                  이 검사 없이 3줄로 밀면 다음 문항의 지문을 타일로 먹어 10문항이 5문항이 된다. */
               var p2 = i + 2 < paras.length ? paras[i + 2] : null;
               var t2 = p2 ? txt(p2) : '';
-              var t1 = p2 && !p2.listed && !numbered(t2) && !/_{2,}/.test(t2) ? txtRaw(p2) : '';
+              var t1 = p2 && !p2.listed && !numbered(t2) && !/_{2,}/.test(slotText(p2)) ? txtRaw(p2) : '';
               var built = parseBuildItem(s1, t1);
               qs.push({
                 id: codeSlug + '-W1-q' + pad2(qs.length + 1),
@@ -1112,7 +1133,12 @@
    */
   function parseScript(paras) {
     var out = { listening: [], speaking: [] };
-    var section = 'listening', moduleNo = 1, cur = null;
+    var section = 'listening', moduleNo = 1, cur = null, pendingCue = '';
+
+    function holdBack() {
+      if (!cur.cue) cur.cue = pendingCue; else cur.lines.push(pendingCue);
+      pendingCue = '';
+    }
 
     function open(range) {
       cur = {
@@ -1141,9 +1167,19 @@
       if (/^script$/i.test(t)) return;
 
       var r = questionRange(t);
-      if (r) { open(r); return; }
+      if (r) {
+        open(r);
+        if (pendingCue) { cur.cue = pendingCue; pendingCue = ''; }
+        return;
+      }
 
       if (!cur) open(null);
+      /* 머리글이 오지 않았다 — 붙들어 둔 안내 줄은 예전처럼 앞 덩어리에 둔다. */
+      if (pendingCue) { holdBack(); }
+      /* 대사가 이미 찬 덩어리 뒤에 오는 안내 줄('Listen to a conversation.')은 다음 머리글의
+         것이다 — SET 2 대본은 안내를 머리글 앞에 적는다. 앞 덩어리에 붙이면 문항 낭독(1-12)이
+         대사로 오해돼 문항마다 음성이 만들어지지 않는다(SET 2 에서 그랬다). */
+      if (section === 'listening' && cur.lines.length && LISTEN_CUE.test(t)) { pendingCue = t; return; }
       if (!cur.cue && LISTEN_CUE.test(t)) { cur.cue = t; return; }
 
       /* 'Interview' 같은 한 낱말 머리글은 대사가 아니다. 스피킹에서는 그 줄이 곧 다음
@@ -1161,6 +1197,7 @@
       if (section === 'speaking') t = t.replace(/^\d{1,2}\s*[.)]\s*/, '');
       cur.lines.push(t);
     });
+    if (pendingCue && cur) holdBack();
 
     ['listening', 'speaking'].forEach(function (sec) {
       out[sec] = out[sec].filter(function (g) { return g.lines.length; });
@@ -1321,7 +1358,9 @@
         /* 문항 낭독 — 줄과 문항을 번호로 맞춘다. */
         blk.questions.forEach(function (q) {
           var line = hit.lines[q.no - hit.from];
-          if (line) q.script = line;
+          /* 손으로 찍은 번호('9. Have you decided…')는 대사가 아니다 — 음성이 '나인' 으로
+             읽지 않게 뗀다(SET 2 는 1-8 만 자동번호이고 9-12 는 번호를 글자로 적었다). */
+          if (line) q.script = line.replace(/^\d{1,2}\s*[.)]\s*/, '');
         });
         if (blk.perQuestionAudio) {
           blk.questions.forEach(function (q) {
@@ -1403,7 +1442,11 @@
           q.answerSentence = wList[k];
           answerKey[q.id] = wList[k];
           if (deriveTiles(q)) derived.push(q.id);
-          else if (!alignBuildAnswer(q)) unaligned.push(q.id);
+          else if (!alignBuildAnswer(q)) {
+            unaligned.push(q.id);
+            unscore(q, 'The word tiles and blanks in the question document cannot build the answer-key sentence "' + wList[k] + '".');
+            delete answerKey[q.id];
+          }
           else if (q.endPunctNote) endPunct.push(q.id + ' — ' + q.endPunctNote);
         }
       });
@@ -1417,7 +1460,7 @@
         gate(strictSource ? 'stop' : 'warn', 'writing',
           unaligned.length + ' sentence-building questions do not cross-check: the word tiles in the question document cannot build the answer-key sentence, in that order ('
             + unaligned.slice(0, 8).join(', ') + (unaligned.length > 8 ? ' and more' : '')
-            + '). Until they match, Build a Sentence has no answer to score against.');
+            + '). They stay in the set but are not scored until the two documents match.');
       }
       if (derived.length) {
         gate(strictSource ? 'stop' : 'warn', 'writing', derived.length + ' sentence-building questions had no word tiles in the docx — the words were taken from the answer key and scrambled (' + derived.slice(0, 3).join(', ') + (derived.length > 3 ? ' and more' : '') + '). ' +
@@ -1437,6 +1480,24 @@
        정답지가 한 줄 밀리거나 보기 개수가 다르면 여기서만 드러난다. 세트 하나에 대해
        "문항마다 정답이 하나, 그 정답이 그 문항의 보기 안에 있다" 를 전수로 확인한다. */
     var crossBad = crossCheckAnswers([reading, listening], unmatched);
+    /* 걸린 문항은 세트에 두되 점수에서 뺀다 — 밀린 정답지로 채점하면 맞힌 학생이 틀린다. */
+    var byId = {};
+    [reading, listening].forEach(function (sec) {
+      sec.modules.forEach(function (m) {
+        m.blocks.forEach(function (b) { (b.questions || []).forEach(function (q) { byId[q.id] = q; }); });
+      });
+    });
+    crossBad.forEach(function (line) {
+      var q = byId[String(line).split(' ')[0]];
+      if (!q) return;
+      if (q.answer !== undefined) q.answerKeyRaw = q.answer;
+      delete q.answer;
+      delete answerKey[q.id];
+      unscore(q, 'The answer key does not fit this question ' + String(line).slice(q.id.length + 1) + '.');
+    });
+    unmatched.forEach(function (id) {
+      if (byId[id]) unscore(byId[id], 'The answer key has no answer for this question.');
+    });
     if (crossBad.length) {
       gate(strictSource ? 'stop' : 'warn', 'answers',
         crossBad.length + ' questions do not cross-check against the answer key: '
@@ -1520,7 +1581,7 @@
       sec.modules.forEach(function (mod) {
         mod.blocks.forEach(function (blk) {
           (blk.questions || []).forEach(function (q) {
-            if (answerKey[q.id] !== undefined) return;
+            if (answerKey[q.id] !== undefined || q.unscored) return;   /* 점수에서 뺀 문항은 정답표에도 없다 */
             if (q.answer !== undefined && q.answer !== null && q.answer !== '') answerKey[q.id] = q.answer;
             else if (q.answerSentence) answerKey[q.id] = q.answerSentence;
           });
@@ -1658,6 +1719,26 @@
     };
     if (opt.origin) summary.origin = opt.origin;
 
+    /* ---- 리포트 ----
+       세트는 부족해도 짓는다(2026-09-15). 막는 대신, 안 된 것을 한자리에 모아 팩과 함께
+       보낸다 — problem(=stop 급) · check(=warn) · 점수에서 뺀 문항. */
+    var unscored = [];
+    sections.forEach(function (sec) {
+      sec.modules.forEach(function (mod) {
+        mod.blocks.forEach(function (blk) {
+          (blk.questions || []).forEach(function (q) {
+            if (q.unscored) unscored.push({ id: q.id, reason: q.unscoredReason || '' });
+          });
+        });
+      });
+    });
+    summary.unscored = unscored.length;
+    var report = {
+      problems: gates.filter(function (g) { return g.level === 'stop'; }).map(function (g) { return g.scope + ': ' + g.message; }),
+      checks: gates.filter(function (g) { return g.level === 'warn'; }).map(function (g) { return g.scope + ': ' + g.message; }),
+      unscored: unscored
+    };
+
     var pack = {
       code: codeSlug.toUpperCase(),
       title: code,
@@ -1667,6 +1748,7 @@
       buildWarnings: gates.map(function (g) { return g.level + ': ' + g.message; }),
       gates: gates,
       summary: summary,
+      report: report,
       importedAt: null,
       source: opt.source || 'set-import'
     };

@@ -22,6 +22,10 @@
  *      'Audio unavailable' 만 보여 준다 — SET 12 가 그럴 뻔했다).
  *   5) 듣기 문항에 화자 사진이 붙어 있는가 (없으면 듣기만 그림 없이 뜬다).
  *
+ * 2026-09-15 부터 막는 것은 1~3(팩·빌더·회귀테스트·등록)뿐이다. 음성·사진·배역표·
+ * 오프라인 목록(2 의 일부, 4, 5)은 없으면 REPORT 로 적고 통과시킨다 — 세트는 부족해도
+ * 항상 나가고, 빠진 것은 리포트로 보여 준다는 지시다.
+ *
  * SET 1·9 는 이 규칙이 생기기 전에 만들어져 모양이 다르다(set9-audio.js,
  * config/_set9_fragments 등). 아래 LEGACY 에 사유와 함께 적고 면제한다. 면제는
  * 여기 적힌 둘뿐이고, 새로 짓는 세트는 예외 없이 전부 지나야 한다.
@@ -44,7 +48,12 @@ var LEGACY = {
 
 var fails = [];
 var notes = [];
+/* 막는 것(fails)과 리포트할 것(reports)을 가른다. 세트는 부족해도 항상 짓는다(2026-09-15) —
+   팩·빌더·회귀테스트·등록은 짓는 쪽이 언제든 채울 수 있으니 막고, 음성·사진·배역표처럼
+   밖에서 와야 하는 것은 없으면 세트를 멈추지 않고 REPORT 로 적는다. */
+var reports = [];
 function check(ok, msg) { if (!ok) fails.push(msg); }
+function report(ok, msg) { if (!ok) reports.push(msg); }
 function read(rel) {
   try { return fs.readFileSync(path.join(SG2, rel), 'utf8'); } catch (e) { return null; }
 }
@@ -124,17 +133,22 @@ sets.forEach(function (n) {
     return;
   }
 
-  /* 갖춰야 할 파일 — 하나라도 없으면 세트는 반쪽이다. */
+  /* 갖춰야 할 파일 — 팩과 빌더가 없으면 세트가 지어진 것이 아니다. */
   var required = [
     ['assets/' + S + '.js', '문항 팩. 없으면 이 세트는 가져온 브라우저 밖에 존재하지 않는다'],
-    ['tools/build_set' + n + '.mjs', '빌더. 없으면 팩을 다시 지을 길이 없다'],
+    ['tools/build_set' + n + '.mjs', '빌더. 없으면 팩을 다시 지을 길이 없다']
+  ];
+  required.forEach(function (pair) {
+    check(exists(pair[0]), 'SET ' + n + ': ' + pair[0] + ' 가 없습니다 — ' + pair[1] + ' (있는 것: ' + trail + ')');
+  });
+  /* 음성·사진·배역표 — 없어도 세트는 나간다. 대신 무엇이 빠졌는지 리포트한다. */
+  [
     ['tts-voices-set' + n + 'exam-11labs.json', '목소리 배역표'],
     ['config/' + S + '-listening-images.json', '듣기 화자 사진 배정표'],
     ['config/offline.' + S + '.json', '오프라인 사전 다운로드 목록'],
     ['media/audio/' + S, '듣기 음성 폴더']
-  ];
-  required.forEach(function (pair) {
-    check(exists(pair[0]), 'SET ' + n + ': ' + pair[0] + ' 가 없습니다 — ' + pair[1] + ' (있는 것: ' + trail + ')');
+  ].forEach(function (pair) {
+    report(exists(pair[0]), 'SET ' + n + ': ' + pair[0] + ' 가 없습니다 — ' + pair[1]);
   });
   check(fs.existsSync(path.join(ROOT, 'tests/test_set_import_set' + n + '.mjs')),
     'SET ' + n + ': tests/test_set_import_set' + n + '.mjs 가 없습니다 — 이 세트의 원본 회귀를 잡는 유일한 그물입니다');
@@ -175,7 +189,7 @@ sets.forEach(function (n) {
   })(pack);
 
   var missing = Object.keys(refs).filter(function (u) { return !exists(u); });
-  check(missing.length === 0,
+  report(missing.length === 0,
     'SET ' + n + ': 팩이 가리키는 파일 ' + missing.length + '개가 디스크에 없습니다 — 학생 화면은 '
       + "'Audio unavailable' 만 봅니다: " + missing.slice(0, 5).join(', '));
 
@@ -183,14 +197,14 @@ sets.forEach(function (n) {
 
   /* 듣기 문항마다 화자 사진 — 소리와 달리 없어도 시험은 그대로 돌아가서 시험장에서야 보인다. */
   var sec = (pack.sections || []).filter(function (s) { return s.id === 'listening'; })[0];
-  if (!sec) { check(false, 'SET ' + n + ': 듣기 영역이 없습니다'); return; }
+  if (!sec) { report(false, 'SET ' + n + ': 듣기 영역이 없습니다'); return; }
   var noPic = [];
   sec.modules.forEach(function (m) {
     m.blocks.forEach(function (b) {
       (b.questions || []).forEach(function (q) { if (!q.image && !b.image) noPic.push(q.id); });
     });
   });
-  check(noPic.length === 0,
+  report(noPic.length === 0,
     'SET ' + n + ': 듣기 ' + noPic.length + '문항에 화자 사진이 없습니다 — 듣기 화면만 그림 없이 뜹니다: '
       + noPic.slice(0, 5).join(', '));
 });
@@ -198,6 +212,11 @@ sets.forEach(function (n) {
 /* ── 보고 ──────────────────────────────────────────────────────────────── */
 console.log('세트 검사: ' + sets.map(function (n) { return 'SET ' + n; }).join(' · '));
 notes.forEach(function (m) { console.log('  · ' + m); });
+if (reports.length) {
+  console.log('');
+  reports.forEach(function (m) { console.log('REPORT ' + m); });
+  console.log('(REPORT 는 막지 않습니다 — 세트는 나가고, 빠진 것은 세트 리포트에 남습니다.)');
+}
 if (fails.length) {
   console.error('');
   fails.forEach(function (m) { console.error('FAIL ' + m); });

@@ -6,6 +6,7 @@
  *     SET 10  'NEW TOEFL MOCK TEST SET 10 Questions.docx' · 'SET 10 ANSWER KEY.docx'
  *     SET 11  'NEW TOEFL SET 11.docx'                 · 'SET 11 ANWER KEY.docx'  (오타)
  *     SET 12  'NEW TOEFL SET 12.docx'                 · 'SET 12 ANWER KEY.docx'
+ *     SET 2   'NEW TOEFL SET 2 Final Mock set 1.docx' · 'TEST 2 SCRIPT 2.docx'  (SET 대신 TEST)
  *   도구가 이름을 한 벌만 알고 있으면 다음 세트에서 "원본을 찾지 못했습니다" 로 멈춘다
  *   (build_voices_manifest.mjs 가 SET 10 이름만 알아 SET 11·12 에서 그렇게 멈췄다).
  *   문서를 받는 사람이 파일 이름을 맞춰 주기를 기대하는 대신, 이름을 읽어서 고른다.
@@ -22,9 +23,10 @@ import path from 'node:path';
 const SCRIPT_RE = /\bscripts?\b/i;
 const ANSWER_RE = /\bans?wer\s*key\b/i;   /* 'ANWER KEY' 오타까지 받는다 */
 
-/** 세트 번호를 달고 있는 .docx 만 남긴다. 'SET 1' 이 'SET 12' 를 물지 않게 경계를 본다. */
+/** 세트 번호를 달고 있는 .docx 만 남긴다. 'SET 1' 이 'SET 12' 를 물지 않게 경계를 본다.
+ *  번호 앞 낱말은 SET 이거나 TEST 다(SET 2 의 스크립트는 'TEST 2 SCRIPT 2.docx' 로 왔다). */
 function forSet(files, setNo) {
-  var re = new RegExp('set\\s*0*' + setNo + '(?![0-9])', 'i');
+  var re = new RegExp('(?:set|test)\\s*0*' + setNo + '(?![0-9])', 'i');
   return files.filter(function (f) {
     return /\.docx$/i.test(f) && !/^~\$/.test(f) && re.test(f);
   });
