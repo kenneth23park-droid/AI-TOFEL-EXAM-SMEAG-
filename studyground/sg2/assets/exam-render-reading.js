@@ -278,6 +278,20 @@
     return frag;
   }
 
+  /* 문장 클릭 문항의 지문은 원문에 "A 문장. B 문장. C … D …" 처럼 글자가 평문으로 박혀 있다.
+     A→B→C→D 가 차례로 문장 머리에 모두 설 때만 그 글자를 배지로 칠한다(원문 글자는 그대로). */
+  function sentenceLetterTokens(paragraph) {
+    var src = String(paragraph == null ? '' : paragraph);
+    var m = /^A (.+?[.!?]["')\]]?) B (.+?[.!?]["')\]]?) C (.+?[.!?]["')\]]?) D (.+)$/.exec(src);
+    if (!m) return [{ text: src }];
+    return [
+      { letter: 'A' }, { text: ' ' + m[1] + ' ' },
+      { letter: 'B' }, { text: ' ' + m[2] + ' ' },
+      { letter: 'C' }, { text: ' ' + m[3] + ' ' },
+      { letter: 'D' }, { text: ' ' + m[4] }
+    ];
+  }
+
   /* ── 블록별 렌더 ─────────────────────────────────────────── */
 
   /* cloze — 관찰 화면(reading-cloze-2760s.png)의 "Fill in the missing letters in the paragraph."
@@ -456,8 +470,12 @@
     var ps = blk.paragraphs || (blk.passage ? [blk.passage] : []), i, j;
     for (i = 0; i < ps.length; i++) {
       var para = el('p', 'rd-para');
-      var toks = insertQ ? markerTokens(ps[i]) : [{ text: ps[i] }];
+      var toks = insertQ ? markerTokens(ps[i]) : sentenceLetterTokens(ps[i]);
       for (j = 0; j < toks.length; j++) {
+        if (toks[j].letter) {
+          para.appendChild(textEl('span', 'rd-sent-letter', toks[j].letter));
+          continue;
+        }
         if (toks[j].text !== undefined) {
           para.appendChild(wrapHighlightedText(toks[j].text, highlightWords, api.hits));
           continue;

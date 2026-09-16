@@ -630,6 +630,13 @@ body.exam-body {
   border: 1px solid var(--brand-tint-2);
 }
 .opt.is-chosen .rd-opt-marker { background: var(--brand); color: #fff; border-color: var(--brand); }
+/* 문장 클릭 지문의 A~D 글자 — 지문 속에서 바로 찾도록 색 배지로 세운다. */
+.rd-sent-letter {
+  display: inline-block; min-width: 20px; height: 20px; line-height: 19px;
+  text-align: center; border-radius: 50%; font-size: 12px; font-weight: 850;
+  vertical-align: -4px; background: var(--brand); color: #fff;
+  border: 1px solid var(--brand);
+}
 
 /* chat — 말풍선 */
 .rd-chat { display: flex; flex-direction: column; gap: 10px; }
