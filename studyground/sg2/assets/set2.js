@@ -2321,7 +2321,7 @@ window.SMEAG_SET2 = {
                   "prepSec": 3,
                   "respondSec": 45,
                   "script": "Thank you for your participation today. I’d like to ask you some questions about exercise. Can you share one or two ways that you or people you know try to stay physically active?",
-                  "image": "media/pictures/set2/image13.png"
+                  "image": "media/pictures/set2/s-task2-interviewer.webp"
                 },
                 {
                   "id": "set2-S2-q02",
@@ -2331,7 +2331,7 @@ window.SMEAG_SET2 = {
                   "prepSec": 3,
                   "respondSec": 45,
                   "script": "That’s helpful. Exercising at a gym provides equipment and structure but costs money and requires travel time, while exercising at home is free and convenient but may lack motivation and proper equipment. Which do you prefer?",
-                  "image": "media/pictures/set2/image13.png"
+                  "image": "media/pictures/set2/s-task2-interviewer.webp"
                 },
                 {
                   "id": "set2-S2-q03",
@@ -2341,7 +2341,7 @@ window.SMEAG_SET2 = {
                   "prepSec": 3,
                   "respondSec": 45,
                   "script": "OK. Many people start exercise programs but stop after a few weeks. Why do you think it is difficult for people to maintain a regular exercise routine?",
-                  "image": "media/pictures/set2/image13.png"
+                  "image": "media/pictures/set2/s-task2-interviewer.webp"
                 },
                 {
                   "id": "set2-S2-q04",
@@ -2351,7 +2351,7 @@ window.SMEAG_SET2 = {
                   "prepSec": 3,
                   "respondSec": 45,
                   "script": "Good points. I just have one more question. How might workplace policies, such as providing gym facilities or flexible schedules, influence people’s exercise habits in the future?",
-                  "image": "media/pictures/set2/image13.png"
+                  "image": "media/pictures/set2/s-task2-interviewer.webp"
                 }
               ],
               "introScript": "Instructions: You have volunteered for a research study about physical activity and health. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
