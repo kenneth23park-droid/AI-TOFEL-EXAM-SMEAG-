@@ -18,8 +18,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      VERCEL_ORG_ID: team_2dm8OcEEEVPKcelKEMlZTzAR
-      VERCEL_PROJECT_ID: prj_KZVPBfpDQ7dLpvaSsPI2rA10WF3V
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
 
