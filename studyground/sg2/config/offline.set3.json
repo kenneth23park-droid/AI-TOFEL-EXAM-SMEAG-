@@ -1,9 +1,9 @@
 {
  "set": "SET3",
  "label": "NEW TOEFL SET 3",
- "rev": "9b1c230e171d",
- "count": 49,
- "bytes": 13022527,
+ "rev": "74670ac633ce",
+ "count": 52,
+ "bytes": 12966826,
  "files": [
   {
    "u": "media/audio/set3/l1-q01.mp3",
@@ -147,18 +147,18 @@
   },
   {
    "u": "media/audio/set3/s2-instructions.mp3",
-   "b": 247893,
-   "h": "94e2968c5de7"
+   "b": 178094,
+   "h": "6fed9db5846b"
   },
   {
    "u": "media/audio/set3/s2-q1.mp3",
-   "b": 339844,
-   "h": "4b5841e67384"
+   "b": 281748,
+   "h": "c80a1f97c7ca"
   },
   {
    "u": "media/audio/set3/s2-q2.mp3",
-   "b": 139224,
-   "h": "6ae6f2b16808"
+   "b": 115400,
+   "h": "f2e0f56e49de"
   },
   {
    "u": "media/audio/set3/s2-q3.mp3",
@@ -167,8 +167,8 @@
   },
   {
    "u": "media/audio/set3/s2-q4.mp3",
-   "b": 180184,
-   "h": "4a6de905a052"
+   "b": 143822,
+   "h": "d79cc1087afa"
   },
   {
    "u": "media/pictures/TOEFL Listening Image (2 People).webp",
@@ -249,6 +249,21 @@
    "u": "media/pictures/set3/image8.png",
    "b": 280318,
    "h": "773f6d46b5cb"
+  },
+  {
+   "u": "media/pictures/set3/w3-alicia.png",
+   "b": 45324,
+   "h": "626f1a1fd692"
+  },
+  {
+   "u": "media/pictures/set3/w3-daniel.png",
+   "b": 40375,
+   "h": "405f860ae493"
+  },
+  {
+   "u": "media/pictures/set3/w3-professor-miller.png",
+   "b": 46681,
+   "h": "bd7b96ec3b6c"
   }
  ]
 }

@@ -1774,14 +1774,17 @@ window.SMEAG_SET3 = {
                   "kind": "discussion",
                   "no": 22,
                   "professor": "Professor Miller – Governmental Policies",
+                  "professorImage": "media/pictures/set3/w3-professor-miller.png",
                   "prompt": "Let’s talk about the reasons behind the migration trends from rural to urban areas. While urban areas tend to offer more job opportunities and services, rural regions are often more affordable and have better living conditions. If governments want to reverse the trend and encourage people to move to rural areas, what should they prioritize?",
                   "posts": [
                     {
                       "name": "Alicia",
+                      "image": "media/pictures/set3/w3-alicia.png",
                       "text": "I think governments should invest in high-quality healthcare facilities and schools in rural areas. If people know that they can access good medical care and education for their children, more families would feel comfortable making the move, even if job opportunities aren’t as diverse as in cities."
                     },
                     {
                       "name": "Daniel",
+                      "image": "media/pictures/set3/w3-daniel.png",
                       "text": "While improving healthcare and education is important, I believe the real issue is lack of modern technology infrastructure. If governments want to attract people to rural areas, they need to prioritize high-speed internet and better mobile networks. In today's digital economy, people need to stay connected, and rural areas are often left behind in that regard."
                     }
                   ],

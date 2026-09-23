@@ -49,6 +49,15 @@
       "isCandidate": false
     },
     {
+      "code": "SET3",
+      "title": "SET 3",
+      "file": "sg2/assets/set3.js",
+      "items": 61,
+      "texts": 17,
+      "scripts": 0,
+      "isCandidate": false
+    },
+    {
       "code": "SET9",
       "title": "NEW TOEFL SET 9",
       "file": "sg2/assets/set9.js",
@@ -58,9 +67,9 @@
       "isCandidate": false
     }
   ],
-  "unitCount": 592,
-  "frameOnlyUnits": 10,
-  "candidatePairs": 784,
+  "unitCount": 668,
+  "frameOnlyUnits": 12,
+  "candidatePairs": 970,
   "thresholds": {
     "shingleK": 4,
     "jaccardHigh": 0.55,
@@ -120,9 +129,9 @@
   },
   "coverage": {
     "note": "팩에 텍스트로 존재하는 것만 비교한다. mp3 만 있고 대본이 없는 오디오는 비교 대상이 아니다.",
-    "scriptsLoaded": "SET1:0 SET10:0 SET11:0 SET12:0 SET2:0 SET9:36",
+    "scriptsLoaded": "SET1:0 SET10:0 SET11:0 SET12:0 SET2:0 SET3:0 SET9:36",
     "frameNote": "유형이 강제하는 정형문(같은 줄이 서로 다른 문항 군집 3곳 이상)은 비교에서 제외했다. 제외된 줄은 각 단위의 framedOut 에 df 와 함께 남는다.",
-    "frameOnlyUnits": "10개 단위는 내용이 전부 정형문이라 비교 대상에서 빠졌다."
+    "frameOnlyUnits": "12개 단위는 내용이 전부 정형문이라 비교 대상에서 빠졌다."
   },
   "counts": {
     "high": 0,
@@ -2072,7 +2081,7 @@
         "framedOut": [
           {
             "line": "Listen to the question and select the best response.",
-            "df": 79
+            "df": 90
           }
         ],
         "tokenCount": 24,
@@ -2159,6 +2168,87 @@
         "tokenCount": 15,
         "meta": null,
         "href": "admin-questions.html?set=set2&q=R1-31"
+      }
+    },
+    {
+      "key": "SET2::L1-13 | SET3::L1-9",
+      "severity": "watch",
+      "allowlisted": false,
+      "allowReason": null,
+      "scope": "cross",
+      "role": "item",
+      "score": 0.2353,
+      "metrics": {
+        "jaccard": 0.129,
+        "containment": 0.2353,
+        "sharedShingles": 4,
+        "longestRun": 7,
+        "sharedChoices": 0,
+        "exact": false,
+        "sameStem": true
+      },
+      "reasons": [
+        "발문(stem)이 글자 그대로 같다 — 정형 발문일 수도, 재활용일 수도 있다."
+      ],
+      "a": {
+        "uid": "SET2::L1-13",
+        "role": "item",
+        "qid": "L1-13",
+        "no": 13,
+        "qkind": "mcq",
+        "policy": "mcq",
+        "title": "L1-13 · Why are the speakers mainly discussing?",
+        "set": "SET2",
+        "setId": "set2",
+        "section": "listening",
+        "sectionLabel": "Listening",
+        "module": "L1",
+        "moduleLabel": "Listening Module 1",
+        "blockKind": "audio-set",
+        "blockHeading": "Questions 13-14",
+        "text": "Why are the speakers mainly discussing?\nA new building opening\nA temporary entrance location\nExtended library hours\nA parking lot expansion",
+        "choices": [
+          "A new building opening",
+          "A temporary entrance location",
+          "Extended library hours",
+          "A parking lot expansion"
+        ],
+        "answerText": "B. A temporary entrance location",
+        "payload": "Why are the speakers mainly discussing?\nA new building opening\nA temporary entrance location\nExtended library hours\nA parking lot expansion",
+        "framedOut": [],
+        "tokenCount": 21,
+        "meta": null,
+        "href": "admin-questions.html?set=set2&q=L1-13"
+      },
+      "b": {
+        "uid": "SET3::L1-9",
+        "role": "item",
+        "qid": "L1-9",
+        "no": 9,
+        "qkind": "mcq",
+        "policy": "mcq",
+        "title": "L1-9 · Why are the speakers mainly discussing?",
+        "set": "SET3",
+        "setId": "set3",
+        "section": "listening",
+        "sectionLabel": "Listening",
+        "module": "L1",
+        "moduleLabel": "Listening Module 1",
+        "blockKind": "audio-set",
+        "blockHeading": "Questions 9-10",
+        "text": "Why are the speakers mainly discussing?\nA weekend running competition\nA marathon training program\nCampus track renovations\nStrength training techniques",
+        "choices": [
+          "A weekend running competition",
+          "A marathon training program",
+          "Campus track renovations",
+          "Strength training techniques"
+        ],
+        "answerText": "B. A marathon training program",
+        "payload": "Why are the speakers mainly discussing?\nA weekend running competition\nA marathon training program\nCampus track renovations\nStrength training techniques",
+        "framedOut": [],
+        "tokenCount": 20,
+        "meta": null,
+        "href": "admin-questions.html?set=set3&q=L1-9"
       }
     },
     {
@@ -2321,87 +2411,6 @@
         "tokenCount": 35,
         "meta": null,
         "href": "admin-questions.html?set=set9&q=L1-18"
-      }
-    },
-    {
-      "key": "SET2::L1-16 | SET9::L1-16",
-      "severity": "watch",
-      "allowlisted": false,
-      "allowReason": null,
-      "scope": "cross",
-      "role": "item",
-      "score": 0.2,
-      "metrics": {
-        "jaccard": 0.1053,
-        "containment": 0.2,
-        "sharedShingles": 4,
-        "longestRun": 7,
-        "sharedChoices": 0,
-        "exact": false,
-        "sameStem": true
-      },
-      "reasons": [
-        "발문(stem)이 글자 그대로 같다 — 정형 발문일 수도, 재활용일 수도 있다."
-      ],
-      "a": {
-        "uid": "SET2::L1-16",
-        "role": "item",
-        "qid": "L1-16",
-        "no": 16,
-        "qkind": "mcq",
-        "policy": "mcq",
-        "title": "L1-16 · What will the woman probably do next?",
-        "set": "SET2",
-        "setId": "set2",
-        "section": "listening",
-        "sectionLabel": "Listening",
-        "module": "L1",
-        "moduleLabel": "Listening Module 1",
-        "blockKind": "audio-set",
-        "blockHeading": "Questions 15-16",
-        "text": "What will the woman probably do next?\nAttend a gym class\nSign a form\nMove to a different locker\nReturn in twenty minutes",
-        "choices": [
-          "Attend a gym class",
-          "Sign a form",
-          "Move to a different locker",
-          "Return in twenty minutes"
-        ],
-        "answerText": "B. Sign a form",
-        "payload": "What will the woman probably do next?\nAttend a gym class\nSign a form\nMove to a different locker\nReturn in twenty minutes",
-        "framedOut": [],
-        "tokenCount": 23,
-        "meta": null,
-        "href": "admin-questions.html?set=set2&q=L1-16"
-      },
-      "b": {
-        "uid": "SET9::L1-16",
-        "role": "item",
-        "qid": "L1-16",
-        "no": 16,
-        "qkind": "mcq",
-        "policy": "mcq",
-        "title": "L1-16 · What will the woman probably do next?",
-        "set": "SET9",
-        "setId": "set9",
-        "section": "listening",
-        "sectionLabel": "Listening",
-        "module": "L1",
-        "moduleLabel": "Listening Module 1",
-        "blockKind": "audio-set",
-        "blockHeading": "Questions 15-16",
-        "text": "What will the woman probably do next?\nContact the biology department\nReserve a different microscope\nPostpone the man's experiment\nLook up the man's booking information",
-        "choices": [
-          "Contact the biology department",
-          "Reserve a different microscope",
-          "Postpone the man's experiment",
-          "Look up the man's booking information"
-        ],
-        "answerText": "D. Look up the man's booking information",
-        "payload": "What will the woman probably do next?\nContact the biology department\nReserve a different microscope\nPostpone the man's experiment\nLook up the man's booking information",
-        "framedOut": [],
-        "tokenCount": 25,
-        "meta": null,
-        "href": "admin-questions.html?set=set9&q=L1-16"
       }
     },
     {

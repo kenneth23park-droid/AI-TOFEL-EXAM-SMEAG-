@@ -549,9 +549,9 @@
       "segments": [
         {
           "speaker": "Instructions",
-          "voice": "onwK4e9ZLuTAKqWW03F9",
-          "voice_name": "GB-Oliver",
-          "el_voice": "Daniel",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
           "text": "You have volunteered for a research study about communication technology. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
         }
       ]
@@ -563,9 +563,9 @@
       "segments": [
         {
           "speaker": "Narrator",
-          "voice": "onwK4e9ZLuTAKqWW03F9",
-          "voice_name": "GB-Oliver",
-          "el_voice": "Daniel",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
           "text": "Thank you for joining today. I’d like to ask you some questions about communication technology. Have you or your friends ever tried to reduce the time you spend on your phone or social media? For example, have you set time limits, deleted apps, or taken breaks from using technology? Why or why not?"
         }
       ]
@@ -577,9 +577,9 @@
       "segments": [
         {
           "speaker": "Narrator",
-          "voice": "onwK4e9ZLuTAKqWW03F9",
-          "voice_name": "GB-Oliver",
-          "el_voice": "Daniel",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
           "text": "I see. When you want to catch up with friends or family who live far away, do you prefer video calls or text messages? Why?"
         }
       ]
@@ -605,9 +605,9 @@
       "segments": [
         {
           "speaker": "Narrator",
-          "voice": "onwK4e9ZLuTAKqWW03F9",
-          "voice_name": "GB-Oliver",
-          "el_voice": "Daniel",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
           "text": "Lastly, is face-to-face communication essential for maintaining close relationships, or are there other effective ways to stay connected with people you care about?"
         }
       ]

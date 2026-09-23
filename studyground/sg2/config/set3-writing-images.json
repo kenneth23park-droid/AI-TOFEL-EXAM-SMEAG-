@@ -1,0 +1,9 @@
+{
+  "source": "TOEFL LISTENING & WRITING PICTURES/ (원본 원형 인물사진 3장) — 176x176 정사각 크롭",
+  "note": "학술 토론(W3) 화자 얼굴. 원본 docx 안에 없는 자료라 여기에 둔다 — set-import.js 가 이름으로 붙인다.",
+  "professor": "media/pictures/set3/w3-professor-miller.png",
+  "posts": {
+    "Alicia": "media/pictures/set3/w3-alicia.png",
+    "Daniel": "media/pictures/set3/w3-daniel.png"
+  }
+}

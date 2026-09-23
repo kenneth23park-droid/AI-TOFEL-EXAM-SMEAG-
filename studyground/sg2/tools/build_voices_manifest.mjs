@@ -98,14 +98,21 @@ const RULES = {
   interview: 'GB-Oliver'
 };
 
+/* 면접관을 세트별로 바꾼다. 진행자는 사진으로도 보이므로, 사진의 사람과 목소리의
+   성별이 어긋나면 학생은 두 사람으로 듣는다 — 사진이 정본이고 목소리가 따라간다.
+   (SET 2 는 같은 이유로 남성으로 맞췄다. SET 3 의 면접관 사진
+   media/pictures/set3/image8.png 은 네 문항 모두 여성이다.) */
+const INTERVIEWER = {
+  3: 'US-Ava'
+};
+
 /* 규칙으로 정하기 어려운 자리만 세트별로 덮어쓴다. 비어 있는 것이 정상이다 —
    여기에 무언가 적히기 시작하면 규칙이 현실을 못 따라간다는 신호다. */
 const OVERRIDE = {
-  /* These two SET 3 sentences are especially sensitive to the default voices'
-     pronunciation; use the established US-Ava voice for a clean ASR match. */
+  /* This SET 3 sentence is especially sensitive to the default voice's
+     pronunciation; use GB-Henry for a clean ASR match. */
   3: {
-    'l1-q13-14': 'GB-Henry',
-    's2-q3': 'US-Ava'
+    'l1-q13-14': 'GB-Henry'
   }
 };
 
@@ -130,10 +137,12 @@ function roleFor(setNo, slot, kind, cur) {
   const over = (OVERRIDE[setNo] || {})[slot];
   if (over) return over;
 
-  if (kind === 'repeat' || kind === 'interview') return RULES[kind];
+  const interviewer = INTERVIEWER[setNo] || RULES.interview;
+  if (kind === 'interview') return interviewer;
+  if (kind === 'repeat') return RULES.repeat;
   /* 안내 방송(instructions)은 그 Task 를 맡은 사람이 그대로 읽는다 — 안내와 문항이
      다른 목소리면 학생은 둘을 다른 사람으로 듣는다. */
-  if (kind === 'instructions') return /^s1-/.test(slot) ? RULES.repeat : RULES.interview;
+  if (kind === 'instructions') return /^s1-/.test(slot) ? RULES.repeat : interviewer;
 
   if (kind === 'short') {
     const mod = (/^l(\d)-/.exec(slot) || [, '1'])[1];

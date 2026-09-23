@@ -156,7 +156,7 @@
   /* ── 런타임 접근자 ─────────────────────────────────────────────────────── */
 
   function contentOf(ctx) {
-    return (ctx && (ctx.content || ctx.set)) || root.SMEAG_SET1 || null;
+    return (ctx && (ctx.content || ctx.set)) || root.SG_CONTENT_PACK || root.SMEAG_SET1 || null;
   }
 
   function storeApi() { return root.SG_STORE || null; }
@@ -170,13 +170,21 @@
   /* 답안 기록의 유일한 경로. engine 이 있으면 engine.answer(), 없으면(셀프테스트) store 직접. */
   function saveAnswer(ctx, qid, value, extra) {
     var eng = ctx && ctx.engine;
+    var engErr = null;
     if (eng && typeof eng.answer === 'function') {
-      try { return eng.answer(qid, value, extra); } catch (e) { warn('engine.answer failed for ' + qid, e); }
+      try { return eng.answer(qid, value, extra); } catch (e) { engErr = e; }
     }
     var s = storeApi();
     if (s && typeof s.upsertAnswer === 'function') {
-      try { return s.upsertAnswer(qid, value, extra); } catch (e) { warn('store.upsertAnswer failed for ' + qid, e); }
+      /* engine 이 거절하는 **정상** 경로가 하나 있다: 화면을 떠날 때의 teardown commit.
+         renderScreen() 이 disposeAll() 을 부르는 시점에 engine 은 이미 다음 화면에 있어
+         이전 화면의 문항을 "does not belong to screen" 으로 거절한다. 여기서 store 에
+         직접 쓰면 답안은 그대로 보존되므로 경고를 남기지 않는다(예전에는 writing 화면을
+         떠날 때마다 콘솔에 가짜 경고가 찍혔다 — F2 렌더 스윕에서 발견). */
+      try { return s.upsertAnswer(qid, value, extra); }
+      catch (e2) { warn('save failed for ' + qid, engErr || e2); return false; }
     }
+    if (engErr) warn('engine.answer failed for ' + qid, engErr);
     return false;
   }
 
@@ -584,18 +592,155 @@
     return box;
   }
 
-  function discussionBox(q) {
-    var box = el('div', 'wr-disc');
-    if (q.professor) box.appendChild(el('div', 'wr-disc-prof', q.professor));
-    if (q.prompt) box.appendChild(el('p', 'wr-disc-prompt', q.prompt));
-    var posts = (q.posts instanceof Array) ? q.posts : [];
-    for (var i = 0; i < posts.length; i++) {
-      var card = el('div', 'wr-post');
-      card.appendChild(el('div', 'wr-post-name', posts[i].name || ''));
-      card.appendChild(el('p', 'wr-post-text', posts[i].text || ''));
-      box.appendChild(card);
+  /* 이름 → 아바타 이니셜. 사진이 없는 화자는 이니셜 원으로 대체한다. */
+  function initialsOf(name) {
+    var s = String(name || '').replace(/^professor\s+/i, '').replace(/[–—-].*$/, '');
+    var parts = s.replace(/^\s+|\s+$/g, '').split(/\s+/), out = '', i;
+    for (i = 0; i < parts.length && out.length < 2; i++) {
+      if (parts[i]) out += parts[i].charAt(0).toUpperCase();
+    }
+    return out || '?';
+  }
+
+  function avatarOf(name, src) {
+    var box = el('div', 'wr-avatar');
+    var url = '';
+    if (src) {
+      url = src;
+      if (root.SG_MEDIA && typeof root.SG_MEDIA.resolveMedia === 'function') {
+        try { url = root.SG_MEDIA.resolveMedia(src) || src; } catch (e) { url = src; }
+      }
+    }
+    if (url) {
+      var img = doc.createElement('img');
+      img.src = url; img.alt = '';
+      box.appendChild(img);
+    } else {
+      box.appendChild(el('span', 'wr-avatar-ini', initialsOf(name)));
     }
     return box;
+  }
+
+  /* 화자 카드 — 아바타(좌) + 이름·본문(우). 교수 글도 같은 형식으로 낸다. */
+  function postCard(name, text, src, textCls) {
+    var card = el('div', 'wr-post');
+    card.appendChild(avatarOf(name, src));
+    var body = el('div', 'wr-post-body');
+    body.appendChild(el('div', 'wr-post-name' + (textCls ? ' wr-disc-prof' : ''), name || ''));
+    body.appendChild(el('p', 'wr-post-text' + (textCls ? ' ' + textCls : ''), text || ''));
+    card.appendChild(body);
+    return card;
+  }
+
+  /* 'Professor Gupta – Education' → 'education' (과목명). 지시문 첫 문장에 쓴다. */
+  function topicOf(q) {
+    if (q.topic) return String(q.topic);
+    var m = String(q.professor || '').split(/[–—-]/);
+    if (m.length > 1) return m[m.length - 1].replace(/^\s+|\s+$/g, '').toLowerCase();
+    return '';
+  }
+
+  /* 화면 상단 지시문 — 최종수정사항.docx Writing Task 3 캡처와 같은 3단 구성:
+     "Your professor is teaching a class on X…" / "In your response, you should do the following." +
+     불릿 / "An effective response will contain at least N words." */
+  function discussionIntro(q) {
+    var box = el('div', 'wr-intro');
+    var topic = topicOf(q);
+    var lead = q.instruction || ('Your professor is teaching a class' + (topic ? ' on ' + topic : '') +
+      '. Write a post responding to the professor\'s question.');
+    box.appendChild(bi('p', lead,
+      '교수님이' + (topic ? ' ' + topic + ' ' : ' ') + '수업을 진행합니다. 교수님의 질문에 답하는 글을 쓰세요.',
+      'wr-intro-lead'));
+
+    box.appendChild(bi('p', 'In your response, you should do the following.',
+      '답안에는 다음 내용이 들어가야 합니다.', 'wr-intro-label'));
+
+    var list = (q.bullets instanceof Array && q.bullets.length) ? q.bullets : [
+      'Express and support your opinion.',
+      'Make a contribution to the discussion in your own words.'
+    ];
+    var ul = el('ul', 'wr-bullets-list');
+    for (var i = 0; i < list.length; i++) ul.appendChild(el('li', null, list[i]));
+    box.appendChild(ul);
+
+    var min = typeof q.minWords === 'number' ? q.minWords : 0;
+    if (min) {
+      box.appendChild(bi('p', 'An effective response will contain at least ' + min + ' words.',
+        '좋은 답안은 최소 ' + min + '단어 이상입니다.', 'wr-intro-min'));
+    }
+    return box;
+  }
+
+  function discussionBox(q) {
+    var box = el('div', 'wr-disc');
+    if (q.professor || q.prompt) {
+      box.appendChild(postCard(q.professor || 'Professor', q.prompt || '',
+        q.professorImage || q.image, 'wr-disc-prompt'));
+    }
+    var posts = (q.posts instanceof Array) ? q.posts : [];
+    for (var i = 0; i < posts.length; i++) {
+      box.appendChild(postCard(posts[i].name || '', posts[i].text || '', posts[i].image));
+    }
+    return box;
+  }
+
+  /* 지문 영역 복사 차단 — CSS user-select 로 선택을 막고, 전체선택(Ctrl+A) 같은
+   * 우회 경로를 위해 copy/cut/drag/우클릭도 취소한다. */
+  function noCopy(node) {
+    var kill = function (e) { if (e && e.preventDefault) e.preventDefault(); return false; };
+    on(node, 'copy', kill);
+    on(node, 'cut', kill);
+    on(node, 'dragstart', kill);
+    on(node, 'contextmenu', kill);
+    return node;
+  }
+
+  /* 작성창 붙여넣기 차단 — Ctrl/Cmd+V, 우클릭 붙여넣기, 드래그&드롭, 미들클릭 붙여넣기까지
+   * 모두 취소한다. 답안은 학생이 직접 타이핑한 글이어야 한다. */
+  function noPaste(node) {
+    var kill = function (e) { if (e && e.preventDefault) e.preventDefault(); return false; };
+    on(node, 'paste', kill);
+    on(node, 'drop', kill);
+    on(node, 'dragover', kill);
+    on(node, 'contextmenu', kill);
+    return node;
+  }
+
+  /* ── 작성창 툴바 (단어수 표시 토글) ──────────────────────────────────────
+   * Cut/Paste/Undo/Redo 버튼은 두지 않는다 — 편집은 키보드 단축키로만. */
+
+  /* 반환: { node, count } — count 는 단어수를 다시 칠하는 함수. */
+  function editorToolbar(ta, minWords) {
+    var bar = el('div', 'wr-tools');
+    var left = el('div', 'wr-tools-left');
+    var right = el('div', 'wr-tools-right');
+    bar.appendChild(left); bar.appendChild(right);
+
+    var count = el('span', 'wr-count');
+    var toggle = doc.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'wr-count-toggle';
+    var hidden = false;
+
+    function paintToggle() {
+      toggle.textContent = (hidden ? '⊘ Show Word Count' : '⊘ Hide Word Count');
+      count.style.visibility = hidden ? 'hidden' : '';
+      toggle.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+    }
+    on(toggle, 'click', function () { hidden = !hidden; paintToggle(); });
+    paintToggle();
+
+    right.appendChild(toggle);
+    right.appendChild(count);
+
+    function paintCount() {
+      var w = wordCount(ta.value);
+      count.textContent = w + (w === 1 ? ' word' : ' words');
+      count.className = 'wr-count' + (minWords && w < minWords ? ' wr-count--warn' : '');
+      return w;
+    }
+
+    return { node: bar, count: paintCount, isHidden: function () { return hidden; } };
   }
 
   function renderFreeWrite(screen, ctx, foundList) {
@@ -613,18 +758,29 @@
           ? bi('h2', 'Write an Email', '이메일 작성하기', 'wr-heading')
           : bi('h2', 'Write for an Academic Discussion', '학술 토론 작성하기', 'wr-heading'));
 
+        /* 2단 배치 — 과제는 왼쪽, 작성창은 오른쪽(최종수정사항.docx Writing Task 2·3:
+         * "task should be on the left side and writing response should be on the right side").
+         * 좁은 화면에서는 CSS 가 1단으로 접는다. */
+        var cols = el('div', 'wr-cols');
+        var pane = el('div', 'wr-pane wr-pane-task');
+        noCopy(pane);
+        var answer = el('div', 'wr-pane wr-pane-answer');
+        cols.appendChild(pane);
+        cols.appendChild(answer);
+        card.appendChild(cols);
+
         var bar = el('div', 'wr-bar');
         var tts = readAloudButton(q);
         if (tts) bar.appendChild(tts);
-        if (bar.firstChild) card.appendChild(bar);
+        if (bar.firstChild) pane.appendChild(bar);
 
         if (isEmail) {
-          card.appendChild(emailHeader(q));
-          card.appendChild(situationBox(q));
+          pane.appendChild(situationBox(q));
           var bl = bulletsBox(q);
-          if (bl) card.appendChild(bl);
+          if (bl) pane.appendChild(bl);
         } else {
-          card.appendChild(discussionBox(q));
+          pane.appendChild(discussionIntro(q));
+          pane.appendChild(discussionBox(q));
         }
 
         var minWords = typeof q.minWords === 'number' ? q.minWords : 0;
@@ -632,26 +788,31 @@
         ta.className = 'wr-textarea';
         ta.setAttribute('rows', '12');
         ta.setAttribute('spellcheck', 'false');
-        ta.placeholder = 'Type your response here (' + minWords + '+ words)';
+        ta.placeholder = isEmail ? 'Type your email here…' : 'Type your response here…';
+        noPaste(ta);
+
+        /* 응답 패널 머리 — 스크린샷 규격: "Your Response:" 아래에 To/Subject 가 오고
+           그 다음 줄이 편집 툴바다. 이메일 과제에서만 To/Subject 를 보여준다. */
+        answer.appendChild(bi('h3', 'Your Response:', '작성란', 'wr-resp-head'));
+        if (isEmail) answer.appendChild(emailHeader(q));
+
+        /* 툴바(단어수 표시 토글)는 작성창 위. */
+        var tools = editorToolbar(ta, minWords);
+        answer.appendChild(tools.node);
+
         var prev = savedAnswer(q.id);
         ta.value = (prev && typeof prev.v === 'string') ? prev.v : '';
-        card.appendChild(ta);
+        answer.appendChild(ta);
 
         var foot = el('div', 'wr-foot');
-        var count = el('span', 'wr-count');
         var min = el('span', 'wr-min');
         min.appendChild(bi('span', 'minimum ' + minWords + ' words', '최소 ' + minWords + '단어', null));
-        foot.appendChild(count); foot.appendChild(min);
-        card.appendChild(foot);
+        foot.appendChild(min);
+        answer.appendChild(foot);
 
         var timer = null;
 
-        function paintCount() {
-          var w = wordCount(ta.value);
-          count.textContent = w + (w === 1 ? ' word' : ' words');
-          count.className = 'wr-count' + (minWords && w < minWords ? ' wr-count--warn' : '');
-          return w;
-        }
+        function paintCount() { return tools.count(); }
 
         function commit() {
           var w = wordCount(ta.value);
@@ -679,7 +840,7 @@
           commit(); flushAnswers();
         });
 
-        editors.push({ textarea: ta, commit: commit, count: paintCount, question: q, minWords: minWords });
+        editors.push({ textarea: ta, commit: commit, count: paintCount, tools: tools, question: q, minWords: minWords });
         wrap.appendChild(card);
       })(foundList[n]);
     }
