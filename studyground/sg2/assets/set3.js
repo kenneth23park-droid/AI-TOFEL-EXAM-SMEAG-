@@ -1471,23 +1471,24 @@ window.SMEAG_SET3 = {
                   "context": "7. The hiking trail looks challenging in the photos.",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "is"
                     },
                     {
-                      "t": "b"
-                    },
-                    {
-                      "t": "b"
+                      "t": "b",
+                      "a": "it"
                     },
                     {
                       "t": "f",
                       "text": "worth"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "climb"
                     },
                     {
                       "t": "f",
@@ -1500,9 +1501,7 @@ window.SMEAG_SET3 = {
                     "climb",
                     "it"
                   ],
-                  "answerSentence": "Is it worth the climb?",
-                  "unscored": true,
-                  "unscoredReason": "The word tiles and blanks in the question document cannot build the answer-key sentence \"Is it worth the climb?\"."
+                  "answerSentence": "Is it worth the climb?"
                 },
                 {
                   "id": "set3-W1-q08",
