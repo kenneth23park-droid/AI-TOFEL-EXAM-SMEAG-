@@ -45,7 +45,7 @@
      빈칸을 더 많이 찾은 쪽을 쓴다: 밑줄로 그은 빈칸도 빈칸이다. 같으면 글자 그대로(text). */
   function blankCount(s) { return (String(s || '').match(/_{2,}/g) || []).length; }
   function slotText(p) {
-    var t = txt(p);
+    var t = txt(p).replace(/\btile\s*\d+\b/gi, '__');
     return p && p.textU && blankCount(p.textU) > blankCount(t) ? p.textU : t;
   }
   function isBlank(p) { return !txt(p) && (!p || !p.images || !p.images.length); }
@@ -430,7 +430,14 @@
       /* 렌더러가 클릭할 수 있는 삽입 자리라고 {{A}}…{{D}} 마커만 버튼을 누른다.
          삽입 문항이 있는 지문 블록에서만 원본의 (A)…(D)를 그 형식으로 바꾼다. */
       if (items.some(function (x) { return x.kind === 'insert'; })) {
-        lines = lines.map(function (line) { return line.replace(/\(([A-D])\)/g, '{{$1}}'); });
+        // Some documents repeat the passage with insertion markers between questions.
+        // Use that exact paragraph only when its words match the initial passage.
+        function withoutPositions(s) { return String(s).replace(/\([A-D]\)|\{\{[A-D]\}\}/g, '').replace(/\s+/g, ' ').trim(); }
+        var marked = paras.slice(qStart, bodyEnd).map(txt).filter(function (s) { return /\([A-D]\)/.test(s); });
+        lines = lines.map(function (line) {
+          var replacement = marked.find(function (s) { return withoutPositions(s) === withoutPositions(line); });
+          return (replacement || line).replace(/\(([A-D])\)/g, '{{$1}}');
+        });
       }
 
       var blk = {
@@ -1114,7 +1121,7 @@
       if (/^answer key/i.test(t)) return;
 
       var b = bucket();
-      if (b) b.push(answerValue(t));
+      if (b) b.push(answerValue(section === 'writing' ? t.replace(/^\d+\s*[.)]\s+/, '') : t));
     });
 
     return out;

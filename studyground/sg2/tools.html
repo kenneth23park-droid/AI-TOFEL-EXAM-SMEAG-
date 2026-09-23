@@ -1,20 +1,20 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Study Tools · SMEAG MockTest</title><link rel="stylesheet" href="assets/app.css">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Study Tools · SMEAG StudyGround</title><link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0e8f82">
+<meta name="theme-color" content="#e8481f">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="MockTest"></head><body>
+<meta name="apple-mobile-web-app-title" content="StudyGround"></head><body>
 <header class="nav"><div class="nav-in">
-  <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Learn · Practice · Test · Repeat</small></span></a>
+  <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
   <nav class="nav-center">
     <a href="tests.html">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
     <a href="npz.html">🎯 <span data-en>Practice</span><span data-ko>연습</span></a>
     <a href="learning.html">🎬 <span data-en>Lectures</span><span data-ko>강의</span></a>
     <a href="community.html">💬 <span data-en>Community</span><span data-ko>커뮤니티</span></a>
-    <a href="dashboard.html">📊 <span data-en>My Result</span><span data-ko>내 성적</span></a>
+    <a href="dashboard.html">📊 <span data-en>My StudyGround</span><span data-ko>내 성적</span></a>
   </nav>
   <div class="nav-right">
+    <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
     <a class="btn ghost sm" href="login.html"><span data-en>Login</span><span data-ko>로그인</span></a>
     <a class="btn brand sm" href="signup.html"><span data-en>Sign Up Free</span><span data-ko>무료 가입</span></a>
   </div>
@@ -26,19 +26,7 @@
     <div class="card"><span class="ic" style="font-size:24px">📝</span><h3 style="font-weight:800;margin-top:8px" data-en>Error Log</h3><h3 style="font-weight:800;margin-top:8px" data-ko>오답 노트</h3><p class="muted" style="font-size:13px;margin-top:6px" data-en>7 items to review (Listening 5 · Reading 2).</p><p class="muted" style="font-size:13px;margin-top:6px" data-ko>복습 7문항 (리스닝 5 · 리딩 2).</p></div>
     <div class="card"><span class="ic" style="font-size:24px">📖</span><h3 style="font-weight:800;margin-top:8px" data-en>Vocab Bank</h3><h3 style="font-weight:800;margin-top:8px" data-ko>단어장</h3><p class="muted" style="font-size:13px;margin-top:6px" data-en>84 saved words · 10 due today.</p><p class="muted" style="font-size:13px;margin-top:6px" data-ko>저장 84단어 · 오늘 복습 10.</p></div>
   </div>
-
-  <!-- 관리자 도구 — SET 별 관리자 로그인을 통과해야 열린다. -->
-  <div class="grid cols-3 mt-24">
-    <a class="card" href="admin-audio-files.html" style="text-decoration:none;color:inherit"><span class="ic" style="font-size:24px">📁</span><h3 style="font-weight:800;margin-top:8px" data-en>Audio files (admin)</h3><h3 style="font-weight:800;margin-top:8px" data-ko>오디오 파일 점검 (관리자)</h3><p class="muted" style="font-size:13px;margin-top:6px" data-en>Path, size, length and missing/replaced status for every clip.</p><p class="muted" style="font-size:13px;margin-top:6px" data-ko>클립별 경로 · 용량 · 길이 · 누락/교체 상태.</p></a>
-    <a class="card" href="admin-audio.html" style="text-decoration:none;color:inherit"><span class="ic" style="font-size:24px">🔊</span><h3 style="font-weight:800;margin-top:8px" data-en>Audio replacement (admin)</h3><h3 style="font-weight:800;margin-top:8px" data-ko>오디오 교체 (관리자)</h3><p class="muted" style="font-size:13px;margin-top:6px" data-en>Point an item at another URL, or upload a clip.</p><p class="muted" style="font-size:13px;margin-top:6px" data-ko>문항별 URL 지정 · 음원 업로드.</p></a>
-    <a class="card" href="admin-set-view.html" style="text-decoration:none;color:inherit"><span class="ic" style="font-size:24px">📋</span><h3 style="font-weight:800;margin-top:8px" data-en>Set overview (admin)</h3><h3 style="font-weight:800;margin-top:8px" data-ko>SET 전체 보기 (관리자)</h3><p class="muted" style="font-size:13px;margin-top:6px" data-en>Structure, listening scripts and the answer key on one page.</p><p class="muted" style="font-size:13px;margin-top:6px" data-ko>구성 · 대본 · 정답을 한 화면에.</p></a>
-    <a class="card" href="admin-audio-sync.html" style="text-decoration:none;color:inherit"><span class="ic" style="font-size:24px">🎧</span><h3 style="font-weight:800;margin-top:8px" data-en>Script ↔ audio (admin)</h3><h3 style="font-weight:800;margin-top:8px" data-ko>대본 · 오디오 대조 (관리자)</h3><p class="muted" style="font-size:13px;margin-top:6px" data-en>Play with the script beside it; mismatched words highlighted.</p><p class="muted" style="font-size:13px;margin-top:6px" data-ko>대본을 나란히 재생 · 어긋난 단어 형광 표시.</p></a>
-    <a class="card" href="scoring-guide.html" style="text-decoration:none;color:inherit"><span class="ic" style="font-size:24px">🎯</span><h3 style="font-weight:800;margin-top:8px" data-en>How we score (teachers)</h3><h3 style="font-weight:800;margin-top:8px" data-ko>채점 근거 (선생님)</h3><p class="muted" style="font-size:13px;margin-top:6px" data-en>Why the scoring works this way, how far a score may be read, and what keeps the data trustworthy.</p><p class="muted" style="font-size:13px;margin-top:6px" data-ko>왜 이렇게 채점하는가 · 점수를 어디까지 읽어도 되는가 · 데이터 신뢰도 장치.</p></a>
-    <a class="card" href="admin-questions.html" style="text-decoration:none;color:inherit"><span class="ic" style="font-size:24px">✎</span><h3 style="font-weight:800;margin-top:8px" data-en>Question editor (admin)</h3><h3 style="font-weight:800;margin-top:8px" data-ko>문항 교체 (관리자)</h3><p class="muted" style="font-size:13px;margin-top:6px" data-en>Replace a prompt, the choices or the answer key.</p><p class="muted" style="font-size:13px;margin-top:6px" data-ko>발문 · 선택지 · 정답 교체.</p></a>
-  </div>
 </main>
-<footer class="foot"><div class="wrap foot-in"><small class="muted">© SMEAG MockTest · Study Tools</small><div class="foot-links"><a href="npz.html" data-en>Practice</a><a href="npz.html" data-ko>연습</a></div></div></footer>
-<script src="assets/app.js"></script>
-<script src="assets/sg-fullscreen.js"></script>
-<script src="assets/sg-auth.js"></script><script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+<footer class="foot"><div class="wrap foot-in"><small class="muted">© SMEAG StudyGround · Study Tools</small><div class="foot-links"><a href="npz.html" data-en>Practice</a><a href="npz.html" data-ko>연습</a></div></div></footer>
+<script src="assets/app.js"></script><script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body></html>

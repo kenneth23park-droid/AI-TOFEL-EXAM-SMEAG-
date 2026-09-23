@@ -58,22 +58,6 @@
   var session = null;
   var cache = {};                 // 파싱 결과 캐시 (읽기 폭주 방지)
   var answerTimer = null;
-  var writeCbs = [];              // 쓰기 관찰자 (로컬 DB·클라우드 미러링)
-
-  /* 쓰기 알림. 이 파일은 여전히 전역에 의존하지 않는다 — 미러링을 붙이는 쪽
-     (exam-live-boot.js)이 여기에 등록한다. 콜백이 터져도 저장은 이미 끝나 있다. */
-  function onWrite(fn) {
-    if (typeof fn === 'function') writeCbs.push(fn);
-    return function () {
-      for (var i = 0; i < writeCbs.length; i++) { if (writeCbs[i] === fn) { writeCbs.splice(i, 1); return; } }
-    };
-  }
-
-  function notifyWrite(type, detail) {
-    for (var i = 0; i < writeCbs.length; i++) {
-      try { writeCbs[i]({ type: type, session: session, detail: detail || {} }); } catch (e) {}
-    }
-  }
 
   function key(part) { return PREFIX + session + '::' + part; }
 
@@ -157,18 +141,16 @@
   function cursor() { return readJSON(key('cursor'), null); }
 
   function saveCursor(screenId, screenIndex, phaseIndex) {
-    var c = {
+    writeJSON(key('cursor'), {
       screenId: screenId,
       screenIndex: screenIndex,
       phaseIndex: phaseIndex || 0,
       updatedAt: Date.now()
-    };
-    writeJSON(key('cursor'), c);
-    notifyWrite('cursor', c);
+    });
   }
 
   function clocks() { return readJSON(key('clocks'), {}); }
-  function saveClocks(m) { writeJSON(key('clocks'), m || {}); notifyWrite('clocks', m || {}); }
+  function saveClocks(m) { writeJSON(key('clocks'), m || {}); }
 
   /* ── 답안 (§5.3) ─────────────────────────────────────────── */
 
@@ -176,9 +158,7 @@
 
   function flushAnswers() {
     if (answerTimer !== null) { (root.clearTimeout || clearTimeout)(answerTimer); answerTimer = null; }
-    var a = answers();
-    writeJSON(key('answers'), a);
-    notifyWrite('answers', a);
+    writeJSON(key('answers'), answers());
   }
 
   /* upsert. 캐시에는 즉시 반영하고 디스크 기록만 debounce 한다 —
@@ -191,14 +171,9 @@
     if (extra) { for (var k in extra) { if (extra.hasOwnProperty(k)) rec[k] = extra[k]; } }
     a[qid] = rec;
     cache[key('answers')] = a;
-    /* 정전은 예고가 없다 — 클릭 한 번으로 끝나는 답(객관식·드래그)은 debounce 없이
-       그 자리에서 디스크로 내린다. 긴 글(Writing)만 200ms 로 모은다. */
-    if (typeof value !== 'string' || value.length <= 64) {
-      flushAnswers();
-    } else if (answerTimer === null) {
+    if (answerTimer === null) {
       answerTimer = (root.setTimeout || setTimeout)(function () { answerTimer = null; flushAnswers(); }, ANSWER_DEBOUNCE_MS);
     }
-    notifyWrite('answer', { qid: qid, rec: rec });
     return rec;
   }
 
@@ -267,29 +242,8 @@
         var tx = db.transaction(MEDIA_STORE, 'readwrite');
         tx.objectStore(MEDIA_STORE).put(blob, mediaKey(qid));
         tx.oncomplete = function () {
-          /* 녹음이 남긴 사실을 답안에 함께 적는다 — 길이·무음 여부는 나중에 파일을
-             열어도 알 수 없거나(무음 판정) 비싸다(길이). 옛 경로가 Blob 을 그대로
-             넘기는 경우도 있어 record 인지 먼저 본다. */
-          /* notSubmit 을 여기서 되돌리는 이유:
-             마이크가 처음 안 열리면 화면이 즉시 NOT SUBMIT 을 적고, 그 뒤 응답 시간이
-             남아 있는 동안 조용히 재시도한다(exam-render-speaking.startRecording).
-             재시도가 성공해 녹음이 여기까지 오면 그 문항은 더 이상 미제출이 아니다.
-             upsertAnswer 는 키를 덮어쓸 뿐 지우지 않으므로, 되돌린다고 말하지 않으면
-             notSubmit:true 가 그대로 남는다. 그러면 api/score.js 는 버킷에 멀쩡한
-             녹음이 있는데도 전사를 건너뛰고 0 점을 박는다(SET 11 q05 가 그랬다). */
-          var meta = { media: 'idb:' + qid, recorded: true, notSubmit: false, reason: '' };
-          if (blob && blob.blob) {
-            if (blob.mime) meta.mime = blob.mime;
-            if (typeof blob.durationMs === 'number') meta.durationMs = blob.durationMs;
-            if (typeof blob.peak === 'number') meta.peak = blob.peak;
-            if (blob.silent === true) meta.silent = true;
-            if (typeof blob.blob.size === 'number') meta.bytes = blob.blob.size;
-          }
-          upsertAnswer(qid, 'idb:' + qid, meta);
+          upsertAnswer(qid, 'idb:' + qid, { media: 'idb:' + qid, recorded: true });
           flushAnswers();
-          /* 녹음이 기기에 안착한 그 순간을 알린다 — 클라우드로 곧장 올리는 쪽
-             (exam-live-boot.js)이 여기에 붙는다. 이 파일은 여전히 전역을 모른다. */
-          notifyWrite('media', { qid: qid, rec: blob });
           if (cb) cb(null, 'idb:' + qid);
         };
         tx.onerror = function () { if (cb) cb(tx.error || new Error('Media write failed.')); };
@@ -406,17 +360,6 @@
     return out;
   }
 
-  /* 한 세션의 키만 추린 스냅샷. 되감기·다시시작 직전 백업본(SG_LDB.arch)이 이것을
-     통째로 안고 간다 — 그래야 잘못 누른 학생의 답안을 손으로 되살릴 수 있다. */
-  function serializeSession(s) {
-    var target = s || session, out = {}, all = backend.allKeys(), i, k;
-    for (i = 0; i < all.length; i++) {
-      k = all[i];
-      if (k.indexOf(PREFIX + target + '::') === 0) out[k] = backend.getItem(k);
-    }
-    return out;
-  }
-
   // 새 백엔드에 스냅샷을 심고 캐시를 버린다 = 새로고침과 동일한 상태.
   function restore(snapshot) {
     var b = memoryBackend(), k;
@@ -453,11 +396,9 @@
     outbox: outbox, enqueue: enqueue, dropFromOutbox: dropFromOutbox, clearOutbox: clearOutbox,
     // 미디어
     putMedia: putMedia, getMedia: getMedia,
-    // 관찰
-    onWrite: onWrite,
     // 순수
     hashString: hashString, findScreenIndex: findScreenIndex, planResume: planResume,
-    canResume: canResume, serialize: serialize, serializeSession: serializeSession, restore: restore
+    canResume: canResume, serialize: serialize, restore: restore
   };
 
   root.SG_STORE = api;

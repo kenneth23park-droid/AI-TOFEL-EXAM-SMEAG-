@@ -1,0 +1,616 @@
+{
+  "provider": "elevenlabs",
+  "model": "eleven_flash_v2_5",
+  "output": "mp3_44100_128",
+  "note": [
+    "SET 3 시험 음성 배역 매니페스트. tools/build_voices_manifest.mjs 가 원본 docx 에서 만든다 — 손으로 고치지 말 것.",
+    "대본은 set-import.js 가 읽은 것과 같은 것이고, out 은 콘텐츠 팩이 가리키는 경로 그대로다.",
+    "목소리 13명은 SET 9 에서 확정된 것을 그대로 쓴다(config/set9-voice-casting.json).",
+    "id 에 세트 접두사를 붙이는 이유: tools/tts_multivoice.py 의 검산 매니페스트는 tts-voices*.json 을 합치므로, l1-q01 같은 이름은 SET 9 것과 부딪친다."
+  ],
+  "items": [
+    {
+      "id": "set3-l1-q01",
+      "kind": "short",
+      "out": "media/audio/set3/l1-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "Can you attend the conference?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l1-q02",
+      "kind": "short",
+      "out": "media/audio/set3/l1-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "When’s the best time to call the clinic?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l1-q03",
+      "kind": "short",
+      "out": "media/audio/set3/l1-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "We haven’t finalized the venue yet, have we?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l1-q04",
+      "kind": "short",
+      "out": "media/audio/set3/l1-q04.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "The insurance documents need to be notarized."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l1-q05",
+      "kind": "short",
+      "out": "media/audio/set3/l1-q05.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "Xb7hH8MSUJpSbSDYk0k2",
+          "voice_name": "GB-Alice",
+          "el_voice": "Alice",
+          "text": "Email or phone call?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l1-q06",
+      "kind": "short",
+      "out": "media/audio/set3/l1-q06.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "Is the network down again?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l1-q07",
+      "kind": "short",
+      "out": "media/audio/set3/l1-q07.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "How long has the position been vacant?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l1-q08",
+      "kind": "short",
+      "out": "media/audio/set3/l1-q08.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Didn’t the venue include parking?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l1-q09-10",
+      "kind": "conversation",
+      "out": "media/audio/set3/l1-q09-10.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Are you still planning to join the marathon training group that meets on campus?"
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Actually, I signed up yesterday. The first session is this Saturday morning at 7 a.m. by the track."
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "That's early. How long are the training runs?"
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "They start with five miles and gradually build up. The coach said we'll do strength training on Wednesdays too."
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Sounds intense. I might come watch on Saturday to see if it's something I'd want to try."
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You should! They're accepting new members through the end of the month."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set3-l1-q11-12",
+      "kind": "conversation",
+      "out": "media/audio/set3/l1-q11-12.mp3",
+      "segments": [
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "I left my backpack in the lecture hall this morning, and now it's gone. My biology homework was in there."
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Did you check the lost and found in the student center? That's where campus security takes items from classrooms."
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Not yet. I came straight to the library to see if anyone turned it in here."
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "The student center is probably your best bet. I lost my calculator last semester, and they had it within an hour."
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Thanks. I'll head over there right now. The homework is due at 3 p.m."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set3-l1-q13-14",
+      "kind": "announcement",
+      "out": "media/audio/set3/l1-q13-14.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "Good afternoon, everyone. The Gardening Club will hold its annual plant sale next Saturday from 9 AM to 3 PM outside the Biology Building. We'll be selling flowers, vegetables, and herbs grown in our campus greenhouse. All proceeds go toward expanding our community garden. Hope to see you there."
+        }
+      ]
+    },
+    {
+      "id": "set3-l1-q15-16",
+      "kind": "announcement",
+      "out": "media/audio/set3/l1-q15-16.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Attention all students looking to improve their presentation skills. The Communication Department is offering a new Public Speaking Certificate Program beginning next month. The eight-week program includes modules on speech structure, audience engagement, and managing stage anxiety. You'll deliver four graded presentations and receive detailed feedback from the communication faculty. Participants who complete all requirements will earn a certificate that can be added to their resume. Registration is at the Communication Arts Building, Room 112. Please bring a completed application form and a short paragraph describing why you want to improve your public speaking abilities."
+        }
+      ]
+    },
+    {
+      "id": "set3-l1-q17-20",
+      "kind": "announcement",
+      "out": "media/audio/set3/l1-q17-20.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "So today, let's talk about a really important method archaeologists use called stratigraphy. Basically, stratigraphy is about studying layers of soil and materials at dig sites to figure out when things happened. I mean, the idea is pretty simple—older stuff gets buried deeper while newer things stay closer to the surface. Think of it like a layer cake, where each layer represents a different time period. Now, here's how it works in practice. When archaeologists excavate a site, they carefully remove one layer at a time. Let's say they find pottery fragments in one layer and stone tools in the layer beneath it. That tells them the stone tools are older. Another example would be finding Roman coins above Greek pottery—the Greek layer came first, then Romans settled there later. But there are some real challenges with this method. Sometimes natural events mess things up. Earthquakes can shift layers around, or tree roots can push newer objects down into older layers. Flooding can also mix everything together, making it hard to tell what's actually from which period. Despite these problems, stratigraphy remains one of our most reliable dating methods. It helps archaeologists build a timeline of human activity at a site and understand how cultures changed over time."
+        }
+      ]
+    },
+    {
+      "id": "set3-l2-q01",
+      "kind": "short",
+      "out": "media/audio/set3/l2-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "The maintenance crew will be here at eight."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l2-q02",
+      "kind": "short",
+      "out": "media/audio/set3/l2-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "What did you think of the keynote speaker?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l2-q03",
+      "kind": "short",
+      "out": "media/audio/set3/l2-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Didn’t you say you’d call the landlord?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set3-l2-q04-05",
+      "kind": "conversation",
+      "out": "media/audio/set3/l2-q04-05.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "How's the editing coming along for the podcast series we're producing?"
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "I finished episodes one through three last week. I'm working on episode four now, and it should be done by Friday."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Great. That puts us right on schedule for the launch date. Have you added the intro music yet?"
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Yes, to the first three. I still need to get the interview audio from Dr. Martinez for episode five."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "I'll follow up with her today. She mentioned she'd have it ready this week."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set3-l2-q06-07",
+      "kind": "conversation",
+      "out": "media/audio/set3/l2-q06-07.mp3",
+      "segments": [
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Have you heard about the new bike share program the university is starting next month?"
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "No, I haven't. How does it work?"
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "You download an app, and then you can unlock bikes at stations all over campus. The first thirty minutes are free for students."
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "That's convenient. I've been thinking about getting a bike, but I don't have space to store one in my apartment."
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Exactly. Plus, you can pick one up near the library and drop it off by the gym or anywhere else. They're installing twenty stations."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set3-l2-q08-11",
+      "kind": "announcement",
+      "out": "media/audio/set3/l2-q08-11.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Alright, so you've probably heard the term \"market equilibrium\" thrown around, but what does it actually mean? Well, in economics, equilibrium is basically the point where supply and demand meet. It's where the amount of something people want to buy exactly matches what sellers want to sell at a particular price. When this happens, the market is stable—no shortages, no surpluses. Let me give you a concrete example. Imagine coffee shops in your neighborhood. If coffee is priced at five dollars, maybe only fifty people buy it daily, but a hundred people want to sell coffee at that price. That creates a surplus. However, if the price drops to three dollars, suddenly a hundred people want coffee, and exactly a hundred vendors are willing to sell at that price. That's equilibrium. Now, here's the thing—markets don't always stay in equilibrium. Lots of factors can disrupt it. Maybe a frost destroys coffee crops, reducing supply. Or perhaps a new study comes out saying coffee is bad for you, which decreases demand. When these disruptions happen, prices have to adjust to find a new equilibrium point. Understanding equilibrium helps businesses set prices and helps governments make policy decisions. It's one of the foundational concepts in economics because it explains how markets naturally regulate themselves. Next, we'll look at what happens when governments interfere with market equilibrium through price controls."
+        }
+      ]
+    },
+    {
+      "id": "set3-l2-q12-15",
+      "kind": "announcement",
+      "out": "media/audio/set3/l2-q12-15.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "OK, so today we're going to explore something called code-switching. This is when bilingual people switch between two or more languages in a single conversation. It's not random—there are actually patterns to when and why people do it. There are different types of code-switching. One type is called intersentential switching, where someone completes a whole sentence in one language, then switches to another language for the next sentence. For instance, a Spanish-English bilingual might say, \"I'm going to the store. Necesitas algo?\" That's switching between sentences. Another type is intrasentential switching, which happens within a single sentence. The same person might say, \"I'm going to the tienda,\" mixing English and Spanish in one sentence. This type is actually more complex because you need really strong skills in both languages to do it smoothly. Now, why do people code-switch? Sometimes it's because a word or concept exists in one language but not the other. Technical terms are a good example. Or maybe they're emphasizing something—switching languages can add emotional weight. Sometimes people code-switch to show group identity, like when immigrants speak one language at home and another at work. The ability to code-switch actually shows sophisticated language control. It's not about being confused or not knowing languages well enough—it's a skill that requires understanding both languages deeply."
+        }
+      ]
+    },
+    {
+      "id": "set3-s1-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set3/s1-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You are being trained to help at the visitor center, listen to your trainer, and repeat what he says. Repeat only once."
+        }
+      ]
+    },
+    {
+      "id": "set3-s1-q1",
+      "kind": "repeat",
+      "out": "media/audio/set3/s1-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "This is our visitor center."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set3-s1-q2",
+      "kind": "repeat",
+      "out": "media/audio/set3/s1-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "The rose garden is located next to the main greenhouse."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set3-s1-q3",
+      "kind": "repeat",
+      "out": "media/audio/set3/s1-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Wheelchairs and strollers are available for rent at this desk."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set3-s1-q4",
+      "kind": "repeat",
+      "out": "media/audio/set3/s1-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Guided walking tours begin every hour at the information booth."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set3-s1-q5",
+      "kind": "repeat",
+      "out": "media/audio/set3/s1-q5.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You may want to pick up a map before exploring the grounds."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set3-s1-q6",
+      "kind": "repeat",
+      "out": "media/audio/set3/s1-q6.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Unfortunately, the butterfly pavilion is currently closed for seasonal maintenance."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set3-s1-q7",
+      "kind": "repeat",
+      "out": "media/audio/set3/s1-q7.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "If visitors have questions about specific plants, our staff can provide information at any garden station."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set3-s2-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set3/s2-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "You have volunteered for a research study about communication technology. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ]
+    },
+    {
+      "id": "set3-s2-q1",
+      "kind": "interview",
+      "out": "media/audio/set3/s2-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Thank you for joining today. I’d like to ask you some questions about communication technology. Have you or your friends ever tried to reduce the time you spend on your phone or social media? For example, have you set time limits, deleted apps, or taken breaks from using technology? Why or why not?"
+        }
+      ]
+    },
+    {
+      "id": "set3-s2-q2",
+      "kind": "interview",
+      "out": "media/audio/set3/s2-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "I see. When you want to catch up with friends or family who live far away, do you prefer video calls or text messages? Why?"
+        }
+      ]
+    },
+    {
+      "id": "set3-s2-q3",
+      "kind": "interview",
+      "out": "media/audio/set3/s2-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "Alright. Some researchers say that even though technology helps people stay connected, many people feel lonelier than before. Do you agree with this view?"
+        }
+      ]
+    },
+    {
+      "id": "set3-s2-q4",
+      "kind": "interview",
+      "out": "media/audio/set3/s2-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Lastly, is face-to-face communication essential for maintaining close relationships, or are there other effective ways to stay connected with people you care about?"
+        }
+      ]
+    }
+  ]
+}

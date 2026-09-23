@@ -51,17 +51,6 @@
     return null;
   }
 
-  /* 즉시 통과하는 read phase(인터뷰) — 버튼으로 멈춰 세우지 않고, 지시문만 화면 진입
-     순간부터 세워 둔다. cue card 를 가진 IELTS 의 selfPaced read 는 여기 걸리지 않는다. */
-  function hasStandingRead(phases) {
-    var list = phases || [];
-    for (var i = 0; i < list.length; i++) {
-      var p = list[i];
-      if (p && p.name === 'read' && endCondition(p) === 'immediate') return true;
-    }
-    return false;
-  }
-
   function endCondition(phase) {
     if (!phase) return 'none';
     if (phase.selfPaced === true) return 'button';
@@ -186,43 +175,6 @@
     return '--:--:--';
   }
 
-  /* ── 녹음 시작 신호음(beep) ────────────────────────────────
-     발주처 요구(2026-08-11): 질문이 끝나고 녹음이 시작되기 전에 "삐" 소리로 알린다.
-     실제 TOEFL 과 같은 신호로, 응시자는 소리를 듣고 말하기 시작하면 된다.
-
-     소리 파일을 쓰지 않고 WebAudio 로 합성한다 — 오프라인 응시에서도 404 가 없고
-     tts-manifest 에 항목이 늘지 않는다(볼륨 테스트음과 같은 이유).
-
-     신호음이 마이크에 녹음되지 않도록 **소리가 끝난 뒤에** 녹음을 연다. 같은 이유로
-     응답 시계도 신호음이 끝난 뒤 건다 — 안 그러면 8초짜리 문항에서 0.4초를 잃는다. */
-  var BEEP_HZ = 880;
-  var BEEP_SEC = 0.28;
-  var BEEP_GAP_MS = 120;      // 소리가 사라지고 마이크가 열리기까지의 여유
-
-  function beepMs() { return Math.round(BEEP_SEC * 1000) + BEEP_GAP_MS; }
-
-  function playBeep() {
-    var AC = root.AudioContext || root.webkitAudioContext;
-    if (!AC) return false;
-    try {
-      var actx = new AC();
-      var osc = actx.createOscillator();
-      var gain = actx.createGain();
-      var t0 = actx.currentTime;
-      var peak = Math.max(0.0002, volume() * 0.25);
-      osc.type = 'sine';
-      osc.frequency.value = BEEP_HZ;
-      // 사각파처럼 뚝 끊으면 '틱' 잡음이 난다. 짧은 어택·릴리스를 준다.
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(peak, t0 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + BEEP_SEC);
-      osc.connect(gain); gain.connect(actx.destination);
-      osc.start(t0); osc.stop(t0 + BEEP_SEC + 0.02);
-      osc.onended = function () { try { actx.close(); } catch (e) {} };
-      return true;
-    } catch (e) { return false; }
-  }
-
   function volume() {
     var RT = root.SG_RUNTIME;
     if (RT && typeof RT.volume === 'function') {
@@ -274,35 +226,24 @@
     var armedKeys = [];
     var recording = false;
     var recordFailed = false;
-    var recStartedAt = 0;        // 무음 경고를 언제부터 셀지 정하는 기준
-    var silentWarned = false;
-    var beepTimer = null;        // 신호음이 울리는 동안만 살아 있다
-    var pendingArm = null;       // 신호음이 끝나고 걸 응답 시계 {index, phase}
-    var advanceTimer = null;     // 응답 종료 후 자동 전진까지의 짧은 대기
-    var stickyCaption = false;   // read/prompt 가 세운 지시문을 prep·record 내내 유지할지
-    var micReady = false;        // 이 화면에서 마이크 스트림을 손에 쥐었는가
-    var micWarming = false;      // 권한 요청이 진행 중인가(두 번 묻지 않기 위해)
-    var micBannerUp = false;     // 지금 배너가 마이크 안내인가(다른 안내를 덮지 않기 위해)
-    var armWaitTimer = null;     // 마이크가 열리기를 기다리는 동안의 폴링
-    var armWaitedMs = 0;
-    var gated = false;           // 권한을 못 잡아 문항을 아직 시작하지 못한 상태
-    var gateTimer = null;
 
     /* ── DOM 골격 ── */
     var box = el('div', 'speaking-screen');
 
-    /* 관찰(speaking-response-1830s.png): 화면 안에 진행표시가 없다.
-       "Speaking | Question 8 of 11" 은 서브바(2행)가 그린다 — 여기서 중복 렌더하지 않는다. */
+    var head = el('div', 'speaking-head');
+    var prog = el('span', 'speaking-progress');
+    if (screen.progress) {
+      prog.appendChild(bi('span',
+        'Question ' + screen.progress.index + ' of ' + screen.progress.total,
+        screen.progress.index + '번 / 전체 ' + screen.progress.total + '문항'));
+    }
+    head.appendChild(prog);
+    box.appendChild(head);
 
     var banner = el('div', 'speaking-banner');
     banner.setAttribute('role', 'status');
     banner.hidden = true;
     box.appendChild(banner);
-
-    /* 관찰: 지시문이 화면 최상단 중앙에 큰 굵은 글씨로 오고, 그 아래 화자 영상,
-       그 아래 RESPONSE TIME 카드가 온다. 그래서 caption 을 stage 안이 아니라 stage 위에 둔다. */
-    var caption = el('div', 'speaking-caption');
-    box.appendChild(caption);
 
     var stage = el('div', 'speaking-stage');
     var portrait = null;
@@ -312,25 +253,14 @@
       portrait.alt = '';
       stage.appendChild(portrait);
     }
+    var caption = el('div', 'speaking-caption');
+    stage.appendChild(caption);
     box.appendChild(stage);
 
-    /* IELTS Part 2 cue card (phase.media.kind==='image').
-       TOEFL 스피킹에는 cue 이미지가 없다. 예전에는 <img> 를 무조건 붙여 두고 hidden 으로
-       숨겼는데, 그러면 src="" 인 img 가 11개 스피킹 화면 전부에 남아 렌더 스윕(F2)에서
-       "bad media src" 로 잡혔다. 이제 실제 src 가 생길 때 만들어 stage 바로 뒤(= 예전과
-       같은 자리)에 끼워 넣는다. 빈 slot div 를 대신 두면 안 된다 — .speaking-screen 은
-       gap:18px 인 flex column 이라 빈 자식도 간격을 하나 더 만든다. */
-    var cueImg = null;
-    function showCue(src) {
-      if (!src) return;
-      if (!cueImg) {
-        cueImg = el('img', 'speaking-cue');
-        cueImg.alt = '';
-        box.insertBefore(cueImg, stage.nextSibling);
-      }
-      cueImg.src = src;
-      cueImg.hidden = false;
-    }
+    var cueImg = el('img', 'speaking-cue');   // IELTS Part 2 cue card (phase.media.kind==='image')
+    cueImg.alt = '';
+    cueImg.hidden = true;
+    box.appendChild(cueImg);
 
     /* ── cue card 패널 (Story 6.2 AC3) ──
        phase.cue 가 있는 화면(IELTS Part 2)에만 만들어진다. read → prep → record 내내
@@ -383,11 +313,8 @@
     var dock = el('div', 'speaking-dock');
     var rbox = el('div', 'response-box');     // .response-box 는 base 블록(Story 1.7) 소유
     rbox.hidden = true;
-    /* 관찰: 헤더는 라벤더 배경 + 흰 대문자 "RESPONSE TIME" 뿐이다. 마이크 아이콘은
-       헤더가 아니라 흰 본문의 숫자 왼쪽에 있고, base 블록의 .response-time::before 가 그린다.
-       그래서 여기서 이모지를 넣지 않는다(넣으면 아이콘이 둘이 된다). */
     var rlabel = el('span', 'response-label');
-    rlabel.appendChild(bi('span', 'RESPONSE TIME', '응답 시간'));
+    rlabel.appendChild(bi('span', '🎤 Response Time', '🎤 응답 시간'));
     var rtime = el('span', 'response-time');
     rtime.textContent = fmt(0, 'HH:MM:SS');
     var meter = el('div', 'speaking-meter');
@@ -445,30 +372,10 @@
 
     /* engine.phaseNext() 를 쓰지 않는 이유(의도된 차이):
        그 API 는 phaseIndex 를 정확히 1 씩만 올리고 마지막 phase 에서 화면을 자동 전진시킨다.
-       settle() 은 0-length phase 를 여러 개 한 번에 건너뛸 수 있으므로 phase 커서는
-       SG_STORE.saveCursor 로 직접 남긴다. localStorage 직접 접근은 없다. */
-
-    /* 스피킹은 응시자가 누를 것이 없다 — 응답 시간이 끝나면 실제 시험처럼 스스로 넘어간다.
-       녹음 저장(stopRecording 의 콜백)이 끝날 틈을 주려고 잠깐만 머문다. */
-    var ADVANCE_MS = 1500;
-    var ADVANCE_MS_NOTICE = 6000;   // 안내(중단·이미 녹음됨)를 읽을 시간은 준다
-    var advanceMs = ADVANCE_MS;
-
-    function cancelAdvance() {
-      if (advanceTimer !== null && root.clearTimeout) { try { root.clearTimeout(advanceTimer); } catch (e) {} }
-      advanceTimer = null;
-    }
-
-    function autoAdvance() {
-      if (advanceTimer !== null) return;   // 이미 예약돼 있으면 두 번 걸지 않는다
-      function go() {
-        advanceTimer = null;
-        if (disposed) return;
-        if (engine && typeof engine.next === 'function') engine.next('auto');
-      }
-      if (root.setTimeout) advanceTimer = root.setTimeout(go, advanceMs);
-      else go();
-    }
+       (a) settle() 은 0-length phase 를 여러 개 한 번에 건너뛸 수 있고,
+       (b) AC6 은 마지막 phase 뒤에 "미리듣기 + Next 만" 남기라고 요구한다.
+       그래서 phase 커서는 SG_STORE.saveCursor 로 직접 남기고, 화면 전진은
+       응시자의 Next(engine.next('manual')) 로만 일으킨다. localStorage 직접 접근은 없다. */
 
     function markNotSubmit(reason) {
       var R = REC();
@@ -510,34 +417,15 @@
       var i = state.phaseIndex;
       var p = state.phases[i];
       if (!p) return;
-      // 신호음이 우는 동안은 시계가 아직 안 걸렸다 — 0 이 아니라 만 시간을 보여준다.
-      if (p.name === 'record') rtime.textContent = fmt(pendingArm ? (p.seconds || 0) : remainingOf(i), 'HH:MM:SS');
+      if (p.name === 'record') rtime.textContent = fmt(remainingOf(i), 'HH:MM:SS');
       else if (p.name === 'prep' && p.seconds > 0) prepTime.textContent = fmt(remainingOf(i), 'MM:SS');
     }
-
-    /* 마이크가 살아 있다는 증거는 이 띠 하나뿐이다 — 응시자는 자기 답을 되들을 수
-     * 없으므로(AC6), 말하는 동안 눈금이 움직이는 것을 보고 안심해야 한다.
-     * 눈금이 끝까지 잠자코 있으면 5초 뒤에 말로도 알린다. */
-    var SILENT_GRACE_MS = 5000;
 
     function pumpMeter() {
       if (disposed) return;
       var R = REC();
       var lv = (recording && R && typeof R.level === 'function') ? R.level() : 0;
       meterFill.style.width = Math.round(lv * 100) + '%';
-      meter.className = 'speaking-meter' +
-        (recording ? ' is-armed' : '') +
-        (lv > 0.06 ? ' is-live' : '');
-
-      if (recording && !silentWarned && !recordFailed && recStartedAt &&
-          R && typeof R.peak === 'function' &&
-          (Date.now() - recStartedAt) > SILENT_GRACE_MS &&
-          R.peak() < (R.SILENT_PEAK || 0.03)) {
-        silentWarned = true;
-        setBanner('No sound is reaching the microphone. Speak up, or check that the right input device is selected and not muted.',
-                  '마이크로 소리가 들어오지 않습니다. 더 크게 말하거나, 입력 장치가 맞는지·음소거는 아닌지 확인하세요.', 'error');
-        logEvent('record_silent', screen.id, { qid: qid });
-      }
       if (root.requestAnimationFrame) rafId = root.requestAnimationFrame(pumpMeter);
     }
 
@@ -597,200 +485,11 @@
       }
     }
 
-    /* ── 마이크 확보 ──
-     * 권한 창은 응답 시간 안에서 떠서는 안 된다. 학생이 Allow 를 누르는 몇 초가
-     * 그대로 답변 시간에서 깎이기 때문이다(관찰된 실제 사고).
-     * 그래서 화면에 들어서자마자 — read·listen·prep 이 도는 동안 — 미리 열어 두고,
-     * 그래도 안 열렸으면 응답 시계를 걸지 않고 열릴 때까지 기다린다. */
-
-    var MIC_WAIT_MAX_MS = 8000;   // 그래도 안 열리면 시험을 세우지 않고 진행한다
-    var MIC_WAIT_STEP_MS = 200;
-
-    function micBanner(en, ko, tone) {
-      setBanner(en, ko, tone);
-      micBannerUp = true;
-    }
-
-    function clearMicBanner() {
-      if (!micBannerUp) return;   // 중단 안내 같은 다른 배너는 건드리지 않는다
-      banner.hidden = true;
-      micBannerUp = false;
-    }
-
-    function prewarmMic() {
-      var R = REC();
-      if (disposed || micReady || micWarming) return;
-      if (!R || typeof R.requestPermission !== 'function') return;
-      if (typeof R.isSupported === 'function' && !R.isSupported()) return;
-      micWarming = true;
-      R.requestPermission(function (e) {
-        micWarming = false;
-        if (disposed) return;
-        if (e) {
-          logEvent('mic_prewarm_failed', screen.id, { qid: qid, code: e.code || '' });
-          if (!gated) {
-            micBanner('Allow the microphone. Your answer cannot be recorded until you do — look for the browser prompt near the address bar.',
-                      '마이크를 허용하세요. 허용하기 전에는 답변이 녹음되지 않습니다 — 주소창 근처의 허용 창을 확인하세요.', 'error');
-          }
-          return;
-        }
-        micReady = true;
-        logEvent('mic_ready', screen.id, { qid: qid });
-        if (gated) { openGate(); return; }
-        clearMicBanner();
-      });
-    }
-
-    /* ── 권한 게이트 ──
-     * 이어보기·딥링크(planResume, ?screen=, ?goq=)는 마이크 점검 화면을 지나치지 않고
-     * 끊긴 스피킹 문항에 곧장 착지한다. 그 자리에서 마이크를 못 잡았다면 문항을
-     * 시작하지 않는다 — 마이크 없는 스피킹 문항은 빈 파일 하나를 남길 뿐이다.
-     * 하드웨어 점검 화면과 같은 규칙이다(건너뛰기 없음). 시계를 걸지 않으므로
-     * 여기서 서 있는 동안 응답 시간은 1초도 줄지 않는다. */
-
-    var GATE_POLL_MS = 2000;
-
-    /* 지금 손에 살아 있는 마이크가 있는가. exam-recorder 의 liveStream 과 같은 판정이다 —
-       트랙이 죽었거나(ended) 다른 앱이 물고 있으면(muted) 없는 것으로 본다. */
-    function micHeld() {
-      var R = REC();
-      if (!R || typeof R.getStream !== 'function') return false;
-      var st = R.getStream();
-      if (!st) return false;
-      if (typeof st.getAudioTracks !== 'function') return true;
-      var ts = st.getAudioTracks();
-      return !!(ts.length && ts[0].readyState !== 'ended' && ts[0].muted !== true);
-    }
-
-    function cancelGatePoll() {
-      if (gateTimer !== null && root.clearTimeout) { try { root.clearTimeout(gateTimer); } catch (e) {} }
-      gateTimer = null;
-    }
-
-    /* 학생이 주소창 자물쇠에서 권한을 푸는 경우, 브라우저는 우리에게 알려 주지 않는다.
-       스스로 주기적으로 다시 잡아 봐야 게이트가 열린다. */
-    function pollGate() {
-      cancelGatePoll();
-      if (!root.setTimeout || disposed || !gated) return;
-      gateTimer = root.setTimeout(function () {
-        gateTimer = null;
-        if (disposed || !gated) return;
-        if (micHeld()) { micReady = true; openGate(); return; }
-        micWarming = false;
-        prewarmMic();
-        pollGate();
-      }, GATE_POLL_MS);
-    }
-
-    function showGate() {
-      if (gated) return;
-      gated = true;
-      rbox.hidden = true;
-      logEvent('mic_gate', screen.id, { qid: qid });
-      setCaption('Microphone required', '마이크가 필요합니다');
-      micBanner('This question cannot start until your microphone is on. Select Allow microphone below, then choose "Allow while visiting the site" in the browser prompt. If no prompt appears, select the lock icon in the address bar and allow the microphone. Your response time has not started.',
-                '마이크가 켜져야 이 문항이 시작됩니다. 아래 Allow microphone 을 누르고, 브라우저 창에서 "Allow while visiting the site" 를 고르세요. 창이 뜨지 않으면 주소창의 자물쇠 아이콘에서 마이크를 허용하세요. 응답 시간은 아직 시작되지 않았습니다.', 'error');
-      setButton('Allow microphone', '마이크 허용', function () { micWarming = false; prewarmMic(); });
-      pollGate();
-    }
-
-    function openGate() {
-      if (!gated) return;
-      gated = false;
-      cancelGatePoll();
-      clearMicBanner();
-      btn.hidden = true;
-      logEvent('mic_gate_open', screen.id, { qid: qid });
-      startPhases();
-    }
-
-    function cancelArmWait() {
-      if (armWaitTimer !== null && root.clearTimeout) { try { root.clearTimeout(armWaitTimer); } catch (e) {} }
-      armWaitTimer = null;
-    }
-
-    /* 응답 시계는 마이크가 실제로 열린 뒤에 건다. startRecording 의 재시도(1초 x 5)가
-       늦게 성공해도 잃는 시간이 없다. 끝내 못 열면 MIC_WAIT_MAX_MS 뒤에 그냥 걸어
-       시험을 계속한다 — 이 문항은 이미 NOT SUBMIT 으로 표시돼 있다. */
-    function armWhenMicLive() {
-      if (disposed || !pendingArm) return;
-      if (recording) {
-        clearMicBanner();
-        armPhaseClock(pendingArm.index, pendingArm.phase);
-        pendingArm = null;
-        cancelArmWait();
-        paint();
-        return;
-      }
-      if (armWaitedMs >= MIC_WAIT_MAX_MS || !root.setTimeout) {
-        logEvent('record_clock_forced', screen.id, { qid: qid, waitedMs: armWaitedMs });
-        armPhaseClock(pendingArm.index, pendingArm.phase);
-        pendingArm = null;
-        cancelArmWait();
-        paint();
-        return;
-      }
-      if (armWaitedMs === 0) {
-        micBanner('Waiting for the microphone. Your response time starts when it opens — select Allow if your browser asks.',
-                  '마이크를 기다리는 중입니다. 마이크가 열려야 응답 시간이 시작됩니다 — 브라우저가 물으면 Allow 를 누르세요.', 'warn');
-      }
-      cancelArmWait();
-      armWaitTimer = root.setTimeout(function () {
-        armWaitTimer = null;
-        armWaitedMs += MIC_WAIT_STEP_MS;
-        armWhenMicLive();
-      }, MIC_WAIT_STEP_MS);
-    }
-
     /* ── 녹음 ── */
 
-    /* record phase 진입 → 신호음 → (소리가 끝나면) 마이크 열기 + 응답 시계.
-       AudioContext 가 없어 소리가 안 나는 브라우저에서도 순서와 타이밍은 같다 —
-       들리느냐만 다르고 시험 진행은 한 갈래로 유지한다. */
-    function beepThenRecord() {
-      var audible = playBeep();
-      logEvent('record_beep', screen.id, { qid: qid, audible: audible });
-      function run() {
-        beepTimer = null;
-        if (disposed) return;
-        startRecording();
-        armWaitedMs = 0;
-        armWhenMicLive();
-      }
-      if (root.setTimeout) beepTimer = root.setTimeout(run, beepMs());
-      else run();
-    }
-
-    function cancelBeep() {
-      if (beepTimer !== null && root.clearTimeout) { try { root.clearTimeout(beepTimer); } catch (e) {} }
-      beepTimer = null;
-      pendingArm = null;
-    }
-
-    /* 마이크가 한 번 실패했다고 문항을 포기하지 않는다 — 응답 시간이 남아 있는 동안
-     * 조용히 다시 연다(권한이 늦게 허용되거나 장치가 잠깐 물린 경우가 대부분이다). */
-    var RETRY_MS = 1000, RETRY_MAX = 5;
-    var retryTimer = null, retryLeft = RETRY_MAX;
-
-    function cancelRetry() {
-      if (retryTimer !== null && root.clearTimeout) { try { root.clearTimeout(retryTimer); } catch (e) {} }
-      retryTimer = null;
-    }
-
-    function scheduleRetry() {
-      if (retryLeft <= 0 || disposed || retryTimer !== null || !root.setTimeout) return;
-      retryLeft -= 1;
-      retryTimer = root.setTimeout(function () {
-        retryTimer = null;
-        if (disposed || recording) return;
-        startRecording(true);
-      }, RETRY_MS);
-    }
-
-    function startRecording(isRetry) {
+    function startRecording() {
       var R = REC();
       recordFailed = false;
-      if (!isRetry) { retryLeft = RETRY_MAX; cancelRetry(); }
       if (!R || !R.isSupported()) {
         recordFailed = true;
         markNotSubmit('unsupported');
@@ -806,36 +505,22 @@
           recording = false;
           rbox.classList.remove('is-recording');
           markNotSubmit(e.code || 'recorder_error');
-          if (retryLeft > 0) {
-            setBanner('Microphone did not open — retrying. Keep speaking; allow the microphone if your browser asks.',
-                      '마이크가 열리지 않아 다시 시도합니다. 계속 말씀하세요. 브라우저가 물으면 마이크를 허용하세요.', 'error');
-            scheduleRetry();
-          } else {
-            setBanner('Microphone is unavailable (' + (e.code || 'error') + '). This question is marked NOT SUBMIT and the test continues.',
-                      '마이크를 사용할 수 없습니다 (' + (e.code || 'error') + '). 이 문항은 NOT SUBMIT 으로 표시되고 시험은 계속됩니다.', 'error');
-          }
-          logEvent('record_failed', screen.id, { qid: qid, code: e.code || '', retryLeft: retryLeft });
+          setBanner('Microphone is unavailable (' + (e.code || 'error') + '). This question is marked NOT SUBMIT and the test continues.',
+                    '마이크를 사용할 수 없습니다 (' + (e.code || 'error') + '). 이 문항은 NOT SUBMIT 으로 표시되고 시험은 계속됩니다.', 'error');
+          logEvent('record_failed', screen.id, { qid: qid, code: e.code || '' });
           return;
         }
-        cancelRetry();
-        micReady = true;
         recording = true;
-        recStartedAt = Date.now();
-        silentWarned = false;
         rbox.classList.add('is-recording');
-        logEvent('record_start', screen.id, { qid: qid, retried: retryLeft < RETRY_MAX });
+        logEvent('record_start', screen.id, { qid: qid });
       });
       if (p && typeof p['catch'] === 'function') p['catch'](function () {});
     }
 
     function stopRecording() {
       var R = REC();
-      // 신호음이 울리는 사이에 phase 가 끝났다면(force·강제전진) 마이크를 열지 않는다.
-      cancelBeep();
-      cancelRetry();
-      if (!R || !recording) { recording = false; recStartedAt = 0; rbox.classList.remove('is-recording'); return; }
+      if (!R || !recording) { recording = false; rbox.classList.remove('is-recording'); return; }
       recording = false;
-      recStartedAt = 0;
       rbox.classList.remove('is-recording');
       var p = R.stop(function (e, res) {
         if (e) {
@@ -847,23 +532,24 @@
           }
           return;
         }
-        logEvent('record_stop', screen.id, { qid: qid, ms: res.durationMs, mime: res.mime,
-                                             saved: res.saved, peak: res.peak, silent: res.silent });
+        logEvent('record_stop', screen.id, { qid: qid, ms: res.durationMs, mime: res.mime, saved: res.saved });
         if (!disposed) showPreview(res);
       });
       if (p && typeof p['catch'] === 'function') p['catch'](function () {});
     }
 
-    /* AC6 — 실제 시험처럼 자기 답을 다시 듣지 못한다. 녹음됐다는 사실만 알린다. */
+    /* AC6 — 미리듣기는 제공하되 재녹음은 불가(timing.allowRerecord 기본 false). */
     function showPreview(res) {
       while (review.firstChild) review.removeChild(review.firstChild);
-      if (res && res.silent) {
-        // 파일은 남았지만 소리가 담기지 않았다. 나중에 "왜 안 들리지" 로 끝나지 않도록 지금 말한다.
-        review.appendChild(bi('p', 'The recording was saved, but almost no sound was picked up. Check your microphone before the next question.',
-                                 '녹음은 저장되었지만 소리가 거의 잡히지 않았습니다. 다음 문항 전에 마이크를 확인하세요.'));
-      } else {
-        review.appendChild(bi('p', 'Your response has been recorded. You cannot record again.',
-                                 '응답이 녹음되었습니다. 다시 녹음할 수는 없습니다.'));
+      review.appendChild(bi('p', 'Your response has been recorded. You cannot record again.',
+                               '응답이 녹음되었습니다. 다시 녹음할 수는 없습니다.'));
+      if (res && res.blob && root.URL && root.URL.createObjectURL) {
+        var a = doc.createElement('audio');
+        a.controls = true;
+        a.className = 'speaking-preview';
+        try { a.src = root.URL.createObjectURL(res.blob); } catch (e) {}
+        a.volume = volume();
+        review.appendChild(a);
       }
       review.hidden = false;
     }
@@ -873,7 +559,7 @@
     function applyActions(list) {
       for (var i = 0; i < list.length; i++) {
         var a = list[i];
-        if (a === 'startRecord') beepThenRecord();
+        if (a === 'startRecord') startRecording();
         else if (a === 'stopRecord') stopRecording();
         // 'playMedia' 는 안착한 phase 를 그릴 때 처리한다(중간에 건너뛴 phase 는 재생 대상이 아니다).
         // 'screenDone' 은 renderPhase 에서 처리한다.
@@ -885,13 +571,15 @@
       btn.hidden = true;
       prepChip.hidden = true;
       rbox.hidden = true;
-      if (cueImg) cueImg.hidden = true;
+      cueImg.hidden = true;
       stage.classList.remove('is-playing');
 
       if (state.status === 'done') {
         setCaption('Your response time has ended.', '응답 시간이 종료되었습니다.');
+        setButton('Next', '다음', function () {
+          if (engine && typeof engine.next === 'function') engine.next('manual');
+        });
         persistCursor();
-        autoAdvance();
         return;
       }
 
@@ -902,28 +590,24 @@
 
       // 이미지 media 는 종료조건이 아니라 표시 자산이다(IELTS Part 2 cue card).
       if (p.media && mediaKind(p.media) === 'image') {
-        showCue(srcOf(p.media));
+        cueImg.src = srcOf(p.media);
+        cueImg.hidden = false;
       } else if (cueSpec && cueSpec.image) {
         // cue card 그림은 read/prep/record 내내 남는다(§6.2 AC3).
-        showCue(srcOf(cueSpec.image));
+        cueImg.src = srcOf(cueSpec.image);
+        cueImg.hidden = false;
       }
 
       if (p.name === 'read') {
-        // 관찰된 문구 그대로. 따옴표는 프레임과 같은 ASCII 아포스트로피(’ 아님).
-        setCaption("Please answer the interviewer's questions.", '면접관의 질문에 답하세요.');
-        stickyCaption = true;
+        setCaption('Please answer the interviewer’s questions.', '면접관의 질문에 답하세요.');
         if (endCondition(p) === 'button') setButton('Continue', '계속', function () { fire('button'); });
       } else if (p.name === 'listen') {
-        /* 인터뷰 지시문이 이미 서 있으면 덮지 않는다 — 관찰(1830s)에서 인터뷰어 영상이 도는
-           동안에도 상단 지시문은 그대로다. 그런 지시문이 없는 S1 에서만 청취 안내를 쓴다. */
-        if (!stickyCaption) setCaption('Listen carefully. The audio plays only once.', '잘 들으세요. 오디오는 한 번만 재생됩니다.');
+        setCaption('Listen carefully. The audio plays only once.', '잘 들으세요. 오디오는 한 번만 재생됩니다.');
       } else if (p.name === 'prompt') {
         setCaption('Read the prompt.', '문제를 읽으세요.');
-        stickyCaption = true;
         if (endCondition(p) === 'button') setButton('Continue', '계속', function () { fire('button'); });
       } else if (p.name === 'prep') {
-        // 지시문이 이미 서 있으면 덮지 않는다 — "Get ready" 는 prep 칩이 따로 말한다.
-        if (!stickyCaption) setCaption('Get ready to speak.', '말할 준비를 하세요.');
+        setCaption('Get ready to speak.', '말할 준비를 하세요.');
         if (p.seconds > 0) { prepChip.hidden = false; }
         /* AC6 — 준비시간 조기 종료. cue card 가 있는 긴 준비시간(IELTS Part 2, 60초)에만
            버튼을 낸다. TOEFL 의 3초 prep 에는 cue 가 없어 버튼이 생기지 않는다(회귀 없음).
@@ -931,30 +615,12 @@
         if (p.cue && p.seconds > 0) {
           setButton('Start speaking now', '지금 말하기 시작', function () { fire('force'); });
         }
-      }
-
-      /* record 전 어느 phase 에서든 마이크를 미리 잡아 둔다 — 학생이 뒤늦게 허용해
-         주었거나, 앞 문항에서 스트림이 끊겼을 수 있다. 이미 쥐고 있으면 아무 일도
-         일어나지 않는다(권한 창을 두 번 띄우지 않는다). */
-      if (p.name !== 'record' && recordIndex() >= 0) prewarmMic();
-
-      if (p.name === 'record') {
-        /* 관찰(1830s): 녹음 중에도 상단 지시문은 "Please answer the interviewer's questions." 그대로다.
-           그래서 read/prompt 가 세운 지시문은 유지하고, 그런 지시문이 없었던 경우
-           (S1 Listen and Repeat 처럼 listen → record 로 바로 가는 흐름)에만 안내를 새로 쓴다. */
-        if (!stickyCaption) setCaption('Speak into your microphone now.', '지금 마이크에 말하세요.');
+      } else if (p.name === 'record') {
+        setCaption('Speak into your microphone now.', '지금 마이크에 말하세요.');
         rbox.hidden = false;
       }
 
-      /* record 의 응답 시계는 신호음이 끝난 뒤에 건다(beepThenRecord 가 건다).
-         여기서 걸어 버리면 아직 마이크가 열리지도 않은 0.4초가 응답 시간에서 깎인다. */
-      if (p.name === 'record' && beepTimer !== null) pendingArm = { index: i, phase: p };
-      else if (p.name === 'record' && !recording) {
-        // 신호음 없이 곧장 들어온 경로. 여기서도 마이크가 열린 뒤에 시계를 건다.
-        pendingArm = { index: i, phase: p };
-        armWaitedMs = 0;
-        armWhenMicLive();
-      } else armPhaseClock(i, p);
+      armPhaseClock(i, p);
       if (isPlayable(p.media)) playPhaseMedia(i, p);
       paint();
     }
@@ -986,12 +652,6 @@
     }
 
     function begin() {
-      /* 인터뷰 지시문은 phase 에 안착하지 않고 지나가므로(즉시 통과), 화면에 들어서는
-         이 자리에서 세운다. 이후 listen·prep·record 가 덮지 않는다. */
-      if (hasStandingRead(phases)) {
-        setCaption("Please answer the interviewer's questions.", '면접관의 질문에 답하세요.');
-        stickyCaption = true;
-      }
       if (detectInterrupted()) {
         var s = STORE();
         var prev = (s && typeof s.getAnswer === 'function') ? s.getAnswer(qid) : null;
@@ -1005,22 +665,9 @@
           logEvent('record_interrupted', screen.id, { qid: qid });
         }
         state = { phases: phases, phaseIndex: phases.length, status: 'done' };
-        advanceMs = ADVANCE_MS_NOTICE;
         renderPhase();
         return;
       }
-      /* 아직 record 까지 갈 길이 남아 있을 때 권한 창을 띄운다.
-         못 잡으면 문항을 시작하지 않고 게이트에서 기다린다. */
-      if (recordIndex() >= 0) {
-        if (micHeld()) micReady = true;
-        prewarmMic();
-        if (!micReady) { showGate(); return; }
-      }
-      startPhases();
-    }
-
-    function startPhases() {
-      if (disposed) return;
       var out = nextPhase(state, { type: 'start' });
       state = { phases: out.phases, phaseIndex: out.phaseIndex, status: out.status };
       applyActions(out.actions);
@@ -1033,11 +680,6 @@
       if (disposed) return;
       disposed = true;
       stopAudio();
-      cancelBeep();
-      cancelRetry();
-      cancelAdvance();
-      cancelArmWait();
-      cancelGatePoll();
       var R = REC();
       if (R && R.isRecording()) { try { R.abort(); } catch (e) {} }
       recording = false;
@@ -1089,9 +731,6 @@
     mediaKind: mediaKind,
     nextPhase: nextPhase,
     initialState: initialState,
-    beepMs: beepMs,
-    BEEP_HZ: BEEP_HZ,
-    BEEP_SEC: BEEP_SEC,
     // 렌더
     render: renderSpeaking,
     phaseKey: phaseKey,

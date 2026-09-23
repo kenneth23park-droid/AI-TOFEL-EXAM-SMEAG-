@@ -76,23 +76,17 @@ Playwright로 원본 전 라우트를 크롤링(13개 라우트, 풀페이지 �
 
 검증 로스터 (계정에서 HTTP 200): **여성 6**(Sarah·Matilda·Alice·Jessica·Laura·Lily) · **남성 9**(George·Adam·Antoni·Daniel·Brian·Eric·Will·Chris·Bill).
 
-### 5.3 제공자: Google Cloud TTS (현재 활성)
-ElevenLabs 무료 quota(10,000자) 소진으로 **Google Cloud TTS로 전환**. 서비스 계정(project `elspa-497623`) OAuth2 Bearer 인증, `tools/tts_google.py` 동일 LangGraph 파이프라인. **6/6 전건 성공**(실패 0), quota 여유.
-
-| 항목 | 유형 | Google 보이스 | 길이 |
+### 5.3 생성 결과 (6항목 · 14세그먼트)
+| 항목 | 유형 | 보이스 | 상태 |
 |---|---|---|---|
-| community-garden | 공지 | GB-Alice | — |
-| questions-13-15 | **채팅(다화자)** | US-Noah·US-Ava·US-Liam (7세그 스티칭) | 67.0s |
-| roman-roads | 학술 | US-Noah | 87.0s |
-| ancient-irrigation | 학술 | US-Emma | — |
-| write-email | 프롬프트 | GB-Oliver | — |
-| write-disc | **토론(다화자)** | US-Liam·US-Zoe·GB-Oliver (Professor/Lena/Omar) | 67.3s |
+| community-garden | 공지 | Alice | ✅ |
+| questions-13-15 | **채팅(다화자)** | George·Sarah·Adam (7세그·63초) | ✅ |
+| roman-roads | 학술 | George | ✅ |
+| ancient-irrigation | 학술 | Matilda | ✅ |
+| write-email | 프롬프트 | Brian | ✅ |
+| write-disc | **토론(다화자)** | Professor/Lena/Omar | ⏳ 무료 quota(10,000자) 소진으로 마지막 1건 미완 — 단일보이스 폴백 재생 중 |
 
-**보이스 다양성**: 7개 서로 다른 Neural2 보이스 · US/GB 액센트 · 남녀 혼합. 다화자(채팅·토론)는 화자별 보이스를 ffmpeg로 스티칭해 한 mp3에 여러 캐릭터.
-
-- Google 도구: [tools/tts_google.py](tools/tts_google.py) — 서비스 계정/API키 겸용, LangGraph, 세그먼트 병렬
-- ElevenLabs 도구도 보존: [tools/tts_multivoice.py](tools/tts_multivoice.py)
-- 두 공급자 모두 `media/tts/index.json`에 `provider` 기록 → 앱은 provider 무관하게 재생
+> quota 리셋 또는 유료 전환 후 `python3 tools/tts_multivoice.py` 재실행 시, 캐시된 세그먼트는 건너뛰고 **누락분만** 합성해 완성됩니다.
 
 ---
 

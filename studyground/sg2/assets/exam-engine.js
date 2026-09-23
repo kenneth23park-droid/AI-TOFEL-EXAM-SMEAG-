@@ -162,22 +162,14 @@
     }
 
     /* 화면 진입 시 clock 을 arm 한다. armClock 은 같은 key 가 있으면 덮어쓰지 않으므로
-       재개해도 시간이 늘어나지 않는다(§5.3).
-
-       screen.timerStartsOnAudioEnd 가 true 면(오디오와 문항이 한 화면인 TOEFL Listening)
-       그 화면의 question/screen scope 시계는 진입 시점에 걸지 않는다 — 오디오가 도는 동안
-       답변 시간이 깎이면 안 되기 때문이다. 렌더러가 재생 종료 시 startDeferredClocks() 를
-       부르면 그때 arm 된다. 더 넓은 scope(module/section)는 시험 전체 시계라 즉시 건다. */
-    function armScreenClocks(screen, opts) {
+       재개해도 시간이 늘어나지 않는다(§5.3). */
+    function armScreenClocks(screen) {
       var c = clock();
       if (!c || !screen) return;
-      var deferring = !!(screen.timerStartsOnAudioEnd && !(opts && opts.audioEnded));
       var ts = timersOf(screen);
       for (var i = 0; i < ts.length; i++) {
         var t = ts[i];
         if (!t || t.mode === 'none') continue;
-        var scope = t.scope || 'screen';
-        if (deferring && (scope === 'question' || scope === 'screen')) continue;
         var key = clockKeyFor(screen, t);
         if (!key) continue;
         var action = t.onExpire || 'autoAdvance';
@@ -237,7 +229,7 @@
       emit('screen', { screen: sc, index: idx });
     }
 
-    /* 전진 전용. 역방향은 아래 back() 하나뿐이고, 같은 모듈 안에서만 열린다. */
+    /* 전진 전용. 역방향 이동 API 는 의도적으로 존재하지 않는다(Story 1.4 AC3). */
     function goTo(nextIdx, reason) {
       if (destroyed) return false;
       if (nextIdx <= idx) return false;
@@ -246,55 +238,6 @@
       releaseScreenClocks(prev);
       idx = nextIdx;
       enter(prev ? prev.id : null, reason || 'manual');
-      return true;
-    }
-
-    /* 학생용 역방향 이동 — 리딩 한 모듈 안에서만 열린다.
-       실측 규칙: "You may move between questions within a module while time remains."
-       같은 섹션·같은 moduleId 의 문항 화면끼리만 오갈 수 있고, 앞 모듈로는 못 넘어간다 —
-       그 모듈의 시계는 이미 닫혔기 때문이다. 화면 사이에 moduleEnd/안내 화면이 끼어 있으면
-       moduleId 가 달라지거나 screenType 이 question 이 아니므로 자연히 막힌다. */
-    function backable(a, b) {
-      if (!a || !b) return false;
-      if (a.screenType !== 'question' || b.screenType !== 'question') return false;
-      if (!a.allowBack || !b.allowBack) return false;
-      if (a.section !== b.section) return false;
-      var m = String(a.moduleId || '');
-      return m !== '' && m === String(b.moduleId || '');
-    }
-
-    function canBack() {
-      if (destroyed || state !== 'in_progress') return false;
-      if (idx <= 0) return false;
-      return backable(current(), list[idx - 1]);
-    }
-
-    function back(reason) {
-      if (!canBack()) return false;
-      var prev = current();
-      releaseScreenClocks(prev);
-      releaseScreenClocks(list[idx - 1]);
-      idx -= 1;
-      log('back', { to: list[idx].id });
-      enter(prev ? prev.id : null, reason || 'back');
-      return true;
-    }
-
-    /* 관리자 전용 자유 이동 — 출제·검수용이다. 학생 흐름은 goTo/next 만 쓰므로
-       "역방향 이동 없음"(Story 1.4 AC3) 계약은 그대로다. 이 함수를 부르는 코드는
-       assets/exam-admin-nav.js 하나뿐이고, 그 파일은 관리자 로그인 없이는 아무 것도 하지 않는다.
-       되돌아간 화면의 screen/question scope 시계는 새로 arm 되도록 비워 준다 —
-       그러지 않으면 이미 만료된 45초 응답시계 때문에 화면이 즉시 넘어간다. */
-    function adminJumpTo(nextIdx, reason) {
-      if (destroyed) return false;
-      if (typeof nextIdx !== 'number' || nextIdx < 0 || nextIdx >= list.length) return false;
-      if (nextIdx === idx) return false;
-      if (state !== 'in_progress') return false;
-      var prev = current();
-      releaseScreenClocks(prev);
-      releaseScreenClocks(list[nextIdx]);
-      idx = nextIdx;
-      enter(prev ? prev.id : null, reason || 'admin_jump');
       return true;
     }
 
@@ -310,12 +253,7 @@
     function next(reason) {
       if (destroyed) return false;
       var r = reason || 'manual';
-      /* 'auto' — 응시자가 아니라 콘텐츠가 화면을 끝낸 경우다. 지금은 스피킹 안내
-         방송이 끝났을 때 렌더러가 쓴다. 'expire'(시간 만료)와 구별해 두는 이유는
-         아래 advance:'manual' 가드다 — 그 가드는 "시간이 다 됐다고 안내 화면을
-         건너뛰지 말라"는 뜻이지, "방송이 끝나도 서 있으라"는 뜻이 아니다.
-         이벤트 로그에도 사람이 눌렀는지 아닌지가 그대로 남는다. */
-      if (r !== 'manual' && r !== 'expire' && r !== 'auto') return false;
+      if (r !== 'manual' && r !== 'expire') return false;
       if (state === 'submitted' || state === 'submitting') return false;
       if (state === 'not_started') return false;
       var sc = current();
@@ -326,18 +264,6 @@
     }
 
     // 오디오/영상 ended 트리거. maxPlays 1 소진 → 다음 단계로(§2).
-    /* 오디오와 문항이 한 화면인 구성에서, 재생이 끝난 뒤 답변 시계를 건다.
-       렌더러(exam-render-listening.js)가 ended/error 시 부른다. 여러 번 불려도
-       armClock 이 같은 key 를 덮어쓰지 않으므로 시간이 늘어나지 않는다. */
-    function startDeferredClocks() {
-      if (destroyed || state !== 'in_progress') return false;
-      var sc = current();
-      if (!sc || !sc.timerStartsOnAudioEnd) return false;
-      armScreenClocks(sc, { audioEnded: true });
-      log('timer_start_after_audio', { screen: sc.id });
-      return true;
-    }
-
     function audioEnded(srcId) {
       if (destroyed || state !== 'in_progress') return false;
       var sc = current();
@@ -465,12 +391,9 @@
     var machine = {
       current: current, currentIndex: currentIndex, screens: function () { return list; },
       status: status, mode: function () { return mode; },
-      start: start, next: next, back: back, canBack: canBack,
-      answer: answer, audioEnded: audioEnded, phaseNext: phaseNext,
-      startDeferredClocks: startDeferredClocks,
+      start: start, next: next, answer: answer, audioEnded: audioEnded, phaseNext: phaseNext,
       phaseIndex: function () { return phaseIndex; },
       markSubmitted: markSubmitted, snapshot: snapshot, restoreTo: restoreTo,
-      adminJumpTo: adminJumpTo,
       onTransition: onTransition, on: on,
       installHistoryGuard: installHistoryGuard, syncHash: syncHash, destroy: destroy,
       clockKeyFor: clockKeyFor

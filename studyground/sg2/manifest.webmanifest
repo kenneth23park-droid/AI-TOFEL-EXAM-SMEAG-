@@ -1,13 +1,13 @@
 {
-  "name": "SMEAG MockTest",
-  "short_name": "MockTest",
+  "name": "SMEAG StudyGround",
+  "short_name": "StudyGround",
   "description": "SMEAG New TOEFL preparation — mock tests, practice, AI scoring. Works offline.",
   "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f1f7f6",
-  "theme_color": "#0e8f82",
+  "background_color": "#f7f4ee",
+  "theme_color": "#e8481f",
   "lang": "en",
   "icons": [
     { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },

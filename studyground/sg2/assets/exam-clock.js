@@ -12,7 +12,7 @@
   'use strict';
 
   /* scope 우선순위 — architecture.md §3.5 "좁은 scope가 이긴다".
-     숫자가 작을수록 좁다. 서브바 타이머는 가장 좁은 scope 를 표시한다. */
+     숫자가 작을수록 좁다. 상단 pill 은 가장 좁은 scope 를 표시한다. */
   var SCOPE_RANK = { question: 0, screen: 1, task: 2, module: 3, section: 4 };
 
   var specs = {};       // key -> {seconds, mode, format, scope, visible, onExpire, fired, label}
@@ -27,28 +27,6 @@
   var TICK_MS = 250;    // §5.5: rAF 대신 250ms 간격. MM:SS 표시에 충분.
   var DEFAULT_WARN_SEC = 60;
 
-  /* Hide Time — 서브바 우측의 "Hide Time / Show Time" 토글 상태.
-     시계 자체는 계속 돈다(만료·autoAdvance 는 그대로). 숫자 표시만 감춘다.
-     관찰된 StudyGround 화면의 토글이며, 세션 내 유지가 필요해 localStorage 에 남긴다. */
-  var HIDE_KEY = 'sg2_hide_time';
-  var timeHidden = false;
-  try {
-    if (root.localStorage) timeHidden = root.localStorage.getItem(HIDE_KEY) === '1';
-  } catch (e) { /* F12: 저장소 차단(사파리 프라이빗 등)이 시험을 멈추지 않는다 */ }
-
-  function isTimeHidden() { return timeHidden; }
-
-  function setTimeHidden(on) {
-    timeHidden = !!on;
-    try {
-      if (root.localStorage) root.localStorage.setItem(HIDE_KEY, timeHidden ? '1' : '0');
-    } catch (e) {}
-    notify([]);   // 구독자(셸)가 즉시 다시 그리도록
-    return timeHidden;
-  }
-
-  function toggleTimeHidden() { return setTimeHidden(!timeHidden); }
-
   /* ── 순수 함수 ───────────────────────────────────────────── */
 
   // deadline 과 기준 시각만으로 남은 초를 계산한다. 저장된 remaining 을 쓰지 않는다.
@@ -60,7 +38,7 @@
 
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
-  // 서브바 타이머는 MM:SS, RESPONSE TIME 카드는 HH:MM:SS (관찰값).
+  // 빨간 pill 은 MM:SS, 보라 RESPONSE TIME 박스는 HH:MM:SS (명세 확정).
   function formatSec(sec, format) {
     if (sec === null || sec === undefined) return '';
     var s = sec < 0 ? 0 : Math.floor(sec);
@@ -76,26 +54,16 @@
   }
 
   /* 표시 대상 clock 하나를 고른다. visible:false 인 상한 타이머는 후보에서 빠지되
-     만료 동작은 계속 살아 있다(§3.4 moduleEnd 상한 30초).
-
-     선택 규칙: (1) 아직 돌고 있는 clock 을 우선, (2) 그 안에서 가장 좁은 scope.
-     (1) 이 필요한 이유 — 지나간 모듈의 clock 은 specs/clocks 맵에 남 아 있고 남은 초가 0 이다.
-     rank 만 보면 Reading 화면에서 이미 끝난 module:L1(0초, rank 3) 이 아직 20:00 남은
-     module:R1(rank 3) 을 순회 순서만으로 이겨서 "00:00" 이 뜬다(헤드리스 재현 확인).
-     실제 화면(reading-cloze-2760s.png)은 18:53 을 보여주므로 돌고 있는 쪽이 이겨야 한다.
-     모든 후보가 만료된 경우에는 종전대로 가장 좁은 scope 의 0 을 그대로 표시한다. */
+     만료 동작은 계속 살아 있다(§3.4 moduleEnd 상한 30초). */
   function pickVisibleKey(specMap, clockMap, nowMs) {
-    var best = null, bestRank = 99, bestLive = false;
+    var best = null, bestRank = 99;
     for (var k in specMap) {
       if (!specMap.hasOwnProperty(k)) continue;
       var sp = specMap[k];
       if (sp.visible === false) continue;
       if (clockMap[k] === null || clockMap[k] === undefined) continue;
       var rank = scopeRank(sp.scope);
-      var live = remainingSecAt(clockMap[k], nowMs) > 0;
-      if (best === null || (live && !bestLive) || (live === bestLive && rank < bestRank)) {
-        best = k; bestRank = rank; bestLive = live;
-      }
+      if (rank < bestRank) { bestRank = rank; best = k; }
     }
     return best;
   }
@@ -199,8 +167,7 @@
     return {
       key: k, scope: sp.scope, mode: sp.mode, format: sp.format,
       remaining: rem, text: formatSec(rem, sp.format),
-      warning: rem !== null && rem <= sp.warnAtSec,
-      hidden: timeHidden
+      warning: rem !== null && rem <= sp.warnAtSec
     };
   }
 
@@ -289,8 +256,6 @@
     hasClock: hasClock, keys: keys, clearClock: clearClock, expireNow: expireNow,
     specOf: specOf, allSpecs: allSpecs, resetFired: resetFired, resetAll: resetAll,
     // 표시/루프
-    display: display, subscribe: subscribe, tickOnce: tickOnce, start: start, stop: stop,
-    // Hide Time 토글
-    isTimeHidden: isTimeHidden, setTimeHidden: setTimeHidden, toggleTimeHidden: toggleTimeHidden
+    display: display, subscribe: subscribe, tickOnce: tickOnce, start: start, stop: stop
   };
 })(typeof window !== 'undefined' ? window : this);

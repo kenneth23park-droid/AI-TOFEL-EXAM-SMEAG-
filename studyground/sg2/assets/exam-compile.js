@@ -10,35 +10,22 @@
  *  - 모든 초 단위 값은 config 에서 온다(F11). set1.js 의 timeLimitSec/prepSec/respondSec 은 읽지 않는다.
  *  - 실패는 throw 가 아니라 warnings[] 다 — 오프라인에서 시험이 멈추면 안 된다(F12).
  *
- * id 규칙: "{section}.{kind}.{moduleId}.{seq}"  예) listening.q.L1.03 · listening.audio.L1.02
- *          seq 는 kind 별로 따로 매긴다 — audio 화면이 끼어들어도 .q. 번호는 밀리지 않는다.
+ * id 규칙: "{section}.{kind}.{moduleId}.{seq}"  예) listening.q.L1.03 · reading.moduleEnd.R1
  *          합성 화면 3종만 고정 id: intro.volume · speaking.hardware · review.submit
- *
- * progress 계약 (2026-08-07 실측 반영):
- *   { first, last, total, style:"single"|"range", index }
- *   서브바 좌측 표기가 섹션마다 다르다 — Listening/Speaking 은 "Question 25 of 32"(단일),
- *   Reading 은 "Questions 1-10 of 35"(범위). 한 화면이 담는 문항이 2개 이상이면 range 다.
- *   total 은 언제나 **섹션 전체 문항 수**. index 는 구 렌더러 호환용으로 first 와 같다.
  */
 (function () {
   'use strict';
 
-  var DEFAULT_ORDER = ['reading', 'listening', 'writing', 'speaking'];
+  var DEFAULT_ORDER = ['listening', 'speaking', 'reading', 'writing'];
 
   /* 합성 화면의 고정 id (config directions[].id → screen id). */
-  var FIXED_ID = { adjustVolume: 'intro.volume', adjustMic: 'intro.microphone',
-                   hardwareCheck: 'speaking.hardware', submitConfirm: 'review.submit' };
+  var FIXED_ID = { adjustVolume: 'intro.volume', hardwareCheck: 'speaking.hardware', submitConfirm: 'review.submit' };
 
   /* 안내 화면 문구. EN 기본 / KO 토글 (F5 — 한국어 하드코딩 금지가 아니라 EN·KO 동시 작성). */
   var DIR_COPY = {
     adjustVolume: {
       bodyEn: 'Use the volume control to set a comfortable listening level. You may adjust the volume at any time during the test.',
       bodyKo: '볼륨 조절 버튼으로 편안한 음량을 설정하세요. 시험 중에는 언제든지 볼륨을 조절할 수 있습니다.'
-    },
-    adjustMic: {
-      // 문구는 렌더러가 레퍼런스대로 그린다. 본문은 비워 두고 제목만 config 의 label 을 쓴다.
-      bodyEn: '',
-      bodyKo: ''
     },
     listeningDirections: {
       bodyEn: 'In this section you will listen to short responses, conversations, announcements and academic talks. Each audio plays once. Answer each question before the time for that question runs out.',
@@ -119,27 +106,7 @@
     };
   }
 
-  /* --- cue card (IELTS Speaking Part 2) ------------------------------------
-   * 콘텐츠의 q.cueCard 를 phase.cue 로 정규화한다. 형태:
-   *   { topicEn, topicKo, bullets:[..], bulletsKo:[..], image:'경로' }
-   * TOEFL 콘텐츠에는 이 필드가 없어 항상 null 을 돌려준다(경로 자체가 실행되지 않는다). */
-  function cueOf(raw, warnings, where) {
-    if (!raw || typeof raw !== 'object') return undefined;
-    var cue = {
-      topicEn: String(raw.topicEn || raw.topic || ''),
-      topicKo: String(raw.topicKo || raw.topicEn || raw.topic || ''),
-      bullets: isArr(raw.bullets) ? raw.bullets.slice(0) : [],
-      bulletsKo: isArr(raw.bulletsKo) ? raw.bulletsKo.slice(0) : []
-    };
-    var img = raw.image ? mediaOf(raw.image, 1, warnings, where + '/cue') : undefined;
-    if (img) cue.image = img;
-    return cue;
-  }
-
   /* --- 타이머 -------------------------------------------------------------- */
-
-  // scope 폭 — 작을수록 좁다. exam-clock.js 의 SCOPE_RANK 와 같은 순서다(§3.5).
-  var RANK = { question: 0, screen: 1, task: 2, module: 3, section: 4 };
 
   /* 한 문제 화면에 걸리는 clock 들을 좁은 scope → 넓은 scope 순으로 만든다(§3.5).
    * timer(표시용) = clocks[0], 나머지는 timers[] 로 넘겨 엔진의 clocks 맵이 공존시킨다. */
@@ -154,27 +121,14 @@
       out.push({ mode: 'countdown', scope: 'question', seconds: perQ, format: fmt, onExpire: onExpire, visible: true });
     }
     if (unit && isNum(unit.allocatedSec)) {
-      out.push({ mode: 'countdown', scope: 'module', seconds: unit.allocatedSec, format: fmt, onExpire: onExpire, visible: false, sharedDeadline: true });
+      out.push({ mode: 'countdown', scope: 'module', seconds: unit.allocatedSec, format: fmt, onExpire: onExpire, visible: true, sharedDeadline: true });
     }
     if (unit && isNum(unit.perTaskSec)) {
-      out.push({ mode: 'countdown', scope: 'task', seconds: unit.perTaskSec, format: fmt, onExpire: onExpire, visible: false, sharedDeadline: true });
+      out.push({ mode: 'countdown', scope: 'task', seconds: unit.perTaskSec, format: fmt, onExpire: onExpire, visible: true, sharedDeadline: true });
     }
     if (isNum(secCfg.sectionSec)) {
       out.push({ mode: 'countdown', scope: 'section', seconds: secCfg.sectionSec, format: fmt, onExpire: onExpire, visible: false, sharedDeadline: true });
     }
-
-    /* 서브바에는 가장 좁은 시계 하나만 띄운다(발주처 요구 2026-08-11 —
-     * "전체 남은 시간 말고 답할 시간만"). 넓은 시계는 visible:false 로 남아 만료·
-     * autoAdvance 는 그대로 동작하되 숫자만 사라진다.
-     *  · TOEFL listening(question) — 모듈 상한 30분이 서브바에서 사라진다. 오디오가
-     *    도는 동안에는 문항 시계가 아직 arm 되지 않아 서브바 우측이 빈다.
-     *  · TOEFL speaking(task) / reading(module) / IELTS(section) — 유일한 시계가
-     *    그대로 표시 시계가 된다(회귀 없음). */
-    var narrow = null;
-    for (var i = 0; i < out.length; i++) {
-      if (narrow === null || RANK[out[i].scope] < RANK[narrow.scope]) narrow = out[i];
-    }
-    if (narrow) narrow.visible = true;
     return out;
   }
 
@@ -241,43 +195,6 @@
     });
   }
 
-  /* --- 섹션 phase 화면 (IELTS transfer time) --------------------------------
-   * config 의 sections.<id>.phases[] 항목 하나 = 화면 하나.
-   * 현재 유일한 사용처는 IELTS Listening 의 transfer time(10분)이다.
-   * TOEFL 의 모든 섹션은 phases:[] 이므로 이 경로가 실행되지 않는다(회귀 없음).
-   *
-   * 화면 계약: instruction 은 timer===null 이어야 하므로(exam-types.js AC3-a)
-   * config 의 screenType 이 'instruction' 이어도 **moduleEnd** 로 컴파일한다.
-   * transfer:{enabled,editable} 가 붙으면 instruction 렌더러의 moduleEnd 분기가
-   * 이전 답안 편집 패널을 그린다(§3.4). */
-  function sectionPhaseScreen(cfg, secCfg, ph, sectionId, targetIds) {
-    var fmt = pick(secCfg.timerFormat, cfg.defaults && cfg.defaults.timerFormat, 'MM:SS');
-    if (fmt !== 'MM:SS' && fmt !== 'HH:MM:SS') fmt = 'MM:SS';
-    var timer = {
-      mode: 'countdown', scope: 'screen', seconds: ph.seconds, format: fmt,
-      onExpire: pick(ph.onExpire, 'autoAdvance'), visible: true
-    };
-    var mins = Math.round(ph.seconds / 60);
-    return window.SG_TYPES.makeScreen({
-      id: sectionId + '.transfer.' + ph.id,
-      screenType: 'moduleEnd',
-      section: sectionId,
-      timer: timer,
-      timers: [timer],
-      advance: pick(ph.advance, cfg.defaults && cfg.defaults.advance, 'manual'),
-      controls: ['finishEarly'],
-      transfer: { enabled: true, editable: true, targetScreenIds: targetIds.slice(0) },
-      copy: {
-        titleEn: ph.label || 'Transfer your answers',
-        titleKo: ph.labelKo || '답안 옮겨 적기',
-        bodyEn: 'You have ' + mins + ' minutes to check and transfer your answers. No audio is played during this time.',
-        bodyKo: '답안을 확인하고 옮겨 적을 시간 ' + mins + '분이 주어집니다. 이 시간에는 오디오가 재생되지 않습니다.',
-        ctaEn: 'Finish early',
-        ctaKo: '조기 종료'
-      }
-    });
-  }
-
   /* --- block.kind → 화면들 (architecture.md 4.2 매핑표 7종) ------------------ */
 
   function qIds(block) {
@@ -314,85 +231,28 @@
 
   /* audio-set 2종 (4.2):
    *  perQuestionAudio:true  → 문항마다 오디오+삽화
-   *  블록 오디오            → 오디오는 블록 첫 화면에만(1회 재생), 삽화는 블록 내내 유지
-   *
-   * ── 오디오 화면 / 답변 화면 분리 (2026-08-07 실측) ─────────────────────────
-   * 녹화 700s 프레임(docs/reference/screens/listening-audio-700s.png)은
-   *   'Listening | Question 25 of 32' + 화자 사진 + 'Listen to an academic talk.'
-   * 만 있고 **선택지도 타이머도 없다**. 900s 프레임(listening-question-900s.png)은
-   * 같은 서브바에 선택지 4개 + 타이머 00:13 이 있다. 즉 StudyGround 는 오디오 재생과
-   * 답변을 별개 화면으로 다룬다. 따라서 오디오가 붙는 자리마다 blockKind 'audio-play'
-   * 화면(타이머 null · advance auto)을 만들고, 답변 화면에는 오디오를 싣지 않는다.
-   *
-   * audio-play 화면은 questionIds 를 갖지 않는다 — 가지면 buildIndex 의
-   * byQuestionId 가 중복되어 'duplicate question id across screens' 경고가 난다.
-   * 대신 progress 만 다음 문항 번호로 채워 서브바 표기를 유지한다(실측 프레임과 동일).
-   *
-   * 분리 조건은 secCfg.timerScope === 'question' 이다. 문항마다 답변 시계가 따로 도는
-   * 시험에서만 "듣기 → 답하기" 가 물리적으로 분리되기 때문이다. IELTS Listening 은
-   * timerScope 가 'section' 이고 30분 단일 시계 아래 **들으면서 답하는** 구조라 분리하지
-   * 않는다 → 출력 무변경.
-   *
-   * ── 분리 해제 (2026-08-10 spec) ────────────────────────────────────────────
-   * secCfg.audioOnQuestionScreen 이 true 면 위 분리를 끈다(TOEFL). 사진과 선택지가
-   * 함께 있는 한 화면에서 오디오가 재생되어야 한다는 발주처 요구다 — 근거는
-   * config/timing.toefl.json provenance "sections.listening.audioOnQuestionScreen".
-   * 이때 답변 시계는 화면 진입이 아니라 **오디오가 끝난 뒤** 시작해야 하므로
-   * 화면에 timerStartsOnAudioEnd:true 를 달아 엔진에 알린다(exam-engine.js armScreenClocks). */
+   *  블록 오디오            → 오디오는 블록 첫 화면에만(1회 재생), 삽화는 블록 내내 유지 */
   function audioSetBlock(ctx, block) {
     var out = [], qs = block.questions || [], i;
     var maxPlays = pick(ctx.secCfg.audio && ctx.secCfg.audio.maxPlays, ctx.cfg.defaults && ctx.cfg.defaults.audioMaxPlays, 1);
     var autoPlay = !!(ctx.secCfg.audio && ctx.secCfg.audio.autoPlay);
-    var splitAudio = pick(ctx.secCfg.timerScope, ctx.cfg.defaults && ctx.cfg.defaults.timerScope) === 'question'
-      && !ctx.secCfg.audioOnQuestionScreen;
     for (i = 0; i < qs.length; i++) {
       var q = qs[i];
-      var where = ctx.sectionId + '/' + ctx.moduleId + '/' + q.id;
       var rawAudio = block.perQuestionAudio ? q.audio : (i === 0 ? block.audio : null);
       var rawImage = block.perQuestionAudio ? q.image : block.image;
-      var image = mediaOf(rawImage, 1, ctx.warnings, where);
-      var audio = mediaOf(rawAudio, maxPlays, ctx.warnings, where);
+      var audio = mediaOf(rawAudio, maxPlays, ctx.warnings, ctx.sectionId + '/' + ctx.moduleId + '/' + q.id);
       if (audio) audio.autoplay = autoPlay;
-      if (audio && splitAudio) {
-        out.push(ctx.mk({
-          kind: 'audio',
-          blockKind: 'audio-play',
-          questionCount: 0,
-          advance: 'auto',
-          allowBack: false,
-          timer: null,
-          audio: audio,
-          image: image,
-          copy: {
-            titleEn: block.heading || 'Listen to the audio.',
-            titleKo: block.headingKo || block.heading || '오디오를 들으세요.',
-            bodyEn: 'Listen carefully to the audio.',
-            bodyKo: '오디오를 주의 깊게 들으세요.'
-          }
-        }));
-      }
       out.push(ctx.mk({
         blockKind: block.kind,
         questionIds: [q.id],
         questionCount: 1,
         advance: 'auto',
         allowBack: false,
-        audio: splitAudio ? undefined : audio,
-        image: image,
-        timerStartsOnAudioEnd: (audio && !splitAudio && ctx.secCfg.audioOnQuestionScreen) ? true : undefined
+        audio: audio,
+        image: mediaOf(rawImage, 1, ctx.warnings, ctx.sectionId + '/' + ctx.moduleId + '/' + q.id)
       }));
     }
     return out;
-  }
-
-  /* 안내 방송의 대본을 화면 본문으로 쓴다(2026-08-11 발주처 요구 — 인터뷰 안내를
-   * 듣기만 하면 놓친다. 실제 시험처럼 같은 문장을 눈으로도 읽게 한다).
-   * 콘텐츠의 script 는 "Instructions: ..." 로 시작하는데, 그 머리말은 화면 제목이
-   * 이미 하는 말이라 떼어 낸다. script 가 없는 팩(set1)은 종전대로 instruction 을 쓴다. */
-  function narrationBody(block) {
-    var s = String((block && block.script) || '').replace(/^\s*instructions\s*[:：]\s*/i, '');
-    s = s.replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
-    return s || String((block && block.instruction) || '');
   }
 
   /* record-set (speaking): introAudio → instruction 화면 1개 + 문항마다 speaking 화면 */
@@ -406,32 +266,9 @@
       tt = { prepSec: 0, responseSec: 0, listenReplays: 1, promptSelfPaced: false, onExpire: 'stopRecord' };
     }
     var fmt = pick(ctx.secCfg.timerFormat, 'HH:MM:SS');
-    /* record phase 를 가진 speaking 화면은 계약상 HH:MM:SS 여야 한다(exam-types.js AC4).
-     * IELTS config 의 speaking.timerFormat 은 'MM:SS' 라 그대로 쓰면 전 화면이
-     * validateScreen 위반으로 degrade(타이머 제거)된다 — 여기서 교정하고 경고만 남긴다.
-     * TOEFL 은 이미 HH:MM:SS 이므로 이 분기를 타지 않는다(출력 무변경). */
-    if (fmt !== 'HH:MM:SS') {
-      ctx.warnings.push('speaking timerFormat "' + fmt + '" is not allowed on record screens; using HH:MM:SS');
-      fmt = 'HH:MM:SS';
-    }
     var onExpire = pick(tt.onExpire, ctx.secCfg.onExpire, 'stopRecord');
 
-    /* 문항별 답변 시간. TOEFL Speaking Task 1(listenAndRepeat)은 문장마다 시간이 다르다 —
-     * 1~2번 8초 / 3~5번 10초 / 6~7번 12초 (최종수정사항.docx). config 의
-     * taskTypes.<t>.responseSecByIndex[] 가 있으면 그 인덱스를 쓰고, 범위를 넘어가면
-     * responseSec 로 떨어진다. byIndex 가 없는 taskType(interview·IELTS)은 종전과 동일. */
-    var byIndex = (tt.responseSecByIndex && tt.responseSecByIndex.length) ? tt.responseSecByIndex : null;
-    function responseSecAt(index) {
-      if (byIndex && typeof byIndex[index] === 'number') return byIndex[index];
-      return pick(tt.responseSec, 0);
-    }
-
     if (block.introAudio) {
-      /* 안내 방송은 화면이 열리면 스스로 흐른다(2026-08-11) — 실제 시험에서 응시자가
-       * 재생을 누르는 절차는 없다. 브라우저가 자동재생을 막으면 렌더러가 'Play audio'
-       * 버튼 하나로 폴백하고, 방송이 끝나면 엔진이 첫 문항으로 넘긴다. */
-      var introAudio = mediaOf(block.introAudio, 1, ctx.warnings, ctx.sectionId + '/' + ctx.moduleId + '/intro');
-      if (introAudio) introAudio.autoplay = true;
       out.push(window.SG_TYPES.makeScreen({
         id: ctx.sectionId + '.intro.' + ctx.moduleId,
         screenType: 'instruction',
@@ -441,11 +278,11 @@
         blockKind: block.kind,
         timer: null,
         advance: 'manual', // introAudioSelfPaced:true — 안내 오디오를 듣고 응시자가 시작한다
-        audio: introAudio,
+        audio: mediaOf(block.introAudio, 1, ctx.warnings, ctx.sectionId + '/' + ctx.moduleId + '/intro'),
         copy: {
           titleEn: block.heading || (ctx.moduleLabel + ' Directions'),
           titleKo: ctx.moduleLabel + ' 안내',
-          bodyEn: narrationBody(block),
+          bodyEn: block.instruction || '',
           bodyKo: '',
           ctaEn: CTA.begin.en,
           ctaKo: CTA.begin.ko
@@ -457,25 +294,15 @@
       var q = qs[i];
       var where = ctx.sectionId + '/' + ctx.moduleId + '/' + q.id;
       var phases = [];
-      /* cue card 는 콘텐츠에서 온다(IELTS Part 2). TOEFL 문항에는 q.cueCard 가 없으므로
-       * 아래 분기가 전혀 실행되지 않는다 — TOEFL phases 출력은 종전과 바이트 단위로 같다. */
-      var cue = cueOf(q.cueCard, ctx.warnings, where);
       // §3.3: TOEFL 도 항상 prep phase 를 갖는다. seconds:0 인 phase 는 엔진이 즉시 통과시킨다.
-      /* 인터뷰 지시문은 멈춰 세우는 화면이 아니다 — 관찰(30:00)에서 응시자가 누르는 버튼 없이
-         지시문이 선 채로 인터뷰어 영상이 곧바로 돈다. seconds:0 · selfPaced 없음 = 즉시 통과이고,
-         렌더러가 이 phase 를 보고 지시문을 화면 진입 순간부터 세워 둔다. */
-      if (tt.promptSelfPaced) phases.push({ name: 'read', seconds: 0 });
-      else if (cue) phases.push({ name: 'read', seconds: 0, selfPaced: true, cue: cue });
+      if (tt.promptSelfPaced) phases.push({ name: 'read', seconds: 0, selfPaced: true });
       var listenMedia = mediaOf(q.audio, tt.listenReplays, ctx.warnings, where);
       if (listenMedia) phases.push({ name: 'listen', seconds: 0, media: listenMedia });
-      var prepPhase = { name: 'prep', seconds: pick(tt.prepSec, 0), onExpire: 'startRecord' };
-      if (cue) prepPhase.cue = cue;
-      phases.push(prepPhase);
-      var respondSec = responseSecAt(i);
-      phases.push({ name: 'record', seconds: respondSec, onExpire: onExpire });
+      phases.push({ name: 'prep', seconds: pick(tt.prepSec, 0), onExpire: 'startRecord' });
+      phases.push({ name: 'record', seconds: pick(tt.responseSec, 0), onExpire: onExpire });
 
       var timer = {
-        mode: 'response', scope: 'screen', seconds: respondSec,
+        mode: 'response', scope: 'screen', seconds: pick(tt.responseSec, 0),
         format: fmt, onExpire: onExpire, visible: true
       };
       out.push(ctx.mk({
@@ -521,21 +348,6 @@
     if (!cfg) { warnings.push('no timing config; nothing compiled'); return { screens: [], index: emptyIndex(), warnings: warnings }; }
     if (!set || !isArr(set.sections)) { warnings.push('no content pack; nothing compiled'); return { screens: [], index: emptyIndex(), warnings: warnings }; }
 
-    /* 문항별 제한시간 오버라이드(assets/question-config.js 가 문항 객체에 실어 둔
-       timeLimitSec)를 화면 조립 때 꺼내 쓰기 위한 인덱스다. 오버라이드가 없으면
-       이 맵은 그냥 쓰이지 않는다 — 기존 타이밍 계산은 한 글자도 바뀌지 않는다. */
-    var qById = {};
-    for (var qs_i = 0; qs_i < set.sections.length; qs_i++) {
-      var qs_sec = set.sections[qs_i], qs_mods = isArr(qs_sec.modules) ? qs_sec.modules : [];
-      for (var qs_j = 0; qs_j < qs_mods.length; qs_j++) {
-        var qs_blocks = isArr(qs_mods[qs_j].blocks) ? qs_mods[qs_j].blocks : [];
-        for (var qs_k = 0; qs_k < qs_blocks.length; qs_k++) {
-          var qs_list = isArr(qs_blocks[qs_k].questions) ? qs_blocks[qs_k].questions : [];
-          for (var qs_l = 0; qs_l < qs_list.length; qs_l++) qById[qs_list[qs_l].id] = qs_list[qs_l];
-        }
-      }
-    }
-
     var order = isArr(cfg.sectionOrder) && cfg.sectionOrder.length ? cfg.sectionOrder : DEFAULT_ORDER;
     var dirs = isArr(cfg.directions) ? cfg.directions : [];
     var si, i, j;
@@ -557,15 +369,13 @@
       var total = countQuestions(setSection);
       var seen = 0;
       var mods = isArr(setSection.modules) ? setSection.modules : [];
-      var qScreenIds = [];  // 이 섹션의 문항 화면 id — transfer 화면의 편집 대상
-      var sectionStart = screens.length;
 
       for (i = 0; i < mods.length; i++) {
         var mod = mods[i];
         var unit = unitCfgOf(secCfg, mod.id);
         if (!unit) warnings.push('no timing config for module/task "' + sectionId + '.' + mod.id + '"; section defaults used');
         var clocks = buildClocks(cfg, secCfg, unit);
-        var seqs = {};   // kind 별 채번 — 'q' 는 종전 번호를 그대로 유지한다
+        var seq = 0;
 
         var ctx = {
           cfg: cfg, secCfg: secCfg, unitCfg: unit, sectionId: sectionId,
@@ -574,10 +384,9 @@
         };
         /* 문제 화면 팩토리 — id 채번·progress 누적·기본 타이머를 한 곳에서 처리한다. */
         ctx.mk = function (spec) {
-          var kind = spec.kind || 'q';
-          seqs[kind] = (seqs[kind] || 0) + 1;
+          seq += 1;
           var s = {
-            id: sectionId + '.' + kind + '.' + mod.id + '.' + pad2(seqs[kind]),
+            id: sectionId + '.q.' + mod.id + '.' + pad2(seq),
             screenType: spec.screenType || 'question',
             section: sectionId,
             module: ctx.moduleIndex,
@@ -588,44 +397,11 @@
             allowBack: spec.allowBack,
             audio: spec.audio,
             image: spec.image,
-            phases: spec.phases,
-            copy: spec.copy,
-            timerStartsOnAudioEnd: spec.timerStartsOnAudioEnd
+            phases: spec.phases
           };
           if (spec.timer !== undefined) { s.timer = spec.timer; s.timers = spec.timers; }
           else { s.timer = clocks.length ? clocks[0] : null; if (clocks.length) s.timers = clocks; }
-
-          /* 관리자가 이 문항만 다른 제한시간을 준 경우(§ admin-questions.html).
-             화면이 문항 하나를 담을 때만 적용하고, 모듈 전체가 공유하는 clocks 배열은
-             건드리지 않도록 이 화면 몫으로 복제해서 바꾼다. */
-          var oneQ = isArr(s.questionIds) && s.questionIds.length === 1 ? qById[s.questionIds[0]] : null;
-          var over = oneQ && isNum(oneQ.timeLimitSec) && oneQ.timeLimitSec > 0 ? oneQ.timeLimitSec : null;
-          if (over && s.timers && s.timers.length) {
-            s.timers = s.timers.map(function (t) {
-              if (t.scope !== 'question' && t.scope !== 'screen') return t;
-              var c = {}; for (var kk in t) if (t.hasOwnProperty(kk)) c[kk] = t[kk];
-              c.seconds = over;
-              return c;
-            });
-            s.timer = s.timers[0];
-          } else if (over && s.timer && (s.timer.scope === 'question' || s.timer.scope === 'screen')) {
-            var t1 = {}; for (var k2 in s.timer) if (s.timer.hasOwnProperty(k2)) t1[k2] = s.timer[k2];
-            t1.seconds = over;
-            s.timer = t1; s.timers = [t1];
-          }
-          /* progress — 실측 서브바 표기(§ 파일 머리말). qn>1 이면 범위 표기다. */
-          if (total) {
-            var qn = spec.questionCount || 0;
-            var first = Math.min(seen + 1, total);
-            var last = qn > 1 ? Math.min(seen + qn, total) : first;
-            s.progress = {
-              index: first,            // 하위호환(구 렌더러) — first 와 같다
-              first: first,
-              last: last,
-              total: total,
-              style: qn > 1 ? 'range' : 'single'
-            };
-          }
+          if (total) { s.progress = { index: seen + 1, total: total }; }
           seen += (spec.questionCount || 0);
           return window.SG_TYPES.makeScreen(s);
         };
@@ -643,26 +419,6 @@
           if (!dir) warnings.push('moduleEndScreen "' + unit.moduleEndScreen + '" not found in directions[]; screen omitted');
           else screens.push(moduleEndScreen(cfg, dir, sectionId, mod.id, i + 1, mod.label || mod.id));
         }
-      }
-
-      // 섹션 phase 화면(IELTS transfer time) — afterSection 안내 화면보다 앞선다.
-      var phList = isArr(secCfg.phases) ? secCfg.phases : [];
-      if (phList.length) {
-        for (i = sectionStart; i < screens.length; i++) {
-          if (screens[i].screenType === 'question' && screens[i].questionIds && screens[i].questionIds.length) {
-            qScreenIds.push(screens[i].id);
-          }
-        }
-      }
-      for (i = 0; i < phList.length; i++) {
-        var ph = phList[i];
-        if (!ph || ph.position !== 'afterSection') continue;
-        if (!isNum(ph.seconds)) { warnings.push('section phase "' + sectionId + '.' + (ph && ph.id) + '" has no positive seconds; screen omitted'); continue; }
-        if (ph.appliesTo === 'paperBased' && opts.delivery === 'computer') {
-          warnings.push('section phase "' + sectionId + '.' + ph.id + '" is paperBased only; skipped for delivery=computer');
-          continue;
-        }
-        screens.push(sectionPhaseScreen(cfg, secCfg, ph, sectionId, qScreenIds));
       }
 
       // afterSection 안내/제출 화면
@@ -721,7 +477,6 @@
 
   window.SG_COMPILE = {
     compileScreens: compileScreens,
-    cueOf: cueOf,
     BLOCK_COMPILERS: BLOCK_COMPILERS,
     FIXED_ID: FIXED_ID
   };

@@ -100,7 +100,14 @@ const RULES = {
 
 /* 규칙으로 정하기 어려운 자리만 세트별로 덮어쓴다. 비어 있는 것이 정상이다 —
    여기에 무언가 적히기 시작하면 규칙이 현실을 못 따라간다는 신호다. */
-const OVERRIDE = {};
+const OVERRIDE = {
+  /* These two SET 3 sentences are especially sensitive to the default voices'
+     pronunciation; use the established US-Ava voice for a clean ASR match. */
+  3: {
+    'l1-q13-14': 'GB-Henry',
+    's2-q3': 'US-Ava'
+  }
+};
 
 /* ------------------------------------------------------------------ */
 

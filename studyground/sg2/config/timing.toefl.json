@@ -14,10 +14,10 @@
     "contentRef": "window.SMEAG_SET1"
   },
   "sectionOrder": [
-    "reading",
     "listening",
-    "writing",
-    "speaking"
+    "speaking",
+    "reading",
+    "writing"
   ],
   "defaults": {
     "timerScope": "module",
@@ -43,7 +43,6 @@
         "autoPlay": true,
         "replayAllowed": false
       },
-      "audioOnQuestionScreen": true,
       "questionCountSource": "content",
       "sectionSec": null,
       "modules": [
@@ -71,7 +70,6 @@
       "tasks": null,
       "taskTypes": null,
       "fallbackPerQuestionSec": 20,
-      "promptOnScreen": false,
       "phases": []
     },
     "speaking": {
@@ -115,17 +113,8 @@
           "mediaType": "audio",
           "promptSelfPaced": false,
           "listenReplays": 1,
-          "prepSec": 2,
-          "responseSec": 12,
-          "responseSecByIndex": [
-            8,
-            8,
-            10,
-            10,
-            10,
-            12,
-            12
-          ],
+          "prepSec": 3,
+          "responseSec": 20,
           "responseSecMin": null,
           "responseSecMax": null,
           "recording": true,
@@ -139,7 +128,6 @@
           "listenReplays": 1,
           "prepSec": 3,
           "responseSec": 45,
-          "responseSecByIndex": null,
           "responseSecMin": null,
           "responseSecMax": null,
           "recording": true,
@@ -159,13 +147,13 @@
       "onExpire": "autoAdvance",
       "audio": null,
       "questionCountSource": "content",
-      "sectionSec": 1800,
+      "sectionSec": 2100,
       "modules": [
         {
           "id": "R1",
           "contentRef": "reading.modules[id=R1]",
           "taskType": null,
-          "allocatedSec": 1200,
+          "allocatedSec": 1080,
           "perQuestionSec": null,
           "onExpire": "autoAdvance",
           "moduleEndScreen": "moduleEnd.reading",
@@ -175,7 +163,7 @@
           "id": "R2",
           "contentRef": "reading.modules[id=R2]",
           "taskType": null,
-          "allocatedSec": 600,
+          "allocatedSec": 1020,
           "perQuestionSec": null,
           "onExpire": "autoAdvance",
           "moduleEndScreen": "moduleEnd.reading",
@@ -204,7 +192,7 @@
           "id": "W1",
           "contentRef": "writing.modules[id=W1]",
           "taskKind": "build-set",
-          "perTaskSec": 420,
+          "perTaskSec": 600,
           "minWords": null,
           "onExpire": "autoAdvance",
           "moduleEndScreen": "taskEnd.writing"
@@ -213,7 +201,7 @@
           "id": "W2",
           "contentRef": "writing.modules[id=W2]",
           "taskKind": "email",
-          "perTaskSec": 420,
+          "perTaskSec": 600,
           "minWords": 80,
           "onExpire": "autoAdvance",
           "moduleEndScreen": "taskEnd.writing"
@@ -234,6 +222,23 @@
     }
   },
   "directions": [
+    {
+      "id": "adjustVolume",
+      "label": "Adjusting the Volume",
+      "screenType": "instruction",
+      "insertAt": {
+        "position": "beforeSection",
+        "section": "listening",
+        "module": null
+      },
+      "maxSec": null,
+      "advance": "manual",
+      "controls": [
+        "playTestAudio",
+        "volume",
+        "continue"
+      ]
+    },
     {
       "id": "listeningDirections",
       "label": "Listening Section Directions",
@@ -258,7 +263,7 @@
         "section": "listening",
         "module": null
       },
-      "maxSec": null,
+      "maxSec": 30,
       "advance": "manual",
       "controls": [
         "continue"
@@ -266,7 +271,7 @@
     },
     {
       "id": "hardwareCheck",
-      "label": "Microphone Check",
+      "label": "Hardware Check",
       "screenType": "hardwareCheck",
       "insertAt": {
         "position": "beforeSection",
@@ -276,6 +281,8 @@
       "maxSec": null,
       "advance": "manual",
       "controls": [
+        "micTest",
+        "speakerTest",
         "continue"
       ]
     },
@@ -318,7 +325,7 @@
         "section": "reading",
         "module": "R1"
       },
-      "maxSec": null,
+      "maxSec": 30,
       "advance": "manual",
       "controls": [
         "continue"
@@ -348,7 +355,7 @@
         "section": "writing",
         "module": null
       },
-      "maxSec": null,
+      "maxSec": 30,
       "advance": "manual",
       "controls": [
         "continue"
@@ -375,40 +382,9 @@
       "observed": "57분53초 화면녹화에서 직접 확인된 값/동작",
       "official": "시험 주관사가 공개한 공식 규격",
       "content": "studyground/sg2/assets/set1.js 콘텐츠 파일에서 그대로 가져온 값",
-      "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요",
-      "spec": "발주처 확정 규격서 — _compare/TOEFL Test set up-최종수정사항.docx. 실측(observed)과 충돌하면 이쪽이 이긴다"
+      "assumed": "가설값 — 검증 전까지 임시로 사용. 반드시 재확인 필요"
     },
     "entries": [
-      {
-        "path": "sections.listening.modules[*].perQuestionSec · fallbackPerQuestionSec",
-        "level": "spec",
-        "source": "최종수정사항.docx Listening Task 1·2 — \"the option to choose will appear on the right side given the 20 secs time limit\" / \"each question will appear after the conversation given 20 SECS. Limit TO ANSWER\". 종전 30초(assumed)를 대체",
-        "verify": "없음(확정)"
-      },
-      {
-        "path": "sections.listening.promptOnScreen",
-        "level": "spec",
-        "source": "최종수정사항.docx Listening Task 1 — \"The speaker will say the question and it will not be shown in screen but only picture instead\". 단, 같은 문서 Task 2 는 \"each question will appear after the conversation\" 이므로 전면 숨김이 아니다. 자체 음성을 갖는 문항(block.perQuestionAudio:true = Task 1)에 한해 문구를 숨기고, 대화·강의형(prompt 가 곧 질문)은 그대로 표시한다",
-        "verify": "없음(확정)"
-      },
-      {
-        "path": "sections.reading.modules[id=R2].allocatedSec · sections.reading.sectionSec",
-        "level": "spec",
-        "source": "최종수정사항.docx \"MODULE 2: 10 mins. (Time limit)\" — Reading Module 2 를 600초로 확정. 종전 540초(assumed)를 대체하며 sectionSec 은 1200+600=1800",
-        "verify": "MODULE 2 헤더가 Reading Module 2 를 가리키는 게 맞는지 발주처 1회 확인 권장 — 문서상 Reading 3개 태스크 뒤·Listening 앞에 위치"
-      },
-      {
-        "path": "sections.writing.tasks[id=W1].perTaskSec · tasks[id=W2].perTaskSec",
-        "level": "spec",
-        "source": "최종수정사항.docx Writing Task 1 \"time limit of 7 MINS. For 10 questions\", Task 2 \"with the time limit of 7 MINS\" → 420초. Task 3 는 \"10 MINS\" 로 종전 600초 유지",
-        "verify": "없음(확정)"
-      },
-      {
-        "path": "sections.speaking.taskTypes.listenAndRepeat.responseSecByIndex",
-        "level": "spec",
-        "source": "최종수정사항.docx Speaking Task 1 — \"8 secs to repeat for the first 2 numbers, And 10 secs for the 3rd-5th statements and 12 secs to the 6th-7th statements\". 종전 전 문항 20초(assumed)를 대체. responseSec:12 는 8번째 이후 문항용 폴백",
-        "verify": "없음(확정)"
-      },
       {
         "path": "sectionOrder",
         "level": "observed",
@@ -435,9 +411,9 @@
       },
       {
         "path": "sections.listening.timerScope",
-        "level": "observed",
-        "source": "실측 — 오디오 재생 화면(700s, Q25 \"Listen to an academic talk.\")에는 서브바 우측 타이머가 아예 없고, 답변 화면(900s, Q29)에만 00:13 이 뜬다. 즉 타이머는 문항 단위로 답변 화면에만 걸린다. modules[*].allocatedSec 은 비표시 모듈 상한(2차 deadline)으로만 남는다",
-        "verify": "없음(확정)"
+        "level": "assumed",
+        "source": "architecture.md 3.5/4.4 정본 — Listening은 문항단위 카운트다운(녹화 36:00 상단 빨간 00:20, 문항 전환 시 리셋)",
+        "verify": "녹화 36:00~44:00 재확인 — 문항 전환 시 타이머 리셋 여부. modules[*].allocatedSec은 모듈 상한(2차 deadline)으로만 사용"
       },
       {
         "path": "sections.listening.modules[*].allocatedSec",
@@ -447,9 +423,9 @@
       },
       {
         "path": "sections.listening.fallbackPerQuestionSec",
-        "level": "observed",
-        "source": "perQuestionSec 과 동일 근거 — 실측 30초 (Q29 884s→00:29 … 904s→00:09)",
-        "verify": "없음(확정)"
+        "level": "assumed",
+        "source": "명세 2-4 listening.perQuestionSec = 20 (녹화 관찰 카운트다운 00:20과 일치)",
+        "verify": "녹화 36:00 지점 카운트다운 시작값이 00:20인지 재확인"
       },
       {
         "path": "sections.speaking.taskTypes.listenAndRepeat.listenReplays",
@@ -489,15 +465,15 @@
       },
       {
         "path": "sections.reading.modules[*].allocatedSec",
-        "level": "observed",
-        "source": "실측(2026-08-07). R1=1200s: recording 2730s→19:22, 2745s→19:08 (15초 경과에 14초 감소 = 1배속 카운트다운, 시작값 20:00). R2=540s: 2930s→08:43, 2960s→08:13, 3000s→07:33, 3030s→07:04 (시작값 09:00). TOEFL MOCK TEST SCREEN RECORDING.mp4 (1906x1130, 30fps, 3472s), ffmpeg 프레임 추출 실측 — 절차는 docs/bmad/timing-spec.md §8",
-        "verify": "없음(확정). 이전 가설값 R1 1080 / R2 1020 을 대체한다"
+        "level": "assumed",
+        "source": "architecture.md 4.4 정본 — R1 1080 / R2 1020. 합계 2100 = set1.js reading.timeLimitSec",
+        "verify": "실제 시험 녹화 45:30~48:30 타이머 초기값 캡처로 R1/R2 분할 확정"
       },
       {
         "path": "sections.reading.sectionSec",
-        "level": "observed",
-        "source": "모듈 실측 합계 1200+540=1740. set1.js reading.timeLimitSec(2100)은 콘텐츠 파일의 구값이며 런타임은 읽지 않는다(F11). 섹션 시계는 module 시계가 있어 visible:false 인 2차 deadline 이다",
-        "verify": "없음(확정). 이전 content 값 2100 을 실측 모듈 합계로 대체"
+        "level": "content",
+        "source": "set1.js reading.timeLimitSec = 2100 (모듈 합계 1080+1020과 일치)",
+        "verify": "없음(콘텐츠 확정). timerScope가 module인 동안은 미사용"
       },
       {
         "path": "sections.reading.modules[id=R1].moduleEndScreen",
@@ -520,20 +496,20 @@
       {
         "path": "directions[*].maxSec",
         "level": "observed",
-        "source": "실측 — 안내화면(02:30/21:30/22:00)과 End of Module 화면(recording 2910s) 모두 서브바 우측이 비어 있다(타이머·Hide Time 둘 다 없음) → 전부 self-paced(null)",
-        "verify": "없음(확정)"
+        "source": "녹화 02:30 / 21:30 / 22:00 안내화면에 타이머 없음 → self-paced(null)",
+        "verify": "moduleEnd의 maxSec 30은 가설 — 녹화 48:30 전환 지연시간 측정"
       },
       {
         "path": "directions[id=moduleEnd.reading].maxSec",
-        "level": "observed",
-        "source": "실측 — recording 2910s \"End of Module 1\" 프레임에 타이머 미표시. 가설이던 30초 비표시 상한을 제거하고 null(무제한, Continue 버튼으로만 진행)로 확정",
-        "verify": "없음(확정)"
+        "level": "assumed",
+        "source": "자동 전환은 관찰되었으나 지연 초는 미측정. advance는 architecture.md 3.4 정본에 따라 manual(Continue 버튼) + 비표시 상한 30초",
+        "verify": "녹화 48:30~49:00 구간 프레임 카운트"
       },
       {
         "path": "sections.listening.modules[*].perQuestionSec",
-        "level": "observed",
-        "source": "실측(2026-08-07) Q29 답변 구간 카운트다운: recording 884s→00:29, 888s→00:25, 892s→00:21, 896s→00:17, 900s→00:13, 904s→00:09 → 4초 간격 4초 감소, 시작값 00:30. TOEFL MOCK TEST SCREEN RECORDING.mp4 (1906x1130, 30fps, 3472s), ffmpeg 프레임 추출 실측 — 절차는 docs/bmad/timing-spec.md §8",
-        "verify": "없음(확정). 이전 가설값 20 을 대체한다"
+        "level": "assumed",
+        "source": "architecture.md 4.4 정본 — listening.modules L1/L2 perQuestionSec 20 (녹화 36:00 카운트다운 00:20)",
+        "verify": "녹화 36:00 카운트다운 시작값이 전 문항 20초로 균일한지 재확인"
       },
       {
         "path": "directions[id=listeningDirections]",
@@ -544,32 +520,8 @@
       {
         "path": "directions[id=taskEnd.writing]",
         "level": "assumed",
-        "source": "architecture.md 4.3 — writing은 task별 taskEnd 화면 3개(W1/W2/W3 각 600초 만료 시). maxSec 은 reading/listening moduleEnd 실측(타이머 없음)과 동형으로 null 로 맞췄다",
+        "source": "architecture.md 4.3 — writing은 task별 taskEnd 화면 3개(W1/W2/W3 각 600초 만료 시)",
         "verify": "녹화에 Writing 구간 미포함 — 실제 시험 Writing 전환 화면 확보 필요"
-      },
-      {
-        "path": "sections.listening.audioOnQuestionScreen",
-        "level": "spec",
-        "source": "발주처 요구(2026-08-10) — 오디오 전용 화면(화자 사진 + 'Audio Playing' 만 있는 화면)과 답변 화면의 분리를 없앤다. 사진과 선택지가 함께 있는 한 화면에서 오디오가 재생되어야 한다. 종전 분리는 실측 두 프레임(700s docs/reference/screens/listening-audio-700s.png = 사진만 · 900s listening-question-900s.png = 선택지 + 타이머 00:13)에 근거한 observed 값이었으나, provenance.levels.spec 규칙대로 확정 규격이 실측을 이긴다. true 면 exam-compile.js 의 audioSetBlock 이 blockKind 'audio-play' 화면을 만들지 않고 답변 화면에 audio 를 그대로 싣는다. IELTS(timing.ielts.json)에는 이 키가 없어 종전 timerScope 기반 판정 그대로다 — 출력 무변경",
-        "verify": "없음(확정)"
-      },
-      {
-        "path": "sections.listening.modules[*].perQuestionSec — 시계 시작 시점",
-        "level": "spec",
-        "source": "audioOnQuestionScreen:true 로 오디오와 답변이 한 화면이 되면서 20초 답변 시계는 화면 진입이 아니라 오디오 종료 시점에 걸린다. 분리 화면 시절에는 오디오 화면에 타이머가 없어(700s 프레임) 자연히 보장되던 성질이다 — 합친 뒤에도 오디오가 도는 동안 답변 시간이 깎이면 안 된다. 컴파일러가 화면에 timerStartsOnAudioEnd:true 를 달고, exam-engine.js 가 question/screen scope clock 의 arm 을 미뤘다가 렌더러의 재생 종료 신호(startDeferredClocks)에 건다",
-        "verify": "없음(확정)"
-      },
-      {
-        "path": "progress (컴파일러 산출 필드)",
-        "level": "observed",
-        "source": "서브바 좌측 실측 — Listening/Speaking 은 'Question 25 of 32' 단일 번호, Reading 은 'Questions 1-10 of 35' 범위. 분모는 섹션 전체 문항 수. → progress:{first,last,total,style:'single'|'range'}",
-        "verify": "없음(확정)"
-      },
-      {
-        "path": "directions[id=adjustVolume] · directions[id=adjustMic] — 삭제",
-        "level": "spec",
-        "source": "발주처 요구(2026-08-12) — 리딩 앞의 오디오·마이크 점검 화면을 없앤다. 학생은 리딩으로 곧장 들어간다. 리딩은 sectionOrder 의 첫 섹션이라 이 두 화면이 시험 전체의 첫 두 화면이었고, 리딩만 응시할 때도(mode=section) 스피커 테스트와 마이크 권한을 통과해야 지문이 열렸다. 렌더러(exam-render-instruction.js 의 renderInstruction 볼륨 분기·renderMicAdjust)는 그대로 둔다 — IELTS(timing.ielts.json)는 여전히 리스닝 앞에서 두 화면을 쓰고, TOEFL 스피킹 앞 hardwareCheck 도 그대로다. 음량 조절 자체는 상단바 Volume 팝오버로 언제든 가능하다",
-        "verify": "없음(확정)"
       }
     ]
   }

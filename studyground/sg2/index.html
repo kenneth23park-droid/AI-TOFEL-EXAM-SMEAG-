@@ -3,39 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- ── 수험생 계정에게 이 랜딩은 없다 ────────────────────────────────────
-     학생이 보는 건 홍보 문구·요금제도, 세트를 고르는 목록도 아니라 지금 치를
-     시험 하나다 — SET 9 리딩. 로그인해 있는 동안 이 페이지로 들어오면(주소 직접
-     입력·게이트 기본 행선지·로고 클릭) 본문이 그려지기 전에 그 시험으로 보낸다.
-     선생님·관리자와 비로그인 방문자는 그대로 본다.
-     판정은 admin-session.js 의 studentSignedIn() 과 같다.
-     행선지는 assets/student-landing.js 한 곳에서 정한다 — login.html 도 같은 값을 쓴다. -->
-<script src="assets/student-landing.js"></script>
-<script>
-(function () {
-  'use strict';
-  try {
-    /* 재부팅으로 끊긴 세션은 아직 저장소에 남아 있다 — sg-auth.js 는 문서 끝에서야
-       실려 지운다. 여기서 그 판정(살아 있다는 표시의 공백)을 먼저 되짚지 않으면,
-       로그인해야 할 사람을 시험 화면으로 보내 놓고 거기서 막게 된다. */
-    var alive = parseInt(localStorage.getItem('sg2_alive_v1') || '0', 10) || 0;
-    if (!alive || Date.now() - alive >= 2 * 60 * 1000) return;
-    var s = JSON.parse(localStorage.getItem('sg2_auth_v1') || 'null');
-    var u = s && s.user;
-    if (!u) return;
-    var r = u.role || (u.is_admin ? 'admin' : 'student');   // role 이 없던 옛 계정은 학생으로 본다
-    if (r !== 'teacher' && r !== 'admin') location.replace(window.SG_STUDENT_LANDING);
-  } catch (e) { /* 프라이빗 모드 — 아래 sg-auth 재확인이 맡는다 */ }
-})();
-</script>
-<title>SMEAG · MockTest — Your New TOEFL Partner</title>
+<title>SMEAG · StudyGround — Your New TOEFL Partner</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0e8f82">
+<meta name="theme-color" content="#e8481f">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="MockTest">
+<meta name="apple-mobile-web-app-title" content="StudyGround">
 </head>
 <body>
 
@@ -44,16 +18,17 @@
   <div class="nav-in">
     <a class="brand" href="index.html">
       <span class="brand-logo">S</span>
-      <span><b>SMEAG MockTest</b><small>Learn · Practice · Test · Repeat</small></span>
+      <span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span>
     </a>
     <nav class="nav-center">
       <a href="tests.html">📝 <span data-en>Mock Tests</span><span data-ko>모의고사</span></a>
       <a href="npz.html">🎯 <span data-en>Practice</span><span data-ko>연습</span></a>
       <a href="learning.html">🎬 <span data-en>Lectures</span><span data-ko>강의</span></a>
       <a href="community.html">💬 <span data-en>Community</span><span data-ko>커뮤니티</span></a>
-      <a href="dashboard.html">📊 <span data-en>My Result</span><span data-ko>내 성적</span></a>
+      <a href="dashboard.html">📊 <span data-en>My StudyGround</span><span data-ko>내 성적</span></a>
     </nav>
     <div class="nav-right">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
       <a class="btn ghost sm" href="purchase.html"><span data-en>Purchase</span><span data-ko>구매</span></a>
       <a class="btn ghost sm" href="login.html"><span data-en>Login</span><span data-ko>로그인</span></a>
       <a class="btn brand sm" href="signup.html"><span data-en>Sign Up Free</span><span data-ko>무료 가입</span></a>
@@ -68,7 +43,7 @@
     <span data-ko>신규 SMEAG 학생 무료 1주 Lite 패스 — 8월 등록 오픈.</span>
   </div>
   <div class="promo-grid">
-    <div class="promo tint">
+    <div class="promo peach">
       <span class="pill" data-en>New Practice Zone</span><span class="pill" data-ko>새 연습존</span>
       <h3 class="mt-8"><span data-en>SET 1 practice library is live.</span><span data-ko>SET 1 연습 라이브러리 오픈.</span></h3>
       <p><span data-en>91 real questions across Reading · Listening · Writing · Speaking, auto-scored.</span>
@@ -94,8 +69,8 @@
 <section class="wrap section" style="padding-top:30px">
   <span class="eyebrow"><span data-en>A new standard for</span><span data-ko>새로운 기준</span></span>
   <h1 class="display mt-8" style="max-width:720px">
-    <span data-en>New TOEFL prep, rebuilt.<br><span style="color:var(--brand)">SMEAG MockTest 2.0.</span></span>
-    <span data-ko>New TOEFL 대비, 다시 설계했습니다.<br><span style="color:var(--brand)">SMEAG MockTest 2.0.</span></span>
+    <span data-en>New TOEFL prep, rebuilt.<br><span style="color:var(--brand)">SMEAG StudyGround 2.0.</span></span>
+    <span data-ko>New TOEFL 대비, 다시 설계했습니다.<br><span style="color:var(--brand)">SMEAG StudyGround 2.0.</span></span>
   </h1>
   <p class="lead mt-16" style="max-width:560px">
     <span data-en>Built to be your last TOEFL partner — real exam structure, AI scoring, and a full practice library.</span>
@@ -228,7 +203,7 @@
 <!-- FAQ -->
 <section class="wrap section faq">
   <h2 class="title mb-24"><span data-en>Frequently asked questions</span><span data-ko>자주 묻는 질문</span></h2>
-  <details open><summary><span data-en>What does SMEAG MockTest include?</span><span data-ko>SMEAG MockTest는 무엇을 제공하나요?</span></summary>
+  <details open><summary><span data-en>What does SMEAG StudyGround include?</span><span data-ko>SMEAG StudyGround는 무엇을 제공하나요?</span></summary>
     <p><span data-en>Realistic New TOEFL mock tests, a Practice Zone of format-specific questions, Click &amp; Learn video lectures, plus a study planner, vocabulary bank and error log.</span>
        <span data-ko>실전형 New TOEFL 모의고사, 유형별 연습존, Click &amp; Learn 영상 강의, 그리고 학습 플래너·단어장·오답노트를 제공합니다.</span></p></details>
   <details><summary><span data-en>How does AI scoring work?</span><span data-ko>AI 채점은 어떻게 동작하나요?</span></summary>
@@ -238,7 +213,7 @@
     <p><span data-en>Practice uses SMEAG's own SET 1 mock — 91 questions with real listening/speaking audio, verified against the source answer key.</span>
        <span data-ko>연습은 SMEAG 자체 SET 1 모의고사(91문항, 실제 리스닝/스피킹 오디오)를 사용하며 원본 정답키로 검증했습니다.</span></p></details>
   <details><summary><span data-en>Can I study offline?</span><span data-ko>오프라인으로 학습할 수 있나요?</span></summary>
-    <p><span data-en>Yes — MockTest runs in a local, no-network mode for on-site use, and a cloud mode with Supabase + AI scoring when online.</span>
+    <p><span data-en>Yes — StudyGround runs in a local, no-network mode for on-site use, and a cloud mode with Supabase + AI scoring when online.</span>
        <span data-ko>네 — 현장용 무네트워크 로컬 모드와, 온라인 시 Supabase+AI 채점 클라우드 모드를 모두 지원합니다.</span></p></details>
 </section>
 
@@ -246,7 +221,7 @@
 <footer class="foot">
   <div class="wrap foot-in">
     <div>
-      <div class="brand"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Learn · Practice · Test · Repeat</small></span></div>
+      <div class="brand"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></div>
       <small style="display:block;margin-top:12px" data-en>SMEAG English Academy · New TOEFL preparation platform</small>
       <small style="display:block;margin-top:12px" data-ko>SMEAG 어학원 · New TOEFL 대비 플랫폼</small>
     </div>
@@ -255,34 +230,11 @@
       <a href="npz.html" data-en>Practice</a><a href="npz.html" data-ko>연습</a>
       <a href="purchase.html" data-en>Purchase</a><a href="purchase.html" data-ko>구매</a>
       <a href="login.html" data-en>Login</a><a href="login.html" data-ko>로그인</a>
-      <!-- 내부용 — 관리자 로그인을 통과해야 목록이 열린다(assets/admin-session.js). -->
-      <a href="admin.html" data-en>Admin</a><a href="admin.html" data-ko>관리자</a>
     </div>
   </div>
 </footer>
 
 <script src="assets/app.js"></script>
-<script src="assets/sg-fullscreen.js"></script>
-<script src="assets/sg-auth.js"></script>
-<script>
-/* 머리에서 내린 판정은 기기에 저장된 프로필만 보고 한 것이라, 서버 사본으로 되짚는다.
-   프라이빗 모드처럼 저장소가 막힌 기기, 그리고 이 페이지를 열어 둔 채 학생 계정으로
-   로그인하는 경우를 여기서 잡는다. 선생님·관리자면 그대로 둔다. */
-(function () {
-  'use strict';
-  var A = window.SG_AUTH;
-  if (!A) return;
-  function sync() {
-    if (!A.user()) return;
-    A.isStaff().then(function (staff) { if (!staff) location.replace(window.SG_STUDENT_LANDING); }, function () {});
-  }
-  A.onChange(sync);
-  sync();
-})();
-</script>
-<script src="assets/offline-prep.js"></script>
-<script src="assets/build-version.js"></script>
-<script src="assets/sg-update-check.js"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
 </html>

@@ -10,7 +10,7 @@
 
 /**
  * @typedef {"instruction"|"question"|"speaking"|"moduleEnd"|"hardwareCheck"|"review"} ScreenType
- * @typedef {"reading"|"listening"|"writing"|"speaking"} SectionId
+ * @typedef {"listening"|"speaking"|"reading"|"writing"} SectionId
  *
  * @typedef {Object} TimerSpec
  * @property {"countdown"|"response"|"prep"|"none"} mode
@@ -52,13 +52,7 @@
  * @property {number}    [module]       // 1-based 모듈 순번
  * @property {string}    [moduleId]     // 'R1' 'L2' 등 set1.js 원본 id
  * @property {string}    [blockKind]    // 원본 block.kind (렌더러 분기용)
- * @typedef {Object} ProgressSpec
- * @property {number} first             // 이 화면이 담는 첫 문항 번호 (1-based, 섹션 기준)
- * @property {number} last              // 마지막 문항 번호. style==="single" 이면 first 와 같다
- * @property {number} total             // 섹션 전체 문항 수 (분모)
- * @property {"single"|"range"} style   // 서브바 표기 — single: "Question f of t" / range: "Questions f-l of t"
- *
- * @property {ProgressSpec|{index:number,total:number}} [progress]
+ * @property {{index:number,total:number}} [progress]
  * @property {string[]}  [questionIds]  // 이 화면이 담는 문항 id들 (복수 가능)
  * @property {TimerSpec|null} timer     // 표시 타이머(가장 좁은 scope). §3.5 우선순위
  * @property {TimerSpec[]} [timers]     // 좁은→넓은 순. 엔진 clocks 맵의 소스(§3.5 공존 규칙)
@@ -76,14 +70,13 @@
   'use strict';
 
   var SCREEN_TYPES = ['instruction', 'question', 'speaking', 'moduleEnd', 'hardwareCheck', 'review'];
-  var SECTION_IDS = ['reading', 'listening', 'writing', 'speaking'];
+  var SECTION_IDS = ['listening', 'speaking', 'reading', 'writing'];
   var TIMER_MODES = ['countdown', 'response', 'prep', 'none'];
   var TIMER_SCOPES = ['section', 'module', 'task', 'question', 'screen'];
   var TIMER_FORMATS = ['MM:SS', 'HH:MM:SS'];
   var ON_EXPIRE = ['autoAdvance', 'stopRecord', 'startRecord', null];
   var ADVANCE = ['manual', 'auto'];
   var PHASE_NAMES = ['prompt', 'listen', 'read', 'prep', 'record'];
-  var PROGRESS_STYLES = ['single', 'range'];
 
   var DEFAULT_MAX_PLAYS = 1; // 관찰값: Listening 오디오는 1회 재생 (Story 1.2 AC5)
 
@@ -107,61 +100,6 @@
     if (!has(ON_EXPIRE, t.onExpire === undefined ? null : t.onExpire)) {
       out.push(prefix + '.onExpire invalid: ' + t.onExpire);
     }
-  }
-
-  /* progress 검증 — 서브바 진행표시(관찰값: "Question 25 of 32" / "Questions 1-10 of 35")의 소스.
-     신규 스키마 {first,last,total,style} 를 정본으로 하되, 컴파일러가 아직 갱신되지 않은
-     구간을 위해 레거시 {index,total} 도 계속 통과시킨다(normalizeProgress 가 흡수한다). */
-  function validateProgress(p, out) {
-    if (!isObj(p)) { out.push('progress must be an object'); return; }
-    var isLegacy = (p.first === undefined && p.style === undefined && p.last === undefined);
-    if (isLegacy) {
-      if (!isPosNum(p.index) || !isPosNum(p.total)) {
-        out.push('progress must be {first,last,total,style} (legacy {index,total} also accepted)');
-      }
-      return;
-    }
-    if (!isPosNum(p.first)) out.push('progress.first must be a number >= 0');
-    if (!isPosNum(p.last)) out.push('progress.last must be a number >= 0');
-    if (!isPosNum(p.total)) out.push('progress.total must be a number >= 0');
-    if (!has(PROGRESS_STYLES, p.style)) out.push('progress.style invalid: ' + p.style);
-    if (isPosNum(p.first) && isPosNum(p.last) && p.last < p.first) {
-      out.push('progress.last must be >= progress.first');
-    }
-    if (p.style === 'single' && isPosNum(p.first) && isPosNum(p.last) && p.first !== p.last) {
-      out.push('progress.style "single" requires first === last');
-    }
-  }
-
-  /* 두 스키마를 하나로 흡수한다. 표시 계층(셸 서브바)은 이것만 쓴다. */
-  function normalizeProgress(p) {
-    if (!isObj(p)) return null;
-    if (isPosNum(p.first) && isPosNum(p.total)) {
-      var last = isPosNum(p.last) ? p.last : p.first;
-      return {
-        first: p.first, last: last, total: p.total,
-        style: has(PROGRESS_STYLES, p.style) ? p.style : (last > p.first ? 'range' : 'single')
-      };
-    }
-    if (isPosNum(p.index) && isPosNum(p.total)) {
-      return { first: p.index, last: p.index, total: p.total, style: 'single' };
-    }
-    return null;
-  }
-
-  /* 관찰된 문구 그대로. 사본을 여기저기 두지 않도록 포매터를 타입 모듈이 소유한다. */
-  function formatProgress(p) {
-    var n = normalizeProgress(p);
-    if (!n) return '';
-    if (n.style === 'range') return 'Questions ' + n.first + '-' + n.last + ' of ' + n.total;
-    return 'Question ' + n.first + ' of ' + n.total;
-  }
-
-  function formatProgressKo(p) {
-    var n = normalizeProgress(p);
-    if (!n) return '';
-    if (n.style === 'range') return n.first + '-' + n.last + '번 / 전체 ' + n.total + '문항';
-    return n.first + '번 / 전체 ' + n.total + '문항';
   }
 
   function validateMedia(m, prefix, out) {
@@ -255,7 +193,11 @@
     if (s.questionIds !== undefined && !(s.questionIds instanceof Array)) {
       out.push('questionIds must be an array');
     }
-    if (s.progress !== undefined) validateProgress(s.progress, out);
+    if (s.progress !== undefined) {
+      if (!isObj(s.progress) || !isPosNum(s.progress.index) || !isPosNum(s.progress.total)) {
+        out.push('progress must be {index:number,total:number}');
+      }
+    }
     return out;
   }
 
@@ -274,7 +216,7 @@
 
   var FIELDS = ['id', 'screenType', 'section', 'module', 'moduleId', 'blockKind', 'progress',
     'questionIds', 'timer', 'timers', 'advance', 'audio', 'image', 'phases',
-    'allowBack', 'transfer', 'controls', 'copy', 'timerStartsOnAudioEnd'];
+    'allowBack', 'transfer', 'controls', 'copy'];
 
   /**
    * TestScreen 팩토리. 계약 위반 시 dev 모드면 throw, 운영 모드면 warn + 안전 기본값으로 degrade.
@@ -322,13 +264,8 @@
     ON_EXPIRE: ON_EXPIRE,
     ADVANCE: ADVANCE,
     PHASE_NAMES: PHASE_NAMES,
-    PROGRESS_STYLES: PROGRESS_STYLES,
     DEFAULT_MAX_PLAYS: DEFAULT_MAX_PLAYS,
     validateScreen: validateScreen,
-    validateProgress: function (p) { var o = []; validateProgress(p, o); return o; },
-    normalizeProgress: normalizeProgress,
-    formatProgress: formatProgress,
-    formatProgressKo: formatProgressKo,
     validateTimer: function (t) { var o = []; validateTimer(t, 'timer', o); return o; },
     makeScreen: makeScreen,
     makeMedia: makeMedia,

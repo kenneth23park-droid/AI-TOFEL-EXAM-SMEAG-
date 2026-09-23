@@ -3,40 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sign Up · SMEAG MockTest</title>
+<title>Sign Up · SMEAG StudyGround</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0e8f82">
+<meta name="theme-color" content="#e8481f">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="MockTest">
-<style>
-  .auth-err { display:none; font-size:13px; font-weight:700; color:#b3261e; background:#fdeceb;
-              border:1px solid #f5c6c2; border-radius:10px; padding:10px 12px; margin-bottom:14px; }
-  .auth-err.on { display:block; }
-  .auth-hint { font-size:12px; color:var(--dim); margin-top:6px; }
-  .idbox { text-align:center; padding:18px 12px; border:1px solid var(--line); border-radius:14px;
-           background:#fafafa; margin-top:6px; }
-  .idbox .id { font-size:30px; font-weight:850; letter-spacing:.02em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
-  .idbox .pw { font-size:15px; font-weight:750; margin-top:2px; }
-  .idbox svg { margin-top:12px; }
-  /* 확인 팝업 — 같은 시험일에 같은 이름이 이미 있을 때만 뜬다. */
-  .modal { display:none; position:fixed; inset:0; background:rgba(17,17,17,.45); z-index:60;
-           align-items:center; justify-content:center; padding:20px; }
-  .modal.on { display:flex; }
-  .modal-card { background:#fff; border-radius:16px; padding:22px; max-width:380px; width:100%; }
-  @media print {
-    .nav, .auth-alt, #again, .no-print { display:none !important; }
-    .auth-card { border:none; box-shadow:none; }
-  }
-</style>
+<meta name="apple-mobile-web-app-title" content="StudyGround">
 </head>
 <body>
 
 <header class="nav">
   <div class="nav-in">
-    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG MockTest</b><small>Learn · Practice · Test · Repeat</small></span></a>
+    <a class="brand" href="index.html"><span class="brand-logo">S</span><span><b>SMEAG StudyGround</b><small>Learn · Practice · Test · Repeat</small></span></a>
     <div class="nav-right" style="margin-left:auto">
+      <span class="lang"><button data-lang="ko">KO</button><button data-lang="en" class="on">EN</button></span>
       <a class="btn ghost sm" href="login.html"><span data-en>Login</span><span data-ko>로그인</span></a>
     </div>
   </div>
@@ -44,223 +25,21 @@
 
 <div class="auth">
   <div class="auth-card">
-
-    <!-- 1단계: 이름 · 시험일자. 아이디는 서버가 배정한다. -->
-    <div id="step-form">
-      <span class="pill"><span data-en>Test-day registration</span><span data-ko>시험 당일 등록</span></span>
-      <h1 class="mt-16"><span data-en>Register for the test</span><span data-ko>시험 등록</span></h1>
-      <p class="sub"><span data-en>Enter your name and the test date. Your ID and password are issued automatically.</span>
-        <span data-ko>이름과 시험일자를 입력하세요. 아이디와 비밀번호는 자동으로 발급됩니다.</span></p>
-
-      <div class="auth-err" id="err"><span data-en></span><span data-ko></span></div>
-
-      <form id="f" autocomplete="on">
-        <div class="field"><label data-en>Name</label><label data-ko>이름</label>
-          <input id="name" type="text" name="name" autocomplete="name" placeholder="김민수" required></div>
-        <div class="field" id="teacher-field" hidden><label data-en>Your teacher (optional)</label><label data-ko>담당 선생님 (선택)</label>
-          <select id="teacher" name="teacher">
-            <option value="">— not assigned —</option>
-          </select>
-          <div class="auth-hint"><span data-en>Your teacher marks your writing and speaking, and sees only their own students.</span>
-            <span data-ko>담당 선생님이 라이팅·스피킹을 채점하며, 자기 학생만 볼 수 있습니다.</span></div></div>
-        <div class="field"><label data-en>Test date</label><label data-ko>시험응시 일자</label>
-          <input id="date" type="date" name="exam-date" required>
-          <div class="auth-hint" id="avail"></div></div>
-        <button class="btn brand block lg" id="go" type="submit">
-          <span data-en>Get my ID</span><span data-ko>아이디 발급</span></button>
-      </form>
-
-      <div class="auth-alt"><span data-en>Already have an ID?</span><span data-ko>이미 아이디가 있으신가요?</span>
-        <a href="login.html"><span data-en>Log in</span><span data-ko>로그인</span></a></div>
-    </div>
-
-    <!-- 2단계: 발급 결과 — 아이디·비밀번호·QR. 인쇄해서 나눠줄 수 있다. -->
-    <div id="step-done" hidden>
-      <span class="pill"><span data-en>Registered</span><span data-ko>등록 완료</span></span>
-      <h1 class="mt-16" id="who"></h1>
-      <p class="sub"><span data-en>Keep this. Scan the QR at the login screen, or type the ID and password.</span>
-        <span data-ko>이 화면을 보관하세요. 로그인 화면에서 QR을 스캔하거나, 아이디와 비밀번호를 직접 입력하면 됩니다.</span></p>
-
-      <div class="idbox">
-        <div class="id" id="out-id"></div>
-        <div class="pw"><span data-en>Password</span><span data-ko>비밀번호</span>: <b id="out-pw"></b></div>
-        <div class="muted" style="font-size:12px" id="out-date"></div>
-        <div class="muted" style="font-size:12px" id="out-teacher"></div>
-        <div id="out-qr"></div>
-        <div class="muted no-print" style="font-size:11px;margin-top:8px" id="qr-note"></div>
-      </div>
-
-      <div class="mt-16" style="display:flex;gap:8px;flex-wrap:wrap">
-        <a class="btn brand" id="to-tests" href="tests.html"><span data-en>Start the test</span><span data-ko>시험 시작</span></a>
-        <button class="btn ghost no-print" type="button" onclick="window.print()"><span data-en>Print</span><span data-ko>인쇄</span></button>
-        <button class="btn ghost no-print" type="button" id="again"><span data-en>Register another</span><span data-ko>다른 학생 등록</span></button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- 같은 시험일 · 같은 이름 확인 팝업 -->
-<div class="modal" id="dup">
-  <div class="modal-card">
-    <h2 style="font-size:18px;font-weight:800"><span data-en>Already registered</span><span data-ko>이미 등록된 이름</span></h2>
-    <p class="muted mt-8" style="font-size:13.5px" id="dup-msg"></p>
-    <div class="mt-16" style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn ghost" type="button" id="dup-cancel"><span data-en>Change the name</span><span data-ko>이름 고치기</span></button>
-      <button class="btn brand" type="button" id="dup-ok"><span data-en>Register anyway</span><span data-ko>그래도 등록</span></button>
-    </div>
+    <span class="pill"><span data-en>Free 1-week Lite pass</span><span data-ko>무료 1주 Lite 패스</span></span>
+    <h1 class="mt-16"><span data-en>Join StudyGround</span><span data-ko>StudyGround 가입</span></h1>
+    <p class="sub"><span data-en>Create a free account to take the SET 1 mock test.</span><span data-ko>무료 계정을 만들고 SET 1 모의고사에 응시하세요.</span></p>
+    <form onsubmit="event.preventDefault();location.href='dashboard.html'">
+      <div class="field"><label data-en>Name</label><label data-ko>이름</label><input type="text" placeholder="Sunny" required></div>
+      <div class="field"><label data-en>Email</label><label data-ko>이메일</label><input type="email" placeholder="you@example.com" required></div>
+      <div class="field"><label data-en>Password</label><label data-ko>비밀번호</label><input type="password" placeholder="••••••••" required></div>
+      <button class="btn brand block lg" type="submit"><span data-en>Sign up free</span><span data-ko>무료 가입</span></button>
+    </form>
+    <div class="auth-alt"><span data-en>Already have an account?</span><span data-ko>이미 계정이 있으신가요?</span>
+      <a href="login.html"><span data-en>Log in</span><span data-ko>로그인</span></a></div>
   </div>
 </div>
 
 <script src="assets/app.js"></script>
-<script src="assets/sg-fullscreen.js"></script>
-<script src="assets/sg-auth.js"></script>
-<script src="assets/sg-qr.js"></script>
-<script>
-/* 이름 + 시험일자 → 서버가 smeag### 를 배정하고 세션까지 내준다.
- * 끝나면 그 자리에서 이미 로그인 상태다. */
-(function () {
-  'use strict';
-  var f = document.getElementById('f'), go = document.getElementById('go'), err = document.getElementById('err');
-  var nameEl = document.getElementById('name'), dateEl = document.getElementById('date');
-  var teacherEl = document.getElementById('teacher'), teacherField = document.getElementById('teacher-field');
-  var avail = document.getElementById('avail');
-  var dup = document.getElementById('dup');
-
-  function show(en, ko) {
-    err.querySelector('[data-en]').textContent = en;
-    err.querySelector('[data-ko]').textContent = ko || en;
-    err.classList.add('on');
-  }
-  function two(n) { return (n < 10 ? '0' : '') + n; }
-  function todayStr() {
-    var d = new Date();
-    return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate());
-  }
-
-  dateEl.value = todayStr();
-
-  /* 그 날짜에 몇 자리가 남았는지 미리 보여준다 — 1000개가 다 차면 등록 자체가 막힌다.
-     남은 자리 수는 서버가 세어 준다(r.free). 화면이 따로 세지 않는다. */
-  function refreshAvail() {
-    if (!dateEl.value) return;
-    SG_AUTH.nextId(dateEl.value).then(function (r) {
-      avail.innerHTML = '<span data-en></span><span data-ko></span>';
-      avail.querySelector('[data-en]').textContent =
-        'Next ID: ' + (r.student_id || '—') + ' · ' + r.free + ' of 1000 free';
-      avail.querySelector('[data-ko]').textContent =
-        '다음 아이디: ' + (r.student_id || '—') + ' · 1000개 중 ' + r.free + '개 남음';
-    }).catch(function () { avail.textContent = ''; });
-  }
-  dateEl.addEventListener('change', refreshAvail);
-  refreshAvail();
-
-  /* 담당 선생님 목록. 선생님 계정이 아직 하나도 없으면 칸 자체를 그리지 않는다.
-   * 고르는 것은 선택이다 — 비워 두면 담당 없이 등록되고, 그 학생의 답안은 관리자만
-   * 본다(RLS 의 sg_can_see). 나중에 담당을 채우면 그때부터 그 선생님이 본다. */
-  function fillTeachers() {
-    SG_AUTH.teachers().then(function (list) {
-      if (!list.length) return;                      // hidden 그대로 둔다
-      teacherEl.innerHTML = '<option value="" selected>— not assigned —</option>' +
-        list.map(function (t) {
-          var label = String(t.name || t.student_id || '');
-          return '<option value="' + t.id + '">' +
-            label.replace(/[&<>"]/g, function (c) {
-              return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
-            }) + '</option>';
-        }).join('');
-      teacherField.hidden = false;
-    }).catch(function () { /* 오프라인이면 서버가 다시 묻는다 */ });
-  }
-  fillTeachers();
-
-  function done(res) {
-    document.getElementById('step-form').hidden = true;
-    document.getElementById('step-done').hidden = false;
-    document.getElementById('who').textContent = (res.user && res.user.name) || nameEl.value;
-    document.getElementById('out-id').textContent = res.student_id;
-    document.getElementById('out-pw').textContent = res.password || '444444';
-    document.getElementById('out-date').textContent = res.exam_date;
-    document.getElementById('out-teacher').textContent =
-      res.teacher && res.teacher.name ? 'Teacher: ' + res.teacher.name : '';
-
-    // QR 은 로그인 화면이 그대로 읽는 형식이다: SG2|아이디|시험일자
-    var payload = 'SG2|' + res.student_id + '|' + res.exam_date;
-    var svg = window.SG_QR ? SG_QR.svg(payload, { size: 168 }) : '';
-    document.getElementById('out-qr').innerHTML = svg;
-
-    // 실제로 읽히는 QR 인지 브라우저 디코더로 확인한다(지원하는 기기에서만).
-    var note = document.getElementById('qr-note');
-    if (svg && window.SG_QR && SG_QR.canScan && SG_QR.canScan()) {
-      verifyQr(svg, payload, note);
-    } else if (svg) {
-      note.textContent = payload;
-    }
-  }
-
-  /* 인쇄 전에 QR 을 한 번 디코딩해 본다 — 안 읽히면 아이디를 손으로 치면 되지만,
-   * 안 읽힌다는 사실은 알려줘야 한다. */
-  function verifyQr(svg, payload, note) {
-    var img = new Image();
-    img.onload = function () {
-      try {
-        var cv = document.createElement('canvas');
-        cv.width = cv.height = 360;
-        var cx = cv.getContext('2d');
-        cx.fillStyle = '#fff'; cx.fillRect(0, 0, 360, 360);
-        cx.imageSmoothingEnabled = false;
-        cx.drawImage(img, 0, 0, 360, 360);
-        new window.BarcodeDetector({ formats: ['qr_code'] }).detect(cv).then(function (codes) {
-          note.textContent = (codes.length && codes[0].rawValue === payload)
-            ? '✓ QR ' + payload
-            : '⚠ QR check failed — use the ID above. (' + payload + ')';
-        }).catch(function () { note.textContent = payload; });
-      } catch (e) { note.textContent = payload; }
-    };
-    img.onerror = function () { note.textContent = payload; };
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
-  }
-
-  function submit(force) {
-    err.classList.remove('on');
-    go.disabled = true;
-    SG_AUTH.register({
-      name: nameEl.value.trim(),
-      examDate: dateEl.value,
-      teacherId: teacherField.hidden ? '' : teacherEl.value,
-      force: force
-    })
-      .then(function (res) { go.disabled = false; done(res); })
-      .catch(function (e) {
-        go.disabled = false;
-        if (e.code === 'same_name_today') {
-          document.getElementById('dup-msg').textContent =
-            (document.documentElement.lang === 'ko' ? e.messageKo : e.message) || e.message;
-          dup.classList.add('on');
-          return;
-        }
-        show(e.message, e.messageKo);
-        refreshAvail();
-      });
-  }
-
-  f.addEventListener('submit', function (e) { e.preventDefault(); submit(false); });
-  document.getElementById('dup-cancel').addEventListener('click', function () {
-    dup.classList.remove('on'); nameEl.focus(); nameEl.select();
-  });
-  document.getElementById('dup-ok').addEventListener('click', function () {
-    dup.classList.remove('on'); submit(true);
-  });
-  document.getElementById('again').addEventListener('click', function () {
-    // 다음 학생을 위해 폼으로 돌아간다. 방금 만든 세션은 끊는다.
-    SG_AUTH.signOut();
-    document.getElementById('step-done').hidden = true;
-    document.getElementById('step-form').hidden = false;
-    nameEl.value = ''; nameEl.focus();
-    refreshAvail();
-  });
-})();
-</script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body>
 </html>

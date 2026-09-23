@@ -12,25 +12,16 @@
      6) instruction / moduleEnd / hardwareCheck / review — Story 2.1
 */
 
-/* === base: shell, topbar, subbar(timer/Hide Time), volume popover, response-box, grid-nav === */
+/* === base: shell, topbar, timer-pill, response-box, grid-nav === */
 
-/* 시험 전용 토큰. app.css 의 토큰은 재사용만 하고 재정의하지 않는다(--exam-* 접두).
-   값은 녹화 프레임(docs/reference/screens/*)에서 눈으로 뜬 색이다:
-   상단바·Hide Time·RESPONSE TIME 헤더의 색조는 녹화 프레임에서는 라벤더였다.
-   브랜드가 블루그린으로 서면서 같은 자리를 같은 밝기의 블루그린으로 옮겼다 —
-   배치·명암 대비는 관찰값 그대로이고 색조만 브랜드를 따라간다. */
+/* 시험 전용으로만 필요한 신규 토큰. 기존 토큰과 이름이 겹치지 않도록 --exam-* 접두.
+   (F6: 색상 리터럴 대신 토큰. RESPONSE TIME 보라색은 app.css 팔레트에 없어 신규 추가) */
 :root {
-  --exam-bg: #ffffff;            /* 관찰값: 시험 화면 배경은 흰색 (cream 아님) */
-  --exam-bar: #93cdc7;           /* 상단바 (녹화 프레임의 연보라 자리) */
-  --exam-bar-ink: #ffffff;
-  --exam-subbar: #ffffff;
-  --exam-accent: #4fa89e;        /* Hide Time 링크색 */
-  --exam-accent-soft: #eaf6f4;
-  --exam-response: #6dbcb2;      /* RESPONSE TIME 카드 헤더 */
-  --exam-response-soft: #f2fbf9;
+  --exam-bg: #f3efe8;          /* 전체화면 시험 배경 — cream 보다 한 단계 진하게 */
+  --exam-bar: #ffffff;
+  --exam-response: #6b4fd8;    /* speaking RESPONSE TIME 박스 */
+  --exam-response-soft: #efeaff;
   --exam-topbar-h: 58px;
-  --exam-subbar-h: 46px;
-  --exam-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 body.exam-body {
@@ -43,158 +34,81 @@ body.exam-body {
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
-  position: relative;
 }
 
-/* ── 상단바 1행 (연보라) ────────────────────────────────── */
+/* ── 상단바 ─────────────────────────────────────────────── */
 .exam-topbar {
   flex: none;
   height: var(--exam-topbar-h);
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  padding: 0 22px;
+  padding: 0 18px;
   background: var(--exam-bar);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow);
   position: relative;
   z-index: 20;
 }
-.exam-brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.exam-brand { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .exam-brand b {
-  font-size: 20px; font-weight: 800; letter-spacing: -.01em; color: var(--exam-bar-ink);
+  font-size: 15px; font-weight: 800; letter-spacing: -.02em; color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.exam-brand small { display: none; }   /* 관찰값: 상단바에 부제는 없다 */
+.exam-brand small {
+  font-size: 10.5px; font-weight: 700; color: var(--muted);
+  letter-spacing: .1em; text-transform: uppercase;
+}
 
-/* ── 상단바 우측 컨트롤 ─────────────────────────────────── */
-/* 섹션별 노출은 셸(exam-runtime.html)이 [hidden] 로 제어한다. 순서는 DOM 순서 고정:
-   Exit · Volume · Help · Review · Back · Next — 관찰된 네 화면의 순서를 모두 만족한다. */
-.exam-actions { display: flex; align-items: center; gap: 10px; }
-.exam-btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 16px; border-radius: 9px;
-  border: none; background: #fff; color: var(--ink);
-  font-size: 14px; font-weight: 650; line-height: 1;
-  white-space: nowrap;
+/* ── 빨간 pill 타이머 (MM:SS) ───────────────────────────── */
+/* question 화면에서만 DOM 에 존재한다. 숨김이 아니라 미렌더(Story 1.7 AC3). */
+.timer-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 18px; border-radius: 999px;
+  background: var(--brand); color: #fff;
+  font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+  box-shadow: 0 4px 12px rgba(232, 72, 31, .3);
 }
-.exam-btn[hidden] { display: none; }
-.exam-btn svg { width: 16px; height: 16px; flex: none; }
-.exam-btn:hover { background: #f2f9f8; }
-.exam-btn:disabled { background: transparent; color: rgba(255, 255, 255, .72); cursor: not-allowed; }
-/* primary(Next/Continue)도 관찰값은 동일한 흰 알약이다 — 색 대비를 만들지 않는다. */
-.exam-btn.primary { background: #fff; color: var(--ink); font-weight: 750; }
-.exam-btn.primary:hover { background: #f2f9f8; }
-/* 오디오가 끝나기 전의 Next — 자리는 지키되 눌리지 않는 것이 보여야 한다.
-   .primary 의 흰 알약이 위의 :disabled 를 덮으므로 여기서 따로 끈다. */
-.exam-btn.primary:disabled,
-.exam-btn.is-audio-locked,
-.exam-btn.is-audio-locked:hover {
-  background: transparent; color: rgba(255, 255, 255, .55);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28); cursor: not-allowed;
+.timer-pill .timer-label {
+  font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; opacity: .85;
 }
-.exam-btn.danger { background: #fff; color: var(--ink); }
-/* 학생 화면에는 없고 관리자에게만 서 있는 Back·Next — 검수용이라는 표시로 초록 테두리를
-   두른다. 실수로 학생 흐름과 헷갈리지 않게 하려는 것뿐, 동작은 같다(exam-shell.js). */
-.exam-btn.is-admin { box-shadow: inset 0 0 0 2px #2f6f4f; }
-/* Review 는 눌린 상태가 보여야 한다(플래그 토글). */
-.exam-btn.is-on { background: var(--ink); color: #fff; }
-.exam-btn.is-on:hover { background: var(--ink); }
+.timer-pill.is-warning { background: var(--brand-ink); animation: exam-timer-pulse 1s infinite; }
+@keyframes exam-timer-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
 
-/* ── 상단바 2행 · 서브바 ────────────────────────────────── */
-/* 흰 배경 + 얇은 하단 경계선. 좌: "Listening | Question 25 of 32", 우: 타이머 + Hide Time.
-   타이머가 없는 화면(오디오 재생 중)에서는 우측이 완전히 빈다.
-   moduleEnd 처럼 서브바 자체가 없는 화면은 [hidden] 으로 행 전체를 제거한다. */
-.exam-subbar {
-  flex: none;
-  min-height: var(--exam-subbar-h);
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 0 22px;
-  background: var(--exam-subbar);
-  border-bottom: 1px solid var(--line);
-  position: relative; z-index: 15;
-}
-.exam-subbar[hidden] { display: none; }
-.exam-crumb {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 15px; color: var(--ink-2); min-width: 0;
-}
-.exam-crumb b { font-weight: 750; color: var(--ink); }
-.exam-crumb-sep { color: var(--line-2); }
-.exam-crumb span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.exam-time { display: flex; align-items: center; gap: 10px; }
-.exam-time[hidden] { display: none; }
-.exam-time-value {
-  font-family: var(--exam-mono);
-  font-size: 16px; font-weight: 600; color: var(--ink);
-  font-variant-numeric: tabular-nums; letter-spacing: .01em;
-}
-/* Hide Time 상태에서는 숫자 자리를 유지하되 내용만 감춘다 — 레이아웃이 튀지 않게. */
-.exam-time.is-hidden .exam-time-value { visibility: hidden; }
-.exam-hidetime {
-  display: inline-flex; align-items: center; gap: 6px;
-  border: none; background: none; padding: 2px 0;
-  color: var(--exam-accent); font-size: 15px; font-weight: 600;
-}
-.exam-hidetime svg { width: 17px; height: 17px; flex: none; }
-.exam-hidetime:hover { color: var(--ink); }
-
-/* ── 음량 팝오버 ────────────────────────────────────────── */
-/* 모달이 아니라 상단바 아래 우측에 뜨는 패널: 막대 레벨미터 + 가로 슬라이더 + 닫기 ×. */
-.exam-popover {
-  position: absolute; top: calc(var(--exam-topbar-h) + 6px); right: 18px; z-index: 60;
-  width: 360px; max-width: calc(100vw - 32px);
-  background: #fff; border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(10, 40, 42, .18);
-  padding: 14px 16px 16px;
-}
-.exam-popover[hidden] { display: none; }
-.exam-pop-close {
-  position: absolute; top: 6px; right: 8px;
-  border: none; background: none; color: var(--muted);
-  font-size: 18px; line-height: 1; padding: 4px 6px;
-}
-.exam-pop-close:hover { color: var(--ink); }
-.exam-meter {
-  display: flex; align-items: flex-end; gap: 3px;
-  height: 120px; margin: 12px 0 14px;
-}
-.exam-meter i {
-  display: block; flex: 1 1 0; min-width: 2px;
-  background: var(--exam-response); border-radius: 2px 2px 0 0;
-  opacity: .28;
-}
-.exam-meter i.on { opacity: 1; }
-.exam-vol-range { width: 100%; accent-color: #4fa89e; }
-
-/* ── RESPONSE TIME 카드 (speaking, HH:MM:SS) ────────────── */
-/* 카드 조립은 speaking 렌더러 소유. 여기서는 색·모서리·타이포 토큰만 준다.
-   관찰값: 라벤더 헤더(흰 대문자 자간 넓게) + 흰 본문(마이크 아이콘 + 등폭 큰 숫자). */
+/* ── 보라 RESPONSE TIME 박스 (HH:MM:SS) ─────────────────── */
 .response-box {
-  display: inline-flex; flex-direction: column; align-items: stretch;
-  min-width: 320px; border-radius: 12px; overflow: hidden;
-  background: #fff; box-shadow: 0 6px 18px rgba(10, 40, 42, .10);
+  display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 20px; border-radius: var(--radius);
+  background: var(--exam-response-soft);
+  border: 1px solid var(--exam-response);
+  color: var(--exam-response);
 }
 .response-box .response-label {
-  display: block; padding: 11px 20px;
-  background: var(--exam-response); color: #fff; text-align: center;
-  font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
 }
 .response-box .response-time {
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  padding: 16px 20px; background: #fff; color: var(--ink);
-  font-family: var(--exam-mono);
-  font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .02em;
+  font-size: 26px; font-weight: 850; font-variant-numeric: tabular-nums; letter-spacing: -.01em;
 }
-/* 마이크 아이콘은 렌더러를 건드리지 않고 base 에서 붙인다(외부 요청 0건 · data URI). */
-.response-box .response-time::before {
-  content: ""; width: 22px; height: 22px; flex: none;
-  background: no-repeat center/contain url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e96ea' stroke-width='1.8' stroke-linecap='round'%3E%3Crect x='9' y='2' width='6' height='11' rx='3'/%3E%3Cpath d='M5 11a7 7 0 0 0 14 0'/%3E%3Cpath d='M12 18v4'/%3E%3C/svg%3E");
+.response-box.is-recording { background: var(--exam-response); color: #fff; }
+
+/* ── 상단바 우측 컨트롤 ─────────────────────────────────── */
+.exam-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.exam-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 10px;
+  border: 1px solid var(--line-2); background: #fff; color: var(--ink-2);
+  font-size: 13px; font-weight: 700;
 }
-.response-box.is-recording .response-label { background: var(--brand); }
+.exam-btn:hover { background: var(--cream-2); }
+.exam-btn:disabled { opacity: .45; cursor: not-allowed; }
+.exam-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.exam-btn.primary:hover { background: var(--brand-ink); }
+.exam-btn.danger { color: var(--brand-ink); border-color: var(--peach-2); }
 
 /* ── 스크린 마운트 ──────────────────────────────────────── */
-.exam-main { flex: 1 1 auto; overflow: auto; padding: 26px 18px 76px; }
+.exam-main { flex: 1 1 auto; overflow: auto; padding: 22px 18px 76px; }
 .exam-screen { max-width: var(--maxw); margin: 0 auto; }
 .screen-placeholder {
   background: #fff; border: 1px dashed var(--line-2); border-radius: var(--radius-lg);
@@ -203,26 +117,17 @@ body.exam-body {
 .screen-placeholder h2 { font-size: 18px; color: var(--ink); margin-bottom: 8px; }
 .screen-placeholder-code {
   display: inline-block; margin: 6px 0 10px; padding: 4px 10px; border-radius: 8px;
-  background: var(--surface-2); color: var(--ink-2);
-  font-family: var(--exam-mono); font-size: 12px;
+  background: var(--cream-2); color: var(--ink-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px;
 }
 
-/* ── 우하단 플로팅 컨트롤 (EN/KO · 전체화면) ────────────── */
-/* 관찰값: 하단 바가 아니라 본문 우하단에 떠 있는 작은 컨트롤이다. */
+/* ── 하단바 (언어 토글 · 상태) ──────────────────────────── */
 .exam-footer {
-  position: absolute; right: 26px; bottom: 22px; z-index: 30;
-  display: flex; align-items: center; gap: 10px;
-  background: none; border: none; padding: 0;
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 18px; background: var(--exam-bar); border-top: 1px solid var(--line);
 }
-/* 디버그용 상태 문자열 — DOM 에는 남기되(스크립트가 쓴다) 화면에는 내지 않는다. */
-.exam-status { display: none; }
-.exam-footctl { display: flex; align-items: center; gap: 8px; }
-.exam-fs {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 26px; height: 26px; border: none; background: none; color: var(--muted);
-}
-.exam-fs svg { width: 15px; height: 15px; }
-.exam-fs:hover { color: var(--ink); }
+.exam-status { font-size: 12px; font-weight: 700; color: var(--muted); }
+.exam-status .dot { color: var(--brand); }
 
 /* ── 문항 그리드 네비게이션 ─────────────────────────────── */
 .grid-nav { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -240,7 +145,7 @@ body.exam-body {
 .exam-modal {
   position: fixed; inset: 0; z-index: 100;
   display: flex; align-items: center; justify-content: center; padding: 20px;
-  background: rgba(10, 40, 42, .5);
+  background: rgba(23, 21, 15, .5);
 }
 .exam-modal-card {
   width: 100%; max-width: 440px; background: #fff; border-radius: var(--radius-lg);
@@ -250,931 +155,34 @@ body.exam-body {
 .exam-modal-card p { font-size: 14px; color: var(--ink-2); margin-bottom: 18px; }
 .exam-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
-/* 정전 복구 선택지는 최대 다섯 줄이라 가로로 세우면 좁은 화면에서 글자가 깨진다.
-   한 줄에 하나씩, 위에서부터 "가까운 지점 → 먼 지점" 순으로 내려간다. */
-#resume-choices { flex-direction: column; align-items: stretch; gap: 7px; }
-#resume-choices .exam-btn { width: 100%; justify-content: center; text-align: center; }
-
-/* Exit 은 관리자 승인이 있어야 열린다 — 모달 안의 아이디·비밀번호 칸. */
-.exam-exit-auth label {
-  display: block; font-size: 12px; font-weight: 750; color: var(--ink-2); margin-bottom: 11px;
-}
-.exam-exit-auth input {
-  display: block; width: 100%; margin-top: 5px; font: inherit; font-size: 14px;
-  padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: #fff; color: inherit;
-}
-.exam-exit-auth input:focus { outline: none; border-color: var(--brand); }
-.exam-modal-card .exam-exit-err {
-  font-size: 12.5px; font-weight: 700; color: #b3261e; background: #fdeceb;
-  border: 1px solid #f5c6c2; border-radius: 10px; padding: 9px 12px; margin-bottom: 12px;
-}
-.exam-exit-err[hidden] { display: none; }
-.exam-modal .exam-btn { border: 1px solid var(--line-2); }
-.exam-modal .exam-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
-
 /* ── 시스템 배지 (오프라인 · 연습모드 · 만료 경고) ──────── */
 .exam-badge {
   display: inline-block; padding: 3px 10px; border-radius: 999px;
   font-size: 11px; font-weight: 800; letter-spacing: .04em;
-  background: var(--surface-2); color: var(--ink-2);
+  background: var(--cream-2); color: var(--ink-2);
 }
 .exam-badge.practice { background: var(--ok-soft); color: var(--ok); }
 .exam-badge.expired { background: var(--brand-soft); color: var(--brand-ink); }
 
 /* 언어 토글은 app.css 의 .lang 규칙을 그대로 쓴다(재정의하지 않음). */
 
-/* ── 제출 완료 화면 ──────────────────────────────────────
-   본문 배경은 흰색이라(--exam-bg) 상단바용 흰 알약은 여기서 보이지 않는다.
-   .instr-card 가 같은 이유로 하는 것처럼 색을 뒤집는다. */
-.exam-done .exam-btn { background: var(--exam-accent-soft); color: var(--ink); }
-.exam-done .exam-btn:hover { background: #dcf0ed; }
-.exam-done .exam-btn.primary { background: var(--exam-response); color: #fff; }
-.exam-done .exam-btn.primary:hover { filter: brightness(1.05); background: var(--exam-response); }
-
-/* 다시 응시 — 전체 한 벌은 알약 하나, 네 영역은 그 아래 한 줄.
-   채점·업로드가 끝나기 전에는 통째로 숨어 있다(exam-shell.js). */
-.exam-retake { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 20px; }
-.exam-retake[hidden] { display: none; }
-.exam-retake-title { font-size: 15px; font-weight: 800; margin-bottom: 12px; }
-.exam-retake-row {
-  display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;
-}
-.exam-retake-row + .exam-retake-row { margin-top: 12px; }
-.exam-retake-lab { font-size: 12.5px; font-weight: 700; color: var(--muted); }
-.exam-retake .sec { padding: 7px 13px; font-size: 13px; }
-
 @media (max-width: 720px) {
-  .exam-topbar { height: auto; padding: 8px 12px; flex-wrap: wrap; }
-  .exam-actions { flex: 1 1 100%; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
-  .exam-btn { padding: 7px 11px; font-size: 13px; }
-  .exam-subbar { padding: 0 12px; }
-  .exam-crumb { font-size: 13.5px; }
+  .exam-topbar { grid-template-columns: 1fr auto; grid-auto-rows: auto; height: auto; padding: 8px 12px; }
+  .exam-actions { grid-column: 1 / -1; justify-content: space-between; }
   .exam-main { padding: 16px 12px 60px; }
-  .exam-popover { right: 8px; width: calc(100vw - 16px); }
-  .exam-footer { right: 12px; bottom: 12px; }
 }
 
 /* === listening === */
-/* Story 2.2 소유. 오디오 스테이지 · 화자 이미지 · 문항 카드.
-
-   주의: .qcard / .opt 는 app.css 가 아니라 기존 exam.html 의 인라인 <style> 에만
-   있었다. exam-runtime.html 은 app.css + exam.css 만 로드하므로 여기서 최소 정의를
-   가져온다. 다른 섹션 렌더러(2.3~2.5)도 이 두 클래스를 그대로 재사용한다 —
-   자기 블록에서 다시 정의하지 말 것. */
-
-.qcard {
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow);
-}
-.qcard .prompt { font-size: 15.5px; font-weight: 650; margin: 6px 0 12px; }
-
-.opt {
-  display: flex; gap: 10px; align-items: flex-start;
-  padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px;
-  margin-bottom: 8px; cursor: pointer; font-size: 14.5px; background: var(--card);
-}
-.opt:hover { border-color: var(--brand); }
-.opt input { margin-top: 3px; accent-color: var(--brand); }
-.opt.is-selected { background: var(--brand-soft); border-color: var(--brand); font-weight: 650; }
-
-/* ── 진행 표시 · 블록 헤딩 ──────────────────────────────── */
-/* 진행 표시("Question 25 of 32")는 셸 서브바가 그린다. .lst-progress 는 렌더러가 더는
-   쓰지 않지만, 구 스냅샷/외부 마크업 호환을 위해 규칙만 남겨 둔다. */
-.lst-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-.lst-progress {
-  font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--ink-2);
-}
-.lst-heading { font-size: 12px; font-weight: 800; color: var(--brand); letter-spacing: .04em; }
-
-/* ── 오디오 재생 전용 화면 (blockKind 'audio-play') ───────
-   실측 docs/reference/screens/listening-audio-700s.png:
-   흰 배경 · 중앙 정렬 · 굵은 블록 제목 · 화자 사진(둥근 모서리, 세로로 긴 카드). */
-.lst-play {
-  position: relative;
-  min-height: 100%;
-  display: flex; flex-direction: column; align-items: center;
-  text-align: center;
-  padding: 26px 16px 40px;
-}
-.lst-play-title {
-  font-size: 30px; font-weight: 800; letter-spacing: -.01em; line-height: 1.25;
-  margin: 4px 0 26px; color: var(--ink);
-}
-.lst-play-stage { margin-bottom: 22px; }
-.lst-play-speaker {
-  width: 400px; max-width: 60vw; aspect-ratio: 1 / 1.24;
-  object-fit: cover; border-radius: 10px; background: var(--surface-2);
-  border: 1px solid var(--line);
-}
-/* 헤드폰 아이콘 — 노드를 늘리지 않도록 CSS 배경(data URI)으로 그린다. */
-.lst-play-icon {
-  width: 34px; height: 34px; margin-bottom: 10px; opacity: .55;
-  background: no-repeat center / contain
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23444' stroke-width='1.8' stroke-linecap='round'><path d='M4 14v-2a8 8 0 0 1 16 0v2'/><rect x='2.5' y='13.5' width='4.5' height='7' rx='2'/><rect x='17' y='13.5' width='4.5' height='7' rx='2'/></svg>");
-}
-.lst-play-lead { font-size: 16px; font-weight: 650; color: var(--ink); margin: 0 0 6px; }
-.lst-play-sub { font-size: 13px; color: var(--muted); margin: 0; }
-.lst-play-btn { margin-top: 16px; }
-/* 우상단 상태 배지 — 'Audio Playing...' */
-.lst-play-badge {
-  position: absolute; top: 10px; right: 8px;
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 6px 14px 6px 11px; border-radius: 999px;
-  background: var(--exam-accent-soft, #eaf6f4); color: var(--exam-accent, #34897f);
-  font-size: 12.5px; font-weight: 700; letter-spacing: .01em;
-}
-.lst-play-badge::before {
-  content: ''; width: 14px; height: 14px; flex: none;
-  background: no-repeat center / contain
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b73d8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 9v6h4l5 4V5L8 9H4z'/><path d='M17 8.5a5 5 0 0 1 0 7'/></svg>");
-}
-.lst-play.is-playing .lst-play-badge { animation: lst-play-blink 1.4s infinite; }
-.lst-play.is-done .lst-play-badge,
-.lst-play.is-spent .lst-play-badge { background: var(--surface-2); color: var(--muted); }
-@keyframes lst-play-blink { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-.lst-instruction { font-size: 14px; color: var(--ink-2); margin-bottom: 12px; }
-
-/* ── 오디오 스테이지 (exam.html .au-stage 연출 계승) ─────── */
-.lst-au { margin: 2px 0 14px; }
-.lst-au-stage {
-  position: relative; display: flex; align-items: center; gap: 18px;
-  background: linear-gradient(160deg, var(--brand-tint), var(--brand-tint-2));
-  border: 1px solid var(--brand-tint-2); border-radius: var(--radius); padding: 16px 18px;
-}
-.lst-au-speaker {
-  width: 120px; height: 120px; object-fit: contain; flex: none;
-  border-radius: 12px; background: var(--card); border: 1px solid var(--line);
-}
-.lst-au-meta { display: flex; flex-direction: column; min-width: 0; }
-/* 재생 잔여시간. pill 과 달리 사각·brand-ink 계열이고 라벨이 아래에 붙는다. */
-.lst-au-count {
-  font-size: 34px; font-weight: 850; color: var(--brand-ink);
-  font-variant-numeric: tabular-nums; letter-spacing: -.02em; line-height: 1.1;
-}
-.lst-au-cap { font-size: 12px; font-weight: 700; color: var(--muted); }
-.lst-au.is-playing .lst-au-stage { box-shadow: 0 0 0 3px rgba(14, 143, 130, .25) inset; }
-.lst-au.is-playing .lst-au-count { color: var(--brand); animation: lst-au-pulse 1s infinite; }
-@keyframes lst-au-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
-.lst-au.is-done .lst-au-stage,
-.lst-au.is-spent .lst-au-stage { background: var(--surface-2); border-color: var(--line); }
-.lst-au.is-done .lst-au-count,
-.lst-au.is-spent .lst-au-count { color: var(--dim); }
-.lst-au-play { margin-top: 10px; }
-.lst-au-audio { display: none; }   /* 브라우저 기본 컨트롤 노출 금지 — 1회 재생 강제(FR8) */
-
-/* 블록 오디오 방식의 후속 문항: 삽화만 유지 */
-.lst-illus { margin-bottom: 14px; }
-.lst-illus .lst-au-speaker { width: 96px; height: 96px; }
-
-/* ── 답변 화면 2열 (오디오가 앞 화면으로 분리된 경우) ─────
-   실측 listening-question-900s.png: 카드 테두리 없음 · 좌 화자 사진 · 우 문항+선택지. */
-.lst-split {
-  display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 46px;
-  align-items: start;
-  max-width: 1180px; margin: 8px auto 0;
-  background: none; border: 0; box-shadow: none; padding: 0;
-}
-.lst-split .lst-illus { margin-bottom: 0; }
-.lst-split .lst-illus-img {
-  width: 100%; height: auto; aspect-ratio: 1 / 1.24; object-fit: cover;
-  border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2);
-}
-.lst-split .lst-q { padding-top: 4px; }
-
-/* 오디오가 이 화면에서 도는 구성(TOEFL: 사진 좌 · 문항 우 · mp3 재생).
-   왼쪽 칸은 사진 위 · 남은 재생시간 아래로 세로 배치한다. */
-.lst-split .lst-au-col { margin: 0; }
-.lst-split .lst-au-col .lst-au-stage {
-  flex-direction: column; align-items: stretch; gap: 12px; padding: 14px;
-}
-.lst-split .lst-au-col .lst-au-meta { flex-direction: row; align-items: baseline; gap: 10px; }
-.lst-split .lst-au-col .lst-au-count { font-size: 26px; }
-.lst-split .lst-au-col .lst-au-cap { line-height: 1.4; }
-.lst-split .lst-au-col .lst-au-play { width: 100%; }
-.lst-card .prompt { font-size: 20px; font-weight: 700; line-height: 1.35; margin: 0 0 20px; }
-
-/* ── 문항 영역 ──────────────────────────────────────────── */
-.lst-q.is-waiting { opacity: .5; }
-/* 대화·강의형: 재생이 끝날 때까지 문항·선택지를 감춘다(안내문만 남는다). */
-.lst-q.is-hidden > .lst-prompt,
-.lst-q.is-hidden > .lst-opts { display: none; }
-.lst-opts.is-locked { pointer-events: none; }
-.lst-opts.is-locked .opt { background: var(--surface-2); color: var(--muted); cursor: not-allowed; }
-.lst-waiting { font-size: 12.5px; margin-top: 8px; }
-
-/* 선택지 — 관찰값: 라디오 대신 A/B/C/D 원형 배지, 넉넉한 여백의 흰 박스 */
-.lst-opts .opt { align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; font-size: 15px; }
-.lst-opts .opt input { opacity: 0; width: 0; height: 0; margin: 0; flex: none; }
-.lst-opts .opt:focus-within { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
-.opt-key {
-  flex: none; width: 30px; height: 30px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: var(--surface-2); border: 1px solid var(--line);
-  font-size: 13.5px; font-weight: 700; color: var(--ink-2);
-}
-.lst-opts .opt.is-selected .opt-key { background: var(--brand); border-color: var(--brand); color: #fff; }
-
-/* ── 복수 선택(mcq-multi) — "Choose 2 answers." ────────────
-   단일선택과 같은 2열 레이아웃을 쓰되, 배지를 원형→사각으로 바꿔 "여러 개"임을
-   글자를 읽기 전에 알 수 있게 한다. 상한에 닿은 뒤의 미선택 항목은 흐려진다. */
-.lst-selecthint {
-  font-size: 12.5px; font-weight: 700; letter-spacing: .01em;
-  color: var(--ink-2); margin: -6px 0 12px;
-}
-.lst-selecthint.is-full { color: var(--brand); }
-.lst-opts.is-multi .opt input { opacity: 0; width: 0; height: 0; margin: 0; flex: none; }
-.lst-opts.is-multi .opt-key { border-radius: 8px; }
-.lst-opts.is-multi .opt.is-selected .opt-key::after {
-  content: ''; position: absolute; width: 14px; height: 14px;
-  background: no-repeat center / contain
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12.5l5.5 5.5L20 6'/></svg>");
-}
-.lst-opts.is-multi .opt.is-selected .opt-key { position: relative; color: transparent; }
-.lst-opts.is-multi .opt.is-capped { opacity: .55; cursor: not-allowed; }
-.lst-opts.is-multi .opt.is-capped:hover { border-color: var(--line); }
-
-/* 상한을 채운 상태에서 다음에 밀려날 답(가장 먼저 고른 것).
-   테두리를 점선으로 바꿔 "다음에 다른 걸 고르면 이게 빠진다" 를 미리 보여 준다. */
-.lst-opts.is-multi .opt.is-next-out { border-style: dashed; }
-.lst-opts.is-multi .opt.is-next-out .opt-key { opacity: .72; }
-
-/* short-response(문항 1개=화면 1개): 삽화 위 · 선택지 세로 */
-.lst-short .lst-au-stage { flex-direction: column; text-align: center; gap: 10px; }
-.lst-short .lst-au-speaker { width: 150px; height: 150px; }
-/* 2열(사진 좌·문항 우) 안에서는 short-response 도 왼쪽 칸을 꽉 채운다. */
-.lst-short .lst-au-col .lst-au-speaker { width: 100%; height: auto; }
-
-@media (max-width: 900px) {
-  .lst-split { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .lst-split .lst-illus-img { width: 260px; max-width: 60vw; }
-  .lst-play-title { font-size: 24px; }
-}
-@media (max-width: 720px) {
-  .lst-au-stage { flex-direction: column; text-align: center; }
-  .lst-au-speaker { width: 96px; height: 96px; }
-  .lst-au-count { font-size: 28px; }
-}
+/* Story 2.2 소유. 오디오 스테이지 · 화자 이미지 · 문항 카드. */
 
 /* === reading === */
-/* Story 2.3 소유. cloze / passage / chat / insert 마커.
-   색은 app.css 토큰과 base 블록의 --exam-* 토큰만 쓴다(F6). 이 블록은 새 토큰을 정의하지 않는다. */
-
-/* 화면 제목 — 관찰(reading-cloze-2760s.png): 중앙 상단에 큰 한 줄. 진행 표시·타이머는 서브바 소유. */
-.rd-screen { max-width: 1180px; margin: 0 auto; }
-.rd-title {
-  margin: 6px 0 22px; text-align: center;
-  font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.25; color: var(--ink);
-}
-/* 관찰: 카드는 흰 배경 + 아주 연한 테두리. */
-.rd-card {
-  background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg);
-  padding: 28px 38px;
-}
-
-/* 2단: 좌 지문(자체 스크롤) · 우 문항. 940px 미만은 1단으로 접는다(Story 2.3 AC2). */
-.rd-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
-.rd-left { position: sticky; top: 0; min-width: 0; }
-.rd-right { min-width: 0; }
-.rd-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-
-/* 긴 지문은 화면 안에서만 스크롤한다 — 상단바/타이머는 셸이 고정하고 있다. */
-.rd-scroll {
-  max-height: calc(100dvh - var(--exam-topbar-h) - var(--exam-subbar-h) - 150px);
-  overflow-y: auto;
-  background: #fff;                 /* 관찰: 카드 배경은 흰색 + 아주 연한 테두리 */
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-}
-.rd-passage-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; color: var(--ink); }
-.rd-passage-image {
-  display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  margin: 0 auto 14px;
-  object-fit: contain;
-}
-.rd-para { font-size: 15px; line-height: 1.8; margin-bottom: 12px; color: var(--ink-2); }
-.rd-para:last-child { margin-bottom: 0; }
-
-/* 어휘 문항의 표적 어휘 — 지문에 미리 표시해 두되, 지금 펴 놓은 문항의 단어만 켠다.
-   mark 의 브라우저 기본 노랑을 끄고, is-on 일 때만 색을 준다. */
-.rd-hit { background: transparent; color: inherit; }
-.rd-hit.is-on {
-  background: #fff1a8; color: inherit; border-radius: 4px; padding: 0 2px;
-  box-shadow: 0 0 0 1px rgba(140, 110, 0, .08) inset;
-}
-
-/* cloze — 관찰(reading-cloze-2760s.png): 빈 입력상자가 아니라 '어간 + 남은 글자 수만큼의 밑줄'이
-   지문 안에 인라인으로 있다(fo__ / she____ / prov_____). 어간은 본문 글꼴, 밑줄과 입력 글자는 등폭.
-   레일(밑줄)은 입력칸 뒤에 겹쳐 두고, 이미 친 글자만큼은 공백으로 비워 두므로 오프셋 계산이 필요 없다. */
-.rd-cloze-card { padding-top: 34px; }
-.rd-cloze-text { font-size: 19px; line-height: 2.05; color: var(--ink); }
-
-/* 칸은 끊어 보이되 낱말은 한 낱말로 읽혀야 한다 — 'popul_ _ _ _ _ _'가 아니라 'popul¦_¦_¦_'.
-   그래서 자간은 칸 경계가 겨우 보일 만큼(.1em)만 주고, 어간과 밑줄 사이에는 여백을 두지 않는다.
-   자간이 크면 낱말이 흩어지고, 0 이면 밑줄이 한 줄로 뭉쳐 글자 수가 세어지지 않는다.
-   레일과 입력칸이 같은 letter-spacing 을 상속하므로 타이핑한 글자는 밑줄 자리에 그대로 앉는다. */
-/* 낱말 사이는 칸 사이보다 넓어야 한다. 'have {{2}} {{3}} {{4}}' 처럼 빈칸이 잇달아 오면
-   밑줄이 이어져 어디서 한 낱말이 끝나는지 보이지 않으므로, 빈칸 뒤에 낱말 간격을 더 준다
-   (칸 경계 .1em < 낱말 경계 공백+.34em). */
-.rd-blank { display: inline; white-space: nowrap; --rd-blank-gap: .1em; margin-right: .34em; }
-.rd-blank-stem { color: var(--ink); }
-.rd-blank-slot {
-  position: relative; display: inline-block; vertical-align: baseline;
-  font-family: var(--exam-mono); border-radius: 3px;
-  letter-spacing: var(--rd-blank-gap); margin-left: 0;
-}
-.rd-blank-rail {
-  position: absolute; left: 0; top: 0; white-space: pre; pointer-events: none;
-  font: inherit; color: var(--ink);
-}
-.blank-in, .rd-blank-in {
-  position: relative; display: block; width: 100%;
-  border: none; background: transparent; padding: 0; margin: 0;
-  font: inherit; color: var(--ink);
-}
-.blank-in:focus, .rd-blank-in:focus { outline: none; }
-.blank-in:disabled { color: var(--muted); }
-/* 채워진 칸은 아주 연하게, 지금 입력 중인 칸은 또렷하게 강조한다. */
-.rd-blank.is-filled .rd-blank-slot { background: var(--exam-response-soft); }
-.rd-blank.is-focus .rd-blank-slot { background: var(--exam-accent-soft); }
-
-.rd-cloze-sep { margin: 26px 0 16px; border-top: 1px solid var(--line); }
-.rd-cloze-note { font-size: 14px; font-style: italic; color: var(--muted); line-height: 1.6; }
-
-/* insert 마커 — 지문 안의 클릭 가능한 삽입 지점 */
-.rd-marker {
-  display: inline; padding: 0 4px; border: none; background: transparent;
-  color: var(--brand); font-size: 13px; font-weight: 800; cursor: pointer;
-}
-/* 글자 배지 — 본문 줄 사이에서 동그라미 하나로 선다. 줄 높이를 밀지 않도록
-   지름을 글자보다 살짝만 키운다. */
-.rd-marker .rd-marker-dot {
-  display: inline-block; width: 20px; height: 20px; line-height: 19px;
-  text-align: center; border-radius: 50%; font-size: 12px; font-weight: 850;
-  vertical-align: -4px; background: var(--brand-soft); color: var(--brand-ink);
-  border: 1px solid var(--brand-tint-2);
-}
-.rd-marker:hover .rd-marker-dot { background: var(--brand); color: #fff; border-color: var(--brand); }
-.rd-marker.is-chosen .rd-marker-dot { background: var(--brand); color: #fff; border-color: var(--brand); }
-.rd-marker .rd-marker-preview { color: var(--ink-2); font-weight: 600; font-style: italic; }
-.rd-insert-sentence { font-style: italic; margin-bottom: 10px; }
-/* insert 보기의 글자 배지 — 지문 마커와 같은 색·같은 크기로 세운다. */
-.rd-opt-marker {
-  display: inline-block; width: 20px; height: 20px; line-height: 19px;
-  text-align: center; border-radius: 50%; font-size: 12px; font-weight: 850;
-  vertical-align: -4px; background: var(--brand-soft); color: var(--brand-ink);
-  border: 1px solid var(--brand-tint-2);
-}
-.opt.is-chosen .rd-opt-marker { background: var(--brand); color: #fff; border-color: var(--brand); }
-/* 문장 클릭 지문의 A~D 글자 — 지문 속에서 바로 찾도록 색 배지로 세운다. */
-.rd-sent-letter {
-  display: inline-block; min-width: 20px; height: 20px; line-height: 19px;
-  text-align: center; border-radius: 50%; font-size: 12px; font-weight: 850;
-  vertical-align: -4px; background: var(--brand); color: #fff;
-  border: 1px solid var(--brand);
-}
-
-/* chat — 말풍선 */
-.rd-chat { display: flex; flex-direction: column; gap: 10px; }
-.rd-chat-row { display: flex; }
-.rd-chat-row.right { justify-content: flex-end; }
-.rd-chat-bubble {
-  max-width: 82%; padding: 9px 12px; border-radius: 14px;
-  background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow);
-}
-.rd-chat-row.right .rd-chat-bubble { background: var(--brand-soft); border-color: var(--brand-tint-2); }
-.rd-chat-meta { font-size: 11.5px; margin-bottom: 3px; }
-.rd-chat-meta .muted { font-weight: 600; }
-.rd-chat-text { font-size: 13.5px; line-height: 1.65; color: var(--ink-2); white-space: pre-wrap; }
-
-/* 문항 카드 · 선택 상태 */
-/* 리딩은 한 화면(=지문 한 편) 안에서도 문항을 하나씩만 편다 — 나머지는 [hidden] 이다. */
-.rd-q { margin-bottom: 12px; }
-.rd-q[hidden] { display: none; }
-.rd-q .opt.is-chosen { background: var(--brand-soft); border-color: var(--brand); }
-.rd-grid { margin-bottom: 12px; }
-
-@media (max-width: 939px) {
-  .rd-cols { grid-template-columns: minmax(0, 1fr); }
-  .rd-left { position: static; }
-  .rd-scroll { max-height: 46vh; }
-}
+/* Story 2.3 소유. cloze / passage / chat / insert 마커. */
 
 /* === writing === */
-/* Story 2.4 소유. build-set 드래그 타일 · free-write 에디터 · 단어 카운터.
-   색은 app.css / base 블록 토큰만 사용한다(F6 — 색상 리터럴 금지). */
-
-.wr-screen { display: flex; flex-direction: column; gap: 16px; }
-.wr-heading { font-size: 19px; font-weight: 800; letter-spacing: -.02em; color: var(--ink); }
-.wr-hint { font-size: 13px; }
-.wr-locked-note {
-  font-size: 13px; font-weight: 700; color: var(--brand-ink);
-  background: var(--brand-soft); border-radius: var(--radius); padding: 10px 14px;
-}
-
-/* ── build-set: 문제 지문 ───────────────────────────────── */
-.wr-context {
-  background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg);
-  padding: 14px 16px; box-shadow: var(--shadow);
-}
-.wr-context-label {
-  display: block; font-size: 10px; font-weight: 800; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
-}
-.wr-context-text { font-size: 15.5px; font-weight: 600; color: var(--ink); }
-
-/* ── build-set: 문장 조립 영역 ──────────────────────────── */
-.wr-sentence {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 6px;
-  min-height: 64px; padding: 16px;
-  background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  font-size: 16px; line-height: 1.6;
-}
-.wr-fixed { font-weight: 650; color: var(--ink); }
-
-.wr-slot {
-  min-width: 84px; min-height: 40px; padding: 8px 14px;
-  border-radius: 10px; border: 2px dashed var(--line-2); background: var(--surface-2);
-  font-size: 15px; font-weight: 700; color: var(--ink-2);
-}
-.wr-slot.is-filled { border-style: solid; border-color: var(--brand); background: var(--brand-soft); color: var(--brand-ink); }
-.wr-slot.is-target { border-color: var(--ink); background: #fff; }
-.wr-slot.is-over { border-color: var(--brand); background: var(--brand-soft); }
-.wr-slot:disabled { opacity: .55; cursor: not-allowed; }
-
-/* ── build-set: 타일 팔레트 ─────────────────────────────── */
-.wr-tiles {
-  display: flex; flex-wrap: wrap; gap: 8px;
-  min-height: 56px; padding: 12px;
-  border: 1px dashed var(--line-2); border-radius: var(--radius-lg); background: var(--surface);
-}
-.wr-tile {
-  padding: 9px 15px; border-radius: 10px;
-  border: 1px solid var(--line-2); background: #fff; color: var(--ink);
-  font-size: 15px; font-weight: 700; cursor: grab;
-  box-shadow: var(--shadow);
-}
-.wr-tile:hover { border-color: var(--brand); }
-.wr-tile.is-selected { background: var(--ink); border-color: var(--ink); color: #fff; }
-.wr-tile:disabled { opacity: .5; cursor: not-allowed; }
-.wr-tiles-empty { font-size: 13px; align-self: center; }
-
-.wr-preview { min-height: 0; }
-.wr-preview.is-complete {
-  padding: 12px 16px; border-radius: var(--radius);
-  background: var(--ok-soft); color: var(--ok);
-}
-.wr-preview-text { font-size: 15.5px; font-weight: 750; }
-
-/* ── build-set: 문항 그리드 ─────────────────────────────── */
-.wr-grid { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.wr-grid-label {
-  font-size: 10px; font-weight: 800; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--muted);
-}
-.wr-grid .grid-nav button:disabled { opacity: .4; cursor: not-allowed; }
-.wr-grid .grid-nav button.current { opacity: 1; }
-
-/* ── free-write ─────────────────────────────────────────── */
-.wr-task {
-  display: flex; flex-direction: column; gap: 14px;
-  background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg);
-  padding: 20px; box-shadow: var(--shadow);
-}
-.wr-bar { display: flex; gap: 8px; align-items: center; }
-
-/* 과제(좌) / 작성창(우) 2단. 좁은 화면은 1단으로 접고 과제가 위로 간다. */
-.wr-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
-.wr-pane { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.wr-pane-answer { position: sticky; top: 0; }
-/* 과제 지문이 길어도 작성창 높이를 밀지 않도록 왼쪽 칸만 스크롤한다(실제 시험 화면과 동일). */
-.wr-pane-task { max-height: calc(100vh - 230px); overflow-y: auto; padding-right: 10px; }
-/* 지문은 드래그 선택·복사 금지 — 답안창에 통째로 붙여넣는 것을 막는다. */
-.wr-pane-task {
-  -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
-  -webkit-touch-callout: none;
-}
-.wr-pane-task button, .wr-pane-task a { -webkit-user-select: none; user-select: none; }
-@media (max-width: 900px) {
-  .wr-cols { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .wr-pane-answer { position: static; }
-  .wr-pane-task { max-height: none; overflow-y: visible; padding-right: 0; }
-}
-
-/* Task 3 지시문 블록 */
-.wr-intro { display: flex; flex-direction: column; gap: 8px; }
-.wr-intro-lead { font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
-.wr-intro-label { font-size: 14.5px; font-weight: 800; color: var(--ink); }
-.wr-intro-min { font-size: 13.5px; color: var(--muted); }
-
-/* 응답 패널 머리. 스크린샷에서는 카드가 아니라 맨 텍스트로 붙는다. */
-.wr-resp-head { font-size: 15px; font-weight: 800; color: var(--ink); }
-.wr-pane-answer .wr-mail-head {
-  background: none; border: 0; border-radius: 0; padding: 0; gap: 2px;
-}
-.wr-pane-answer .wr-mail-key { width: auto; color: var(--ink); }
-
-.wr-mail-head {
-  display: flex; flex-direction: column; gap: 6px;
-  border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
-  background: var(--surface);
-}
-.wr-mail-row { display: flex; gap: 10px; font-size: 14px; }
-.wr-mail-key { flex: none; width: 82px; font-weight: 800; color: var(--muted); }
-.wr-mail-val { font-weight: 650; color: var(--ink); word-break: break-word; }
-
-.wr-situation, .wr-bullets {
-  border: 1px solid var(--line-2); border-radius: var(--radius); padding: 14px 16px;
-}
-.wr-situation-label, .wr-bullets-label {
-  font-size: 10.5px; font-weight: 800; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--brand-ink); margin-bottom: 6px;
-}
-.wr-situation-text { font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
-.wr-bullets-list { margin: 0; padding-left: 20px; font-size: 14.5px; line-height: 1.8; color: var(--ink-2); }
-.wr-bullets-list li { list-style: disc; }
-
-.wr-disc { display: flex; flex-direction: column; gap: 16px; }
-.wr-disc-prof { font-size: 13px; font-weight: 800; color: var(--brand-ink); }
-.wr-disc-prompt { font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
-.wr-post { display: flex; gap: 12px; align-items: flex-start; }
-.wr-post-body { min-width: 0; }
-.wr-post-name { font-size: 13px; font-weight: 800; color: var(--ink); margin-bottom: 4px; }
-.wr-post-text { font-size: 14px; line-height: 1.6; color: var(--ink-2); }
-.wr-avatar {
-  flex: none; width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
-  background: var(--surface-2); border: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: center;
-}
-.wr-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.wr-avatar-ini { font-size: 14px; font-weight: 800; color: var(--muted); letter-spacing: .02em; }
-
-/* 작성창 툴바 — 단어수 표시 토글 (우). 편집 버튼(Cut/Paste/Undo/Redo)은 두지 않는다. */
-.wr-tools { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
-.wr-tools-left { display: flex; gap: 6px; }
-.wr-tools-right { display: flex; align-items: center; gap: 10px; }
-.wr-count-toggle {
-  font: inherit; font-size: 12.5px; font-weight: 700; color: var(--brand-ink);
-  background: none; border: 0; padding: 2px 4px; cursor: pointer;
-}
-.wr-count-toggle:hover { text-decoration: underline; }
-
-.wr-textarea {
-  width: 100%; min-height: 220px; resize: vertical;
-  border: 1px solid var(--line-2); border-radius: var(--radius); padding: 14px;
-  font: inherit; font-size: 15px; line-height: 1.65; color: var(--ink); background: #fff;
-}
-.wr-pane-answer .wr-textarea { min-height: 360px; }
-.wr-textarea:focus { outline: 2px solid var(--brand); outline-offset: -1px; }
-.wr-textarea[readonly] { background: var(--surface-2); color: var(--ink-2); }
-
-.wr-foot { display: flex; align-items: baseline; gap: 10px; }
-.wr-count { font-size: 14px; font-weight: 800; color: var(--ok); font-variant-numeric: tabular-nums; }
-.wr-count--warn { color: var(--brand-ink); }
-.wr-min { font-size: 12px; font-weight: 700; color: var(--muted); }
-
-@media (max-width: 560px) {
-  .wr-sentence { padding: 12px; }
-  .wr-slot { min-width: 68px; }
-  .wr-mail-key { width: 64px; }
-  .wr-textarea { min-height: 180px; }
-}
+/* Story 2.4 소유. build-set 드래그 타일 · free-write 에디터 · 단어 카운터. */
 
 /* === speaking === */
 /* Story 2.5 소유. phases 렌더 · 녹음 인디케이터(.response-box 는 base 소유). */
 
-/* 관찰(speaking-response-1830s.png): 흰 배경 위에 카드 테두리 없이
-   [지시문] → [화자 영상] → [RESPONSE TIME 카드] 가 세로 중앙 정렬로 쌓인다.
-   화면 안 진행표시(.speaking-head/.speaking-progress)는 존재하지 않는다 — 서브바가 그린다.
-   그 두 클래스는 렌더러에서 제거했으므로 규칙도 함께 삭제했다. */
-.speaking-screen {
-  display: flex; flex-direction: column; align-items: center; gap: 18px;
-  text-align: center;
-}
-
-/* 오류·경고 배너 — FR14 의 "명시적 고지". 색만이 아니라 좌측 굵은 테두리로도 구분(NFR9). */
-.speaking-banner[hidden] { display: none; }
-.speaking-banner {
-  padding: 10px 14px; border-radius: var(--radius);
-  border-left: 4px solid var(--line-2); background: var(--surface-2);
-  font-size: 13px; font-weight: 650; color: var(--ink-2);
-}
-.speaking-banner.is-warn { border-left-color: var(--warn); }
-.speaking-banner.is-error { border-left-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
-
-/* 지시문 — 관찰: 화면 최상단 중앙, 크고 굵은 검정. (예: "Please answer the interviewer's questions.") */
-.speaking-caption {
-  max-width: 760px; text-align: center;
-  font-size: 27px; font-weight: 800; letter-spacing: -.015em; line-height: 1.3;
-  color: var(--ink);
-}
-.speaking-caption p { margin: 0; }
-
-/* 화자 무대 — 관찰: 흰 배경에 테두리·그림자 없이 인물만 놓인다. */
-.speaking-stage {
-  display: flex; flex-direction: column; align-items: center; gap: 14px;
-  padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none;
-}
-.speaking-portrait {
-  max-width: 300px; width: 100%; height: auto;
-}
-/* 제시 이미지는 재생 중에도 정지 상태를 유지한다 — 실제 시험처럼 흔들리지 않는다.
-   (구 speaking-talk 확대/축소 맥동 규칙 삭제) */
-.speaking-stage.is-playing .speaking-portrait { animation: none; transform: none; }
-/* (구 .speaking-caption 15px 규칙 삭제 — 위의 관찰값 27px 제목 규칙이 정본이다) */
-.speaking-audio { display: none; }   /* 재생은 1회 자동 — 컨트롤을 노출하지 않는다 */
-
-/* IELTS Part 2 cue card (phase.media.kind === 'image') */
-.speaking-cue[hidden] { display: none; }
-.speaking-cue {
-  display: block; max-width: 520px; width: 100%; margin: 0 auto;
-  border: 1px solid var(--line-2); border-radius: var(--radius); box-shadow: var(--shadow);
-}
-
-/* RESPONSE TIME 도크 — 관찰: 화자 영상 "바로 아래" 중앙. 화면 바닥으로 밀지 않는다
-   (구 margin-top:auto 는 카드를 하단에 붙여 관찰된 배치와 어긋났다). */
-.speaking-dock {
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
-  margin-top: 4px;
-}
-.speaking-dock .response-box[hidden] { display: none; }
-.speaking-dock .response-box { min-width: 320px; }
-/* 녹음 중 맥동 — 카드가 살아 있음을 보인다. 카드가 흰색이라 링만 은은하게. */
-.response-box.is-recording { animation: speaking-pulse 1.6s ease-in-out infinite; }
-@keyframes speaking-pulse {
-  0%, 100% { box-shadow: 0 6px 18px rgba(10, 40, 42, .10), 0 0 0 0 rgba(169, 176, 234, .55); }
-  50%      { box-shadow: 0 6px 18px rgba(10, 40, 42, .10), 0 0 0 10px rgba(169, 176, 234, 0); }
-}
-
-/* 입력 레벨 미터 (AnalyserNode). 흰 본문 카드의 맨 아래 얇은 띠로 앉는다. */
-.speaking-meter {
-  width: 100%; height: 10px; border-radius: 0;
-  background: var(--exam-response-soft); overflow: hidden;
-  /* 눈금을 새겨 둔다 — 통짜 막대보다 움직임이 눈에 잡힌다. */
-  background-image: repeating-linear-gradient(to right,
-    rgba(255, 255, 255, .85) 0 2px, transparent 2px 12px);
-}
-.speaking-meter-fill {
-  display: block; width: 0; height: 100%;
-  background: var(--exam-response); transition: width .06s linear;
-}
-.response-box.is-recording .speaking-meter-fill { background: var(--brand); }
-/* 녹음 중인데 아무 소리도 안 들어오면 띠가 조용히 숨을 쉰다 — 죽은 화면과 구분된다. */
-.speaking-meter.is-armed:not(.is-live) { animation: speaking-meter-idle 1.4s ease-in-out infinite; }
-.speaking-meter.is-live .speaking-meter-fill { background: var(--ok, #2e7d32); }
-@keyframes speaking-meter-idle { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-
-/* prep phase 칩 — TOEFL 3초 / IELTS Part 2 60초 모두 같은 위젯 */
-.speaking-prep[hidden] { display: none; }
-.speaking-prep {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 8px 16px; border-radius: 999px;
-  border: 1px dashed var(--exam-response); color: var(--exam-response);
-  font-size: 13px; font-weight: 800; letter-spacing: .04em;
-}
-.speaking-prep-time { font-variant-numeric: tabular-nums; font-size: 16px; }
-
-.speaking-actions { display: flex; justify-content: center; }
-.speaking-btn[hidden] { display: none; }
-
-/* 녹음 후 미리듣기 (재녹음 불가 — AC6) */
-.speaking-review[hidden] { display: none; }
-.speaking-review {
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff;
-  font-size: 13px; color: var(--ink-2);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .response-box.is-recording { animation: none; }
-}
-
-@media (max-width: 720px) {
-  .speaking-portrait { max-width: 76%; }
-  .speaking-caption { font-size: 21px; }
-  .speaking-dock .response-box { min-width: 0; width: 100%; max-width: 320px; }
-}
-
 /* === instruction / moduleEnd / hardwareCheck / review === */
 /* Story 2.1 소유. 안내 화면 · 모듈 종료 · 장치 점검 · 제출 확인. */
-
-.instr-card {
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg);
-  padding: 34px 32px; box-shadow: var(--shadow); max-width: 780px; margin: 0 auto;
-}
-.instr-card h1 { font-size: 26px; font-weight: 850; letter-spacing: -.02em; margin-bottom: 12px; }
-.instr-body { font-size: 15.5px; color: var(--ink-2); line-height: 1.65; margin-bottom: 20px; }
-.instr-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
-.instr-cta { padding: 11px 26px; font-size: 15px; }
-/* 카드 안 버튼은 흰 배경 위에 놓인다 — 상단바용 흰 알약 스타일을 여기서 뒤집는다. */
-.instr-card .exam-btn { background: var(--exam-accent-soft); color: var(--ink); }
-.instr-card .exam-btn:hover { background: #dcf0ed; }
-.instr-card .exam-btn.primary { background: var(--exam-response); color: #fff; }
-.instr-card .exam-btn.primary:hover { filter: brightness(1.05); background: var(--exam-response); }
-.instr-card .exam-btn:disabled { opacity: .55; color: inherit; }
-
-/* ── Adjusting the Volume (녹화 02:30) ──────────────────── */
-/* 화면 안에는 슬라이더가 없다 — 조절은 상단바 Volume 팝오버가 담당한다. */
-.instr-volume-screen h1 { text-align: center; font-size: 30px; margin-bottom: 0; }
-.instr-volume-screen .instr-rule { margin: 20px 0 26px; }
-.instr-vol-para { font-size: 16.5px; color: var(--ink); margin-bottom: 22px; }
-.instr-vol-para b { font-weight: 850; }
-
-.instr-volume { margin-top: 30px; }
-.instr-vol-note { display: flex; align-items: center; gap: 22px; }
-.instr-vol-icon {
-  flex: 0 0 auto; width: 58px; height: 58px; border-radius: 50%; border: 0;
-  background: var(--exam-response); color: #fff; cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.instr-vol-icon svg { width: 28px; height: 28px; }
-.instr-vol-icon:hover { filter: brightness(1.05); }
-.instr-vol-icon:focus-visible { outline: 2px solid var(--exam-accent); outline-offset: 3px; }
-.instr-vol-note-text { font-size: 16.5px; color: var(--ink); }
-
-.instr-vol-play-row { display: flex; justify-content: center; margin-top: 42px; }
-.instr-testaudio { padding: 12px 26px; font-size: 15.5px; gap: 10px; }
-.instr-testaudio svg { width: 18px; height: 18px; fill: currentColor; stroke: none; }
-.instr-vol-status { font-size: 12.5px; margin-top: 10px; text-align: center; }
-.instr-vol-status:empty { display: none; }   /* 오류가 없으면 자리를 차지하지 않는다 */
-
-/* ── 표 (Speaking directions · review 집계) ─────────────── */
-.instr-table-wrap { overflow-x: auto; margin: 6px 0 4px; }
-.instr-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.instr-table th, .instr-table td {
-  text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line);
-  white-space: nowrap;
-}
-.instr-table th {
-  font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase;
-  color: var(--muted); border-bottom-color: var(--line-2);
-}
-.instr-table td:first-child { white-space: normal; font-weight: 650; }
-.instr-table-total td { font-weight: 850; border-bottom: none; background: var(--surface); }
-.instr-table td.is-unanswered { color: var(--brand-ink); font-weight: 800; }
-
-/* ── Section Directions (Reading) ───────────────────────── */
-/* 레퍼런스 화면: 제목 왼쪽 액센트 바 · 격자 테두리 표 · 굵은 시간 표기. */
-.instr-directions h1 {
-  border-left: 5px solid var(--exam-accent);
-  padding-left: 14px; margin-bottom: 18px;
-}
-.instr-directions .instr-table-wrap { margin: 18px 0 22px; }
-.instr-directions .instr-table th,
-.instr-directions .instr-table td {
-  border: 1px solid var(--line); white-space: normal; vertical-align: top;
-  padding: 12px 14px; font-size: 14.5px;
-}
-.instr-directions .instr-table th {
-  background: var(--exam-accent-soft); color: var(--ink-2);
-  font-size: 13px; font-weight: 800; letter-spacing: 0; text-transform: none;
-}
-.instr-directions .instr-table td:first-child { width: 38%; font-weight: 650; }
-.instr-dir-time b { font-weight: 850; color: var(--ink); }
-
-/* ── Hardware Check ─────────────────────────────────────── */
-.instr-hw-row { border-top: 1px solid var(--line); padding-top: 18px; margin-top: 18px; }
-.instr-hw-title { font-size: 13px; font-weight: 800; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--ink-2); margin-bottom: 12px; }
-.instr-hw-row .exam-btn { margin-bottom: 10px; }
-.instr-hw-status { font-size: 13.5px; color: var(--ink-2); margin-bottom: 10px; }
-.instr-hw-status.is-ok { color: var(--ok); font-weight: 700; }
-.instr-hw-status.is-error { color: var(--brand-ink); font-weight: 700; }
-.instr-meter {
-  height: 14px; border-radius: 999px; background: var(--surface-2);
-  border: 1px solid var(--line); overflow: hidden; margin-bottom: 10px;
-}
-.instr-meter-bar { height: 100%; width: 0%; background: var(--line-2); transition: width .06s linear; }
-.instr-meter-bar.is-live { background: var(--ok); }
-.instr-hw-pick { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-.instr-hw-picklabel { font-size: 13px; font-weight: 700; color: var(--ink-2); }
-.instr-hw-select {
-  flex: 1 1 260px; min-width: 0; max-width: 480px;
-  font: inherit; font-size: 14px; color: var(--ink);
-  padding: 8px 10px; border-radius: 8px;
-  border: 1px solid var(--line); background: #fff;
-}
-.instr-hw-readout {
-  font-size: 13px; font-weight: 700; color: var(--muted);
-  font-variant-numeric: tabular-nums; margin-bottom: 10px;
-}
-.instr-hw-readout.is-live { color: var(--ok); }
-
-/* ── Adjusting the Microphone (레퍼런스 en_test-nt) ─────── */
-/* 관찰: 가운데 정렬 제목 → 가로선 → 흰 카드(좌 원형 RECORD / 우 안내+낭독 지문)
-   → 칸 나뉜 레벨 미터 → Too Quiet · Good · Too Loud → 우하단 Skip. */
-.instr-micscreen { max-width: 900px; padding: 30px 34px 26px; }
-.instr-mic-h1 { text-align: center; font-size: 30px; margin-bottom: 18px; }
-.instr-micscreen .instr-rule { margin-bottom: 26px; }
-
-.instr-mic { display: grid; grid-template-columns: 190px 1fr; gap: 26px; align-items: start; }
-.instr-mic-left { display: flex; justify-content: center; padding-top: 6px; }
-
-.instr-mic-record {
-  width: 150px; height: 150px; border-radius: 50%; border: 0; cursor: pointer;
-  background: var(--brand-tint); color: var(--brand-ink);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-  box-shadow: inset 0 0 0 1px var(--brand-tint-2); transition: background .15s ease, transform .1s ease;
-}
-.instr-mic-record:hover:not(:disabled) { background: var(--brand-tint-2); }
-.instr-mic-record:active:not(:disabled) { transform: scale(.97); }
-.instr-mic-record:disabled { cursor: default; }
-.instr-mic-record.is-disabled { background: var(--lock); color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
-.instr-mic-record.is-arming { background: var(--surface-2); color: var(--ink-2); }
-.instr-mic-record.is-arming .instr-mic-record-label { font-size: 34px; letter-spacing: 0; }
-.instr-mic-record.is-recording { background: var(--brand); color: #fff; box-shadow: inset 0 0 0 1px var(--brand-ink);
-  animation: micPulse 1.4s ease-in-out infinite; }
-/* 스트림이 붙은 상태 — 아이콘이 살아 있음을 알린다(녹음 중과는 색이 다르다). */
-.instr-mic-record.is-live { background: var(--brand-tint-2); color: var(--brand);
-  box-shadow: inset 0 0 0 2px var(--ok); animation: micLiveRing 1.8s ease-in-out infinite; }
-.instr-mic-record.is-live .instr-mic-icon { animation: micIconLive 1.6s ease-in-out infinite; }
-@keyframes micLiveRing { 0%, 100% { box-shadow: inset 0 0 0 2px var(--ok), 0 0 0 0 rgba(21,128,61,.28); }
-                         50%      { box-shadow: inset 0 0 0 2px var(--ok), 0 0 0 10px rgba(21,128,61,0); } }
-.instr-mic-icon { width: 44px; height: 44px; fill: currentColor; transform-origin: 50% 50%; }
-@keyframes micIconLive { 0%, 100% { opacity: .78; transform: scale(1); }
-                         50%      { opacity: 1;   transform: scale(1.08); } }
-.instr-mic-record-label {
-  font-size: 13px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase;
-}
-@keyframes micPulse { 0%, 100% { box-shadow: inset 0 0 0 1px var(--brand-ink), 0 0 0 0 rgba(14, 143, 130,.35); }
-                      50% { box-shadow: inset 0 0 0 1px var(--brand-ink), 0 0 0 14px rgba(14, 143, 130,0); } }
-
-.instr-mic-copy p { font-size: 15.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 14px; }
-.instr-mic-sample {
-  background: var(--surface); border-radius: var(--radius); padding: 16px 18px;
-  color: var(--ink) !important; margin-bottom: 0 !important;
-}
-
-.instr-seg-wrap { margin: 26px 0 6px; }
-.instr-seg { display: flex; gap: 3px; }
-.instr-seg-cell {
-  flex: 1 1 0; height: 22px; border: 1px solid var(--line);
-  border-radius: 3px; background: var(--card);
-}
-.instr-seg-cell.is-on.is-quiet { background: var(--warn); border-color: var(--warn); }
-.instr-seg-cell.is-on.is-good { background: var(--ok); border-color: var(--ok); }
-.instr-seg-cell.is-on.is-loud { background: var(--brand); border-color: var(--brand); }
-.instr-seg.is-active .instr-seg-cell { border-color: var(--muted); }
-.instr-seg-cell.is-peak { box-shadow: inset 0 0 0 2px var(--ink); }
-.instr-seg-labels {
-  display: flex; justify-content: space-between; margin-top: 7px;
-  font-size: 12.5px; color: var(--muted); font-weight: 650;
-}
-
-.instr-mic-copy .instr-mic-required {
-  margin-top: 12px; margin-bottom: 0; font-size: 13.5px; font-weight: 700; color: var(--brand-ink);
-}
-.instr-mic-status { margin-top: 12px; min-height: 1.3em; }
-.instr-mic-actions { justify-content: flex-end; }
-
-@media (max-width: 720px) {
-  .instr-mic { grid-template-columns: 1fr; gap: 18px; }
-  .instr-mic-record { width: 124px; height: 124px; }
-  .instr-mic-h1 { font-size: 24px; }
-  .instr-seg-cell { height: 18px; }
-}
-
-/* ── moduleEnd · transfer time (§3.4) ───────────────────── */
-/* 관찰(reading-module-end-2910s.png): 카드 테두리·그림자·배경이 없다.
-   흰 바탕 위에 굵은 검정 제목 → 얇은 가로 구분선 → 두 줄 본문(좌측 정렬)뿐이다.
-   구 규칙은 제목을 brand-ink 보라로 칠했는데 관찰값은 거의 검정이다. */
-.instr-moduleend {
-  background: transparent; border: 0; box-shadow: none;
-  max-width: 900px; padding: 42px 8px 0;
-}
-.instr-moduleend h1 { color: var(--ink); font-size: 32px; margin-bottom: 18px; }
-.instr-rule { height: 1px; background: var(--line); margin: 0 0 22px; }
-.instr-moduleend .instr-body { margin-bottom: 14px; font-size: 16.5px; color: var(--ink-2); }
-.instr-transfer { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 18px; }
-.instr-transfer-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
-.instr-transfer-hint { font-size: 12.5px; margin-bottom: 12px; }
-.instr-transfer-list { list-style: none; max-height: 46vh; overflow-y: auto; padding-right: 4px; }
-.instr-transfer-item { border-bottom: 1px dashed var(--line); padding: 10px 0; }
-.instr-transfer-qid {
-  font-size: 11px; font-weight: 800; letter-spacing: .08em; color: var(--muted);
-  text-transform: uppercase; margin-bottom: 6px;
-}
-.instr-transfer-opts .opt { padding: 7px 11px; font-size: 13.5px; margin-bottom: 6px; }
-.instr-transfer-text {
-  width: 100%; padding: 8px 11px; border: 1px solid var(--line-2);
-  border-radius: 9px; font: inherit; font-size: 14px;
-}
-
-/* ── review ─────────────────────────────────────────────── */
-.instr-review-warn {
-  margin-top: 14px; padding: 11px 14px; border-radius: 10px;
-  background: var(--brand-soft); color: var(--brand-ink);
-  font-size: 13.5px; font-weight: 700;
-}
-
-@media (max-width: 720px) {
-  .instr-card { padding: 22px 18px; }
-  .instr-card h1 { font-size: 21px; }
-  .instr-moduleend { padding: 24px 4px 0; }
-  .instr-moduleend h1 { font-size: 24px; }
-}

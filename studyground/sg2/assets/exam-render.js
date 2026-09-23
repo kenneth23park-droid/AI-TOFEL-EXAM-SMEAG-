@@ -35,30 +35,9 @@
     return mountEl;
   }
 
-  /* 화면이 바뀌면 이전 화면의 소리는 그 자리에서 끊는다.
-   *
-   * DOM 에서 노드를 떼는 것만으로는 재생이 멈추지 않는다 — 브라우저는 분리된
-   * <audio> 도 계속 재생한다. 그래서 다음 화면을 그리기 전에 문서 안의 모든
-   * audio/video 를 직접 멈춘다(듣기 오디오 · 스피킹 안내음 · 지시화면 음원 전부).
-   *
-   * 멈추기 전에 data-sg-stopped 를 찍는다. 듣기 렌더러는 "일시정지 후 재개 금지"
-   * 규칙 때문에 pause 이벤트에서 다시 play() 하는데, 그 훅이 이 표시를 보고 물러난다.
-   * 표시가 없으면 화면을 떠난 오디오가 되살아난다. */
-  function stopMedia() {
-    if (!doc) return 0;
-    var list = doc.querySelectorAll ? doc.querySelectorAll('audio, video') : [];
-    for (var i = 0; i < list.length; i++) {
-      var a = list[i];
-      try { a.setAttribute('data-sg-stopped', ''); } catch (e) {}
-      try { a.pause(); } catch (e2) {}
-    }
-    return list.length;
-  }
-
   function clear() {
     var m = mount();
     if (!m) return;
-    stopMedia();
     while (m.firstChild) m.removeChild(m.firstChild);
   }
 
@@ -113,7 +92,7 @@
 
   root.SG_RENDER = {
     register: register, has: has, types: types,
-    setMount: setMount, mount: mount, clear: clear, stopMedia: stopMedia,
+    setMount: setMount, mount: mount, clear: clear,
     bilingual: bilingual, placeholder: placeholder, render: render
   };
 })(typeof window !== 'undefined' ? window : this);

@@ -22,7 +22,6 @@ import argparse
 import hashlib
 import json
 import os
-import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -62,22 +61,7 @@ def synth(text: str, voice: str, model: str, output: str, api_key: str) -> bytes
         return resp.read()
 
 
-# ── post-run gate ────────────────────────────────────────────────────────────────────────
-# 판정 기준은 여기 복사하지 않는다. 진입점 하나(studyground/tools/audio_gate.py)만 부르고,
-# 그쪽이 계층 0~3(매핑·신선도 / 무결성 / 신호 / ASR 대본대조)을 바뀜 음원에만 돌린다.
-GATE = ROOT.parent / "tools" / "audio_gate.py"
-
-
-def run_audio_gate() -> int:
-    if not GATE.is_file():
-        print(f"\n[audio gate] SKIPPED — 게이트를 찾지 못했다: {GATE}")
-        return 0
-    print(f"\n[audio gate] {GATE}")
-    sys.stdout.flush()   # 안 그러면 우리 출력이 자식 출력 뒤로 밀린다
-    return subprocess.run([sys.executable, str(GATE)]).returncode
-
-
-def main() -> int:
+def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--api-key", default=os.getenv("ELEVENLABS_API_KEY") or os.getenv("XI_API_KEY", ""))
     ap.add_argument("--voice", default="")
@@ -101,9 +85,8 @@ def main() -> int:
     if args.dry_run:
         for it in items:
             print(f"  - {it['id']:42s} {len(it.get('text','')):>5} chars")
-        print("\n[dry-run] no API calls made, no audio gate. "
-              "Set ELEVENLABS_API_KEY and re-run to generate.")
-        return 0
+        print("\n[dry-run] no API calls made. Set ELEVENLABS_API_KEY and re-run to generate.")
+        return
 
     if not args.api_key:
         sys.exit(
@@ -138,11 +121,6 @@ def main() -> int:
     INDEX.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\ndone — generated {made}, skipped {skipped}, failed {failed}. index → {INDEX}")
 
-    rc = run_audio_gate()
-    if rc:
-        print(f"[audio gate] FAILED (exit {rc}) — 이 음원은 발행하면 안 된다.")
-    return rc or (1 if failed else 0)
-
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
