@@ -27,6 +27,19 @@ jobs:
         with:
           node-version: '22'
 
+      # 배포 앞의 문. pre-commit 훅과 같은 검사를 여기서 다시 돈다 —
+      # 훅은 `git commit --no-verify` 로 넘길 수 있지만 이 자리는 넘길 수 없다.
+      #
+      # 세트 완결성: 흔적이 있으면 팩·미디어·등록이 전부 있어야 한다(SET 12 는 팩 없이 나갔다).
+      # 원본 docx 빈 틀: 파서가 바뀌어 틀이 더는 가져와지지 않으면 선생님은 틀대로 채우고도
+      # 문항이 사라진 세트를 받는다. 틀을 strict 모드로 지어 120문항이 나오는지 본다.
+      # 문항 겹침(dup_check)은 지금 빠져 있다 — SET 1 L1-10 = SET 4 L2-7 을 원본대로 두기로
+      # 했고(2026-09-30), 이 문에 두면 모든 배포가 막힌다. pre-commit 훅에서는 계속 돈다.
+      - name: Gate — 세트 완결성 · 원본 틀
+        run: |
+          node studyground/tests/test_set_complete.js
+          node studyground/tests/test_set_template.mjs
+
       - name: Install Vercel CLI
         run: npm install -g vercel@54
 

@@ -6,7 +6,7 @@
  * source mode** 로 지어 120문항이 stop 없이 나오는지, 커밋된 틀이 생성기와 같은지 본다. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -16,7 +16,7 @@ const SG2 = path.join(ROOT, 'sg2');
 
 const DOCX = require(path.join(SG2, 'assets/docx-read.js'));
 const IMPORT = require(path.join(SG2, 'assets/set-import.js'));
-const { OUT_DIR, FILES, templateDocs } = await import(path.join(ROOT, 'tools/make_set_template.mjs'));
+const { OUT_DIR, FILES, templateDocs } = await import(pathToFileURL(path.join(ROOT, 'tools/make_set_template.mjs')).href);
 
 const checks = [];
 function check(name, ok, detail) { checks.push({ name, ok: !!ok, detail: detail || '' }); }

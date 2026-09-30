@@ -45,7 +45,9 @@
      빈칸을 더 많이 찾은 쪽을 쓴다: 밑줄로 그은 빈칸도 빈칸이다. 같으면 글자 그대로(text). */
   function blankCount(s) { return (String(s || '').match(/_{2,}/g) || []).length; }
   function slotText(p) {
-    var t = txt(p).replace(/\btile\s*\d+\b/gi, '__');
+    /* 빈칸 자리에 'tile 3' 처럼 적어 오는 원본이 있다(SET 3). 다만 새 세트 빈 틀은 타일
+       자리를 '[tile 1]' 로 적으므로, 대괄호 안의 것은 빈칸이 아니라 타일이다. */
+    var t = txt(p).replace(/(^|[^\[])\btile\s*\d+\b(?!\])/gi, '$1__');
     return p && p.textU && blankCount(p.textU) > blankCount(t) ? p.textU : t;
   }
   function isBlank(p) { return !txt(p) && (!p || !p.images || !p.images.length); }
