@@ -333,7 +333,14 @@
           "voice": "cjVigY5qzO86Huf0OWal",
           "voice_name": "US-Mason",
           "el_voice": "Eric",
-          "text": "Actually, yes. The funding agency has very specific margin requirement, and I keep getting errors. W. Send it over when you’re done with the edits. I can format it this evening."
+          "text": "Actually, yes. The funding agency has very specific margin requirement, and I keep getting errors."
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Send it over when you’re done with the edits. I can format it this evening."
         }
       ],
       "speed": 0.9

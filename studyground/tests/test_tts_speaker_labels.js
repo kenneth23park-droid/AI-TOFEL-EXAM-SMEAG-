@@ -67,5 +67,30 @@ ok('tts-plan.js 에서 규칙을 찾았다', !!a, a || '');
 ok('tts-client.js 에서 규칙을 찾았다', !!b, b || '');
 ok('두 규칙이 글자까지 같다', !!a && a === b);
 
+console.log('\n[4] 콜론 없는 M·W 표시 (SET 4 대본)');
+/* SET 4 L2 4-5 의 마지막 줄은 'W. Send it over…' 였다. 마침표를 몰라서 그 줄이 남자 대사에
+   붙었고, 남자 목소리가 "W. Send it over" 까지 읽었다. */
+var CLIENT = (function () {
+  var src = fs.readFileSync(path.join(SG2, 'assets', 'tts-client.js'), 'utf8');
+  var m = /\n\s*if \(!m\) m = (\/\^\(\[MW\]\)[^\n]*?\/)\.exec\(t\);/.exec(src);
+  return m ? m[1] : null;
+})();
+var PLAN_MW = (function () {
+  var src = fs.readFileSync(path.join(SG2, 'assets', 'tts-plan.js'), 'utf8');
+  var m = /\n\s*if \(!m\) m = (\/\^\(\[MW\]\)[^\n]*?\/)\.exec\(t\);/.exec(src);
+  return m ? m[1] : null;
+})();
+ok('두 파일의 M·W 규칙이 글자까지 같다', !!CLIENT && CLIENT === PLAN_MW, CLIENT + ' / ' + PLAN_MW);
+var set4 = PLAN.parseScript([
+  'W   How’s the grant proposal coming along?',
+  'M   Actually, yes. I keep getting errors.',
+  'W. Send it over when you’re done with the edits.'
+].join('\n'));
+ok('세 줄이 세 대사', set4.length === 3, set4.map(function (s) { return s.speaker; }).join(' · '));
+ok('"W. Send it over" 는 W 의 대사', set4[2] && set4[2].speaker === 'W' && /^Send it over/.test(set4[2].text),
+   set4[2] && (set4[2].speaker + ' | ' + set4[2].text));
+ok('남자 대사에 "W." 가 붙지 않는다', set4[1] && set4[1].text.indexOf('W.') < 0, set4[1] && set4[1].text);
+ok('"I think so." 는 화자 표시가 아니다', PLAN.parseScript('Narrator: Hi.\nI think so.').length === 1);
+
 console.log(fails.length ? '\n✗ ' + fails.length + ' FAILED: ' + fails.join(', ') : '\n✓ ALL PASS');
 process.exit(fails.length ? 1 : 0);

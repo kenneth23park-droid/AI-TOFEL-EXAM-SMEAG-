@@ -81,7 +81,7 @@ None.
 
 ## Academic discussion without faces
 
-- `set4-W3-disc` — shows initials instead of photos (config/set4-writing-images.json)
+None.
 
 ## Files not made yet
 

@@ -190,6 +190,8 @@
            SET 12 L2 'So the takeaway is this: ...' 가 그렇게 화자로 잡혀 배역이 갈렸다.
            낱말마다 첫 글자가 대문자여야 한다는 조건 하나로 그 줄들이 걸러진다. */
         var m = /^([A-Z][A-Za-z0-9._'-]{0,15}(?: [A-Z0-9][A-Za-z0-9._'-]{0,15}){0,2}):\s*(.+)$/.exec(t);
+        /* 콜론 없는 M·W 표시('W   How's…' · 'W. Send it over…') — tts-plan.js 와 같은 규칙. */
+        if (!m) m = /^([MW])\.?\s+(\S.*)$/.exec(t);
         if (m) out.push({ speaker: m[1].trim(), text: m[2].trim() });
         else if (out.length && !/[:]$/.test(t)) out[out.length - 1].text += ' ' + t;
         else out.push({ speaker: 'Narrator', text: t });

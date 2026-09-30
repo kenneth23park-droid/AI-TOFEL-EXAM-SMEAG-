@@ -138,29 +138,10 @@ window.SMEAG_SET4 = {
               ]
             },
             {
-              "kind": "passage",
+              "kind": "chat",
               "heading": "Questions 13-15",
               "instruction": "",
               "title": "Text Message",
-              "paragraphs": [
-                "Text Message Chain",
-                "Rebecca Chen ۰9:15 A.M.",
-                "Hannah Moreno ۰9:22 A.M.",
-                "Rebecca Chen ۰9:25 A.M.",
-                "R",
-                "Rebecca Chen ۰9:32 A.M.",
-                "H",
-                "Hannah Moreno ۰9:22 A.M.",
-                "Morning, everyone. The Nexus launch is confirmed for March 8. Marketing just informed me that we need to finalize all promotional materials by February 20 to allow time for printing and distribution.",
-                "Derek Simmons ۰9:18 A.M.",
-                "I’ll coordinate with our graphic design team to have the banners and posters ready by February 15. That gives us a buffer for revisions.",
-                "Should I reach out to our retail partners now to confirm their display requirements? Some of them had specific size requests last time",
-                "Yes, please do that. Also, make sure you get the dimensions for both window displays and counter stands. We can’t afford mix-ups like we had with the Nexus 2 launch.",
-                "Derek Simmons ۰9:28 A.M.",
-                "Speaking of which, should we include the QR code that links to the product demo video, or just the website URL?",
-                "Go with the QR code. Research shows customers engage more with video content. I’ll send you the finalized video link by tomorrow.",
-                "Go it. I’ll compile the partner requirements and share them with Derek by Friday so he can adjust the design templates accordingly."
-              ],
               "questions": [
                 {
                   "kind": "mcq",
@@ -200,6 +181,50 @@ window.SMEAG_SET4 = {
                   "no": 15,
                   "id": "R1-15",
                   "answer": 2
+                }
+              ],
+              "messages": [
+                {
+                  "name": "Rebecca Chen",
+                  "time": "9:15 A.M.",
+                  "side": "left",
+                  "text": "Morning, everyone. The Nexus launch is confirmed for March 8. Marketing just informed me that we need to finalize all promotional materials by February 20 to allow time for printing and distribution."
+                },
+                {
+                  "name": "Derek Simmons",
+                  "time": "9:18 A.M.",
+                  "side": "right",
+                  "text": "I’ll coordinate with our graphic design team to have the banners and posters ready by February 15. That gives us a buffer for revisions."
+                },
+                {
+                  "name": "Hannah Moreno",
+                  "time": "9:22 A.M.",
+                  "side": "left",
+                  "text": "Should I reach out to our retail partners now to confirm their display requirements? Some of them had specific size requests last time"
+                },
+                {
+                  "name": "Rebecca Chen",
+                  "time": "9:25 A.M.",
+                  "side": "left",
+                  "text": "Yes, please do that. Also, make sure you get the dimensions for both window displays and counter stands. We can’t afford mix-ups like we had with the Nexus 2 launch."
+                },
+                {
+                  "name": "Derek Simmons",
+                  "time": "9:28 A.M.",
+                  "side": "right",
+                  "text": "Speaking of which, should we include the QR code that links to the product demo video, or just the website URL?"
+                },
+                {
+                  "name": "Rebecca Chen",
+                  "time": "9:32 A.M.",
+                  "side": "left",
+                  "text": "Go with the QR code. Research shows customers engage more with video content. I’ll send you the finalized video link by tomorrow."
+                },
+                {
+                  "name": "Hannah Moreno",
+                  "time": "9:22 A.M.",
+                  "side": "left",
+                  "text": "Go it. I’ll compile the partner requirements and share them with Derek by Friday so he can adjust the design templates accordingly."
                 }
               ]
             },
@@ -629,7 +654,7 @@ window.SMEAG_SET4 = {
               "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set4/l1-q09-10.mp3",
               "scriptOrigin": "script-docx",
-              "script": "W How’s the quarterly budget report coming along? Finance needs it by Thursday.\nM I’ve finished the expense analysis and the revenue projections. I’m just waiting on the department\nheads to confirm their numbers.\nW Have you followed up with them? We can’t afford any delays this time.\nM I sent reminders yesterday. Most have responded, but I’m still waiting on operations and HR.\nW If you don’t hear back by tomorrow afternoon, let me know. I’ll reach out to them directly."
+              "script": "Woman: How’s the quarterly budget report coming along? Finance needs it by Thursday.\nMan: I’ve finished the expense analysis and the revenue projections. I’m just waiting on the department heads to confirm their numbers.\nWoman: Have you followed up with them? We can’t afford any delays this time.\nMan: I sent reminders yesterday. Most have responded, but I’m still waiting on operations and HR.\nWoman: If you don’t hear back by tomorrow afternoon, let me know. I’ll reach out to them directly."
             },
             {
               "kind": "audio-set",
@@ -666,7 +691,7 @@ window.SMEAG_SET4 = {
               "image": "media/pictures/TOEFL Listening Image (2 Persons).webp",
               "audio": "media/audio/set4/l1-q11-12.mp3",
               "scriptOrigin": "script-docx",
-              "script": "M Did you hear? They’ve moved the staff meeting to the auditorium instead of Conference Room B.\nW Really? When did that happen? I already set up the projector there this morning.\nM Apparently, there’s a plumbing issue on the third floor, so all rooms up there are closed until it’s\nfixed.\nW Well, I’d better head over to the auditorium and make sure the equipment’s compatible. The\npresentation’s in an hour.\nM I can help you carry things over if you need."
+              "script": "Man: Did you hear? They’ve moved the staff meeting to the auditorium instead of Conference Room B.\nWoman: Really? When did that happen? I already set up the projector there this morning.\nMan: Apparently, there’s a plumbing issue on the third floor, so all rooms up there are closed until it’s fixed.\nWoman: Well, I’d better head over to the auditorium and make sure the equipment’s compatible. The presentation’s in an hour.\nMan: I can help you carry things over if you need."
             },
             {
               "kind": "audio-set",
@@ -903,7 +928,7 @@ window.SMEAG_SET4 = {
               "image": "media/pictures/TOEFL Listening Image (2 People).webp",
               "audio": "media/audio/set4/l2-q04-05.mp3",
               "scriptOrigin": "script-docx",
-              "script": "W How’s the grant proposal coming along? The submission deadline is tomorrow, right?\nM It’s almost done. Dr. Patterson just sent back her edits on the methodology section. I need to\nincorporate those and then it’s ready.\nW Do you need any help with the formatting?\nM Actually, yes. The funding agency has very specific margin requirement, and I keep getting errors.\nW. Send it over when you’re done with the edits. I can format it this evening."
+              "script": "Woman: How’s the grant proposal coming along? The submission deadline is tomorrow, right?\nMan: It’s almost done. Dr. Patterson just sent back her edits on the methodology section. I need to incorporate those and then it’s ready.\nWoman: Do you need any help with the formatting?\nMan: Actually, yes. The funding agency has very specific margin requirement, and I keep getting errors.\nWoman: Send it over when you’re done with the edits. I can format it this evening."
             },
             {
               "kind": "audio-set",
@@ -940,7 +965,7 @@ window.SMEAG_SET4 = {
               "image": "media/pictures/TOEFL Listening Image (2 Persons).webp",
               "audio": "media/audio/set4/l2-q06-07.mp3",
               "scriptOrigin": "script-docx",
-              "script": "M I have a problem. I bought the textbook for Professor Miller’s class, but I just realized it’s the\nprevious edition.\nW Oh no. The bookstore won’t take it back once you’ve opened the shrink wrap.\nM I know. I already checked. I’m hoping someone in class might want to trade.\nW Actually, my roommate dropped that course last week. She might still have her new edition. Want\nme to ask her?\nM That would be great. I’d really appreciate it."
+              "script": "Man: I have a problem. I bought the textbook for Professor Miller’s class, but I just realized it’s the previous edition.\nWoman: Oh no. The bookstore won’t take it back once you’ve opened the shrink wrap.\nMan: I know. I already checked. I’m hoping someone in class might want to trade.\nWoman: Actually, my roommate dropped that course last week. She might still have her new edition. Want me to ask her?\nMan: That would be great. I’d really appreciate it."
             },
             {
               "kind": "audio-set",
@@ -1777,14 +1802,17 @@ window.SMEAG_SET4 = {
                   "posts": [
                     {
                       "name": "Emma",
-                      "text": "I believe that people will work fewer hours in the future. As technology continues to automate tasks and increase productivity, there will be less need for human labor in many fields. With more wealth being generated, individuals may prioritize their quality of life and push for more leisure time, leading to shorter workweeks."
+                      "text": "I believe that people will work fewer hours in the future. As technology continues to automate tasks and increase productivity, there will be less need for human labor in many fields. With more wealth being generated, individuals may prioritize their quality of life and push for more leisure time, leading to shorter workweeks.",
+                      "image": "media/pictures/set4/w3-emma.png"
                     },
                     {
                       "name": "Liam",
-                      "text": "I’m not convinced. Even with technological advances, the pressure to remain competitive in a global economy will likely keep work hours high. Companies may expect workers to be available at all times to maintain an edge, and the increasing gig economy could make it harder for people to secure consistent leisure time."
+                      "text": "I’m not convinced. Even with technological advances, the pressure to remain competitive in a global economy will likely keep work hours high. Companies may expect workers to be available at all times to maintain an edge, and the increasing gig economy could make it harder for people to secure consistent leisure time.",
+                      "image": "media/pictures/set4/w3-liam.png"
                     }
                   ],
-                  "minWords": 100
+                  "minWords": 100,
+                  "professorImage": "media/pictures/set4/w3-professor-thompson.png"
                 }
               ]
             }

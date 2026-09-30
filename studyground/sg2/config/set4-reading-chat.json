@@ -1,0 +1,17 @@
+{
+  "source": "NEW TOEFL MOCK TEST SET 4 Questions.docx — Reading Module 1, Questions 13-15 (bubble order as printed on the page)",
+  "note": "The chat is drawn with floating text boxes, so the document order is not the reading order. This file gives the order only; set-import.js refuses any name, time or text that is not word for word in the passage. The source's typos (Hannah's second '9:22 A.M.', 'Go it.') are kept as printed.",
+  "blocks": {
+    "R1-13": {
+      "messages": [
+        { "name": "Rebecca Chen", "time": "9:15 A.M.", "side": "left", "text": "Morning, everyone. The Nexus launch is confirmed for March 8. Marketing just informed me that we need to finalize all promotional materials by February 20 to allow time for printing and distribution." },
+        { "name": "Derek Simmons", "time": "9:18 A.M.", "side": "right", "text": "I’ll coordinate with our graphic design team to have the banners and posters ready by February 15. That gives us a buffer for revisions." },
+        { "name": "Hannah Moreno", "time": "9:22 A.M.", "side": "left", "text": "Should I reach out to our retail partners now to confirm their display requirements? Some of them had specific size requests last time" },
+        { "name": "Rebecca Chen", "time": "9:25 A.M.", "side": "left", "text": "Yes, please do that. Also, make sure you get the dimensions for both window displays and counter stands. We can’t afford mix-ups like we had with the Nexus 2 launch." },
+        { "name": "Derek Simmons", "time": "9:28 A.M.", "side": "right", "text": "Speaking of which, should we include the QR code that links to the product demo video, or just the website URL?" },
+        { "name": "Rebecca Chen", "time": "9:32 A.M.", "side": "left", "text": "Go with the QR code. Research shows customers engage more with video content. I’ll send you the finalized video link by tomorrow." },
+        { "name": "Hannah Moreno", "time": "9:22 A.M.", "side": "left", "text": "Go it. I’ll compile the partner requirements and share them with Derek by Friday so he can adjust the design templates accordingly." }
+      ]
+    }
+  }
+}

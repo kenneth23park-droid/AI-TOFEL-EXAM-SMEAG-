@@ -43,6 +43,7 @@ const out = IMPORT.build({
   code: 'SET 4', questions, script, answers,
   listeningImages: optionalJson('config/set4-listening-images.json'),
   discussionImages: optionalJson('config/set4-writing-images.json'),
+  readingChats: optionalJson('config/set4-reading-chat.json'),
   strictSource: true
 });
 if (!out.pack) {
@@ -52,6 +53,28 @@ if (!out.pack) {
 
 const pack = out.pack;
 pack.importedAt = IMPORTED_AT;
+
+/* 대화 대본의 화자 표시를 'Man:' · 'Woman:' 로 적는다(2026-09-30 교정본).
+   원본은 콜론 없는 'W   How's…' · 'W. Send it over…' 이고, 한 대사가 줄바꿈으로 끊겨
+   'heads to confirm…' 같은 줄이 따로 떨어져 있다 — 그 줄은 앞 대사에 잇는다.
+   첫 줄이 M·W 로 시작하는 대본만 손댄다(강의 · 안내방송은 그대로). */
+const SPEAKER = { M: 'Man', W: 'Woman' };
+function labelSpeakers(text) {
+  const lines = String(text).split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (!lines.length || !/^[MW]\.?\s+\S/.test(lines[0])) return text;
+  const out = [];
+  for (const l of lines) {
+    const m = /^([MW])\.?\s+(\S.*)$/.exec(l);
+    if (m) out.push(SPEAKER[m[1]] + ': ' + m[2]);
+    else out[out.length - 1] += ' ' + l;
+  }
+  return out.join('\n');
+}
+(function walk(o) {
+  if (!o || typeof o !== 'object') return;
+  if (typeof o.script === 'string') o.script = labelSpeakers(o.script);
+  Object.values(o).forEach(walk);
+})(pack);
 if (pack.summary) pack.summary.sources = [FILES.questions, FILES.script, FILES.answers];
 
 fs.writeFileSync(

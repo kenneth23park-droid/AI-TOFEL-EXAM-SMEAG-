@@ -164,7 +164,7 @@
             if (blk.title) add(blk.title);
             if (isArr(blk.paragraphs) && blk.paragraphs.length) add(blk.paragraphs[0]);
             if (blk.template) add(blk.template);
-            if (blk.script && blk.kind !== 'record-set') add(String(blk.script).replace(/^[MW]:\s*/gm, ''));
+            if (blk.script && blk.kind !== 'record-set') add(String(blk.script).replace(/^(?:M|W|Man|Woman):\s*/gm, ''));
             (blk.questions || []).forEach(function (q) {
               if (q.kind === 'email' && q.subject) add(q.subject);
               if (q.kind === 'discussion' && q.prompt) add(q.prompt);

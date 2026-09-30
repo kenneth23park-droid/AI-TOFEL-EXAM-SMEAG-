@@ -1256,6 +1256,40 @@
       var id = 'R' + no;
       reading.modules.push({ id: id, label: 'Reading Module ' + no, blocks: parseReadingModule(mod, id, rMismatch) });
     });
+    /* 문자 대화(text message chain)의 말풍선 순서 — 원본은 말풍선마다 떠 있는 글상자라
+       문서 순서가 화면 순서가 아니다(SET 4 R1 13-15: 이름·시각만 먼저 줄줄이 나오고
+       아바타 머리글자 'R' · 'H' 가 한 줄씩 끼고, 말풍선 글은 그 뒤에 섞여 나왔다).
+       위치로 되살릴 규칙이 없어 순서는 원본 밖 config/<set>-reading-chat.json 이 준다 —
+       듣기 사진과 같은 자리다. 글은 그 지문에 그대로 있는 것만 받는다. */
+    var readingChats = (input.readingChats && input.readingChats.blocks) || {};
+    Object.keys(readingChats).forEach(function (firstId) {
+      var hit = null;
+      reading.modules.forEach(function (mod) {
+        mod.blocks.forEach(function (blk) {
+          if (blk.questions && blk.questions[0] && blk.questions[0].id === firstId) hit = blk;
+        });
+      });
+      var spec = readingChats[firstId] || {};
+      var ms = spec.messages || [];
+      if (!hit || !hit.paragraphs || !ms.length) {
+        gate('stop', 'reading', 'Text message chain ' + firstId + ' — no reading passage starting at that question, or no messages in the chat file.');
+        return;
+      }
+      var passage = flattenText(hit.paragraphs.join('\n'));
+      var missing = ms.filter(function (m) {
+        return [m.name, m.time, m.text].some(function (v) { return !v || passage.indexOf(flattenText(v)) < 0; });
+      });
+      if (missing.length) {
+        gate('stop', 'reading', 'Text message chain ' + firstId + ' — these messages are not word for word in the passage: '
+          + missing.map(function (m) { return (m.name || '?') + ' ' + (m.time || '?'); }).join(', '));
+        return;
+      }
+      hit.kind = 'chat';
+      hit.messages = ms.map(function (m) {
+        return { name: m.name, time: m.time, side: m.side === 'right' ? 'right' : 'left', text: m.text };
+      });
+      delete hit.paragraphs;
+    });
     if (rMismatch.length) {
       gate('warn', 'reading', 'The numbers printed on these questions disagree with their "Questions a-b" heading — the numbering that keeps the module in order was used: ' + rMismatch.join(', '));
     }
@@ -1892,6 +1926,10 @@
         (mod.blocks || []).forEach(function (blk) {
           VERBATIM_BLOCK_FIELDS.forEach(function (k) { look(mod.id + ' ' + k, blk[k]); });
           lookList(mod.id + ' passage', blk.paragraphs);
+          (blk.messages || []).forEach(function (m, i) {
+            look(mod.id + ' message' + (i + 1), m && m.name);
+            look(mod.id + ' message' + (i + 1), m && m.text);
+          });
           (blk.questions || []).forEach(function (q) {
             VERBATIM_Q_FIELDS.forEach(function (k) { look(q.id + ' ' + k, q[k]); });
             VERBATIM_Q_LISTS.forEach(function (k) { lookList(q.id + ' ' + k, q[k]); });

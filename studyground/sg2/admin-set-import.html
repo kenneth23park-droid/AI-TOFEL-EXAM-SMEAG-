@@ -558,6 +558,13 @@
       busy.textContent = 'Looking for the listening pictures…';
       return loadListeningImages(slugOf(codeEl.value));
     }).then(function (listeningImages) {
+      /* 문자 대화의 말풍선 순서도 원본 밖에 산다 — 없으면 지문 그대로 간다. */
+      return fetch('config/' + slugOf(codeEl.value) + '-reading-chat.json', { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; })
+        .then(function (readingChats) { return { images: listeningImages, chats: readingChats || {} }; });
+    }).then(function (extra) {
+      var listeningImages = extra.images;
       busy.textContent = 'Splitting the sections…';
       built = window.SG_SET_IMPORT.build({
         code: codeEl.value.trim(),
@@ -565,6 +572,7 @@
         script: parsed.script,
         answers: parsed.answers,
         listeningImages: listeningImages,
+        readingChats: extra.chats,
         sources: slots.map(function (k) { return files[k] && files[k].name; }).filter(Boolean),
         strictSource: STRICT_SOURCE_ONLY
       });

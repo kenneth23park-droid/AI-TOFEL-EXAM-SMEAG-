@@ -1,9 +1,9 @@
 {
  "set": "SET4",
  "label": "NEW TOEFL SET 4",
- "rev": "3daf168727ad",
- "count": 49,
- "bytes": 11432297,
+ "rev": "24f15e96aab5",
+ "count": 52,
+ "bytes": 11564677,
  "files": [
   {
    "u": "media/audio/set4/l1-q01.mp3",
@@ -249,6 +249,21 @@
    "u": "media/pictures/set4/image8.png",
    "b": 718670,
    "h": "3b263881d5fc"
+  },
+  {
+   "u": "media/pictures/set4/w3-emma.png",
+   "b": 45324,
+   "h": "626f1a1fd692"
+  },
+  {
+   "u": "media/pictures/set4/w3-liam.png",
+   "b": 40375,
+   "h": "405f860ae493"
+  },
+  {
+   "u": "media/pictures/set4/w3-professor-thompson.png",
+   "b": 46681,
+   "h": "bd7b96ec3b6c"
   }
  ]
 }

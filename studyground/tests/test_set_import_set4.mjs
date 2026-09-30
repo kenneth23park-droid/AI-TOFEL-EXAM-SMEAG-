@@ -37,6 +37,20 @@ for (const b of sections.reading.modules.flatMap((m) => m.blocks)) {
 }
 assert.equal(reading.filter((q) => q.kind === 'blank').length, 20);
 
+/* R1 13-15 는 문자 대화다. 원본은 말풍선마다 떠 있는 글상자라 문서 순서대로 읽으면
+   이름·시각이 먼저 몰려 나오고 아바타 머리글자 'R' · 'H' 가 지문 한 줄이 됐다.
+   순서는 config/set4-reading-chat.json 이 주고, 글은 원본 그대로다. */
+const chat = sections.reading.modules[0].blocks.find((b) => b.questions?.[0]?.id === 'R1-13');
+assert.equal(chat.kind, 'chat');
+assert.equal(chat.paragraphs, undefined);
+assert.deepEqual([...chat.messages.map((m) => m.name + ' ' + m.time)], [
+  'Rebecca Chen 9:15 A.M.', 'Derek Simmons 9:18 A.M.', 'Hannah Moreno 9:22 A.M.', 'Rebecca Chen 9:25 A.M.',
+  'Derek Simmons 9:28 A.M.', 'Rebecca Chen 9:32 A.M.', 'Hannah Moreno 9:22 A.M.'
+]);
+assert.match(chat.messages[0].text, /^Morning, everyone\./);
+assert.deepEqual([...chat.messages.map((m) => m.side === 'right')], [false, true, false, false, true, false, false]);
+assert.deepEqual([...chat.questions.map((q) => q.id)], ['R1-13', 'R1-14', 'R1-15']);
+
 const listening = questions(sections.listening);
 const listeningBlocks = sections.listening.modules.flatMap((m) => m.blocks);
 const listeningAudio = listeningBlocks.flatMap((b) => [b.audio, ...(b.questions || []).map((q) => q.audio)]).filter(Boolean);
@@ -50,10 +64,17 @@ for (const b of listeningBlocks.filter((b) => b.audio)) {
   assert.ok(String(b.script || '').length > 80, b.heading + ' script is empty');
 }
 
-/* 화자를 'W   How's…' 로 적는다(콜론 없음). 대화가 한 명의 내레이터로 읽히면 안 된다. */
+/* 원본은 화자를 'W   How's…' 로 적는다(콜론 없음). 교정본대로 'Man:' · 'Woman:' 로 바꿔 싣고,
+   줄바꿈으로 끊긴 대사('heads to confirm…')는 앞 대사에 잇는다. */
 const PLAN = require('../sg2/assets/tts-plan.js');
-const conv = PLAN.parseScript(listeningBlocks.find((b) => b.heading === 'Questions 9-10').script);
-assert.deepEqual([...new Set(conv.map((l) => l.speaker))].sort(), ['M', 'W']);
+const convScript = listeningBlocks.find((b) => b.heading === 'Questions 9-10').script;
+assert.match(convScript, /^Woman: How’s the quarterly budget report/);
+assert.match(convScript, /department heads to confirm/);
+for (const b of listeningBlocks.filter((b) => /^(Man|Woman):/.test(b.script || ''))) {
+  for (const line of b.script.split('\n')) assert.match(line, /^(Man|Woman): \S/, b.heading + ' line without a speaker');
+}
+const conv = PLAN.parseScript(convScript);
+assert.deepEqual([...new Set(conv.map((l) => l.speaker))].sort(), ['Man', 'Woman']);
 assert.doesNotMatch(conv[0].text, /^W\s/);
 const voices = JSON.parse(fs.readFileSync(new URL('tts-voices-set4exam-11labs.json', root), 'utf8'));
 assert.equal(voices.items.filter((i) => i.kind === 'conversation').length, 4);
@@ -68,7 +89,11 @@ for (const q of builds) {
   assert.ok(q.slots.every((s) => s.t !== 'b' || s.a));
 }
 assert.ok(questions(sections.writing).some((q) => q.kind === 'email'));
-assert.ok(questions(sections.writing).some((q) => q.kind === 'discussion'));
+const disc = questions(sections.writing).find((q) => q.kind === 'discussion');
+assert.ok(disc);
+for (const p of [disc.professorImage, ...disc.posts.map((x) => x.image)]) {
+  assert.ok(p && fs.existsSync(new URL(p, root)), 'discussion photo missing: ' + p);
+}
 assert.equal(questions(sections.speaking).length, 11);
 
 const IMPORT = require('../sg2/assets/set-import.js');
