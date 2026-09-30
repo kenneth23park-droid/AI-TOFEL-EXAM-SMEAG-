@@ -436,7 +436,10 @@
 // v111: SET 4 가 저장소에 들어왔다(tools/build_set4.mjs · assets/set4.js). 정답지가 한 줄에
 //       번호까지 적어('11. A' · '1. blood') set-import.js 의 정답 읽기가 함께 바뀐다.
 //       프리캐시 목록(팩 · 오프라인 목록)이 바뀌었으므로 판올림.
-const VERSION = 'sg-v111';
+// v112: 9/23 의 SET 3 게시 커밋(3590329)이 화면·시험 엔진 스무 파일을 8월 초 사본으로
+//       덮어써 브랜드 색이 오렌지로, 제목이 StudyGround 로, 시험 화면이 옛 빨간 pill 로
+//       돌아가 있었다. 그 파일들을 커밋 직전 판으로 되돌린다 — 전부 SHELL_ASSETS 라 판올림.
+const VERSION = 'sg-v112';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

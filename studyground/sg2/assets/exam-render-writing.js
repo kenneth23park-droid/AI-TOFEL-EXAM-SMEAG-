@@ -466,8 +466,9 @@
   /* ── 문항 그리드 네비게이션 (build-set 전용) ──────────────────────────── */
 
   /* 같은 모듈(W1)의 build-set 화면들을 모아 1..N 그리드를 만든다.
-     엔진에는 역방향 이동 API 가 없다(Story 1.4 AC3 — 의도적). 그래서 앞으로 가는 셀만
-     활성화하고, 뒤 셀은 disabled 로 남긴다. 엔진이 훗날 goToScreen 을 노출하면 자동으로 쓴다. */
+     칸은 앞뒤 양쪽으로 열린다 — 엔진이 같은 모듈 안에서는 back() 을 열어 두기 때문이다
+     (exam-engine.js backable(): 같은 section·moduleId 의 allowBack 문항 화면끼리).
+     상단바 Back/Next 가 하는 일을 이 그리드도 그대로 할 뿐이고, 모듈 경계는 엔진이 막는다. */
   function siblingScreens(screen, ctx) {
     var eng = ctx && ctx.engine;
     if (!eng || typeof eng.screens !== 'function') return null;
@@ -485,7 +486,6 @@
     var sibs = siblingScreens(screen, ctx);
     if (!sibs) return null;
     var eng = ctx.engine;
-    var here = eng.currentIndex ? eng.currentIndex() : -1;
     var box = el('div', 'wr-grid');
     box.appendChild(bi('span', 'Questions', '문항', 'wr-grid-label'));
     var nav = el('div', 'grid-nav');
@@ -500,20 +500,20 @@
         btn.textContent = String(n + 1);
         btn.setAttribute('data-screen-id', s.id);
         var isHere = s.id === screen.id;
-        var forward = sibs[n].index > here;
         if (isHere) btn.className = 'current';
         var a = savedAnswer((s.questionIds || [])[0]);
         if (!isHere && a && a.complete) btn.className = 'answered';
-        if (!isHere && !forward) {
-          btn.disabled = true;
-          btn.title = 'You cannot go back to a previous question.';
-        }
         if (isHere) btn.disabled = true;
         on(btn, 'click', function () {
           if (isHere) return;
           if (typeof eng.goToScreen === 'function') { eng.goToScreen(s.id, 'manual'); return; }
+          /* 한 칸씩 옮긴다. 각 걸음마다 화면이 다시 그려져 이 그리드는 사라지므로
+             현재 위치는 매번 엔진에게 다시 묻는다. 엔진이 거절하면(모듈 경계·시간 만료)
+             그 자리에서 멈춘다 — 억지로 더 가지 않는다. */
           var steps = sibs[n].index - (eng.currentIndex ? eng.currentIndex() : 0);
-          for (var k = 0; k < steps; k++) { if (!eng.next('manual')) break; }
+          var k;
+          if (steps > 0) { for (k = 0; k < steps; k++) { if (!eng.next('manual')) break; } }
+          else { for (k = 0; k < -steps; k++) { if (!eng.back('manual')) break; } }
         });
         nav.appendChild(btn);
       })(i);

@@ -16,14 +16,14 @@
 
   /* --- Listening 유형별 삽화 (원본 PICTURES 폴더) ------------------ */
   var IMG = {
-    q_male: PICS + 'TOEFL Listening Image (Single male).png',
-    q_male2: PICS + 'TOEFL Listening Image (Single male 2).png',
-    q_male3: PICS + 'TOEFL Listening Image (Single male 3).png',
-    q_female: PICS + 'TOEFL Listening Image (Single female).png',
-    q_female2: PICS + 'TOEFL Listening Image (Single female 2).png',
-    conv2: PICS + 'TOEFL Listening Image (2 Persons).png',
-    conv2b: PICS + 'TOEFL Listening Image (2 People).png',
-    talk: PICS + 'TOEFL Listening Image (Academic, Single female).png'
+    q_male: PICS + 'TOEFL Listening Image (Single male).webp',
+    q_male2: PICS + 'TOEFL Listening Image (Single male 2).webp',
+    q_male3: PICS + 'TOEFL Listening Image (Single male 3).webp',
+    q_female: PICS + 'TOEFL Listening Image (Single female).webp',
+    q_female2: PICS + 'TOEFL Listening Image (Single female 2).webp',
+    conv2: PICS + 'TOEFL Listening Image (2 Persons).webp',
+    conv2b: PICS + 'TOEFL Listening Image (2 People).webp',
+    talk: PICS + 'TOEFL Listening Image (Academic, Single female).webp'
   };
 
   /* 단문응답(Q1-7 / Q1-3) 화자 삽화.
