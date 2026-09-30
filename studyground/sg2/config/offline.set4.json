@@ -1,9 +1,9 @@
 {
  "set": "SET4",
  "label": "NEW TOEFL SET 4",
- "rev": "671a29803f19",
+ "rev": "21b98e7ea735",
  "count": 52,
- "bytes": 11368503,
+ "bytes": 10763280,
  "files": [
   {
    "u": "media/audio/set4/l1-q01.mp3",
@@ -47,13 +47,13 @@
   },
   {
    "u": "media/audio/set4/l1-q09-10.mp3",
-   "b": 461053,
-   "h": "99701448a648"
+   "b": 268922,
+   "h": "e369cd410d10"
   },
   {
    "u": "media/audio/set4/l1-q11-12.mp3",
-   "b": 415495,
-   "h": "065546d50572"
+   "b": 287895,
+   "h": "5267940c88be"
   },
   {
    "u": "media/audio/set4/l1-q13-14.mp3",
@@ -92,8 +92,8 @@
   },
   {
    "u": "media/audio/set4/l2-q06-07.mp3",
-   "b": 546316,
-   "h": "4bac115ef804"
+   "b": 260824,
+   "h": "0963e06625ea"
   },
   {
    "u": "media/audio/set4/l2-q08-11.mp3",
