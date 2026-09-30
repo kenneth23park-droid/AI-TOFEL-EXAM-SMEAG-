@@ -59,6 +59,10 @@ SETS = {
         'label': 'NEW TOEFL SET 3',
         'sources': ['assets/set3.js'],
     },
+    'set4': {
+        'label': 'NEW TOEFL SET 4',
+        'sources': ['assets/set4.js'],
+    },
 }
 
 # 파일 이름에 공백이 들어간 참조가 있다("TOEFL Listening Image (Single female).webp").

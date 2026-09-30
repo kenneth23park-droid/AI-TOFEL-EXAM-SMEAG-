@@ -1,0 +1,602 @@
+{
+  "provider": "elevenlabs",
+  "model": "eleven_flash_v2_5",
+  "output": "mp3_44100_128",
+  "note": [
+    "SET 4 시험 음성 배역 매니페스트. tools/build_voices_manifest.mjs 가 원본 docx 에서 만든다 — 손으로 고치지 말 것.",
+    "대본은 set-import.js 가 읽은 것과 같은 것이고, out 은 콘텐츠 팩이 가리키는 경로 그대로다.",
+    "목소리 13명은 SET 9 에서 확정된 것을 그대로 쓴다(config/set9-voice-casting.json).",
+    "id 에 세트 접두사를 붙이는 이유: tools/tts_multivoice.py 의 검산 매니페스트는 tts-voices*.json 을 합치므로, l1-q01 같은 이름은 SET 9 것과 부딪친다."
+  ],
+  "items": [
+    {
+      "id": "set4-l1-q01",
+      "kind": "short",
+      "out": "media/audio/set4/l1-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "“What time does the bank close today?”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l1-q02",
+      "kind": "short",
+      "out": "media/audio/set4/l1-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "“Have you tried the new Italian place downtown?”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l1-q03",
+      "kind": "short",
+      "out": "media/audio/set4/l1-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "“Cash or card?”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l1-q04",
+      "kind": "short",
+      "out": "media/audio/set4/l1-q04.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "“The copy machine is out of toner again.”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l1-q05",
+      "kind": "short",
+      "out": "media/audio/set4/l1-q05.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "Xb7hH8MSUJpSbSDYk0k2",
+          "voice_name": "GB-Alice",
+          "el_voice": "Alice",
+          "text": "“Isn’t your brother a dentist?”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l1-q06",
+      "kind": "short",
+      "out": "media/audio/set4/l1-q06.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "“Can someone give me a hand with these boxes?”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l1-q07",
+      "kind": "short",
+      "out": "media/audio/set4/l1-q07.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "“The internship application requires two references.”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l1-q08",
+      "kind": "short",
+      "out": "media/audio/set4/l1-q08.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "“This is your stop, isn’t it?”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l1-q09-10",
+      "kind": "conversation",
+      "out": "media/audio/set4/l1-q09-10.mp3",
+      "segments": [
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "How’s the quarterly budget report coming along? Finance needs it by Thursday."
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "I’ve finished the expense analysis and the revenue projections. I’m just waiting on the department heads to confirm their numbers."
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Have you followed up with them? We can’t afford any delays this time."
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "I sent reminders yesterday. Most have responded, but I’m still waiting on operations and HR."
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "If you don’t hear back by tomorrow afternoon, let me know. I’ll reach out to them directly."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set4-l1-q11-12",
+      "kind": "conversation",
+      "out": "media/audio/set4/l1-q11-12.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Did you hear? They’ve moved the staff meeting to the auditorium instead of Conference Room B."
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Really? When did that happen? I already set up the projector there this morning."
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Apparently, there’s a plumbing issue on the third floor, so all rooms up there are closed until it’s fixed."
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Well, I’d better head over to the auditorium and make sure the equipment’s compatible. The presentation’s in an hour."
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "I can help you carry things over if you need."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set4-l1-q13-14",
+      "kind": "announcement",
+      "out": "media/audio/set4/l1-q13-14.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Attention everyone. The Chess Club is hosting its annual campus championship next Saturday in the Student Union game room. Players of all skill levels are welcome, and trophies will be awarded to the top three finishers. We hope to see you compete!"
+        }
+      ]
+    },
+    {
+      "id": "set4-l1-q15-16",
+      "kind": "announcement",
+      "out": "media/audio/set4/l1-q15-16.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Good afternoon. The Career Services Center is launching a professional development workshop series starting next month. Sessions will cover resume writing, interview skills, networking strategies, and salary negotiation. Each workshop runs ninety minutes and features practicing HR professionals as guest speakers. To register, stop by Burton Hall, Room 105, with your student ID. You may sign up for individual workshops or the complete series. Early registration is recommended as seating is limited."
+        }
+      ]
+    },
+    {
+      "id": "set4-l1-q17-20",
+      "kind": "announcement",
+      "out": "media/audio/set4/l1-q17-20.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "So let’s talk about renewable energy sources. This is an increasingly important topic as we look for alternatives to fossil fuels coal, oil, and natural gas. Renewable energy comes from sources that are naturally replenished and won’t run out. Solar energy is one of the most common types. It captures sunlight using panels and converts it into electricity. The sun provides an enormous amount of energy every day, far more than humans currently use. The challenge is that solar power depends on weather conditions and doesn’t work at night without storage systems. Wind energy is another major source. Wind turbines convert the movement of air into electrical power. Wind farms can be built on land or offshore, and they produce no pollution during operation. However, wind is variable; sometimes it blows strongly, sometimes not at all. Hydroelectric power uses flowing water to generate electricity. Dams are built on rivers, and the moving water spins turbines. This is reliable and produces large amounts of power, but building dams can affect river ecosystems and displace communities. Each renewable source has advantages and limitations. That’s why many experts believe the future lies in combining multiple sources. By using solar, wind, and water power together, we can create a more reliable and sustainable system."
+        }
+      ]
+    },
+    {
+      "id": "set4-l2-q01",
+      "kind": "short",
+      "out": "media/audio/set4/l2-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "“The training session runs until noon.”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l2-q02",
+      "kind": "short",
+      "out": "media/audio/set4/l2-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "“I forgot my wallet at home.”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l2-q03",
+      "kind": "short",
+      "out": "media/audio/set4/l2-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "“The document won’t open on my computer.”"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set4-l2-q04-05",
+      "kind": "conversation",
+      "out": "media/audio/set4/l2-q04-05.mp3",
+      "segments": [
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "How’s the grant proposal coming along? The submission deadline is tomorrow, right?"
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "It’s almost done. Dr. Patterson just sent back her edits on the methodology section. I need to incorporate those and then it’s ready."
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Do you need any help with the formatting?"
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Actually, yes. The funding agency has very specific margin requirement, and I keep getting errors. W. Send it over when you’re done with the edits. I can format it this evening."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set4-l2-q06-07",
+      "kind": "conversation",
+      "out": "media/audio/set4/l2-q06-07.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "I have a problem. I bought the textbook for Professor Miller’s class, but I just realized it’s the previous edition."
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Oh no. The bookstore won’t take it back once you’ve opened the shrink wrap."
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "I know. I already checked. I’m hoping someone in class might want to trade."
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Actually, my roommate dropped that course last week. She might still have her new edition. Want me to ask her?"
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "That would be great. I’d really appreciate it."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set4-l2-q08-11",
+      "kind": "announcement",
+      "out": "media/audio/set4/l2-q08-11.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "So today, let's look at one of the most fundamental concepts in economics: supply and demand. Understanding this will help you make sense of why prices change and how markets work. Let's start with demand. Demand refers to how much of a product consumers want to buy at different prices. Generally, when prices are low, people want to buy more. When prices are high, people buy less. This makes intuitive sense, right? If your favorite snack suddenly costs twice as much, you'd probably buy it less often. Supply is the opposite side. It refers to how much producers are willing to sell at different prices. When prices are high, producers want to make and sell more because they'll earn more profit. When prices are low, they produce less because it's not as profitable. Now, here's where it gets interesting. In a market, supply and demand interact to determine the actual price. The equilibrium price is where the amount consumers want to buy equals the amount producers want to sell. If the price is too high, there's a surplus because supply exceeds demand. If it's too low, there's a shortage because demand exceeds supply. The market naturally pushes toward equilibrium. This basic model helps explain everything from why concert tickets sell out to why gas prices fluctuate. Next, we will examine factors that cause supply and demand curves to shift."
+        }
+      ]
+    },
+    {
+      "id": "set4-l2-q12-15",
+      "kind": "announcement",
+      "out": "media/audio/set4/l2-q12-15.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "Today we're going to explore symbiosis. Now, symbiosis basically refers to close, long-term relationships between different species. These relationships are everywhere in nature, and they come in several forms. Let me walk you through the main types. First, there's mutualism. This is when both species benefit from the relationship. A classic example is bees and flowers. Bees get nectar for food, and flowers get pollinated so they can reproduce. Both sides gain something valuable. You also see mutualism with certain bacteria in our digestive system—they help us break down food, and we provide them with a place to live. The second type is parasitism. In this relationship, one organism benefits while the other is harmed. Think of ticks or mosquitoes. They feed on blood from their host, gaining nutrition, but the host loses blood and may even get sick. Parasites don't usually kill their hosts right away, though, because that would end their food source. Finally, we have commensalism. Here, one species benefits, and the other is neither helped nor harmed. Small fish that attach to sharks are a good example. The fish get free transportation and access to food scraps, while the shark isn't really affected either way. Understanding these relationships helps us see how interconnected ecosystems really are. When one species is affected, it can have ripple effects throughout the entire community of organisms."
+        }
+      ]
+    },
+    {
+      "id": "set4-s1-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set4/s1-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You are being trained to assist customers at the car rental company, listen to your trainer, and repeat what she says. Repeat only once."
+        }
+      ]
+    },
+    {
+      "id": "set4-s1-q1",
+      "kind": "repeat",
+      "out": "media/audio/set4/s1-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Welcome to our car rental counter."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set4-s1-q2",
+      "kind": "repeat",
+      "out": "media/audio/set4/s1-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "The rental agreement forms are on the desk"
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set4-s1-q3",
+      "kind": "repeat",
+      "out": "media/audio/set4/s1-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "All vehicles are parked in the lot outside."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set4-s1-q4",
+      "kind": "repeat",
+      "out": "media/audio/set4/s1-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Please have your driver’s license and credit card ready"
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set4-s1-q5",
+      "kind": "repeat",
+      "out": "media/audio/set4/s1-q5.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Car keys are organized in this cabinet by vehicle number."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set4-s1-q6",
+      "kind": "repeat",
+      "out": "media/audio/set4/s1-q6.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "We recommend inspecting the car for any damage before you leave."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set4-s1-q7",
+      "kind": "repeat",
+      "out": "media/audio/set4/s1-q7.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "When returning the car, please park it in the designated return area outside the building."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set4-s2-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set4/s2-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "You have volunteered for a research study about different types of work. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ]
+    },
+    {
+      "id": "set4-s2-q1",
+      "kind": "interview",
+      "out": "media/audio/set4/s2-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Thank you for participating today. I’d like to ask you some questions about work. What kind of work do you or people you know do? For example, is it the kind of work done in the office, in a store, from home, or somewhere else?"
+        }
+      ]
+    },
+    {
+      "id": "set4-s2-q2",
+      "kind": "interview",
+      "out": "media/audio/set4/s2-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Thank you. A job with a high salary may require longer hours and more stress, while a job with lower pay may offer more free time and better work-life balance. Which would you prefer?"
+        }
+      ]
+    },
+    {
+      "id": "set4-s2-q3",
+      "kind": "interview",
+      "out": "media/audio/set4/s2-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Interesting. Do you think the way people think about their careers has changed compared to previous generations? Why or why not?"
+        }
+      ]
+    },
+    {
+      "id": "set4-s2-q4",
+      "kind": "interview",
+      "out": "media/audio/set4/s2-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "One more question. Considering both the benefits and challenges, do you think working remotely is better for most employees than working in a traditional office?"
+        }
+      ]
+    }
+  ]
+}

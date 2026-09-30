@@ -135,6 +135,7 @@
 <script src="assets/set12.js?v=105"></script>
 <script src="assets/set2.js?v=109"></script>
 <script src="assets/set3.js?v=110"></script>
+<script src="assets/set4.js?v=111"></script>
 <script src="assets/sg-band.js"></script>
 <!-- 스피킹 녹음은 IndexedDB 에 있고, 그 문을 여는 것은 SG_STORE 하나뿐이다
      (assets/exam-store.js). 이 줄이 없으면 sg-results.js 의 uploadRecordings 가
@@ -155,7 +156,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   /* 학생은 서버가 허용한 본인 응시 기록을 모든 공개 세트에 걸쳐 본다. */
-  var SETS = (window.SG_STUDENT_SETS || ['SET1', 'SET9', 'SET10', 'SET11']).map(code);
+  var SETS = (window.SG_STUDENT_SETS || ['SET1', 'SET4', 'SET9', 'SET10', 'SET11']).map(code);
   var EXAM = window.SG_STUDENT_EXAM || 'tests.html';
   var ONLY = '';                      // 학생으로 확인된 뒤에만 채워진다
   function code(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }

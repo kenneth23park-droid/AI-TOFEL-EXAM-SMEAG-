@@ -99,6 +99,8 @@
   /** 정답지 한 줄 → 비교 가능한 값. 'B.' → 1(인덱스), 'populations' → 문자열. */
   function answerValue(raw) {
     var s = String(raw || '').trim();
+    /* SET 4 정답지는 한 줄에 번호까지 적는다('11. A' · '1. blood'). 번호는 정답이 아니다. */
+    s = s.replace(/^\d{1,3}\s*[.)]\s+(?=\S)/, '');
     var m = /^([A-E])\s*[.)]?\s*$/.exec(s);
     if (m) return CHOICE_LETTERS.indexOf(m[1]);
     return s.replace(/\s+/g, ' ');
@@ -1119,6 +1121,8 @@
       var mm = /^module\s+(\d+)\s*$/i.exec(t);
       if (mm) { moduleNo = +mm[1]; return; }
       if (/^answer key/i.test(t)) return;
+      /* SET 4 정답지는 라이팅 답 앞에 과제 이름과 구간을 한 줄씩 적는다 — 답이 아니다. */
+      if (/^questions?\s+\d+\s*[-–]\s*\d+\s*$/i.test(t) || /^build an? sentences?$/i.test(t)) return;
 
       var b = bucket();
       if (b) b.push(answerValue(section === 'writing' ? t.replace(/^\d+\s*[.)]\s+/, '') : t));
@@ -1172,6 +1176,9 @@
       var mm = /^module\s+(\d+)\s*$/i.exec(t);
       if (mm) { moduleNo = +mm[1]; cur = null; return; }
       if (/^script$/i.test(t)) return;
+      /* SET 4 대본은 맨 위에 문서 제목('New TOEFL Set 4 Audio Script')을 적는다. 대사가 아니다 —
+         대사로 받으면 머리글 없는 덩어리가 되어 모든 구간의 대본 자리를 차지한다. */
+      if (/^new\s+toefl\b.*\bscript$/i.test(t)) return;
 
       var r = questionRange(t);
       if (r) {

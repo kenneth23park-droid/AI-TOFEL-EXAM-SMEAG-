@@ -19,4 +19,4 @@
  */
 window.SG_STUDENT_LANDING = 'dashboard.html';
 window.SG_STUDENT_EXAM = 'tests.html';
-window.SG_STUDENT_SETS = ['SET1', 'SET9', 'SET10', 'SET11'];
+window.SG_STUDENT_SETS = ['SET1', 'SET4', 'SET9', 'SET10', 'SET11'];

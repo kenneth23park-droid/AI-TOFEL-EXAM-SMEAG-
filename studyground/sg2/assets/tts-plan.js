@@ -41,6 +41,9 @@
          SET 12 L2 'So the takeaway is this: ...' 가 그렇게 화자로 잡혀 배역이 갈렸다.
          낱말마다 첫 글자가 대문자여야 한다는 조건 하나로 그 줄들이 걸러진다. */
       var m = /^([A-Z][A-Za-z0-9._'-]{0,15}(?: [A-Z0-9][A-Za-z0-9._'-]{0,15}){0,2}):\s*(.+)$/.exec(t);
+      /* SET 4 대본은 콜론 없이 글자 하나와 공백으로 화자를 적는다('W   How's…'). M·W 만 받는다 —
+         그 밖의 한 글자('I ', 'A ')는 문장 첫 낱말이다. */
+      if (!m) m = /^([MW])\s+(\S.*)$/.exec(t);
       if (m) out.push({ speaker: m[1].trim(), text: m[2].trim() });
       else if (out.length && !/[:]$/.test(t)) out[out.length - 1].text += ' ' + t;
       else out.push({ speaker: 'Narrator', text: t });
