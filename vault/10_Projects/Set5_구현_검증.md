@@ -2,7 +2,7 @@
 title: TOEFL Set 5 구현 및 검증
 date: 2026-10-06
 area: TOEFL
-status: complete-local
+status: deployed
 tags: [SMEAG-AI, TOEFL, Set5]
 ---
 
@@ -19,3 +19,12 @@ Chrome 시험 화면 79개 모두 렌더, MP3 33개 모두 브라우저 디코�
 원본 교정 내역: `studyground/docs/set5-source-corrections.md`. 빌드 리포트: `studyground/docs/set-reports/set5.md`.
 
 음성 선택: ElevenLabs sensitive 키를 재조회할 수 없어 사용자에게 선택지를 제시하고 기다린 뒤, 계속 진행 요청에 따라 전체 Set5에 로컬 Kokoro 엔진을 적용했다. AU-Lily만 영국 bf_lily로 대응; 원본 대사는 동일. 생성/ASR Python3.12 환경 분리, ASR faster-whisper 1.2.1 + av 16.1.0 + small.en CPU/int8, CPU 스레드 2. 배포·Drive 동기화는 수행하지 않았다. 재생성 절차: `studyground/docs/set5-audio.md`.
+
+## 배포 완료 — 2026-10-06
+
+사용자 `커밋 푸시 배포` 요청으로 프로덕션 배포 승인 확인. 구현 커밋 `7bc50a28916e1f6ecc14c34deacb79263da4fd5c`를 origin/main에 푸시. GitHub Actions run `37528280060`의 세트 완결성·원본 틀 검사 및 Vercel production 배포 성공.
+
+라이브 `https://smeag-studyground.vercel.app/`의 version `sg-v115`, Set5 팩, 시험 카드, 오프라인 목록이 검증본과 일치. 미디어 52개를 모두 실제 다운로드하여 크기와 SHA256을 대조했고 누락·불일치 0. 로컬 백업과 관련 없는 Set4 작업 파일은 커밋/배포에서 제외했다. Drive 동기화는 미실시.
+
+배포 URL: `https://smeag-studyground-fokopnayh-jitnet-7048s-projects.vercel.app`.
+실행 기록: `https://github.com/kenneth23park-droid/AI-TOFEL-EXAM-SMEAG-/actions/runs/37528280060`.
