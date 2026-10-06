@@ -54,9 +54,12 @@
 
   /** 'Questions 13-14' → {from:13,to:14}. 아니면 null. */
   function questionRange(s) {
-    var m = /^questions?\s+(\d+)\s*[-–—]\s*(\d+)/i.exec(s);
+    /* SET 5's script prints "Question1-3" without a space. The numeric
+       boundary is unambiguous; retaining that heading as dialogue shifts the
+       short responses and lets its unbounded group match every later block. */
+    var m = /^questions?\s*(\d+)\s*[-–—]\s*(\d+)/i.exec(s);
     if (m) return { from: +m[1], to: +m[2] };
-    m = /^questions?\s+(\d+)\s*$/i.exec(s);
+    m = /^questions?\s*(\d+)\s*$/i.exec(s);
     return m ? { from: +m[1], to: +m[1] } : null;
   }
 

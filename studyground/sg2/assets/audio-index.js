@@ -13,7 +13,8 @@
 
   var PACKS = [
     { set: 'set1', label: 'SET 1', global: 'SMEAG_SET1' },
-    { set: 'set9', label: 'SET 9', global: 'SMEAG_SET9' }
+    { set: 'set9', label: 'SET 9', global: 'SMEAG_SET9' },
+    { set: 'set5', label: 'SET 5', global: 'SMEAG_SET5' }
   ];
 
   /* SG_MEDIA 가 없는 화면(관리자 페이지)에서도 같은 리맵을 쓴다. */

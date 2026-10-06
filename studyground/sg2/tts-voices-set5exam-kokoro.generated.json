@@ -1,0 +1,496 @@
+{
+  "set5-l1-q01": {
+    "file": "media/audio/set5/l1-q01.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_heart"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "ba80351d2f28ef642ffda7cbb4ba03f4eeeacf6087b3a5338ad990f1781e8238",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "ef1fde90f666fa725cf6e44d7088d0c52dc2fc3c70508edbb81be1b53fb65a45",
+    "wer": 0.0
+  },
+  "set5-l1-q02": {
+    "file": "media/audio/set5/l1-q02.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "am_michael"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "e59f1a017b43b7a7f95df094b459fce1c4369cf00d10bb54c7ab2340dcd3a211",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "1081ac701511c4ab75179bbc12094f28ce869e4b818c3220f4903a932116e465",
+    "wer": 0.0
+  },
+  "set5-l1-q03": {
+    "file": "media/audio/set5/l1-q03.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_bella"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "ad67397c67592c80cec5e40c2e764b7f62c338d741696f57a9f9c634cadf7fb5",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "517713d616f04ea5a1905d079148cf9fac037d3be5325e45dee19063312f8d6c",
+    "wer": 0.0
+  },
+  "set5-l1-q04": {
+    "file": "media/audio/set5/l1-q04.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "am_fenrir"
+    ],
+    "speed": 0.75,
+    "segments": 1,
+    "textHash": "c378fc6c428fc1ba14b87a91c4ac0eb6a743f9b38bb20794dcb9786341136d53",
+    "processingVersion": "chunk180-v2-headroom075",
+    "chunking": "180chars, 150ms gap within speaker, peak headroom 0.75",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "bcd623be771e52a789d5f36d26d1b15994e24df1b6cafc037ff1fe43f63681b7",
+    "wer": 0.0
+  },
+  "set5-l1-q05": {
+    "file": "media/audio/set5/l1-q05.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bf_alice"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "bb4a35212aa0be908e36fc1f161af3f8188757627f7c25737019073706d2d32b",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "4a7c83b092bd4b254740e663b3b0d1d754bd07756076f37822f304407003c8e9",
+    "wer": 0.0
+  },
+  "set5-l1-q06": {
+    "file": "media/audio/set5/l1-q06.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bm_george"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "9dc423307718a46207a74cf07a6f4b7b3ec3efd53000eb65a1434ecca9d8652d",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "891cbdbc091a442f8d9c8ca5f60d4bdf54d77cfb94556f76a9afe439bb5bc2ad",
+    "wer": 0.0
+  },
+  "set5-l1-q07": {
+    "file": "media/audio/set5/l1-q07.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bf_lily"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "627c6abd71b71a1c5e19ff5c0c23228729e5cfe8eb684fe454ddfc1ab624e5ce",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "1d575c5ae751ccb3af5dc69911895730a2dfb18f55ac80f503d6c2b659bdc2cb",
+    "wer": 0.0
+  },
+  "set5-l1-q08": {
+    "file": "media/audio/set5/l1-q08.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "am_puck"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "30c0208d778a37a6c20c6610ab1c66afa32f5131e7f6b5a244ae995089d88b0b",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "3f9794a1120bcf9de7f211351edab797f0afb12d586a1d02f2a451efb2349b91",
+    "wer": 0.0
+  },
+  "set5-l1-q09-10": {
+    "file": "media/audio/set5/l1-q09-10.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole",
+      "am_michael"
+    ],
+    "speed": 1.1,
+    "segments": 5,
+    "textHash": "e67123a836a1e40686ba3ccfc792c96dac62274fad9ad9f1c90294d0277519d0",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "1c7ad2a2e6c180264dc88a483f65065d775d4649206e76b297b15a823cc23194",
+    "wer": 0.013
+  },
+  "set5-l1-q11-12": {
+    "file": "media/audio/set5/l1-q11-12.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_bella",
+      "am_eric"
+    ],
+    "speed": 1.1,
+    "segments": 5,
+    "textHash": "22b6e65c209e440c233b25c04460226be022280f273e7b8c4360a024993b1de5",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "5a3b9d73cbfa8654441a3735dcbf6f50bcac4b59764701528f0c533a078c864d",
+    "wer": 0.0
+  },
+  "set5-l1-q13-14": {
+    "file": "media/audio/set5/l1-q13-14.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "am_michael"
+    ],
+    "speed": 1.0,
+    "segments": 1,
+    "textHash": "f7993ffa23044d26de19bd36da8f5ba6e18f3611f44732b956d8c244762a088a",
+    "processingVersion": "chunk180-v2-headroom075",
+    "chunking": "180chars, 150ms gap within speaker, peak headroom 0.75",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "7a51f766c024a60a4f818bbc159075d11510442f2b5a95e8312355485251ce94",
+    "wer": 0.0
+  },
+  "set5-l1-q15-16": {
+    "file": "media/audio/set5/l1-q15-16.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "am_eric"
+    ],
+    "speed": 1.0,
+    "segments": 1,
+    "textHash": "5906e95df7a886e7e4cf836effb9a25ec68132b2ad76712b6e4c544ecf74bf61",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "019ec9300b3ccbef9766a1237e71b8e5bead0abaca5037f09eecea5df4edf59e",
+    "wer": 0.0
+  },
+  "set5-l1-q17-20": {
+    "file": "media/audio/set5/l1-q17-20.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "am_fenrir"
+    ],
+    "speed": 0.95,
+    "segments": 1,
+    "textHash": "577f2d5dc88316a2383191a37744dd35773992055ebc82238183382902935591",
+    "processingVersion": "chunk180-v2-headroom075",
+    "chunking": "180chars, 150ms gap within speaker, peak headroom 0.75",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "c895eba9ce4b26e4af43249200e55bdff9ff2f8745db4de0246a0715ccc32a87",
+    "wer": 0.009
+  },
+  "set5-l2-q01": {
+    "file": "media/audio/set5/l2-q01.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_heart"
+    ],
+    "speed": 0.75,
+    "segments": 1,
+    "textHash": "3ac0a95bd5a3c94410198ac87071c8c1627f939f86efddba6b23ce8b4f343348",
+    "processingVersion": "chunk180-v2-headroom075",
+    "chunking": "180chars, 150ms gap within speaker, peak headroom 0.75",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "0c53a3015e4a79c6330c68ba507b1e422ed85861b3f3ba47dca7e19b7b332f62",
+    "wer": 0.0
+  },
+  "set5-l2-q02": {
+    "file": "media/audio/set5/l2-q02.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "1c628af51f452abbd186fce01e3ecb06179e3ada41495b2fa9f65f0e3d8b1ffe",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "33df4205d2b25d59db836b646c8266181c9178988e1fc3aae9e1919a2b5816b5",
+    "wer": 0.0
+  },
+  "set5-l2-q03": {
+    "file": "media/audio/set5/l2-q03.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bf_isabella"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "3edd98d516e4a4cebe3d844d907e6778198f570a40b986f40170b532c532d2e4",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "128ea015b8399cfbf16d86e02a8394cd7db100cc748ec6ff65706017a59863e1",
+    "wer": 0.0
+  },
+  "set5-l2-q04-05": {
+    "file": "media/audio/set5/l2-q04-05.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "am_fenrir",
+      "af_aoede"
+    ],
+    "speed": 1.1,
+    "segments": 5,
+    "textHash": "9313e51f3bc5eb6a34f79e98c331bb5b8594ea2c1065fd5efd4c14744900cc89",
+    "processingVersion": "chunk180-v2-headroom075",
+    "chunking": "180chars, 150ms gap within speaker, peak headroom 0.75",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "eb571acff2d0ee169d41a4c0aae1111993b99fcd783be4ddeb1a7ceafc21983f",
+    "wer": 0.0
+  },
+  "set5-l2-q06-07": {
+    "file": "media/audio/set5/l2-q06-07.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "am_puck",
+      "bf_isabella"
+    ],
+    "speed": 1.1,
+    "segments": 5,
+    "textHash": "0a7309d6d52d687c468138c7533e132ce6c41556931a100752b6421bb227a8d4",
+    "processingVersion": "chunk180-v2-headroom075",
+    "chunking": "180chars, 150ms gap within speaker, peak headroom 0.75",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "b17127e9a21cc899e0fbd87df5eb94f0f19f7a35a1b8ded91efbea90becd9cc4",
+    "wer": 0.0
+  },
+  "set5-l2-q08-11": {
+    "file": "media/audio/set5/l2-q08-11.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bm_lewis"
+    ],
+    "speed": 1.0,
+    "segments": 1,
+    "textHash": "de80d2e1c771e619f5c22f0f10b6463731e813ed58af462ee7a1f8d75356bac4",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "2f1fd885d5248f840cb87ed712c0f9dd56cdd825b34a2702d72234b0780dcca8",
+    "wer": 0.0084
+  },
+  "set5-l2-q12-15": {
+    "file": "media/audio/set5/l2-q12-15.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bm_george"
+    ],
+    "speed": 1.0,
+    "segments": 1,
+    "textHash": "154d195532306b5e32af8911beeab225e6f80daa7bc8594a0264f2b7436f5f54",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "843364b4366951280abdad2ad8eda3c465ee895f2ca26ded8dbf98f3a530c9d4",
+    "wer": 0.0086
+  },
+  "set5-s1-instructions": {
+    "file": "media/audio/set5/s1-instructions.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
+    "segments": 1,
+    "textHash": "26585ce36a0653cb7fa9193a29d6838db9c9bd64c5cb9544fca299e0bb502444",
+    "processingVersion": "chunk180-v2-headroom075",
+    "chunking": "180chars, 150ms gap within speaker, peak headroom 0.75",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "6af76d99b8997e688225186e7f9876bfeec28e22d21c1d739e3a4d6e5f22343e",
+    "wer": 0.0
+  },
+  "set5-s1-q1": {
+    "file": "media/audio/set5/s1-q1.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
+    "segments": 1,
+    "textHash": "3dbe615e2d1b8e0103b94e09e329fbaad56f1059418126346354aae1cf5aa5c1",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "c5376633958677d03fc136c2aabc3428efacb0482e25974ec8b242fd7caf10da",
+    "wer": 0.0
+  },
+  "set5-s1-q2": {
+    "file": "media/audio/set5/s1-q2.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
+    "segments": 1,
+    "textHash": "2a6be08474cb90d0c0bbfe53689eca616a5d11e9d14872363af8d823eece3829",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "a68e4b395ec74ef1785176d5793dd56377525e56cbdcb10da669e1f095efea7d",
+    "wer": 0.0
+  },
+  "set5-s1-q3": {
+    "file": "media/audio/set5/s1-q3.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
+    "segments": 1,
+    "textHash": "9a3544864beaa891ed0a92da113a5ac517abcddd6d1d0dd58b522af1581b8c1d",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "8b6bbe34985d1d1f99f0715c9fcd81e5b1e832f0c07f9f322bf089ecaef2f8ed",
+    "wer": 0.0
+  },
+  "set5-s1-q4": {
+    "file": "media/audio/set5/s1-q4.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
+    "segments": 1,
+    "textHash": "2d916b673311181330883eabe327b34fc8cfb2f3e674eeebb9eefc89c58932d6",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "7c188a096b9bfaa954659d6f0b00f31b40f76925f0ac94c05f907f34d19206e6",
+    "wer": 0.0
+  },
+  "set5-s1-q5": {
+    "file": "media/audio/set5/s1-q5.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
+    "segments": 1,
+    "textHash": "399e4083ded0bacbb08dc8a5f397c8ebebf4d87063caf9bda91529575560ceb0",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "8438929c296313935d14c514c419b1551146bd818c817cad2dc55a006bc90451",
+    "wer": 0.0
+  },
+  "set5-s1-q6": {
+    "file": "media/audio/set5/s1-q6.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
+    "segments": 1,
+    "textHash": "cf3e9296e9721619c6e943fa5df9a59c150d587c5b886333e6e296ad219ecd57",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "01baa18b55cd0990a6766e5525ab5973d144c193996b5cd2112a05f85ccf853a",
+    "wer": 0.0
+  },
+  "set5-s1-q7": {
+    "file": "media/audio/set5/s1-q7.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "af_nicole"
+    ],
+    "speed": 1.25,
+    "segments": 1,
+    "textHash": "6dc19a3cb4b27acd8738c45fbc4c2fc9d50bb82da1185ad4a2a1407a80943365",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "810c906bb361a9bd8a75038a42d8f520010a4746a858baf63066011615a7324e",
+    "wer": 0.0
+  },
+  "set5-s2-instructions": {
+    "file": "media/audio/set5/s2-instructions.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bm_lewis"
+    ],
+    "speed": 1.0,
+    "segments": 1,
+    "textHash": "563e6c643808fa023c920f3b16fb6941211dc79853d8d83314e5cd55d526ac4a",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "95225418c977bf6fe19b77069fd5e0a8efdc4f51aad40341576a7e2b1331fb43",
+    "wer": 0.0
+  },
+  "set5-s2-q1": {
+    "file": "media/audio/set5/s2-q1.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bm_lewis"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "824bbed6be73188f4393c09700dbba8afcf908e9f5e11d0001b3f9013ec52970",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "ec2c361843f476695e95494dcfe30b36a460596f2187485eec7ce3a59060cc17",
+    "wer": 0.0
+  },
+  "set5-s2-q2": {
+    "file": "media/audio/set5/s2-q2.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bm_lewis"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "2ddbd654c358a0b39a6d366912b4bfa255be4dd040224d78952edef09d7fd83b",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "4bf4b6b4df8501e2be08aca5e1afa99502bf8a0408b9f00937cdf454d1dcc940",
+    "wer": 0.0
+  },
+  "set5-s2-q3": {
+    "file": "media/audio/set5/s2-q3.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bm_lewis"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "ff0d2c4026c33a139c634fe9d1cf673afac4959e8b2a554ba10730146466514f",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "127f47a9c2eec244702dc7c7fd4b3424ce31af6f3b05085c816b4de36b787eeb",
+    "wer": 0.0
+  },
+  "set5-s2-q4": {
+    "file": "media/audio/set5/s2-q4.mp3",
+    "provider": "kokoro-onnx",
+    "modelAssetsHash": "2cdb7679bfbb0873",
+    "voices": [
+      "bm_lewis"
+    ],
+    "speed": 1.12,
+    "segments": 1,
+    "textHash": "df4700d36d0513ae49e33ae7c7ea80ab42d7e6ece4e6b2886444bf80a641ee38",
+    "chunking": "chunk180-v1, 150ms gap within speaker",
+    "validation": "PASS: actual ASR and strict audio gate",
+    "audioSha256": "b0975b1155f1d1221d44370c9d1ea0d775c07388529a01ea1a65df4225c6ebbc",
+    "wer": 0.0
+  }
+}

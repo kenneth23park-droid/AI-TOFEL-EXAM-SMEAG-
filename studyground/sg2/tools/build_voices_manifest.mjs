@@ -205,7 +205,8 @@ const main = async () => {
     const segments = lines.map((l) => {
       /* 대화는 화자 표시(M/W)마다 배역이 다르고, 나머지는 한 명이 끝까지 읽는다.
          표시가 배역표에 없으면 지어내지 않고 아래에서 멈춘다. */
-      const name = typeof role === 'string' ? role : role[l.speaker];
+      const speakerKey = { Woman: 'W', Man: 'M' }[l.speaker] || l.speaker;
+      const name = typeof role === 'string' ? role : role[speakerKey];
       if (!name || !CAST[name]) { unknown.push(slot + ' (' + l.speaker + ')'); return null; }
       const c = CAST[name];
       chars += l.text.length;
@@ -237,6 +238,11 @@ const main = async () => {
   };
 
   const dest = path.join(SG2, `tts-voices-set${setNo}exam-11labs.json`);
+  // A complete set rendered by another provider keeps its ElevenLabs plan
+  // as a reference. Rebuilding the plan must not reactivate that old policy.
+  if (fs.existsSync(dest) && JSON.parse(fs.readFileSync(dest, 'utf8')).active === false) {
+    manifest.active = false;
+  }
   const text = JSON.stringify(manifest, null, 2) + '\n';
   const same = fs.existsSync(dest) && fs.readFileSync(dest, 'utf8') === text;
 

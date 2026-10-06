@@ -315,7 +315,7 @@ def build_verify_manifest(dest: Path = VERIFY_MANIFEST) -> Path:
         for it in man.get("items", []):
             segs = [
                 {"speaker": s.get("speaker", ""),
-                 "say_voice": f"{policy}|{s.get('voice') or s.get('voice_name', '')}",
+                 "say_voice": s.get("say_voice") or f"{policy}|{s.get('voice') or s.get('voice_name', '')}",
                  "text": s.get("text", "")}
                 for s in it.get("segments", []) if s.get("text", "").strip()
             ]

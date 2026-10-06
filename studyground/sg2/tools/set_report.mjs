@@ -8,6 +8,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 function mediaRefs(pack) {
   const refs = new Set();
@@ -53,14 +54,23 @@ export function writeSetReport(o) {
 
   /* 음성 받아쓰기 대조(tts_multivoice.py 끝의 audio gate) 결과. 통과 기록이 없으면 FAIL 이다 —
      게이트는 실패한 음원의 기준을 적지 않는다. WARN 은 사람이 한 번 들어 볼 것. */
-  const castPath = path.join(sg2, 'tts-voices-set' + setNo + 'exam-11labs.json');
-  const idxPath = path.join(sg2, 'media/audio', S, '.audio-index.verify-manifest.tts.json');
+  const localCast = path.join(sg2, 'tts-voices-set' + setNo + 'exam-kokoro.json');
+  const castPath = fs.existsSync(localCast) && JSON.parse(fs.readFileSync(localCast, 'utf8')).active !== false
+    ? localCast : path.join(sg2, 'tts-voices-set' + setNo + 'exam-11labs.json');
+  const setIndex = path.join(sg2, 'media/audio', S, '.audio-index.tts-manifest.' + S + '.json');
+  const idxPath = fs.existsSync(setIndex) ? setIndex
+    : path.join(sg2, 'media/audio', S, '.audio-index.verify-manifest.tts.json');
   const audioFail = [], audioListen = [];
   if (fs.existsSync(castPath)) {
     const idx = fs.existsSync(idxPath) ? (JSON.parse(fs.readFileSync(idxPath, 'utf8')).items || {}) : {};
     (JSON.parse(fs.readFileSync(castPath, 'utf8')).items || []).forEach((it) => {
       const s = (idx[it.id] || {}).stt;
-      if (!s || s.verdict === 'FAIL') {
+      const audioPath = path.join(sg2, it.out);
+      const currentHash = fs.existsSync(audioPath)
+        ? createHash('sha256').update(fs.readFileSync(audioPath)).digest('hex') : null;
+      if (s && s.audioSha256 !== currentHash) {
+        audioFail.push('`' + it.out + '` — speech check is stale for the current audio');
+      } else if (!s || s.verdict === 'FAIL') {
         audioFail.push('`' + it.out + '` — ' + (s ? s.reason : 'no passing speech check against the script'));
       } else if (s.verdict === 'WARN') {
         audioListen.push('`' + it.out + '` — ' + s.reason);

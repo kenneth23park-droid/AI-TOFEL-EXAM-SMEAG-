@@ -98,6 +98,7 @@
 <script src="assets/dup-view.js"></script>
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
+<script src="assets/set5.js?v=114"></script>
 <script src="assets/set-import.js"></script>
 <script src="assets/set-store.js"></script>
 <script src="assets/admin-session.js"></script>
@@ -208,6 +209,7 @@
     var out = [];
     if (window.SMEAG_SET1) out.push(window.SMEAG_SET1);
     if (window.SMEAG_SET9) out.push(window.SMEAG_SET9);
+    if (window.SMEAG_SET5) out.push(window.SMEAG_SET5);
     if (window.SG_SET_STORE) {
       SG_SET_STORE.list().forEach(function (row) {
         var p = SG_SET_STORE.get(row.slug);

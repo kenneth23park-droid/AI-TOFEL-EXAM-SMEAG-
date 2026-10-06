@@ -1,0 +1,610 @@
+{
+  "provider": "elevenlabs",
+  "model": "eleven_flash_v2_5",
+  "output": "mp3_44100_128",
+  "note": [
+    "SET 5 시험 음성 배역 매니페스트. tools/build_voices_manifest.mjs 가 원본 docx 에서 만든다 — 손으로 고치지 말 것.",
+    "대본은 set-import.js 가 읽은 것과 같은 것이고, out 은 콘텐츠 팩이 가리키는 경로 그대로다.",
+    "목소리 13명은 SET 9 에서 확정된 것을 그대로 쓴다(config/set9-voice-casting.json).",
+    "id 에 세트 접두사를 붙이는 이유: tools/tts_multivoice.py 의 검산 매니페스트는 tts-voices*.json 을 합치므로, l1-q01 같은 이름은 SET 9 것과 부딪친다."
+  ],
+  "items": [
+    {
+      "id": "set5-l1-q01",
+      "kind": "short",
+      "out": "media/audio/set5/l1-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "How often does the shuttle run?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l1-q02",
+      "kind": "short",
+      "out": "media/audio/set5/l1-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Have you submitted your expense report?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l1-q03",
+      "kind": "short",
+      "out": "media/audio/set5/l1-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Window or middle seat?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l1-q04",
+      "kind": "short",
+      "out": "media/audio/set5/l1-q04.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "The client wants to move the deadline up."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l1-q05",
+      "kind": "short",
+      "out": "media/audio/set5/l1-q05.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "Xb7hH8MSUJpSbSDYk0k2",
+          "voice_name": "GB-Alice",
+          "el_voice": "Alice",
+          "text": "Doesn’t the museum offer free admission on Sundays?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l1-q06",
+      "kind": "short",
+      "out": "media/audio/set5/l1-q06.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "Can you forward me that email thread?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l1-q07",
+      "kind": "short",
+      "out": "media/audio/set5/l1-q07.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "The team meeting got moved to three o’clock."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l1-q08",
+      "kind": "short",
+      "out": "media/audio/set5/l1-q08.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "You’ve been to Japan before, haven’t you?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l1-q09-10",
+      "kind": "conversation",
+      "out": "media/audio/set5/l1-q09-10.mp3",
+      "segments": [
+        {
+          "speaker": "Woman",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "How’s the quarterly budget report coming along? Finance needs it by Thursday."
+        },
+        {
+          "speaker": "Man",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "I’ve finished the expense analysis and the revenue projections. I’m just waiting on the department heads to confirm their numbers."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Have you followed up with them? We can’t afford any delays this time."
+        },
+        {
+          "speaker": "Man",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "I sent reminders yesterday. Most have responded, but I’m still waiting on operations and HR."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "If you don’t hear back by tomorrow afternoon, let me know. I’ll reach out to them directly."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set5-l1-q11-12",
+      "kind": "conversation",
+      "out": "media/audio/set5/l1-q11-12.mp3",
+      "segments": [
+        {
+          "speaker": "Woman",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "I just got an email from the internship coordinator. Apparently, our start date has been pushed back two weeks."
+        },
+        {
+          "speaker": "Man",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Really? I thought we were supposed to begin on June 1st. What happened?"
+        },
+        {
+          "speaker": "Woman",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "The company is relocating to a new office building, and it won’t be ready until mid-June. So now we start on the 15th instead."
+        },
+        {
+          "speaker": "Man",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Well, that’s actually not too bad. I can use the extra time to finish my online certification course."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Same here. I was stressing about completing everything before the internship. This gives us some breathing room."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set5-l1-q13-14",
+      "kind": "announcement",
+      "out": "media/audio/set5/l1-q13-14.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Students, the university is upgrading our email system to improve security and storage capacity. Starting next Monday, you’ll need to log in using your full student ID number instead of your username. Please update your email app settings before then."
+        }
+      ]
+    },
+    {
+      "id": "set5-l1-q15-16",
+      "kind": "announcement",
+      "out": "media/audio/set5/l1-q15-16.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Students, the campus shuttle is adjusting its routes starting this Monday to better serve the new dormitory complex. The Blue Line will include two additional stops near Riverside Hall. Please check the updated schedule posted on the transportation website and plan your commute accordingly."
+        }
+      ]
+    },
+    {
+      "id": "set5-l1-q17-20",
+      "kind": "announcement",
+      "out": "media/audio/set5/l1-q17-20.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "OK, so I want to explain the concept of food chains and food webs. These are fundamental ideas in ecology that help us understand how energy moves through ecosystems. A food chain is a simple model showing how energy passes from one organism to another. It starts with producers, which are usually plants. Plants capture energy from the sun through photosynthesis. Then primary consumers, like rabbits or insects, eat the plants. Secondary consumers, such as small birds or frogs, eat the primary consumers. And at the top, you might have tertiary consumers, like hawks or foxes, eating the secondary consumers. Now, in reality, ecosystems are more complicated than a simple chain. Most animals eat more than one type of food, and most organisms are eaten by more than one predator. So scientists use the term food web to describe these interconnected relationships. A food web is basically many food chains linked together. Why does this matter? Well, if one species in a food web disappears, it affects many others. For example, if a disease kills most of the rabbits in an area, the foxes that eat rabbits will struggle, but so will the plants that rabbits used to keep in check. Everything is connected. Understanding food webs helps us predict how changes in one population might ripple through an entire ecosystem."
+        }
+      ]
+    },
+    {
+      "id": "set5-l2-q01",
+      "kind": "short",
+      "out": "media/audio/set5/l2-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "That’s a lot of luggage for a weekend trip, isn’t it?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l2-q02",
+      "kind": "short",
+      "out": "media/audio/set5/l2-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "The Wi-Fi password doesn’t seem to be working?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l2-q03",
+      "kind": "short",
+      "out": "media/audio/set5/l2-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "The shipment was supposed to arrive yesterday."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set5-l2-q04-05",
+      "kind": "conversation",
+      "out": "media/audio/set5/l2-q04-05.mp3",
+      "segments": [
+        {
+          "speaker": "Man",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Professor Adams, I wanted to update you on my dissertation progress. I’ve completed the data analysis chapter."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "That’s great news. How did the statistical models turn out?"
+        },
+        {
+          "speaker": "Man",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Better than expected, actually. The results support my hypothesis pretty strongly. I just need to write up the discussion section now."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Excellent. Once that’s done, send me the full draft. I’ll need at least two weeks to review it before we schedule your defense."
+        },
+        {
+          "speaker": "Man",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Understood. I’m hoping to have everything for you by the end of this month."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set5-l2-q06-07",
+      "kind": "conversation",
+      "out": "media/audio/set5/l2-q06-07.mp3",
+      "segments": [
+        {
+          "speaker": "Man",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Did you see the email about the leadership conference next week?"
+        },
+        {
+          "speaker": "Woman",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Yes, the one about the keynote speaker change? I was looking forward to hearing Dr. Chen speak about innovation in education."
+        },
+        {
+          "speaker": "Man",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Same here. But the replacement speaker is actually quite well-known in organizational psychology. She wrote that book on team dynamics."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Oh, I’ve heard of her. That might be even more relevant to my work in human resources, actually."
+        },
+        {
+          "speaker": "Man",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Right, I thought you’d find it interesting."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set5-l2-q08-11",
+      "kind": "announcement",
+      "out": "media/audio/set5/l2-q08-11.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Alright, today I want to compare two different strategies animals use to regulate their body temperature—being warm-blooded versus cold-blooded. These terms are a bit simplified, but they help us understand some fundamental differences. Warm-blooded animals, which include mammals and birds, generate their own body heat internally. Their metabolism is constantly working to maintain a stable internal temperature regardless of the environment. A human body stays around 37 degrees Celsius whether you’re in a hot desert or a cold mountain. This gives warm-blooded animals a significant advantage—they can remain active in a wide range of conditions. Cold-blooded animals, like reptiles, fish, and insects, work differently. They rely on external sources to regulate their temperature. A lizard, for instance, will bask in the sun to warm up and seek shade when it gets too hot. Their body temperature changes with their surroundings. Now, each strategy has trade-offs. Warm-blooded animals can be active anytime, but they need to eat a lot more food to fuel their metabolism. A mouse might need to eat half its body weight daily. Cold-blooded animals need much less food, but their activity is limited by environmental conditions. On cold days, they become sluggish and slow. Neither approach is superior—they’re just different solutions to the same problem of surviving in various environments. Next, we will examine how some animals can actually switch between these strategies."
+        }
+      ]
+    },
+    {
+      "id": "set5-l2-q12-15",
+      "kind": "announcement",
+      "out": "media/audio/set5/l2-q12-15.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "OK, so let’s talk about something you encounter every day but might not think much about—the states of matter. Most of you know there are three main states: solid, liquid, and gas. But do you understand what’s actually happening at the molecular level? In a solid, molecules are packed tightly together in fixed positions. They vibrate but don’t move around freely. This is why solids maintain their shape—put a rock on a table, and it stays exactly where you put it. The molecules are locked in place. Liquids are different. The molecules are still close together, but they can slide past one another. This is why liquids take the shape of their container. Pour water into a glass, and it conforms to the glass’s shape. The molecules have more freedom to move but are still attracted to each other. In gases, molecules have the most energy and freedom. They spread out to fill whatever space is available and move rapidly in all directions. The molecules are far apart and barely interact with each other. This is why gases can be compressed easily—there’s lots of empty space between molecules. What determines which state matter is in? Temperature and pressure. Add heat energy, and molecules move faster. Eventually, a solid becomes liquid, and a liquid becomes gas. Remove heat, and the opposite happens. It’s all about how much energy the molecules have."
+        }
+      ]
+    },
+    {
+      "id": "set5-s1-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set5/s1-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You are being trained to assist visitors at the sports and recreation center, listen to your trainer, and repeat what she says. Repeat only once."
+        }
+      ]
+    },
+    {
+      "id": "set5-s1-q1",
+      "kind": "repeat",
+      "out": "media/audio/set5/s1-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Welcome! Let’s go over the facilities."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set5-s1-q2",
+      "kind": "repeat",
+      "out": "media/audio/set5/s1-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "There are two basketball courts in the main gym."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set5-s1-q3",
+      "kind": "repeat",
+      "out": "media/audio/set5/s1-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "The indoor swimming pool is open from six to nine daily."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set5-s1-q4",
+      "kind": "repeat",
+      "out": "media/audio/set5/s1-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Visitors can register for fitness classes at the membership desk here."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set5-s1-q5",
+      "kind": "repeat",
+      "out": "media/audio/set5/s1-q5.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "We encourage families to check out our youth programs and summer camps."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set5-s1-q6",
+      "kind": "repeat",
+      "out": "media/audio/set5/s1-q6.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Please remind visitors that children under twelve must be accompanied by an adult."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set5-s1-q7",
+      "kind": "repeat",
+      "out": "media/audio/set5/s1-q7.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "If someone wants to book a private event, they should contact our event team in advance."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set5-s2-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set5/s2-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "You have volunteered for a research study about how to spend your free time. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ]
+    },
+    {
+      "id": "set5-s2-q1",
+      "kind": "interview",
+      "out": "media/audio/set5/s2-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Thank you for joining today. I’d like to ask you some questions about free time. Do you usually spend free time at home, outside, or a mix of both?"
+        }
+      ]
+    },
+    {
+      "id": "set5-s2-q2",
+      "kind": "interview",
+      "out": "media/audio/set5/s2-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "I see. When you watch movies or TV shows, do you prefer to watch them alone or with friends or family? Why?"
+        }
+      ]
+    },
+    {
+      "id": "set5-s2-q3",
+      "kind": "interview",
+      "out": "media/audio/set5/s2-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "That makes sense. Some people say that streaming services have made entertainment better because there are more choices, while others say having too many options makes it harder to decide what to watch. What do you think?"
+        }
+      ]
+    },
+    {
+      "id": "set5-s2-q4",
+      "kind": "interview",
+      "out": "media/audio/set5/s2-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Finally, how do you think people’s entertainment habits might change in the next ten years?"
+        }
+      ]
+    }
+  ],
+  "active": false
+}

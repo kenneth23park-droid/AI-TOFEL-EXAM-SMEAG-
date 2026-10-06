@@ -1,0 +1,340 @@
+{
+  "set": "set5",
+  "source": "tts-manifest.set5.json",
+  "items": [
+    {
+      "id": "l1-q01",
+      "path": "media/audio/set5/l1-q01.mp3",
+      "text": "How often does the shuttle run?",
+      "asr": "How often does the shuttle run?",
+      "voices": [
+        "af_heart"
+      ],
+      "asrAudioSha256": "ef1fde90f666fa725cf6e44d7088d0c52dc2fc3c70508edbb81be1b53fb65a45"
+    },
+    {
+      "id": "l1-q02",
+      "path": "media/audio/set5/l1-q02.mp3",
+      "text": "Have you submitted your expense report?",
+      "asr": "Have you submitted your expense report?",
+      "voices": [
+        "am_michael"
+      ],
+      "asrAudioSha256": "1081ac701511c4ab75179bbc12094f28ce869e4b818c3220f4903a932116e465"
+    },
+    {
+      "id": "l1-q03",
+      "path": "media/audio/set5/l1-q03.mp3",
+      "text": "Window or middle seat?",
+      "asr": "window or middle seat.",
+      "voices": [
+        "af_bella"
+      ],
+      "asrAudioSha256": "517713d616f04ea5a1905d079148cf9fac037d3be5325e45dee19063312f8d6c"
+    },
+    {
+      "id": "l1-q04",
+      "path": "media/audio/set5/l1-q04.mp3",
+      "text": "The client wants to move the deadline up.",
+      "asr": "The client wants to move the deadline up.",
+      "voices": [
+        "am_fenrir"
+      ],
+      "asrAudioSha256": "bcd623be771e52a789d5f36d26d1b15994e24df1b6cafc037ff1fe43f63681b7"
+    },
+    {
+      "id": "l1-q05",
+      "path": "media/audio/set5/l1-q05.mp3",
+      "text": "Doesn’t the museum offer free admission on Sundays?",
+      "asr": "Doesn't the museum offer free admission on Sundays?",
+      "voices": [
+        "bf_alice"
+      ],
+      "asrAudioSha256": "4a7c83b092bd4b254740e663b3b0d1d754bd07756076f37822f304407003c8e9"
+    },
+    {
+      "id": "l1-q06",
+      "path": "media/audio/set5/l1-q06.mp3",
+      "text": "Can you forward me that email thread?",
+      "asr": "Can you forward me that email thread?",
+      "voices": [
+        "bm_george"
+      ],
+      "asrAudioSha256": "891cbdbc091a442f8d9c8ca5f60d4bdf54d77cfb94556f76a9afe439bb5bc2ad"
+    },
+    {
+      "id": "l1-q07",
+      "path": "media/audio/set5/l1-q07.mp3",
+      "text": "The team meeting got moved to three o’clock.",
+      "asr": "The team meeting got moved to three o'clock.",
+      "voices": [
+        "bf_lily"
+      ],
+      "asrAudioSha256": "1d575c5ae751ccb3af5dc69911895730a2dfb18f55ac80f503d6c2b659bdc2cb"
+    },
+    {
+      "id": "l1-q08",
+      "path": "media/audio/set5/l1-q08.mp3",
+      "text": "You’ve been to Japan before, haven’t you?",
+      "asr": "You've been to Japan before, haven't you?",
+      "voices": [
+        "am_puck"
+      ],
+      "asrAudioSha256": "3f9794a1120bcf9de7f211351edab797f0afb12d586a1d02f2a451efb2349b91"
+    },
+    {
+      "id": "l1-q09-10",
+      "path": "media/audio/set5/l1-q09-10.mp3",
+      "text": "How’s the quarterly budget report coming along? Finance needs it by Thursday. I’ve finished the expense analysis and the revenue projections. I’m just waiting on the department heads to confirm their numbers. Have you followed up with them? We can’t afford any delays this time. I sent reminders yesterday. Most have responded, but I’m still waiting on operations and HR. If you don’t hear back by tomorrow afternoon, let me know. I’ll reach out to them directly.",
+      "asr": "How's the quarterly budget report coming along? Finance needs it by Thursday. I finished the expense analysis and the revenue projections. I'm just waiting on the department heads to confirm their numbers. Have you followed up with them? We can't afford any delays this time. I sent reminders yesterday. Most have responded, but I'm still waiting on operations and HR. If you don't hear back by tomorrow afternoon, let me know. I'll reach out to them directly.",
+      "voices": [
+        "af_nicole",
+        "am_michael"
+      ],
+      "asrAudioSha256": "1c7ad2a2e6c180264dc88a483f65065d775d4649206e76b297b15a823cc23194"
+    },
+    {
+      "id": "l1-q11-12",
+      "path": "media/audio/set5/l1-q11-12.mp3",
+      "text": "I just got an email from the internship coordinator. Apparently, our start date has been pushed back two weeks. Really? I thought we were supposed to begin on June 1st. What happened? The company is relocating to a new office building, and it won’t be ready until mid-June. So now we start on the 15th instead. Well, that’s actually not too bad. I can use the extra time to finish my online certification course. Same here. I was stressing about completing everything before the internship. This gives us some breathing room.",
+      "asr": "I just got an email from the internship coordinator. Apparently, our start date has been pushed back two weeks. Really, I thought we were supposed to begin on June 1st. What happened? The company is relocating to a new office building, and it won't be ready until mid-June. So now, we start on the 15th instead. Well, that's actually not too bad. I can use the extra time to finish my online certification course. Same here. I was stressing about completing everything before the internship. This gives us some breathing room.",
+      "voices": [
+        "af_bella",
+        "am_eric"
+      ],
+      "asrAudioSha256": "5a3b9d73cbfa8654441a3735dcbf6f50bcac4b59764701528f0c533a078c864d"
+    },
+    {
+      "id": "l1-q13-14",
+      "path": "media/audio/set5/l1-q13-14.mp3",
+      "text": "Students, the university is upgrading our email system to improve security and storage capacity. Starting next Monday, you’ll need to log in using your full student ID number instead of your username. Please update your email app settings before then.",
+      "asr": "Students, the university is upgrading our email system to improve security and storage capacity. Starting next Monday, you'll need to log in using your full student ID number instead of your username. Please update your email app settings before then.",
+      "voices": [
+        "am_michael"
+      ],
+      "asrAudioSha256": "7a51f766c024a60a4f818bbc159075d11510442f2b5a95e8312355485251ce94"
+    },
+    {
+      "id": "l1-q15-16",
+      "path": "media/audio/set5/l1-q15-16.mp3",
+      "text": "Students, the campus shuttle is adjusting its routes starting this Monday to better serve the new dormitory complex. The Blue Line will include two additional stops near Riverside Hall. Please check the updated schedule posted on the transportation website and plan your commute accordingly.",
+      "asr": "Students, the campus shuttle is adjusting its routes starting this Monday to better serve the new dormitory complex. The blue line will include two additional stops near Riverside Hall. Please check the updated schedule posted on the transportation website and plan your commute accordingly.",
+      "voices": [
+        "am_eric"
+      ],
+      "asrAudioSha256": "019ec9300b3ccbef9766a1237e71b8e5bead0abaca5037f09eecea5df4edf59e"
+    },
+    {
+      "id": "l1-q17-20",
+      "path": "media/audio/set5/l1-q17-20.mp3",
+      "text": "OK, so I want to explain the concept of food chains and food webs. These are fundamental ideas in ecology that help us understand how energy moves through ecosystems. A food chain is a simple model showing how energy passes from one organism to another. It starts with producers, which are usually plants. Plants capture energy from the sun through photosynthesis. Then primary consumers, like rabbits or insects, eat the plants. Secondary consumers, such as small birds or frogs, eat the primary consumers. And at the top, you might have tertiary consumers, like hawks or foxes, eating the secondary consumers. Now, in reality, ecosystems are more complicated than a simple chain. Most animals eat more than one type of food, and most organisms are eaten by more than one predator. So scientists use the term food web to describe these interconnected relationships. A food web is basically many food chains linked together. Why does this matter? Well, if one species in a food web disappears, it affects many others. For example, if a disease kills most of the rabbits in an area, the foxes that eat rabbits will struggle, but so will the plants that rabbits used to keep in check. Everything is connected. Understanding food webs helps us predict how changes in one population might ripple through an entire ecosystem.",
+      "asr": "Ok so I want to explain the concept of food chains and food webs. These are fundamental ideas in ecology that help us understand how energy moves through ecosystems. A food chain is a simple model showing how energy passes from one organism to another. It starts with producers which are usually plants. Plants capture energy from the sun through photosynthesis. Then primary consumers like rabbits or insects eat the plants. Primary consumers such as small birds or frogs eat the primary consumers. And at the top you might have tertiary consumers like hawks or foxes eating the secondary consumers. Now in reality ecosystems are more complicated than a simple chain. Most animals eat more than one type of food and most organisms are eaten by more than one predator. So scientists use the term food web to describe these interconnected relationships. A food web is basically many food chains linked together. Why does this matter? Well if one species in a food web disappears it affects many others. For example if a disease kills most of the rabbits in an area the foxes that eat rabbits will struggle but so will the plants that rabbits use to keep in check. Everything is connected. Understanding food webs helps us predict how changes in one population might ripple through an entire ecosystem.",
+      "voices": [
+        "am_fenrir"
+      ],
+      "asrAudioSha256": "c895eba9ce4b26e4af43249200e55bdff9ff2f8745db4de0246a0715ccc32a87"
+    },
+    {
+      "id": "l2-q01",
+      "path": "media/audio/set5/l2-q01.mp3",
+      "text": "That’s a lot of luggage for a weekend trip, isn’t it?",
+      "asr": "That's a lot of luggage for a weekend trip, isn't it?",
+      "voices": [
+        "af_heart"
+      ],
+      "asrAudioSha256": "0c53a3015e4a79c6330c68ba507b1e422ed85861b3f3ba47dca7e19b7b332f62"
+    },
+    {
+      "id": "l2-q02",
+      "path": "media/audio/set5/l2-q02.mp3",
+      "text": "The Wi-Fi password doesn’t seem to be working?",
+      "asr": "The Wi-Fi password doesn't seem to be working.",
+      "voices": [
+        "af_nicole"
+      ],
+      "asrAudioSha256": "33df4205d2b25d59db836b646c8266181c9178988e1fc3aae9e1919a2b5816b5"
+    },
+    {
+      "id": "l2-q03",
+      "path": "media/audio/set5/l2-q03.mp3",
+      "text": "The shipment was supposed to arrive yesterday.",
+      "asr": "The shipment was supposed to arrive yesterday.",
+      "voices": [
+        "bf_isabella"
+      ],
+      "asrAudioSha256": "128ea015b8399cfbf16d86e02a8394cd7db100cc748ec6ff65706017a59863e1"
+    },
+    {
+      "id": "l2-q04-05",
+      "path": "media/audio/set5/l2-q04-05.mp3",
+      "text": "Professor Adams, I wanted to update you on my dissertation progress. I’ve completed the data analysis chapter. That’s great news. How did the statistical models turn out? Better than expected, actually. The results support my hypothesis pretty strongly. I just need to write up the discussion section now. Excellent. Once that’s done, send me the full draft. I’ll need at least two weeks to review it before we schedule your defense. Understood. I’m hoping to have everything for you by the end of this month.",
+      "asr": "Professor Adams, I wanted to update you on my dissertation progress. I've completed the data analysis chapter. That's great news. How did the statistical models turn out? Better than expected, actually. The results support my hypothesis pretty strongly. I just need to write up the discussion section now. Excellent. Once that's done, send me the full draft. I'll need at least two weeks to review it before we schedule your defense. Understood. I'm hoping to have everything for you by the end of this month.",
+      "voices": [
+        "am_fenrir",
+        "af_aoede"
+      ],
+      "asrAudioSha256": "eb571acff2d0ee169d41a4c0aae1111993b99fcd783be4ddeb1a7ceafc21983f"
+    },
+    {
+      "id": "l2-q06-07",
+      "path": "media/audio/set5/l2-q06-07.mp3",
+      "text": "Did you see the email about the leadership conference next week? Yes, the one about the keynote speaker change? I was looking forward to hearing Dr. Chen speak about innovation in education. Same here. But the replacement speaker is actually quite well-known in organizational psychology. She wrote that book on team dynamics. Oh, I’ve heard of her. That might be even more relevant to my work in human resources, actually. Right, I thought you’d find it interesting.",
+      "asr": "Did you see the email about the leadership conference next week? Yes, the one about the keynote speaker change. I was looking forward to hearing Dr. Chen speak about innovation in education. Same here, but the replacement speaker is actually quite well known in organizational psychology. She wrote that book on team dynamics. Oh, I've heard of her. That might be even more relevant to my work in human resources, actually. Right, I thought you'd find it interesting.",
+      "voices": [
+        "am_puck",
+        "bf_isabella"
+      ],
+      "asrAudioSha256": "b17127e9a21cc899e0fbd87df5eb94f0f19f7a35a1b8ded91efbea90becd9cc4"
+    },
+    {
+      "id": "l2-q08-11",
+      "path": "media/audio/set5/l2-q08-11.mp3",
+      "text": "Alright, today I want to compare two different strategies animals use to regulate their body temperature—being warm-blooded versus cold-blooded. These terms are a bit simplified, but they help us understand some fundamental differences. Warm-blooded animals, which include mammals and birds, generate their own body heat internally. Their metabolism is constantly working to maintain a stable internal temperature regardless of the environment. A human body stays around 37 degrees Celsius whether you’re in a hot desert or a cold mountain. This gives warm-blooded animals a significant advantage—they can remain active in a wide range of conditions. Cold-blooded animals, like reptiles, fish, and insects, work differently. They rely on external sources to regulate their temperature. A lizard, for instance, will bask in the sun to warm up and seek shade when it gets too hot. Their body temperature changes with their surroundings. Now, each strategy has trade-offs. Warm-blooded animals can be active anytime, but they need to eat a lot more food to fuel their metabolism. A mouse might need to eat half its body weight daily. Cold-blooded animals need much less food, but their activity is limited by environmental conditions. On cold days, they become sluggish and slow. Neither approach is superior—they’re just different solutions to the same problem of surviving in various environments. Next, we will examine how some animals can actually switch between these strategies.",
+      "asr": "Alright, today I want to compare two different strategies animals use to regulate their body temperature, being warm-blooded versus cold-blooded. These terms are a bit simplified, but they help us understand some fundamental differences. Warm-blooded animals, which include mammals and birds, generate their own body heat internally. Their metabolism is constantly working to maintain a stable internal temperature, regardless of the environment. A human body stays around 37 degrees Celsius, whether you're in a hot desert or a cold mountain. This gives warm-blooded animals a significant advantage. They can remain active in a wide range of conditions. Cold-blooded animals, like reptiles, fish and insects, work differently. They rely on external sources to regulate their temperature. A lizard, for instance, will bask in the sun to warm up and seek shade when it gets too hot. Their body temperature changes with their surroundings. Now each strategy has trade-offs. Warm-blooded animals can be active any time, but they need to eat a lot more food to fuel their metabolism. A mouse might need to eat half its body weight daily. Cold-blooded animals need much less food, but their activity is limited by environmental conditions. On cold days they become sluggish and slow. Neither approach is superior. They're just different solutions to the same problem of surviving in various environments. Next, we will examine how some animals can actually switch between these strategies.",
+      "voices": [
+        "bm_lewis"
+      ],
+      "asrAudioSha256": "2f1fd885d5248f840cb87ed712c0f9dd56cdd825b34a2702d72234b0780dcca8"
+    },
+    {
+      "id": "l2-q12-15",
+      "path": "media/audio/set5/l2-q12-15.mp3",
+      "text": "OK, so let’s talk about something you encounter every day but might not think much about—the states of matter. Most of you know there are three main states: solid, liquid, and gas. But do you understand what’s actually happening at the molecular level? In a solid, molecules are packed tightly together in fixed positions. They vibrate but don’t move around freely. This is why solids maintain their shape—put a rock on a table, and it stays exactly where you put it. The molecules are locked in place. Liquids are different. The molecules are still close together, but they can slide past one another. This is why liquids take the shape of their container. Pour water into a glass, and it conforms to the glass’s shape. The molecules have more freedom to move but are still attracted to each other. In gases, molecules have the most energy and freedom. They spread out to fill whatever space is available and move rapidly in all directions. The molecules are far apart and barely interact with each other. This is why gases can be compressed easily—there’s lots of empty space between molecules. What determines which state matter is in? Temperature and pressure. Add heat energy, and molecules move faster. Eventually, a solid becomes liquid, and a liquid becomes gas. Remove heat, and the opposite happens. It’s all about how much energy the molecules have.",
+      "asr": "Okay, so let's talk about something you encounter every day but might not think much about, the states of matter. Most of you know there are three main states, solid, liquid, and gas. But do you understand what's actually happening at the molecular level? In a solid, molecules are packed tightly together in fixed positions. They vibrate but don't move around freely. This is why solids maintain their shape, put a rock on a table, and it stays exactly where you put it. The molecules are locked in place. Liquids are different. The molecules are still closed together but they can slide past one another. This is why liquids take the shape of their container. Pour water into a glass and it conforms to the glass's shape. The molecules have more freedom to move but are still attracted to each other. In gases, molecules have the most energy and freedom. They spread out to fill whatever space is available and move rapidly in all directions. The molecules are far apart and barely interact with each other. This is why gases can be compressed easily. There's lots of empty space between molecules. What determines which state matter is in? Temperature and pressure. Add heat energy and molecules move faster. Eventually, a solid becomes liquid and a liquid becomes gas. Remove heat and the opposite happens. It's all about how much energy the molecules have.",
+      "voices": [
+        "bm_george"
+      ],
+      "asrAudioSha256": "843364b4366951280abdad2ad8eda3c465ee895f2ca26ded8dbf98f3a530c9d4"
+    },
+    {
+      "id": "s1-instructions",
+      "path": "media/audio/set5/s1-instructions.mp3",
+      "text": "You are being trained to assist visitors at the sports and recreation center, listen to your trainer, and repeat what she says. Repeat only once.",
+      "asr": "You are being trained to assist visitors at the Sports and Recreation Center. Listen to your trainer and repeat what she says. Repeat only once.",
+      "voices": [
+        "af_nicole"
+      ],
+      "asrAudioSha256": "6af76d99b8997e688225186e7f9876bfeec28e22d21c1d739e3a4d6e5f22343e"
+    },
+    {
+      "id": "s1-q1",
+      "path": "media/audio/set5/s1-q1.mp3",
+      "text": "Welcome! Let’s go over the facilities.",
+      "asr": "Welcome. Let's go over the facilities.",
+      "voices": [
+        "af_nicole"
+      ],
+      "asrAudioSha256": "c5376633958677d03fc136c2aabc3428efacb0482e25974ec8b242fd7caf10da"
+    },
+    {
+      "id": "s1-q2",
+      "path": "media/audio/set5/s1-q2.mp3",
+      "text": "There are two basketball courts in the main gym.",
+      "asr": "There are two basketball courts in the main gym.",
+      "voices": [
+        "af_nicole"
+      ],
+      "asrAudioSha256": "a68e4b395ec74ef1785176d5793dd56377525e56cbdcb10da669e1f095efea7d"
+    },
+    {
+      "id": "s1-q3",
+      "path": "media/audio/set5/s1-q3.mp3",
+      "text": "The indoor swimming pool is open from six to nine daily.",
+      "asr": "The indoor swimming pool is open from 6 to 9 daily.",
+      "voices": [
+        "af_nicole"
+      ],
+      "asrAudioSha256": "8b6bbe34985d1d1f99f0715c9fcd81e5b1e832f0c07f9f322bf089ecaef2f8ed"
+    },
+    {
+      "id": "s1-q4",
+      "path": "media/audio/set5/s1-q4.mp3",
+      "text": "Visitors can register for fitness classes at the membership desk here.",
+      "asr": "Visitors can register for fitness classes at the membership desk here.",
+      "voices": [
+        "af_nicole"
+      ],
+      "asrAudioSha256": "7c188a096b9bfaa954659d6f0b00f31b40f76925f0ac94c05f907f34d19206e6"
+    },
+    {
+      "id": "s1-q5",
+      "path": "media/audio/set5/s1-q5.mp3",
+      "text": "We encourage families to check out our youth programs and summer camps.",
+      "asr": "We encourage families to check out our youth programs and summer camps.",
+      "voices": [
+        "af_nicole"
+      ],
+      "asrAudioSha256": "8438929c296313935d14c514c419b1551146bd818c817cad2dc55a006bc90451"
+    },
+    {
+      "id": "s1-q6",
+      "path": "media/audio/set5/s1-q6.mp3",
+      "text": "Please remind visitors that children under twelve must be accompanied by an adult.",
+      "asr": "Please remind visitors that children under 12 must be accompanied by an adult.",
+      "voices": [
+        "af_nicole"
+      ],
+      "asrAudioSha256": "01baa18b55cd0990a6766e5525ab5973d144c193996b5cd2112a05f85ccf853a"
+    },
+    {
+      "id": "s1-q7",
+      "path": "media/audio/set5/s1-q7.mp3",
+      "text": "If someone wants to book a private event, they should contact our event team in advance.",
+      "asr": "If someone wants to book a private event, they should contact our event team in advance.",
+      "voices": [
+        "af_nicole"
+      ],
+      "asrAudioSha256": "810c906bb361a9bd8a75038a42d8f520010a4746a858baf63066011615a7324e"
+    },
+    {
+      "id": "s2-instructions",
+      "path": "media/audio/set5/s2-instructions.mp3",
+      "text": "You have volunteered for a research study about how to spend your free time. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+      "asr": "You have volunteered for a research study about how to spend your free time. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+      "voices": [
+        "bm_lewis"
+      ],
+      "asrAudioSha256": "95225418c977bf6fe19b77069fd5e0a8efdc4f51aad40341576a7e2b1331fb43"
+    },
+    {
+      "id": "s2-q1",
+      "path": "media/audio/set5/s2-q1.mp3",
+      "text": "Thank you for joining today. I’d like to ask you some questions about free time. Do you usually spend free time at home, outside, or a mix of both?",
+      "asr": "Thank you for joining today. I'd like to ask you some questions about free time. Do you usually spend free time at home, outside, or a mix of both?",
+      "voices": [
+        "bm_lewis"
+      ],
+      "asrAudioSha256": "ec2c361843f476695e95494dcfe30b36a460596f2187485eec7ce3a59060cc17"
+    },
+    {
+      "id": "s2-q2",
+      "path": "media/audio/set5/s2-q2.mp3",
+      "text": "I see. When you watch movies or TV shows, do you prefer to watch them alone or with friends or family? Why?",
+      "asr": "I see. When you watch movies or TV shows, do you prefer to watch them alone or with friends or family? Why?",
+      "voices": [
+        "bm_lewis"
+      ],
+      "asrAudioSha256": "4bf4b6b4df8501e2be08aca5e1afa99502bf8a0408b9f00937cdf454d1dcc940"
+    },
+    {
+      "id": "s2-q3",
+      "path": "media/audio/set5/s2-q3.mp3",
+      "text": "That makes sense. Some people say that streaming services have made entertainment better because there are more choices, while others say having too many options makes it harder to decide what to watch. What do you think?",
+      "asr": "That makes sense, some people say that streaming services have made entertainment better because there are more choices, while others say having too many options makes it harder to decide what to. Watch what do you think.",
+      "voices": [
+        "bm_lewis"
+      ],
+      "asrAudioSha256": "127f47a9c2eec244702dc7c7fd4b3424ce31af6f3b05085c816b4de36b787eeb"
+    },
+    {
+      "id": "s2-q4",
+      "path": "media/audio/set5/s2-q4.mp3",
+      "text": "Finally, how do you think people’s entertainment habits might change in the next ten years?",
+      "asr": "Finally, how do you think people's entertainment habits might change in the next 10 years?",
+      "voices": [
+        "bm_lewis"
+      ],
+      "asrAudioSha256": "b0975b1155f1d1221d44370c9d1ea0d775c07388529a01ea1a65df4225c6ebbc"
+    }
+  ]
+}

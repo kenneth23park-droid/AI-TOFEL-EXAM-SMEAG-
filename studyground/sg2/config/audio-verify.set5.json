@@ -1,0 +1,2064 @@
+{
+  "manifest": "E:\\smeag-mock-test\\AI-TOFEL-EXAM-SMEAG-\\studyground\\sg2\\tts-manifest.set5.json",
+  "set": "set5",
+  "wpm": 165,
+  "wpmSource": "tts_set9.py:RATE_WPM",
+  "thresholds": {
+    "codec_allowed": [
+      "mp3"
+    ],
+    "sample_rate_allowed": [
+      22050,
+      24000,
+      44100,
+      48000
+    ],
+    "channels_allowed": [
+      1,
+      2
+    ],
+    "min_bytes": 1024,
+    "wpm_default": 165,
+    "short_words": 25,
+    "dur_ratio_warn_long": [
+      0.8,
+      1.3
+    ],
+    "dur_ratio_fail_long": [
+      0.6,
+      1.7
+    ],
+    "dur_ratio_warn_short": [
+      0.7,
+      1.6
+    ],
+    "dur_ratio_fail_short": [
+      0.45,
+      2.5
+    ],
+    "silence_noise_db": -40,
+    "silence_min_sec": 0.25,
+    "speech_ratio_dead": 0.02,
+    "speech_ratio_warn": 0.55,
+    "lead_silence_warn": 1.5,
+    "tail_silence_warn": 2.5,
+    "internal_gap_warn": 4.0,
+    "turn_gap_ratio": 0.6,
+    "turn_gap_min_sec": 0.3,
+    "turn_deficit_fail": 0.5,
+    "mean_volume_low": -35.0,
+    "mean_volume_high": -10.0,
+    "peak_clip_db": -0.1
+  },
+  "sttThresholds": {
+    "wer_warn": 0.02,
+    "wer_reject": 0.05,
+    "short_segment_words": 25,
+    "short_segment_tolerated_errors": 1,
+    "source": "E:\\smeag-mock-test\\AI-TOFEL-EXAM-SMEAG-\\smeag-local-ai\\qa\\stt_loopback.py"
+  },
+  "stt": {
+    "scope": "changed",
+    "queued": 0,
+    "backend": null,
+    "detection": [],
+    "transcribed": 0,
+    "reason": "대기열이 비었다 — 전사할 신규·교체 음원이 없다",
+    "rescored": 33
+  },
+  "itemsChecked": 33,
+  "itemsDeclared": 33,
+  "changedOnly": false,
+  "counts": {
+    "PASS": 33,
+    "WARN": 0,
+    "FAIL": 0
+  },
+  "skipped": [],
+  "orphanFiles": [],
+  "packCrossCheck": [
+    {
+      "pack": "set-generate.js",
+      "status": "OK",
+      "refs": 0,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set-import.js",
+      "status": "OK",
+      "refs": 0,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set-media.js",
+      "status": "OK",
+      "refs": 0,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set-store.js",
+      "status": "OK",
+      "refs": 0,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set1.js",
+      "status": "OK",
+      "refs": 32,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set10.js",
+      "status": "OK",
+      "refs": 40,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set11.js",
+      "status": "OK",
+      "refs": 40,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set12.js",
+      "status": "OK",
+      "refs": 40,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set2.js",
+      "status": "OK",
+      "refs": 44,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set3.js",
+      "status": "OK",
+      "refs": 33,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set4.js",
+      "status": "OK",
+      "refs": 33,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set5.js",
+      "status": "OK",
+      "refs": 33,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set9-audio.js",
+      "status": "OK",
+      "refs": 34,
+      "scoped": 0,
+      "missingFromManifest": []
+    },
+    {
+      "pack": "set9.js",
+      "status": "OK",
+      "refs": 40,
+      "scoped": 0,
+      "missingFromManifest": []
+    }
+  ],
+  "globalReasons": [],
+  "items": [
+    {
+      "id": "set5-l1-q01",
+      "path": "media/audio/set5/l1-q01.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "aeb646da6bb9f16758db0afb9bfc2602ccb19c574488da7eeeeb7ae116208057",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791315880.9,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "ef1fde90f666fa725cf6e44d7088d0c52dc2fc3c70508edbb81be1b53fb65a45",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 1.62,
+          "bitrateKbps": 84,
+          "bytes": 17114,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 17114,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 6,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 2.18,
+          "actualSec": 1.62,
+          "durationRatio": 0.743,
+          "segments": 1,
+          "speechRatio": 1.0,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -22.5,
+          "maxVolumeDb": -6.2,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "How often does the shuttle run?",
+          "audioSha256": "ef1fde90f666fa725cf6e44d7088d0c52dc2fc3c70508edbb81be1b53fb65a45",
+          "scriptHash": "aeb646da6bb9f16758db0afb9bfc2602ccb19c574488da7eeeeb7ae116208057",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q02",
+      "path": "media/audio/set5/l1-q02.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "b99c31c33db2a5b9a99a7c911d7eaec6de959efd9835fa4f927b496d7fd4868d",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791315884.4,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "1081ac701511c4ab75179bbc12094f28ce869e4b818c3220f4903a932116e465",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 2.24,
+          "bitrateKbps": 80,
+          "bytes": 22322,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 22322,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 6,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 2.18,
+          "actualSec": 2.24,
+          "durationRatio": 1.027,
+          "segments": 1,
+          "speechRatio": 0.858,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.32,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -23.8,
+          "maxVolumeDb": -6.0,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Have you submitted your expense report?",
+          "audioSha256": "1081ac701511c4ab75179bbc12094f28ce869e4b818c3220f4903a932116e465",
+          "scriptHash": "b99c31c33db2a5b9a99a7c911d7eaec6de959efd9835fa4f927b496d7fd4868d",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q03",
+      "path": "media/audio/set5/l1-q03.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "e35f0f6ccc20223e6c3beac00f4b0a000f0c60f3c60e2e5862b14d1747e1685c",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791315887.1,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "517713d616f04ea5a1905d079148cf9fac037d3be5325e45dee19063312f8d6c",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 1.19,
+          "bitrateKbps": 87,
+          "bytes": 13023,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 13023,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 4,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 1.45,
+          "actualSec": 1.19,
+          "durationRatio": 0.818,
+          "segments": 1,
+          "speechRatio": 1.0,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -20.7,
+          "maxVolumeDb": -5.8,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "window or middle seat.",
+          "audioSha256": "517713d616f04ea5a1905d079148cf9fac037d3be5325e45dee19063312f8d6c",
+          "scriptHash": "e35f0f6ccc20223e6c3beac00f4b0a000f0c60f3c60e2e5862b14d1747e1685c",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q04",
+      "path": "media/audio/set5/l1-q04.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "e3e739796fa892cfda966416ac26bcc5b4fc73ff6bd5be917d7ca8fc72dfa8d6",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318264.9,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "bcd623be771e52a789d5f36d26d1b15994e24df1b6cafc037ff1fe43f63681b7",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 2.82,
+          "bitrateKbps": 98,
+          "bytes": 34370,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 34370,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 8,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 2.91,
+          "actualSec": 2.82,
+          "durationRatio": 0.969,
+          "segments": 1,
+          "speechRatio": 1.0,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -19.3,
+          "maxVolumeDb": -2.3,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "The client wants to move the deadline up.",
+          "audioSha256": "bcd623be771e52a789d5f36d26d1b15994e24df1b6cafc037ff1fe43f63681b7",
+          "scriptHash": "e3e739796fa892cfda966416ac26bcc5b4fc73ff6bd5be917d7ca8fc72dfa8d6",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q05",
+      "path": "media/audio/set5/l1-q05.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "9abf07745018ec39d21489922103c8ad924fcfc230b9e0ce8acc9ac6a35b3d96",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791315894.7,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "4a7c83b092bd4b254740e663b3b0d1d754bd07756076f37822f304407003c8e9",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 2.99,
+          "bitrateKbps": 71,
+          "bytes": 26628,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 26628,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 8,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 2.91,
+          "actualSec": 2.99,
+          "durationRatio": 1.028,
+          "segments": 1,
+          "speechRatio": 1.0,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -20.2,
+          "maxVolumeDb": -1.9,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Doesn't the museum offer free admission on Sundays?",
+          "audioSha256": "4a7c83b092bd4b254740e663b3b0d1d754bd07756076f37822f304407003c8e9",
+          "scriptHash": "9abf07745018ec39d21489922103c8ad924fcfc230b9e0ce8acc9ac6a35b3d96",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q06",
+      "path": "media/audio/set5/l1-q06.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "563cf78981a968bb29137288dcd13e6f171d638a54de2c737d1ddb3e99746754",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791315898.0,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "891cbdbc091a442f8d9c8ca5f60d4bdf54d77cfb94556f76a9afe439bb5bc2ad",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 2.41,
+          "bitrateKbps": 72,
+          "bytes": 21837,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 21837,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 7,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 2.55,
+          "actualSec": 2.41,
+          "durationRatio": 0.947,
+          "segments": 1,
+          "speechRatio": 1.0,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -20.6,
+          "maxVolumeDb": -5.8,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Can you forward me that email thread?",
+          "audioSha256": "891cbdbc091a442f8d9c8ca5f60d4bdf54d77cfb94556f76a9afe439bb5bc2ad",
+          "scriptHash": "563cf78981a968bb29137288dcd13e6f171d638a54de2c737d1ddb3e99746754",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q07",
+      "path": "media/audio/set5/l1-q07.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "9a9d7bf2611d8d7c87aa9399d6995d786613662f0bbb33f4278d5178d3469590",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791315901.1,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "1d575c5ae751ccb3af5dc69911895730a2dfb18f55ac80f503d6c2b659bdc2cb",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 2.45,
+          "bitrateKbps": 69,
+          "bytes": 21253,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 21253,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 8,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 2.91,
+          "actualSec": 2.45,
+          "durationRatio": 0.842,
+          "segments": 1,
+          "speechRatio": 1.0,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -20.2,
+          "maxVolumeDb": -3.8,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "The team meeting got moved to three o'clock.",
+          "audioSha256": "1d575c5ae751ccb3af5dc69911895730a2dfb18f55ac80f503d6c2b659bdc2cb",
+          "scriptHash": "9a9d7bf2611d8d7c87aa9399d6995d786613662f0bbb33f4278d5178d3469590",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q08",
+      "path": "media/audio/set5/l1-q08.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "e6621d824ce55890704526ab3ac89272596dd1e0ccc9f83b099183a82a68edd1",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791315904.3,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "3f9794a1120bcf9de7f211351edab797f0afb12d586a1d02f2a451efb2349b91",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 1.81,
+          "bitrateKbps": 98,
+          "bytes": 22119,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 22119,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 7,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 2.55,
+          "actualSec": 1.81,
+          "durationRatio": 0.711,
+          "segments": 1,
+          "speechRatio": 1.0,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -18.3,
+          "maxVolumeDb": -1.4,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "You've been to Japan before, haven't you?",
+          "audioSha256": "3f9794a1120bcf9de7f211351edab797f0afb12d586a1d02f2a451efb2349b91",
+          "scriptHash": "e6621d824ce55890704526ab3ac89272596dd1e0ccc9f83b099183a82a68edd1",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q09-10",
+      "path": "media/audio/set5/l1-q09-10.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "a21e7cb8e86abfe219e6aaa0a0a77278279ff4c515ec6764ebcc0f8233b17417",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791315940.8,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "1c7ad2a2e6c180264dc88a483f65065d775d4649206e76b297b15a823cc23194",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 33.39,
+          "bitrateKbps": 73,
+          "bytes": 303061,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 303061,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 77,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 29.6,
+          "actualSec": 33.39,
+          "durationRatio": 1.128,
+          "segments": 5,
+          "speechRatio": 0.765,
+          "speechRuns": 12,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 1.24,
+          "detectedTurns": 12,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -23.2,
+          "maxVolumeDb": -2.0,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.013,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 1.3%)",
+          "transcript": "How's the quarterly budget report coming along? Finance needs it by Thursday. I finished the expense analysis and the revenue projections. I'm just waiting on the department heads to confirm their numbers. Have you followed up with them? We can't afford any delays this time. I sent reminders yesterday. Most have responded, but I'm still waiting on operations and HR. If you don't hear back by tomorrow afternoon, let me know. I'll reach out to them directly.",
+          "audioSha256": "1c7ad2a2e6c180264dc88a483f65065d775d4649206e76b297b15a823cc23194",
+          "scriptHash": "a21e7cb8e86abfe219e6aaa0a0a77278279ff4c515ec6764ebcc0f8233b17417",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q11-12",
+      "path": "media/audio/set5/l1-q11-12.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "52e502638c062eb40813c718c0f24191a185e75edd65160326e6cc3712a5d66b",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791315970.9,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "5a3b9d73cbfa8654441a3735dcbf6f50bcac4b59764701528f0c533a078c864d",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 30.02,
+          "bitrateKbps": 73,
+          "bytes": 272237,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 272237,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 92,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 35.05,
+          "actualSec": 30.02,
+          "durationRatio": 0.856,
+          "segments": 5,
+          "speechRatio": 0.842,
+          "speechRuns": 11,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.55,
+          "detectedTurns": 11,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -21.4,
+          "maxVolumeDb": -2.3,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "I just got an email from the internship coordinator. Apparently, our start date has been pushed back two weeks. Really, I thought we were supposed to begin on June 1st. What happened? The company is relocating to a new office building, and it won't be ready until mid-June. So now, we start on the 15th instead. Well, that's actually not too bad. I can use the extra time to finish my online certification course. Same here. I was stressing about completing everything before the internship. This gives us some breathing room.",
+          "audioSha256": "5a3b9d73cbfa8654441a3735dcbf6f50bcac4b59764701528f0c533a078c864d",
+          "scriptHash": "52e502638c062eb40813c718c0f24191a185e75edd65160326e6cc3712a5d66b",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q13-14",
+      "path": "media/audio/set5/l1-q13-14.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "d537ff3cb0aee572dacfe7d325589632b4e143986c3ab9d5727f15dfaa17629f",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318145.4,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "7a51f766c024a60a4f818bbc159075d11510442f2b5a95e8312355485251ce94",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 17.28,
+          "bitrateKbps": 76,
+          "bytes": 164702,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 164702,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 40,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 14.55,
+          "actualSec": 17.28,
+          "durationRatio": 1.188,
+          "segments": 1,
+          "speechRatio": 0.871,
+          "speechRuns": 6,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.74,
+          "detectedTurns": 6,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -25.1,
+          "maxVolumeDb": -2.5,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Students, the university is upgrading our email system to improve security and storage capacity. Starting next Monday, you'll need to log in using your full student ID number instead of your username. Please update your email app settings before then.",
+          "audioSha256": "7a51f766c024a60a4f818bbc159075d11510442f2b5a95e8312355485251ce94",
+          "scriptHash": "d537ff3cb0aee572dacfe7d325589632b4e143986c3ab9d5727f15dfaa17629f",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q15-16",
+      "path": "media/audio/set5/l1-q15-16.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "5e3c5d8f79b879aab4448d8489f0a33703696b4d2e108749c3805b8542e76859",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791316001.8,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "019ec9300b3ccbef9766a1237e71b8e5bead0abaca5037f09eecea5df4edf59e",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 14.89,
+          "bitrateKbps": 69,
+          "bytes": 127797,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 127797,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 44,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 16.0,
+          "actualSec": 14.89,
+          "durationRatio": 0.931,
+          "segments": 1,
+          "speechRatio": 0.932,
+          "speechRuns": 3,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.53,
+          "detectedTurns": 3,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -21.4,
+          "maxVolumeDb": -6.6,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Students, the campus shuttle is adjusting its routes starting this Monday to better serve the new dormitory complex. The blue line will include two additional stops near Riverside Hall. Please check the updated schedule posted on the transportation website and plan your commute accordingly.",
+          "audioSha256": "019ec9300b3ccbef9766a1237e71b8e5bead0abaca5037f09eecea5df4edf59e",
+          "scriptHash": "5e3c5d8f79b879aab4448d8489f0a33703696b4d2e108749c3805b8542e76859",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l1-q17-20",
+      "path": "media/audio/set5/l1-q17-20.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "7ce48222531cd25404ef6f051da17cf46d33bd3ae7960386d9fffa128746c8be",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318201.4,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "c895eba9ce4b26e4af43249200e55bdff9ff2f8745db4de0246a0715ccc32a87",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 86.81,
+          "bitrateKbps": 89,
+          "bytes": 961756,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 961756,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 221,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 80.36,
+          "actualSec": 86.81,
+          "durationRatio": 1.08,
+          "segments": 1,
+          "speechRatio": 0.939,
+          "speechRuns": 17,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.46,
+          "detectedTurns": 11,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -23.7,
+          "maxVolumeDb": -2.4,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.009,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.9%)",
+          "transcript": "Ok so I want to explain the concept of food chains and food webs. These are fundamental ideas in ecology that help us understand how energy moves through ecosystems. A food chain is a simple model showing how energy passes from one organism to another. It starts with producers which are usually plants. Plants capture energy from the sun through photosynthesis. Then primary consumers like rabbits or insects eat the plants. Primary consumers such as small birds or frogs eat the primary consumers. And at the top you might have tertiary consumers like hawks or foxes eating the secondary consumers. Now in reality ecosystems are more complicated than a simple chain. Most animals eat more than one type of food and most organisms are eaten by more than one predator. So scientists use the term food web to describe these interconnected relationships. A food web is basically many food chains linked together. Why does this matter? Well if one species in a food web disappears it affects many others. For example if a disease kills most of the rabbits in an area the foxes that eat rabbits will struggle but so will the plants that rabbits use to keep in check. Everything is connected. Understanding food webs helps us predict how changes in one population might ripple through an entire ecosystem.",
+          "audioSha256": "c895eba9ce4b26e4af43249200e55bdff9ff2f8745db4de0246a0715ccc32a87",
+          "scriptHash": "7ce48222531cd25404ef6f051da17cf46d33bd3ae7960386d9fffa128746c8be",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l2-q01",
+      "path": "media/audio/set5/l2-q01.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "174fbd8e9d2f1c3e0258502029365859be7257aea32a885be57e4e6e14b6c68c",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318267.4,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "0c53a3015e4a79c6330c68ba507b1e422ed85861b3f3ba47dca7e19b7b332f62",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 3.86,
+          "bitrateKbps": 80,
+          "bytes": 38550,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 38550,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 11,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 4.0,
+          "actualSec": 3.86,
+          "durationRatio": 0.965,
+          "segments": 1,
+          "speechRatio": 0.904,
+          "speechRuns": 2,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.37,
+          "detectedTurns": 2,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -22.7,
+          "maxVolumeDb": -6.2,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "That's a lot of luggage for a weekend trip, isn't it?",
+          "audioSha256": "0c53a3015e4a79c6330c68ba507b1e422ed85861b3f3ba47dca7e19b7b332f62",
+          "scriptHash": "174fbd8e9d2f1c3e0258502029365859be7257aea32a885be57e4e6e14b6c68c",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l2-q02",
+      "path": "media/audio/set5/l2-q02.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "fa088e8d9dada00634fdc37afbf2af4947f69be794d2c09467dfde2e75b684c8",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791316098.4,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "33df4205d2b25d59db836b646c8266181c9178988e1fc3aae9e1919a2b5816b5",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 3.31,
+          "bitrateKbps": 75,
+          "bytes": 31012,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 31012,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 9,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 3.27,
+          "actualSec": 3.31,
+          "durationRatio": 1.011,
+          "segments": 1,
+          "speechRatio": 0.832,
+          "speechRuns": 2,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.56,
+          "detectedTurns": 2,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -22.2,
+          "maxVolumeDb": -3.7,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "The Wi-Fi password doesn't seem to be working.",
+          "audioSha256": "33df4205d2b25d59db836b646c8266181c9178988e1fc3aae9e1919a2b5816b5",
+          "scriptHash": "fa088e8d9dada00634fdc37afbf2af4947f69be794d2c09467dfde2e75b684c8",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l2-q03",
+      "path": "media/audio/set5/l2-q03.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "948725f39a0de1312d19a96e982915637071c71bbad9c39ce14cb7a57497ced1",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791316102.3,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "128ea015b8399cfbf16d86e02a8394cd7db100cc748ec6ff65706017a59863e1",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 2.52,
+          "bitrateKbps": 80,
+          "bytes": 25239,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 25239,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 7,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 2.55,
+          "actualSec": 2.52,
+          "durationRatio": 0.99,
+          "segments": 1,
+          "speechRatio": 0.895,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.26,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -17.7,
+          "maxVolumeDb": -1.0,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "The shipment was supposed to arrive yesterday.",
+          "audioSha256": "128ea015b8399cfbf16d86e02a8394cd7db100cc748ec6ff65706017a59863e1",
+          "scriptHash": "948725f39a0de1312d19a96e982915637071c71bbad9c39ce14cb7a57497ced1",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l2-q04-05",
+      "path": "media/audio/set5/l2-q04-05.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "9a55feb100d0a467317ff1480924806bcc854553556099a65ebc9754dcc969c3",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318224.9,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "eb571acff2d0ee169d41a4c0aae1111993b99fcd783be4ddeb1a7ceafc21983f",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 28.86,
+          "bitrateKbps": 85,
+          "bytes": 305772,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 305772,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 85,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 32.51,
+          "actualSec": 28.86,
+          "durationRatio": 0.888,
+          "segments": 5,
+          "speechRatio": 0.898,
+          "speechRuns": 8,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.52,
+          "detectedTurns": 6,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -20.5,
+          "maxVolumeDb": -2.2,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Professor Adams, I wanted to update you on my dissertation progress. I've completed the data analysis chapter. That's great news. How did the statistical models turn out? Better than expected, actually. The results support my hypothesis pretty strongly. I just need to write up the discussion section now. Excellent. Once that's done, send me the full draft. I'll need at least two weeks to review it before we schedule your defense. Understood. I'm hoping to have everything for you by the end of this month.",
+          "audioSha256": "eb571acff2d0ee169d41a4c0aae1111993b99fcd783be4ddeb1a7ceafc21983f",
+          "scriptHash": "9a55feb100d0a467317ff1480924806bcc854553556099a65ebc9754dcc969c3",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l2-q06-07",
+      "path": "media/audio/set5/l2-q06-07.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "aa93e0d6f76fba2ade2157b5f584893e6cad38cf05e322782958e92f00c3b9c5",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318241.9,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "b17127e9a21cc899e0fbd87df5eb94f0f19f7a35a1b8ded91efbea90becd9cc4",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 26.45,
+          "bitrateKbps": 83,
+          "bytes": 276024,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 276024,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 78,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 29.96,
+          "actualSec": 26.45,
+          "durationRatio": 0.883,
+          "segments": 5,
+          "speechRatio": 0.833,
+          "speechRuns": 9,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.26,
+          "longestInternalGapSec": 0.98,
+          "detectedTurns": 7,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -20.4,
+          "maxVolumeDb": -2.3,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Did you see the email about the leadership conference next week? Yes, the one about the keynote speaker change. I was looking forward to hearing Dr. Chen speak about innovation in education. Same here, but the replacement speaker is actually quite well known in organizational psychology. She wrote that book on team dynamics. Oh, I've heard of her. That might be even more relevant to my work in human resources, actually. Right, I thought you'd find it interesting.",
+          "audioSha256": "b17127e9a21cc899e0fbd87df5eb94f0f19f7a35a1b8ded91efbea90becd9cc4",
+          "scriptHash": "aa93e0d6f76fba2ade2157b5f584893e6cad38cf05e322782958e92f00c3b9c5",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l2-q08-11",
+      "path": "media/audio/set5/l2-q08-11.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "95dd167e018270b63af844b727389bcf5b25eac6c579ef296e1df0b32f9d201e",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791317980.7,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "2f1fd885d5248f840cb87ed712c0f9dd56cdd825b34a2702d72234b0780dcca8",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 95.41,
+          "bitrateKbps": 81,
+          "bytes": 971810,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 971810,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 238,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 86.55,
+          "actualSec": 95.41,
+          "durationRatio": 1.102,
+          "segments": 1,
+          "speechRatio": 0.869,
+          "speechRuns": 33,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.67,
+          "detectedTurns": 19,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -23.5,
+          "maxVolumeDb": -0.5,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0084,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.8%)",
+          "transcript": "Alright, today I want to compare two different strategies animals use to regulate their body temperature, being warm-blooded versus cold-blooded. These terms are a bit simplified, but they help us understand some fundamental differences. Warm-blooded animals, which include mammals and birds, generate their own body heat internally. Their metabolism is constantly working to maintain a stable internal temperature, regardless of the environment. A human body stays around 37 degrees Celsius, whether you're in a hot desert or a cold mountain. This gives warm-blooded animals a significant advantage. They can remain active in a wide range of conditions. Cold-blooded animals, like reptiles, fish and insects, work differently. They rely on external sources to regulate their temperature. A lizard, for instance, will bask in the sun to warm up and seek shade when it gets too hot. Their body temperature changes with their surroundings. Now each strategy has trade-offs. Warm-blooded animals can be active any time, but they need to eat a lot more food to fuel their metabolism. A mouse might need to eat half its body weight daily. Cold-blooded animals need much less food, but their activity is limited by environmental conditions. On cold days they become sluggish and slow. Neither approach is superior. They're just different solutions to the same problem of surviving in various environments. Next, we will examine how some animals can actually switch between these strategies.",
+          "audioSha256": "2f1fd885d5248f840cb87ed712c0f9dd56cdd825b34a2702d72234b0780dcca8",
+          "scriptHash": "95dd167e018270b63af844b727389bcf5b25eac6c579ef296e1df0b32f9d201e",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-l2-q12-15",
+      "path": "media/audio/set5/l2-q12-15.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "4f31b41df316a2ddd039f2f0ea0186cc9095d6f4cb13757c9afca27d066e153e",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318041.2,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "843364b4366951280abdad2ad8eda3c465ee895f2ca26ded8dbf98f3a530c9d4",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 88.54,
+          "bitrateKbps": 67,
+          "bytes": 738440,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 738440,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 233,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 84.73,
+          "actualSec": 88.54,
+          "durationRatio": 1.045,
+          "segments": 1,
+          "speechRatio": 0.854,
+          "speechRuns": 36,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.59,
+          "detectedTurns": 24,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -21.2,
+          "maxVolumeDb": -4.9,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0086,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.9%)",
+          "transcript": "Okay, so let's talk about something you encounter every day but might not think much about, the states of matter. Most of you know there are three main states, solid, liquid, and gas. But do you understand what's actually happening at the molecular level? In a solid, molecules are packed tightly together in fixed positions. They vibrate but don't move around freely. This is why solids maintain their shape, put a rock on a table, and it stays exactly where you put it. The molecules are locked in place. Liquids are different. The molecules are still closed together but they can slide past one another. This is why liquids take the shape of their container. Pour water into a glass and it conforms to the glass's shape. The molecules have more freedom to move but are still attracted to each other. In gases, molecules have the most energy and freedom. They spread out to fill whatever space is available and move rapidly in all directions. The molecules are far apart and barely interact with each other. This is why gases can be compressed easily. There's lots of empty space between molecules. What determines which state matter is in? Temperature and pressure. Add heat energy and molecules move faster. Eventually, a solid becomes liquid and a liquid becomes gas. Remove heat and the opposite happens. It's all about how much energy the molecules have.",
+          "audioSha256": "843364b4366951280abdad2ad8eda3c465ee895f2ca26ded8dbf98f3a530c9d4",
+          "scriptHash": "4f31b41df316a2ddd039f2f0ea0186cc9095d6f4cb13757c9afca27d066e153e",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s1-instructions",
+      "path": "media/audio/set5/s1-instructions.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "ef7f23be54fde293f0edbef11aad87ccd286fe339e4a96b591ffeede4517bbf3",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318306.4,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "6af76d99b8997e688225186e7f9876bfeec28e22d21c1d739e3a4d6e5f22343e",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 11.24,
+          "bitrateKbps": 71,
+          "bytes": 100020,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 100020,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 25,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 9.09,
+          "actualSec": 11.24,
+          "durationRatio": 1.236,
+          "segments": 1,
+          "speechRatio": 0.695,
+          "speechRuns": 6,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 1.2,
+          "detectedTurns": 5,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -22.4,
+          "maxVolumeDb": -2.7,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "You are being trained to assist visitors at the Sports and Recreation Center. Listen to your trainer and repeat what she says. Repeat only once.",
+          "audioSha256": "6af76d99b8997e688225186e7f9876bfeec28e22d21c1d739e3a4d6e5f22343e",
+          "scriptHash": "ef7f23be54fde293f0edbef11aad87ccd286fe339e4a96b591ffeede4517bbf3",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s1-q1",
+      "path": "media/audio/set5/s1-q1.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "9a9e1bae699c06c1db8fffdcd83c97ee7ad1cbafdcf557832ffceb36545f5813",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318053.4,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "c5376633958677d03fc136c2aabc3428efacb0482e25974ec8b242fd7caf10da",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 2.39,
+          "bitrateKbps": 78,
+          "bytes": 23359,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 23359,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 6,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 2.18,
+          "actualSec": 2.39,
+          "durationRatio": 1.095,
+          "segments": 1,
+          "speechRatio": 0.841,
+          "speechRuns": 2,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.38,
+          "detectedTurns": 2,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -21.8,
+          "maxVolumeDb": -5.4,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Welcome. Let's go over the facilities.",
+          "audioSha256": "c5376633958677d03fc136c2aabc3428efacb0482e25974ec8b242fd7caf10da",
+          "scriptHash": "9a9e1bae699c06c1db8fffdcd83c97ee7ad1cbafdcf557832ffceb36545f5813",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s1-q2",
+      "path": "media/audio/set5/s1-q2.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "25a3b4bed2e27449030abaad301574608c0e1ac5a3f27ac5d07de013532b32b7",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318056.6,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "a68e4b395ec74ef1785176d5793dd56377525e56cbdcb10da669e1f095efea7d",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 3.16,
+          "bitrateKbps": 76,
+          "bytes": 29814,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 29814,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 9,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 3.27,
+          "actualSec": 3.16,
+          "durationRatio": 0.966,
+          "segments": 1,
+          "speechRatio": 0.857,
+          "speechRuns": 2,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.45,
+          "detectedTurns": 2,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -22.0,
+          "maxVolumeDb": -4.4,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "There are two basketball courts in the main gym.",
+          "audioSha256": "a68e4b395ec74ef1785176d5793dd56377525e56cbdcb10da669e1f095efea7d",
+          "scriptHash": "25a3b4bed2e27449030abaad301574608c0e1ac5a3f27ac5d07de013532b32b7",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s1-q3",
+      "path": "media/audio/set5/s1-q3.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "bfa92bac89124c88f092877bf0694e2bf99e8eb56ebe5573f339b9e93c4c4c41",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318060.3,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "8b6bbe34985d1d1f99f0715c9fcd81e5b1e832f0c07f9f322bf089ecaef2f8ed",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 4.14,
+          "bitrateKbps": 75,
+          "bytes": 38694,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 38694,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 11,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 4.0,
+          "actualSec": 4.14,
+          "durationRatio": 1.035,
+          "segments": 1,
+          "speechRatio": 0.784,
+          "speechRuns": 3,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.56,
+          "detectedTurns": 3,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -21.8,
+          "maxVolumeDb": -2.9,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "The indoor swimming pool is open from 6 to 9 daily.",
+          "audioSha256": "8b6bbe34985d1d1f99f0715c9fcd81e5b1e832f0c07f9f322bf089ecaef2f8ed",
+          "scriptHash": "bfa92bac89124c88f092877bf0694e2bf99e8eb56ebe5573f339b9e93c4c4c41",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s1-q4",
+      "path": "media/audio/set5/s1-q4.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "df17f6d4e3cf10d5f5a24559681f4e309242bcda76c53c244aed74b6f39a3158",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318064.1,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "7c188a096b9bfaa954659d6f0b00f31b40f76925f0ac94c05f907f34d19206e6",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 4.42,
+          "bitrateKbps": 77,
+          "bytes": 42430,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 42430,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 11,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 4.0,
+          "actualSec": 4.42,
+          "durationRatio": 1.105,
+          "segments": 1,
+          "speechRatio": 0.869,
+          "speechRuns": 2,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.58,
+          "detectedTurns": 2,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -22.6,
+          "maxVolumeDb": -3.5,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Visitors can register for fitness classes at the membership desk here.",
+          "audioSha256": "7c188a096b9bfaa954659d6f0b00f31b40f76925f0ac94c05f907f34d19206e6",
+          "scriptHash": "df17f6d4e3cf10d5f5a24559681f4e309242bcda76c53c244aed74b6f39a3158",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s1-q5",
+      "path": "media/audio/set5/s1-q5.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "04fb5a8de5924efe552d9c4eec62962cd7dfc66f9197c387f6efd0cbff674394",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318068.9,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "8438929c296313935d14c514c419b1551146bd818c817cad2dc55a006bc90451",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 4.82,
+          "bitrateKbps": 74,
+          "bytes": 44686,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 44686,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 12,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 4.36,
+          "actualSec": 4.82,
+          "durationRatio": 1.105,
+          "segments": 1,
+          "speechRatio": 0.786,
+          "speechRuns": 3,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.61,
+          "detectedTurns": 3,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -22.6,
+          "maxVolumeDb": -4.8,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "We encourage families to check out our youth programs and summer camps.",
+          "audioSha256": "8438929c296313935d14c514c419b1551146bd818c817cad2dc55a006bc90451",
+          "scriptHash": "04fb5a8de5924efe552d9c4eec62962cd7dfc66f9197c387f6efd0cbff674394",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s1-q6",
+      "path": "media/audio/set5/s1-q6.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "72064faa822ad7c60d7363f64ea2618d33f21f9516cd9f9ee9dd5a079c496a91",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318073.8,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "01baa18b55cd0990a6766e5525ab5973d144c193996b5cd2112a05f85ccf853a",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 6.34,
+          "bitrateKbps": 73,
+          "bytes": 57936,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 57936,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 13,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 4.73,
+          "actualSec": 6.34,
+          "durationRatio": 1.341,
+          "segments": 1,
+          "speechRatio": 0.733,
+          "speechRuns": 4,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.69,
+          "detectedTurns": 4,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -22.6,
+          "maxVolumeDb": -1.5,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Please remind visitors that children under 12 must be accompanied by an adult.",
+          "audioSha256": "01baa18b55cd0990a6766e5525ab5973d144c193996b5cd2112a05f85ccf853a",
+          "scriptHash": "72064faa822ad7c60d7363f64ea2618d33f21f9516cd9f9ee9dd5a079c496a91",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s1-q7",
+      "path": "media/audio/set5/s1-q7.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "97be886f4ebc9f49fef46a175eb2ae882b8f12f8ccae9cc7a4c1a81c425ec89b",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318078.1,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "810c906bb361a9bd8a75038a42d8f520010a4746a858baf63066011615a7324e",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 6.17,
+          "bitrateKbps": 73,
+          "bytes": 56635,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 56635,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 16,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 5.82,
+          "actualSec": 6.17,
+          "durationRatio": 1.06,
+          "segments": 1,
+          "speechRatio": 0.775,
+          "speechRuns": 3,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.88,
+          "detectedTurns": 3,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -22.1,
+          "maxVolumeDb": -4.1,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "If someone wants to book a private event, they should contact our event team in advance.",
+          "audioSha256": "810c906bb361a9bd8a75038a42d8f520010a4746a858baf63066011615a7324e",
+          "scriptHash": "97be886f4ebc9f49fef46a175eb2ae882b8f12f8ccae9cc7a4c1a81c425ec89b",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s2-instructions",
+      "path": "media/audio/set5/s2-instructions.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "2ca32a5e2bb64f4525ff4099a8dbbe0ff8161e788530af7e18e39c61a0bb5dc2",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318086.5,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "95225418c977bf6fe19b77069fd5e0a8efdc4f51aad40341576a7e2b1331fb43",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 12.84,
+          "bitrateKbps": 82,
+          "bytes": 131060,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 131060,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 36,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 13.09,
+          "actualSec": 12.84,
+          "durationRatio": 0.981,
+          "segments": 1,
+          "speechRatio": 0.889,
+          "speechRuns": 4,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.58,
+          "detectedTurns": 3,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -23.3,
+          "maxVolumeDb": -1.5,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "You have volunteered for a research study about how to spend your free time. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+          "audioSha256": "95225418c977bf6fe19b77069fd5e0a8efdc4f51aad40341576a7e2b1331fb43",
+          "scriptHash": "2ca32a5e2bb64f4525ff4099a8dbbe0ff8161e788530af7e18e39c61a0bb5dc2",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s2-q1",
+      "path": "media/audio/set5/s2-q1.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "473793d5ccb7af20d94fff74c33d0cad3fd650302a73d48640179e30aed16395",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318092.3,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "ec2c361843f476695e95494dcfe30b36a460596f2187485eec7ce3a59060cc17",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 8.68,
+          "bitrateKbps": 82,
+          "bytes": 89234,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 89234,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 29,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 10.55,
+          "actualSec": 8.68,
+          "durationRatio": 0.823,
+          "segments": 1,
+          "speechRatio": 0.889,
+          "speechRuns": 3,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.54,
+          "detectedTurns": 3,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -23.7,
+          "maxVolumeDb": -3.2,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Thank you for joining today. I'd like to ask you some questions about free time. Do you usually spend free time at home, outside, or a mix of both?",
+          "audioSha256": "ec2c361843f476695e95494dcfe30b36a460596f2187485eec7ce3a59060cc17",
+          "scriptHash": "473793d5ccb7af20d94fff74c33d0cad3fd650302a73d48640179e30aed16395",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s2-q2",
+      "path": "media/audio/set5/s2-q2.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "ced3efbba8e48bb5431a359488e08bd49375682997d9e5e3e0e2054b5daf8637",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318097.0,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "4bf4b6b4df8501e2be08aca5e1afa99502bf8a0408b9f00937cdf454d1dcc940",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 6.83,
+          "bitrateKbps": 82,
+          "bytes": 70226,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 70226,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 22,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 8.0,
+          "actualSec": 6.83,
+          "durationRatio": 0.854,
+          "segments": 1,
+          "speechRatio": 0.828,
+          "speechRuns": 4,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.5,
+          "detectedTurns": 3,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -23.4,
+          "maxVolumeDb": -5.5,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "I see. When you watch movies or TV shows, do you prefer to watch them alone or with friends or family? Why?",
+          "audioSha256": "4bf4b6b4df8501e2be08aca5e1afa99502bf8a0408b9f00937cdf454d1dcc940",
+          "scriptHash": "ced3efbba8e48bb5431a359488e08bd49375682997d9e5e3e0e2054b5daf8637",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s2-q3",
+      "path": "media/audio/set5/s2-q3.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "ea39ea20510b1f541008babf2e30f1cf5d4a5b3fc0b0babd56d4e4173a22eb36",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318105.9,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "127f47a9c2eec244702dc7c7fd4b3424ce31af6f3b05085c816b4de36b787eeb",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 12.08,
+          "bitrateKbps": 85,
+          "bytes": 127707,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 127707,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 37,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 13.45,
+          "actualSec": 12.08,
+          "durationRatio": 0.898,
+          "segments": 1,
+          "speechRatio": 0.865,
+          "speechRuns": 6,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.47,
+          "detectedTurns": 3,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -23.4,
+          "maxVolumeDb": -2.6,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "That makes sense, some people say that streaming services have made entertainment better because there are more choices, while others say having too many options makes it harder to decide what to. Watch what do you think.",
+          "audioSha256": "127f47a9c2eec244702dc7c7fd4b3424ce31af6f3b05085c816b4de36b787eeb",
+          "scriptHash": "ea39ea20510b1f541008babf2e30f1cf5d4a5b3fc0b0babd56d4e4173a22eb36",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    },
+    {
+      "id": "set5-s2-q4",
+      "path": "media/audio/set5/s2-q4.mp3",
+      "verdict": "PASS",
+      "layers": {
+        "layer0_mapping": {
+          "exists": true,
+          "scriptHash": "897b90d5b0ff2471ee1dc4783bbf540b6c2112200cb3940346a75b52fd2893bf",
+          "freshness": "FRESH",
+          "mp3Mtime": 1791318111.4,
+          "manifestMtime": 1791318275.5,
+          "audioSha256": "b0975b1155f1d1221d44370c9d1ea0d775c07388529a01ea1a65df4225c6ebbc",
+          "audioChanged": false,
+          "status": "OK"
+        },
+        "layer1_integrity": {
+          "durationSec": 4.71,
+          "bitrateKbps": 86,
+          "bytes": 50779,
+          "sampleRate": 44100,
+          "channels": 1,
+          "codec": "mp3",
+          "diskBytes": 50779,
+          "status": "OK"
+        },
+        "layer2_signal": {
+          "words": 15,
+          "wpm": 165,
+          "wpmSource": "tts_set9.py:RATE_WPM",
+          "expectedSec": 5.45,
+          "actualSec": 4.71,
+          "durationRatio": 0.863,
+          "segments": 1,
+          "speechRatio": 1.0,
+          "speechRuns": 1,
+          "leadSilenceSec": 0.0,
+          "tailSilenceSec": 0.0,
+          "longestInternalGapSec": 0.0,
+          "detectedTurns": 1,
+          "turnGapThresholdSec": 0.3,
+          "meanVolumeDb": -23.7,
+          "maxVolumeDb": -3.4,
+          "status": "OK"
+        },
+        "layer3_transcript": {
+          "verdict": "PASS",
+          "wer": 0.0,
+          "backend": "faster_whisper",
+          "reason": "음원·대본이 그대로라 지난 판정 재사용 (WER 0.0%)",
+          "transcript": "Finally, how do you think people's entertainment habits might change in the next 10 years?",
+          "audioSha256": "b0975b1155f1d1221d44370c9d1ea0d775c07388529a01ea1a65df4225c6ebbc",
+          "scriptHash": "897b90d5b0ff2471ee1dc4783bbf540b6c2112200cb3940346a75b52fd2893bf",
+          "status": "CACHED"
+        }
+      },
+      "reasons": []
+    }
+  ],
+  "indexUpdated": false
+}

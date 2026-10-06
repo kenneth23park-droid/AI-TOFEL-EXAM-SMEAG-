@@ -90,6 +90,7 @@
 <script src="assets/question-config.js"></script>
 <script src="assets/set1.js"></script>
 <script src="assets/set9.js"></script>
+<script src="assets/set5.js?v=114"></script>
 <script src="assets/set9-audio.js"></script>
 <script src="assets/audio-config.js"></script>
 <script src="assets/admin-session.js"></script>
@@ -150,6 +151,22 @@
       });
     });
     if (items.length) groups.push({ set: 'SET 9 · Listening (full exam)', items: items });
+  })();
+
+  // SET 5 exam (from set5.js — full exam listening audio, media/audio/set5/*)
+  (function () {
+    var S = window.SMEAG_SET5; if (!S) return;
+    var sec = (S.sections||[]).filter(function(x){return x.id==='listening';})[0]; if (!sec) return;
+    var seen = {}, items = [];
+    (sec.modules||[]).forEach(function (m) {
+      (m.blocks||[]).forEach(function (b) {
+        function add(p, t){ if (p && !seen[p]) { seen[p]=1; items.push({ title:t, path:p }); } }
+        if (b.audio) add(b.audio, (m.label||m.id)+' · '+(b.heading||'Audio'));
+        if (b.introAudio) add(b.introAudio, (m.label||m.id)+' · Instructions');
+        (b.questions||[]).forEach(function (q){ if (q.audio) add(q.audio, (m.label||m.id)+' · Q'+(q.no||'')); });
+      });
+    });
+    if (items.length) groups.push({ set: 'SET 5 · Listening (full exam)', items: items });
   })();
 
   var host = document.getElementById('host');

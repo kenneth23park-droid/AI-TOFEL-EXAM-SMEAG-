@@ -60,6 +60,7 @@
     if (/(^|[A-Z])0*2$/.test(t) || t === 'SET2') return 'set2';
     if (/(^|[A-Z])0*3$/.test(t) || t === 'SET3') return 'set3';
     if (/(^|[A-Z])0*4$/.test(t) || t === 'SET4') return 'set4';
+    if (/(^|[A-Z])0*5$/.test(t) || t === 'SET5') return 'set5';
     return 'set1';
   }
 
