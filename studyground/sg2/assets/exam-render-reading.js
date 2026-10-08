@@ -292,6 +292,25 @@
     ];
   }
 
+  /* insert 문항 지문인데 {{A}} 마커 없이 원문에 "… products. A" / "… flow. B Higher …" 처럼
+     글자가 평문으로 박힌 세트가 있다(SET 4·5). 문장 경계에 A→B→C→D 가 차례로 한 번씩만
+     설 때 그 글자를 {{A}} 마커로 바꿔 배지·클릭 지점으로 세운다. 어긋나면 원문 그대로 둔다. */
+  function plainInsertMarkers(ps) {
+    var i, joined = ps.join('\n');
+    if (/\{\{[A-D]\}\}/.test(joined)) return ps;
+    var re = /(^|[.!?]["'”’)\]]?\s+)([A-D])(?=\s+[A-Z“"‘']|\s*$)/g, seen = [], m;
+    for (i = 0; i < ps.length; i++) {
+      re.lastIndex = 0;
+      while ((m = re.exec(String(ps[i] || ''))) !== null) seen.push(m[2]);
+    }
+    if (seen.join('') !== 'ABCD') return ps;
+    var out = [];
+    for (i = 0; i < ps.length; i++) {
+      out.push(String(ps[i] || '').replace(re, function (all, lead, letter) { return lead + '{{' + letter + '}}'; }));
+    }
+    return out;
+  }
+
   /* ── 블록별 렌더 ─────────────────────────────────────────── */
 
   /* cloze — 관찰 화면(reading-cloze-2760s.png)의 "Fill in the missing letters in the paragraph."
@@ -468,6 +487,7 @@
       box.appendChild(img);
     }
     var ps = blk.paragraphs || (blk.passage ? [blk.passage] : []), i, j;
+    if (insertQ) ps = plainInsertMarkers(ps);
     for (i = 0; i < ps.length; i++) {
       var para = el('p', 'rd-para');
       var toks = insertQ ? markerTokens(ps[i]) : sentenceLetterTokens(ps[i]);
