@@ -440,7 +440,8 @@
 //       덮어써 브랜드 색이 오렌지로, 제목이 StudyGround 로, 시험 화면이 옛 빨간 pill 로
 //       돌아가 있었다. 그 파일들을 커밋 직전 판으로 되돌린다 — 전부 SHELL_ASSETS 라 판올림.
 // v114: Register SET 5 pack and offline manifest in the shell cache.
-const VERSION = 'sg-v115';
+// v116: SET 5 끼워 넣기 지문의 평문 A~D 를 클릭 배지로 세운다(exam-render-reading.js) — 셸이라 판올림.
+const VERSION = 'sg-v116';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
