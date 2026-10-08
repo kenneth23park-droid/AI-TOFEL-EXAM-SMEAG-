@@ -1,5 +1,29 @@
 # SET 5 음원 재생성 및 검증
 
+## 2026-10-08 — ElevenLabs 로 되돌림
+
+강사 피드백: Speaking Task 1 트레이너(Kokoro `af_nicole`)가 "지치고 속삭이는" 소리였다.
+ElevenLabs 키가 다시 쓸 수 있게 되어 SET 5 전체를 ElevenLabs 로 다시 만들었다.
+
+- 듣기·Speaking 2 등 25개: `tts-voices-set5exam-11labs.json` (SET 9 배역 13명, 문항마다 다른 목소리,
+  `eleven_flash_v2_5`). 이제 `active: true`.
+- Speaking 1 여덟 개: `tts-voices-set5s1-11labs.json` — Jessica, `eleven_multilingual_v2`,
+  stability 0.4 · style 0.45, 문항 speed 0.8(131–186 wpm), -16 LUFS 로 맞춤. 지시문이 "repeat what
+  **she** says" 라 트레이너는 한 사람이다. 파일명이 뒤에 정렬돼 합집합에서 이 매니페스트가 이긴다.
+- Kokoro 매니페스트는 `active: false` 참고용.
+
+```sh
+cd studyground/sg2
+ELEVENLABS_API_KEY=... python3 tools/tts_multivoice.py --manifest tts-voices-set5exam-11labs.json --no-verify
+ELEVENLABS_API_KEY=... python3 tools/tts_multivoice.py --manifest tts-voices-set5s1-11labs.json --no-verify
+cd .. && .venv/bin/python tools/verify_audio.py --manifest sg2/tts-manifest.set5.json --stt-scope all --require-stt --stt-model small.en --stt-backend faster_whisper --update-index --stamp-on-pass --json sg2/config/audio-verify.set5.json
+```
+
+순서가 중요하다 — 배역표가 S1 을 Sarah 로 먼저 쓰고, 트레이너 매니페스트가 덮어쓴다.
+같은 날 정답지 Listening Module 2 Q3 를 D→C 로 고쳤다(`tools/correct_set5_sources.py` 의 `answers`).
+
+## 이전 기록 (Kokoro, 2026-10-06)
+
 전체 Set 5는 로컬 Kokoro ONNX v1.0 F32로 생성한다. ElevenLabs 키를 재조회할 수 없어
 키 없는 로컬 엔진을 사용한다. 한 세트 안의 엔진은 동일하다. 원본 대사와 출력 경로는
 그대로이며 기존 화자 배역을 Kokoro preset으로 대응시킨다. AU-Lily는 호주 preset이

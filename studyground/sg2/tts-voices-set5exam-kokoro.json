@@ -4,7 +4,8 @@
   "output": "mp3_44100_vbr_q4",
   "note": [
     "SET5 whole-set local generation because ElevenLabs credentials are unavailable. Source scripts and output paths unchanged. All US/GB voices mapped using existing tts_kokoro.VOICE_MAP; AU-Lily uses GB bf_lily.",
-    "Speaking Task 1 (set5-s1-*) moved to tts-voices-set5s1-11labs.json on 2026-10-08: the teacher reported af_nicole as tired/whispering."
+    "Speaking Task 1 (set5-s1-*) moved to tts-voices-set5s1-11labs.json on 2026-10-08: the teacher reported af_nicole as tired/whispering.",
+    "Superseded 2026-10-08: SET 5 is rendered with ElevenLabs again (tts-voices-set5exam-11labs.json + tts-voices-set5s1-11labs.json). Kept as reference."
   ],
   "items": [
     {
@@ -536,5 +537,5 @@
       "speed": 1.12
     }
   ],
-  "active": true
+  "active": false
 }

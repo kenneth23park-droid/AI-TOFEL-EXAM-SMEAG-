@@ -4,531 +4,531 @@
   "sigVersion": 3,
   "items": {
     "set5-l1-q01": {
-      "scriptHash": "aeb646da6bb9f16758db0afb9bfc2602ccb19c574488da7eeeeb7ae116208057",
+      "scriptHash": "8d014eb141b3772ff692fd8974f368a9a1c08bd61aa2e1944d960d002e1479c6",
       "sigVersion": 3,
-      "bytes": 17114,
-      "durationSec": 1.62,
-      "audioSha256": "ef1fde90f666fa725cf6e44d7088d0c52dc2fc3c70508edbb81be1b53fb65a45",
+      "bytes": 36824,
+      "durationSec": 2.23,
+      "audioSha256": "1b3ba3a6b5ee9e73c4cf50810ffd04e8dcdf90a3eb087fc2422a7899be1f7b72",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "How often does the shuttle run?",
-        "audioSha256": "ef1fde90f666fa725cf6e44d7088d0c52dc2fc3c70508edbb81be1b53fb65a45",
-        "scriptHash": "aeb646da6bb9f16758db0afb9bfc2602ccb19c574488da7eeeeb7ae116208057"
+        "audioSha256": "1b3ba3a6b5ee9e73c4cf50810ffd04e8dcdf90a3eb087fc2422a7899be1f7b72",
+        "scriptHash": "8d014eb141b3772ff692fd8974f368a9a1c08bd61aa2e1944d960d002e1479c6"
       }
     },
     "set5-l1-q02": {
-      "scriptHash": "b99c31c33db2a5b9a99a7c911d7eaec6de959efd9835fa4f927b496d7fd4868d",
+      "scriptHash": "a7e2255c30024e55af23dede3ca81d1c2248b7fa55c8bfdbeb6308a2a9fd8d57",
       "sigVersion": 3,
-      "bytes": 22322,
-      "durationSec": 2.24,
-      "audioSha256": "1081ac701511c4ab75179bbc12094f28ce869e4b818c3220f4903a932116e465",
+      "bytes": 40586,
+      "durationSec": 2.46,
+      "audioSha256": "68eb961238d61df999fc851cfba83bfb6e5947a99ef193710b2ed91fe6dcf206",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "Have you submitted your expense report?",
-        "audioSha256": "1081ac701511c4ab75179bbc12094f28ce869e4b818c3220f4903a932116e465",
-        "scriptHash": "b99c31c33db2a5b9a99a7c911d7eaec6de959efd9835fa4f927b496d7fd4868d"
+        "audioSha256": "68eb961238d61df999fc851cfba83bfb6e5947a99ef193710b2ed91fe6dcf206",
+        "scriptHash": "a7e2255c30024e55af23dede3ca81d1c2248b7fa55c8bfdbeb6308a2a9fd8d57"
       }
     },
     "set5-l1-q03": {
-      "scriptHash": "e35f0f6ccc20223e6c3beac00f4b0a000f0c60f3c60e2e5862b14d1747e1685c",
+      "scriptHash": "e4a028afd6386ac7214667ef741c5488170c6c6dd336299ae569223fb85df7e6",
       "sigVersion": 3,
-      "bytes": 13023,
-      "durationSec": 1.19,
-      "audioSha256": "517713d616f04ea5a1905d079148cf9fac037d3be5325e45dee19063312f8d6c",
+      "bytes": 27629,
+      "durationSec": 1.67,
+      "audioSha256": "a8a2c8130804b6f2e5d8c547b0c95762c15fd4ddac973bf320895b4d94095270",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "window or middle seat.",
-        "audioSha256": "517713d616f04ea5a1905d079148cf9fac037d3be5325e45dee19063312f8d6c",
-        "scriptHash": "e35f0f6ccc20223e6c3beac00f4b0a000f0c60f3c60e2e5862b14d1747e1685c"
+        "audioSha256": "a8a2c8130804b6f2e5d8c547b0c95762c15fd4ddac973bf320895b4d94095270",
+        "scriptHash": "e4a028afd6386ac7214667ef741c5488170c6c6dd336299ae569223fb85df7e6"
       }
     },
     "set5-l1-q04": {
-      "scriptHash": "e3e739796fa892cfda966416ac26bcc5b4fc73ff6bd5be917d7ca8fc72dfa8d6",
+      "scriptHash": "c7d8aeb21e78473f5c8e90256141edb108efc01b48ce804baaebd2d838891510",
       "sigVersion": 3,
-      "bytes": 34370,
-      "durationSec": 2.82,
-      "audioSha256": "bcd623be771e52a789d5f36d26d1b15994e24df1b6cafc037ff1fe43f63681b7",
+      "bytes": 41004,
+      "durationSec": 2.51,
+      "audioSha256": "bd211dec6e763247be336240a920ac3441540d99743dd0fa9ea7a992d44293af",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "The client wants to move the deadline up.",
-        "audioSha256": "bcd623be771e52a789d5f36d26d1b15994e24df1b6cafc037ff1fe43f63681b7",
-        "scriptHash": "e3e739796fa892cfda966416ac26bcc5b4fc73ff6bd5be917d7ca8fc72dfa8d6"
+        "audioSha256": "bd211dec6e763247be336240a920ac3441540d99743dd0fa9ea7a992d44293af",
+        "scriptHash": "c7d8aeb21e78473f5c8e90256141edb108efc01b48ce804baaebd2d838891510"
       }
     },
     "set5-l1-q05": {
-      "scriptHash": "9abf07745018ec39d21489922103c8ad924fcfc230b9e0ce8acc9ac6a35b3d96",
+      "scriptHash": "7d08d83da9ff83584aea93508532af479156f949541b3d28979faba8351d3a5d",
       "sigVersion": 3,
-      "bytes": 26628,
-      "durationSec": 2.99,
-      "audioSha256": "4a7c83b092bd4b254740e663b3b0d1d754bd07756076f37822f304407003c8e9",
+      "bytes": 66499,
+      "durationSec": 4.09,
+      "audioSha256": "a8c680bbf1eeaea86ca8ef12c1bcd09d27611e370469afc195d34fc196b6ccf1",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "Doesn't the museum offer free admission on Sundays?",
-        "audioSha256": "4a7c83b092bd4b254740e663b3b0d1d754bd07756076f37822f304407003c8e9",
-        "scriptHash": "9abf07745018ec39d21489922103c8ad924fcfc230b9e0ce8acc9ac6a35b3d96"
+        "audioSha256": "a8c680bbf1eeaea86ca8ef12c1bcd09d27611e370469afc195d34fc196b6ccf1",
+        "scriptHash": "7d08d83da9ff83584aea93508532af479156f949541b3d28979faba8351d3a5d"
       }
     },
     "set5-l1-q06": {
-      "scriptHash": "563cf78981a968bb29137288dcd13e6f171d638a54de2c737d1ddb3e99746754",
+      "scriptHash": "6caee775f6ca0da725e21fd06fb67ea8959a306a90d2c4925e0e0ead9395db47",
       "sigVersion": 3,
-      "bytes": 21837,
-      "durationSec": 2.41,
-      "audioSha256": "891cbdbc091a442f8d9c8ca5f60d4bdf54d77cfb94556f76a9afe439bb5bc2ad",
+      "bytes": 46437,
+      "durationSec": 2.83,
+      "audioSha256": "4595e05a7713804715d7b4ed307c0d277a1440e7544f02232e5edb8c7fe8f8fd",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "Can you forward me that email thread?",
-        "audioSha256": "891cbdbc091a442f8d9c8ca5f60d4bdf54d77cfb94556f76a9afe439bb5bc2ad",
-        "scriptHash": "563cf78981a968bb29137288dcd13e6f171d638a54de2c737d1ddb3e99746754"
+        "audioSha256": "4595e05a7713804715d7b4ed307c0d277a1440e7544f02232e5edb8c7fe8f8fd",
+        "scriptHash": "6caee775f6ca0da725e21fd06fb67ea8959a306a90d2c4925e0e0ead9395db47"
       }
     },
     "set5-l1-q07": {
-      "scriptHash": "9a9d7bf2611d8d7c87aa9399d6995d786613662f0bbb33f4278d5178d3469590",
+      "scriptHash": "c00cb2e1248e364e7ca4665d9d210236384f99b11b490f27471a611807176855",
       "sigVersion": 3,
-      "bytes": 21253,
-      "durationSec": 2.45,
-      "audioSha256": "1d575c5ae751ccb3af5dc69911895730a2dfb18f55ac80f503d6c2b659bdc2cb",
+      "bytes": 47273,
+      "durationSec": 2.88,
+      "audioSha256": "2c87ae54be824167460e3ed11ef45dd41f7aa9224a30a2efee9a4dc523f517ec",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
-        "transcript": "The team meeting got moved to three o'clock.",
-        "audioSha256": "1d575c5ae751ccb3af5dc69911895730a2dfb18f55ac80f503d6c2b659bdc2cb",
-        "scriptHash": "9a9d7bf2611d8d7c87aa9399d6995d786613662f0bbb33f4278d5178d3469590"
+        "transcript": "the team meeting got moved to three o'clock.",
+        "audioSha256": "2c87ae54be824167460e3ed11ef45dd41f7aa9224a30a2efee9a4dc523f517ec",
+        "scriptHash": "c00cb2e1248e364e7ca4665d9d210236384f99b11b490f27471a611807176855"
       }
     },
     "set5-l1-q08": {
-      "scriptHash": "e6621d824ce55890704526ab3ac89272596dd1e0ccc9f83b099183a82a68edd1",
+      "scriptHash": "83be3485a04dcc7e7ff49e4252d5c5dee97e6c3a0e849ac4590547b4345bd5ae",
       "sigVersion": 3,
-      "bytes": 22119,
-      "durationSec": 1.81,
-      "audioSha256": "3f9794a1120bcf9de7f211351edab797f0afb12d586a1d02f2a451efb2349b91",
+      "bytes": 44347,
+      "durationSec": 2.69,
+      "audioSha256": "699f524ea8fb5d48b07b21383772b8942fc6d6c439525923ca6513f24330811d",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "You've been to Japan before, haven't you?",
-        "audioSha256": "3f9794a1120bcf9de7f211351edab797f0afb12d586a1d02f2a451efb2349b91",
-        "scriptHash": "e6621d824ce55890704526ab3ac89272596dd1e0ccc9f83b099183a82a68edd1"
+        "audioSha256": "699f524ea8fb5d48b07b21383772b8942fc6d6c439525923ca6513f24330811d",
+        "scriptHash": "83be3485a04dcc7e7ff49e4252d5c5dee97e6c3a0e849ac4590547b4345bd5ae"
       }
     },
     "set5-l1-q09-10": {
-      "scriptHash": "a21e7cb8e86abfe219e6aaa0a0a77278279ff4c515ec6764ebcc0f8233b17417",
+      "scriptHash": "bd5300443e7efe550ba86ae93742ee47f17e24025351bd8b58cd7b18d4504987",
       "sigVersion": 3,
-      "bytes": 303061,
-      "durationSec": 33.39,
-      "audioSha256": "1c7ad2a2e6c180264dc88a483f65065d775d4649206e76b297b15a823cc23194",
+      "bytes": 279644,
+      "durationSec": 26.77,
+      "audioSha256": "2009161987771c731593b0f5139c5a25957b91823962a0bf1cc7f73d1ba6c39e",
       "stt": {
-        "verdict": "PASS",
-        "wer": 0.013,
+        "verdict": "WARN",
+        "wer": 0.026,
         "backend": "faster_whisper",
-        "reason": "WER 1.3%",
-        "transcript": "How's the quarterly budget report coming along? Finance needs it by Thursday. I finished the expense analysis and the revenue projections. I'm just waiting on the department heads to confirm their numbers. Have you followed up with them? We can't afford any delays this time. I sent reminders yesterday. Most have responded, but I'm still waiting on operations and HR. If you don't hear back by tomorrow afternoon, let me know. I'll reach out to them directly.",
-        "audioSha256": "1c7ad2a2e6c180264dc88a483f65065d775d4649206e76b297b15a823cc23194",
-        "scriptHash": "a21e7cb8e86abfe219e6aaa0a0a77278279ff4c515ec6764ebcc0f8233b17417"
+        "reason": "WER 2.6% — queue for a human listen",
+        "transcript": "How's the quarterly budget report coming along? Finance needs it by Thursday. I finished the expense analysis and the revenue projections. I'm just waiting on the department heads to confirm their numbers. Have you followed up with them? We can't afford any delays this time. I sent reminders yesterday. Most have responded, but I'm still waiting on operations in HR. If you don't hear back by tomorrow afternoon, let me know. I'll reach out to them directly.",
+        "audioSha256": "2009161987771c731593b0f5139c5a25957b91823962a0bf1cc7f73d1ba6c39e",
+        "scriptHash": "bd5300443e7efe550ba86ae93742ee47f17e24025351bd8b58cd7b18d4504987"
       }
     },
     "set5-l1-q11-12": {
-      "scriptHash": "52e502638c062eb40813c718c0f24191a185e75edd65160326e6cc3712a5d66b",
+      "scriptHash": "665d447542259427af0deee753289627376c694e29033f0f46bbcd56431f4bd5",
       "sigVersion": 3,
-      "bytes": 272237,
-      "durationSec": 30.02,
-      "audioSha256": "5a3b9d73cbfa8654441a3735dcbf6f50bcac4b59764701528f0c533a078c864d",
+      "bytes": 352740,
+      "durationSec": 34.06,
+      "audioSha256": "9fa4ef68589c6c1b88cd79006756eee850f67f9a4edadcbeaf3850d28ec4e435",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
-        "transcript": "I just got an email from the internship coordinator. Apparently, our start date has been pushed back two weeks. Really, I thought we were supposed to begin on June 1st. What happened? The company is relocating to a new office building, and it won't be ready until mid-June. So now, we start on the 15th instead. Well, that's actually not too bad. I can use the extra time to finish my online certification course. Same here. I was stressing about completing everything before the internship. This gives us some breathing room.",
-        "audioSha256": "5a3b9d73cbfa8654441a3735dcbf6f50bcac4b59764701528f0c533a078c864d",
-        "scriptHash": "52e502638c062eb40813c718c0f24191a185e75edd65160326e6cc3712a5d66b"
+        "transcript": "I just got an email from the internship coordinator. Apparently, our start date has been pushed back two weeks. Really? I thought we were supposed to begin on June 1st. What happened? The company is relocating to a new office building, and it won't be ready until mid-June. So now we start on the 15th instead. Well, that's actually not too bad. I can use the extra time to finish my online certification course. Same here. I was stressing about completing everything before the internship. This gives us some breathing room.",
+        "audioSha256": "9fa4ef68589c6c1b88cd79006756eee850f67f9a4edadcbeaf3850d28ec4e435",
+        "scriptHash": "665d447542259427af0deee753289627376c694e29033f0f46bbcd56431f4bd5"
       }
     },
     "set5-l1-q13-14": {
-      "scriptHash": "d537ff3cb0aee572dacfe7d325589632b4e143986c3ab9d5727f15dfaa17629f",
+      "scriptHash": "760e8f6f9f6286507a9ffd1bfef186531034b692775872a3a13f97c3cd1ad4af",
       "sigVersion": 3,
-      "bytes": 164702,
-      "durationSec": 17.28,
-      "audioSha256": "7a51f766c024a60a4f818bbc159075d11510442f2b5a95e8312355485251ce94",
+      "bytes": 227831,
+      "durationSec": 14.16,
+      "audioSha256": "c0e0dd4bcc5c48c69580d3ffe89640561ab3b6dcd8662966b3beaf099b2b9e2c",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "Students, the university is upgrading our email system to improve security and storage capacity. Starting next Monday, you'll need to log in using your full student ID number instead of your username. Please update your email app settings before then.",
-        "audioSha256": "7a51f766c024a60a4f818bbc159075d11510442f2b5a95e8312355485251ce94",
-        "scriptHash": "d537ff3cb0aee572dacfe7d325589632b4e143986c3ab9d5727f15dfaa17629f"
+        "audioSha256": "c0e0dd4bcc5c48c69580d3ffe89640561ab3b6dcd8662966b3beaf099b2b9e2c",
+        "scriptHash": "760e8f6f9f6286507a9ffd1bfef186531034b692775872a3a13f97c3cd1ad4af"
       }
     },
     "set5-l1-q15-16": {
-      "scriptHash": "5e3c5d8f79b879aab4448d8489f0a33703696b4d2e108749c3805b8542e76859",
+      "scriptHash": "a547e6dd34808f02b5427a897642e05deaa3fcd1d94b4f88f6e35a532bdc819c",
       "sigVersion": 3,
-      "bytes": 127797,
-      "durationSec": 14.89,
-      "audioSha256": "019ec9300b3ccbef9766a1237e71b8e5bead0abaca5037f09eecea5df4edf59e",
+      "bytes": 259596,
+      "durationSec": 16.16,
+      "audioSha256": "97223d19c17de4cc9366a87fc1b858bc85b5af4676946755ed3a3d651bbb3a88",
       "stt": {
-        "verdict": "PASS",
-        "wer": 0.0,
+        "verdict": "WARN",
+        "wer": 0.0227,
         "backend": "faster_whisper",
-        "reason": "WER 0.0%",
-        "transcript": "Students, the campus shuttle is adjusting its routes starting this Monday to better serve the new dormitory complex. The blue line will include two additional stops near Riverside Hall. Please check the updated schedule posted on the transportation website and plan your commute accordingly.",
-        "audioSha256": "019ec9300b3ccbef9766a1237e71b8e5bead0abaca5037f09eecea5df4edf59e",
-        "scriptHash": "5e3c5d8f79b879aab4448d8489f0a33703696b4d2e108749c3805b8542e76859"
+        "reason": "WER 2.3% — queue for a human listen",
+        "transcript": "Students, the campus shuttle is adjusting its roots starting this Monday to better serve the new dormitory complex. The blue line will include two additional stops near Riverside Hall. Please check the updated schedule posted on the transportation website and plan your commute accordingly.",
+        "audioSha256": "97223d19c17de4cc9366a87fc1b858bc85b5af4676946755ed3a3d651bbb3a88",
+        "scriptHash": "a547e6dd34808f02b5427a897642e05deaa3fcd1d94b4f88f6e35a532bdc819c"
       }
     },
     "set5-l1-q17-20": {
-      "scriptHash": "7ce48222531cd25404ef6f051da17cf46d33bd3ae7960386d9fffa128746c8be",
+      "scriptHash": "a69698d264e5cb9b47907c9094222a9411375dbfc7940843dc19bcf1c4ddfa74",
       "sigVersion": 3,
-      "bytes": 961756,
-      "durationSec": 86.81,
-      "audioSha256": "c895eba9ce4b26e4af43249200e55bdff9ff2f8745db4de0246a0715ccc32a87",
+      "bytes": 1350470,
+      "durationSec": 84.33,
+      "audioSha256": "a27bc77f3c05885f27311a8f252020cc3e7800fe4ee7e57a7b2fe8556dc04b31",
       "stt": {
         "verdict": "PASS",
-        "wer": 0.009,
+        "wer": 0.0181,
         "backend": "faster_whisper",
-        "reason": "WER 0.9%",
-        "transcript": "Ok so I want to explain the concept of food chains and food webs. These are fundamental ideas in ecology that help us understand how energy moves through ecosystems. A food chain is a simple model showing how energy passes from one organism to another. It starts with producers which are usually plants. Plants capture energy from the sun through photosynthesis. Then primary consumers like rabbits or insects eat the plants. Primary consumers such as small birds or frogs eat the primary consumers. And at the top you might have tertiary consumers like hawks or foxes eating the secondary consumers. Now in reality ecosystems are more complicated than a simple chain. Most animals eat more than one type of food and most organisms are eaten by more than one predator. So scientists use the term food web to describe these interconnected relationships. A food web is basically many food chains linked together. Why does this matter? Well if one species in a food web disappears it affects many others. For example if a disease kills most of the rabbits in an area the foxes that eat rabbits will struggle but so will the plants that rabbits use to keep in check. Everything is connected. Understanding food webs helps us predict how changes in one population might ripple through an entire ecosystem.",
-        "audioSha256": "c895eba9ce4b26e4af43249200e55bdff9ff2f8745db4de0246a0715ccc32a87",
-        "scriptHash": "7ce48222531cd25404ef6f051da17cf46d33bd3ae7960386d9fffa128746c8be"
+        "reason": "WER 1.8%",
+        "transcript": "Okay, so I wanna explain the concept of food chains and food webs. These are fundamental ideas in ecology that help us understand how energy moves through ecosystems. A food chain is a simple model showing how energy passes from one organism to another. It starts with producers, which are usually plants. Plants capture energy from the sun through photosynthesis. Then primary consumers, like rabbits or insects, eat the plants. Secondary consumers, such as small birds or frogs, eat the primary consumers. And at the top, you might have tertiary consumers, like hawks or foxes, eating the secondary consumers. Now in reality, ecosystems are more complicated than a simple chain. Most animals eat more than one type of food and most organisms are eaten by more than one predator. So scientists use the term food web to describe these interconnected relationships. A food web is basically many food chains linked together. Why does this matter? Well, if one species in a food web disappears, it affects many others. For example, if a disease kills most of the rabbits in an area, the foxes that eat rabbits will struggle. But so will the plants that rabbits use to keep in check. Everything is connected. Understanding food webs helps us predict how changes in one population might ripple through an entire ecosystem.",
+        "audioSha256": "a27bc77f3c05885f27311a8f252020cc3e7800fe4ee7e57a7b2fe8556dc04b31",
+        "scriptHash": "a69698d264e5cb9b47907c9094222a9411375dbfc7940843dc19bcf1c4ddfa74"
       }
     },
     "set5-l2-q01": {
-      "scriptHash": "174fbd8e9d2f1c3e0258502029365859be7257aea32a885be57e4e6e14b6c68c",
+      "scriptHash": "2f961ed0928799378bcebd9ee0ba0dc722d206d2eb227f9ba1be328abd61a2d2",
       "sigVersion": 3,
-      "bytes": 38550,
-      "durationSec": 3.86,
-      "audioSha256": "0c53a3015e4a79c6330c68ba507b1e422ed85861b3f3ba47dca7e19b7b332f62",
+      "bytes": 56886,
+      "durationSec": 3.48,
+      "audioSha256": "444fd62ceaf190f94017494cfd1c431ddee29cdf635f5227e42044b169486a32",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "That's a lot of luggage for a weekend trip, isn't it?",
-        "audioSha256": "0c53a3015e4a79c6330c68ba507b1e422ed85861b3f3ba47dca7e19b7b332f62",
-        "scriptHash": "174fbd8e9d2f1c3e0258502029365859be7257aea32a885be57e4e6e14b6c68c"
+        "audioSha256": "444fd62ceaf190f94017494cfd1c431ddee29cdf635f5227e42044b169486a32",
+        "scriptHash": "2f961ed0928799378bcebd9ee0ba0dc722d206d2eb227f9ba1be328abd61a2d2"
       }
     },
     "set5-l2-q02": {
-      "scriptHash": "fa088e8d9dada00634fdc37afbf2af4947f69be794d2c09467dfde2e75b684c8",
+      "scriptHash": "200fd8de6c672f47a8ba44d014f17020155c885584560ceef591a8f7cb4bbaa9",
       "sigVersion": 3,
-      "bytes": 31012,
-      "durationSec": 3.31,
-      "audioSha256": "33df4205d2b25d59db836b646c8266181c9178988e1fc3aae9e1919a2b5816b5",
+      "bytes": 49363,
+      "durationSec": 3.02,
+      "audioSha256": "afaf7a4d3a4867768f0fc7bab89cce4ba9ab5d83a5890b5d75baf1a7aef55283",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
-        "transcript": "The Wi-Fi password doesn't seem to be working.",
-        "audioSha256": "33df4205d2b25d59db836b646c8266181c9178988e1fc3aae9e1919a2b5816b5",
-        "scriptHash": "fa088e8d9dada00634fdc37afbf2af4947f69be794d2c09467dfde2e75b684c8"
+        "transcript": "The Wi-Fi password doesn't seem to be working?",
+        "audioSha256": "afaf7a4d3a4867768f0fc7bab89cce4ba9ab5d83a5890b5d75baf1a7aef55283",
+        "scriptHash": "200fd8de6c672f47a8ba44d014f17020155c885584560ceef591a8f7cb4bbaa9"
       }
     },
     "set5-l2-q03": {
-      "scriptHash": "948725f39a0de1312d19a96e982915637071c71bbad9c39ce14cb7a57497ced1",
+      "scriptHash": "5fe1b2e50e0e38969b44689973fdaa0f79f096155e871c9353914cdcb50ca934",
       "sigVersion": 3,
-      "bytes": 25239,
-      "durationSec": 2.52,
-      "audioSha256": "128ea015b8399cfbf16d86e02a8394cd7db100cc748ec6ff65706017a59863e1",
+      "bytes": 48527,
+      "durationSec": 2.97,
+      "audioSha256": "b7c11f733f52ea6810a281a23ec94314771db003e5741e3ddb7d3b7b6141adec",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "The shipment was supposed to arrive yesterday.",
-        "audioSha256": "128ea015b8399cfbf16d86e02a8394cd7db100cc748ec6ff65706017a59863e1",
-        "scriptHash": "948725f39a0de1312d19a96e982915637071c71bbad9c39ce14cb7a57497ced1"
+        "audioSha256": "b7c11f733f52ea6810a281a23ec94314771db003e5741e3ddb7d3b7b6141adec",
+        "scriptHash": "5fe1b2e50e0e38969b44689973fdaa0f79f096155e871c9353914cdcb50ca934"
       }
     },
     "set5-l2-q04-05": {
-      "scriptHash": "9a55feb100d0a467317ff1480924806bcc854553556099a65ebc9754dcc969c3",
+      "scriptHash": "6ab919a63c1880b28234726aeb1c479a216c8568bd37d5e7b6aabcd872240a68",
       "sigVersion": 3,
-      "bytes": 305772,
-      "durationSec": 28.86,
-      "audioSha256": "eb571acff2d0ee169d41a4c0aae1111993b99fcd783be4ddeb1a7ceafc21983f",
+      "bytes": 285658,
+      "durationSec": 28.4,
+      "audioSha256": "2d5dea6c572907f312e70ab8e857f9d3e5a3a904100d63bd826b127c3ecfc594",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
-        "transcript": "Professor Adams, I wanted to update you on my dissertation progress. I've completed the data analysis chapter. That's great news. How did the statistical models turn out? Better than expected, actually. The results support my hypothesis pretty strongly. I just need to write up the discussion section now. Excellent. Once that's done, send me the full draft. I'll need at least two weeks to review it before we schedule your defense. Understood. I'm hoping to have everything for you by the end of this month.",
-        "audioSha256": "eb571acff2d0ee169d41a4c0aae1111993b99fcd783be4ddeb1a7ceafc21983f",
-        "scriptHash": "9a55feb100d0a467317ff1480924806bcc854553556099a65ebc9754dcc969c3"
+        "transcript": "Professor Adams, I wanted to update you on my dissertation progress. I've completed the data analysis chapter. That's great news. How did the statistical models turn out? Better than expected, actually. The results support my hypothesis pretty strongly. I just need to write up the discussion section now. Excellent. Once that's done, send me the full draft. I'll need at least two weeks to review it before we schedule your defense. Understood, I'm hoping to have everything for you by the end of this month.",
+        "audioSha256": "2d5dea6c572907f312e70ab8e857f9d3e5a3a904100d63bd826b127c3ecfc594",
+        "scriptHash": "6ab919a63c1880b28234726aeb1c479a216c8568bd37d5e7b6aabcd872240a68"
       }
     },
     "set5-l2-q06-07": {
-      "scriptHash": "aa93e0d6f76fba2ade2157b5f584893e6cad38cf05e322782958e92f00c3b9c5",
+      "scriptHash": "47d9c860cf45fe26f9f3a59f6232e42c3239d747537ec74f9e19ae8fb85d6458",
       "sigVersion": 3,
-      "bytes": 276024,
-      "durationSec": 26.45,
-      "audioSha256": "b17127e9a21cc899e0fbd87df5eb94f0f19f7a35a1b8ded91efbea90becd9cc4",
+      "bytes": 302102,
+      "durationSec": 30.39,
+      "audioSha256": "c2e9255a45aef6f32ba3d52c8ec3e81b0ec99304c3912ccfb5c5f2ed91de4778",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "Did you see the email about the leadership conference next week? Yes, the one about the keynote speaker change. I was looking forward to hearing Dr. Chen speak about innovation in education. Same here, but the replacement speaker is actually quite well known in organizational psychology. She wrote that book on team dynamics. Oh, I've heard of her. That might be even more relevant to my work in human resources, actually. Right, I thought you'd find it interesting.",
-        "audioSha256": "b17127e9a21cc899e0fbd87df5eb94f0f19f7a35a1b8ded91efbea90becd9cc4",
-        "scriptHash": "aa93e0d6f76fba2ade2157b5f584893e6cad38cf05e322782958e92f00c3b9c5"
+        "audioSha256": "c2e9255a45aef6f32ba3d52c8ec3e81b0ec99304c3912ccfb5c5f2ed91de4778",
+        "scriptHash": "47d9c860cf45fe26f9f3a59f6232e42c3239d747537ec74f9e19ae8fb85d6458"
       }
     },
     "set5-l2-q08-11": {
-      "scriptHash": "95dd167e018270b63af844b727389bcf5b25eac6c579ef296e1df0b32f9d201e",
+      "scriptHash": "b53f0fb7b04db7e672c1e5f8837a629885c85fa79fcc7792811a0efd8e71a5c8",
       "sigVersion": 3,
-      "bytes": 971810,
-      "durationSec": 95.41,
-      "audioSha256": "2f1fd885d5248f840cb87ed712c0f9dd56cdd825b34a2702d72234b0780dcca8",
+      "bytes": 1821510,
+      "durationSec": 113.78,
+      "audioSha256": "ec138a2faf42d4fe0da4a53579d8edad2a217470df50ff5ac90a62ad822e5ea2",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0084,
         "backend": "faster_whisper",
         "reason": "WER 0.8%",
-        "transcript": "Alright, today I want to compare two different strategies animals use to regulate their body temperature, being warm-blooded versus cold-blooded. These terms are a bit simplified, but they help us understand some fundamental differences. Warm-blooded animals, which include mammals and birds, generate their own body heat internally. Their metabolism is constantly working to maintain a stable internal temperature, regardless of the environment. A human body stays around 37 degrees Celsius, whether you're in a hot desert or a cold mountain. This gives warm-blooded animals a significant advantage. They can remain active in a wide range of conditions. Cold-blooded animals, like reptiles, fish and insects, work differently. They rely on external sources to regulate their temperature. A lizard, for instance, will bask in the sun to warm up and seek shade when it gets too hot. Their body temperature changes with their surroundings. Now each strategy has trade-offs. Warm-blooded animals can be active any time, but they need to eat a lot more food to fuel their metabolism. A mouse might need to eat half its body weight daily. Cold-blooded animals need much less food, but their activity is limited by environmental conditions. On cold days they become sluggish and slow. Neither approach is superior. They're just different solutions to the same problem of surviving in various environments. Next, we will examine how some animals can actually switch between these strategies.",
-        "audioSha256": "2f1fd885d5248f840cb87ed712c0f9dd56cdd825b34a2702d72234b0780dcca8",
-        "scriptHash": "95dd167e018270b63af844b727389bcf5b25eac6c579ef296e1df0b32f9d201e"
+        "transcript": "Alright, today I want to compare two different strategies animals use to regulate their body temperature, being warm-blooded versus cold-blooded. These terms are a bit simplified, but they help us understand some fundamental differences. Warm-blooded animals, which include mammals and birds, generate their own body heat internally. Their metabolism is constantly working to maintain a stable internal temperature regardless of the environment. A human body stays around 37 degrees Celsius, whether you're in a hot desert or a cold mountain. This gives warm-blooded animals a significant advantage. They can remain active in a wide range of conditions. Cold-blooded animals like reptiles, fish, and insects work differently. They rely on external sources to regulate their temperature. A lizard, for instance, will bask in the sun to warm up and seek shade when it gets too hot. Their body temperature changes with their surroundings. Now, each strategy has trade-offs. Warm-blooded animals can be active any time, but they need to eat a lot more food to fuel their metabolism. A mouse might need to eat half its body weight daily. Cold-blooded animals need much less food, but their activity is limited by environmental conditions. On cold days, they become sluggish and slow. Neither approach is superior. They're just different solutions to the same problem of surviving in various environments. Next, we will examine how some animals can actually switch between these strategies.",
+        "audioSha256": "ec138a2faf42d4fe0da4a53579d8edad2a217470df50ff5ac90a62ad822e5ea2",
+        "scriptHash": "b53f0fb7b04db7e672c1e5f8837a629885c85fa79fcc7792811a0efd8e71a5c8"
       }
     },
     "set5-l2-q12-15": {
-      "scriptHash": "4f31b41df316a2ddd039f2f0ea0186cc9095d6f4cb13757c9afca27d066e153e",
+      "scriptHash": "edbf1168394b63db816f48994098a70984478d6c46cf28849715b565995f838c",
       "sigVersion": 3,
-      "bytes": 738440,
-      "durationSec": 88.54,
-      "audioSha256": "843364b4366951280abdad2ad8eda3c465ee895f2ca26ded8dbf98f3a530c9d4",
+      "bytes": 1394355,
+      "durationSec": 87.07,
+      "audioSha256": "12b346a87df3033837eb27eb59a844f4d9cdc960418a13a63df656bbdd006073",
       "stt": {
         "verdict": "PASS",
-        "wer": 0.0086,
+        "wer": 0.0043,
         "backend": "faster_whisper",
-        "reason": "WER 0.9%",
-        "transcript": "Okay, so let's talk about something you encounter every day but might not think much about, the states of matter. Most of you know there are three main states, solid, liquid, and gas. But do you understand what's actually happening at the molecular level? In a solid, molecules are packed tightly together in fixed positions. They vibrate but don't move around freely. This is why solids maintain their shape, put a rock on a table, and it stays exactly where you put it. The molecules are locked in place. Liquids are different. The molecules are still closed together but they can slide past one another. This is why liquids take the shape of their container. Pour water into a glass and it conforms to the glass's shape. The molecules have more freedom to move but are still attracted to each other. In gases, molecules have the most energy and freedom. They spread out to fill whatever space is available and move rapidly in all directions. The molecules are far apart and barely interact with each other. This is why gases can be compressed easily. There's lots of empty space between molecules. What determines which state matter is in? Temperature and pressure. Add heat energy and molecules move faster. Eventually, a solid becomes liquid and a liquid becomes gas. Remove heat and the opposite happens. It's all about how much energy the molecules have.",
-        "audioSha256": "843364b4366951280abdad2ad8eda3c465ee895f2ca26ded8dbf98f3a530c9d4",
-        "scriptHash": "4f31b41df316a2ddd039f2f0ea0186cc9095d6f4cb13757c9afca27d066e153e"
+        "reason": "WER 0.4%",
+        "transcript": "Okay, so let's talk about something you encounter every day, but might not think much about. The states of matter. Most of you know, there are three main states, solid, liquid, and gas. But do you understand what's actually happening at the molecular level? In a solid, molecules are packed tightly together in fixed positions. They vibrate but don't move around freely. This is why solids maintain their shape, put a rock on a table, and it stays exactly where you put it. The molecules are locked in place. Liquids are different. The molecules are still close together, but they can slide past one another. This is why liquids take the shape of their container. Pour water into a glass, and it conforms to the glass's shape. The molecules have more freedom to move, but are still attracted to each other. In gases, molecules have the most energy and freedom. They spread out to fill whatever space is available and move rapidly in all directions. The molecules are far apart and barely interact with each other. This is why gases can be compressed easily. There's lots of empty space between molecules. What determines which state matter is in? Temperature and pressure. Add heat energy, and molecules move faster. Eventually, a solid becomes liquid, and a liquid becomes gas. Remove heat, and the opposite happens. It's all about how much energy the molecules have.",
+        "audioSha256": "12b346a87df3033837eb27eb59a844f4d9cdc960418a13a63df656bbdd006073",
+        "scriptHash": "edbf1168394b63db816f48994098a70984478d6c46cf28849715b565995f838c"
       }
     },
     "set5-s1-instructions": {
-      "scriptHash": "ef7f23be54fde293f0edbef11aad87ccd286fe339e4a96b591ffeede4517bbf3",
+      "scriptHash": "18b5275844533a5c983f70da43fc08cb36cda551b977a937920094bef7da4976",
       "sigVersion": 3,
-      "bytes": 100020,
-      "durationSec": 11.24,
-      "audioSha256": "6af76d99b8997e688225186e7f9876bfeec28e22d21c1d739e3a4d6e5f22343e",
+      "bytes": 148001,
+      "durationSec": 9.2,
+      "audioSha256": "04c501e11645b633c7379c41ed540f935a01364dc578dd1d7a103117148117a5",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "You are being trained to assist visitors at the Sports and Recreation Center. Listen to your trainer and repeat what she says. Repeat only once.",
-        "audioSha256": "6af76d99b8997e688225186e7f9876bfeec28e22d21c1d739e3a4d6e5f22343e",
-        "scriptHash": "ef7f23be54fde293f0edbef11aad87ccd286fe339e4a96b591ffeede4517bbf3"
+        "audioSha256": "04c501e11645b633c7379c41ed540f935a01364dc578dd1d7a103117148117a5",
+        "scriptHash": "18b5275844533a5c983f70da43fc08cb36cda551b977a937920094bef7da4976"
       }
     },
     "set5-s1-q1": {
-      "scriptHash": "9a9e1bae699c06c1db8fffdcd83c97ee7ad1cbafdcf557832ffceb36545f5813",
+      "scriptHash": "840cc27952da80fbd02ed6915ebe4b1084b461c27bc537f3514520cabeebd12c",
       "sigVersion": 3,
-      "bytes": 23359,
-      "durationSec": 2.39,
-      "audioSha256": "c5376633958677d03fc136c2aabc3428efacb0482e25974ec8b242fd7caf10da",
+      "bytes": 44765,
+      "durationSec": 2.74,
+      "audioSha256": "708066d74913824c55045b2e4cc7552db5fdb9b555cf6dbb3b21cc4f1dba9c8d",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
-        "transcript": "Welcome. Let's go over the facilities.",
-        "audioSha256": "c5376633958677d03fc136c2aabc3428efacb0482e25974ec8b242fd7caf10da",
-        "scriptHash": "9a9e1bae699c06c1db8fffdcd83c97ee7ad1cbafdcf557832ffceb36545f5813"
+        "transcript": "Welcome, let's go over the facilities.",
+        "audioSha256": "708066d74913824c55045b2e4cc7552db5fdb9b555cf6dbb3b21cc4f1dba9c8d",
+        "scriptHash": "840cc27952da80fbd02ed6915ebe4b1084b461c27bc537f3514520cabeebd12c"
       }
     },
     "set5-s1-q2": {
-      "scriptHash": "25a3b4bed2e27449030abaad301574608c0e1ac5a3f27ac5d07de013532b32b7",
+      "scriptHash": "a0692a9ca89f0274bd7fbefd70982f6af24a67bc7d47d8d0c13a13598339b17e",
       "sigVersion": 3,
-      "bytes": 29814,
+      "bytes": 51453,
       "durationSec": 3.16,
-      "audioSha256": "a68e4b395ec74ef1785176d5793dd56377525e56cbdcb10da669e1f095efea7d",
+      "audioSha256": "5e4f0815ed87d29986e2413000654863f79265dfc525741d06eeed0291300c2f",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "There are two basketball courts in the main gym.",
-        "audioSha256": "a68e4b395ec74ef1785176d5793dd56377525e56cbdcb10da669e1f095efea7d",
-        "scriptHash": "25a3b4bed2e27449030abaad301574608c0e1ac5a3f27ac5d07de013532b32b7"
+        "audioSha256": "5e4f0815ed87d29986e2413000654863f79265dfc525741d06eeed0291300c2f",
+        "scriptHash": "a0692a9ca89f0274bd7fbefd70982f6af24a67bc7d47d8d0c13a13598339b17e"
       }
     },
     "set5-s1-q3": {
-      "scriptHash": "bfa92bac89124c88f092877bf0694e2bf99e8eb56ebe5573f339b9e93c4c4c41",
+      "scriptHash": "487a226449a775e4f882e8aeeef79cf4f43857a8cd3cbd3927510bcea04c5e13",
       "sigVersion": 3,
-      "bytes": 38694,
-      "durationSec": 4.14,
-      "audioSha256": "8b6bbe34985d1d1f99f0715c9fcd81e5b1e832f0c07f9f322bf089ecaef2f8ed",
+      "bytes": 69425,
+      "durationSec": 4.27,
+      "audioSha256": "e178e3db9ba945eff3e36145525ab6fdb645ac353bd950772dc24b03b6090403",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "The indoor swimming pool is open from 6 to 9 daily.",
-        "audioSha256": "8b6bbe34985d1d1f99f0715c9fcd81e5b1e832f0c07f9f322bf089ecaef2f8ed",
-        "scriptHash": "bfa92bac89124c88f092877bf0694e2bf99e8eb56ebe5573f339b9e93c4c4c41"
+        "audioSha256": "e178e3db9ba945eff3e36145525ab6fdb645ac353bd950772dc24b03b6090403",
+        "scriptHash": "487a226449a775e4f882e8aeeef79cf4f43857a8cd3cbd3927510bcea04c5e13"
       }
     },
     "set5-s1-q4": {
-      "scriptHash": "df17f6d4e3cf10d5f5a24559681f4e309242bcda76c53c244aed74b6f39a3158",
+      "scriptHash": "8c3f0484ce9d1e14cd2d7c3f2f7d9a466b60e3c23ba5bfe278d223a07d3d5278",
       "sigVersion": 3,
-      "bytes": 42430,
-      "durationSec": 4.42,
-      "audioSha256": "7c188a096b9bfaa954659d6f0b00f31b40f76925f0ac94c05f907f34d19206e6",
+      "bytes": 72351,
+      "durationSec": 4.46,
+      "audioSha256": "d5c4c2bf44e3c1fce011fc8d16d12b978cf65b230fc97858b27bad8bab9f765c",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "Visitors can register for fitness classes at the membership desk here.",
-        "audioSha256": "7c188a096b9bfaa954659d6f0b00f31b40f76925f0ac94c05f907f34d19206e6",
-        "scriptHash": "df17f6d4e3cf10d5f5a24559681f4e309242bcda76c53c244aed74b6f39a3158"
+        "audioSha256": "d5c4c2bf44e3c1fce011fc8d16d12b978cf65b230fc97858b27bad8bab9f765c",
+        "scriptHash": "8c3f0484ce9d1e14cd2d7c3f2f7d9a466b60e3c23ba5bfe278d223a07d3d5278"
       }
     },
     "set5-s1-q5": {
-      "scriptHash": "04fb5a8de5924efe552d9c4eec62962cd7dfc66f9197c387f6efd0cbff674394",
+      "scriptHash": "bd0b97ddb7d5484334a893fe3f064dfce1d319f1f5f4baad77d20e98c5900f30",
       "sigVersion": 3,
-      "bytes": 44686,
-      "durationSec": 4.82,
-      "audioSha256": "8438929c296313935d14c514c419b1551146bd818c817cad2dc55a006bc90451",
+      "bytes": 74022,
+      "durationSec": 4.55,
+      "audioSha256": "4e4616d063d62d09ed983b96e84a8b1745242d24b478c5c9b0fc20e042d13521",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "We encourage families to check out our youth programs and summer camps.",
-        "audioSha256": "8438929c296313935d14c514c419b1551146bd818c817cad2dc55a006bc90451",
-        "scriptHash": "04fb5a8de5924efe552d9c4eec62962cd7dfc66f9197c387f6efd0cbff674394"
+        "audioSha256": "4e4616d063d62d09ed983b96e84a8b1745242d24b478c5c9b0fc20e042d13521",
+        "scriptHash": "bd0b97ddb7d5484334a893fe3f064dfce1d319f1f5f4baad77d20e98c5900f30"
       }
     },
     "set5-s1-q6": {
-      "scriptHash": "72064faa822ad7c60d7363f64ea2618d33f21f9516cd9f9ee9dd5a079c496a91",
+      "scriptHash": "b5f2a0f21aa0d58ce283e2b0b3c41cc962976deeffb05d9ab35f0ce45c87a333",
       "sigVersion": 3,
-      "bytes": 57936,
-      "durationSec": 6.34,
-      "audioSha256": "01baa18b55cd0990a6766e5525ab5973d144c193996b5cd2112a05f85ccf853a",
+      "bytes": 88651,
+      "durationSec": 5.48,
+      "audioSha256": "5dccfee6b20185f44583200099772e960dc31269cee5053a44d19d8f3ec3585c",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "Please remind visitors that children under 12 must be accompanied by an adult.",
-        "audioSha256": "01baa18b55cd0990a6766e5525ab5973d144c193996b5cd2112a05f85ccf853a",
-        "scriptHash": "72064faa822ad7c60d7363f64ea2618d33f21f9516cd9f9ee9dd5a079c496a91"
+        "audioSha256": "5dccfee6b20185f44583200099772e960dc31269cee5053a44d19d8f3ec3585c",
+        "scriptHash": "b5f2a0f21aa0d58ce283e2b0b3c41cc962976deeffb05d9ab35f0ce45c87a333"
       }
     },
     "set5-s1-q7": {
-      "scriptHash": "97be886f4ebc9f49fef46a175eb2ae882b8f12f8ccae9cc7a4c1a81c425ec89b",
+      "scriptHash": "a3d86e11df03449cbbd8f87c69b341aa7c3b8b14b6faba2a4e4d6306cc9fc1fe",
       "sigVersion": 3,
-      "bytes": 56635,
-      "durationSec": 6.17,
-      "audioSha256": "810c906bb361a9bd8a75038a42d8f520010a4746a858baf63066011615a7324e",
+      "bytes": 83635,
+      "durationSec": 5.15,
+      "audioSha256": "cdf2bceedbd7e7cb720f3ac83e4e8f891f73cc7d57ed03ed961f0625001b2345",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "If someone wants to book a private event, they should contact our event team in advance.",
-        "audioSha256": "810c906bb361a9bd8a75038a42d8f520010a4746a858baf63066011615a7324e",
-        "scriptHash": "97be886f4ebc9f49fef46a175eb2ae882b8f12f8ccae9cc7a4c1a81c425ec89b"
+        "audioSha256": "cdf2bceedbd7e7cb720f3ac83e4e8f891f73cc7d57ed03ed961f0625001b2345",
+        "scriptHash": "a3d86e11df03449cbbd8f87c69b341aa7c3b8b14b6faba2a4e4d6306cc9fc1fe"
       }
     },
     "set5-s2-instructions": {
-      "scriptHash": "2ca32a5e2bb64f4525ff4099a8dbbe0ff8161e788530af7e18e39c61a0bb5dc2",
+      "scriptHash": "57bd69d0b3ced60513c7a9e5210d4522c30ca05abe594a3cae1c279e7bc8526b",
       "sigVersion": 3,
-      "bytes": 131060,
-      "durationSec": 12.84,
-      "audioSha256": "95225418c977bf6fe19b77069fd5e0a8efdc4f51aad40341576a7e2b1331fb43",
+      "bytes": 244132,
+      "durationSec": 15.19,
+      "audioSha256": "43065f5c7343c543849ad0f3b03533def139474a837031b2ed16753082e6ce10",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
-        "transcript": "You have volunteered for a research study about how to spend your free time. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
-        "audioSha256": "95225418c977bf6fe19b77069fd5e0a8efdc4f51aad40341576a7e2b1331fb43",
-        "scriptHash": "2ca32a5e2bb64f4525ff4099a8dbbe0ff8161e788530af7e18e39c61a0bb5dc2"
+        "transcript": "You have volunteered for a research study about how to spend your free time. You will have a short, online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+        "audioSha256": "43065f5c7343c543849ad0f3b03533def139474a837031b2ed16753082e6ce10",
+        "scriptHash": "57bd69d0b3ced60513c7a9e5210d4522c30ca05abe594a3cae1c279e7bc8526b"
       }
     },
     "set5-s2-q1": {
-      "scriptHash": "473793d5ccb7af20d94fff74c33d0cad3fd650302a73d48640179e30aed16395",
+      "scriptHash": "6db378500dd6ec62ef8c1a3747f441aa6b855b5b2a5287f0aca875d9366c0a5f",
       "sigVersion": 3,
-      "bytes": 89234,
-      "durationSec": 8.68,
-      "audioSha256": "ec2c361843f476695e95494dcfe30b36a460596f2187485eec7ce3a59060cc17",
+      "bytes": 174751,
+      "durationSec": 10.87,
+      "audioSha256": "9082decd813db4bd90d2338f49bc8c6573fe6d1dd987cabee05c2b797e6c84b5",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "Thank you for joining today. I'd like to ask you some questions about free time. Do you usually spend free time at home, outside, or a mix of both?",
-        "audioSha256": "ec2c361843f476695e95494dcfe30b36a460596f2187485eec7ce3a59060cc17",
-        "scriptHash": "473793d5ccb7af20d94fff74c33d0cad3fd650302a73d48640179e30aed16395"
+        "audioSha256": "9082decd813db4bd90d2338f49bc8c6573fe6d1dd987cabee05c2b797e6c84b5",
+        "scriptHash": "6db378500dd6ec62ef8c1a3747f441aa6b855b5b2a5287f0aca875d9366c0a5f"
       }
     },
     "set5-s2-q2": {
-      "scriptHash": "ced3efbba8e48bb5431a359488e08bd49375682997d9e5e3e0e2054b5daf8637",
+      "scriptHash": "e1fe8eac6b8aa5a6b2be2047f92cc03c9a811cb5e0845c6da8e6f5cda2d4a379",
       "sigVersion": 3,
-      "bytes": 70226,
-      "durationSec": 6.83,
-      "audioSha256": "4bf4b6b4df8501e2be08aca5e1afa99502bf8a0408b9f00937cdf454d1dcc940",
+      "bytes": 137134,
+      "durationSec": 8.5,
+      "audioSha256": "0a59283120eec43d588ae69776c3f729eb22de26d5ef56a6a3230605ac1faeef",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "I see. When you watch movies or TV shows, do you prefer to watch them alone or with friends or family? Why?",
-        "audioSha256": "4bf4b6b4df8501e2be08aca5e1afa99502bf8a0408b9f00937cdf454d1dcc940",
-        "scriptHash": "ced3efbba8e48bb5431a359488e08bd49375682997d9e5e3e0e2054b5daf8637"
+        "audioSha256": "0a59283120eec43d588ae69776c3f729eb22de26d5ef56a6a3230605ac1faeef",
+        "scriptHash": "e1fe8eac6b8aa5a6b2be2047f92cc03c9a811cb5e0845c6da8e6f5cda2d4a379"
       }
     },
     "set5-s2-q3": {
-      "scriptHash": "ea39ea20510b1f541008babf2e30f1cf5d4a5b3fc0b0babd56d4e4173a22eb36",
+      "scriptHash": "93353c2a1a5963635f5ea5e118ff92414dc02fa33a019f1755f1882de3d288a2",
       "sigVersion": 3,
-      "bytes": 127707,
-      "durationSec": 12.08,
-      "audioSha256": "127f47a9c2eec244702dc7c7fd4b3424ce31af6f3b05085c816b4de36b787eeb",
+      "bytes": 248311,
+      "durationSec": 15.46,
+      "audioSha256": "227c85f55a8fe31f23d4912d590be67bd0dbf75ba10b65070aeea670121371fd",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
-        "transcript": "That makes sense, some people say that streaming services have made entertainment better because there are more choices, while others say having too many options makes it harder to decide what to. Watch what do you think.",
-        "audioSha256": "127f47a9c2eec244702dc7c7fd4b3424ce31af6f3b05085c816b4de36b787eeb",
-        "scriptHash": "ea39ea20510b1f541008babf2e30f1cf5d4a5b3fc0b0babd56d4e4173a22eb36"
+        "transcript": "That makes sense. Some people say that streaming services have made entertainment better because there are more choices, while others say having too many options makes it harder to decide what to watch. What do you think?",
+        "audioSha256": "227c85f55a8fe31f23d4912d590be67bd0dbf75ba10b65070aeea670121371fd",
+        "scriptHash": "93353c2a1a5963635f5ea5e118ff92414dc02fa33a019f1755f1882de3d288a2"
       }
     },
     "set5-s2-q4": {
-      "scriptHash": "897b90d5b0ff2471ee1dc4783bbf540b6c2112200cb3940346a75b52fd2893bf",
+      "scriptHash": "c80bd6e7210b3ff527ddd6e4221b82876f784ae6284d6733a227c68222409f64",
       "sigVersion": 3,
-      "bytes": 50779,
-      "durationSec": 4.71,
-      "audioSha256": "b0975b1155f1d1221d44370c9d1ea0d775c07388529a01ea1a65df4225c6ebbc",
+      "bytes": 89487,
+      "durationSec": 5.53,
+      "audioSha256": "d03de8900222a42ba7772c6fbea8ce85f060149fde296b9e36f396cefdc1ad72",
       "stt": {
         "verdict": "PASS",
         "wer": 0.0,
         "backend": "faster_whisper",
         "reason": "WER 0.0%",
         "transcript": "Finally, how do you think people's entertainment habits might change in the next 10 years?",
-        "audioSha256": "b0975b1155f1d1221d44370c9d1ea0d775c07388529a01ea1a65df4225c6ebbc",
-        "scriptHash": "897b90d5b0ff2471ee1dc4783bbf540b6c2112200cb3940346a75b52fd2893bf"
+        "audioSha256": "d03de8900222a42ba7772c6fbea8ce85f060149fde296b9e36f396cefdc1ad72",
+        "scriptHash": "c80bd6e7210b3ff527ddd6e4221b82876f784ae6284d6733a227c68222409f64"
       }
     }
   }

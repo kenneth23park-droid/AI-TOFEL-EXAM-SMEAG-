@@ -111,10 +111,25 @@ if (voices) {
       normalize(spoken[job.out]), job.id + ' cast must speak exact pack script');
   }
 }
+/* 2026-10-08: SET 5 is rendered with ElevenLabs again. The cast manifest is active;
+   Speaking 1 is re-voiced by its own manifest (a livelier trainer), which sorts later
+   in tts_multivoice's union and so owns those eight files. Kokoro stays as reference. */
+const trainer = optional('tts-voices-set5s1-11labs.json');
+if (trainer) {
+  assert.equal(trainer.active, true);
+  assert.equal(voices.active, true, 'ElevenLabs cast renders SET 5');
+  const cast = Object.fromEntries(voices.items.map(i => [i.id, i]));
+  assert.equal(trainer.items.length, 8);
+  for (const job of trainer.items) {
+    assert.match(job.id, /^set5-s1-/);
+    assert.equal(job.out, cast[job.id].out);
+    assert.deepEqual(job.segments.map(s => s.text), cast[job.id].segments.map(s => s.text),
+      job.id + ' trainer must speak the cast script');
+  }
+}
 const localVoices = optional('tts-voices-set5exam-kokoro.json');
-if (localVoices) {
+if (localVoices && localVoices.active !== false) {
   assert.equal(localVoices.provider, 'kokoro-onnx');
-  assert.equal(localVoices.active, true);
   assert.equal(voices.active, false, 'Only the rendered provider should be active');
   assert.equal(localVoices.items.length, 33);
   assert.deepEqual(new Set(localVoices.items.map(i => i.out)), audio);
