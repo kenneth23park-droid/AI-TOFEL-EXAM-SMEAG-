@@ -3,7 +3,8 @@
   "model": "kokoro-82m-v1.0-f32",
   "output": "mp3_44100_vbr_q4",
   "note": [
-    "SET5 whole-set local generation because ElevenLabs credentials are unavailable. Source scripts and output paths unchanged. All US/GB voices mapped using existing tts_kokoro.VOICE_MAP; AU-Lily uses GB bf_lily."
+    "SET5 whole-set local generation because ElevenLabs credentials are unavailable. Source scripts and output paths unchanged. All US/GB voices mapped using existing tts_kokoro.VOICE_MAP; AU-Lily uses GB bf_lily.",
+    "Speaking Task 1 (set5-s1-*) moved to tts-voices-set5s1-11labs.json on 2026-10-08: the teacher reported af_nicole as tired/whispering."
   ],
   "items": [
     {
@@ -453,134 +454,6 @@
         }
       ],
       "speed": 1.0
-    },
-    {
-      "id": "set5-s1-instructions",
-      "kind": "instructions",
-      "out": "media/audio/set5/s1-instructions.mp3",
-      "segments": [
-        {
-          "speaker": "Instructions",
-          "voice": "af_nicole",
-          "voice_name": "US-Emma",
-          "text": "You are being trained to assist visitors at the sports and recreation center, listen to your trainer, and repeat what she says. Repeat only once.",
-          "kokoro_lang": "a",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
-        }
-      ],
-      "speed": 1.25
-    },
-    {
-      "id": "set5-s1-q1",
-      "kind": "repeat",
-      "out": "media/audio/set5/s1-q1.mp3",
-      "segments": [
-        {
-          "speaker": "Narrator",
-          "voice": "af_nicole",
-          "voice_name": "US-Emma",
-          "text": "Welcome! Let’s go over the facilities.",
-          "kokoro_lang": "a",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
-        }
-      ],
-      "speed": 1.25
-    },
-    {
-      "id": "set5-s1-q2",
-      "kind": "repeat",
-      "out": "media/audio/set5/s1-q2.mp3",
-      "segments": [
-        {
-          "speaker": "Narrator",
-          "voice": "af_nicole",
-          "voice_name": "US-Emma",
-          "text": "There are two basketball courts in the main gym.",
-          "kokoro_lang": "a",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
-        }
-      ],
-      "speed": 1.25
-    },
-    {
-      "id": "set5-s1-q3",
-      "kind": "repeat",
-      "out": "media/audio/set5/s1-q3.mp3",
-      "segments": [
-        {
-          "speaker": "Narrator",
-          "voice": "af_nicole",
-          "voice_name": "US-Emma",
-          "text": "The indoor swimming pool is open from six to nine daily.",
-          "kokoro_lang": "a",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
-        }
-      ],
-      "speed": 1.25
-    },
-    {
-      "id": "set5-s1-q4",
-      "kind": "repeat",
-      "out": "media/audio/set5/s1-q4.mp3",
-      "segments": [
-        {
-          "speaker": "Narrator",
-          "voice": "af_nicole",
-          "voice_name": "US-Emma",
-          "text": "Visitors can register for fitness classes at the membership desk here.",
-          "kokoro_lang": "a",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
-        }
-      ],
-      "speed": 1.25
-    },
-    {
-      "id": "set5-s1-q5",
-      "kind": "repeat",
-      "out": "media/audio/set5/s1-q5.mp3",
-      "segments": [
-        {
-          "speaker": "Narrator",
-          "voice": "af_nicole",
-          "voice_name": "US-Emma",
-          "text": "We encourage families to check out our youth programs and summer camps.",
-          "kokoro_lang": "a",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
-        }
-      ],
-      "speed": 1.25
-    },
-    {
-      "id": "set5-s1-q6",
-      "kind": "repeat",
-      "out": "media/audio/set5/s1-q6.mp3",
-      "segments": [
-        {
-          "speaker": "Narrator",
-          "voice": "af_nicole",
-          "voice_name": "US-Emma",
-          "text": "Please remind visitors that children under twelve must be accompanied by an adult.",
-          "kokoro_lang": "a",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
-        }
-      ],
-      "speed": 1.25
-    },
-    {
-      "id": "set5-s1-q7",
-      "kind": "repeat",
-      "out": "media/audio/set5/s1-q7.mp3",
-      "segments": [
-        {
-          "speaker": "Narrator",
-          "voice": "af_nicole",
-          "voice_name": "US-Emma",
-          "text": "If someone wants to book a private event, they should contact our event team in advance.",
-          "kokoro_lang": "a",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
-        }
-      ],
-      "speed": 1.25
     },
     {
       "id": "set5-s2-instructions",

@@ -849,7 +849,7 @@ window.SMEAG_SET5 = {
                   "image": "media/pictures/TOEFL Listening Image (Academic, Single female).webp",
                   "script": "The shipment was supposed to arrive yesterday.",
                   "audio": "media/audio/set5/l2-q03.mp3",
-                  "answer": 3
+                  "answer": 2
                 }
               ],
               "perQuestionAudio": true,
@@ -2009,7 +2009,7 @@ window.SMEAG_SET5 = {
     "L1-20": 0,
     "L2-1": 0,
     "L2-2": 1,
-    "L2-3": 3,
+    "L2-3": 2,
     "L2-4": 1,
     "L2-5": 2,
     "L2-6": 1,

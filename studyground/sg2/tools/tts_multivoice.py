@@ -81,7 +81,7 @@ FORCE = False
 
 # ── ElevenLabs call ────────────────────────────────────────────────────────────
 def synth_segment(voice: str, text: str, speed: float | None = None,
-                  model: str | None = None) -> bytes:
+                  model: str | None = None, settings: dict | None = None) -> bytes:
     """`speed` is ElevenLabs' delivery-rate control (0.7 slowest … 1.2 fastest).
 
     It matters here because Flash v2.5 reads short prompts much faster than the
@@ -91,12 +91,19 @@ def synth_segment(voice: str, text: str, speed: float | None = None,
 
     `model` lets one item override the run-wide model. Single-voice items stay on
     the cheaper, steadier Flash; only multi-voice items move up (see synth_dialogue).
+
+    `settings` is the rest of ElevenLabs' voice_settings (stability, style, …).
+    Without it a voice reads in its flattest default — SET 5's repeat drills were
+    reported as "tired, whispering", so those items ask for more expression.
     """
     payload: dict[str, Any] = {
         "text": text, "model_id": model or MODEL, "output_format": OUTPUT,
     }
+    vs = dict(settings or {})
     if speed is not None:
-        payload["voice_settings"] = {"speed": speed}
+        vs["speed"] = speed
+    if vs:
+        payload["voice_settings"] = vs
     body = json.dumps(payload).encode()
     req = urllib.request.Request(
         API.format(voice=voice), data=body, method="POST",
@@ -133,11 +140,14 @@ def synth_dialogue(segments: list[dict], model: str, seed: int) -> bytes:
 
 
 def seg_hash(voice: str, text: str, speed: float | None = None,
-             model: str | None = None) -> str:
-    """Speed and model join the key so a re-paced or re-modelled item invalidates
-    only its own segments."""
-    return hashlib.sha1(
-        f"{voice}|{model or MODEL}|{speed}|{text}".encode()).hexdigest()[:12]
+             model: str | None = None, settings: dict | None = None) -> str:
+    """Speed, model and voice settings join the key so a re-paced or re-modelled
+    item invalidates only its own segments. Settings only join when present, so
+    the keys of items without them stay what they were."""
+    key = f"{voice}|{model or MODEL}|{speed}|{text}"
+    if settings:
+        key += "|" + json.dumps(settings, sort_keys=True)
+    return hashlib.sha1(key.encode()).hexdigest()[:12]
 
 
 def dialogue_seed(state: "ItemState") -> int:
@@ -154,6 +164,8 @@ class ItemState(TypedDict, total=False):
     kind: str
     speed: float           # optional per-item delivery rate, 0.7-1.2
     model: str             # optional per-item model override (default: run-wide MODEL)
+    voice_settings: dict   # optional ElevenLabs voice_settings (stability, style, …)
+    loudnorm: float        # optional target loudness (LUFS) applied after stitch
     mode: str              # "dialogue" → one multi-speaker call instead of per-segment
     segments: list[dict]
     seg_files: list[str]
@@ -176,6 +188,7 @@ def synth(state: ItemState) -> ItemState:
 
     speed = state.get("speed")
     model = state.get("model") or MODEL
+    settings = state.get("voice_settings")
 
     # 다화자 항목은 한 번의 호출로 통째로 만든다 — stitch 는 파일 하나를 그대로 옮긴다.
     if state.get("mode") == "dialogue" and len(segs) > 1:
@@ -188,11 +201,11 @@ def synth(state: ItemState) -> ItemState:
 
     def one(i_seg):
         i, seg = i_seg
-        h = seg_hash(seg["voice"], seg["text"], speed, model)
+        h = seg_hash(seg["voice"], seg["text"], speed, model, settings)
         f = SEG_DIR / f"{state['id']}.{i:02d}.{h}.mp3"
         if f.is_file() and not FORCE:
             return str(f)
-        audio = synth_segment(seg["voice"], seg["text"], speed, model)
+        audio = synth_segment(seg["voice"], seg["text"], speed, model, settings)
         f.write_bytes(audio)
         return str(f)
 
@@ -215,6 +228,7 @@ def stitch(state: ItemState) -> ItemState:
 
     if len(files) == 1:
         out.write_bytes(Path(files[0]).read_bytes())
+        normalize(out, state.get("loudnorm"))
         return {"out": str(out)}
 
     # Build a silence clip once, weave between segments, concat via demuxer.
@@ -237,7 +251,30 @@ def stitch(state: ItemState) -> ItemState:
              "-c:a", "libmp3lame", "-q:a", "4", str(out)],
             check=True, capture_output=True,
         )
+    normalize(out, state.get("loudnorm"))
     return {"out": str(out)}
+
+
+def normalize(out: Path, target: float | None) -> None:
+    """Bring a clip to `target` LUFS. Voices differ by several dB at the source, and
+    a drill that is quieter than the clips around it reads as a mumble."""
+    if target is None:
+        return
+    # Measure, then apply one fixed gain. ffmpeg's one-pass loudnorm misses by
+    # several dB on a 2-4 s drill; a plain gain keeps the delivery untouched.
+    probe = subprocess.run(
+        ["ffmpeg", "-nostats", "-i", str(out), "-af", "ebur128", "-f", "null", "-"],
+        check=True, capture_output=True, text=True,
+    ).stderr
+    measured = [float(l.split()[1]) for l in probe.splitlines() if l.strip().startswith("I:")][-1]
+    tmp = out.with_suffix(".norm.mp3")
+    subprocess.run(
+        ["ffmpeg", "-y", "-i", str(out), "-af",
+         f"volume={target - measured:.2f}dB,alimiter=limit=0.89",
+         "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "128k", str(tmp)],
+        check=True, capture_output=True,
+    )
+    tmp.replace(out)
 
 
 def verify(state: ItemState) -> ItemState:
@@ -385,6 +422,11 @@ def main() -> int:
     OUTPUT = man.get("output", OUTPUT)
     FORCE = args.force
     items = man.get("items", [])
+    # Manifest-wide defaults; an item's own value wins.
+    for it in items:
+        for key in ("voice_settings", "loudnorm"):
+            if key in man and key not in it:
+                it[key] = man[key]
     if args.only:
         items = [it for it in items if it.get("id") == args.only]
         if not items:

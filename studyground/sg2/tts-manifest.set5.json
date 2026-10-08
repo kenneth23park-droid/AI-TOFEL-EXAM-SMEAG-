@@ -372,12 +372,12 @@
       "out": "media/audio/set5/s1-instructions.mp3",
       "text": "You are being trained to assist visitors at the sports and recreation center, listen to your trainer, and repeat what she says. Repeat only once.",
       "gap_ms": 400,
-      "origin": "tts-voices-set5exam-kokoro.json",
+      "origin": "tts-voices-set5s1-11labs.json",
       "segments": [
         {
           "speaker": "Instructions",
           "text": "You are being trained to assist visitors at the sports and recreation center, listen to your trainer, and repeat what she says. Repeat only once.",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9|speed=0.9"
         }
       ]
     },
@@ -386,12 +386,12 @@
       "out": "media/audio/set5/s1-q1.mp3",
       "text": "Welcome! Let’s go over the facilities.",
       "gap_ms": 400,
-      "origin": "tts-voices-set5exam-kokoro.json",
+      "origin": "tts-voices-set5s1-11labs.json",
       "segments": [
         {
           "speaker": "Narrator",
           "text": "Welcome! Let’s go over the facilities.",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9|speed=0.8"
         }
       ]
     },
@@ -400,12 +400,12 @@
       "out": "media/audio/set5/s1-q2.mp3",
       "text": "There are two basketball courts in the main gym.",
       "gap_ms": 400,
-      "origin": "tts-voices-set5exam-kokoro.json",
+      "origin": "tts-voices-set5s1-11labs.json",
       "segments": [
         {
           "speaker": "Narrator",
           "text": "There are two basketball courts in the main gym.",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9|speed=0.8"
         }
       ]
     },
@@ -414,12 +414,12 @@
       "out": "media/audio/set5/s1-q3.mp3",
       "text": "The indoor swimming pool is open from six to nine daily.",
       "gap_ms": 400,
-      "origin": "tts-voices-set5exam-kokoro.json",
+      "origin": "tts-voices-set5s1-11labs.json",
       "segments": [
         {
           "speaker": "Narrator",
           "text": "The indoor swimming pool is open from six to nine daily.",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9|speed=0.8"
         }
       ]
     },
@@ -428,12 +428,12 @@
       "out": "media/audio/set5/s1-q4.mp3",
       "text": "Visitors can register for fitness classes at the membership desk here.",
       "gap_ms": 400,
-      "origin": "tts-voices-set5exam-kokoro.json",
+      "origin": "tts-voices-set5s1-11labs.json",
       "segments": [
         {
           "speaker": "Narrator",
           "text": "Visitors can register for fitness classes at the membership desk here.",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9|speed=0.8"
         }
       ]
     },
@@ -442,12 +442,12 @@
       "out": "media/audio/set5/s1-q5.mp3",
       "text": "We encourage families to check out our youth programs and summer camps.",
       "gap_ms": 400,
-      "origin": "tts-voices-set5exam-kokoro.json",
+      "origin": "tts-voices-set5s1-11labs.json",
       "segments": [
         {
           "speaker": "Narrator",
           "text": "We encourage families to check out our youth programs and summer camps.",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9|speed=0.8"
         }
       ]
     },
@@ -456,12 +456,12 @@
       "out": "media/audio/set5/s1-q6.mp3",
       "text": "Please remind visitors that children under twelve must be accompanied by an adult.",
       "gap_ms": 400,
-      "origin": "tts-voices-set5exam-kokoro.json",
+      "origin": "tts-voices-set5s1-11labs.json",
       "segments": [
         {
           "speaker": "Narrator",
           "text": "Please remind visitors that children under twelve must be accompanied by an adult.",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9|speed=0.8"
         }
       ]
     },
@@ -470,12 +470,12 @@
       "out": "media/audio/set5/s1-q7.mp3",
       "text": "If someone wants to book a private event, they should contact our event team in advance.",
       "gap_ms": 400,
-      "origin": "tts-voices-set5exam-kokoro.json",
+      "origin": "tts-voices-set5s1-11labs.json",
       "segments": [
         {
           "speaker": "Narrator",
           "text": "If someone wants to book a private event, they should contact our event team in advance.",
-          "say_voice": "kokoro-82m-v1.0-f32|mp3_44100_vbr_q4|af_nicole|rate=1.25"
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9|speed=0.8"
         }
       ]
     },

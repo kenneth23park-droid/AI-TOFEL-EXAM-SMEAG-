@@ -91,6 +91,20 @@ def script(root):
     assert changed == 5
     return changed
 
+def answers(root):
+    # Listening Module 2 Q3: the teacher confirmed C ("I was busy with meetings
+    # yesterday."); the key said D. Locate the module by its heading, not by index.
+    paras = [p for p in root.iter(W + 'p') if text(p).strip()]
+    listening = next(i for i, p in enumerate(paras) if text(p).strip() == 'LISTENING')
+    module2 = next(i for i in range(listening, len(paras)) if text(paras[i]).strip() == 'Module 2')
+    q3 = paras[module2 + 3]
+    if text(q3).strip() == 'C':
+        return 0
+    assert text(q3).strip() == 'D', text(q3)
+    replace(q3, 'C')
+    return 1
+
 if __name__ == '__main__':
     edit('NEW TOEFL SET 5 1.docx', questions)
     edit('Set 5 Script 1.docx', script)
+    edit('Set 5 ANSWER KEY 1.docx', answers)
