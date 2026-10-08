@@ -777,9 +777,8 @@ window.SMEAG_SET5 = {
                   "id": "L1-20",
                   "kind": "mcq",
                   "no": 20,
-                  "prompt": "Listen to the question and select the best response.",
+                  "prompt": "What can be inferred about ecosystems?",
                   "choices": [
-                    "What can be inferred about ecosystems?",
                     "Changes to one species can have widespread effects on others",
                     "Most ecosystems have only one food chain",
                     "Removing a species improves ecosystem balance",
@@ -878,9 +877,8 @@ window.SMEAG_SET5 = {
                   "id": "L2-5",
                   "kind": "mcq",
                   "no": 5,
-                  "prompt": "Listen to the question and select the best response.",
+                  "prompt": "What does Professor Adams ask the man to do?",
                   "choices": [
-                    "What does Professor Adams ask the man to do?",
                     "Revise his hypothesis",
                     "Prepare a summary of his findings",
                     "Submit the complete draft to her",

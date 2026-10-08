@@ -664,7 +664,12 @@
         var allListedChoices = !hadPendingStem && lines.length >= 3 && lines.length <= 5
           && listed.length === lines.length && listed.every(function (x) { return x; })
           && !lines.some(function (line) { return numbered(line) || lettered(line); });
-        var got = allListedChoices
+        /* SET 5 puts a listed, unnumbered question above four listed choices.
+           Five listed lines with a question first = stem + four choices, not five choices. */
+        var listedStem = allListedChoices && lines.length === 5 && /[?？]$/.test(lines[0]);
+        var got = listedStem
+          ? [{ no: null, prompt: lines[0], choices: lines.slice(1) }]
+          : allListedChoices
           ? [{ no: null, prompt: '', choices: lines.slice() }]
           : itemsFromGroup(lines);
         if (allListedChoices) trailingNumberMarkers = true;
