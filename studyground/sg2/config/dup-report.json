@@ -76,6 +76,15 @@
       "isCandidate": false
     },
     {
+      "code": "SET6",
+      "title": "SET 6",
+      "file": "sg2/assets/set6.js",
+      "items": 60,
+      "texts": 18,
+      "scripts": 0,
+      "isCandidate": false
+    },
+    {
       "code": "SET9",
       "title": "NEW TOEFL SET 9",
       "file": "sg2/assets/set9.js",
@@ -85,9 +94,9 @@
       "isCandidate": false
     }
   ],
-  "unitCount": 822,
-  "frameOnlyUnits": 16,
-  "candidatePairs": 1512,
+  "unitCount": 898,
+  "frameOnlyUnits": 18,
+  "candidatePairs": 1713,
   "thresholds": {
     "shingleK": 4,
     "jaccardHigh": 0.55,
@@ -147,13 +156,13 @@
   },
   "coverage": {
     "note": "팩에 텍스트로 존재하는 것만 비교한다. mp3 만 있고 대본이 없는 오디오는 비교 대상이 아니다.",
-    "scriptsLoaded": "SET1:0 SET10:0 SET11:0 SET12:0 SET2:0 SET3:0 SET4:0 SET5:0 SET9:36",
+    "scriptsLoaded": "SET1:0 SET10:0 SET11:0 SET12:0 SET2:0 SET3:0 SET4:0 SET5:0 SET6:0 SET9:36",
     "frameNote": "유형이 강제하는 정형문(같은 줄이 서로 다른 문항 군집 3곳 이상)은 비교에서 제외했다. 제외된 줄은 각 단위의 framedOut 에 df 와 함께 남는다.",
-    "frameOnlyUnits": "16개 단위는 내용이 전부 정형문이라 비교 대상에서 빠졌다."
+    "frameOnlyUnits": "18개 단위는 내용이 전부 정형문이라 비교 대상에서 빠졌다."
   },
   "counts": {
-    "high": 4,
-    "watch": 58,
+    "high": 5,
+    "watch": 59,
     "info": 7,
     "allowlisted": 7
   },
@@ -412,6 +421,90 @@
           ]
         },
         "href": "admin-questions.html?set=set5&q=L1-9"
+      }
+    },
+    {
+      "key": "SET1::L1-8 | SET6::L1-9",
+      "severity": "high",
+      "allowlisted": false,
+      "allowReason": null,
+      "scope": "cross",
+      "role": "item",
+      "score": 0.6923,
+      "metrics": {
+        "jaccard": 0.5143,
+        "containment": 0.6923,
+        "sharedShingles": 18,
+        "longestRun": 10,
+        "sharedChoices": 3,
+        "exact": false,
+        "sameStem": true
+      },
+      "reasons": [
+        "4-gram 자카드 0.51 — 소재·구성이 상당히 겹친다.",
+        "짧은 쪽의 69% 가 긴 쪽과 겹친다.",
+        "선택지 3개가 그대로 일치 (4개 중) — 문항 재활용 서명.",
+        "발문(stem)이 글자 그대로 같다 — 정형 발문일 수도, 재활용일 수도 있다."
+      ],
+      "a": {
+        "uid": "SET1::L1-8",
+        "role": "item",
+        "qid": "L1-8",
+        "no": 8,
+        "qkind": "mcq",
+        "policy": "mcq",
+        "title": "L1-8 · What does the man say about his assignment?",
+        "set": "SET1",
+        "setId": "set1",
+        "section": "listening",
+        "sectionLabel": "Listening",
+        "module": "L1",
+        "moduleLabel": "Listening Module 1",
+        "blockKind": "audio-set",
+        "blockHeading": "Question 8",
+        "text": "What does the man say about his assignment?\nIt involves more work than planned.\nIt requires special training.\nIt conflicts with another commitment.\nIt was changed from what he expected.",
+        "choices": [
+          "It involves more work than planned.",
+          "It requires special training.",
+          "It conflicts with another commitment.",
+          "It was changed from what he expected."
+        ],
+        "answerText": "D. It was changed from what he expected.",
+        "payload": "What does the man say about his assignment?\nIt involves more work than planned.\nIt requires special training.\nIt conflicts with another commitment.\nIt was changed from what he expected.",
+        "framedOut": [],
+        "tokenCount": 30,
+        "meta": null,
+        "href": "admin-questions.html?set=set1&q=L1-8"
+      },
+      "b": {
+        "uid": "SET6::L1-9",
+        "role": "item",
+        "qid": "L1-9",
+        "no": 9,
+        "qkind": "mcq",
+        "policy": "mcq",
+        "title": "L1-9 · What does the man say about his assignment?",
+        "set": "SET6",
+        "setId": "set6",
+        "section": "listening",
+        "sectionLabel": "Listening",
+        "module": "L1",
+        "moduleLabel": "Listening Module 1",
+        "blockKind": "audio-set",
+        "blockHeading": "Questions 9-10",
+        "text": "What does the man say about his assignment?\nIt changed from what he expected.\nIt requires special training.\nIt conflicts with another commitment.\nIt involves more work than planned.",
+        "choices": [
+          "It changed from what he expected.",
+          "It requires special training.",
+          "It conflicts with another commitment.",
+          "It involves more work than planned."
+        ],
+        "answerText": "A. It changed from what he expected.",
+        "payload": "What does the man say about his assignment?\nIt changed from what he expected.\nIt requires special training.\nIt conflicts with another commitment.\nIt involves more work than planned.",
+        "framedOut": [],
+        "tokenCount": 29,
+        "meta": null,
+        "href": "admin-questions.html?set=set6&q=L1-9"
       }
     },
     {
@@ -3264,6 +3357,87 @@
       }
     },
     {
+      "key": "SET5::R2-11 | SET6::R1-16",
+      "severity": "watch",
+      "allowlisted": false,
+      "allowReason": null,
+      "scope": "cross",
+      "role": "item",
+      "score": 0.4167,
+      "metrics": {
+        "jaccard": 0.2273,
+        "containment": 0.4167,
+        "sharedShingles": 5,
+        "longestRun": 8,
+        "sharedChoices": 0,
+        "exact": false,
+        "sameStem": false
+      },
+      "reasons": [
+        "짧은 쪽의 42% 가 긴 쪽과 겹친다."
+      ],
+      "a": {
+        "uid": "SET5::R2-11",
+        "role": "item",
+        "qid": "R2-11",
+        "no": 11,
+        "qkind": "mcq",
+        "policy": "mcq",
+        "title": "R2-11 · The word “accumulation” in paragraph 3 is closest in meaning to",
+        "set": "SET5",
+        "setId": "set5",
+        "section": "reading",
+        "sectionLabel": "Reading",
+        "module": "R2",
+        "moduleLabel": "Reading Module 2",
+        "blockKind": "passage",
+        "blockHeading": "Questions 11-15",
+        "text": "The word “accumulation” in paragraph 3 is closest in meaning to\nremoval\ndissipation\nequal distribution\ngradual build-up",
+        "choices": [
+          "removal",
+          "dissipation",
+          "equal distribution",
+          "gradual build-up"
+        ],
+        "answerText": "D. gradual build-up",
+        "payload": "The word “accumulation” in paragraph 3 is closest in meaning to\nremoval\ndissipation\nequal distribution\ngradual build-up",
+        "framedOut": [],
+        "tokenCount": 18,
+        "meta": null,
+        "href": "admin-questions.html?set=set5&q=R2-11"
+      },
+      "b": {
+        "uid": "SET6::R1-16",
+        "role": "item",
+        "qid": "R1-16",
+        "no": 16,
+        "qkind": "mcq",
+        "policy": "mcq",
+        "title": "R1-16 · The word “prolonged” in paragraph 3 is closest in meaning to:",
+        "set": "SET6",
+        "setId": "set6",
+        "section": "reading",
+        "sectionLabel": "Reading",
+        "module": "R1",
+        "moduleLabel": "Reading Module 1",
+        "blockKind": "passage",
+        "blockHeading": "Questions 16-20",
+        "text": "The word “prolonged” in paragraph 3 is closest in meaning to:\nextended\nintense\nrepeated\nbrief",
+        "choices": [
+          "extended",
+          "intense",
+          "repeated",
+          "brief"
+        ],
+        "answerText": "A. extended",
+        "payload": "The word “prolonged” in paragraph 3 is closest in meaning to:\nextended\nintense\nrepeated\nbrief",
+        "framedOut": [],
+        "tokenCount": 15,
+        "meta": null,
+        "href": "admin-questions.html?set=set6&q=R1-16"
+      }
+    },
+    {
       "key": "SET12::R1-30 | SET12::R2-11",
       "severity": "watch",
       "allowlisted": false,
@@ -3746,12 +3920,88 @@
         "framedOut": [
           {
             "line": "Listen to the question and select the best response.",
-            "df": 112
+            "df": 127
           }
         ],
         "tokenCount": 24,
         "meta": null,
         "href": "admin-questions.html?set=set12&q=L1-6"
+      }
+    },
+    {
+      "key": "SET4::R1-18 | SET6::R1-20",
+      "severity": "watch",
+      "allowlisted": false,
+      "allowReason": null,
+      "scope": "cross",
+      "role": "item",
+      "score": 0.2632,
+      "metrics": {
+        "jaccard": 0.0463,
+        "containment": 0.2632,
+        "sharedShingles": 5,
+        "longestRun": 8,
+        "sharedChoices": 0,
+        "exact": false,
+        "sameStem": false
+      },
+      "reasons": [
+        "짧은 쪽의 26% 가 긴 쪽과 겹친다."
+      ],
+      "a": {
+        "uid": "SET4::R1-18",
+        "role": "item",
+        "qid": "R1-18",
+        "no": 18,
+        "qkind": "mcq",
+        "policy": "mcq",
+        "title": "R1-18 · Click on the sentence in paragraph 2 that establishes the mechanism by which ceremonial exchanges generated lasting reciprocal debts.",
+        "set": "SET4",
+        "setId": "set4",
+        "section": "reading",
+        "sectionLabel": "Reading",
+        "module": "R1",
+        "moduleLabel": "Reading Module 1",
+        "blockKind": "passage",
+        "blockHeading": "Questions 16-20",
+        "text": "Click on the sentence in paragraph 2 that establishes the mechanism by which ceremonial exchanges generated lasting reciprocal debts.\nThe potlatch ceremonies of Pacific Northwest indigenous peoples provide a striking illustration of gift economy principles in action.\nDuring these elaborate gatherings, hosts distributed blankets, copper goods, and food to guest in displays that demonstrated wealth through generosity rather than accumulation.\nRecipients incurred social debts that would repay at future ceremonies, creating ongoing cycles of obligation.\nThese cycles reinforced alliances between families and villages across generations and maintained social hierarchies through the strategic timing and scale of gifts.",
+        "choices": [
+          "The potlatch ceremonies of Pacific Northwest indigenous peoples provide a striking illustration of gift economy principles in action.",
+          "During these elaborate gatherings, hosts distributed blankets, copper goods, and food to guest in displays that demonstrated wealth through generosity rather than accumulation.",
+          "Recipients incurred social debts that would repay at future ceremonies, creating ongoing cycles of obligation.",
+          "These cycles reinforced alliances between families and villages across generations and maintained social hierarchies through the strategic timing and scale of gifts."
+        ],
+        "answerText": "C. Recipients incurred social debts that would repay at future ceremonies, creating ongoing cycles of obligation.",
+        "payload": "Click on the sentence in paragraph 2 that establishes the mechanism by which ceremonial exchanges generated lasting reciprocal debts.\nThe potlatch ceremonies of Pacific Northwest indigenous peoples provide a striking illustration of gift economy principles in action.\nDuring these elaborate gatherings, hosts distributed blankets, copper goods, and food to guest in displays that demonstrated wealth through generosity rather than accumulation.\nRecipients incurred social debts that would repay at future ceremonies, creating ongoing cycles of obligation.\nThese cycles reinforced alliances between families and villages across generations and maintained social hierarchies through the strategic timing and scale of gifts.",
+        "framedOut": [],
+        "tokenCount": 97,
+        "meta": null,
+        "href": "admin-questions.html?set=set4&q=R1-18"
+      },
+      "b": {
+        "uid": "SET6::R1-20",
+        "role": "item",
+        "qid": "R1-20",
+        "no": 20,
+        "qkind": "mcq",
+        "policy": "mcq",
+        "title": "R1-20 · Click on the sentence in paragraph 2 that specifies the benefits the algae obtain from their coral hosts in the symbiotic exchange.",
+        "set": "SET6",
+        "setId": "set6",
+        "section": "reading",
+        "sectionLabel": "Reading",
+        "module": "R1",
+        "moduleLabel": "Reading Module 1",
+        "blockKind": "passage",
+        "blockHeading": "Questions 16-20",
+        "text": "Click on the sentence in paragraph 2 that specifies the benefits the algae obtain from their coral hosts in the symbiotic exchange.",
+        "choices": [],
+        "answerText": "D. undefined",
+        "payload": "Click on the sentence in paragraph 2 that specifies the benefits the algae obtain from their coral hosts in the symbiotic exchange.",
+        "framedOut": [],
+        "tokenCount": 22,
+        "meta": null,
+        "href": "admin-questions.html?set=set6&q=R1-20"
       }
     },
     {
@@ -4076,87 +4326,6 @@
         "tokenCount": 15,
         "meta": null,
         "href": "admin-questions.html?set=set5&q=R1-16"
-      }
-    },
-    {
-      "key": "SET1::L1-14 | SET2::L1-22",
-      "severity": "watch",
-      "allowlisted": false,
-      "allowReason": null,
-      "scope": "cross",
-      "role": "item",
-      "score": 0.2333,
-      "metrics": {
-        "jaccard": 0.1273,
-        "containment": 0.2333,
-        "sharedShingles": 7,
-        "longestRun": 9,
-        "sharedChoices": 0,
-        "exact": false,
-        "sameStem": true
-      },
-      "reasons": [
-        "발문(stem)이 글자 그대로 같다 — 정형 발문일 수도, 재활용일 수도 있다."
-      ],
-      "a": {
-        "uid": "SET1::L1-14",
-        "role": "item",
-        "qid": "L1-14",
-        "no": 14,
-        "qkind": "mcq",
-        "policy": "mcq",
-        "title": "L1-14 · What should a student submit when signing up?",
-        "set": "SET1",
-        "setId": "set1",
-        "section": "listening",
-        "sectionLabel": "Listening",
-        "module": "L1",
-        "moduleLabel": "Listening Module 1",
-        "blockKind": "audio-set",
-        "blockHeading": "Questions 13-14",
-        "text": "What should a student submit when signing up?\nA completed research paper and presentation slides\nA video recording of their presentation\nThree recommendation letters from professors\nA project abstract and faculty advisor’s signature",
-        "choices": [
-          "A completed research paper and presentation slides",
-          "A video recording of their presentation",
-          "Three recommendation letters from professors",
-          "A project abstract and faculty advisor’s signature"
-        ],
-        "answerText": "D. A project abstract and faculty advisor’s signature",
-        "payload": "What should a student submit when signing up?\nA completed research paper and presentation slides\nA video recording of their presentation\nThree recommendation letters from professors\nA project abstract and faculty advisor’s signature",
-        "framedOut": [],
-        "tokenCount": 33,
-        "meta": null,
-        "href": "admin-questions.html?set=set1&q=L1-14"
-      },
-      "b": {
-        "uid": "SET2::L1-22",
-        "role": "item",
-        "qid": "L1-22",
-        "no": 22,
-        "qkind": "mcq",
-        "policy": "mcq",
-        "title": "L1-22 · What should a student submit when signing up?",
-        "set": "SET2",
-        "setId": "set2",
-        "section": "listening",
-        "sectionLabel": "Listening",
-        "module": "L1",
-        "moduleLabel": "Listening Module 1",
-        "blockKind": "audio-set",
-        "blockHeading": "Questions 21-22",
-        "text": "What should a student submit when signing up?\nA transcript and proof of enrollment\nA video recording of a practice lesson\nA statement of teaching goals and a reference letter\nDocumentation of previous teaching experience",
-        "choices": [
-          "A transcript and proof of enrollment",
-          "A video recording of a practice lesson",
-          "A statement of teaching goals and a reference letter",
-          "Documentation of previous teaching experience"
-        ],
-        "answerText": "C. A statement of teaching goals and a reference letter",
-        "payload": "What should a student submit when signing up?\nA transcript and proof of enrollment\nA video recording of a practice lesson\nA statement of teaching goals and a reference letter\nDocumentation of previous teaching experience",
-        "framedOut": [],
-        "tokenCount": 35,
-        "meta": null,
-        "href": "admin-questions.html?set=set2&q=L1-22"
       }
     },
     {

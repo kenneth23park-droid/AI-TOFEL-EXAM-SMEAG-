@@ -441,7 +441,10 @@
 //       돌아가 있었다. 그 파일들을 커밋 직전 판으로 되돌린다 — 전부 SHELL_ASSETS 라 판올림.
 // v114: Register SET 5 pack and offline manifest in the shell cache.
 // v116: SET 5 끼워 넣기 지문의 평문 A~D 를 클릭 배지로 세운다(exam-render-reading.js) — 셸이라 판올림.
-const VERSION = 'sg-v119';
+// v121: SET 6 팩·선택기·오프라인 목록을 등록한다. 원본에 없는 음성도
+//       offline.set6.json 의 missing 목록에 남겨, 기기가 무음인데 준비 완료라고 하지 않는다.
+// v122: SET 6 음성 37개를 생성해 offline.set6.json 에 실제 파일·해시를 등록한다.
+const VERSION = 'sg-v122';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -491,7 +494,7 @@ const SHELL_ASSETS = [
   // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.
   'assets/offline-prep.js', 'config/offline.sets.json',
   'config/offline.set9.json', 'config/offline.set10.json', 'config/offline.set11.json',
-  'config/offline.set12.json', 'config/offline.set2.json', 'config/offline.set3.json', 'config/offline.set4.json', 'config/offline.set5.json',
+  'config/offline.set12.json', 'config/offline.set2.json', 'config/offline.set3.json', 'config/offline.set4.json', 'config/offline.set5.json', 'config/offline.set6.json',
 
   // 전체화면 자동 진입 · 화면 맞춤 — 오프라인 시험장에서도 첫 화면부터 적용돼야 한다.
   'assets/sg-fullscreen.js',
@@ -503,7 +506,7 @@ const SHELL_ASSETS = [
   // 검사기는 오프라인이면 조용히 물러나므로 프리캐시해도 시험장에서 걸리지 않는다.
   'assets/build-version.js', 'assets/sg-update-check.js',
 
-  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js', 'assets/set11.js', 'assets/set12.js', 'assets/set2.js', 'assets/set3.js', 'assets/set4.js', 'assets/set5.js',
+  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js', 'assets/set11.js', 'assets/set12.js', 'assets/set2.js', 'assets/set3.js', 'assets/set4.js', 'assets/set5.js', 'assets/set6.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',
   'manifest.webmanifest',
 

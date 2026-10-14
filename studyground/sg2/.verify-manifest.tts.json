@@ -3510,6 +3510,2235 @@
       "origin": "tts-voices-set2exam-11labs.json"
     },
     {
+      "id": "set3-l1-q01",
+      "text": "Can you attend the conference?",
+      "out": "media/audio/set3/l1-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Can you attend the conference?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q02",
+      "text": "When’s the best time to call the clinic?",
+      "out": "media/audio/set3/l1-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "When’s the best time to call the clinic?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q03",
+      "text": "We haven’t finalized the venue yet, have we?",
+      "out": "media/audio/set3/l1-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "We haven’t finalized the venue yet, have we?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q04",
+      "text": "The insurance documents need to be notarized.",
+      "out": "media/audio/set3/l1-q04.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "The insurance documents need to be notarized."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q05",
+      "text": "Email or phone call?",
+      "out": "media/audio/set3/l1-q05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|Xb7hH8MSUJpSbSDYk0k2",
+          "text": "Email or phone call?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q06",
+      "text": "Is the network down again?",
+      "out": "media/audio/set3/l1-q06.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "Is the network down again?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q07",
+      "text": "How long has the position been vacant?",
+      "out": "media/audio/set3/l1-q07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "How long has the position been vacant?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q08",
+      "text": "Didn’t the venue include parking?",
+      "out": "media/audio/set3/l1-q08.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Didn’t the venue include parking?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q09-10",
+      "text": "Are you still planning to join the marathon training group that meets on campus? Actually, I signed up yesterday. The first session is this Saturday morning at 7 a.m. by the track. That's early. How long are the training runs? They start with five miles and gradually build up. The coach said we'll do strength training on Wednesdays too. Sounds intense. I might come watch on Saturday to see if it's something I'd want to try. You should! They're accepting new members through the end of the month.",
+      "out": "media/audio/set3/l1-q09-10.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Are you still planning to join the marathon training group that meets on campus?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Actually, I signed up yesterday. The first session is this Saturday morning at 7 a.m. by the track."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "That's early. How long are the training runs?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "They start with five miles and gradually build up. The coach said we'll do strength training on Wednesdays too."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Sounds intense. I might come watch on Saturday to see if it's something I'd want to try."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "You should! They're accepting new members through the end of the month."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q11-12",
+      "text": "I left my backpack in the lecture hall this morning, and now it's gone. My biology homework was in there. Did you check the lost and found in the student center? That's where campus security takes items from classrooms. Not yet. I came straight to the library to see if anyone turned it in here. The student center is probably your best bet. I lost my calculator last semester, and they had it within an hour. Thanks. I'll head over there right now. The homework is due at 3 p.m.",
+      "out": "media/audio/set3/l1-q11-12.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "I left my backpack in the lecture hall this morning, and now it's gone. My biology homework was in there."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Did you check the lost and found in the student center? That's where campus security takes items from classrooms."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Not yet. I came straight to the library to see if anyone turned it in here."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "The student center is probably your best bet. I lost my calculator last semester, and they had it within an hour."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Thanks. I'll head over there right now. The homework is due at 3 p.m."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q13-14",
+      "text": "Good afternoon, everyone. The Gardening Club will hold its annual plant sale next Saturday from 9 AM to 3 PM outside the Biology Building. We'll be selling flowers, vegetables, and herbs grown in our campus greenhouse. All proceeds go toward expanding our community garden. Hope to see you there.",
+      "out": "media/audio/set3/l1-q13-14.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "Good afternoon, everyone. The Gardening Club will hold its annual plant sale next Saturday from 9 AM to 3 PM outside the Biology Building. We'll be selling flowers, vegetables, and herbs grown in our campus greenhouse. All proceeds go toward expanding our community garden. Hope to see you there."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q15-16",
+      "text": "Attention all students looking to improve their presentation skills. The Communication Department is offering a new Public Speaking Certificate Program beginning next month. The eight-week program includes modules on speech structure, audience engagement, and managing stage anxiety. You'll deliver four graded presentations and receive detailed feedback from the communication faculty. Participants who complete all requirements will earn a certificate that can be added to their resume. Registration is at the Communication Arts Building, Room 112. Please bring a completed application form and a short paragraph describing why you want to improve your public speaking abilities.",
+      "out": "media/audio/set3/l1-q15-16.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Attention all students looking to improve their presentation skills. The Communication Department is offering a new Public Speaking Certificate Program beginning next month. The eight-week program includes modules on speech structure, audience engagement, and managing stage anxiety. You'll deliver four graded presentations and receive detailed feedback from the communication faculty. Participants who complete all requirements will earn a certificate that can be added to their resume. Registration is at the Communication Arts Building, Room 112. Please bring a completed application form and a short paragraph describing why you want to improve your public speaking abilities."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l1-q17-20",
+      "text": "So today, let's talk about a really important method archaeologists use called stratigraphy. Basically, stratigraphy is about studying layers of soil and materials at dig sites to figure out when things happened. I mean, the idea is pretty simple—older stuff gets buried deeper while newer things stay closer to the surface. Think of it like a layer cake, where each layer represents a different time period. Now, here's how it works in practice. When archaeologists excavate a site, they carefully remove one layer at a time. Let's say they find pottery fragments in one layer and stone tools in the layer beneath it. That tells them the stone tools are older. Another example would be finding Roman coins above Greek pottery—the Greek layer came first, then Romans settled there later. But there are some real challenges with this method. Sometimes natural events mess things up. Earthquakes can shift layers around, or tree roots can push newer objects down into older layers. Flooding can also mix everything together, making it hard to tell what's actually from which period. Despite these problems, stratigraphy remains one of our most reliable dating methods. It helps archaeologists build a timeline of human activity at a site and understand how cultures changed over time.",
+      "out": "media/audio/set3/l1-q17-20.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "So today, let's talk about a really important method archaeologists use called stratigraphy. Basically, stratigraphy is about studying layers of soil and materials at dig sites to figure out when things happened. I mean, the idea is pretty simple—older stuff gets buried deeper while newer things stay closer to the surface. Think of it like a layer cake, where each layer represents a different time period. Now, here's how it works in practice. When archaeologists excavate a site, they carefully remove one layer at a time. Let's say they find pottery fragments in one layer and stone tools in the layer beneath it. That tells them the stone tools are older. Another example would be finding Roman coins above Greek pottery—the Greek layer came first, then Romans settled there later. But there are some real challenges with this method. Sometimes natural events mess things up. Earthquakes can shift layers around, or tree roots can push newer objects down into older layers. Flooding can also mix everything together, making it hard to tell what's actually from which period. Despite these problems, stratigraphy remains one of our most reliable dating methods. It helps archaeologists build a timeline of human activity at a site and understand how cultures changed over time."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l2-q01",
+      "text": "The maintenance crew will be here at eight.",
+      "out": "media/audio/set3/l2-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "The maintenance crew will be here at eight."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l2-q02",
+      "text": "What did you think of the keynote speaker?",
+      "out": "media/audio/set3/l2-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "What did you think of the keynote speaker?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l2-q03",
+      "text": "Didn’t you say you’d call the landlord?",
+      "out": "media/audio/set3/l2-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Didn’t you say you’d call the landlord?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l2-q04-05",
+      "text": "How's the editing coming along for the podcast series we're producing? I finished episodes one through three last week. I'm working on episode four now, and it should be done by Friday. Great. That puts us right on schedule for the launch date. Have you added the intro music yet? Yes, to the first three. I still need to get the interview audio from Dr. Martinez for episode five. I'll follow up with her today. She mentioned she'd have it ready this week.",
+      "out": "media/audio/set3/l2-q04-05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "How's the editing coming along for the podcast series we're producing?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "I finished episodes one through three last week. I'm working on episode four now, and it should be done by Friday."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Great. That puts us right on schedule for the launch date. Have you added the intro music yet?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Yes, to the first three. I still need to get the interview audio from Dr. Martinez for episode five."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "I'll follow up with her today. She mentioned she'd have it ready this week."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l2-q06-07",
+      "text": "Have you heard about the new bike share program the university is starting next month? No, I haven't. How does it work? You download an app, and then you can unlock bikes at stations all over campus. The first thirty minutes are free for students. That's convenient. I've been thinking about getting a bike, but I don't have space to store one in my apartment. Exactly. Plus, you can pick one up near the library and drop it off by the gym or anywhere else. They're installing twenty stations.",
+      "out": "media/audio/set3/l2-q06-07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Have you heard about the new bike share program the university is starting next month?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "No, I haven't. How does it work?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "You download an app, and then you can unlock bikes at stations all over campus. The first thirty minutes are free for students."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "That's convenient. I've been thinking about getting a bike, but I don't have space to store one in my apartment."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Exactly. Plus, you can pick one up near the library and drop it off by the gym or anywhere else. They're installing twenty stations."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l2-q08-11",
+      "text": "Alright, so you've probably heard the term \"market equilibrium\" thrown around, but what does it actually mean? Well, in economics, equilibrium is basically the point where supply and demand meet. It's where the amount of something people want to buy exactly matches what sellers want to sell at a particular price. When this happens, the market is stable—no shortages, no surpluses. Let me give you a concrete example. Imagine coffee shops in your neighborhood. If coffee is priced at five dollars, maybe only fifty people buy it daily, but a hundred people want to sell coffee at that price. That creates a surplus. However, if the price drops to three dollars, suddenly a hundred people want coffee, and exactly a hundred vendors are willing to sell at that price. That's equilibrium. Now, here's the thing—markets don't always stay in equilibrium. Lots of factors can disrupt it. Maybe a frost destroys coffee crops, reducing supply. Or perhaps a new study comes out saying coffee is bad for you, which decreases demand. When these disruptions happen, prices have to adjust to find a new equilibrium point. Understanding equilibrium helps businesses set prices and helps governments make policy decisions. It's one of the foundational concepts in economics because it explains how markets naturally regulate themselves. Next, we'll look at what happens when governments interfere with market equilibrium through price controls.",
+      "out": "media/audio/set3/l2-q08-11.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Alright, so you've probably heard the term \"market equilibrium\" thrown around, but what does it actually mean? Well, in economics, equilibrium is basically the point where supply and demand meet. It's where the amount of something people want to buy exactly matches what sellers want to sell at a particular price. When this happens, the market is stable—no shortages, no surpluses. Let me give you a concrete example. Imagine coffee shops in your neighborhood. If coffee is priced at five dollars, maybe only fifty people buy it daily, but a hundred people want to sell coffee at that price. That creates a surplus. However, if the price drops to three dollars, suddenly a hundred people want coffee, and exactly a hundred vendors are willing to sell at that price. That's equilibrium. Now, here's the thing—markets don't always stay in equilibrium. Lots of factors can disrupt it. Maybe a frost destroys coffee crops, reducing supply. Or perhaps a new study comes out saying coffee is bad for you, which decreases demand. When these disruptions happen, prices have to adjust to find a new equilibrium point. Understanding equilibrium helps businesses set prices and helps governments make policy decisions. It's one of the foundational concepts in economics because it explains how markets naturally regulate themselves. Next, we'll look at what happens when governments interfere with market equilibrium through price controls."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-l2-q12-15",
+      "text": "OK, so today we're going to explore something called code-switching. This is when bilingual people switch between two or more languages in a single conversation. It's not random—there are actually patterns to when and why people do it. There are different types of code-switching. One type is called intersentential switching, where someone completes a whole sentence in one language, then switches to another language for the next sentence. For instance, a Spanish-English bilingual might say, \"I'm going to the store. Necesitas algo?\" That's switching between sentences. Another type is intrasentential switching, which happens within a single sentence. The same person might say, \"I'm going to the tienda,\" mixing English and Spanish in one sentence. This type is actually more complex because you need really strong skills in both languages to do it smoothly. Now, why do people code-switch? Sometimes it's because a word or concept exists in one language but not the other. Technical terms are a good example. Or maybe they're emphasizing something—switching languages can add emotional weight. Sometimes people code-switch to show group identity, like when immigrants speak one language at home and another at work. The ability to code-switch actually shows sophisticated language control. It's not about being confused or not knowing languages well enough—it's a skill that requires understanding both languages deeply.",
+      "out": "media/audio/set3/l2-q12-15.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "OK, so today we're going to explore something called code-switching. This is when bilingual people switch between two or more languages in a single conversation. It's not random—there are actually patterns to when and why people do it. There are different types of code-switching. One type is called intersentential switching, where someone completes a whole sentence in one language, then switches to another language for the next sentence. For instance, a Spanish-English bilingual might say, \"I'm going to the store. Necesitas algo?\" That's switching between sentences. Another type is intrasentential switching, which happens within a single sentence. The same person might say, \"I'm going to the tienda,\" mixing English and Spanish in one sentence. This type is actually more complex because you need really strong skills in both languages to do it smoothly. Now, why do people code-switch? Sometimes it's because a word or concept exists in one language but not the other. Technical terms are a good example. Or maybe they're emphasizing something—switching languages can add emotional weight. Sometimes people code-switch to show group identity, like when immigrants speak one language at home and another at work. The ability to code-switch actually shows sophisticated language control. It's not about being confused or not knowing languages well enough—it's a skill that requires understanding both languages deeply."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s1-instructions",
+      "text": "You are being trained to help at the visitor center, listen to your trainer, and repeat what he says. Repeat only once.",
+      "out": "media/audio/set3/s1-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "You are being trained to help at the visitor center, listen to your trainer, and repeat what he says. Repeat only once."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s1-q1",
+      "text": "This is our visitor center.",
+      "out": "media/audio/set3/s1-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "This is our visitor center."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s1-q2",
+      "text": "The rose garden is located next to the main greenhouse.",
+      "out": "media/audio/set3/s1-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "The rose garden is located next to the main greenhouse."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s1-q3",
+      "text": "Wheelchairs and strollers are available for rent at this desk.",
+      "out": "media/audio/set3/s1-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Wheelchairs and strollers are available for rent at this desk."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s1-q4",
+      "text": "Guided walking tours begin every hour at the information booth.",
+      "out": "media/audio/set3/s1-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Guided walking tours begin every hour at the information booth."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s1-q5",
+      "text": "You may want to pick up a map before exploring the grounds.",
+      "out": "media/audio/set3/s1-q5.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "You may want to pick up a map before exploring the grounds."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s1-q6",
+      "text": "Unfortunately, the butterfly pavilion is currently closed for seasonal maintenance.",
+      "out": "media/audio/set3/s1-q6.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Unfortunately, the butterfly pavilion is currently closed for seasonal maintenance."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s1-q7",
+      "text": "If visitors have questions about specific plants, our staff can provide information at any garden station.",
+      "out": "media/audio/set3/s1-q7.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "If visitors have questions about specific plants, our staff can provide information at any garden station."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s2-instructions",
+      "text": "You have volunteered for a research study about communication technology. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+      "out": "media/audio/set3/s2-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "You have volunteered for a research study about communication technology. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s2-q1",
+      "text": "Thank you for joining today. I’d like to ask you some questions about communication technology. Have you or your friends ever tried to reduce the time you spend on your phone or social media? For example, have you set time limits, deleted apps, or taken breaks from using technology? Why or why not?",
+      "out": "media/audio/set3/s2-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Thank you for joining today. I’d like to ask you some questions about communication technology. Have you or your friends ever tried to reduce the time you spend on your phone or social media? For example, have you set time limits, deleted apps, or taken breaks from using technology? Why or why not?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s2-q2",
+      "text": "I see. When you want to catch up with friends or family who live far away, do you prefer video calls or text messages? Why?",
+      "out": "media/audio/set3/s2-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "I see. When you want to catch up with friends or family who live far away, do you prefer video calls or text messages? Why?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s2-q3",
+      "text": "Alright. Some researchers say that even though technology helps people stay connected, many people feel lonelier than before. Do you agree with this view?",
+      "out": "media/audio/set3/s2-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Alright. Some researchers say that even though technology helps people stay connected, many people feel lonelier than before. Do you agree with this view?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set3-s2-q4",
+      "text": "Lastly, is face-to-face communication essential for maintaining close relationships, or are there other effective ways to stay connected with people you care about?",
+      "out": "media/audio/set3/s2-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Lastly, is face-to-face communication essential for maintaining close relationships, or are there other effective ways to stay connected with people you care about?"
+        }
+      ],
+      "origin": "tts-voices-set3exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q01",
+      "text": "“What time does the bank close today?”",
+      "out": "media/audio/set4/l1-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "“What time does the bank close today?”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q02",
+      "text": "“Have you tried the new Italian place downtown?”",
+      "out": "media/audio/set4/l1-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "“Have you tried the new Italian place downtown?”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q03",
+      "text": "“Cash or card?”",
+      "out": "media/audio/set4/l1-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "“Cash or card?”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q04",
+      "text": "“The copy machine is out of toner again.”",
+      "out": "media/audio/set4/l1-q04.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "“The copy machine is out of toner again.”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q05",
+      "text": "“Isn’t your brother a dentist?”",
+      "out": "media/audio/set4/l1-q05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|Xb7hH8MSUJpSbSDYk0k2",
+          "text": "“Isn’t your brother a dentist?”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q06",
+      "text": "“Can someone give me a hand with these boxes?”",
+      "out": "media/audio/set4/l1-q06.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "“Can someone give me a hand with these boxes?”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q07",
+      "text": "“The internship application requires two references.”",
+      "out": "media/audio/set4/l1-q07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "“The internship application requires two references.”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q08",
+      "text": "“This is your stop, isn’t it?”",
+      "out": "media/audio/set4/l1-q08.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "“This is your stop, isn’t it?”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q09-10",
+      "text": "How’s the quarterly budget report coming along? Finance needs it by Thursday. I’ve finished the expense analysis and the revenue projections. I’m just waiting on the department heads to confirm their numbers. Have you followed up with them? We can’t afford any delays this time. I sent reminders yesterday. Most have responded, but I’m still waiting on operations and HR. If you don’t hear back by tomorrow afternoon, let me know. I’ll reach out to them directly.",
+      "out": "media/audio/set4/l1-q09-10.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "How’s the quarterly budget report coming along? Finance needs it by Thursday."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "I’ve finished the expense analysis and the revenue projections. I’m just waiting on the department heads to confirm their numbers."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Have you followed up with them? We can’t afford any delays this time."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "I sent reminders yesterday. Most have responded, but I’m still waiting on operations and HR."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "If you don’t hear back by tomorrow afternoon, let me know. I’ll reach out to them directly."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q11-12",
+      "text": "Did you hear? They’ve moved the staff meeting to the auditorium instead of Conference Room B. Really? When did that happen? I already set up the projector there this morning. Apparently, there’s a plumbing issue on the third floor, so all rooms up there are closed until it’s fixed. Well, I’d better head over to the auditorium and make sure the equipment’s compatible. The presentation’s in an hour. I can help you carry things over if you need.",
+      "out": "media/audio/set4/l1-q11-12.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Did you hear? They’ve moved the staff meeting to the auditorium instead of Conference Room B."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Really? When did that happen? I already set up the projector there this morning."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Apparently, there’s a plumbing issue on the third floor, so all rooms up there are closed until it’s fixed."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Well, I’d better head over to the auditorium and make sure the equipment’s compatible. The presentation’s in an hour."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "I can help you carry things over if you need."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q13-14",
+      "text": "Attention everyone. The Chess Club is hosting its annual campus championship next Saturday in the Student Union game room. Players of all skill levels are welcome, and trophies will be awarded to the top three finishers. We hope to see you compete!",
+      "out": "media/audio/set4/l1-q13-14.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Attention everyone. The Chess Club is hosting its annual campus championship next Saturday in the Student Union game room. Players of all skill levels are welcome, and trophies will be awarded to the top three finishers. We hope to see you compete!"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q15-16",
+      "text": "Good afternoon. The Career Services Center is launching a professional development workshop series starting next month. Sessions will cover resume writing, interview skills, networking strategies, and salary negotiation. Each workshop runs ninety minutes and features practicing HR professionals as guest speakers. To register, stop by Burton Hall, Room 105, with your student ID. You may sign up for individual workshops or the complete series. Early registration is recommended as seating is limited.",
+      "out": "media/audio/set4/l1-q15-16.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Good afternoon. The Career Services Center is launching a professional development workshop series starting next month. Sessions will cover resume writing, interview skills, networking strategies, and salary negotiation. Each workshop runs ninety minutes and features practicing HR professionals as guest speakers. To register, stop by Burton Hall, Room 105, with your student ID. You may sign up for individual workshops or the complete series. Early registration is recommended as seating is limited."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l1-q17-20",
+      "text": "So let’s talk about renewable energy sources. This is an increasingly important topic as we look for alternatives to fossil fuels coal, oil, and natural gas. Renewable energy comes from sources that are naturally replenished and won’t run out. Solar energy is one of the most common types. It captures sunlight using panels and converts it into electricity. The sun provides an enormous amount of energy every day, far more than humans currently use. The challenge is that solar power depends on weather conditions and doesn’t work at night without storage systems. Wind energy is another major source. Wind turbines convert the movement of air into electrical power. Wind farms can be built on land or offshore, and they produce no pollution during operation. However, wind is variable; sometimes it blows strongly, sometimes not at all. Hydroelectric power uses flowing water to generate electricity. Dams are built on rivers, and the moving water spins turbines. This is reliable and produces large amounts of power, but building dams can affect river ecosystems and displace communities. Each renewable source has advantages and limitations. That’s why many experts believe the future lies in combining multiple sources. By using solar, wind, and water power together, we can create a more reliable and sustainable system.",
+      "out": "media/audio/set4/l1-q17-20.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "So let’s talk about renewable energy sources. This is an increasingly important topic as we look for alternatives to fossil fuels coal, oil, and natural gas. Renewable energy comes from sources that are naturally replenished and won’t run out. Solar energy is one of the most common types. It captures sunlight using panels and converts it into electricity. The sun provides an enormous amount of energy every day, far more than humans currently use. The challenge is that solar power depends on weather conditions and doesn’t work at night without storage systems. Wind energy is another major source. Wind turbines convert the movement of air into electrical power. Wind farms can be built on land or offshore, and they produce no pollution during operation. However, wind is variable; sometimes it blows strongly, sometimes not at all. Hydroelectric power uses flowing water to generate electricity. Dams are built on rivers, and the moving water spins turbines. This is reliable and produces large amounts of power, but building dams can affect river ecosystems and displace communities. Each renewable source has advantages and limitations. That’s why many experts believe the future lies in combining multiple sources. By using solar, wind, and water power together, we can create a more reliable and sustainable system."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l2-q01",
+      "text": "“The training session runs until noon.”",
+      "out": "media/audio/set4/l2-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "“The training session runs until noon.”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l2-q02",
+      "text": "“I forgot my wallet at home.”",
+      "out": "media/audio/set4/l2-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "“I forgot my wallet at home.”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l2-q03",
+      "text": "“The document won’t open on my computer.”",
+      "out": "media/audio/set4/l2-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "“The document won’t open on my computer.”"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l2-q04-05",
+      "text": "How’s the grant proposal coming along? The submission deadline is tomorrow, right? It’s almost done. Dr. Patterson just sent back her edits on the methodology section. I need to incorporate those and then it’s ready. Do you need any help with the formatting? Actually, yes. The funding agency has very specific margin requirement, and I keep getting errors. Send it over when you’re done with the edits. I can format it this evening.",
+      "out": "media/audio/set4/l2-q04-05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "How’s the grant proposal coming along? The submission deadline is tomorrow, right?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "It’s almost done. Dr. Patterson just sent back her edits on the methodology section. I need to incorporate those and then it’s ready."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Do you need any help with the formatting?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Actually, yes. The funding agency has very specific margin requirement, and I keep getting errors."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Send it over when you’re done with the edits. I can format it this evening."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l2-q06-07",
+      "text": "I have a problem. I bought the textbook for Professor Miller’s class, but I just realized it’s the previous edition. Oh no. The bookstore won’t take it back once you’ve opened the shrink wrap. I know. I already checked. I’m hoping someone in class might want to trade. Actually, my roommate dropped that course last week. She might still have her new edition. Want me to ask her? That would be great. I’d really appreciate it.",
+      "out": "media/audio/set4/l2-q06-07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "I have a problem. I bought the textbook for Professor Miller’s class, but I just realized it’s the previous edition."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Oh no. The bookstore won’t take it back once you’ve opened the shrink wrap."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "I know. I already checked. I’m hoping someone in class might want to trade."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Actually, my roommate dropped that course last week. She might still have her new edition. Want me to ask her?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "That would be great. I’d really appreciate it."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l2-q08-11",
+      "text": "So today, let's look at one of the most fundamental concepts in economics: supply and demand. Understanding this will help you make sense of why prices change and how markets work. Let's start with demand. Demand refers to how much of a product consumers want to buy at different prices. Generally, when prices are low, people want to buy more. When prices are high, people buy less. This makes intuitive sense, right? If your favorite snack suddenly costs twice as much, you'd probably buy it less often. Supply is the opposite side. It refers to how much producers are willing to sell at different prices. When prices are high, producers want to make and sell more because they'll earn more profit. When prices are low, they produce less because it's not as profitable. Now, here's where it gets interesting. In a market, supply and demand interact to determine the actual price. The equilibrium price is where the amount consumers want to buy equals the amount producers want to sell. If the price is too high, there's a surplus because supply exceeds demand. If it's too low, there's a shortage because demand exceeds supply. The market naturally pushes toward equilibrium. This basic model helps explain everything from why concert tickets sell out to why gas prices fluctuate. Next, we will examine factors that cause supply and demand curves to shift.",
+      "out": "media/audio/set4/l2-q08-11.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "So today, let's look at one of the most fundamental concepts in economics: supply and demand. Understanding this will help you make sense of why prices change and how markets work. Let's start with demand. Demand refers to how much of a product consumers want to buy at different prices. Generally, when prices are low, people want to buy more. When prices are high, people buy less. This makes intuitive sense, right? If your favorite snack suddenly costs twice as much, you'd probably buy it less often. Supply is the opposite side. It refers to how much producers are willing to sell at different prices. When prices are high, producers want to make and sell more because they'll earn more profit. When prices are low, they produce less because it's not as profitable. Now, here's where it gets interesting. In a market, supply and demand interact to determine the actual price. The equilibrium price is where the amount consumers want to buy equals the amount producers want to sell. If the price is too high, there's a surplus because supply exceeds demand. If it's too low, there's a shortage because demand exceeds supply. The market naturally pushes toward equilibrium. This basic model helps explain everything from why concert tickets sell out to why gas prices fluctuate. Next, we will examine factors that cause supply and demand curves to shift."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-l2-q12-15",
+      "text": "Today we're going to explore symbiosis. Now, symbiosis basically refers to close, long-term relationships between different species. These relationships are everywhere in nature, and they come in several forms. Let me walk you through the main types. First, there's mutualism. This is when both species benefit from the relationship. A classic example is bees and flowers. Bees get nectar for food, and flowers get pollinated so they can reproduce. Both sides gain something valuable. You also see mutualism with certain bacteria in our digestive system—they help us break down food, and we provide them with a place to live. The second type is parasitism. In this relationship, one organism benefits while the other is harmed. Think of ticks or mosquitoes. They feed on blood from their host, gaining nutrition, but the host loses blood and may even get sick. Parasites don't usually kill their hosts right away, though, because that would end their food source. Finally, we have commensalism. Here, one species benefits, and the other is neither helped nor harmed. Small fish that attach to sharks are a good example. The fish get free transportation and access to food scraps, while the shark isn't really affected either way. Understanding these relationships helps us see how interconnected ecosystems really are. When one species is affected, it can have ripple effects throughout the entire community of organisms.",
+      "out": "media/audio/set4/l2-q12-15.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "Today we're going to explore symbiosis. Now, symbiosis basically refers to close, long-term relationships between different species. These relationships are everywhere in nature, and they come in several forms. Let me walk you through the main types. First, there's mutualism. This is when both species benefit from the relationship. A classic example is bees and flowers. Bees get nectar for food, and flowers get pollinated so they can reproduce. Both sides gain something valuable. You also see mutualism with certain bacteria in our digestive system—they help us break down food, and we provide them with a place to live. The second type is parasitism. In this relationship, one organism benefits while the other is harmed. Think of ticks or mosquitoes. They feed on blood from their host, gaining nutrition, but the host loses blood and may even get sick. Parasites don't usually kill their hosts right away, though, because that would end their food source. Finally, we have commensalism. Here, one species benefits, and the other is neither helped nor harmed. Small fish that attach to sharks are a good example. The fish get free transportation and access to food scraps, while the shark isn't really affected either way. Understanding these relationships helps us see how interconnected ecosystems really are. When one species is affected, it can have ripple effects throughout the entire community of organisms."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s1-instructions",
+      "text": "You are being trained to assist customers at the car rental company, listen to your trainer, and repeat what she says. Repeat only once.",
+      "out": "media/audio/set4/s1-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "You are being trained to assist customers at the car rental company, listen to your trainer, and repeat what she says. Repeat only once."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s1-q1",
+      "text": "Welcome to our car rental counter.",
+      "out": "media/audio/set4/s1-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Welcome to our car rental counter."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s1-q2",
+      "text": "The rental agreement forms are on the desk",
+      "out": "media/audio/set4/s1-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "The rental agreement forms are on the desk"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s1-q3",
+      "text": "All vehicles are parked in the lot outside.",
+      "out": "media/audio/set4/s1-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "All vehicles are parked in the lot outside."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s1-q4",
+      "text": "Please have your driver’s license and credit card ready",
+      "out": "media/audio/set4/s1-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Please have your driver’s license and credit card ready"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s1-q5",
+      "text": "Car keys are organized in this cabinet by vehicle number.",
+      "out": "media/audio/set4/s1-q5.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Car keys are organized in this cabinet by vehicle number."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s1-q6",
+      "text": "We recommend inspecting the car for any damage before you leave.",
+      "out": "media/audio/set4/s1-q6.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "We recommend inspecting the car for any damage before you leave."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s1-q7",
+      "text": "When returning the car, please park it in the designated return area outside the building.",
+      "out": "media/audio/set4/s1-q7.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "When returning the car, please park it in the designated return area outside the building."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s2-instructions",
+      "text": "You have volunteered for a research study about different types of work. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+      "out": "media/audio/set4/s2-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "You have volunteered for a research study about different types of work. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s2-q1",
+      "text": "Thank you for participating today. I’d like to ask you some questions about work. What kind of work do you or people you know do? For example, is it the kind of work done in the office, in a store, from home, or somewhere else?",
+      "out": "media/audio/set4/s2-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Thank you for participating today. I’d like to ask you some questions about work. What kind of work do you or people you know do? For example, is it the kind of work done in the office, in a store, from home, or somewhere else?"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s2-q2",
+      "text": "Thank you. A job with a high salary may require longer hours and more stress, while a job with lower pay may offer more free time and better work-life balance. Which would you prefer?",
+      "out": "media/audio/set4/s2-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Thank you. A job with a high salary may require longer hours and more stress, while a job with lower pay may offer more free time and better work-life balance. Which would you prefer?"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s2-q3",
+      "text": "Interesting. Do you think the way people think about their careers has changed compared to previous generations? Why or why not?",
+      "out": "media/audio/set4/s2-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Interesting. Do you think the way people think about their careers has changed compared to previous generations? Why or why not?"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set4-s2-q4",
+      "text": "One more question. Considering both the benefits and challenges, do you think working remotely is better for most employees than working in a traditional office?",
+      "out": "media/audio/set4/s2-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "One more question. Considering both the benefits and challenges, do you think working remotely is better for most employees than working in a traditional office?"
+        }
+      ],
+      "origin": "tts-voices-set4exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q01",
+      "text": "How often does the shuttle run?",
+      "out": "media/audio/set5/l1-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "How often does the shuttle run?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q02",
+      "text": "Have you submitted your expense report?",
+      "out": "media/audio/set5/l1-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Have you submitted your expense report?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q03",
+      "text": "Window or middle seat?",
+      "out": "media/audio/set5/l1-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Window or middle seat?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q04",
+      "text": "The client wants to move the deadline up.",
+      "out": "media/audio/set5/l1-q04.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "The client wants to move the deadline up."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q05",
+      "text": "Doesn’t the museum offer free admission on Sundays?",
+      "out": "media/audio/set5/l1-q05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|Xb7hH8MSUJpSbSDYk0k2",
+          "text": "Doesn’t the museum offer free admission on Sundays?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q06",
+      "text": "Can you forward me that email thread?",
+      "out": "media/audio/set5/l1-q06.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "Can you forward me that email thread?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q07",
+      "text": "The team meeting got moved to three o’clock.",
+      "out": "media/audio/set5/l1-q07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "The team meeting got moved to three o’clock."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q08",
+      "text": "You’ve been to Japan before, haven’t you?",
+      "out": "media/audio/set5/l1-q08.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "You’ve been to Japan before, haven’t you?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q09-10",
+      "text": "How’s the quarterly budget report coming along? Finance needs it by Thursday. I’ve finished the expense analysis and the revenue projections. I’m just waiting on the department heads to confirm their numbers. Have you followed up with them? We can’t afford any delays this time. I sent reminders yesterday. Most have responded, but I’m still waiting on operations and HR. If you don’t hear back by tomorrow afternoon, let me know. I’ll reach out to them directly.",
+      "out": "media/audio/set5/l1-q09-10.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "How’s the quarterly budget report coming along? Finance needs it by Thursday."
+        },
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "I’ve finished the expense analysis and the revenue projections. I’m just waiting on the department heads to confirm their numbers."
+        },
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Have you followed up with them? We can’t afford any delays this time."
+        },
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "I sent reminders yesterday. Most have responded, but I’m still waiting on operations and HR."
+        },
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "If you don’t hear back by tomorrow afternoon, let me know. I’ll reach out to them directly."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q11-12",
+      "text": "I just got an email from the internship coordinator. Apparently, our start date has been pushed back two weeks. Really? I thought we were supposed to begin on June 1st. What happened? The company is relocating to a new office building, and it won’t be ready until mid-June. So now we start on the 15th instead. Well, that’s actually not too bad. I can use the extra time to finish my online certification course. Same here. I was stressing about completing everything before the internship. This gives us some breathing room.",
+      "out": "media/audio/set5/l1-q11-12.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "I just got an email from the internship coordinator. Apparently, our start date has been pushed back two weeks."
+        },
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Really? I thought we were supposed to begin on June 1st. What happened?"
+        },
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "The company is relocating to a new office building, and it won’t be ready until mid-June. So now we start on the 15th instead."
+        },
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Well, that’s actually not too bad. I can use the extra time to finish my online certification course."
+        },
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Same here. I was stressing about completing everything before the internship. This gives us some breathing room."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q13-14",
+      "text": "Students, the university is upgrading our email system to improve security and storage capacity. Starting next Monday, you’ll need to log in using your full student ID number instead of your username. Please update your email app settings before then.",
+      "out": "media/audio/set5/l1-q13-14.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Students, the university is upgrading our email system to improve security and storage capacity. Starting next Monday, you’ll need to log in using your full student ID number instead of your username. Please update your email app settings before then."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q15-16",
+      "text": "Students, the campus shuttle is adjusting its routes starting this Monday to better serve the new dormitory complex. The Blue Line will include two additional stops near Riverside Hall. Please check the updated schedule posted on the transportation website and plan your commute accordingly.",
+      "out": "media/audio/set5/l1-q15-16.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Students, the campus shuttle is adjusting its routes starting this Monday to better serve the new dormitory complex. The Blue Line will include two additional stops near Riverside Hall. Please check the updated schedule posted on the transportation website and plan your commute accordingly."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l1-q17-20",
+      "text": "OK, so I want to explain the concept of food chains and food webs. These are fundamental ideas in ecology that help us understand how energy moves through ecosystems. A food chain is a simple model showing how energy passes from one organism to another. It starts with producers, which are usually plants. Plants capture energy from the sun through photosynthesis. Then primary consumers, like rabbits or insects, eat the plants. Secondary consumers, such as small birds or frogs, eat the primary consumers. And at the top, you might have tertiary consumers, like hawks or foxes, eating the secondary consumers. Now, in reality, ecosystems are more complicated than a simple chain. Most animals eat more than one type of food, and most organisms are eaten by more than one predator. So scientists use the term food web to describe these interconnected relationships. A food web is basically many food chains linked together. Why does this matter? Well, if one species in a food web disappears, it affects many others. For example, if a disease kills most of the rabbits in an area, the foxes that eat rabbits will struggle, but so will the plants that rabbits used to keep in check. Everything is connected. Understanding food webs helps us predict how changes in one population might ripple through an entire ecosystem.",
+      "out": "media/audio/set5/l1-q17-20.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "OK, so I want to explain the concept of food chains and food webs. These are fundamental ideas in ecology that help us understand how energy moves through ecosystems. A food chain is a simple model showing how energy passes from one organism to another. It starts with producers, which are usually plants. Plants capture energy from the sun through photosynthesis. Then primary consumers, like rabbits or insects, eat the plants. Secondary consumers, such as small birds or frogs, eat the primary consumers. And at the top, you might have tertiary consumers, like hawks or foxes, eating the secondary consumers. Now, in reality, ecosystems are more complicated than a simple chain. Most animals eat more than one type of food, and most organisms are eaten by more than one predator. So scientists use the term food web to describe these interconnected relationships. A food web is basically many food chains linked together. Why does this matter? Well, if one species in a food web disappears, it affects many others. For example, if a disease kills most of the rabbits in an area, the foxes that eat rabbits will struggle, but so will the plants that rabbits used to keep in check. Everything is connected. Understanding food webs helps us predict how changes in one population might ripple through an entire ecosystem."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l2-q01",
+      "text": "That’s a lot of luggage for a weekend trip, isn’t it?",
+      "out": "media/audio/set5/l2-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "That’s a lot of luggage for a weekend trip, isn’t it?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l2-q02",
+      "text": "The Wi-Fi password doesn’t seem to be working?",
+      "out": "media/audio/set5/l2-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "The Wi-Fi password doesn’t seem to be working?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l2-q03",
+      "text": "The shipment was supposed to arrive yesterday.",
+      "out": "media/audio/set5/l2-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "The shipment was supposed to arrive yesterday."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l2-q04-05",
+      "text": "Professor Adams, I wanted to update you on my dissertation progress. I’ve completed the data analysis chapter. That’s great news. How did the statistical models turn out? Better than expected, actually. The results support my hypothesis pretty strongly. I just need to write up the discussion section now. Excellent. Once that’s done, send me the full draft. I’ll need at least two weeks to review it before we schedule your defense. Understood. I’m hoping to have everything for you by the end of this month.",
+      "out": "media/audio/set5/l2-q04-05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Professor Adams, I wanted to update you on my dissertation progress. I’ve completed the data analysis chapter."
+        },
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "That’s great news. How did the statistical models turn out?"
+        },
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Better than expected, actually. The results support my hypothesis pretty strongly. I just need to write up the discussion section now."
+        },
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Excellent. Once that’s done, send me the full draft. I’ll need at least two weeks to review it before we schedule your defense."
+        },
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Understood. I’m hoping to have everything for you by the end of this month."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l2-q06-07",
+      "text": "Did you see the email about the leadership conference next week? Yes, the one about the keynote speaker change? I was looking forward to hearing Dr. Chen speak about innovation in education. Same here. But the replacement speaker is actually quite well-known in organizational psychology. She wrote that book on team dynamics. Oh, I’ve heard of her. That might be even more relevant to my work in human resources, actually. Right, I thought you’d find it interesting.",
+      "out": "media/audio/set5/l2-q06-07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Did you see the email about the leadership conference next week?"
+        },
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Yes, the one about the keynote speaker change? I was looking forward to hearing Dr. Chen speak about innovation in education."
+        },
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Same here. But the replacement speaker is actually quite well-known in organizational psychology. She wrote that book on team dynamics."
+        },
+        {
+          "speaker": "Woman",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Oh, I’ve heard of her. That might be even more relevant to my work in human resources, actually."
+        },
+        {
+          "speaker": "Man",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Right, I thought you’d find it interesting."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l2-q08-11",
+      "text": "Alright, today I want to compare two different strategies animals use to regulate their body temperature—being warm-blooded versus cold-blooded. These terms are a bit simplified, but they help us understand some fundamental differences. Warm-blooded animals, which include mammals and birds, generate their own body heat internally. Their metabolism is constantly working to maintain a stable internal temperature regardless of the environment. A human body stays around 37 degrees Celsius whether you’re in a hot desert or a cold mountain. This gives warm-blooded animals a significant advantage—they can remain active in a wide range of conditions. Cold-blooded animals, like reptiles, fish, and insects, work differently. They rely on external sources to regulate their temperature. A lizard, for instance, will bask in the sun to warm up and seek shade when it gets too hot. Their body temperature changes with their surroundings. Now, each strategy has trade-offs. Warm-blooded animals can be active anytime, but they need to eat a lot more food to fuel their metabolism. A mouse might need to eat half its body weight daily. Cold-blooded animals need much less food, but their activity is limited by environmental conditions. On cold days, they become sluggish and slow. Neither approach is superior—they’re just different solutions to the same problem of surviving in various environments. Next, we will examine how some animals can actually switch between these strategies.",
+      "out": "media/audio/set5/l2-q08-11.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Alright, today I want to compare two different strategies animals use to regulate their body temperature—being warm-blooded versus cold-blooded. These terms are a bit simplified, but they help us understand some fundamental differences. Warm-blooded animals, which include mammals and birds, generate their own body heat internally. Their metabolism is constantly working to maintain a stable internal temperature regardless of the environment. A human body stays around 37 degrees Celsius whether you’re in a hot desert or a cold mountain. This gives warm-blooded animals a significant advantage—they can remain active in a wide range of conditions. Cold-blooded animals, like reptiles, fish, and insects, work differently. They rely on external sources to regulate their temperature. A lizard, for instance, will bask in the sun to warm up and seek shade when it gets too hot. Their body temperature changes with their surroundings. Now, each strategy has trade-offs. Warm-blooded animals can be active anytime, but they need to eat a lot more food to fuel their metabolism. A mouse might need to eat half its body weight daily. Cold-blooded animals need much less food, but their activity is limited by environmental conditions. On cold days, they become sluggish and slow. Neither approach is superior—they’re just different solutions to the same problem of surviving in various environments. Next, we will examine how some animals can actually switch between these strategies."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-l2-q12-15",
+      "text": "OK, so let’s talk about something you encounter every day but might not think much about—the states of matter. Most of you know there are three main states: solid, liquid, and gas. But do you understand what’s actually happening at the molecular level? In a solid, molecules are packed tightly together in fixed positions. They vibrate but don’t move around freely. This is why solids maintain their shape—put a rock on a table, and it stays exactly where you put it. The molecules are locked in place. Liquids are different. The molecules are still close together, but they can slide past one another. This is why liquids take the shape of their container. Pour water into a glass, and it conforms to the glass’s shape. The molecules have more freedom to move but are still attracted to each other. In gases, molecules have the most energy and freedom. They spread out to fill whatever space is available and move rapidly in all directions. The molecules are far apart and barely interact with each other. This is why gases can be compressed easily—there’s lots of empty space between molecules. What determines which state matter is in? Temperature and pressure. Add heat energy, and molecules move faster. Eventually, a solid becomes liquid, and a liquid becomes gas. Remove heat, and the opposite happens. It’s all about how much energy the molecules have.",
+      "out": "media/audio/set5/l2-q12-15.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "OK, so let’s talk about something you encounter every day but might not think much about—the states of matter. Most of you know there are three main states: solid, liquid, and gas. But do you understand what’s actually happening at the molecular level? In a solid, molecules are packed tightly together in fixed positions. They vibrate but don’t move around freely. This is why solids maintain their shape—put a rock on a table, and it stays exactly where you put it. The molecules are locked in place. Liquids are different. The molecules are still close together, but they can slide past one another. This is why liquids take the shape of their container. Pour water into a glass, and it conforms to the glass’s shape. The molecules have more freedom to move but are still attracted to each other. In gases, molecules have the most energy and freedom. They spread out to fill whatever space is available and move rapidly in all directions. The molecules are far apart and barely interact with each other. This is why gases can be compressed easily—there’s lots of empty space between molecules. What determines which state matter is in? Temperature and pressure. Add heat energy, and molecules move faster. Eventually, a solid becomes liquid, and a liquid becomes gas. Remove heat, and the opposite happens. It’s all about how much energy the molecules have."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-s1-instructions",
+      "text": "You are being trained to assist visitors at the sports and recreation center, listen to your trainer, and repeat what she says. Repeat only once.",
+      "out": "media/audio/set5/s1-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "You are being trained to assist visitors at the sports and recreation center, listen to your trainer, and repeat what she says. Repeat only once."
+        }
+      ],
+      "origin": "tts-voices-set5s1-11labs.json"
+    },
+    {
+      "id": "set5-s1-q1",
+      "text": "Welcome! Let’s go over the facilities.",
+      "out": "media/audio/set5/s1-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Welcome! Let’s go over the facilities."
+        }
+      ],
+      "origin": "tts-voices-set5s1-11labs.json"
+    },
+    {
+      "id": "set5-s1-q2",
+      "text": "There are two basketball courts in the main gym.",
+      "out": "media/audio/set5/s1-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "There are two basketball courts in the main gym."
+        }
+      ],
+      "origin": "tts-voices-set5s1-11labs.json"
+    },
+    {
+      "id": "set5-s1-q3",
+      "text": "The indoor swimming pool is open from six to nine daily.",
+      "out": "media/audio/set5/s1-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "The indoor swimming pool is open from six to nine daily."
+        }
+      ],
+      "origin": "tts-voices-set5s1-11labs.json"
+    },
+    {
+      "id": "set5-s1-q4",
+      "text": "Visitors can register for fitness classes at the membership desk here.",
+      "out": "media/audio/set5/s1-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Visitors can register for fitness classes at the membership desk here."
+        }
+      ],
+      "origin": "tts-voices-set5s1-11labs.json"
+    },
+    {
+      "id": "set5-s1-q5",
+      "text": "We encourage families to check out our youth programs and summer camps.",
+      "out": "media/audio/set5/s1-q5.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "We encourage families to check out our youth programs and summer camps."
+        }
+      ],
+      "origin": "tts-voices-set5s1-11labs.json"
+    },
+    {
+      "id": "set5-s1-q6",
+      "text": "Please remind visitors that children under twelve must be accompanied by an adult.",
+      "out": "media/audio/set5/s1-q6.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "Please remind visitors that children under twelve must be accompanied by an adult."
+        }
+      ],
+      "origin": "tts-voices-set5s1-11labs.json"
+    },
+    {
+      "id": "set5-s1-q7",
+      "text": "If someone wants to book a private event, they should contact our event team in advance.",
+      "out": "media/audio/set5/s1-q7.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_multilingual_v2|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "If someone wants to book a private event, they should contact our event team in advance."
+        }
+      ],
+      "origin": "tts-voices-set5s1-11labs.json"
+    },
+    {
+      "id": "set5-s2-instructions",
+      "text": "You have volunteered for a research study about how to spend your free time. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+      "out": "media/audio/set5/s2-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "You have volunteered for a research study about how to spend your free time. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-s2-q1",
+      "text": "Thank you for joining today. I’d like to ask you some questions about free time. Do you usually spend free time at home, outside, or a mix of both?",
+      "out": "media/audio/set5/s2-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Thank you for joining today. I’d like to ask you some questions about free time. Do you usually spend free time at home, outside, or a mix of both?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-s2-q2",
+      "text": "I see. When you watch movies or TV shows, do you prefer to watch them alone or with friends or family? Why?",
+      "out": "media/audio/set5/s2-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "I see. When you watch movies or TV shows, do you prefer to watch them alone or with friends or family? Why?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-s2-q3",
+      "text": "That makes sense. Some people say that streaming services have made entertainment better because there are more choices, while others say having too many options makes it harder to decide what to watch. What do you think?",
+      "out": "media/audio/set5/s2-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "That makes sense. Some people say that streaming services have made entertainment better because there are more choices, while others say having too many options makes it harder to decide what to watch. What do you think?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set5-s2-q4",
+      "text": "Finally, how do you think people’s entertainment habits might change in the next ten years?",
+      "out": "media/audio/set5/s2-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Finally, how do you think people’s entertainment habits might change in the next ten years?"
+        }
+      ],
+      "origin": "tts-voices-set5exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q01",
+      "text": "Who’s handling customer complaints today?",
+      "out": "media/audio/set6/l1-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "Who’s handling customer complaints today?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q02",
+      "text": "Have you seen the revised schedule?",
+      "out": "media/audio/set6/l1-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Have you seen the revised schedule?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q03",
+      "text": "Soup or salad with your meal?",
+      "out": "media/audio/set6/l1-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "Soup or salad with your meal?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q04",
+      "text": "The heating system is acting up again.",
+      "out": "media/audio/set6/l1-q04.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "The heating system is acting up again."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q05",
+      "text": "Wasn’t the deadline extended until next week?",
+      "out": "media/audio/set6/l1-q05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|Xb7hH8MSUJpSbSDYk0k2",
+          "text": "Wasn’t the deadline extended until next week?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q06",
+      "text": "Could I get an extension on the paper?",
+      "out": "media/audio/set6/l1-q06.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "Could I get an extension on the paper?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q07",
+      "text": "Do you know what time the pharmacy opens?",
+      "out": "media/audio/set6/l1-q07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|VyyyOgRmsqOzaZXnKWnI",
+          "text": "Do you know what time the pharmacy opens?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q08",
+      "text": "That’s the author who gave the talk, isn’t it?",
+      "out": "media/audio/set6/l1-q08.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "That’s the author who gave the talk, isn’t it?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q09-10",
+      "text": "Are you still planning to help out at the science fair this Saturday? Yes, but I just found out I’m assigned to judge the middle school projects instead of the high school ones. That’s actually better. The younger students are usually more enthusiastic about explaining their work. True. I just need to be at the gymnasium by 8:30 to pick up my judging materials. Great. I’ll see you there. I’m helping with registration at the front desk.",
+      "out": "media/audio/set6/l1-q09-10.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Are you still planning to help out at the science fair this Saturday?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Yes, but I just found out I’m assigned to judge the middle school projects instead of the high school ones."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "That’s actually better. The younger students are usually more enthusiastic about explaining their work."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "True. I just need to be at the gymnasium by 8:30 to pick up my judging materials."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Great. I’ll see you there. I’m helping with registration at the front desk."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q11-12",
+      "text": "Are you going to the alumni networking dinner on Friday evening? I wasn’t planning to, but my advisor mentioned it might be a good opportunity to meet people in my field. Definitely. Last year I connected with someone who ended up offering me a summer position at her company. That’s impressive. What time does it start? The reception begins at 6, but the dinner isn’t served until 7. I usually show up early to mingle.",
+      "out": "media/audio/set6/l1-q11-12.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Are you going to the alumni networking dinner on Friday evening?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "I wasn’t planning to, but my advisor mentioned it might be a good opportunity to meet people in my field."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Definitely. Last year I connected with someone who ended up offering me a summer position at her company."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|XrExE9yKIg1WjnnlVkGX",
+          "text": "That’s impressive. What time does it start?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "The reception begins at 6, but the dinner isn’t served until 7. I usually show up early to mingle."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q13-14",
+      "text": "Good evening, everyone. The Book Club is holding a book swap event this Thursday in the library lobby from noon to four. Bring any books you’d like to trade and take home new ones for free. It’s a great way to refresh your reading list!",
+      "out": "media/audio/set6/l1-q13-14.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|TX3LPaxmHKxFdv7VOQHJ",
+          "text": "Good evening, everyone. The Book Club is holding a book swap event this Thursday in the library lobby from noon to four. Bring any books you’d like to trade and take home new ones for free. It’s a great way to refresh your reading list!"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q15-16",
+      "text": "Great news-our Professional Writing Certification Program is now accepting applications. This year, we’ve added modules on digital content strategy and technical communication. You’ll work with published authors and receive personalized feedback on your portfolio. The program runs eight weeks during spring semester. To register, visit the Humanities Building, Room 203, and submit a writing sample along with your completed application form. Spots are limited, so apply early.",
+      "out": "media/audio/set6/l1-q15-16.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|nPczCjzI2devNBz1zQrb",
+          "text": "Great news-our Professional Writing Certification Program is now accepting applications. This year, we’ve added modules on digital content strategy and technical communication. You’ll work with published authors and receive personalized feedback on your portfolio. The program runs eight weeks during spring semester. To register, visit the Humanities Building, Room 203, and submit a writing sample along with your completed application form. Spots are limited, so apply early."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l1-q17-20",
+      "text": "Today I want to compare two fundamental types of learning that psychologists have studied extensively-classical conditioning and operant conditioning. They might sound similar, but they work in quite different ways. Let’s start with classical conditioning. This was first described through experiments with dogs. The basic idea is that an organism learns to associate two stimuli together. For example, if a bell rings every time before food appears, eventually the sound of the bell alone will trigger a response-like salivating. The learner is passive here; they’re not doing anything to make the food appear. They simply learn that one thing predicts another. Now, operant conditioning works differently. Here, learning happens through consequences. The organism actively does something, and what happens afterward determines whether they’ll do it again. If a behavior leads to a reward, it’s more likely to be repeated. If it leads to something unpleasant, it’s less likely to happen again. So the learner is active- their behavior actually influences the outcome. Here’s a simple way to remember the difference: in classical conditioning, the response comes before any action-it’s automatic. In operant conditioning, the behavior comes first, then the consequence. Both types of learning are important and happen constantly in our daily lives, often without us even realizing it. Next, we will explore how these principles are applied in education and therapy.",
+      "out": "media/audio/set6/l1-q17-20.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Today I want to compare two fundamental types of learning that psychologists have studied extensively-classical conditioning and operant conditioning. They might sound similar, but they work in quite different ways. Let’s start with classical conditioning. This was first described through experiments with dogs. The basic idea is that an organism learns to associate two stimuli together. For example, if a bell rings every time before food appears, eventually the sound of the bell alone will trigger a response-like salivating. The learner is passive here; they’re not doing anything to make the food appear. They simply learn that one thing predicts another. Now, operant conditioning works differently. Here, learning happens through consequences. The organism actively does something, and what happens afterward determines whether they’ll do it again. If a behavior leads to a reward, it’s more likely to be repeated. If it leads to something unpleasant, it’s less likely to happen again. So the learner is active- their behavior actually influences the outcome. Here’s a simple way to remember the difference: in classical conditioning, the response comes before any action-it’s automatic. In operant conditioning, the behavior comes first, then the consequence. Both types of learning are important and happen constantly in our daily lives, often without us even realizing it. Next, we will explore how these principles are applied in education and therapy."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q01",
+      "text": "What’s the dress code for the event?",
+      "out": "media/audio/set6/l2-q01.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "What’s the dress code for the event?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q02",
+      "text": "Did anyone call while I was out?",
+      "out": "media/audio/set6/l2-q02.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Did anyone call while I was out?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q03",
+      "text": "Here or to go?",
+      "out": "media/audio/set6/l2-q03.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Here or to go?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q04",
+      "text": "I keep getting an error message when I log in.",
+      "out": "media/audio/set6/l2-q04.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "I keep getting an error message when I log in."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q05",
+      "text": "Isn’t the registration fee supposed to be waived for members?",
+      "out": "media/audio/set6/l2-q05.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Isn’t the registration fee supposed to be waived for members?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q06",
+      "text": "Would you mind reviewing my slides before the presentations?",
+      "out": "media/audio/set6/l2-q06.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "Would you mind reviewing my slides before the presentations?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q07",
+      "text": "We’re still on for Friday, aren’t we?",
+      "out": "media/audio/set6/l2-q07.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|FGY2WhTYpPnrIDTdsKH5",
+          "text": "We’re still on for Friday, aren’t we?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q08-09",
+      "text": "I have a problem. I’m supposed to present my research findings in ten minutes, but the projector in the seminar room isn’t working. Did you try restarting it? Sometimes the connection just needs to be reset. I tried that. The power light comes on, but nothing displays on the screen. There’s a spare projector in the supply closet down the hall. I can help you set it up if you’d like. That would save me. Let’s go get it now.",
+      "out": "media/audio/set6/l2-q08-09.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "I have a problem. I’m supposed to present my research findings in ten minutes, but the projector in the seminar room isn’t working."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "Did you try restarting it? Sometimes the connection just needs to be reset."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "I tried that. The power light comes on, but nothing displays on the screen."
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cjVigY5qzO86Huf0OWal",
+          "text": "There’s a spare projector in the supply closet down the hall. I can help you set it up if you’d like."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|cgSgspJ2msm6clMCkdW9",
+          "text": "That would save me. Let’s go get it now."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q10-11",
+      "text": "Have you tried the new payment app they just launched for campus services? No. I haven’t. What can you use it for? Pretty much everything. You can pay for meals, printing, even laundry in the dorms. It’s all linked to your student account. That sounds convenient. Is it difficult to set up? Not at all. You just download it and log in with your university credentials. It took me about two minutes.",
+      "out": "media/audio/set6/l2-q10-11.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Have you tried the new payment app they just launched for campus services?"
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "No. I haven’t. What can you use it for?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Pretty much everything. You can pay for meals, printing, even laundry in the dorms. It’s all linked to your student account."
+        },
+        {
+          "speaker": "W",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|pFZP5JQG7iQjIQuC4Bku",
+          "text": "That sounds convenient. Is it difficult to set up?"
+        },
+        {
+          "speaker": "M",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|CwhRBWXzGAHq8TQ4Fs17",
+          "text": "Not at all. You just download it and log in with your university credentials. It took me about two minutes."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q12-13",
+      "text": "Attention, everyone. A mandatory fire drill has been scheduled for this Friday at 2 PM in all campus buildings. When you hear the alarm, please exit through the nearest emergency door and gather at your designated assembly point. Review the evacuation maps posted in your building.",
+      "out": "media/audio/set6/l2-q12-13.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Attention, everyone. A mandatory fire drill has been scheduled for this Friday at 2 PM in all campus buildings. When you hear the alarm, please exit through the nearest emergency door and gather at your designated assembly point. Review the evacuation maps posted in your building."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-l2-q14-15",
+      "text": "Attention all students interested in entrepreneurship. The annual Business Pitch Competition is now open for registration. This year’s competition features three rounds, with semifinalists receiving one-on-one mentoring from local business executives. First-place winners will receive a five-thousand-dollar seed fund and workspace at the Innovation Hub. Teams of up to four members may register at the School of Business, Office 118, by submitting a one-page business concept summary. All majors are welcome to participate.",
+      "out": "media/audio/set6/l2-q14-15.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|JBFqnCBsd6RMkjVDRZzb",
+          "text": "Attention all students interested in entrepreneurship. The annual Business Pitch Competition is now open for registration. This year’s competition features three rounds, with semifinalists receiving one-on-one mentoring from local business executives. First-place winners will receive a five-thousand-dollar seed fund and workspace at the Innovation Hub. Teams of up to four members may register at the School of Business, Office 118, by submitting a one-page business concept summary. All majors are welcome to participate."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s1-instructions",
+      "text": "You are being trained to assist travelers at the train station, listen to your trainer, and repeat what she says. Repeat only once.",
+      "out": "media/audio/set6/s1-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "You are being trained to assist travelers at the train station, listen to your trainer, and repeat what she says. Repeat only once."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s1-q1",
+      "text": "This is the main information booth.",
+      "out": "media/audio/set6/s1-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "This is the main information booth."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s1-q2",
+      "text": "The ticket machines are over there by the entrance.",
+      "out": "media/audio/set6/s1-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "The ticket machines are over there by the entrance."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s1-q3",
+      "text": "Platform numbers and departure times are shown on the board above.",
+      "out": "media/audio/set6/s1-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Platform numbers and departure times are shown on the board above."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s1-q4",
+      "text": "Travelers can purchase tickets online or at any of the kiosks.",
+      "out": "media/audio/set6/s1-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Travelers can purchase tickets online or at any of the kiosks."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s1-q5",
+      "text": "We suggest that passengers arrive at least fifteen minutes before departure time.",
+      "out": "media/audio/set6/s1-q5.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "We suggest that passengers arrive at least fifteen minutes before departure time."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s1-q6",
+      "text": "Also, luggage storage lockers are available near Platform One for a small fee.",
+      "out": "media/audio/set6/s1-q6.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "Also, luggage storage lockers are available near Platform One for a small fee."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s1-q7",
+      "text": "If a passenger misses their train, they may exchange their ticket at the service window nearby.",
+      "out": "media/audio/set6/s1-q7.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|EXAVITQu4vr4xnSDxMaL",
+          "text": "If a passenger misses their train, they may exchange their ticket at the service window nearby."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s2-instructions",
+      "text": "You have volunteered for a research study about your spending habits. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions.",
+      "out": "media/audio/set6/s2-instructions.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "You have volunteered for a research study about your spending habits. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s2-q1",
+      "text": "Thank you for speaking with me today. I’d like to ask you some questions about shopping habits and spending choices. When you need to buy clothes or everyday items, do you prefer to shop in stores or online? Why?",
+      "out": "media/audio/set6/s2-q1.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Thank you for speaking with me today. I’d like to ask you some questions about shopping habits and spending choices. When you need to buy clothes or everyday items, do you prefer to shop in stores or online? Why?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s2-q2",
+      "text": "Interesting. When you’re going to buy something, do you usually plan and research beforehand, or do you prefer to decide quickly while shopping? Why?",
+      "out": "media/audio/set6/s2-q2.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Interesting. When you’re going to buy something, do you usually plan and research beforehand, or do you prefer to decide quickly while shopping? Why?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s2-q3",
+      "text": "OK. Some people say that with online shopping and easy payment methods, it has become harder for people to control their spending. Do you agree with this?",
+      "out": "media/audio/set6/s2-q3.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "OK. Some people say that with online shopping and easy payment methods, it has become harder for people to control their spending. Do you agree with this?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
+      "id": "set6-s2-q4",
+      "text": "Good points. Lastly, do you think schools should teach young people how to manage money and make smart spending decisions?",
+      "out": "media/audio/set6/s2-q4.mp3",
+      "gap_ms": 400,
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "say_voice": "eleven_flash_v2_5|mp3_44100_128|onwK4e9ZLuTAKqWW03F9",
+          "text": "Good points. Lastly, do you think schools should teach young people how to manage money and make smart spending decisions?"
+        }
+      ],
+      "origin": "tts-voices-set6exam-11labs.json"
+    },
+    {
       "id": "set9-L2-04-05",
       "text": "Hey, did you manage to get into Professor Hammond's linguistics seminar? I know it fills up fast. Not initially. I was number four on the waitlist, but I just got an email saying a spot opened up. That's great news! I'm still stuck at number seven. I'm keeping my fingers crossed, but I'm not holding my breath. You might want to have a backup plan. The add-drop deadline is next Friday, and the list doesn't usually move that quickly. Yeah, I've been looking at a sociolinguistics course as an alternative. It fits my schedule, but it's not my first choice. Well, sometimes those unexpected courses turn out to be the best ones.",
       "out": "media/audio/set9/set9-L2-04-05.mp3",

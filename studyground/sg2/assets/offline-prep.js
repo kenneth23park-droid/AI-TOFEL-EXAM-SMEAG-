@@ -61,6 +61,7 @@
     if (/(^|[A-Z])0*3$/.test(t) || t === 'SET3') return 'set3';
     if (/(^|[A-Z])0*4$/.test(t) || t === 'SET4') return 'set4';
     if (/(^|[A-Z])0*5$/.test(t) || t === 'SET5') return 'set5';
+    if (/(^|[A-Z])0*6$/.test(t) || t === 'SET6') return 'set6';
     return 'set1';
   }
 
@@ -87,7 +88,7 @@
      아니면 진행률의 분모가 실제로 받아야 할 양보다 커진다. */
   function merge(parts) {
     if (parts.length === 1) return parts[0];
-    var files = [], seen = {}, labels = [], i, j;
+    var files = [], seen = {}, missing = [], missingSeen = {}, labels = [], i, j;
     for (i = 0; i < parts.length; i++) {
       labels.push(parts[i].label || parts[i].set || '');
       var fs = parts[i].files || [];
@@ -95,6 +96,12 @@
         if (seen[fs[j].u]) continue;
         seen[fs[j].u] = true;
         files.push(fs[j]);
+      }
+      var absent = parts[i].missing || [];
+      for (j = 0; j < absent.length; j++) {
+        if (seen[absent[j]] || missingSeen[absent[j]]) continue;
+        missingSeen[absent[j]] = true;
+        missing.push(absent[j]);
       }
     }
     files.sort(function (a, b) { return a.u < b.u ? -1 : (a.u > b.u ? 1 : 0); });
@@ -108,7 +115,8 @@
       rev: rev.length + ':' + files.length,
       count: files.length,
       bytes: bytes,
-      files: files
+      files: files,
+      missing: missing
     };
   }
 
@@ -172,7 +180,7 @@
     }).then(function (parts) {
       var m = merge(parts);
       state.manifest = m;
-      state.total = m.files.length;
+      state.total = m.files.length + (m.missing || []).length;
       state.bytes = m.bytes;
       return m;
     });
@@ -183,8 +191,8 @@
     return load(true).then(function (m) {
       return mediaCacheName().then(function (name) {
         if (!name) {
-          return { supported: false, ready: false, have: 0, total: m.files.length,
-                   fresh: m.files.length, stale: 0, todo: [], prune: [], manifest: m, cache: null };
+          return { supported: false, ready: false, have: 0, total: state.total,
+                   fresh: state.total, stale: 0, todo: [], prune: [], manifest: m, cache: null };
         }
         var rec = record();
         var known = rec.have || {};
@@ -205,6 +213,13 @@
               }
               have++; haveBytes += f.b;
             });
+            /* 빌드 시점부터 서버에 없던 참조. 목록에서 빼면 기기가 모든 파일을 받았다고
+               오판한다. 0-byte 가짜 파일이 아니라 fetch 해야 할 실패 항목으로 남긴다. */
+            (m.missing || []).forEach(function (u) {
+              wanted[absolute(u)] = true;
+              todo.push({ u: u, b: 0, h: 'missing-source' });
+              fresh++;
+            });
 
             /* 목록에서 빠진 파일 — 문항이 교체되면 옛 오디오가 캐시에 남는다.
                단, 세트 하나만 보고 있을 때는 지우지 않는다. 그 목록에 없는 파일은
@@ -220,7 +235,7 @@
 
             return {
               supported: true, ready: todo.length === 0,
-              have: have, total: m.files.length,
+              have: have, total: state.total,
               haveBytes: haveBytes, bytes: m.bytes,
               fresh: fresh, stale: stale, prune: prune.length,
               update: state.update, rev: m.rev, knownRev: rec.rev || null,

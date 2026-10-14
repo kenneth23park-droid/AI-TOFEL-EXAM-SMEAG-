@@ -1,0 +1,669 @@
+{
+  "provider": "elevenlabs",
+  "model": "eleven_flash_v2_5",
+  "output": "mp3_44100_128",
+  "note": [
+    "SET 6 시험 음성 배역 매니페스트. tools/build_voices_manifest.mjs 가 원본 docx 에서 만든다 — 손으로 고치지 말 것.",
+    "대본은 set-import.js 가 읽은 것과 같은 것이고, out 은 콘텐츠 팩이 가리키는 경로 그대로다.",
+    "목소리 13명은 SET 9 에서 확정된 것을 그대로 쓴다(config/set9-voice-casting.json).",
+    "id 에 세트 접두사를 붙이는 이유: tools/tts_multivoice.py 의 검산 매니페스트는 tts-voices*.json 을 합치므로, l1-q01 같은 이름은 SET 9 것과 부딪친다."
+  ],
+  "items": [
+    {
+      "id": "set6-l1-q01",
+      "kind": "short",
+      "out": "media/audio/set6/l1-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "Who’s handling customer complaints today?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l1-q02",
+      "kind": "short",
+      "out": "media/audio/set6/l1-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Have you seen the revised schedule?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l1-q03",
+      "kind": "short",
+      "out": "media/audio/set6/l1-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Soup or salad with your meal?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l1-q04",
+      "kind": "short",
+      "out": "media/audio/set6/l1-q04.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "The heating system is acting up again."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l1-q05",
+      "kind": "short",
+      "out": "media/audio/set6/l1-q05.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "Xb7hH8MSUJpSbSDYk0k2",
+          "voice_name": "GB-Alice",
+          "el_voice": "Alice",
+          "text": "Wasn’t the deadline extended until next week?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l1-q06",
+      "kind": "short",
+      "out": "media/audio/set6/l1-q06.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "Could I get an extension on the paper?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l1-q07",
+      "kind": "short",
+      "out": "media/audio/set6/l1-q07.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "Do you know what time the pharmacy opens?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l1-q08",
+      "kind": "short",
+      "out": "media/audio/set6/l1-q08.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "That’s the author who gave the talk, isn’t it?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l1-q09-10",
+      "kind": "conversation",
+      "out": "media/audio/set6/l1-q09-10.mp3",
+      "segments": [
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Are you still planning to help out at the science fair this Saturday?"
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Yes, but I just found out I’m assigned to judge the middle school projects instead of the high school ones."
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "That’s actually better. The younger students are usually more enthusiastic about explaining their work."
+        },
+        {
+          "speaker": "M",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "True. I just need to be at the gymnasium by 8:30 to pick up my judging materials."
+        },
+        {
+          "speaker": "W",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Great. I’ll see you there. I’m helping with registration at the front desk."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set6-l1-q11-12",
+      "kind": "conversation",
+      "out": "media/audio/set6/l1-q11-12.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Are you going to the alumni networking dinner on Friday evening?"
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "I wasn’t planning to, but my advisor mentioned it might be a good opportunity to meet people in my field."
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Definitely. Last year I connected with someone who ended up offering me a summer position at her company."
+        },
+        {
+          "speaker": "W",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "That’s impressive. What time does it start?"
+        },
+        {
+          "speaker": "M",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "The reception begins at 6, but the dinner isn’t served until 7. I usually show up early to mingle."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set6-l1-q13-14",
+      "kind": "announcement",
+      "out": "media/audio/set6/l1-q13-14.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Good evening, everyone. The Book Club is holding a book swap event this Thursday in the library lobby from noon to four. Bring any books you’d like to trade and take home new ones for free. It’s a great way to refresh your reading list!"
+        }
+      ]
+    },
+    {
+      "id": "set6-l1-q15-16",
+      "kind": "announcement",
+      "out": "media/audio/set6/l1-q15-16.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Great news-our Professional Writing Certification Program is now accepting applications. This year, we’ve added modules on digital content strategy and technical communication. You’ll work with published authors and receive personalized feedback on your portfolio. The program runs eight weeks during spring semester. To register, visit the Humanities Building, Room 203, and submit a writing sample along with your completed application form. Spots are limited, so apply early."
+        }
+      ]
+    },
+    {
+      "id": "set6-l1-q17-20",
+      "kind": "announcement",
+      "out": "media/audio/set6/l1-q17-20.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Today I want to compare two fundamental types of learning that psychologists have studied extensively-classical conditioning and operant conditioning. They might sound similar, but they work in quite different ways. Let’s start with classical conditioning. This was first described through experiments with dogs. The basic idea is that an organism learns to associate two stimuli together. For example, if a bell rings every time before food appears, eventually the sound of the bell alone will trigger a response-like salivating. The learner is passive here; they’re not doing anything to make the food appear. They simply learn that one thing predicts another. Now, operant conditioning works differently. Here, learning happens through consequences. The organism actively does something, and what happens afterward determines whether they’ll do it again. If a behavior leads to a reward, it’s more likely to be repeated. If it leads to something unpleasant, it’s less likely to happen again. So the learner is active- their behavior actually influences the outcome. Here’s a simple way to remember the difference: in classical conditioning, the response comes before any action-it’s automatic. In operant conditioning, the behavior comes first, then the consequence. Both types of learning are important and happen constantly in our daily lives, often without us even realizing it. Next, we will explore how these principles are applied in education and therapy."
+        }
+      ]
+    },
+    {
+      "id": "set6-l2-q01",
+      "kind": "short",
+      "out": "media/audio/set6/l2-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "What’s the dress code for the event?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l2-q02",
+      "kind": "short",
+      "out": "media/audio/set6/l2-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Did anyone call while I was out?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l2-q03",
+      "kind": "short",
+      "out": "media/audio/set6/l2-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Here or to go?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l2-q04",
+      "kind": "short",
+      "out": "media/audio/set6/l2-q04.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "I keep getting an error message when I log in."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l2-q05",
+      "kind": "short",
+      "out": "media/audio/set6/l2-q05.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Isn’t the registration fee supposed to be waived for members?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l2-q06",
+      "kind": "short",
+      "out": "media/audio/set6/l2-q06.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Would you mind reviewing my slides before the presentations?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l2-q07",
+      "kind": "short",
+      "out": "media/audio/set6/l2-q07.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "We’re still on for Friday, aren’t we?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set6-l2-q08-09",
+      "kind": "conversation",
+      "out": "media/audio/set6/l2-q08-09.mp3",
+      "segments": [
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "I have a problem. I’m supposed to present my research findings in ten minutes, but the projector in the seminar room isn’t working."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Did you try restarting it? Sometimes the connection just needs to be reset."
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "I tried that. The power light comes on, but nothing displays on the screen."
+        },
+        {
+          "speaker": "M",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "There’s a spare projector in the supply closet down the hall. I can help you set it up if you’d like."
+        },
+        {
+          "speaker": "W",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "That would save me. Let’s go get it now."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set6-l2-q10-11",
+      "kind": "conversation",
+      "out": "media/audio/set6/l2-q10-11.mp3",
+      "segments": [
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Have you tried the new payment app they just launched for campus services?"
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "No. I haven’t. What can you use it for?"
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Pretty much everything. You can pay for meals, printing, even laundry in the dorms. It’s all linked to your student account."
+        },
+        {
+          "speaker": "W",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "That sounds convenient. Is it difficult to set up?"
+        },
+        {
+          "speaker": "M",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Not at all. You just download it and log in with your university credentials. It took me about two minutes."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set6-l2-q12-13",
+      "kind": "announcement",
+      "out": "media/audio/set6/l2-q12-13.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Attention, everyone. A mandatory fire drill has been scheduled for this Friday at 2 PM in all campus buildings. When you hear the alarm, please exit through the nearest emergency door and gather at your designated assembly point. Review the evacuation maps posted in your building."
+        }
+      ]
+    },
+    {
+      "id": "set6-l2-q14-15",
+      "kind": "announcement",
+      "out": "media/audio/set6/l2-q14-15.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "Attention all students interested in entrepreneurship. The annual Business Pitch Competition is now open for registration. This year’s competition features three rounds, with semifinalists receiving one-on-one mentoring from local business executives. First-place winners will receive a five-thousand-dollar seed fund and workspace at the Innovation Hub. Teams of up to four members may register at the School of Business, Office 118, by submitting a one-page business concept summary. All majors are welcome to participate."
+        }
+      ]
+    },
+    {
+      "id": "set6-s1-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set6/s1-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You are being trained to assist travelers at the train station, listen to your trainer, and repeat what she says. Repeat only once."
+        }
+      ]
+    },
+    {
+      "id": "set6-s1-q1",
+      "kind": "repeat",
+      "out": "media/audio/set6/s1-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "This is the main information booth."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set6-s1-q2",
+      "kind": "repeat",
+      "out": "media/audio/set6/s1-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "The ticket machines are over there by the entrance."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set6-s1-q3",
+      "kind": "repeat",
+      "out": "media/audio/set6/s1-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Platform numbers and departure times are shown on the board above."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set6-s1-q4",
+      "kind": "repeat",
+      "out": "media/audio/set6/s1-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Travelers can purchase tickets online or at any of the kiosks."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set6-s1-q5",
+      "kind": "repeat",
+      "out": "media/audio/set6/s1-q5.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "We suggest that passengers arrive at least fifteen minutes before departure time."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set6-s1-q6",
+      "kind": "repeat",
+      "out": "media/audio/set6/s1-q6.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Also, luggage storage lockers are available near Platform One for a small fee."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set6-s1-q7",
+      "kind": "repeat",
+      "out": "media/audio/set6/s1-q7.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "If a passenger misses their train, they may exchange their ticket at the service window nearby."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set6-s2-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set6/s2-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "You have volunteered for a research study about your spending habits. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ]
+    },
+    {
+      "id": "set6-s2-q1",
+      "kind": "interview",
+      "out": "media/audio/set6/s2-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Thank you for speaking with me today. I’d like to ask you some questions about shopping habits and spending choices. When you need to buy clothes or everyday items, do you prefer to shop in stores or online? Why?"
+        }
+      ]
+    },
+    {
+      "id": "set6-s2-q2",
+      "kind": "interview",
+      "out": "media/audio/set6/s2-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Interesting. When you’re going to buy something, do you usually plan and research beforehand, or do you prefer to decide quickly while shopping? Why?"
+        }
+      ]
+    },
+    {
+      "id": "set6-s2-q3",
+      "kind": "interview",
+      "out": "media/audio/set6/s2-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "OK. Some people say that with online shopping and easy payment methods, it has become harder for people to control their spending. Do you agree with this?"
+        }
+      ]
+    },
+    {
+      "id": "set6-s2-q4",
+      "kind": "interview",
+      "out": "media/audio/set6/s2-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Good points. Lastly, do you think schools should teach young people how to manage money and make smart spending decisions?"
+        }
+      ]
+    }
+  ]
+}

@@ -67,6 +67,10 @@ SETS = {
         'label': 'NEW TOEFL SET 5',
         'sources': ['assets/set5.js'],
     },
+    'set6': {
+        'label': 'NEW TOEFL SET 6',
+        'sources': ['assets/set6.js'],
+    },
 }
 
 # 파일 이름에 공백이 들어간 참조가 있다("TOEFL Listening Image (Single female).webp").
@@ -110,14 +114,20 @@ def build(code, spec):
     rev = hashlib.sha256(
         ''.join(f['u'] + ':' + f['h'] for f in files).encode('utf-8')
     ).hexdigest()[:12]
-    return {
+    manifest = {
         'set': code.upper(),
         'label': spec['label'],
         'rev': rev,
         'count': len(files),
         'bytes': sum(f['b'] for f in files),
         'files': files,
-    }, missing
+    }
+    # 존재하지 않는 참조도 목록에 남긴다. files 에 넣으면 실제 파일·해시 계약을 깨므로
+    # 별도 필드로 둔다. 화면은 이 경로들을 미완료로 세어, 음성이 없는데도 "Ready for
+    # offline" 이라고 말하지 않는다. 파일이 생기면 다음 생성 때 자동으로 files 로 옮겨진다.
+    if missing:
+        manifest['missing'] = missing
+    return manifest, missing
 
 
 def main():

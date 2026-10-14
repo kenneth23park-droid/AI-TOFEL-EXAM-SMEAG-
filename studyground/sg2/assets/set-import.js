@@ -227,7 +227,10 @@
     /* 번호와 힌트 글자 사이의 공백은 세트마다 다르다 — SET 9 는 '1 popul_ _ _',
        SET 10 은 '1S_ _' 처럼 붙여 쓴다. 공백을 요구하면 SET 10 은 35문항 중 2개만
        잡힌다. 밑줄이 뒤따르는 것만 빈칸으로 보므로 공백 없이도 안전하다. */
-    var template = source.replace(/(\d{1,2})\s*([A-Za-z’']*)((?:\s*_)+)/g, function (all, no, hint) {
+    var supers = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5',
+      '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+    var template = source.replace(/([0-9⁰¹²³⁴-⁹]{1,2})\s*([A-Za-z’']*)((?:\s*_)+)/g, function (all, rawNo, hint) {
+      var no = rawNo.replace(/[⁰¹²³⁴-⁹]/g, function (c) { return supers[c]; });
       questions.push({ kind: 'blank', local: +no, hint: hint });
       return '{{' + no + '}}';
     });
@@ -251,7 +254,7 @@
   }
 
   /** 빈칸 지문인가 — 번호 뒤에 밑줄이 이어지는 줄. */
-  function isClozeLine(t) { return !!t && /\d\s*[A-Za-z’']*(\s*_){2,}/.test(t); }
+  function isClozeLine(t) { return !!t && /[0-9⁰¹²³⁴-⁹]\s*[A-Za-z’']*(\s*_){2,}/.test(t); }
 
   /* 지문 앞에 붙는 안내 줄. 세트마다 문구가 달라 목록으로 둔다 — 지문 본문이 아니므로
      제목으로 올라가면 안 된다. */
@@ -640,6 +643,15 @@
           listed = listed.slice(1);
         }
 
+        /* SET 6 Module 2 puts the short-response instruction immediately after
+           the first four listed choices. It belongs to the block, not to choice D. */
+        if (lines.length === 5 && /select the best response/i.test(lines[4])
+            && !listed[4] && listed.slice(0, 4).every(function (x) { return x; })) {
+          if (!blk.instruction) blk.instruction = lines[4];
+          lines = lines.slice(0, 4);
+          listed = listed.slice(0, 4);
+        }
+
         if (lines.length > 1) {
           var lastNo = numbered(lines[lines.length - 1]);
           var markerAfterListedChoices = lastNo && !lastNo.text
@@ -941,27 +953,39 @@
           if (r) { rng = r; i++; continue; }
           if (/^make an appropriate sentence/i.test(line)) { instruction = line; i++; continue; }
           if (!line) { i++; continue; }
-          /* context / slot / tiles 3줄 묶음. slot 줄은 밑줄이 2개 이상. */
-          var slotAt = -1;
-          if (/_{2,}/.test(line)) slotAt = i;
-          if (slotAt < 0) {
-            /* context 줄 — 다음 두 줄이 slot/tiles 인지 본다. */
-            var s1 = i + 1 < paras.length ? slotText(paras[i + 1]) : '';
-            if (/_{2,}/.test(s1)) {
-              /* 타일 줄이 아예 없는 세트가 있다(SET 10). 타일 줄은 '자동번호 목록이 아니고
-                 밑줄도 없는 줄' 이다 — 다음 문항의 context 줄은 자동번호 목록이라 구분된다.
-                 이 검사 없이 3줄로 밀면 다음 문항의 지문을 타일로 먹어 10문항이 5문항이 된다. */
-              var p2 = i + 2 < paras.length ? paras[i + 2] : null;
-              var t2 = p2 ? txt(p2) : '';
-              var t1 = p2 && !p2.listed && !numbered(t2) && !/_{2,}/.test(slotText(p2)) ? txtRaw(p2) : '';
-              var built = parseBuildItem(s1, t1);
-              qs.push({
-                id: codeSlug + '-W1-q' + pad2(qs.length + 1),
-                kind: 'build', no: no++,
-                context: line, slots: built.slots, tiles: built.tiles
-              });
-              i += t1 ? 3 : 2; continue;
+          /* 보통은 context / slot / tiles 3줄이지만 SET 6 은 context 없이 slot / tiles 두
+             줄만 쓰고 사이에 빈 문단도 둔다. 다음 실제 글줄을 보되, 자동번호
+             문단은 다음 문항의 context 일 수 있으므로 타일로 먹지 않는다. */
+          var slotAt = -1, context = '', slotLine = '';
+          var ownSlot = slotText(paras[i]);
+          var ownNumber = numbered(ownSlot);
+          if (ownNumber && /_{2,}/.test(ownNumber.text)) ownSlot = ownNumber.text;
+          if (/_{2,}/.test(ownSlot)) {
+            slotAt = i; slotLine = ownSlot;
+          } else {
+            var seek = i + 1;
+            while (seek < paras.length && !txt(paras[seek])) seek++;
+            var nextSlot = seek < paras.length ? slotText(paras[seek]) : '';
+            if (/_{2,}/.test(nextSlot)) {
+              slotAt = seek; slotLine = nextSlot; context = line;
             }
+          }
+          if (slotAt >= 0) {
+            var tileAt = slotAt + 1;
+            while (tileAt < paras.length && !txt(paras[tileAt])) tileAt++;
+            var tileP = tileAt < paras.length ? paras[tileAt] : null;
+            var tileText = tileP ? txt(tileP) : '';
+            var tiles = tileP && tileAt - slotAt <= 3 && !tileP.listed && !numbered(tileText)
+              && !/_{2,}/.test(slotText(tileP))
+              && !EMAIL_HEAD.test(tileText) && !DISC_HEAD.test(tileText) ? txtRaw(tileP) : '';
+            var built = parseBuildItem(slotLine, tiles);
+            qs.push({
+              id: codeSlug + '-W1-q' + pad2(qs.length + 1),
+              kind: 'build', no: no++,
+              context: context, slots: built.slots, tiles: built.tiles
+            });
+            i = tiles ? tileAt + 1 : slotAt + 1;
+            continue;
           }
           i++;
         }
@@ -1121,7 +1145,7 @@
       return out[section][moduleNo];
     }
 
-    paras.forEach(function (p) {
+    paras.forEach(function (p, pi) {
       var t = txt(p);
       if (!t) return;
 
@@ -1135,7 +1159,16 @@
       if (/^questions?\s+\d+\s*[-–]\s*\d+\s*$/i.test(t) || /^build an? sentences?$/i.test(t)) return;
 
       var b = bucket();
-      if (b) b.push(answerValue(section === 'writing' ? t.replace(/^\d+\s*[.)]\s+/, '') : t));
+      if (b) {
+        var value = answerValue(section === 'writing' ? t.replace(/^\d+\s*[.)]\s+/, '') : t);
+        /* SET 6 정답지는 자동번호 한 항목이 지면 너비 때문에 다음 문단으로
+           줄바꿈된다. 목록 표시가 없는 이어진 문단은 새 정답이 아니라 직전
+           Writing 정답의 뒷부분이다. */
+        if (section === 'writing' && !p.listed && b.length
+            && pi > 0 && paras[pi - 1].listed
+            && !/^\d+\s*[.)]\s+/.test(t)) b[b.length - 1] += ' ' + value;
+        else b.push(value);
+      }
     });
 
     return out;
