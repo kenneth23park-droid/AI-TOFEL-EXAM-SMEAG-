@@ -1107,7 +1107,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q01",
                   "kind": "build",
                   "no": 11,
-                  "context": "",
+                  "context": "What did the contractor say about the renovation?",
                   "slots": [
                     {
                       "t": "f",
@@ -1175,7 +1175,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q02",
                   "kind": "build",
                   "no": 12,
-                  "context": "",
+                  "context": "Are you still trying to learn the guitar?",
                   "slots": [
                     {
                       "t": "b",
@@ -1241,7 +1241,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q03",
                   "kind": "build",
                   "no": 13,
-                  "context": "",
+                  "context": "Did the interviewer ask about her technical skills?",
                   "slots": [
                     {
                       "t": "b"
@@ -1307,7 +1307,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q04",
                   "kind": "build",
                   "no": 14,
-                  "context": "",
+                  "context": "I’m thinking of booking that new Italian restaurant for our team dinner.",
                   "slots": [
                     {
                       "t": "f",
@@ -1381,7 +1381,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q05",
                   "kind": "build",
                   "no": 15,
-                  "context": "",
+                  "context": "I finally switched to a new phone last weekend.",
                   "slots": [
                     {
                       "t": "b"
@@ -1435,7 +1435,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q06",
                   "kind": "build",
                   "no": 16,
-                  "context": "",
+                  "context": "My cousin is graduating from college next month.",
                   "slots": [
                     {
                       "t": "b",
@@ -1503,7 +1503,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q07",
                   "kind": "build",
                   "no": 17,
-                  "context": "",
+                  "context": "How was the concert last night?",
                   "slots": [
                     {
                       "t": "f",
@@ -1571,7 +1571,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q08",
                   "kind": "build",
                   "no": 18,
-                  "context": "",
+                  "context": "Did the real estate agent call you back?",
                   "slots": [
                     {
                       "t": "b",
@@ -1643,7 +1643,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q09",
                   "kind": "build",
                   "no": 19,
-                  "context": "",
+                  "context": "Where is the nearest post office?",
                   "slots": [
                     {
                       "t": "b",
@@ -1694,7 +1694,7 @@ window.SMEAG_SET6 = {
                   "id": "set6-W1-q10",
                   "kind": "build",
                   "no": 20,
-                  "context": "",
+                  "context": "I thought the team meeting was on Wednesday.",
                   "slots": [
                     {
                       "t": "b",

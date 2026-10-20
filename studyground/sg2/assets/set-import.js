@@ -969,6 +969,8 @@
             var seek = i + 1;
             while (seek < paras.length && !txt(paras[seek])) seek++;
             var nextSlot = seek < paras.length ? slotText(paras[seek]) : '';
+            var nextNumber = numbered(nextSlot);
+            if (nextNumber && /_{2,}/.test(nextNumber.text)) nextSlot = nextNumber.text;
             if (/_{2,}/.test(nextSlot)) {
               slotAt = seek; slotLine = nextSlot; context = line;
             }
