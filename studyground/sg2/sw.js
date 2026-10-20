@@ -444,7 +444,8 @@
 // v121: SET 6 팩·선택기·오프라인 목록을 등록한다. 원본에 없는 음성도
 //       offline.set6.json 의 missing 목록에 남겨, 기기가 무음인데 준비 완료라고 하지 않는다.
 // v122: SET 6 음성 37개를 생성해 offline.set6.json 에 실제 파일·해시를 등록한다.
-const VERSION = 'sg-v122';
+// v123: SET 6 R1-20 보기 넷이 비어 있던 것을 채운다('Select a sentence from Paragraph N' 안내 줄을 건너뛴다).
+const VERSION = 'sg-v123';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

@@ -256,7 +256,12 @@ window.SMEAG_SET6 = {
                 {
                   "kind": "mcq",
                   "prompt": "Click on the sentence in paragraph 2 that specifies the benefits the algae obtain from their coral hosts in the symbiotic exchange.",
-                  "choices": [],
+                  "choices": [
+                    "Coral polyps are tiny animals related to jellyfish that build hard limestone skeletons around themselves.",
+                    "Within their cells live zooxanthellae, single-celled algae that perform photosynthesis and share up to ninety percent of the sugars they produce with their coral hosts.",
+                    "This energy transfer fuels coral growth and skeleton construction.",
+                    "In return, the algae receive shelter and access to sunlight."
+                  ],
                   "no": 20,
                   "id": "R1-20",
                   "answer": 3

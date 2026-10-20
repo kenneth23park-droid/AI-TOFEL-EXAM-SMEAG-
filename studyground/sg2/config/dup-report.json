@@ -96,7 +96,7 @@
   ],
   "unitCount": 898,
   "frameOnlyUnits": 18,
-  "candidatePairs": 1713,
+  "candidatePairs": 1714,
   "thresholds": {
     "shingleK": 4,
     "jaccardHigh": 0.55,
@@ -162,7 +162,7 @@
   },
   "counts": {
     "high": 5,
-    "watch": 59,
+    "watch": 58,
     "info": 7,
     "allowlisted": 7
   },
@@ -3926,82 +3926,6 @@
         "tokenCount": 24,
         "meta": null,
         "href": "admin-questions.html?set=set12&q=L1-6"
-      }
-    },
-    {
-      "key": "SET4::R1-18 | SET6::R1-20",
-      "severity": "watch",
-      "allowlisted": false,
-      "allowReason": null,
-      "scope": "cross",
-      "role": "item",
-      "score": 0.2632,
-      "metrics": {
-        "jaccard": 0.0463,
-        "containment": 0.2632,
-        "sharedShingles": 5,
-        "longestRun": 8,
-        "sharedChoices": 0,
-        "exact": false,
-        "sameStem": false
-      },
-      "reasons": [
-        "짧은 쪽의 26% 가 긴 쪽과 겹친다."
-      ],
-      "a": {
-        "uid": "SET4::R1-18",
-        "role": "item",
-        "qid": "R1-18",
-        "no": 18,
-        "qkind": "mcq",
-        "policy": "mcq",
-        "title": "R1-18 · Click on the sentence in paragraph 2 that establishes the mechanism by which ceremonial exchanges generated lasting reciprocal debts.",
-        "set": "SET4",
-        "setId": "set4",
-        "section": "reading",
-        "sectionLabel": "Reading",
-        "module": "R1",
-        "moduleLabel": "Reading Module 1",
-        "blockKind": "passage",
-        "blockHeading": "Questions 16-20",
-        "text": "Click on the sentence in paragraph 2 that establishes the mechanism by which ceremonial exchanges generated lasting reciprocal debts.\nThe potlatch ceremonies of Pacific Northwest indigenous peoples provide a striking illustration of gift economy principles in action.\nDuring these elaborate gatherings, hosts distributed blankets, copper goods, and food to guest in displays that demonstrated wealth through generosity rather than accumulation.\nRecipients incurred social debts that would repay at future ceremonies, creating ongoing cycles of obligation.\nThese cycles reinforced alliances between families and villages across generations and maintained social hierarchies through the strategic timing and scale of gifts.",
-        "choices": [
-          "The potlatch ceremonies of Pacific Northwest indigenous peoples provide a striking illustration of gift economy principles in action.",
-          "During these elaborate gatherings, hosts distributed blankets, copper goods, and food to guest in displays that demonstrated wealth through generosity rather than accumulation.",
-          "Recipients incurred social debts that would repay at future ceremonies, creating ongoing cycles of obligation.",
-          "These cycles reinforced alliances between families and villages across generations and maintained social hierarchies through the strategic timing and scale of gifts."
-        ],
-        "answerText": "C. Recipients incurred social debts that would repay at future ceremonies, creating ongoing cycles of obligation.",
-        "payload": "Click on the sentence in paragraph 2 that establishes the mechanism by which ceremonial exchanges generated lasting reciprocal debts.\nThe potlatch ceremonies of Pacific Northwest indigenous peoples provide a striking illustration of gift economy principles in action.\nDuring these elaborate gatherings, hosts distributed blankets, copper goods, and food to guest in displays that demonstrated wealth through generosity rather than accumulation.\nRecipients incurred social debts that would repay at future ceremonies, creating ongoing cycles of obligation.\nThese cycles reinforced alliances between families and villages across generations and maintained social hierarchies through the strategic timing and scale of gifts.",
-        "framedOut": [],
-        "tokenCount": 97,
-        "meta": null,
-        "href": "admin-questions.html?set=set4&q=R1-18"
-      },
-      "b": {
-        "uid": "SET6::R1-20",
-        "role": "item",
-        "qid": "R1-20",
-        "no": 20,
-        "qkind": "mcq",
-        "policy": "mcq",
-        "title": "R1-20 · Click on the sentence in paragraph 2 that specifies the benefits the algae obtain from their coral hosts in the symbiotic exchange.",
-        "set": "SET6",
-        "setId": "set6",
-        "section": "reading",
-        "sectionLabel": "Reading",
-        "module": "R1",
-        "moduleLabel": "Reading Module 1",
-        "blockKind": "passage",
-        "blockHeading": "Questions 16-20",
-        "text": "Click on the sentence in paragraph 2 that specifies the benefits the algae obtain from their coral hosts in the symbiotic exchange.",
-        "choices": [],
-        "answerText": "D. undefined",
-        "payload": "Click on the sentence in paragraph 2 that specifies the benefits the algae obtain from their coral hosts in the symbiotic exchange.",
-        "framedOut": [],
-        "tokenCount": 22,
-        "meta": null,
-        "href": "admin-questions.html?set=set6&q=R1-20"
       }
     },
     {

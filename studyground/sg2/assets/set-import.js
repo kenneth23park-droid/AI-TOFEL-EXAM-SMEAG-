@@ -202,6 +202,9 @@
         if (++blanks > 2 || choices.length) break;
         i++; continue;
       }
+      /* SET 6 R1-20 처럼 문두와 보기 사이에 'Select a sentence from Paragraph 2' 안내가
+         끼어 있으면 거기서 멈춰 보기가 0개가 됐다. 보기 앞의 이 안내 줄은 건너뛴다. */
+      if (!choices.length && /^select a sentence from paragraph\s+\d+\.?$/i.test(t)) { i++; continue; }
       var L = lettered(t);
       if (L && L.letter >= 0) { choices.push(L.text); sawLetter = true; i++; blanks = 0; continue; }
       if (!sawLetter && p.listed && choices.length < 5 && !numbered(t) && !questionRange(t)) {
