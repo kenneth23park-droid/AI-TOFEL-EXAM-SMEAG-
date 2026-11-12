@@ -1734,34 +1734,40 @@ window.SMEAG_SET2 = {
                       "text": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "just"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "found"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "out"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "that"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "I"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "won"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "two tickets"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
-                    },
-                    {
-                      "t": "b"
+                      "t": "b",
+                      "a": "the concert"
                     },
                     {
                       "t": "f",
@@ -1779,9 +1785,7 @@ window.SMEAG_SET2 = {
                     "two tickets",
                     "out"
                   ],
-                  "answerSentence": "I just found out that I won two tickets to the concert.",
-                  "unscored": true,
-                  "unscoredReason": "The word tiles and blanks in the question document cannot build the answer-key sentence \"I just found out that I won two tickets to the concert.\"."
+                  "sentence": "I just found out that I won two tickets to the concert."
                 },
                 {
                   "id": "set2-W1-q06",
@@ -2465,6 +2469,7 @@ window.SMEAG_SET2 = {
     "set2-W1-q02": "Do you know how late it stays open?",
     "set2-W1-q03": "I signed up for online lessons.",
     "set2-W1-q04": "Do you know if they make custom cakes for parties?",
+    "set2-W1-q05": "I just found out that I won two tickets to the concert.",
     "set2-W1-q06": "Yes, she inquired when I would complete my current project.",
     "set2-W1-q07": "Would you like me to help you practice your opening?",
     "set2-W1-q08": "Have you seen how cold it is outside right now?",
@@ -2528,7 +2533,7 @@ window.SMEAG_SET2 = {
       }
     ],
     "gates": {
-      "stop": 1,
+      "stop": 0,
       "warn": 1
     },
     "sources": [
@@ -2536,21 +2541,14 @@ window.SMEAG_SET2 = {
       "TEST 2 SCRIPT 2.docx",
       "SET 2 ANSWER KEY version 2.docx"
     ],
-    "unscored": 1
+    "unscored": 0
   },
   "report": {
-    "problems": [
-      "writing: 1 sentence-building questions do not cross-check: the word tiles in the question document cannot build the answer-key sentence, in that order (set2-W1-q05). They stay in the set but are not scored until the two documents match."
-    ],
+    "problems": [],
     "checks": [
       "writing: 1 sentence-building questions end with a different punctuation mark in the two documents. The words all match, so the answer is scored — but the mark the student sees comes from the question document (set2-W1-q09 — The question document ends this sentence with \"?\" but the answer key ends it with \".\".)."
     ],
-    "unscored": [
-      {
-        "id": "set2-W1-q05",
-        "reason": "The word tiles and blanks in the question document cannot build the answer-key sentence \"I just found out that I won two tickets to the concert.\"."
-      }
-    ]
+    "unscored": []
   },
   "importedAt": "2026-09-15T00:00:00.000Z",
   "source": "set-import"

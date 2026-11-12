@@ -7,8 +7,8 @@ Sources: `NEW TOEFL SET 2 Final Mock set 1.docx` · `TEST 2 SCRIPT 2.docx` · `S
 | | |
 |---|---|
 | Questions | 122 (R 50 · L 49 · W 12 · S 11) |
-| Not scored | 1 |
-| Problems | 1 |
+| Not scored | 0 |
+| Problems | 0 |
 | Checks | 1 |
 | Audio files missing | 0 |
 | Pictures missing | 0 |
@@ -17,11 +17,13 @@ Sources: `NEW TOEFL SET 2 Final Mock set 1.docx` · `TEST 2 SCRIPT 2.docx` · `S
 
 ## Questions not scored
 
-- `set2-W1-q05` — The word tiles and blanks in the question document cannot build the answer-key sentence "I just found out that I won two tickets to the concert.".
+None.
 
 ## Problems (these used to stop the build)
 
-- writing: 1 sentence-building questions do not cross-check: the word tiles in the question document cannot build the answer-key sentence, in that order (set2-W1-q05). They stay in the set but are not scored until the two documents match.
+None.
+
+Fixed by hand in `set2.js` (2026-11-12), not in the source docx: set2-W1-q05 had 10 blanks for 9 tiles; one blank was removed (9 blanks = 9 tiles), so it is scored. The source docx should be changed the same way, or a rebuild will undo this.
 
 ## Checks
 
