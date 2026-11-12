@@ -446,7 +446,8 @@
 // v122: SET 6 음성 37개를 생성해 offline.set6.json 에 실제 파일·해시를 등록한다.
 // v123: SET 6 R1-20 보기 넷이 비어 있던 것을 채운다('Select a sentence from Paragraph N' 안내 줄을 건너뛴다).
 // v124: SET 6 Writing Task 1 문항 1~10 에 빠져 있던 대화 질문(context)을 넣는다.
-const VERSION = 'sg-v124';
+// v125: SET 6 W1-q03(statistical analysis)·q05(old contacts) 타일을 하나로 합쳐 채점에 넣고, 리뷰 화면의 전체·틀린 것만 탭을 없앤다.
+const VERSION = 'sg-v125';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';

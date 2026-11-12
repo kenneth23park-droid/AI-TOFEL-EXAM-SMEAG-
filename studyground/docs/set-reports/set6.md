@@ -7,8 +7,8 @@ Sources: `NEW TOEFL SET 6.docx` · `SET 6 Script.docx` · `SET 6 ANSWER KEY.docx
 | | |
 |---|---|
 | Questions | 93 (R 35 · L 35 · W 12 · S 11) |
-| Not scored | 2 |
-| Problems | 1 |
+| Not scored | 0 |
+| Problems | 0 |
 | Checks | 0 |
 | Audio files missing | 0 |
 | Pictures missing | 0 |
@@ -17,12 +17,13 @@ Sources: `NEW TOEFL SET 6.docx` · `SET 6 Script.docx` · `SET 6 ANSWER KEY.docx
 
 ## Questions not scored
 
-- `set6-W1-q03` — The word tiles and blanks in the question document cannot build the answer-key sentence "Yes, he asked whether she had any prior experience with statistical analysis software.".
-- `set6-W1-q05` — The word tiles and blanks in the question document cannot build the answer-key sentence "Were you able to transfer all of your old contacts?".
+None.
 
 ## Problems (these used to stop the build)
 
-- writing: 2 sentence-building questions do not cross-check: the word tiles in the question document cannot build the answer-key sentence, in that order (set6-W1-q03, set6-W1-q05). They stay in the set but are not scored until the two documents match.
+None.
+
+Fixed by hand in `set6.js` (2026-11-12), not in the source docx: set6-W1-q03 now has one tile "statistical analysis" (10 tiles for 10 blanks) and set6-W1-q05 has one tile "old contacts" (9 tiles for 9 blanks), so both are scored. The source docx should be changed the same way, or a rebuild will undo this.
 
 ## Checks
 

@@ -1244,42 +1244,52 @@ window.SMEAG_SET6 = {
                   "context": "Did the interviewer ask about her technical skills?",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "yes"
                     },
                     {
                       "t": "f",
                       "text": ","
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "he"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "asked"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "whether"
                     },
                     {
                       "t": "f",
                       "text": "she"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "had"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "any"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "prior"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "experience"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "with"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "statistical analysis"
                     },
                     {
                       "t": "f",
@@ -1296,12 +1306,9 @@ window.SMEAG_SET6 = {
                     "he",
                     "experience",
                     "any",
-                    "statistical",
-                    "analysis"
+                    "statistical analysis"
                   ],
-                  "answerSentence": "Yes, he asked whether she had any prior experience with statistical analysis software.",
-                  "unscored": true,
-                  "unscoredReason": "The word tiles and blanks in the question document cannot build the answer-key sentence \"Yes, he asked whether she had any prior experience with statistical analysis software.\"."
+                  "sentence": "Yes, he asked whether she had any prior experience with statistical analysis software."
                 },
                 {
                   "id": "set6-W1-q04",
@@ -1384,31 +1391,40 @@ window.SMEAG_SET6 = {
                   "context": "I finally switched to a new phone last weekend.",
                   "slots": [
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "were"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "you"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "able"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "to"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "transfer"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "all"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "of"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "your"
                     },
                     {
-                      "t": "b"
+                      "t": "b",
+                      "a": "old contacts"
                     },
                     {
                       "t": "f",
@@ -1417,19 +1433,16 @@ window.SMEAG_SET6 = {
                   ],
                   "tiles": [
                     "your",
-                    "old",
+                    "old contacts",
                     "were",
                     "you",
                     "of",
-                    "contacts",
                     "able",
                     "all",
                     "to",
                     "transfer"
                   ],
-                  "answerSentence": "Were you able to transfer all of your old contacts?",
-                  "unscored": true,
-                  "unscoredReason": "The word tiles and blanks in the question document cannot build the answer-key sentence \"Were you able to transfer all of your old contacts?\"."
+                  "sentence": "Were you able to transfer all of your old contacts?"
                 },
                 {
                   "id": "set6-W1-q06",
@@ -2041,7 +2054,9 @@ window.SMEAG_SET6 = {
     "L2-15": 2,
     "set6-W1-q01": "He asked if we wanted to keep the original flooring.",
     "set6-W1-q02": "Didn’t I tell you I gave up already?",
+    "set6-W1-q03": "Yes, he asked whether she had any prior experience with statistical analysis software.",
     "set6-W1-q04": "Do you know if they take reservations for large groups?",
+    "set6-W1-q05": "Were you able to transfer all of your old contacts?",
     "set6-W1-q06": "Does she know what field she wants to work in?",
     "set6-W1-q07": "The main performer played a song that I had never heard before.",
     "set6-W1-q08": "Yes, she wanted to know when we could tour the property.",
@@ -2099,7 +2114,7 @@ window.SMEAG_SET6 = {
       }
     ],
     "gates": {
-      "stop": 1,
+      "stop": 0,
       "warn": 0
     },
     "sources": [
@@ -2107,23 +2122,12 @@ window.SMEAG_SET6 = {
       "SET 6 Script.docx",
       "SET 6 ANSWER KEY.docx"
     ],
-    "unscored": 2
+    "unscored": 0
   },
   "report": {
-    "problems": [
-      "writing: 2 sentence-building questions do not cross-check: the word tiles in the question document cannot build the answer-key sentence, in that order (set6-W1-q03, set6-W1-q05). They stay in the set but are not scored until the two documents match."
-    ],
+    "problems": [],
     "checks": [],
-    "unscored": [
-      {
-        "id": "set6-W1-q03",
-        "reason": "The word tiles and blanks in the question document cannot build the answer-key sentence \"Yes, he asked whether she had any prior experience with statistical analysis software.\"."
-      },
-      {
-        "id": "set6-W1-q05",
-        "reason": "The word tiles and blanks in the question document cannot build the answer-key sentence \"Were you able to transfer all of your old contacts?\"."
-      }
-    ]
+    "unscored": []
   },
   "importedAt": "2026-10-14T00:00:00.000Z",
   "source": "set-import"
