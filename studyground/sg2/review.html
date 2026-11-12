@@ -399,16 +399,15 @@
    * 바로 건너오기 위해서다. 없는 영역을 적었으면 조용히 전체로 돌아간다. */
   var ALL = [], filter = (function () {
     var s = String(qs.get('sec') || '').toLowerCase();
-    return (s === 'wrong' || LAB[s]) ? s : 'all';
+    return LAB[s] ? s : '';
   })();
 
   function paintTabs() {
     var secs = [], seen = {};
     ALL.forEach(function (r) { if (!seen[r.section]) { seen[r.section] = true; secs.push(r.section); } });
-    if (filter !== 'all' && filter !== 'wrong' && !seen[filter]) filter = 'all';
-    var html = '<button data-sec="all"' + (filter === 'all' ? ' class="on"' : '') + '>' + bi('All', '전체') + '</button>' +
-               '<button data-sec="wrong"' + (filter === 'wrong' ? ' class="on"' : '') + '>' +
-                 bi('Wrong only', '틀린 것만') + '</button>';
+    // 전체/틀린 것만 탭은 없앴다 — 영역 탭만 두고, 지정이 없으면 첫 영역을 연다.
+    if (!seen[filter]) filter = secs[0] || '';
+    var html = '';
     secs.forEach(function (s) {
       html += '<button data-sec="' + s + '"' + (filter === s ? ' class="on"' : '') + '>' +
         bi(LAB[s] ? LAB[s][0] : s, LAB[s] ? LAB[s][1] : s) + '</button>';
