@@ -404,10 +404,21 @@ window.SG_RESULTS = (function () {
   function tasks(session, ownerId) {
     var q = 'sg_task_scores?select=id,session,question_id,skill,task_kind,ai_score,ai_rubric,' +
             'ai_model,ai_at,ai_error,transcript,transcript_model,media_path,' +
-            'teacher_score,teacher_note,confirmed_at&order=question_id';
+            'teacher_score,teacher_note,confirmed_at&order=question_id,id';
     if (session) q += '&session=eq.' + encodeURIComponent(session);
     if (ownerId) q += '&owner=eq.' + encodeURIComponent(ownerId);
-    return rest(q).then(function (rows) { return dedupeTasks(rows || []); });
+    /* Supabase 는 한 번에 1000행까지만 돌려준다. 관리자 화면은 전체(2026-11 기준 3000행 넘음)를
+       부르므로 한 번에 받으면 뒤쪽이 잘려, 라이팅·스피킹이 '—' 로 빠진 채 종합 밴드가 R·L 만으로
+       매겨졌다. 1000행씩 끝까지 받는다. */
+    var PAGE = 1000, all = [];
+    function page(from) {
+      return rest(q + '&limit=' + PAGE + '&offset=' + from).then(function (rows) {
+        rows = Array.isArray(rows) ? rows : [];
+        all = all.concat(rows);
+        return rows.length === PAGE ? page(from + PAGE) : all;
+      });
+    }
+    return page(0).then(function (rows) { return dedupeTasks(rows); });
   }
 
   /* 예전 DB 에 unique(owner,session,question_id) 제약이 없던 기간에 같은 문항의
