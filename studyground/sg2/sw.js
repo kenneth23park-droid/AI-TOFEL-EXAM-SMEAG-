@@ -450,7 +450,8 @@
 // v126: SET 2 W1-q05 의 빈칸 하나를 지워 빈칸 9 = 타일 9 로 맞추고 채점에 넣는다.
 // v127: 관리자 성적표가 라이팅·스피킹 채점 행을 1000행에서 잘라 받던 것을 끝까지 받는다(종합 밴드가 R·L 만으로 매겨졌다).
 // v128: SET 7 팩·선택기·오프라인 목록을 등록한다.
-const VERSION = 'sg-v128';
+// v129: tests.html 모의고사 목록을 세트 번호 순(SET 1→12)으로 다시 놓는다 — 셸이라 판올림.
+const VERSION = 'sg-v129';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
