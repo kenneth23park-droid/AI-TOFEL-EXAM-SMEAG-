@@ -449,7 +449,8 @@
 // v125: SET 6 W1-q03(statistical analysis)·q05(old contacts) 타일을 하나로 합쳐 채점에 넣고, 리뷰 화면의 전체·틀린 것만 탭을 없앤다.
 // v126: SET 2 W1-q05 의 빈칸 하나를 지워 빈칸 9 = 타일 9 로 맞추고 채점에 넣는다.
 // v127: 관리자 성적표가 라이팅·스피킹 채점 행을 1000행에서 잘라 받던 것을 끝까지 받는다(종합 밴드가 R·L 만으로 매겨졌다).
-const VERSION = 'sg-v127';
+// v128: SET 7 팩·선택기·오프라인 목록을 등록한다.
+const VERSION = 'sg-v128';
 const SHELL = 'sg-shell-' + VERSION;
 // 판올림과 무관하게 살아남는다 — 갱신은 해시가, 정리는 offline-prep 의 prune 이 한다.
 const MEDIA = 'sg-media-v2';
@@ -499,7 +500,7 @@ const SHELL_ASSETS = [
   // "무엇이 빠졌는지"를 판단해 알려줄 수 있다.
   'assets/offline-prep.js', 'config/offline.sets.json',
   'config/offline.set9.json', 'config/offline.set10.json', 'config/offline.set11.json',
-  'config/offline.set12.json', 'config/offline.set2.json', 'config/offline.set3.json', 'config/offline.set4.json', 'config/offline.set5.json', 'config/offline.set6.json',
+  'config/offline.set12.json', 'config/offline.set2.json', 'config/offline.set3.json', 'config/offline.set4.json', 'config/offline.set5.json', 'config/offline.set6.json', 'config/offline.set7.json',
 
   // 전체화면 자동 진입 · 화면 맞춤 — 오프라인 시험장에서도 첫 화면부터 적용돼야 한다.
   'assets/sg-fullscreen.js',
@@ -511,7 +512,7 @@ const SHELL_ASSETS = [
   // 검사기는 오프라인이면 조용히 물러나므로 프리캐시해도 시험장에서 걸리지 않는다.
   'assets/build-version.js', 'assets/sg-update-check.js',
 
-  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js', 'assets/set11.js', 'assets/set12.js', 'assets/set2.js', 'assets/set3.js', 'assets/set4.js', 'assets/set5.js', 'assets/set6.js',
+  'assets/app.css', 'assets/app.js', 'assets/set1.js', 'assets/set9.js', 'assets/set9-audio.js', 'assets/set10.js', 'assets/set11.js', 'assets/set12.js', 'assets/set2.js', 'assets/set3.js', 'assets/set4.js', 'assets/set5.js', 'assets/set6.js', 'assets/set7.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.svg',
   'manifest.webmanifest',
 

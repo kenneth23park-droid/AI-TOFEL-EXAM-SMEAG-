@@ -1,0 +1,609 @@
+{
+  "provider": "elevenlabs",
+  "model": "eleven_flash_v2_5",
+  "output": "mp3_44100_128",
+  "note": [
+    "SET 7 시험 음성 배역 매니페스트. tools/build_voices_manifest.mjs 가 원본 docx 에서 만든다 — 손으로 고치지 말 것.",
+    "대본은 set-import.js 가 읽은 것과 같은 것이고, out 은 콘텐츠 팩이 가리키는 경로 그대로다.",
+    "목소리 13명은 SET 9 에서 확정된 것을 그대로 쓴다(config/set9-voice-casting.json).",
+    "id 에 세트 접두사를 붙이는 이유: tools/tts_multivoice.py 의 검산 매니페스트는 tts-voices*.json 을 합치므로, l1-q01 같은 이름은 SET 9 것과 부딪친다."
+  ],
+  "items": [
+    {
+      "id": "set7-l1-q01",
+      "kind": "short",
+      "out": "media/audio/set7/l1-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "When does the dry cleaner close?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l1-q02",
+      "kind": "short",
+      "out": "media/audio/set7/l1-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Did you manage to fix the issue?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l1-q03",
+      "kind": "short",
+      "out": "media/audio/set7/l1-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "I’m having trouble accessing the database."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l1-q04",
+      "kind": "short",
+      "out": "media/audio/set7/l1-q04.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Would you be able to swap desks with me?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l1-q05",
+      "kind": "short",
+      "out": "media/audio/set7/l1-q05.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "Xb7hH8MSUJpSbSDYk0k2",
+          "voice_name": "GB-Alice",
+          "el_voice": "Alice",
+          "text": "How do I get to the student services building?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l1-q06",
+      "kind": "short",
+      "out": "media/audio/set7/l1-q06.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "What’s the best way to reach the manager?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l1-q07",
+      "kind": "short",
+      "out": "media/audio/set7/l1-q07.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "VyyyOgRmsqOzaZXnKWnI",
+          "voice_name": "AU-Lily",
+          "el_voice": "Sunny - AU Female (SET9)",
+          "text": "Have you made reservations yet?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l1-q08",
+      "kind": "short",
+      "out": "media/audio/set7/l1-q08.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "Pickup or delivery?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l1-q09-10",
+      "kind": "conversation",
+      "out": "media/audio/set7/l1-q09-10.mp3",
+      "segments": [
+        {
+          "speaker": "Woman",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Did you notice the cafeteria looks completely different this week?"
+        },
+        {
+          "speaker": "Man",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Yes, they renovated over the break. But it’s not just the appearance. They’ve changed the entire menu too."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "I saw that. No more pizza stations. Instead, they have a build-your-own grain bowl counter."
+        },
+        {
+          "speaker": "Man",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "I actually like the new options. They seem healthier than what we had before."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "I agree. The only downside is the prices went up a bit."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set7-l1-q11-12",
+      "kind": "conversation",
+      "out": "media/audio/set7/l1-q11-12.mp3",
+      "segments": [
+        {
+          "speaker": "Woman",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "I’m locked out of my dorm room. I left my key card on the desk when I went to get breakfast."
+        },
+        {
+          "speaker": "Man",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "That’s frustrating. Have you tried the front desk? They should be able to let you in."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "I went there first, but the resident advisor isn’t back until noon. That’s two hours from now."
+        },
+        {
+          "speaker": "Man",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Actually, campus security can also unlock doors in emergencies. Their office is right across from the dining hall."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "XrExE9yKIg1WjnnlVkGX",
+          "voice_name": "US-Mia",
+          "el_voice": "Matilda",
+          "text": "Oh, I didn’t know that. I’ll head over there now."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set7-l1-q13-14",
+      "kind": "announcement",
+      "out": "media/audio/set7/l1-q13-14.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "TX3LPaxmHKxFdv7VOQHJ",
+          "voice_name": "US-Liam",
+          "el_voice": "Liam",
+          "text": "Students, please note that all campus building access cards will be deactivated at the end of this month. You must pick up your new card from the Security Office in Whitman Hall by next Friday. Bring your current student ID for verification. The new cards will be activated on the first of next month."
+        }
+      ]
+    },
+    {
+      "id": "set7-l1-q15-16",
+      "kind": "announcement",
+      "out": "media/audio/set7/l1-q15-16.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "nPczCjzI2devNBz1zQrb",
+          "voice_name": "US-Ethan",
+          "el_voice": "Brian",
+          "text": "Attention all students interested in technology careers. The Computer Science Department is launching a Data Science Bootcamp this January. Over six weekends, you’ll learn Python programming, statistical analysis, and machine learning fundamentals through hands-on projects. Industry professionals will lead workshops and review your final capstone projects. To apply, visit the Technology Building, Room 415, with your resume and a brief statement explaining your interest in data science. No prior coding experience is required."
+        }
+      ]
+    },
+    {
+      "id": "set7-l1-q17-20",
+      "kind": "announcement",
+      "out": "media/audio/set7/l1-q17-20.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "So, let’s talk about something really fascinating—how the human brain evolved over millions of years. Understanding this history helps us appreciate why our brains work the way they do today. Our earliest ancestors, living several million years ago, had brains roughly the size of a chimpanzee’s—about 400 cubic centimeters. These early brains were sufficient for basic survival: finding food, avoiding predators, and simple social interactions. Then, something remarkable happened. Starting around two million years ago, brain size began increasing dramatically. Scientists believe several factors drove this change. First, our ancestors started eating more nutrient-rich foods, including meat, which provided the energy needed to support larger brains. Second, the development of tools required more complex thinking and planning. As brains grew larger, new regions developed, particularly the prefrontal cortex—that’s the area right behind your forehead. This region handles abstract thinking, planning for the future, and controlling impulses. It’s one of the last parts of the brain to fully develop, not maturing until our mid-twenties. By the time modern humans appeared around 300,000 years ago, brain size had nearly tripled compared to our earliest ancestors. However, it’s important to note that size isn’t everything. The organization of the brain and the connections between neurons matter just as much, perhaps even more, than overall volume."
+        }
+      ]
+    },
+    {
+      "id": "set7-l2-q01",
+      "kind": "short",
+      "out": "media/audio/set7/l2-q01.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "FGY2WhTYpPnrIDTdsKH5",
+          "voice_name": "US-Ava",
+          "el_voice": "Laura",
+          "text": "My badge isn’t working at the front entrance."
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l2-q02",
+      "kind": "short",
+      "out": "media/audio/set7/l2-q02.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Who’s taking over while the director is away?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l2-q03",
+      "kind": "short",
+      "out": "media/audio/set7/l2-q03.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "You’re presenting first, aren’t you?"
+        }
+      ],
+      "speed": 0.75
+    },
+    {
+      "id": "set7-l2-q04-05",
+      "kind": "conversation",
+      "out": "media/audio/set7/l2-q04-05.mp3",
+      "segments": [
+        {
+          "speaker": "Woman",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "How’s the grant proposal coming along? The submission deadline is tomorrow, right?"
+        },
+        {
+          "speaker": "Man",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "It’s almost done. Dr. Patterson just sent back her edits in the methodology section. I need to incorporate those and then it’s ready."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Do you need any help with the final formatting?"
+        },
+        {
+          "speaker": "Man",
+          "voice": "cjVigY5qzO86Huf0OWal",
+          "voice_name": "US-Mason",
+          "el_voice": "Eric",
+          "text": "Actually, yes. The funding agency has very specific margin requirements, and I keep getting errors."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "cgSgspJ2msm6clMCkdW9",
+          "voice_name": "US-Zoe",
+          "el_voice": "Jessica",
+          "text": "Send it over when you’re done with the edits. I can format it this evening."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set7-l2-q06-07",
+      "kind": "conversation",
+      "out": "media/audio/set7/l2-q06-07.mp3",
+      "segments": [
+        {
+          "speaker": "Woman",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "How’s the website redesign coming along? The launch date is next Monday, right?"
+        },
+        {
+          "speaker": "Man",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "We’re on track. The development team finished the homepage yesterday, and now they’re working on the product pages."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "What about the mobile version? That was a concern last week."
+        },
+        {
+          "speaker": "Man",
+          "voice": "CwhRBWXzGAHq8TQ4Fs17",
+          "voice_name": "US-Noah",
+          "el_voice": "Roger",
+          "text": "We sorted that out. The responsive design is working smoothly now. We just need to do final testing over the weekend."
+        },
+        {
+          "speaker": "Woman",
+          "voice": "pFZP5JQG7iQjIQuC4Bku",
+          "voice_name": "GB-Ivy",
+          "el_voice": "Lily",
+          "text": "Great. Let me know if you need any extra hands for the testing phase."
+        }
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "set7-l2-q08-11",
+      "kind": "announcement",
+      "out": "media/audio/set7/l2-q08-11.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "So today, let’s discuss inflation—what it is and why it happens. This is something that affects everyone, so it’s important to understand the basics. Inflation, simply put, is when the general price level of goods and services rises over time. When inflation occurs, each unit of currency buys fewer things than it did before. So if you could buy a sandwich for five dollars, that’s inflation at work. Now, what causes prices to rise? There are two main mechanisms. The first is called demand-pull inflation. This happens when there’s too much money chasing too few goods. If people have more money to spend but the supply of products stays the same, sellers can raise prices because buyers are willing to pay more. The second type is cost-push inflation. This occurs of product increase. For example, if the prices of oil rises, transportation becomes more expensive. Companies then pass these higher costs on to consumers through higher prices. Central banks try to manage inflation by controlling the money supply and interest rates. A little inflation—usually around two percent annually—is actually considered healthy for an economy. It encourages spending and investment. However, when inflation gets too high, it can seriously damage an economy because people’s savings lose value and planning for the future becomes difficult."
+        }
+      ]
+    },
+    {
+      "id": "set7-l2-q12-15",
+      "kind": "announcement",
+      "out": "media/audio/set7/l2-q12-15.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "JBFqnCBsd6RMkjVDRZzb",
+          "voice_name": "GB-Henry",
+          "el_voice": "George",
+          "text": "Alright, today we’re going to talk about the relationship between sleep and learning. This is something that directly affects all of you as students. Research shows that sleep plays a crucial role in how well we remember and learn new information. So what happens when we sleep? During sleep, especially during a stage called deep sleep, our brains are actually very active. They’re processing and organizing the information we encountered during the day. Think of it like a librarian sorting books. While you’re awake, information comes in randomly. During sleep, your brain files everything in the right place so you can find it later. Studies have shown that people who sleep well after learning something new remember it much better than people who stay awake. In one experiment, participants who slept after studying performed significantly better on tests than those who didn’t sleep. This effect is strongest when sleep happens soon after learning. Now, here’s what this means for students. Staying up all night to study, what we call cramming, is actually counterproductive. You might cover more material, but your brain won’t retain it properly without sleep. A better strategy is to study in shorter sessions and get adequate rest. Your brain needs that downtime to consolidate what you’ve learned."
+        }
+      ]
+    },
+    {
+      "id": "set7-s1-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set7/s1-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You are being trained to assist students at the career center, listen to your trainer, and repeat what she says. Repeat only once."
+        }
+      ]
+    },
+    {
+      "id": "set7-s1-q1",
+      "kind": "repeat",
+      "out": "media/audio/set7/s1-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Welcome! This is our career center for students."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set7-s1-q2",
+      "kind": "repeat",
+      "out": "media/audio/set7/s1-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "You can find resume templates on the resource table."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set7-s1-q3",
+      "kind": "repeat",
+      "out": "media/audio/set7/s1-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Interview practice rooms are available just down the hallway here."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set7-s1-q4",
+      "kind": "repeat",
+      "out": "media/audio/set7/s1-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Students can have one-on-one meetings with career advisors at these desks"
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set7-s1-q5",
+      "kind": "repeat",
+      "out": "media/audio/set7/s1-q5.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "We have career fair information posted on that bulletin board over there."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set7-s1-q6",
+      "kind": "repeat",
+      "out": "media/audio/set7/s1-q6.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Job and internship listings from employers are posted on this board here."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set7-s1-q7",
+      "kind": "repeat",
+      "out": "media/audio/set7/s1-q7.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "EXAVITQu4vr4xnSDxMaL",
+          "voice_name": "US-Emma",
+          "el_voice": "Sarah",
+          "text": "Before meeting with an advisor, students should complete the assessment form at the computer station."
+        }
+      ],
+      "speed": 0.7
+    },
+    {
+      "id": "set7-s2-instructions",
+      "kind": "instructions",
+      "out": "media/audio/set7/s2-instructions.mp3",
+      "segments": [
+        {
+          "speaker": "Instructions",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "You have volunteered for a research study about protecting the environment. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer's questions."
+        }
+      ]
+    },
+    {
+      "id": "set7-s2-q1",
+      "kind": "interview",
+      "out": "media/audio/set7/s2-q1.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Thank you for participating today. I'd like to ask you some questions about daily habits and the environment. What kinds of things do you or people you know do to help the environment in daily life? For example, recycling, saving water, or using less plastic?"
+        }
+      ]
+    },
+    {
+      "id": "set7-s2-q2",
+      "kind": "interview",
+      "out": "media/audio/set7/s2-q2.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "That's helpful. When buying products, do you prefer to choose ones that are environmentally friendly, or do you focus more on price and convenience? Why?"
+        }
+      ]
+    },
+    {
+      "id": "set7-s2-q3",
+      "kind": "interview",
+      "out": "media/audio/set7/s2-q3.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Alright. Some people believe that individual actions like recycling make a real difference, while others think that only large companies and governments can solve environmental problems. What is your opinion?"
+        }
+      ]
+    },
+    {
+      "id": "set7-s2-q4",
+      "kind": "interview",
+      "out": "media/audio/set7/s2-q4.mp3",
+      "segments": [
+        {
+          "speaker": "Narrator",
+          "voice": "onwK4e9ZLuTAKqWW03F9",
+          "voice_name": "GB-Oliver",
+          "el_voice": "Daniel",
+          "text": "Good points. I just have one more question. Do you think younger generations will be more environmentally conscious than older generations, or will habits stay mostly the same?"
+        }
+      ]
+    }
+  ]
+}

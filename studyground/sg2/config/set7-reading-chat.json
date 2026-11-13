@@ -1,0 +1,16 @@
+{
+  "source": "NEW TOEFL MOCK TEST SET 7.docx — Reading Module 1, Questions 11-12 (Text Message Chain, order as printed)",
+  "note": "Order and sides only; set-import.js refuses any name, time or text that is not word for word in the passage. 'Library' is capitalised as printed.",
+  "blocks": {
+    "R1-11": {
+      "messages": [
+        { "name": "Professor Adams", "time": "2:15 P.M.", "side": "left", "text": "Just a reminder that your group presentations on renewable energy are due next Thursday. Please upload your slides to the course portal by 5:00 P.M. the day before." },
+        { "name": "Yuki Tanaka", "time": "2:17 P.M.", "side": "right", "text": "Thanks for the reminder. Our group is meeting tonight to finalize everything." },
+        { "name": "Kevin Martinez", "time": "2:19 P.M.", "side": "left", "text": "Yuki, I finished the section on wind energy. Should I send it to you now or wait until the meeting?" },
+        { "name": "Yuki Tanaka", "time": "2:21 P.M.", "side": "right", "text": "Go ahead and send it now. That way I can start integrating it with the other sections." },
+        { "name": "Amara Diallo", "time": "2:23 P.M.", "side": "left", "text": "I'm almost done with the solar energy portion. I just need to add a few more statistics. I'll bring the completed version tonight." },
+        { "name": "Yuki Tanaka", "time": "2:25 P.M.", "side": "right", "text": "Sounds good. Let's meet in the Library at 7:00 P.M. We can use one of the study rooms." }
+      ]
+    }
+  }
+}
